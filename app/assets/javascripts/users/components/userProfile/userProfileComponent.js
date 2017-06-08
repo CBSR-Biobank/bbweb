@@ -1,27 +1,19 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
-  /**
-   * Allows user to change his / her details, including updating password.
-   */
-  function userProfileDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {},
-      templateUrl : '/assets/javascripts/users/directives/userProfile/userProfile.html',
-      controller: UserProfileCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl : '/assets/javascripts/users/components/userProfile/userProfile.html',
+    controller: UserProfileController,
+    controllerAs: 'vm',
+    bindings: {
+    }
+  };
 
-    return directive;
-  }
-
-  UserProfileCtrl.$inject = [
+  UserProfileController.$inject = [
     'gettextCatalog',
     'modalService',
     'modalInput',
@@ -30,32 +22,49 @@ define(function () {
     'User'
   ];
 
-  /**
-   * Displays a list of users in a table.
+  /*
+   * Controller for this component.
    */
-  function UserProfileCtrl(gettextCatalog,
-                           modalService,
-                           modalInput,
-                           notificationsService,
-                           usersService,
-                           User) {
+  function UserProfileController(gettextCatalog,
+                                 modalService,
+                                 modalInput,
+                                 notificationsService,
+                                 usersService,
+                                 User) {
     var vm = this;
 
-    vm.updateName      = updateName;
-    vm.updateEmail     = updateEmail;
-    vm.updatePassword  = updatePassword;
-    vm.updateAvatarUrl = updateAvatarUrl;
-    vm.removeAvatarUrl = removeAvatarUrl;
-
-    init();
+    vm.$onInit           = onInit;
+    vm.studyMemberships  = '';
+    vm.centreMemberships = '';
+    vm.updateName        = updateName;
+    vm.updateEmail       = updateEmail;
+    vm.updatePassword    = updatePassword;
+    vm.updateAvatarUrl   = updateAvatarUrl;
+    vm.removeAvatarUrl   = removeAvatarUrl;
 
     //--
 
-    function init() {
-      usersService.requestCurrentUser().then(function (user) {
-        vm.user = User.create(user);
-        vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
-      });
+    function onInit() {
+      usersService.requestCurrentUser()
+        .then(function (user) {
+          vm.user = User.create(user);
+          vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
+          if (vm.user.membership.studyInfo.all) {
+            vm.studyMemberships = gettextCatalog.getString('All Studies');
+          } else if (vm.user.membership.studyInfo.names.length > 0){
+             vm.studyMemberships = vm.user.membership.studyInfo.names.join(', ');
+          } else {
+            vm.studyMemberships = gettextCatalog.getString('None');
+          }
+
+          if (vm.user.membership.centreInfo.all) {
+            vm.centreMemberships = gettextCatalog.getString('All Centres');
+          } else if (vm.user.membership.centreInfo.names.length > 0){
+             vm.centreMemberships = vm.user.membership.centreInfo.names.join(', ');
+          } else {
+             vm.centreMemberships = gettextCatalog.getString('None');
+          }
+        });
     }
 
     function updateError(err) {
@@ -82,8 +91,11 @@ define(function () {
                       { required: true, minLength: 2 })
         .result.then(function (name) {
           vm.user.updateName(name)
-            .then(postUpdate(gettextCatalog.getString('User name updated successfully.'),
-                             gettextCatalog.getString('Update successful')))
+            .then(function (user) {
+              postUpdate(gettextCatalog.getString('User name updated successfully.'),
+                         gettextCatalog.getString('Update successful'))(user);
+              usersService.retrieveCurrentUser();
+            })
             .catch(updateError);
         });
     }
@@ -143,5 +155,5 @@ define(function () {
     }
   }
 
-  return userProfileDirective;
+  return component;
 });

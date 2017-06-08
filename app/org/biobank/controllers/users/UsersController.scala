@@ -58,11 +58,10 @@ class UsersController @Inject() (val action:         BbwebAction,
 
         usersService.loginAllowed(credentials.email, credentials.password).fold(
           err => Unauthorized,
-          user => {
-            val token = authToken.newToken(user.id)
-            log.debug(s"user logged in: ${user.email}, token: $token")
-            Ok(usersService.userToDto(user))
-              .withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+          userDto => {
+            val token = authToken.newToken(UserId(userDto.id))
+            log.debug(s"user logged in: ${userDto.email}, token: $token")
+            Ok(userDto).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
           }
         )
       }
@@ -72,9 +71,9 @@ class UsersController @Inject() (val action:         BbwebAction,
    * Retrieves the user associated with the token, if it is valid.
    */
   def authenticateUser(): Action[Unit] = action(parse.empty) { implicit request =>
-      usersService.getUser(request.authInfo.userId).fold(
+      usersService.getUserIfAuthorized(request.authInfo.userId, request.authInfo.userId).fold(
         err  => Unauthorized,
-        user =>  Ok(usersService.userToDto(user))
+        user =>  Ok(user)
       )
     }
 

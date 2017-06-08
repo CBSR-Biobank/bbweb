@@ -28,26 +28,32 @@ define([
       var self = this;
 
       _.extend(self, TestSuiteMixin.prototype);
-
       self.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
-                              'adminService');
-
+                              'User',
+                              'adminService',
+                              'usersService',
+                              'factory');
       self.putHtmlTemplates(
         '/assets/javascripts/admin/directives/biobankAdmin/biobankAdmin.html');
+
     }));
 
     it('has valid scope', function() {
-      var counts = {
-        studies: 1,
-        centres: 2,
-        users: 3
-      };
+      var user = this.factory.user(),
+          counts = {
+            studies: 1,
+            centres: 2,
+            users: 3
+          };
 
+      this.usersService.requestCurrentUser =
+        jasmine.createSpy().and.returnValue(this.$q.when(user));
       spyOn(this.adminService, 'aggregateCounts').and.returnValue(this.$q.when(counts));
 
       createController.call(this);
+      expect(this.controller.user).toEqual(jasmine.any(this.User));
       expect(this.controller.counts).toEqual(counts);
     });
 

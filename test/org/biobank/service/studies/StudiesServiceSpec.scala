@@ -143,6 +143,36 @@ class StudiesServiceSpec
 
   describe("StudiesService") {
 
+    describe("collection studies") {
+
+      it("all types of users can access") {
+        val f = new UsersWithStudyAccessFixture
+        forAll (f.usersCanReadTable) { (user, label) =>
+          info(s"$label")
+          studiesService.collectionStudies(user.id,
+                                           new FilterString(""),
+                                           new SortString("")) mustSucceed { set =>
+            set must have size (0)
+          }
+        }
+
+        info("no membership user")
+        studiesService.collectionStudies(f.noMembershipUser.id,
+                                           new FilterString(""),
+                                           new SortString("")) mustSucceed { set =>
+          set must have size (0)
+        }
+
+        info("no permission user")
+        studiesService.collectionStudies(f.nonStudyPermissionUser.id,
+                                           new FilterString(""),
+                                           new SortString("")) mustSucceed { set =>
+          set must have size (0)
+        }
+      }
+
+    }
+
     describe ("for study counts") {
 
       it("users can access") {

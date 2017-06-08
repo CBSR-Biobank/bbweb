@@ -17,10 +17,10 @@ define(function (require) {
 
   module.component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'));
   module.component('registerUser',   require('./components/registerUser/registerUserComponent'));
+  module.component('userProfile',    require('./components/userProfile/userProfileComponent'));
 
   module.directive('login',         require('./directives/login/loginDirective'));
   module.directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'));
-  module.directive('userProfile',   require('./directives/userProfile/userProfileDirective'));
   module.directive('passwordSent',  require('./directives/passwordSent/passwordSentDirective'));
   module.directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'));
 

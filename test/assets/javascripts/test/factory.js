@@ -24,11 +24,10 @@ define([
     'UserState',
     'SpecimenState',
     'ShipmentState',
-    'ShipmentItemState',
-    'AppConfig'
+    'ShipmentItemState'
   ];
 
-  /**
+  /*
    * Generates JSON domain entities as if returned by the server.
    *
    * This has to be an AngularJS service so that it's dependencies from the real application
@@ -45,8 +44,7 @@ define([
                    UserState,
                    SpecimenState,
                    ShipmentState,
-                   ShipmentItemState,
-                   AppConfig) {
+                   ShipmentItemState) {
 
     var defaultEntities = {},
         entityCount = 0,
@@ -516,7 +514,12 @@ define([
                        name:      stringNext(),
                        email:     stringNext(),
                        avatarUrl: null,
-                       state:     UserState.REGISTERED
+                       state:     UserState.REGISTERED,
+                       roles:     [],
+                       membership: {
+                         studyInfo:  { all: false, names: [] },
+                         centreInfo: { all: false, names: [] }
+                       }
                      },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
           u = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));

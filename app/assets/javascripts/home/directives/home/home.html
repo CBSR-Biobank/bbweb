@@ -16,8 +16,9 @@
   </div>
 
   <div class="row">
+
     <!-- COLLECTION -->
-    <div class="col-md-4">
+    <div class="col-md-4" ng-if="vm.allowCollection">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
@@ -34,7 +35,7 @@
     </div>
 
     <!-- SHIPPING -->
-    <div class="col-md-4">
+    <div class="col-md-4" ng-if="vm.shippingAllowed">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">
@@ -55,7 +56,7 @@
   <div class="row">
 
     <!-- ADMINISTRATION -->
-    <div class="col-md-4">
+    <div class="col-md-4" ng-if="vm.adminAllowed">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h3 class="panel-title">

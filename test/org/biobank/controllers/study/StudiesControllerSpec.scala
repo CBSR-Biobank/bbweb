@@ -15,6 +15,25 @@ import play.api.test.Helpers._
 class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
+  class CollectionFixture {
+    val study = factory.createEnabledStudy
+    val specimenDescription = factory.createCollectionSpecimenDescription
+    val ceventType = factory.createCollectionEventType.copy(studyId               = study.id,
+                                                             specimenDescriptions = Set(specimenDescription),
+                                                             annotationTypes      = Set.empty)
+    val participant = factory.createParticipant.copy(studyId = study.id)
+    val cevent = factory.createCollectionEvent
+    val centre = factory.createEnabledCentre.copy(studyIds  = Set(study.id),
+                                                  locations = Set(factory.createLocation))
+
+    Set(centre,
+        study,
+        ceventType,
+        participant,
+        cevent)
+      .foreach(addToRepository)
+  }
+
   private def uri(): String = "/studies/"
 
   private def uri(path: String): String = uri + s"$path"
@@ -67,9 +86,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   private def updateWithInvalidVersion(jsonField: JsObject, urlFunc: Study => String): Unit = {
     val study = factory.createDisabledStudy
     studyRepository.put(study)
-
     val cmdJson = Json.obj("expectedVersion" -> Some(study.version + 1)) ++ jsonField
-
     val json = makeRequest(POST, urlFunc(study), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
@@ -83,18 +100,15 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     updateWithInvalidVersion(Json.obj(), urlFunc)
   }
 
-  private def updateNonDisabledStudy[T <: Study](study: T,
+  private def updateNonDisabledStudy[T <: Study](study:     T,
                                                  jsonField: JsObject,
-                                                 urlFunc: Study => String): Unit = {
+                                                 urlFunc:   Study => String): Unit = {
     study match {
       case s: DisabledStudy => fail("study should not be disabled")
       case _ => // do nothing
     }
-
     studyRepository.put(study)
-
     val cmdJson = Json.obj("expectedVersion" -> Some(study.version)) ++ jsonField
-
     val json = makeRequest(POST, urlFunc(study), BAD_REQUEST, cmdJson)
 
     (json \ "status").as[String] must include ("error")
@@ -105,6 +119,69 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   describe("Study REST API") {
+
+    describe("GET /studies/collectionStudies") {
+
+      it("returns the studies that a user can collect specimens for") {
+        val f = new CollectionFixture
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("collectionStudies"))
+        compareObj(jsonItem, f.study)
+      }
+
+      it("111 when study disabled, returns zero studies") {
+        val f = new CollectionFixture
+        f.study.disable.map(addToRepository)
+        PagedResultsSpec(this).emptyResults(uri("collectionStudies"))
+      }
+
+      it("111 when centre disabled, returns zero studies") {
+        val f = new CollectionFixture
+        f.centre.disable.map(addToRepository)
+        PagedResultsSpec(this).emptyResults(uri("collectionStudies"))
+      }
+
+    }
+
+    describe("GET /studies/counts") {
+
+      it("return empty counts") {
+        val json = makeRequest(GET, uri("counts"))
+
+        (json \ "status").as[String] must include ("success")
+
+        (json \ "data" \ "total").as[Long] must be (0)
+
+        (json \ "data" \ "disabledCount").as[Long] must be (0)
+
+        (json \ "data" \ "enabledCount").as[Long] must be (0)
+
+        (json \ "data" \ "retiredCount").as[Long] must be (0)
+      }
+
+      it("return valid counts") {
+        val studies = List(factory.createDisabledStudy,
+                           factory.createDisabledStudy,
+                           factory.createDisabledStudy,
+                           factory.createEnabledStudy,
+                           factory.createEnabledStudy,
+                           factory.createRetiredStudy)
+
+        studies.foreach { c => studyRepository.put(c) }
+
+        val json = makeRequest(GET, uri("counts"))
+
+        (json \ "status").as[String] must include ("success")
+
+        (json \ "data" \ "total").as[Long] must be (6)
+
+        (json \ "data" \ "disabledCount").as[Long] must be (3)
+
+        (json \ "data" \ "enabledCount").as[Long] must be (2)
+
+        (json \ "data" \ "retiredCount").as[Long] must be (1)
+      }
+
+    }
 
     describe("GET /studies") {
 
@@ -139,8 +216,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = studies(0)
         studies.foreach(studyRepository.put)
 
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("filter" -> s"name::${study.name}"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("filter" -> s"name::${study.name}"))
         compareObj(jsonItem, study)
       }
 
@@ -949,47 +1025,6 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail when unretiring a study and the version is invalid") {
         updateWithInvalidVersion(urlUnretire)
       }
-    }
-
-    describe("GET /studies/counts") {
-
-      it("return empty counts") {
-        val json = makeRequest(GET, uri("counts"))
-
-        (json \ "status").as[String] must include ("success")
-
-        (json \ "data" \ "total").as[Long] must be (0)
-
-        (json \ "data" \ "disabledCount").as[Long] must be (0)
-
-        (json \ "data" \ "enabledCount").as[Long] must be (0)
-
-        (json \ "data" \ "retiredCount").as[Long] must be (0)
-      }
-
-      it("return valid counts") {
-        val studies = List(factory.createDisabledStudy,
-                           factory.createDisabledStudy,
-                           factory.createDisabledStudy,
-                           factory.createEnabledStudy,
-                           factory.createEnabledStudy,
-                           factory.createRetiredStudy)
-
-        studies.foreach { c => studyRepository.put(c) }
-
-        val json = makeRequest(GET, uri("counts"))
-
-        (json \ "status").as[String] must include ("success")
-
-        (json \ "data" \ "total").as[Long] must be (6)
-
-        (json \ "data" \ "disabledCount").as[Long] must be (3)
-
-        (json \ "data" \ "enabledCount").as[Long] must be (2)
-
-        (json \ "data" \ "retiredCount").as[Long] must be (1)
-      }
-
     }
 
     describe("GET /studies/valuetypes") {

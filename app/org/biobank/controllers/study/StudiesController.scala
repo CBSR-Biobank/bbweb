@@ -30,6 +30,20 @@ class StudiesController @Inject() (val action:  BbwebAction,
 
   private val PageSizeMax = 10
 
+  def collectionStudies(): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      validationReply(
+        Future {
+          for {
+            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            studies    <- service.collectionStudies(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
+            validPage  <- pagedQuery.validPage(studies.size)
+            results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
+          } yield results
+        }
+      )
+    }
+
   def studyCounts(): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       validationReply(Future(service.getCountsByStatus(request.authInfo.userId)))

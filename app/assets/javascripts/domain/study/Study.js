@@ -204,8 +204,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      *          domain.studies.Study}.
      */
     Study.list = function (options) {
-      var url = uri(),
-          params,
+      var params,
           validKeys = [
             'filter',
             'sort',
@@ -218,19 +217,46 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
         return value === '';
       });
 
-      return biobankApi.get(url, params).then(function(reply) {
-        // reply is a paged result
-        var deferred = $q.defer();
-        try {
-          reply.items = _.map(reply.items, function(obj){
-            return Study.create(obj);
-          });
-          deferred.resolve(reply);
-        } catch (e) {
-          deferred.reject('invalid studies from server');
-        }
-        return deferred.promise;
+      return biobankApi.get(uri(), params).then(createStudiesFromPagedResult);
+    };
+
+    /**
+     * Used to list studies the user can collect specimens for.
+     *
+     * <p>A paged API is used to list studies. See below for more details.</p>
+     *
+     * @param {object} options - The options to use to list studies.
+     *
+     * @param {string} [options.filter] The filter to use on study names. Default is empty string.
+     *
+     * @param {string} [options.sort=name] Studies can be sorted by <code>name</code> or by
+     *        <code>state</code>. Values other than these two yield an error. Use a minus sign prefix to sort
+     *        in descending order.
+     *
+     * @param {int} [options.page=1] If the total results are longer than limit, then page selects which
+     *        studies should be returned. If an invalid value is used then the response is an error.
+     *
+     * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size
+     *        is 10. If a value larger than 10 is used then the response is an error.
+     *
+     * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
+     *          domain.studies.Study}.
+     */
+    Study.collectionStudies = function (options) {
+      var params,
+          validKeys = [
+            'filter',
+            'sort',
+            'page',
+            'limit'
+          ];
+
+      options = options || {};
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
       });
+
+      return biobankApi.get(uri('collectionStudies'), params).then(createStudiesFromPagedResult);
     };
 
     /**
@@ -437,6 +463,19 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
     Study.prototype.allLocations = function () {
       return biobankApi.get('/studies/centres/' + this.id);
     };
+
+    function createStudiesFromPagedResult(reply) {
+      var deferred = $q.defer();
+      try {
+        reply.items = _.map(reply.items, function(obj){
+          return Study.create(obj);
+        });
+        deferred.resolve(reply);
+      } catch (e) {
+        deferred.reject('invalid studies from server');
+      }
+      return deferred.promise;
+    }
 
     function changeState(state) {
       /* jshint validthis:true */

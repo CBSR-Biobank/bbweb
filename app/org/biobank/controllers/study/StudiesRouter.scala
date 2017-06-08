@@ -10,6 +10,10 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
 
   override def routes: Routes = {
 
+    case GET(p"/collectionStudies") =>
+      // this action extracts parameters from the raw query string
+      controller.collectionStudies
+
     case GET(p"/names") =>
       // this action extracts parameters from the raw query string
       controller.listNames

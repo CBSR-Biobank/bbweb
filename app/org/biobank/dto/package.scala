@@ -17,6 +17,25 @@ package dto {
 
   }
 
+  final case class MembershipInfoDto(all: Boolean, names: Set[String])
+
+  object MembershipInfoDto {
+
+    implicit val membershipInfoDtoWriter: Writes[MembershipInfoDto] = Json.writes[MembershipInfoDto]
+
+  }
+
+  final case class MembershipDto(id:           String,
+                                 version:      Long,
+                                 studyInfo:    MembershipInfoDto,
+                                 centreInfo:   MembershipInfoDto)
+
+  object MembershipDto {
+
+    implicit val membershipDtoWriter: Writes[MembershipDto] = Json.writes[MembershipDto]
+
+  }
+
   final case class UserDto(id:           String,
                            version:      Long,
                            timeAdded:    DateTime,
@@ -25,7 +44,8 @@ package dto {
                            name:         String,
                            email:        String,
                            avatarUrl:    Option[String],
-                           roles:        Set[RoleId])
+                           roles:        Set[RoleId],
+                           membership:   MembershipDto)
 
   object UserDto {
 

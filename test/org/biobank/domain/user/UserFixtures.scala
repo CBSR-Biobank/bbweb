@@ -9,11 +9,11 @@ trait UserFixtures {
                          val activeUser:     ActiveUser,
                          val lockedUser:     LockedUser)
 
-  def passwordHasher: PasswordHasher
+  protected def passwordHasher: PasswordHasher
 
-  val factory: Factory
+  protected val factory: Factory
 
-  def createRegisteredUser(plainPassword: String): RegisteredUser = {
+  protected def createRegisteredUser(plainPassword: String): RegisteredUser = {
     val salt = passwordHasher.generateSalt
 
     factory.createRegisteredUser.copy(
@@ -21,7 +21,7 @@ trait UserFixtures {
       password = passwordHasher.encrypt(plainPassword, salt))
   }
 
-  def createActiveUser(plainPassword: String): ActiveUser = {
+  protected def createActiveUser(plainPassword: String): ActiveUser = {
     val salt = passwordHasher.generateSalt
 
     factory.createActiveUser.copy(
@@ -29,7 +29,7 @@ trait UserFixtures {
       password = passwordHasher.encrypt(plainPassword, salt))
   }
 
-  def createLockedUser(plainPassword: String): LockedUser = {
+  protected def createLockedUser(plainPassword: String): LockedUser = {
     val salt = passwordHasher.generateSalt
 
     factory.createLockedUser.copy(
@@ -37,7 +37,7 @@ trait UserFixtures {
       password = passwordHasher.encrypt(plainPassword, salt))
   }
 
-  def usersOfAllStates() =
+  protected def usersOfAllStates() =
     new UsersOfAllStates(factory.createRegisteredUser,
                          factory.createActiveUser,
                          factory.createLockedUser)

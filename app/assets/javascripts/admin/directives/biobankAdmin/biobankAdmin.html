@@ -4,7 +4,7 @@
 <div class="row">
 
   <!-- STUDY ADMIN -->
-  <div class="col-md-4">
+  <div class="col-md-4" ng-if="vm.user.hasStudyAdminRole()">
     <div class="panel panel-default" style="margin-top: 10px;">
       <div class="panel-heading">
         <h3 class="panel-title">
@@ -32,7 +32,7 @@
   </div>
 
   <!-- CENTRE ADMIN -->
-  <div class="col-md-4">
+  <div class="col-md-4" ng-if="vm.user.hasCentreAdminRole()">
     <div class="panel panel-default" style="margin-top: 10px;">
       <div class="panel-heading">
         <h3 class="panel-title">
@@ -62,7 +62,7 @@
   </div>
 
   <!-- USER ADMIN -->
-  <div class="col-md-4">
+  <div class="col-md-4" ng-if="vm.user.hasUserAdminRole()">
     <div class="panel panel-default" style="margin-top: 10px;">
       <div class="panel-heading">
         <h3 class="panel-title">

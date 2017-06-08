@@ -5,7 +5,7 @@ import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.domain.access._
-import org.biobank.domain.centre.CentreRepository
+import org.biobank.domain.centre.{Centre, CentreRepository}
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study._
 import org.biobank.domain.user.UserId
@@ -17,6 +17,7 @@ import org.biobank.infrastructure.event.ProcessingTypeEvents._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
 import org.biobank.service.access.AccessService
+import org.biobank.service.centres.CentreServicePermissionChecks
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
@@ -25,6 +26,18 @@ import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[StudiesServiceImpl])
 trait StudiesService extends BbwebService {
+
+  /**
+   * Returns a sequence of enabled [[Study]] for which the user can collect specimens for.
+   *
+   * @param requestUserId the ID of the user making the request.
+   *
+   * @param filter the string representation of the filter expression to use to filter the studies.
+   *
+   * @param sort the string representation of the sort expression to use when sorting the studies.
+   */
+  def collectionStudies(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[Study]]
 
   def getStudyCount(requestUserId: UserId): ServiceValidation[Long]
 
@@ -95,11 +108,38 @@ class StudiesServiceImpl @Inject()(
   val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
     extends StudiesService
     with AccessChecksSerivce
-    with StudyServicePermissionChecks {
+    with StudyServicePermissionChecks
+    with CentreServicePermissionChecks {
 
   import org.biobank.CommonValidations._
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
+
+  def collectionStudies(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[Study]] = {
+    val collectionStudies: ServiceValidation[Seq[Study]] = for {
+        membershipStudies <- getMembershipStudies(requestUserId)
+        membershipCentres <- getMembershipCentres(requestUserId)
+      } yield {
+        val enabledStudies = membershipStudies.filter { s => s.state == Study.enabledState }
+        val enabledCentres = membershipCentres.filter { c => c.state == Centre.enabledState }
+        val centreStudies  = enabledCentres
+          .flatMap { centre =>
+            centre.studyIds.map(studyRepository.getByKey)
+          }
+          .toList.sequenceU
+          .map { s =>
+            s.filter { s => s.state == Study.enabledState }.toSet
+          }
+
+        // centreStudies should never be an error because its value is based on enabled centres
+        centreStudies.fold(
+          err => Seq.empty[EnabledStudy],
+          cs  => (enabledStudies & cs).toSeq
+        )
+      }
+    collectionStudies.flatMap(studies => filterStudiesInternal(studies.toSet, filter, sort))
+  }
 
   def getStudyCount(requestUserId: UserId): ServiceValidation[Long] = {
     withPermittedStudies(requestUserId) { studies =>

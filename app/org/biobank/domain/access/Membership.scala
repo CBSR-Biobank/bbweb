@@ -4,6 +4,7 @@ import org.biobank.domain._
 import org.biobank.domain.user.{User, UserId}
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.centre.CentreId
+import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._

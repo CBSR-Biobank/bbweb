@@ -67,7 +67,8 @@ define(function () {
      * server responds with an error, another dialog box is displayed showing the error and the promise is
      * rejected.
      *
-     * @param  {function} entity - The domain entity to be removed.
+     * @param {function} promiseFunc - A function that returns a promise. It is invoked if the user confirms
+     * that he / she wants to proceed with removing the entity.
      *
      * @param {String} headerHtml - The header text to display in the confirmation dialog box.
      *
@@ -77,8 +78,9 @@ define(function () {
      *
      * @param {String} removeFaileBodyHtml - The body text to display in the remove error dialog box.
      *
-     * @return A promise. The promise is resolved if the entity was removed. The promise is rejected if the
-     * user does not want to remove the entity or if the server does not allow the entity to be removed.
+     * @return {Promise<boolean>} The promise is resolved if the entity was removed. The promise is rejected
+     * if the user does not want to remove the entity or if the server does not allow the entity to be
+     * removed.
      */
     function removeEntity(promiseFunc,
                           headerHtml,
@@ -89,8 +91,13 @@ define(function () {
 
       function removeConfirmed() {
         return promiseFunc().catch(function (error) {
+          var errMsg = JSON.stringify(error);
+          if (error.status && (error.status === 401)) {
+            errMsg = gettextCatalog.getString('You do not have permission to perform this action');
+          }
+
           return modalService.modalOkCancel(removeFailedHeaderHtml,
-                                            removeFaileBodyHtml + ': ' + error);
+                                            removeFaileBodyHtml + ': ' + errMsg);
         });
       }
     }

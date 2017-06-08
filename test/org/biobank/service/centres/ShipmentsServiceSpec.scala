@@ -564,7 +564,7 @@ class ShipmentsServiceSpec
 
     }
 
-    describe("111 when updating shipment specimens") {
+    describe("when updating shipment specimens") {
 
       it("users with access") {
         val (f, specimen, shipmentSpecimen) = shipmentSpecimenFixture

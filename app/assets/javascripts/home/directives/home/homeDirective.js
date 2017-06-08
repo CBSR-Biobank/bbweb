@@ -19,9 +19,9 @@ define(['lodash'], function (_) {
     return directive;
   }
 
-  HomeCtrl.$inject = ['$rootScope', '$timeout', 'usersService'];
+  HomeCtrl.$inject = ['$rootScope', '$timeout', 'usersService', 'User'];
 
-  function HomeCtrl($rootScope, $timeout, usersService) {
+  function HomeCtrl($rootScope, $timeout, usersService, User) {
     var vm = this;
 
     vm.userIsAuthenticated = false;
@@ -31,11 +31,15 @@ define(['lodash'], function (_) {
     //--
 
     function init() {
-      // A bit of a hack: We know that biobankHeaderDirective authenticates the user, so we use a timeout to
-      // wait for authentication reply to have been resolved.
-      $timeout(function () {
-        vm.userIsAuthenticated = usersService.isAuthenticated();
-      }, 50);
+      usersService.requestCurrentUser().then(function (user) {
+        vm.user = User.create(user);
+        vm.userIsAuthenticated = true;
+        vm.allowCollection = vm.user.hasRole('SpecimenCollector');
+        vm.shippingAllowed = vm.user.hasRole('ShippingUser');
+        vm.adminAllowed = vm.user.hasAnyRoleOf('StudyAdministrator',
+                                               'CentreAdministrator',
+                                               'UserAdministrator');
+      });
     }
   }
 

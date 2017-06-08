@@ -6,8 +6,9 @@ import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.ValidationKey
 import org.biobank.domain.access.PermissionId
-import org.biobank.domain.user._
+import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.study.{StudyId, StudyRepository}
+import org.biobank.domain.user._
 import org.biobank.dto._
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.UserCommands._
@@ -22,7 +23,6 @@ import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[UsersServiceImpl])
 trait UsersService extends BbwebService {
-
   /**
    * Returns a users.
    *
@@ -62,7 +62,7 @@ trait UsersService extends BbwebService {
   /**
    * Permissions not checked since anyone can attempt a login.
    */
-  def loginAllowed(email: String, enteredPwd: String): ServiceValidation[User]
+  def loginAllowed(email: String, enteredPwd: String): ServiceValidation[UserDto]
 
   /**
    * Permissions not checked since anyone can register as a user.
@@ -76,8 +76,6 @@ trait UsersService extends BbwebService {
 
   def processCommand(cmd: UserCommand): Future[ServiceValidation[User]]
 
-  def userToDto(user: User): UserDto
-
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
 }
@@ -86,6 +84,7 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
                                                val accessService:                      AccessService,
                                                val userRepository:                     UserRepository,
                                                val studyRepository:                    StudyRepository,
+                                               val centreRepository:                   CentreRepository,
                                                val passwordHasher:                     PasswordHasher)
     extends UsersService
     with AccessChecksSerivce
@@ -99,12 +98,15 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[UserDto] = {
-    val hasPermission = accessService.hasPermission(requestUserId, PermissionId.UserRead).valueOr(_ => false)
-    if (hasPermission || (requestUserId == id)) {
-      userRepository.getByKey(id).map(userToDto)
-    } else {
-      Unauthorized.failureNel[UserDto]
-    }
+    for {
+      hasPermission <- accessService.hasPermission(requestUserId, PermissionId.UserRead)
+      user          <- userRepository.getByKey(id)
+      membership    <- getMembershipDto(id)
+      dto           <- {
+        if (hasPermission || (requestUserId == id)) userToDto(user, membership).successNel[String]
+        else Unauthorized.failureNel[UserDto]
+      }
+    } yield dto
   }
 
   def getUser(id: UserId): ServiceValidation[User] = {
@@ -155,7 +157,7 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
     }
   }
 
-  def loginAllowed(email: String, enteredPwd: String): ServiceValidation[User] = {
+  def loginAllowed(email: String, enteredPwd: String): ServiceValidation[UserDto] = {
     for {
       user <- userRepository.getByEmail(email)
       active <- user match {
@@ -166,7 +168,8 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
         if (passwordHasher.valid(user.password, user.salt, enteredPwd)) user.successNel[String]
         else InvalidPassword.failureNel[User]
       }
-    } yield user
+      membership <- getMembershipDto(user.id)
+    } yield userToDto(user, membership)
   }
 
   def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]] = {
@@ -184,22 +187,59 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
           accessService.hasPermission(UserId(c.sessionUserId), PermissionId.UserChangeState)
         case c: UserModifyCommand =>
           accessService.hasPermission(UserId(c.sessionUserId), PermissionId.UserUpdate)
-        case _ => true.successNel[String]
+            .map { permission =>
+              // user is allowed to change his / her own settings
+              permission || (c.sessionUserId == c.id)
+            }
+        case _ =>
+          // anonymous user can register as users
+          true.successNel[String]
       }
 
-    if (v.exists(permission => permission)) {
-      ask(processor, cmd).mapTo[ServiceValidation[UserEvent]].map { validation =>
-        for {
-          event <- validation
-          user  <- userRepository.getByKey(UserId(event.id))
-        } yield user
+    v.fold(
+      err => Future.successful(err.failure[User]),
+      permitted => if (permitted) {
+        ask(processor, cmd).mapTo[ServiceValidation[UserEvent]].map { validation =>
+          for {
+            event <- validation
+            user  <- userRepository.getByKey(UserId(event.id))
+          } yield user
+        }
+      } else {
+        Future.successful(Unauthorized.failureNel[User])
       }
-    } else {
-      Future.successful(Unauthorized.failureNel[User])
+    )
+  }
+
+  private def getMembershipDto(id: UserId): ServiceValidation[MembershipDto] = {
+    for {
+      membership <- accessService.getMembership(id)
+      studyNames <- {
+        membership.studyInfo.studyIds
+          .map(studyRepository.getByKey)
+          .toList.sequenceU
+          .map(studies => studies.map(s => s.name).toSet)
+          .leftMap(err => InternalServerError.nel)
+      }
+      centreNames <- {
+        membership.centreInfo.centreIds
+          .map(centreRepository.getByKey)
+          .toList.sequenceU
+          .map(centres => centres.map(c => c.name).toSet)
+          .leftMap(err => InternalServerError.nel)
+      }
+    } yield {
+      val studyInfo = MembershipInfoDto(all = membership.studyInfo.allStudies, names = studyNames)
+      val centreInfo = MembershipInfoDto(all = membership.centreInfo.allCentres, names = centreNames)
+
+      MembershipDto(id           = membership.id.id,
+                    version      = membership.version,
+                    studyInfo    = studyInfo,
+                    centreInfo   = centreInfo)
     }
   }
 
-  def userToDto(user: User): UserDto = {
+  private def userToDto(user: User, membership: MembershipDto): UserDto = {
     UserDto(id           = user.id.id,
             version      = user.version,
             timeAdded    = user.timeAdded,
@@ -208,7 +248,8 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
             name         = user.name,
             email        = user.email,
             avatarUrl    = user.avatarUrl,
-            roles        = accessService.getRoles(user.id))
+            roles        = accessService.getRoles(user.id),
+            membership   = membership)
   }
 
 }

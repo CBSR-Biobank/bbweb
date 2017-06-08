@@ -16,7 +16,7 @@ trait CentreServicePermissionChecks extends ServicePermissionChecks {
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   private def withPermittedCentres[T](requestUserId: UserId, permissionId: PermissionId)
-                                    (block: Set[Centre] => ServiceValidation[T])
+                                  (block: Set[Centre] => ServiceValidation[T])
       : ServiceValidation[T] = {
     whenPermitted(requestUserId, permissionId) { () =>
       for {

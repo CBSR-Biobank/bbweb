@@ -17,13 +17,14 @@ define(function() {
     var currentUser;
 
     var service = {
-      getCurrentUser:     getCurrentUser,
-      requestCurrentUser: requestCurrentUser,
-      login:              login,
-      logout:             logout,
-      isAuthenticated:    isAuthenticated,
-      sessionTimeout:     sessionTimeout,
-      passwordReset:      passwordReset
+      getCurrentUser:      getCurrentUser,
+      retrieveCurrentUser: retrieveCurrentUser,
+      requestCurrentUser:  requestCurrentUser,
+      login:               login,
+      logout:              logout,
+      isAuthenticated:     isAuthenticated,
+      sessionTimeout:      sessionTimeout,
+      passwordReset:       passwordReset
     };
 
     init();
@@ -51,15 +52,18 @@ define(function() {
         });
     }
 
-    function requestCurrentUser() {
-      if (isAuthenticated()) {
-        return $q.when(currentUser);
-      }
-
+    function retrieveCurrentUser() {
       return biobankApi.get('/users/authenticate').then(function(user) {
         currentUser = user;
         return currentUser;
       });
+    }
+
+    function requestCurrentUser() {
+      if (isAuthenticated()) {
+        return $q.when(currentUser);
+      }
+      return retrieveCurrentUser();
     }
 
     function getCurrentUser() {

@@ -3,12 +3,12 @@ package org.biobank.fixture
 import org.biobank.Global
 import org.biobank.controllers.FixedEhCache
 import org.biobank.domain._
-import org.biobank.domain.access.AccessItemRepository
+import org.biobank.domain.access._
 import org.biobank.domain.centre._
 import org.biobank.domain.participants._
 import org.biobank.domain.processing._
 import org.biobank.domain.study._
-import org.biobank.domain.user.UserRepository
+import org.biobank.domain.user._
 import org.biobank.service.PasswordHasher
 import org.scalatest._
 import org.scalatestplus.play._
@@ -78,7 +78,7 @@ abstract class ControllerFixture
       .overrides(bind[CacheApi].to[FixedEhCache])
       .build()
 
-  def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
+  protected def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
     val request = Json.obj("email" -> email, "password" -> password)
     route(app, FakeRequest(POST, "/users/login").withJsonBody(request)).fold {
       cancel("login failed")
@@ -99,11 +99,11 @@ abstract class ControllerFixture
     cookie.split("; ")(0).split("=")(1)
   }
 
-  def makeRequest(method:         String,
-                  path:           String,
-                  expectedStatus: Int,
-                  json:           JsValue,
-                  token:          String): JsValue = {
+  override def makeRequest(method:         String,
+                           path:           String,
+                           expectedStatus: Int,
+                           json:           JsValue,
+                           token:          String): JsValue = {
     val fakeRequest = FakeRequest(method, path)
       .withJsonBody(json)
       .withHeaders("X-XSRF-TOKEN" -> token)
@@ -166,26 +166,45 @@ abstract class ControllerFixture
   // for the following getters: a new application is created for each test, therefore,
   // new instances of each of these is created with the new application
 
-  def passwordHasher = app.injector.instanceOf[PasswordHasher]
+  protected def passwordHasher = app.injector.instanceOf[PasswordHasher]
 
-  def accessItemRepository                   = app.injector.instanceOf[AccessItemRepository]
+  protected def accessItemRepository                   = app.injector.instanceOf[AccessItemRepository]
+  protected def membershipRepository                   = app.injector.instanceOf[MembershipRepository]
 
-  def collectionEventTypeRepository          = app.injector.instanceOf[CollectionEventTypeRepository]
-  def processingTypeRepository               = app.injector.instanceOf[ProcessingTypeRepository]
-  def specimenGroupRepository                = app.injector.instanceOf[SpecimenGroupRepository]
-  def specimenLinkTypeRepository             = app.injector.instanceOf[SpecimenLinkTypeRepository]
-  def studyRepository                        = app.injector.instanceOf[StudyRepository]
+  protected def userRepository                         = app.injector.instanceOf[UserRepository]
 
-  def participantRepository                  = app.injector.instanceOf[ParticipantRepository]
-  def collectionEventRepository              = app.injector.instanceOf[CollectionEventRepository]
-  def ceventSpecimenRepository               = app.injector.instanceOf[CeventSpecimenRepository]
-  def specimenRepository                     = app.injector.instanceOf[SpecimenRepository]
-  def processingEventInputSpecimenRepository = app.injector.instanceOf[ProcessingEventInputSpecimenRepository]
+  protected def studyRepository                        = app.injector.instanceOf[StudyRepository]
+  protected def collectionEventTypeRepository          = app.injector.instanceOf[CollectionEventTypeRepository]
+  protected def processingTypeRepository               = app.injector.instanceOf[ProcessingTypeRepository]
+  protected def specimenGroupRepository                = app.injector.instanceOf[SpecimenGroupRepository]
+  protected def specimenLinkTypeRepository             = app.injector.instanceOf[SpecimenLinkTypeRepository]
 
-  def userRepository                         = app.injector.instanceOf[UserRepository]
+  protected def participantRepository                  = app.injector.instanceOf[ParticipantRepository]
+  protected def collectionEventRepository              = app.injector.instanceOf[CollectionEventRepository]
+  protected def ceventSpecimenRepository               = app.injector.instanceOf[CeventSpecimenRepository]
+  protected def specimenRepository                     = app.injector.instanceOf[SpecimenRepository]
+  protected def processingEventInputSpecimenRepository = app.injector.instanceOf[ProcessingEventInputSpecimenRepository]
 
-  def centreRepository                       = app.injector.instanceOf[CentreRepository]
-  def shipmentRepository                     = app.injector.instanceOf[ShipmentRepository]
-  def shipmentSpecimenRepository             = app.injector.instanceOf[ShipmentSpecimenRepository]
+
+  protected def centreRepository                       = app.injector.instanceOf[CentreRepository]
+  protected def shipmentRepository                     = app.injector.instanceOf[ShipmentRepository]
+  protected def shipmentSpecimenRepository             = app.injector.instanceOf[ShipmentSpecimenRepository]
+
+  protected def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
+    entity match {
+      case e: AccessItem          => accessItemRepository.put(e)
+      case e: Membership          => membershipRepository.put(e)
+      case e: User                => userRepository.put(e)
+      case e: Study               => studyRepository.put(e)
+      case e: Centre              => centreRepository.put(e)
+      case e: CollectionEventType => collectionEventTypeRepository.put(e)
+      case e: Participant         => participantRepository.put(e)
+      case e: CollectionEvent     => collectionEventRepository.put(e)
+      case e: Specimen            => specimenRepository.put(e)
+      case e: ShipmentSpecimen    => shipmentSpecimenRepository.put(e)
+      case e: Shipment            => shipmentRepository.put(e)
+      case _                      => fail("invalid entity")
+    }
+  }
 
 }

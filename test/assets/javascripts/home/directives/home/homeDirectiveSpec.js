@@ -31,13 +31,20 @@ define([
       self.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              '$httpBackend');
+                              '$httpBackend',
+                              'User',
+                              'usersService',
+                              'factory');
 
       self.putHtmlTemplates('/assets/javascripts/home/directives/home/home.html');
     }));
 
     it('has valid scope', function() {
+      var user = this.factory.user();
+      this.usersService.requestCurrentUser =
+        jasmine.createSpy().and.returnValue(this.$q.when(user));
       createDirective.call(this);
+      expect(this.controller.user).toEqual(jasmine.any(this.User));
       expect(this.$rootScope.pageTitle).toBeDefined('Biobank');
     });
   });

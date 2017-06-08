@@ -20,10 +20,10 @@ define(function (require) {
                require('./components/ceventSpecimensView/ceventSpecimensViewComponent'))
 
     .component('specimenView',        require('./components/specimenView/specimenViewComponent'))
+    .component('collection',          require('./components/collection/collectionComponent'))
 
     .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
 
-    .directive('collection',          require('./directives/collection/collectionDirective'))
     .directive('selectStudy',         require('./directives/selectStudy/selectStudyDirective'))
 
     .directive('participantAdd',      require('./directives/participantAdd/participantAddDirective'))

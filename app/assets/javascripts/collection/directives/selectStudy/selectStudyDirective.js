@@ -5,7 +5,7 @@
 define(['lodash'], function(_) {
   'use strict';
 
-  /**
+  /*
    * This directive allows the user to select a {@link Study} from the list provided by function getStudies().
    */
   function selectStudyDirective() {
@@ -72,6 +72,8 @@ define(['lodash'], function(_) {
     function updateStudies() {
       if (vm.pagerOptions.filter) {
         vm.pagerOptions.filter += ';';
+      } else {
+        vm.pagerOptions.filter = '';
       }
 
       vm.pagerOptions.filter += 'state::enabled';
@@ -82,7 +84,7 @@ define(['lodash'], function(_) {
       });
     }
 
-    /**
+    /*
      * Called when user enters text into the 'name filter'.
      */
     function nameFilterUpdated() {

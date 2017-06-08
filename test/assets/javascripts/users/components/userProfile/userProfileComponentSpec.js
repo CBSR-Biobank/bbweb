@@ -14,8 +14,8 @@ define(function (require) {
   describe('Directive: userProfileDirective', function() {
 
     var createController = function (user) {
-      this.$injector.get('usersService').requestCurrentUser =
-        jasmine.createSpy().and.returnValue(this.$q.when(user));
+      this.usersService.requestCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(user));
+      this.usersService.retrieveCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(user));
 
       this.element = angular.element('<user-profile user="vm.user"></user-profile>');
       this.scope = this.$rootScope.$new();
@@ -40,12 +40,13 @@ define(function (require) {
                               'modalService',
                               'modalInput',
                               'User',
-                              'notificationsService');
+                              'notificationsService',
+                              'usersService');
 
       self.ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
 
       self.putHtmlTemplates(
-        '/assets/javascripts/users/directives/userProfile/userProfile.html',
+        '/assets/javascripts/users/components/userProfile/userProfile.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/common/modalInput/modalInput.html',
         '/assets/javascripts/common/modalInput/boolean.html',

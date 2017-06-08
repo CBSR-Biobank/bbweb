@@ -11,11 +11,10 @@ define(['lodash', 'tv4'], function(_, tv4) {
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
-    'UserState',
-    'usersService'
+    'UserState'
   ];
 
-  /**
+  /*
    * Angular factory for Users.
    */
   function UserFactory($q,
@@ -23,8 +22,27 @@ define(['lodash', 'tv4'], function(_, tv4) {
                        biobankApi,
                        ConcurrencySafeEntity,
                        DomainError,
-                       UserState,
-                       usersService) {
+                       UserState) {
+
+    var MEMBERSHIP_INFO_SCHEMA = {
+      'id': 'MembershipInfo',
+      'type': 'object',
+      'properties': {
+        'all':   { 'type': 'boolean' },
+        'names': { 'type': 'array', items: 'string' }
+      }
+    };
+
+    var MEMBERSHIP_SCHEMA = {
+      'id': 'Membership',
+      'type': 'object',
+      properties: {
+        'id':         { 'type': 'string' },
+        'version':    { 'type': 'integer', 'minimum': 0 },
+        'studyInfo':  { 'type': 'object', 'items': { '$ref': 'MembershipInfo' } },
+        'centreInfo': { 'type': 'object', 'items': { '$ref': 'MembershipInfo' } }
+      }
+    };
 
     var SCHEMA = {
       'id': 'User',
@@ -37,9 +55,11 @@ define(['lodash', 'tv4'], function(_, tv4) {
         'name':         { 'type': 'string' },
         'email':        { 'type': 'string' },
         'avatarUrl':    { 'type': [ 'string', 'null' ] },
-        'state':        { 'type': 'string' }
+        'state':        { 'type': 'string' },
+        'roles':        { 'type': 'array', items: 'string' },
+        'membership':   { 'type': 'object', 'items': { '$ref': 'Membership' } }
       },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state' ]
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state', 'roles', 'membership' ]
     };
 
     /**
@@ -81,6 +101,13 @@ define(['lodash', 'tv4'], function(_, tv4) {
        */
 
       /**
+       * The roles this user has.
+       *
+       * @name domain.users.User#roles
+       * @type {Array<string>}
+       */
+
+      /**
        * The state can be one of: registered, active or locked.
        *
        * @name domain.users.User#state
@@ -103,7 +130,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     User.isValid = function (obj) {
-      return ConcurrencySafeEntity.isValid(SCHEMA, null, obj);
+       return ConcurrencySafeEntity.isValid(SCHEMA, [MEMBERSHIP_INFO_SCHEMA, MEMBERSHIP_SCHEMA], obj);
     };
 
     /**
@@ -290,6 +317,26 @@ define(['lodash', 'tv4'], function(_, tv4) {
 
     User.prototype.isLocked = function () {
       return (this.state === UserState.LOCKED);
+    };
+
+    User.prototype.hasRole = function (role) {
+      return _.includes(this.roles, role);
+    };
+
+    User.prototype.hasAnyRoleOf = function (/* role1, role2, ..., roleN */) {
+      return _.intersection(Array.prototype.slice.call(arguments), this.roles).length > 0;
+    };
+
+    User.prototype.hasStudyAdminRole = function () {
+      return this.hasRole('StudyAdministrator');
+    };
+
+    User.prototype.hasCentreAdminRole = function () {
+      return this.hasRole('CentreAdministrator');
+    };
+
+    User.prototype.hasUserAdminRole = function () {
+      return this.hasRole('UserAdministrator');
     };
 
     function changeStatus(user, state) {

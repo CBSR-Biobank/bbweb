@@ -17,15 +17,9 @@ define(['lodash'], function(_) {
     $stateProvider
       .state('home.collection', {
         url: '^/collection',
-        resolve: {
-          studyCounts: resolveStudyCounts,
-          centreCounts: resolveCentreCounts
-        },
         views: {
           'main@': {
-            template: '<collection study-counts="vm.studyCounts" centre-counts="vm.centreCounts"></collection>',
-            controller: CollectionCtrl,
-            controllerAs: 'vm'
+            template: '<collection></collection>'
           }
         },
         data: {
@@ -208,16 +202,6 @@ define(['lodash'], function(_) {
           displayName: '{{specimen.inventoryId}}'
         }
       });
-
-    resolveStudyCounts.$inject = ['StudyCounts'];
-    function resolveStudyCounts(StudyCounts) {
-      return StudyCounts.get();
-    }
-
-    resolveCentreCounts.$inject = ['CentreCounts'];
-    function resolveCentreCounts(CentreCounts) {
-      return CentreCounts.get();
-    }
 
     resolveStudy.$inject = ['$stateParams', 'Study'];
     function resolveStudy($stateParams, Study) {
