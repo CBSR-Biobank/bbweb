@@ -27,13 +27,21 @@ trait UserServiceFixtures {
                                  nonAdminUser:          ActiveUser,
                                  user:                  ActiveUser,
                                  val userPlainPassword: String)
-      extends UsersFixture(adminUser, nonAdminUser, user)
+      extends UsersFixture(adminUser, nonAdminUser, user) {
+    Set(adminUser, nonAdminUser, user).foreach { user =>
+      val membership = factory.createMembership.copy(userIds = Set(user.id))
+      membershipRepository.put(membership)
+    }
+
+  }
 
   protected val factory: Factory
 
   protected val nameGenerator: NameGenerator
 
   protected val accessItemRepository: AccessItemRepository
+
+  protected val membershipRepository: MembershipRepository
 
   protected val userRepository: UserRepository
 

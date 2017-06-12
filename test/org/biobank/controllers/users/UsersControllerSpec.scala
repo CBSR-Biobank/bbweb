@@ -18,33 +18,47 @@ import play.api.test._
 class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFixtures {
   import org.biobank.TestUtils._
 
-  def uri: String = "/users/"
+  class activeUserFixture {
+    val user = factory.createActiveUser
+    userRepository.put(user)
+    addMembershipForUser(user)
+  }
 
-  def uri(user: User): String = uri + s"${user.id.id}"
+  private def uri: String = "/users/"
 
-  def uri(path: String): String = uri + s"$path"
+  private def uri(user: User): String = uri + s"${user.id.id}"
 
-  def updateUri(user: User, path: String): String = uri(path) + s"/${user.id.id}"
+  private def uri(path: String): String = uri + s"$path"
 
-  def createRegisteredUserInRepository(plainPassword: String): RegisteredUser = {
+  private def updateUri(user: User, path: String): String = uri(path) + s"/${user.id.id}"
+
+  private def addMembershipForUser(user: User) = {
+    val membership = factory.createMembership.copy(userIds = Set(user.id))
+    membershipRepository.put(membership)
+  }
+
+  private def createRegisteredUserInRepository(plainPassword: String): RegisteredUser = {
     val user = createRegisteredUser(plainPassword)
     userRepository.put(user)
+    addMembershipForUser(user)
     user
   }
 
-  def createActiveUserInRepository(plainPassword: String): ActiveUser = {
+  private def createActiveUserInRepository(plainPassword: String): ActiveUser = {
     val user = createActiveUser(plainPassword)
     userRepository.put(user)
+    addMembershipForUser(user)
     user
   }
 
-  def createLockedUserInRepository(plainPassword: String): LockedUser = {
+  private def createLockedUserInRepository(plainPassword: String): LockedUser = {
     val user = createLockedUser(plainPassword)
     userRepository.put(user)
+    addMembershipForUser(user)
     user
   }
 
-  def compareObjs(jsonList: List[JsObject], users: List[User]) = {
+  private def compareObjs(jsonList: List[JsObject], users: List[User]) = {
     val usersMap = users.map { user => (user.id, user) }.toMap
     jsonList.foreach { jsonObj =>
       val jsonId = UserId((jsonObj \ "id").as[String])
@@ -52,11 +66,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
     }
   }
 
-  def jsonUsersFilterOutDefaultUser(jsonList: List[JsObject]): List[JsObject] = {
+  private def jsonUsersFilterOutDefaultUser(jsonList: List[JsObject]): List[JsObject] = {
     jsonList.filter(json => (json \ "id").as[String] != Global.DefaultUserId.id)
   }
 
-  def multipleItemsResultWithDefaultUser(uri:         String,
+  private def multipleItemsResultWithDefaultUser(uri:         String,
                                          queryParams: Map[String, String] =  Map.empty,
                                          offset:      Long,
                                          total:       Long,
@@ -611,12 +625,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
     describe("GET /users/:id") {
 
       it("return a user") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-        val json = makeRequest(GET, uri(user))
+        val f = new activeUserFixture
+        val json = makeRequest(GET, uri(f.user))
         (json \ "status").as[String] must be ("success")
         val jsonObj = (json \ "data").as[JsObject]
-        compareObj(jsonObj, user)
+        compareObj(jsonObj, f.user)
       }
 
       it("return not found for an invalid user") {
@@ -739,7 +752,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("POST /users/login") {
+    describe("111 POST /users/login") {
 
       it("allow a user to log in") {
         val plainPassword = nameGenerator.next[String]
