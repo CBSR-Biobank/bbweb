@@ -95,6 +95,11 @@ class CentresController @Inject()(val action:  BbwebAction,
   def addLocation(id: CentreId): Action[JsValue] =
     commandAction[AddCentreLocationCmd](Json.obj("id" -> id))(processCommand)
 
+  def updateLocation(id: CentreId, locationId: String): Action[JsValue] = {
+    val json = Json.obj("id" -> id, "locationId" -> locationId)
+    commandAction[UpdateCentreLocationCmd](json)(processCommand)
+  }
+
   def removeLocation(centreId: CentreId, ver: Long, locationId: String): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       processCommand(RemoveCentreLocationCmd(request.authInfo.userId.id, centreId.id, ver, locationId))

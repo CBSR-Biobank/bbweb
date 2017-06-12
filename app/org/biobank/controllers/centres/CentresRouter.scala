@@ -35,6 +35,9 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
     case POST(p"/locations/${centreId(id)}") =>
       controller.addLocation(id)
 
+    case POST(p"/locations/${centreId(centreId)}/$locationId") =>
+      controller.updateLocation(centreId, locationId)
+
     case POST(p"/snapshot") =>
       controller.snapshot
 

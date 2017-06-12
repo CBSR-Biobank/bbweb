@@ -49,6 +49,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       case et: EventType.Enabled            => applyEnabledEvent(event)
       case et: EventType.Disabled           => applyDisabledEvent(event)
       case et: EventType.LocationAdded      => applyLocationAddedEvent(event)
+      case et: EventType.LocationUpdated    => applyLocationUpdatedEvent(event)
       case et: EventType.LocationRemoved    => applyLocationRemovedEvent(event)
       case et: EventType.StudyAdded         => applyStudyAddedEvent(event)
       case et: EventType.StudyRemoved       => applyStudyRemovedEvent(event)
@@ -84,6 +85,9 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
 
     case cmd: AddCentreLocationCmd =>
       processUpdateCmdOnDisabledCentre(cmd, addLocationCmdToEvent, applyLocationAddedEvent)
+
+    case cmd: UpdateCentreLocationCmd =>
+      processUpdateCmdOnDisabledCentre(cmd, updateLocationCmdToEvent, applyLocationUpdatedEvent)
 
     case cmd: RemoveCentreLocationCmd =>
       processUpdateCmdOnDisabledCentre(cmd, removeLocationCmdToEvent, applyLocationRemovedEvent)
@@ -216,6 +220,38 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       _.locationAdded.location.postalCode          := cmd.postalCode,
       _.locationAdded.location.optionalPoBoxNumber := cmd.poBoxNumber,
       _.locationAdded.location.countryIsoCode      := cmd.countryIsoCode)
+  }
+
+  /**
+   * FIXME: Locations should be added regardless of the centre's status.
+   */
+  private def updateLocationCmdToEvent(cmd:    UpdateCentreLocationCmd,
+                                       centre: DisabledCentre): ServiceValidation[CentreEvent] = {
+    for {
+      location <- {
+        // need to call Location.create so that a new Id is generated
+        Location(id             = LocationId(cmd.locationId),
+                 name           = cmd.name,
+                 street         = cmd.street,
+                 city           = cmd.city,
+                 province       = cmd.province,
+                 postalCode     = cmd.postalCode,
+                 poBoxNumber    = cmd.poBoxNumber,
+                 countryIsoCode = cmd.countryIsoCode).successNel[String]
+      }
+      updatedCentre <- centre.withLocation(location)
+    } yield CentreEvent(centre.id.id).update(
+      _.sessionUserId                                := cmd.sessionUserId,
+      _.time                                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.locationUpdated.version                      := cmd.expectedVersion,
+      _.locationUpdated.location.locationId          := cmd.locationId,
+      _.locationUpdated.location.name                := cmd.name,
+      _.locationUpdated.location.street              := cmd.street,
+      _.locationUpdated.location.city                := cmd.city,
+      _.locationUpdated.location.province            := cmd.province,
+      _.locationUpdated.location.postalCode          := cmd.postalCode,
+      _.locationUpdated.location.optionalPoBoxNumber := cmd.poBoxNumber,
+      _.locationUpdated.location.countryIsoCode      := cmd.countryIsoCode)
   }
 
   /**
@@ -396,6 +432,26 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                            province       = eventLocation.getProvince,
                                            postalCode     = eventLocation.getPostalCode,
                                            poBoxNumber    = eventLocation.poBoxNumber,
+                   countryIsoCode = eventLocation.getCountryIsoCode))
+      v.foreach { c => centreRepository.put(c.copy(timeModified = Some(eventTime))) }
+      v
+    }
+  }
+
+  private def applyLocationUpdatedEvent(event: CentreEvent): Unit = {
+    onValidEventDisabledCentreAndVersion(event,
+                                         event.eventType.isLocationUpdated,
+                                         event.getLocationUpdated.getVersion) { (centre, _, eventTime) =>
+      val locationUpdatedEvent = event.getLocationUpdated
+      val eventLocation = locationUpdatedEvent.getLocation
+      val v = centre.withLocation(
+          Location(id             = LocationId(eventLocation.getLocationId),
+                   name           = eventLocation.getName,
+                   street         = eventLocation.getStreet,
+                   city           = eventLocation.getCity,
+                   province       = eventLocation.getProvince,
+                   postalCode     = eventLocation.getPostalCode,
+                   poBoxNumber    = eventLocation.poBoxNumber,
                    countryIsoCode = eventLocation.getCountryIsoCode))
       v.foreach { c => centreRepository.put(c.copy(timeModified = Some(eventTime))) }
       v

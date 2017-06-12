@@ -44,6 +44,19 @@ object CentreCommands {
                                         countryIsoCode:  String)
       extends CentreModifyCommand
 
+  final case class UpdateCentreLocationCmd(sessionUserId:   String,
+                                           id:              String,
+                                           expectedVersion: Long,
+                                           locationId:      String,
+                                           name:            String,
+                                           street:          String,
+                                           city:            String,
+                                           province:        String,
+                                           postalCode:      String,
+                                           poBoxNumber:     Option[String],
+                                           countryIsoCode:  String)
+      extends CentreModifyCommand
+
   final case class RemoveCentreLocationCmd(sessionUserId:   String,
                                            id:              String,
                                            expectedVersion: Long,
@@ -96,6 +109,9 @@ object CentreCommands {
 
   implicit val addCentreLocationCmdReads: Reads[AddCentreLocationCmd] =
     Json.reads[AddCentreLocationCmd]
+
+  implicit val updateCentreLocationCmdReads: Reads[UpdateCentreLocationCmd] =
+    Json.reads[UpdateCentreLocationCmd]
 
   implicit val removeCentreLocationCmdReads: Reads[RemoveCentreLocationCmd] =
     Json.reads[RemoveCentreLocationCmd]
