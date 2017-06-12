@@ -135,7 +135,7 @@ define(['lodash'], function (_) {
     function editPoBoxNumber() {
       modalInput.text(gettextCatalog.getString('Edit PO box number'),
                       gettextCatalog.getString('PO box Number'),
-                      vm.location.postalCode).result
+                      vm.location.poBoxNumber).result
         .then(function (poBoxNumber) {
           vm.location.poBoxNumber = poBoxNumber;
           vm.centre.updateLocation(vm.location)
@@ -148,8 +148,8 @@ define(['lodash'], function (_) {
     function editCountryIsoCode() {
       modalInput.text(gettextCatalog.getString('Edit country ISO code'),
                       gettextCatalog.getString('Country ISO code'),
-                      vm.location.postalCode).result.
-        then(function (countryIsoCode) {
+                      vm.location.countryIsoCode).result
+        .then(function (countryIsoCode) {
           vm.location.countryIsoCode = countryIsoCode;
           vm.centre.updateLocation(vm.location)
             .then(postUpdate(gettextCatalog.getString('CountryIsoCode changed successfully.'),

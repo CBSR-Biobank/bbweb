@@ -30,7 +30,7 @@ define(['lodash'], function(_) {
     'domainNotificationService'
   ];
 
-  /**
+  /*
    *
    */
   function LocationsPanelCtrl($scope,
