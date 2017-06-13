@@ -198,6 +198,17 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
           salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
           avatarUrl    = None)
 
+      val specimenCollector = ActiveUser(
+          id           = UserId("specimen-collector"),
+          version      = 0L,
+          timeAdded    = Global.StartOfTime,
+          timeModified = None,
+          name         = "Specimen Collector",
+          email        = "specimen_collector@admin.com",
+          password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
+          salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
+          avatarUrl    = None)
+
       val shippingAdmin = ActiveUser(
           id           = UserId("shipping-admin"),
           version      = 0L,
@@ -220,10 +231,12 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
           salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
           avatarUrl    = None)
 
-      Set(studyAdmin, studyUser, shippingAdmin, shippingUser).foreach(userRepository.put)
+      Set(studyAdmin, studyUser, specimenCollector, shippingAdmin, shippingUser)
+        .foreach(userRepository.put)
 
       addUserToRole(studyAdmin, RoleId.StudyAdministrator)
       addUserToRole(studyUser, RoleId.StudyUser)
+      addUserToRole(specimenCollector, RoleId.SpecimenCollector)
       addUserToRole(shippingAdmin, RoleId.ShippingAdministrator)
       addUserToRole(shippingUser, RoleId.ShippingUser)
 
@@ -234,6 +247,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                      timeModified = None,
                      userIds      = Set(studyAdmin.id,
                                         studyUser.id,
+                                        specimenCollector.id,
                                         shippingAdmin.id,
                                         shippingUser.id),
                      studyInfo    = MembershipStudyInfo(true, Set.empty[StudyId]),
