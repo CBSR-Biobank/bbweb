@@ -11,14 +11,14 @@ define(function () {
     controllerAs: 'vm'
   };
 
-  CollectionController.$inject = ['gettextCatalog', 'Study'];
+  CollectionController.$inject = ['$state', 'gettextCatalog', 'Study'];
 
   /*
    * Controller for this component.
    *
    * The studyCounts object has the following fields: disabled, enabled, and retired.
    */
-  function CollectionController(gettextCatalog, Study) {
+  function CollectionController($state, gettextCatalog, Study) {
     var vm = this;
 
     vm.$onInit              = onInit;
@@ -29,9 +29,15 @@ define(function () {
     //---
 
     function onInit() {
-      Study.collectionStudies().then(function (reply) {
-        vm.isCollectionAllowed = (reply.items.length > 0);
-      });
+      Study.collectionStudies()
+        .then(function (reply) {
+          vm.isCollectionAllowed = (reply.items.length > 0);
+        })
+        .catch(function (error) {
+          if (error.status && (error.status === 401)) {
+            $state.go('home.users.login', {}, { reload: true });
+          }
+        });
     }
 
     // invoked by the SelectStudy directive
