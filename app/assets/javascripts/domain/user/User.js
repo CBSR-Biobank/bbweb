@@ -57,9 +57,9 @@ define(['lodash', 'tv4'], function(_, tv4) {
         'avatarUrl':    { 'type': [ 'string', 'null' ] },
         'state':        { 'type': 'string' },
         'roles':        { 'type': 'array', items: 'string' },
-        'membership':   { 'type': 'object', 'items': { '$ref': 'Membership' } }
+        'membership':   { 'type': [ 'object', 'null' ], 'items': { '$ref': 'Membership' } }
       },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state', 'roles', 'membership' ]
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state' ]
     };
 
     /**

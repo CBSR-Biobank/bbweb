@@ -101,9 +101,8 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
     for {
       hasPermission <- accessService.hasPermission(requestUserId, PermissionId.UserRead)
       user          <- userRepository.getByKey(id)
-      membership    <- getMembershipDto(id)
       dto           <- {
-        if (hasPermission || (requestUserId == id)) userToDto(user, membership).successNel[String]
+        if (hasPermission || (requestUserId == id)) userToDto(user, getMembershipDto(id)).successNel[String]
         else Unauthorized.failureNel[UserDto]
       }
     } yield dto
@@ -135,16 +134,10 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
           else result.reverse
         }
 
-      v.flatMap { users =>
+      v.map { users =>
         users
-          .map { user =>
-            getMembershipDto(user.id).map { membership =>
-              userToDto(user, membership)
-            }
-          }
-          .toList.sequenceU
-          .map(dtos => dtos.toSeq)
-          //.leftMap(err => InternalServerError.nel)
+          .map { user => userToDto(user, getMembershipDto(user.id)) }
+        //.leftMap(err => InternalServerError.nel)
       }
     }
   }
@@ -180,8 +173,7 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
         if (passwordHasher.valid(user.password, user.salt, enteredPwd)) user.successNel[String]
         else InvalidPassword.failureNel[User]
       }
-      membership <- getMembershipDto(user.id)
-    } yield userToDto(user, membership)
+    } yield userToDto(user, getMembershipDto(user.id))
   }
 
   def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]] = {
@@ -251,7 +243,7 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
     }
   }
 
-  private def userToDto(user: User, membership: MembershipDto): UserDto = {
+  private def userToDto(user: User, membership: ServiceValidation[MembershipDto]): UserDto = {
     UserDto(id           = user.id.id,
             version      = user.version,
             timeAdded    = user.timeAdded,
@@ -261,7 +253,7 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
             email        = user.email,
             avatarUrl    = user.avatarUrl,
             roles        = accessService.getRoles(user.id),
-            membership   = membership)
+            membership   = membership.toOption)
   }
 
 }

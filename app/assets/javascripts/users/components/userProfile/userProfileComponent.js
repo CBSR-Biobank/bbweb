@@ -51,20 +51,25 @@ define(function () {
         .then(function (user) {
           vm.user = User.create(user);
           vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
-          if (vm.user.membership.studyInfo.all) {
-            vm.studyMemberships = gettextCatalog.getString('All Studies');
-          } else if (vm.user.membership.studyInfo.names.length > 0){
-             vm.studyMemberships = vm.user.membership.studyInfo.names.join(', ');
+          if (vm.user.membership) {
+            if (vm.user.membership.studyInfo.all) {
+              vm.studyMemberships = gettextCatalog.getString('All Studies');
+            } else if (vm.user.membership.studyInfo.names.length > 0){
+              vm.studyMemberships = vm.user.membership.studyInfo.names.join(', ');
+            } else {
+              vm.studyMemberships = gettextCatalog.getString('None');
+            }
+
+            if (vm.user.membership.centreInfo.all) {
+              vm.centreMemberships = gettextCatalog.getString('All Centres');
+            } else if (vm.user.membership.centreInfo.names.length > 0){
+              vm.centreMemberships = vm.user.membership.centreInfo.names.join(', ');
+            } else {
+              vm.centreMemberships = gettextCatalog.getString('None');
+            }
           } else {
             vm.studyMemberships = gettextCatalog.getString('None');
-          }
-
-          if (vm.user.membership.centreInfo.all) {
-            vm.centreMemberships = gettextCatalog.getString('All Centres');
-          } else if (vm.user.membership.centreInfo.names.length > 0){
-             vm.centreMemberships = vm.user.membership.centreInfo.names.join(', ');
-          } else {
-             vm.centreMemberships = gettextCatalog.getString('None');
+            vm.centreMemberships = gettextCatalog.getString('None');
           }
         })
         .catch(function (error) {

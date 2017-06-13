@@ -45,7 +45,7 @@ package dto {
                            email:        String,
                            avatarUrl:    Option[String],
                            roles:        Set[RoleId],
-                           membership:   MembershipDto)
+                           membership:   Option[MembershipDto])
 
   object UserDto {
 
