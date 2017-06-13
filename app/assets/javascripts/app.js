@@ -80,8 +80,8 @@ define(function(require) {
   // }]);
 
   //.config(exceptionConfig)
+  //.config(httpInterceptorConfig)
     .config(loggingConfig)
-    .config(httpInterceptorConfig)
     .config(configToastr);
 
   //--
