@@ -2,6 +2,7 @@ package org.biobank
 
 import javax.inject.{ Inject, Singleton }
 import org.biobank.domain._
+import org.biobank.domain.access._
 import org.biobank.domain.centre._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
@@ -178,6 +179,7 @@ class TestData @Inject() (config:                        Configuration,
                           participantRepository:         ParticipantRepository,
                           collectionEventRepository:     CollectionEventRepository,
                           userRepository:                UserRepository,
+                          membershipRepository:          MembershipRepository,
                           centreRepository:              CentreRepository,
                           specimenRepository:            SpecimenRepository,
                           ceventSpecimenRepository:      CeventSpecimenRepository,
@@ -204,21 +206,29 @@ class TestData @Inject() (config:                        Configuration,
       val plainPassword = "testuser"
       val salt = passwordHasher.generateSalt
       val hashids = Hashids("test-data-users")
+      val users = userData.zipWithIndex.map { case((name, email), index) =>
+        ActiveUser(id           = UserId(hashids.encode(index.toLong)),
+                   version      = 0L,
+                   timeAdded    = Global.StartOfTime,
+                   timeModified = None,
+                   name         = name,
+                   email        = email,
+                   password     = passwordHasher.encrypt(plainPassword, salt),
+                   salt         = salt,
+                   avatarUrl    = None)
+        }
 
-      userData.zipWithIndex.foreach { case((name, email), index) =>
-        val user: User = ActiveUser(
-            id           = UserId(hashids.encode(index.toLong)),
-            version      = 0L,
-            timeAdded    = Global.StartOfTime,
-            timeModified = None,
-            name         = name,
-            email        = email,
-            password     = passwordHasher.encrypt(plainPassword, salt),
-            salt         = salt,
-            avatarUrl    = None
-          )
-        userRepository.put(user)
-      }
+      users.foreach(userRepository.put)
+
+      val membership = Membership(id = MembershipId("test-data-all-studies-and-centres-membership"),
+                                  version      = 0L,
+                                  timeAdded    = Global.StartOfTime,
+                                  timeModified = None,
+                                  userIds      = users.map(user => user.id).toSet,
+                                  studyInfo    = MembershipStudyInfo(true, Set.empty[StudyId]),
+                                  centreInfo   = MembershipCentreInfo(true, Set.empty[CentreId]))
+
+      membershipRepository.put(membership)
     }
   }
 
