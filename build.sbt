@@ -5,7 +5,7 @@ name := "bbweb"
 
 organization in ThisBuild := "org.biobank"
 
-version := "0.0.0.5"
+version := "0.0.0.6"
 
 def excludeSpecs2(module: ModuleID): ModuleID =
   module.excludeAll(ExclusionRule(organization = "org.specs2", name = "specs2"))
