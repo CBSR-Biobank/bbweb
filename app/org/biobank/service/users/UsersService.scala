@@ -48,7 +48,7 @@ trait UsersService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the users.
    */
-  def getUsers(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[User]]
+  def getUsers(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[UserDto]]
 
   /**
    * Returns the counts of all users and also counts of users categorized by state.
@@ -116,23 +116,35 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
 
   def getUsers(requestUserId: UserId,
                filter:        FilterString,
-               sort:          SortString): ServiceValidation[Seq[User]] = {
+               sort:          SortString): ServiceValidation[Seq[UserDto]] = {
     whenPermitted(requestUserId, PermissionId.UserRead) { () =>
       val allUsers = userRepository.getValues.toSet
       val sortStr = if (sort.expression.isEmpty) new SortString("email")
                     else sort
-      for {
-        users           <- UserFilter.filterUsers(allUsers, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { User.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-      } yield {
-        val result = users.toSeq.sortWith(sortFunc)
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
+      val v = for {
+          users           <- UserFilter.filterUsers(allUsers, filter)
+          sortExpressions <- { QuerySortParser(sortStr).
+                                toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+          firstSort       <- { sortExpressions.headOption.
+                                toSuccessNel(ServiceError("at least one sort expression is required")) }
+          sortFunc        <- { User.sort2Compare.get(firstSort.name).
+                                toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+        } yield {
+          val result = users.toSeq.sortWith(sortFunc)
+          if (firstSort.order == AscendingOrder) result
+          else result.reverse
+        }
+
+      v.flatMap { users =>
+        users
+          .map { user =>
+            getMembershipDto(user.id).map { membership =>
+              userToDto(user, membership)
+            }
+          }
+          .toList.sequenceU
+          .map(dtos => dtos.toSeq)
+          //.leftMap(err => InternalServerError.nel)
       }
     }
   }
