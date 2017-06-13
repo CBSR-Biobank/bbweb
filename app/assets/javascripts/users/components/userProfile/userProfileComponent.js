@@ -14,6 +14,7 @@ define(function () {
   };
 
   UserProfileController.$inject = [
+    '$state',
     'gettextCatalog',
     'modalService',
     'modalInput',
@@ -25,7 +26,8 @@ define(function () {
   /*
    * Controller for this component.
    */
-  function UserProfileController(gettextCatalog,
+  function UserProfileController($state,
+                                 gettextCatalog,
                                  modalService,
                                  modalInput,
                                  notificationsService,
@@ -63,6 +65,11 @@ define(function () {
              vm.centreMemberships = vm.user.membership.centreInfo.names.join(', ');
           } else {
              vm.centreMemberships = gettextCatalog.getString('None');
+          }
+        })
+        .catch(function (error) {
+          if (error.status && (error.status === 401)) {
+            $state.go('home.users.login', {}, { reload: true });
           }
         });
     }
