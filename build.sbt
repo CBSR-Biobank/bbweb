@@ -1,11 +1,15 @@
+import com.typesafe.config._
+
+val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
+
+version := conf.getString("app.version")
+
 val akkaVer = "2.4.18"
 val angularVer = "1.5.11"
 
 name := "bbweb"
 
 organization in ThisBuild := "org.biobank"
-
-version := "0.0.0.6"
 
 def excludeSpecs2(module: ModuleID): ModuleID =
   module.excludeAll(ExclusionRule(organization = "org.specs2", name = "specs2"))
