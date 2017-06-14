@@ -17,8 +17,13 @@ cache:
     - $HOME/.ivy2/cache
     - $HOME/.sbt/boot/
 
+before_cache:
+  # Cleanup the cached directories to avoid unnecessary cache updates
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
+
 scala:
-  - 2.11.8
+  - 2.11.11
 
 node_js:
   - "6.9.4"
@@ -28,17 +33,13 @@ jdk:
 
 script:
   - cp conf/logback-test.xml.template conf/logback-test.xml
-  - sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M test:compile
-  - sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M clean coverage test
+  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travis/jvmopts test:compile
+  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travis/jvmopts clean coverage test
   - npm install
   - node_modules/karma/bin/karma start
 
-  # Tricks to avoid unnecessary cache updates
-  - find $HOME/.sbt -name "*.lock" | xargs rm
-  - find $HOME/.ivy2 -name "ivydata-*.properties" | xargs rm
-
 after_success:
-  - sbt ++$TRAVIS_SCALA_VERSION -Dfile.encoding=UTF8 -J-XX:ReservedCodeCacheSize=256M coverageReport coveralls
+  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travis/jvmopts coverageReport coveralls
 
 branches:
   only:
