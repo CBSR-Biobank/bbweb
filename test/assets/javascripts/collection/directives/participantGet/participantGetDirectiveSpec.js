@@ -116,7 +116,7 @@ define([
 
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(errorMsg));
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
-        spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
+        spyOn(this.$state, 'reload').and.returnValue(null);
 
         createDirective.call(this);
         this.controller.uniqueId = uniqueId;
@@ -124,7 +124,7 @@ define([
         this.scope.$digest();
 
         expect(this.modalService.modalOkCancel).toHaveBeenCalled();
-        expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
+        expect(this.$state.reload).toHaveBeenCalled();
       });
 
       it('on a 404 response, when patient with unique id already exists, modal is shown to user', function() {

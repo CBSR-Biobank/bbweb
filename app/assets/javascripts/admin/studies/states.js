@@ -14,10 +14,10 @@ define(function () {
 
   function config($urlRouterProvider, $stateProvider) {
 
-    resolveStudy.$inject = ['$stateParams', 'Study'];
-    function resolveStudy($stateParams, Study) {
-      if ($stateParams.studyId) {
-        return Study.get($stateParams.studyId);
+    resolveStudy.$inject = ['$transition$', 'Study'];
+    function resolveStudy($transition$, Study) {
+      if ($transition$.params().studyId) {
+        return Study.get($transition$.params().studyId);
       }
       throw new Error('state parameter studyId is invalid');
     }

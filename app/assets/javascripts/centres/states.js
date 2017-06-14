@@ -14,9 +14,9 @@ define(function () {
 
   function config($urlRouterProvider, $stateProvider) {
 
-    resolveShipment.$inject = ['Shipment', '$stateParams', '$state'];
-    function resolveShipment(Shipment, $stateParams, $state) {
-      return Shipment.get($stateParams.shipmentId)
+    resolveShipment.$inject = ['Shipment', '$transition$', '$state'];
+    function resolveShipment(Shipment, $transition$, $state) {
+      return Shipment.get($transition$.params().shipmentId)
         .catch(function () {
           $state.go('404', null, { location: false });
         });
@@ -38,8 +38,8 @@ define(function () {
         abstract: true,
         url: '/centres/{centreId}',
         resolve: {
-          centre: ['Centre', '$stateParams', function (Centre, $stateParams) {
-            return Centre.get($stateParams.centreId);
+          centre: ['Centre', '$transition$', function (Centre, $transition$) {
+            return Centre.get($transition$.params().centreId);
           }]
         },
         views: {

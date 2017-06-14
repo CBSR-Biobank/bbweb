@@ -21,10 +21,10 @@ define(function () {
       url: '/proctypes/add',
       resolve: {
         processingType: [
-          '$stateParams', 'ProcessingType',
-          function($stateParams, ProcessingType) {
+          '$transition$', 'ProcessingType',
+          function($transition$, ProcessingType) {
             var pt = new ProcessingType();
-            pt.studyId = $stateParams.studyId;
+            pt.studyId = $transition$.params().studyId;
             return pt;
         }]
       },
@@ -46,9 +46,9 @@ define(function () {
       url: '/proctypes/update/{processingTypeId}',
       resolve: {
         processingType: [
-          '$stateParams', 'ProcessingType',
-          function($stateParams, ProcessingType) {
-            return ProcessingType.get($stateParams.studyId, $stateParams.processingTypeId);
+          '$transition$', 'ProcessingType',
+          function($transition$, ProcessingType) {
+            return ProcessingType.get($transition$.params().studyId, $transition$.params().processingTypeId);
           }
         ]
       },
@@ -91,9 +91,9 @@ define(function () {
       url: '/annottype/update/{annotationTypeId}',
       resolve: {
         annotationType: [
-          '$stateParams', 'SpecimenLinkAnnotationType',
-          function($stateParams, SpecimenLinkAnnotationType) {
-            return SpecimenLinkAnnotationType.get($stateParams.studyId, $stateParams.annotationTypeId);
+          '$transition$', 'SpecimenLinkAnnotationType',
+          function($transition$, SpecimenLinkAnnotationType) {
+            return SpecimenLinkAnnotationType.get($transition$.params().studyId, $transition$.params().annotationTypeId);
           }
         ]
       },
@@ -139,9 +139,9 @@ define(function () {
       url: '/sltype/update/{procTypeId}/{spcLinkTypeId}',
       resolve: {
         spcLinkType: [
-          '$stateParams', 'SpecimenLinkType',
-          function($stateParams, SpecimenLinkType) {
-            return SpecimenLinkType.get($stateParams.procTypeId, $stateParams.spcLinkTypeId);
+          '$transition$', 'SpecimenLinkType',
+          function($transition$, SpecimenLinkType) {
+            return SpecimenLinkType.get($transition$.params().procTypeId, $transition$.params().spcLinkTypeId);
           }
         ]
       },

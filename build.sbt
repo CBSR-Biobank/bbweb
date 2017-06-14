@@ -113,7 +113,7 @@ libraryDependencies ++= Seq(
   "org.webjars.npm"             %  "angular-smart-table"                 % "2.1.6",
   "org.webjars.npm"             %  "angular-toastr"                      % "1.7.0",
   "org.webjars.npm"             %  "angular-ui-bootstrap"                % "2.5.0",
-  ( "org.webjars.npm"           %  "angular-ui-router"                   % "0.4.2" ).exclude("org.webjars.npm", "angular"),
+  ( "org.webjars.npm"           % "angular-ui-router"                    % "1.0.3" ).exclude("org.webjars.npm", "angular"),
   "org.webjars.bower"           %  "angular-utils-ui-breadcrumbs"        % "0.2.2",
   "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
   ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.6.0" ).exclude("org.webjars.bower", "angular"),

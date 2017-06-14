@@ -70,7 +70,8 @@ define(function(require) {
       languageService.initLanguage({ debug: true });
     }])
 
-    .run(debugFunc) // For debugging
+    .run(uiRouterTrace) // For tracing state transitions
+    .run(uiRouterIsAuthorized) // For authorization checks
     .provider('AppConfig', AppConfig)
 
   // see http://blog.thoughtram.io/angularjs/2014/12/22/exploring-angular-1.3-disabling-debug-info.html
@@ -94,62 +95,26 @@ define(function(require) {
 
   }
 
-  debugFunc.$inject = ['$rootScope'];
+  uiRouterTrace.$inject = ['$trace'];
 
-  function debugFunc($rootScope) {
-    /*jshint unused: false*/
+  function uiRouterTrace($trace) {
+    $trace.enable('TRANSITION');
+  }
 
-    // change these to true to have the information displayed in the console
-    var debugStateChangeStart   = false;
-    var debugStateChangeSuccess = false;
-    var debugViewContentLoading = false;
-    var debugViewContentLoaded  = false;
-    var debugStateNotFound      = false;
+  uiRouterIsAuthorized.$inject = ['$transitions'];
 
-    // $rootScope.$state = $state;
-    // $rootScope.$stateParams = $stateParams;
+  function uiRouterIsAuthorized($transitions) {
+    $transitions.onStart({ to: 'admin.**' }, checkIsAuthenticated);
+    $transitions.onStart({ to: 'collection.**' }, checkIsAuthenticated);
 
-    $rootScope.$on('$stateChangeError',function(event, toState, toParams, fromState , fromParams){
-      console.log('$stateChangeError - fired when an error occurs during transition.');
-      console.log(arguments);
-    });
-
-    if (debugStateChangeStart) {
-      $rootScope.$on('$stateChangeStart',function(event, toState, toParams, fromState, fromParams){
-        console.log('$stateChangeStart to '+ toState.name + ' from ' + fromState.name +
-                    ' - fired when the transition begins. toState, toParams : \n', toState, toParams);
-      });
+    function checkIsAuthenticated(trans) {
+      var auth = trans.injector().get('usersService');
+      if (!auth.isAuthenticated()) {
+        // User isn't authenticated. Redirect to a new Target State
+        return trans.router.stateService.target('login');
+      }
+      return null;
     }
-
-    if (debugStateChangeSuccess) {
-      $rootScope.$on('$stateChangeSuccess',function(event, toState, toParams, fromState, fromParams){
-        console.log('$stateChangeSuccess to '+ toState.name +
-                    '- fired once the state transition is complete.');
-      });
-    }
-
-    if (debugViewContentLoading) {
-      $rootScope.$on('$viewContentLoading',function(event, viewConfig){
-        // runs on individual scopes, so putting it in 'run' doesn't work.
-        console.log('$viewContentLoading - view begins loading - dom not rendered',viewConfig);
-      });
-    }
-
-    if (debugViewContentLoaded) {
-      $rootScope.$on('$viewContentLoaded',function(event){
-        console.log('$viewContentLoaded - fired after dom rendered',event);
-      });
-    }
-
-    if (debugStateNotFound) {
-      $rootScope.$on('$stateNotFound',function(event, unfoundState, fromState, fromParams){
-        console.log('$stateNotFound '+ unfoundState.to +
-                    '  - fired when a state cannot be found by its name.');
-        console.log(unfoundState, fromState, fromParams);
-      });
-    }
-
-    /*jshint unused: true*/
   }
 
   // exceptionConfig.$inject = ['$provide'];

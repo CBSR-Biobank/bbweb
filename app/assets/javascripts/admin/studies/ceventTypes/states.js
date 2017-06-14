@@ -18,11 +18,11 @@ define(['lodash'], function (_) {
       url: '/event/{ceventTypeId}',
       resolve: {
         ceventType: [
-          '$stateParams',
+          '$transition$',
           'study',
           'CollectionEventType',
-          function ($stateParams, study, CollectionEventType) {
-            return CollectionEventType.get(study.id, $stateParams.ceventTypeId);
+          function ($transition$, study, CollectionEventType) {
+            return CollectionEventType.get(study.id, $transition$.params().ceventTypeId);
           }
         ]
       },
@@ -101,11 +101,11 @@ define(['lodash'], function (_) {
       resolve: {
         annotationType: [
           'ceventType',
-          '$stateParams',
-          function (ceventType, $stateParams) {
-            var annotationType = _.find(ceventType.annotationTypes, { id: $stateParams.annotationTypeId });
+          '$transition$',
+          function (ceventType, $transition$) {
+            var annotationType = _.find(ceventType.annotationTypes, { id: $transition$.params().annotationTypeId });
             if (_.isUndefined(annotationType)) {
-              throw new Error('could not find annotation type: ' + $stateParams.annotationTypeId);
+              throw new Error('could not find annotation type: ' + $transition$.params().annotationTypeId);
             }
             return annotationType;
           }
@@ -175,12 +175,12 @@ define(['lodash'], function (_) {
       resolve: {
         specimenDescription: [
           'ceventType',
-          '$stateParams',
-          function (ceventType, $stateParams) {
+          '$transition$',
+          function (ceventType, $transition$) {
             var specimenDescription = _.find(ceventType.specimenDescriptions,
-                                           { id: $stateParams.specimenDescriptionId });
+                                           { id: $transition$.params().specimenDescriptionId });
             if (_.isUndefined(specimenDescription)) {
-              throw new Error('could not find specimen spec: ' + $stateParams.specimenDescriptionId);
+              throw new Error('could not find specimen spec: ' + $transition$.params().specimenDescriptionId);
             }
             return specimenDescription;
           }

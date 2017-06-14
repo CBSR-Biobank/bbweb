@@ -14,9 +14,9 @@ define(['lodash'], function (_) {
 
   function centreStates($urlRouterProvider, $stateProvider) {
 
-    resolveCentre.$inject = ['$stateParams', 'Centre'];
-    function resolveCentre($stateParams, Centre) {
-      return Centre.get($stateParams.centreId);
+    resolveCentre.$inject = ['$transition$', 'Centre'];
+    function resolveCentre($transition$, Centre) {
+      return Centre.get($transition$.params().centreId);
     }
 
     $urlRouterProvider.otherwise('/');
@@ -150,10 +150,10 @@ define(['lodash'], function (_) {
       url: '/location/view/:locationId',
       resolve: {
         location: [
-          '$stateParams',
+          '$transition$',
           'centre',
-          function ($stateParams, centre) {
-            return _.find(centre.locations, { id: $stateParams.locationId });
+          function ($transition$, centre) {
+            return _.find(centre.locations, { id: $transition$.params().locationId });
           }
         ]
       },

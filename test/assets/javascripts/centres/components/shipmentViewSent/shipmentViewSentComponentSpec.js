@@ -27,7 +27,6 @@ define(function (require) {
                               '$compile',
                               '$state',
                               'toastr',
-                              'stateHelper',
                               'Shipment',
                               'ShipmentState',
                               'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
@@ -63,7 +62,7 @@ define(function (require) {
         this.shipment = this.createShipment();
 
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-        spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
+        spyOn(this.$state, 'reload').and.returnValue(null);
 
         this.createScope(this.shipment);
       });
@@ -72,7 +71,7 @@ define(function (require) {
         spyOn(this.Shipment.prototype, 'pack').and.returnValue(this.$q.when(this.shipment));
         this.controller.returnToPackedState();
         this.scope.$digest();
-        expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
+        expect(this.$state.reload).toHaveBeenCalled();
       });
 
       it('user is informed if shipment cannot be returned to packed state', function() {
@@ -99,13 +98,13 @@ define(function (require) {
 
         timeNow.setSeconds(0);
         spyOn(this.Shipment.prototype, 'receive').and.returnValue(this.$q.when(this.shipment));
-        spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
+        spyOn(this.$state, 'reload').and.returnValue(null);
 
         this.controller.receiveShipment();
         this.scope.$digest();
 
         expect(this.Shipment.prototype.receive).toHaveBeenCalledWith(moment(timeNow).utc().format());
-        expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
+        expect(this.$state.reload).toHaveBeenCalled();
       });
 
       it('user is informed if shipment cannot be unpacked', function() {
@@ -207,14 +206,14 @@ define(function (require) {
 
       it('can tag a shipment as lost', function() {
         spyOn(this.Shipment.prototype, 'lost').and.returnValue(this.$q.when(this.shipment));
-        spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
+        spyOn(this.$state, 'reload').and.returnValue(null);
 
         this.shipment = this.createShipment({ state: this.ShipmentState.SENT });
         this.createScope(this.shipment);
         this.controller.tagAsLost();
         this.scope.$digest();
 
-        expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
+        expect(this.$state.reload).toHaveBeenCalled();
       });
 
       it('user is informed if shipment cannot be tagged as lost', function() {

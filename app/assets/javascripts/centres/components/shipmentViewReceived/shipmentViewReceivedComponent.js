@@ -79,7 +79,9 @@ define(function (require) {
           return vm.shipment.send(vm.shipment.timeSent);
         })
         .catch(notificationsService.updateErrorAndReject)
-        .then(stateHelper.reloadAndReinit);
+        .then(function () {
+          $state.reload();
+        });
     }
   }
 

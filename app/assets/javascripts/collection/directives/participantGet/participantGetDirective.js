@@ -96,7 +96,7 @@ define(function () {
       ).then(function() {
         $state.go('home.collection.study.participantAdd', { uniqueId: uniqueId });
       }).catch(function() {
-        stateHelper.reloadAndReinit();
+        $state.reload();
       });
     }
   }

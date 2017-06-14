@@ -52,9 +52,9 @@ define(function () {
         'main@': {
           template: '<password-sent email="vm.email"></password-sent>',
           controller: [
-            '$stateParams',
-            function ($stateParams) {
-              this.email = $stateParams.email;
+            '$transition$',
+            function ($transition$) {
+              this.email = $transition$.params().email;
             }
           ],
           controllerAst: 'vm'

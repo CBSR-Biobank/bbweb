@@ -63,7 +63,9 @@ define(function (require) {
           return vm.shipment.pack(vm.shipment.timePacked)
             .catch(notificationsService.updateErrorAndReject);
         })
-        .then(stateHelper.reloadAndReinit);
+        .then(function () {
+          $state.reload();
+        });
     }
 
     function tagAsLost() {
@@ -74,7 +76,9 @@ define(function (require) {
           return vm.shipment.lost()
             .catch(notificationsService.updateErrorAndReject);
         })
-        .then(stateHelper.reloadAndReinit);
+        .then(function () {
+          $state.reload();
+        });
     }
 
     function receiveShipment() {
@@ -92,7 +96,9 @@ define(function (require) {
               return $q.reject(err);
             });
         })
-        .then(stateHelper.reloadAndReinit);
+        .then(function () {
+          $state.reload();
+        });
     }
 
     function unpackShipment() {

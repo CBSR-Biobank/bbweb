@@ -24,7 +24,6 @@ define(function (require) {
                               '$compile',
                               '$state',
                               'toastr',
-                              'stateHelper',
                               'Shipment',
                               'ShipmentState',
                               'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
@@ -111,7 +110,7 @@ define(function (require) {
         this.shipment = this.createShipment();
 
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-        spyOn(this.stateHelper, 'reloadAndReinit').and.returnValue(null);
+        spyOn(this.$state, 'reload').and.returnValue(null);
 
         this.createScope(this.shipment);
       });
@@ -120,7 +119,7 @@ define(function (require) {
         spyOn(this.Shipment.prototype, 'send').and.returnValue(this.$q.when(this.shipment));
         this.controller.returnToSentState();
         this.scope.$digest();
-        expect(this.stateHelper.reloadAndReinit).toHaveBeenCalled();
+        expect(this.$state.reload).toHaveBeenCalled();
       });
 
       it('user is informed if shipment cannot be returned to sent state', function() {

@@ -21,11 +21,11 @@ define(function () {
       url: '/spcgroup/add',
       resolve: {
         specimenGroup: [
-          '$stateParams',
+          '$transition$',
           'SpecimenGroup',
-          function($stateParams, SpecimenGroup) {
+          function($transition$, SpecimenGroup) {
             var sg = new SpecimenGroup();
-            sg.studyId = $stateParams.studyId;
+            sg.studyId = $transition$.params().studyId;
             return sg;
           }]
       },
@@ -47,10 +47,10 @@ define(function () {
       url: '/spcgroup/update/{specimenGroupId}',
       resolve: {
         specimenGroup: [
-          '$stateParams',
+          '$transition$',
           'SpecimenGroup',
-          function($stateParams, SpecimenGroup) {
-            return SpecimenGroup.get($stateParams.studyId, $stateParams.specimenGroupId);
+          function($transition$, SpecimenGroup) {
+            return SpecimenGroup.get($transition$.params().studyId, $transition$.params().specimenGroupId);
           }
         ]
       },

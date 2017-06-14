@@ -203,23 +203,23 @@ define(['lodash'], function(_) {
         }
       });
 
-    resolveStudy.$inject = ['$stateParams', 'Study'];
-    function resolveStudy($stateParams, Study) {
-      return Study.get($stateParams.studyId);
+    resolveStudy.$inject = ['$transition$', 'Study'];
+    function resolveStudy($transition$, Study) {
+      return Study.get($transition$.params().studyId);
     }
 
-    resolveParticipant.$inject = ['$stateParams', 'Participant', 'study'];
-    function resolveParticipant($stateParams, Participant, study) {
-      return Participant.get($stateParams.studyId, $stateParams.participantId)
+    resolveParticipant.$inject = ['$transition$', 'Participant', 'study'];
+    function resolveParticipant($transition$, Participant, study) {
+      return Participant.get($transition$.params().studyId, $transition$.params().participantId)
         .then(function (p) {
           p.setStudy(study);
           return p;
         });
     }
 
-    resolveParticipantByUniqueId.$inject = ['$stateParams', 'Participant'];
-    function resolveParticipantByUniqueId($stateParams, Participant) {
-      return Participant.getByUniqueId($stateParams.studyId, $stateParams.uniqueId);
+    resolveParticipantByUniqueId.$inject = ['$transition$', 'Participant'];
+    function resolveParticipantByUniqueId($transition$, Participant) {
+      return Participant.getByUniqueId($transition$.params().studyId, $transition$.params().uniqueId);
     }
 
     resolveCollectionEventsPagedResult.$inject = ['CollectionEvent', 'participant'];
@@ -232,15 +232,15 @@ define(['lodash'], function(_) {
       'CollectionEvent',
       'participant',
       'collectionEventTypes',
-      '$stateParams'
+      '$transition$'
     ];
 
     function resolveNewCollectionEvent(CollectionEvent,
                                     participant,
                                     collectionEventTypes,
-                                    $stateParams) {
+                                    $transition$) {
       var cevent,
-          ceventType = _.find(collectionEventTypes, { id: $stateParams.collectionEventTypeId });
+          ceventType = _.find(collectionEventTypes, { id: $transition$.params().collectionEventTypeId });
 
       if (!ceventType) {
         throw new Error('could not find collection event type');
@@ -253,16 +253,16 @@ define(['lodash'], function(_) {
 
     resolveCollectionEvent.$inject = [
       '$q',
-      '$stateParams',
+      '$transition$',
       'CollectionEvent',
       'collectionEventTypes'
     ];
 
     function resolveCollectionEvent($q,
-                                    $stateParams,
+                                    $transition$,
                                     CollectionEvent,
                                     collectionEventTypes) {
-      return CollectionEvent.get($stateParams.collectionEventId)
+      return CollectionEvent.get($transition$.params().collectionEventId)
         .then(function (cevent) {
           var ceventType = _.find(collectionEventTypes, { id: cevent.collectionEventTypeId });
 
@@ -275,10 +275,10 @@ define(['lodash'], function(_) {
         });
     }
 
-    resolveSpecimen.$inject = [ '$stateParams', 'Specimen' ];
+    resolveSpecimen.$inject = [ '$transition$', 'Specimen' ];
 
-    function resolveSpecimen($stateParams, Specimen) {
-      return Specimen.getByInventoryId($stateParams.inventoryId);
+    function resolveSpecimen($transition$, Specimen) {
+      return Specimen.getByInventoryId($transition$.params().inventoryId);
     }
 
     CollectionCtrl.$inject = [ 'studyCounts', 'centreCounts' ];
@@ -294,11 +294,11 @@ define(['lodash'], function(_) {
       this.study = study;
     }
 
-    ParticipantAddCtrl.$inject = [ '$stateParams', 'study' ];
+    ParticipantAddCtrl.$inject = [ '$transition$', 'study' ];
 
-    function ParticipantAddCtrl($stateParams, study) {
+    function ParticipantAddCtrl($transition$, study) {
       this.study    = study;
-      this.uniqueId = $stateParams.uniqueId;
+      this.uniqueId = $transition$.params().uniqueId;
     }
 
     StudyParticipantCtrl.$inject = [ 'study', 'participant' ];
@@ -333,7 +333,7 @@ define(['lodash'], function(_) {
     }
 
     CeventAddCtrl.$inject = [
-      '$stateParams',
+      '$transition$',
       'study',
       'participant',
       'collectionEventTypes',
@@ -348,13 +348,13 @@ define(['lodash'], function(_) {
       return collectionEventType;
     }
 
-    function CeventAddCtrl($stateParams, study, participant, collectionEventTypes, collectionEvent) {
+    function CeventAddCtrl($transition$, study, participant, collectionEventTypes, collectionEvent) {
       this.study = study;
       this.participant = participant;
       this.collectionEvent = collectionEvent;
 
       this.collectionEventType = findCollectionEventType(collectionEventTypes,
-                                                         $stateParams.collectionEventTypeId);
+                                                         $transition$.params().collectionEventTypeId);
     }
 
     CeventDetailsCtrl.$inject = [
