@@ -33,13 +33,13 @@ jdk:
 
 script:
   - cp conf/logback-test.xml.template conf/logback-test.xml
-  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travis/jvmopts test:compile
-  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travis/jvmopts clean coverage test
+  - sbt ++$TRAVIS_SCALA_VERSION test:compile
+  - sbt ++$TRAVIS_SCALA_VERSION clean coverage test
   - npm install
   - node_modules/karma/bin/karma start
 
 after_success:
-  - sbt ++$TRAVIS_SCALA_VERSION -jvm-opts travis/jvmopts coverageReport coveralls
+  - sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
 
 branches:
   only:
