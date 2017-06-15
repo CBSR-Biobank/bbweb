@@ -23,9 +23,6 @@ define(['angular'], function(angular) {
           'main@': {
             template: '<home></home>'
           }
-        },
-        data: {
-          displayName: 'Home'
         }
       })
       .state('home.about', {
@@ -34,9 +31,6 @@ define(['angular'], function(angular) {
           'main@': {
             templateUrl: '/assets/javascripts/home/about.html'
           }
-        },
-        data: {
-          displayName: 'About'
         }
       })
       .state('home.contact', {
@@ -45,9 +39,6 @@ define(['angular'], function(angular) {
           'main@': {
             templateUrl: '/assets/javascripts/home/contact.html'
           }
-        },
-        data: {
-          displayName: 'Contact Us'
         }
       })
       .state('404', {

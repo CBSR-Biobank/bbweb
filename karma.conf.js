@@ -43,7 +43,6 @@ module.exports = function(config) {
       { pattern: 'target/web/web-modules/main/webjars/lib/angular-toastr/dist/angular-toastr.tpls.js', included: false },
       { pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-bootstrap/dist/ui-bootstrap-tpls.js', included: false },
       { pattern: 'target/web/web-modules/main/webjars/lib/angular-ui-router/release/angular-ui-router.js', included: false },
-      { pattern: 'target/web/web-modules/main/webjars/lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs.js', included: false },
       { pattern: 'target/web/web-modules/main/webjars/lib/bootstrap/dist/js/bootstrap.js', included: false },
       { pattern: 'target/web/web-modules/main/webjars/lib/bootstrap-ui-datetime-picker/dist/datetime-picker.js', included: false },
       { pattern: 'target/web/web-modules/main/webjars/lib/jquery/dist/jquery.js', included: false },

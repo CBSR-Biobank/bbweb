@@ -29,9 +29,6 @@ define(function () {
           'main@': {
             template: '<shipping-home></shipping-home>'
           }
-        },
-        data: {
-          displayName: 'Shipping'
         }
       })
       .state('home.shipping.centre', {
@@ -61,9 +58,6 @@ define(function () {
             controller: CentreController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: '{{centre.name}}: Incoming'
         }
       })
       .state('home.shipping.centre.outgoing', {
@@ -74,9 +68,6 @@ define(function () {
             controller: CentreController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: '{{centre.name}}: Outgoing'
         }
       })
       .state('home.shipping.centre.completed', {
@@ -87,9 +78,6 @@ define(function () {
             controller: CentreController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: '{{centre.name}}: Completed'
         }
       })
       .state('home.shipping.add', {
@@ -98,9 +86,6 @@ define(function () {
           'main@': {
             template: '<shipment-add></shipment-add>'
           }
-        },
-        data: {
-          displayName: 'Add'
         }
       })
       .state('home.shipping.addItems', {
@@ -114,9 +99,6 @@ define(function () {
             controller: ShipmentController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: '{{shipment.courierName}} - {{shipment.trackingNumber}}: Items to ship'
         }
       })
       .state('home.shipping.shipment', {
@@ -130,9 +112,6 @@ define(function () {
             controller: ShipmentController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
       .state('home.shipping.shipment.unpack', {
@@ -144,9 +123,6 @@ define(function () {
             controller: ShipmentController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          breadcrumProxy: 'home.shipping.unpack.info'
         }
       })
       .state('home.shipping.shipment.unpack.info', {
@@ -157,9 +133,6 @@ define(function () {
             controller: ShipmentController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
       .state('home.shipping.shipment.unpack.unpack', {
@@ -170,9 +143,6 @@ define(function () {
             controller: ShipmentController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
       .state('home.shipping.shipment.unpack.received', {
@@ -195,9 +165,6 @@ define(function () {
             ],
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
       .state('home.shipping.shipment.unpack.missing', {
@@ -220,9 +187,6 @@ define(function () {
             ],
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       })
       .state('home.shipping.shipment.unpack.extra', {
@@ -233,9 +197,6 @@ define(function () {
             controller: ShipmentController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Unpack shipment: {{shipment.courierName}} - {{shipment.trackingNumber}}'
         }
       });
 

@@ -21,9 +21,6 @@ define(['lodash'], function(_) {
           'main@': {
             template: '<collection></collection>'
           }
-        },
-        data: {
-          displayName: 'Collection'
         }
       })
       .state('home.collection.study', {
@@ -37,9 +34,6 @@ define(['lodash'], function(_) {
             controller: CollectionStudyCtrl,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: '{{study.name}}'
         }
       })
       .state('home.collection.study.participantAdd', {
@@ -50,9 +44,6 @@ define(['lodash'], function(_) {
             controller: ParticipantAddCtrl,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Add participant'
         }
       })
       .state('home.collection.study.participant', {
@@ -67,9 +58,6 @@ define(['lodash'], function(_) {
             controller: StudyParticipantCtrl,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          breadcrumProxy: 'home.collection.study.participant.summary'
         }
       })
       .state('home.collection.study.participant.summary', {
@@ -81,9 +69,6 @@ define(['lodash'], function(_) {
             controller: StudyParticipantCtrl,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Participant {{participant.uniqueId}}'
         }
       })
       .state('home.collection.study.participant.cevents', {
@@ -109,9 +94,6 @@ define(['lodash'], function(_) {
             controller: ParticipantCeventsController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Participant {{participant.uniqueId}}: Events'
         }
       })
       .state('home.collection.study.participant.cevents.add', {
@@ -128,9 +110,6 @@ define(['lodash'], function(_) {
             controller: ParticipantCeventsAddController,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Add collection event'
         }
       })
       .state('home.collection.study.participant.cevents.add.details', {
@@ -151,9 +130,6 @@ define(['lodash'], function(_) {
             controller: CeventAddCtrl,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: '{{ collectionEvent.collectionEventType.name }}'
         }
       })
       .state('home.collection.study.participant.cevents.details', {
@@ -173,9 +149,6 @@ define(['lodash'], function(_) {
             controller: CeventDetailsCtrl,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: 'Visit # {{ collectionEvent.visitNumber }}'
         }
       })
       .state('home.collection.study.participant.cevents.details.specimen', {
@@ -197,9 +170,6 @@ define(['lodash'], function(_) {
             controller: CeventSpecimenCtrl,
             controllerAs: 'vm'
           }
-        },
-        data: {
-          displayName: '{{specimen.inventoryId}}'
         }
       });
 

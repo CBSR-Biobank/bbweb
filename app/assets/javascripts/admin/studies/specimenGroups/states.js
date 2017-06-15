@@ -14,56 +14,44 @@ define(function () {
     // FIXME does this need to be in each state definition file?
     $urlRouterProvider.otherwise('/');
 
-    /**
-     * Used to add a specimen group.
-     */
-    $stateProvider.state('home.admin.studies.study.specimens.groupAdd', {
-      url: '/spcgroup/add',
-      resolve: {
-        specimenGroup: [
-          '$transition$',
-          'SpecimenGroup',
-          function($transition$, SpecimenGroup) {
-            var sg = new SpecimenGroup();
-            sg.studyId = $transition$.params().studyId;
-            return sg;
-          }]
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
-          controller: 'SpecimenGroupEditCtrl as vm'
-        }
-      },
-      data: {
-        displayName: 'Specimen Group'
-      }
-    });
-
-    /**
-     * Used to update a specimen group.
-     */
-    $stateProvider.state('home.admin.studies.study.specimens.groupUpdate', {
-      url: '/spcgroup/update/{specimenGroupId}',
-      resolve: {
-        specimenGroup: [
-          '$transition$',
-          'SpecimenGroup',
-          function($transition$, SpecimenGroup) {
-            return SpecimenGroup.get($transition$.params().studyId, $transition$.params().specimenGroupId);
+    $stateProvider
+      .state('home.admin.studies.study.specimens.groupAdd', {
+        url: '/spcgroup/add',
+        resolve: {
+          specimenGroup: [
+            '$transition$',
+            'SpecimenGroup',
+            function($transition$, SpecimenGroup) {
+              var sg = new SpecimenGroup();
+              sg.studyId = $transition$.params().studyId;
+              return sg;
+            }]
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
+            controller: 'SpecimenGroupEditCtrl as vm'
           }
-        ]
-      },
-      views: {
-        'main@': {
-          templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
-          controller: 'SpecimenGroupEditCtrl as vm'
         }
-      },
-      data: {
-        displayName: 'Specimen Group'
-      }
-    });
+      })
+      .state('home.admin.studies.study.specimens.groupUpdate', {
+        url: '/spcgroup/update/{specimenGroupId}',
+        resolve: {
+          specimenGroup: [
+            '$transition$',
+            'SpecimenGroup',
+            function($transition$, SpecimenGroup) {
+              return SpecimenGroup.get($transition$.params().studyId, $transition$.params().specimenGroupId);
+            }
+          ]
+        },
+        views: {
+          'main@': {
+            templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
+            controller: 'SpecimenGroupEditCtrl as vm'
+          }
+        }
+      });
   }
 
   return config;

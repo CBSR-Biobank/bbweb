@@ -31,9 +31,6 @@ define(function () {
         'main@': {
           template: '<user-admin></user-admin>'
         }
-      },
-      data: {
-        displayName: 'Users'
       }
     });
 

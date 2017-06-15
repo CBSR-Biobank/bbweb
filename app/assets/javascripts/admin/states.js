@@ -23,9 +23,6 @@ define(function () {
         'main@': {
           template: '<biobank-admin></biobank-admin>'
         }
-      },
-      data: {
-        displayName: 'Administration'
       }
     });
 

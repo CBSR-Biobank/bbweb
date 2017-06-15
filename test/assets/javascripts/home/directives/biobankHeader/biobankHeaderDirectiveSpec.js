@@ -38,8 +38,7 @@ define([
                               'factory');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/home/directives/biobankHeader/biobankHeader.html',
-        '/assets/javascripts/common/directives/uiBreadcrumbs.tpl.html');
+        '/assets/javascripts/home/directives/biobankHeader/biobankHeader.html');
     }));
 
     it('should have valid scope', function() {

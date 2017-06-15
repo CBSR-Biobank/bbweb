@@ -43,7 +43,6 @@
       'angular-sanitize':             '../lib/angular-sanitize/angular-sanitize',
       'angular-toastr':               '../lib/angular-toastr/dist/angular-toastr.tpls',
       'angular-ui-router':            '../lib/angular-ui-router/release/angular-ui-router',
-      'angular-utils-ui-breadcrumbs': '../lib/angular-utils-ui-breadcrumbs/uiBreadcrumbs',
       'bootstrap':                    '../lib/bootstrap/dist/js/bootstrap',
       'bootstrap-ui-datetime-picker': '../lib/bootstrap-ui-datetime-picker/dist/datetime-picker',
       'jquery':                       '../lib/jquery/dist/jquery',

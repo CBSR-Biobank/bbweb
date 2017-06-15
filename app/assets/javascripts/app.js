@@ -33,7 +33,6 @@ define(function(require) {
   require('angular-sanitize');
   require('angular-toastr');
   require('angular-ui-router');
-  require('angular-utils-ui-breadcrumbs');
   require('bootstrap');
   require('bootstrap-ui-datetime-picker');
   require('jquery');
@@ -44,7 +43,6 @@ define(function(require) {
   // will not be resolved
   angular.module('biobankApp',
                  [
-                   'angularUtils.directives.uiBreadcrumbs',
                    'gettext',
                    'ngAnimate',
                    'ngCookies',
