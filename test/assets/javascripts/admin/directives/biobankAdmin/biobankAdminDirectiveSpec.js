@@ -36,7 +36,8 @@ define([
                               'usersService',
                               'factory');
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/biobankAdmin/biobankAdmin.html');
+        '/assets/javascripts/admin/directives/biobankAdmin/biobankAdmin.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
     }));
 

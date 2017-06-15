@@ -46,7 +46,8 @@ define(function (require) {
       _.extend(this, SuiteMixin.prototype);
 
       this.putHtmlTemplates(
-        '/assets/javascripts/centres/components/centreShipments/centreShipments.html');
+        '/assets/javascripts/centres/components/centreShipments/centreShipments.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.injectDependencies('$q',
                               '$rootScope',

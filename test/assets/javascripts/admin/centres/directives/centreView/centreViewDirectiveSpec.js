@@ -43,7 +43,8 @@ define([
       self.centre = new self.Centre(self.factory.centre());
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/centreView/centreView.html');
+        '/assets/javascripts/admin/centres/directives/centreView/centreView.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('should contain a valid centre', function() {

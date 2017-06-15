@@ -45,17 +45,16 @@ define(function (require) {
                               '$state',
                               'Centre',
                               'Location',
-                              'stateHelper',
                               'factory');
 
       self.location = new self.Location(self.factory.location());
       self.centre = new self.Centre(self.factory.centre({ locations: [ self.location ]}));
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/centreLocationView/centreLocationView.html');
+        '/assets/javascripts/admin/centres/directives/centreLocationView/centreLocationView.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       self.returnStateName = 'home.admin.centres.centre.locations';
-      spyOn(self.stateHelper, 'updateBreadcrumbs').and.returnValue(null);
     }));
 
     it('scope should be valid', function() {

@@ -53,9 +53,10 @@ define([
                               'UserCounts');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/components/users/userAdmin/userAdmin.html',
-        '/assets/javascripts/admin/components/users/usersTable/usersTable.html',
-        '/assets/javascripts/common/directives/pagination.html');
+        '/assets/javascripts/admin/users/components/userAdmin/userAdmin.html',
+        '/assets/javascripts/admin/users/components/usersTable/usersTable.html',
+        '/assets/javascripts/common/directives/pagination.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('scope is valid on startup', function() {

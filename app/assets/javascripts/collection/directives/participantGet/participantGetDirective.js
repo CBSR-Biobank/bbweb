@@ -28,9 +28,9 @@ define(function () {
     '$log',
     '$state',
     'gettextCatalog',
-    'stateHelper',
     'modalService',
-    'Participant'
+    'Participant',
+    'breadcrumbService'
   ];
 
   var patientDoesNotExistRe = /EntityCriteriaNotFound: participant with unique ID does not exist/;
@@ -44,10 +44,18 @@ define(function () {
                               $log,
                               $state,
                               gettextCatalog,
-                              stateHelper,
                               modalService,
-                              Participant) {
+                              Participant,
+                              breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.collection'),
+      breadcrumbService.forStateWithFunc('home.collection.study', function () {
+        return vm.study.name;
+      })
+    ];
 
     vm.uniqueId = '';
     vm.onSubmit = onSubmit;

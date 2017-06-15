@@ -26,7 +26,8 @@ define(function () {
     'notificationsService',
     'timeService',
     'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
-    'gettextCatalog'
+    'gettextCatalog',
+    'breadcrumbService'
   ];
 
   /*
@@ -43,10 +44,26 @@ define(function () {
                                           notificationsService,
                                           timeService,
                                           SHIPMENT_RECEIVE_PROGRESS_ITEMS,
-                                          gettextCatalog) {
+                                          gettextCatalog,
+                                          breadcrumbService) {
     var vm = this;
 
     vm.$onInit = onInit;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.shipping'),
+      breadcrumbService.forStateWithFunc(
+        'home.shipping.shipment.unpack.info',
+        function () {
+          return gettextCatalog.getString(
+            'Unpack Shipment: {{courierName}} - {{trackingNumber}}',
+            {
+              courierName: vm.shipment.courierName,
+              trackingNumber: vm.shipment.trackingNumber
+            });
+        })
+    ];
 
     // initialize this controller's base class
     $controller('TabbedPageController',

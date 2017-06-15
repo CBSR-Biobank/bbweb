@@ -18,7 +18,8 @@ define(function (require) {
       _.extend(this, ShippingComponentTestSuiteMixin.prototype, ServerReplyMixin.prototype);
       this.putHtmlTemplates(
         '/assets/javascripts/centres/components/unpackedShipmentView/unpackedShipmentView.html',
-        '/assets/javascripts/common/services/modalService/modalOk.html');
+        '/assets/javascripts/common/services/modalService/modalOk.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.injectDependencies('$q',
                               '$rootScope',

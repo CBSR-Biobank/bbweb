@@ -34,7 +34,6 @@ define([
                               '$rootScope',
                               '$compile',
                               '$state',
-                              'stateHelper',
                               'modalService',
                               'Study',
                               'Participant',
@@ -42,7 +41,8 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantGet/participantGet.html',
         '/assets/javascripts/common/services/modalService/modal.html',
-        '/assets/javascripts/common/services/modalService/modalOk.html');
+        '/assets/javascripts/common/services/modalService/modalOk.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.jsonParticipant = this.factory.participant();
       this.jsonStudy       = this.factory.defaultStudy();

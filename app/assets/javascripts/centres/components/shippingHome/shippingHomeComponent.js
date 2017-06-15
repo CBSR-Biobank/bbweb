@@ -22,13 +22,14 @@ define(function (require) {
   ShippingHomeController.$inject = [
     '$state',
     'gettextCatalog',
-    'Centre'
+    'Centre',
+    'breadcrumbService'
   ];
 
   /**
    * Allows the user to select a centre associated to her account or the user group she is associated with.
    */
-  function ShippingHomeController($state, gettextCatalog, Centre) {
+  function ShippingHomeController($state, gettextCatalog, Centre, breadcrumbService) {
     var vm = this;
 
     vm.hasValidCentres = false;
@@ -37,6 +38,11 @@ define(function (require) {
     vm.centreSelected  = centreSelected;
 
     vm.$onInit = onInit;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.shipping')
+    ];
 
     //---
 

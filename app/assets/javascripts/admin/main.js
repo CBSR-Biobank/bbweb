@@ -29,9 +29,6 @@ define(function (require) {
     .directive('locationAdd',           require('./directives/locationAdd/locationAddDirective'))
     .directive('biobankAdmin',          require('./directives/biobankAdmin/biobankAdminDirective'))
 
-    .component('userAdmin',             require('./components/users/userAdmin/userAdminComponent'))
-    .component('usersTable',            require('./components/users/usersTable/usersTableComponent'))
-
     .component('annotationTypeSummary',
                require('./components/annotationTypeSummary/annotationTypeSummaryComponent'))
 

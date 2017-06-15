@@ -28,7 +28,8 @@ define(function (require) {
     'timeService',
     'notificationsService',
     'domainNotificationService',
-    'shipmentSkipToSentModalService'
+    'shipmentSkipToSentModalService',
+    'breadcrumbService'
   ];
 
   /**
@@ -47,8 +48,23 @@ define(function (require) {
                                       timeService,
                                       notificationsService,
                                       domainNotificationService,
-                                      shipmentSkipToSentModalService) {
+                                      shipmentSkipToSentModalService,
+                                      breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.shipping'),
+      breadcrumbService.forStateWithFunc('home.shipping.addItems', function () {
+        return gettextCatalog.getString(
+          '{{courierName}} - {{trackingNumber}}: Items to ship',
+          {
+            courierName: vm.shipment.courierName,
+            trackingNumber: vm.shipment.trackingNumber
+          });
+
+      })
+    ];
 
     vm.timePacked     = new Date();
     vm.tagAsPacked    = tagAsPacked;

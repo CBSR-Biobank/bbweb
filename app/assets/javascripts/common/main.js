@@ -19,6 +19,7 @@ define(function (require) {
     .controller('TabbedPageController',   require('./controllers/TabbedPageController'))
     .controller('PagedListController',    require('./controllers/PagedListController'))
 
+    .component('breadcrumbs',             require('./components/breadcrumbs/breadcrumbsComponent'))
     .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
     .component('collapsiblePanel',        require('./components/collapsiblePanel/collapsiblePanelComponent'))
     .component('nameAndStateFilters',     require('./components/nameAndStateFilters/nameAndStateFiltersComponent'))
@@ -42,6 +43,7 @@ define(function (require) {
     .filter('timeago',                    require('./filters/timeagoFilter'))
     .filter('truncate',                   require('./filters/truncateFilter'))
 
+    .service('breadcrumbService',         require('./services/breadcrumbService'))
     .service('Panel',                     require('./services/Panel'))
     .service('annotationUpdate',          require('./services/annotationUpdateService'))
     .service('biobankApi',                require('./services/biobankApiService'))
@@ -49,7 +51,6 @@ define(function (require) {
     .service('funutils',                  require('./services/funutils'))
     .service('modalService',              require('./services/modalService/modalService'))
     .service('notificationsService',      require('./services/notificationsService'))
-    .service('stateHelper',               require('./services/stateHelperService'))
     .service('timeService',               require('./services/timeService'))
     .service('validationService',         require('./services/validationService'))
     .service('domainNotificationService', require('./services/domainNotification/domainNotificationService') )

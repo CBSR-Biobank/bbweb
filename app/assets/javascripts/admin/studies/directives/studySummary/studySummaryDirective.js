@@ -7,6 +7,8 @@ define(['lodash'], function(_) {
 
   /**
    * Displays the study name and description and allows the user to change the state of the study.
+   *
+   * Emits event 'study-name-changed' when the user updates the name on the study.
    */
   function studySummaryDirective() {
     var directive = {
@@ -30,8 +32,7 @@ define(['lodash'], function(_) {
     'modalService',
     'modalInput',
     'notificationsService',
-    'CollectionEventType',
-    'stateHelper'
+    'CollectionEventType'
   ];
 
   function StudySummaryCtrl($scope,
@@ -40,8 +41,7 @@ define(['lodash'], function(_) {
                             modalService,
                             modalInput,
                             notificationsService,
-                            CollectionEventType,
-                            stateHelper) {
+                            CollectionEventType) {
 
     var vm = this;
 
@@ -116,7 +116,7 @@ define(['lodash'], function(_) {
         .then(function (name) {
           vm.study.updateName(name)
             .then(function (study) {
-              stateHelper.updateBreadcrumbs();
+              $scope.$emit('study-name-changed', study);
               postUpdate(gettextCatalog.getString('Name changed successfully.'),
                          gettextCatalog.getString('Change successful'))(study);
             })

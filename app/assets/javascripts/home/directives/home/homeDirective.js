@@ -19,10 +19,12 @@ define(['lodash'], function (_) {
     return directive;
   }
 
-  HomeCtrl.$inject = ['$rootScope', '$timeout', 'usersService', 'User'];
+  HomeCtrl.$inject = ['$rootScope', '$timeout', 'usersService', 'User', 'breadcrumbService'];
 
-  function HomeCtrl($rootScope, $timeout, usersService, User) {
+  function HomeCtrl($rootScope, $timeout, usersService, User, breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [ breadcrumbService.forState('home') ];
 
     vm.userIsAuthenticated = false;
     $rootScope.pageTitle = 'Biobank';

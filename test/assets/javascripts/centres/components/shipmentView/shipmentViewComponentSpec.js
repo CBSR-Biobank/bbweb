@@ -25,7 +25,8 @@ define(function (require) {
         '/assets/javascripts/centres/components/shipmentViewSent/shipmentViewSent.html',
         '/assets/javascripts/centres/components/shipmentViewReceived/shipmentViewReceived.html',
         '/assets/javascripts/centres/components/shipmentViewCompleted/shipmentViewCompleted.html',
-        '/assets/javascripts/centres/components/shipmentViewLost/shipmentViewLost.html');
+        '/assets/javascripts/centres/components/shipmentViewLost/shipmentViewLost.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.injectDependencies('$q',
                               '$rootScope',

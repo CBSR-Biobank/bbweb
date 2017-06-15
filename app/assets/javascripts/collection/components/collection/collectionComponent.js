@@ -11,15 +11,20 @@ define(function () {
     controllerAs: 'vm'
   };
 
-  CollectionController.$inject = ['$state', 'gettextCatalog', 'Study'];
+  CollectionController.$inject = ['$state', 'gettextCatalog', 'Study', 'breadcrumbService'];
 
   /*
    * Controller for this component.
    *
    * The studyCounts object has the following fields: disabled, enabled, and retired.
    */
-  function CollectionController($state, gettextCatalog, Study) {
+  function CollectionController($state, gettextCatalog, Study, breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.collection'),
+    ];
 
     vm.$onInit              = onInit;
     vm.isCollectionAllowed  = false;

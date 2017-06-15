@@ -29,7 +29,7 @@ define(['angular'], function(angular) {
         url: 'about',
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/home/about.html'
+            template: '<about></about>'
           }
         }
       })

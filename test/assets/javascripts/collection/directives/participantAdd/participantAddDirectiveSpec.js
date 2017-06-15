@@ -52,7 +52,8 @@ define([
         '/assets/javascripts/common/annotationsInput/multipleSelectAnnotation.html',
         '/assets/javascripts/common/annotationsInput/numberAnnotation.html',
         '/assets/javascripts/common/annotationsInput/singleSelectAnnotation.html',
-        '/assets/javascripts/common/annotationsInput/textAnnotation.html');
+        '/assets/javascripts/common/annotationsInput/textAnnotation.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       self.jsonParticipant = self.factory.participant();
       self.jsonStudy       = self.factory.defaultStudy();

@@ -14,19 +14,31 @@ define(function () {
     }
   };
 
-  ShipmentViewController.$inject = ['gettextCatalog', 'ShipmentState'];
+  ShipmentViewController.$inject = ['gettextCatalog', 'ShipmentState', 'breadcrumbService'];
 
-  function ShipmentViewController(gettextCatalog, ShipmentState) {
+  function ShipmentViewController(gettextCatalog, ShipmentState, breadcrumbService) {
     var vm = this;
 
-    vm.pageHeader = getPageHeader();
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.shipping'),
+      breadcrumbService.forStateWithFunc('home.shipping.shipment', function () {
+        return gettextCatalog.getString(
+          'Shipment: {{courierName}} - {{trackingNumber}}',
+          {
+            courierName: vm.shipment.courierName,
+            trackingNumber: vm.shipment.trackingNumber
+          });
 
+      })
+    ];
+
+    vm.pageHeader = getPageHeader();
     vm.shipmentStateValid = ((vm.shipment.state === ShipmentState.PACKED) ||
                              (vm.shipment.state === ShipmentState.SENT) ||
                              (vm.shipment.state === ShipmentState.RECEIVED) ||
                              (vm.shipment.state === ShipmentState.COMPLETED) ||
                              (vm.shipment.state === ShipmentState.LOST));
-
     vm.showSpecimenState = (vm.shipment.state === ShipmentState.COMPLETED);
 
     //---

@@ -29,7 +29,8 @@ define(function (require) {
                               'factory');
       this.putHtmlTemplates(
         '/assets/javascripts/collection/components/specimenView/specimenView.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html');
+        '/assets/javascripts/common/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.createController = function (study,
                                         participant,
@@ -60,8 +61,7 @@ define(function (require) {
             rawCollectionEventType = self.factory.collectionEventType(
               { specimenDescriptions: [ rawSpecimenDescription ]}),
             collectionEventType = self.CollectionEventType.create(rawCollectionEventType),
-            collectionEvent = self.CollectionEvent(self.factory.collectionEvent(),
-                                                       self.collectionEventType),
+            collectionEvent = new self.CollectionEvent(self.factory.collectionEvent(), collectionEventType),
             specimen = new self.Specimen(self.factory.specimen(),
                                          collectionEventType.specimenDescriptions[0]),
             participant = new self.Participant(self.factory.defaultParticipant()),

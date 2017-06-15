@@ -2,10 +2,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
 
-  /**
+  var _       = require('lodash'),
+      sprintf = require('sprintf-js').sprintf;
+
+  /*
    *
    */
   function collectionSpecimenDescriptionViewDirective() {
@@ -36,7 +39,7 @@ define(['lodash'], function (_) {
     'PreservationType',
     'PreservationTemperatureType',
     'SpecimenType',
-    'stateHelper'
+    'breadcrumbService'
   ];
 
   function CollectionSpecimenDescriptionViewCtrl($state,
@@ -49,8 +52,22 @@ define(['lodash'], function (_) {
                                                  PreservationType,
                                                  PreservationTemperatureType,
                                                  SpecimenType,
-                                                 stateHelper) {
+                                                 breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.studies'),
+      breadcrumbService.forStateWithFunc(
+        sprintf('home.admin.studies.study.collection.ceventType({ studyId: "%s", ceventTypeId: "%s" })',
+                vm.collectionEventType.studyId,
+                vm.collectionEventType.id),
+        function () { return vm.study.name; }),
+      breadcrumbService.forStateWithFunc(
+        'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
+        function () { return vm.specimenDescription.name; })
+    ];
 
     vm.returnState = {
       name: 'home.admin.studies.study.collection.ceventType',
@@ -102,10 +119,7 @@ define(['lodash'], function (_) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.specimenDescription.name = name;
-          return updateCollectionEventType()
-            .then(function () {
-              stateHelper.updateBreadcrumbs();
-            });
+          return updateCollectionEventType();
         });
     }
 

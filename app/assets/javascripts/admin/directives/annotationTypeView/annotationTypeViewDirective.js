@@ -33,15 +33,13 @@ define(['lodash'], function (_) {
     '$state',
     'gettextCatalog',
     'modalInput',
-    'annotationTypeUpdateModal',
-    'stateHelper'
+    'annotationTypeUpdateModal'
   ];
 
   function AnnotationTypeViewCtrl($state,
                                   gettextCatalog,
                                   modalInput,
-                                  annotationTypeUpdateModal,
-                                  stateHelper) {
+                                  annotationTypeUpdateModal) {
     var vm = this;
 
     vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabel();
@@ -63,10 +61,7 @@ define(['lodash'], function (_) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.annotationType.name = name;
-          vm.onUpdate()(vm.annotationType)
-            .then(function () {
-              stateHelper.updateBreadcrumbs();
-            });
+          vm.onUpdate()(vm.annotationType);
         });
     }
 

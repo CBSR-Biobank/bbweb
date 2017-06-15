@@ -19,12 +19,16 @@ define(function () {
     return directive;
   }
 
-  BiobankAdminCtrl.$inject = ['adminService', 'usersService', 'User'];
+  BiobankAdminCtrl.$inject = ['adminService', 'usersService', 'User', 'breadcrumbService'];
 
-  function BiobankAdminCtrl(adminService, usersService, User) {
+  function BiobankAdminCtrl(adminService, usersService, User, breadcrumbService) {
     var vm = this;
 
     vm.counts = {};
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin')
+    ];
 
     init();
 

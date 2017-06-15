@@ -31,7 +31,8 @@ define(['lodash'], function(_) {
     'notificationsService',
     'domainNotificationService',
     'timeService',
-    'CollectionEvent'
+    'CollectionEvent',
+    'breadcrumbService'
   ];
 
   /**
@@ -43,7 +44,8 @@ define(['lodash'], function(_) {
                              notificationsService,
                              domainNotificationService,
                              timeService,
-                             CollectionEvent) {
+                             CollectionEvent,
+                             breadcrumbService) {
     var vm = this;
 
     vm.collectionEvent = new CollectionEvent({ participantId: vm.participant.id },
@@ -56,6 +58,26 @@ define(['lodash'], function(_) {
     vm.submit = submit;
     vm.cancel = cancel;
     vm.dateTimeOnEdit = dateTimeOnEdit;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.collection'),
+      breadcrumbService.forStateWithFunc('home.collection.study', function () {
+        return vm.study.name;
+      }),
+      breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents',
+        function () {
+          return gettextCatalog.getString('Participant {{uniqueId}}',
+                                          { uniqueId: vm.participant.uniqueId });
+        }),
+      breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents.add',
+        function () {
+          return gettextCatalog.getString('Event type: {{type}}',
+                                          { type: vm.collectionEventType.name });
+        })
+    ];
 
     // --
 

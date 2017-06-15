@@ -28,11 +28,26 @@ define(['lodash'], function (_) {
     '$scope',
     '$window',
     '$state',
-    'gettextCatalog'
+    'gettextCatalog',
+    'breadcrumbService'
   ];
 
-  function StudyViewCtrl($controller,$scope, $window, $state, gettextCatalog) {
+  function StudyViewCtrl($controller,
+                         $scope,
+                         $window,
+                         $state,
+                         gettextCatalog,
+                         breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.studies'),
+      breadcrumbService.forStateWithFunc('home.admin.studies.study', function () {
+        return vm.study.name;
+      })
+    ];
 
     // initialize this controller's base class
     $controller('TabbedPageController',
@@ -65,6 +80,7 @@ define(['lodash'], function (_) {
       }
     ];
 
+    $scope.$on('study-name-changed', studyNameUpdated);
     init();
 
     //--
@@ -82,6 +98,11 @@ define(['lodash'], function (_) {
         // remember the last viewed study
         $window.localStorage.setItem('study.panel.studyId', vm.study.id);
       }
+    }
+
+    function studyNameUpdated(event, study) {
+      event.stopPropagation();
+      vm.study = study;
     }
   }
 

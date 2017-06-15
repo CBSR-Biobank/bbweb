@@ -1,3 +1,4 @@
+<breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
 <div class="page-header">
   <h1>
     Shipping
@@ -8,8 +9,8 @@
     </div>
   </h1>
 </div>
-<div class="row" ng-if="!vm.hasValidCentres">
-  <div class="col-md-12">
+<div class="row" ng-cloak>
+  <div class="col-md-12"  ng-if="!vm.hasValidCentres">
     <div class="alert alert-warning" role="alert">
       <translate>
         Two or more centres, or one centre with more than one location required for shipping.
@@ -18,11 +19,7 @@
       <translate>Please configure more centres and / or locations.</translate>
     </div>
   </div>
-</div>
-<div class="row"
-     ng-if="vm.hasValidCentres"
-     ng-cloak>
-  <div class="col-md-6">
+  <div class="col-md-6" ng-if="vm.hasValidCentres">
     <select-centre panel-header="{{'Select a centre to view its shipping information' | translate}}"
                    get-centres="vm.updateCentres"
                    on-centre-selected="vm.centreSelected"

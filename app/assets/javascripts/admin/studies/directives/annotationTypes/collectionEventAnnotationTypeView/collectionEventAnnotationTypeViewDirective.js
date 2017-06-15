@@ -2,10 +2,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
 
-  /**
+  var _       = require('lodash'),
+      sprintf = require('sprintf-js').sprintf;
+
+  /*
    *
    */
   function collectionEventAnnotationTypeViewDirective() {
@@ -29,14 +32,36 @@ define(['lodash'], function (_) {
     '$q',
     'CollectionEventType',
     'gettextCatalog',
-    'notificationsService'
+    'notificationsService',
+    'breadcrumbService'
   ];
 
   function CollectionEventAnnotationTypeViewCtrl($q,
                                                  CollectionEventType,
                                                  gettextCatalog,
-                                                 notificationsService) {
+                                                 notificationsService,
+                                                 breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.studies'),
+      breadcrumbService.forStateWithFunc(
+        sprintf('home.admin.studies.study.collection.ceventType({ studyId: "%s", ceventTypeId: "%s" })',
+                vm.collectionEventType.studyId,
+                vm.collectionEventType.id),
+        function () { return vm.study.name; }),
+      breadcrumbService.forStateWithFunc(
+        'home.admin.studies.study.collection.ceventType.annotationTypeView',
+        function () {
+          if (_.isUndefined(vm.annotationType)) {
+            return gettextCatalog.getString('Error');
+          }
+          return gettextCatalog.getString('Event annotation: {{name}}',
+                                          { name: vm.annotationType.name });
+        })
+    ];
 
     vm.onUpdate = onUpdate;
     onInit();
@@ -54,8 +79,8 @@ define(['lodash'], function (_) {
     function onUpdate(annotationType) {
       return vm.collectionEventType.updateAnnotationType(annotationType)
         .then(postUpdate)
-        .then(notifySuccess)
-        .catch(notificationsService.updateError);
+        .catch(notificationsService.updateError)
+        .then(notifySuccess);
     }
 
     function postUpdate(collectionEventType) {

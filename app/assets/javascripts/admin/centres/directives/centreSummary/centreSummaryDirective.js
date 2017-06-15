@@ -96,8 +96,11 @@ define(['lodash'], function (_) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.centre.updateName(name)
-            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                             gettextCatalog.getString('Change successful')))
+            .then(function (centre) {
+              $scope.$emit('centre-name-changed', centre);
+              postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                         gettextCatalog.getString('Change successful'))(centre);
+            })
             .catch(notificationsService.updateError);
         });
     }

@@ -58,7 +58,8 @@ define(function (require) {
                               'factory');
       this.putHtmlTemplates(
         '/assets/javascripts/centres/components/shippingHome/shippingHome.html',
-        '/assets/javascripts/centres/components/selectCentre/selectCentre.html');
+        '/assets/javascripts/centres/components/selectCentre/selectCentre.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
     }));
 

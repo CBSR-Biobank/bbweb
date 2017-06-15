@@ -28,7 +28,8 @@ define(['lodash'], function(_) {
     'gettextCatalog',
     'Participant',
     'domainNotificationService',
-    'notificationsService'
+    'notificationsService',
+    'breadcrumbService'
   ];
 
   /**
@@ -38,8 +39,18 @@ define(['lodash'], function(_) {
                               gettextCatalog,
                               Participant,
                               domainNotificationService,
-                              notificationsService) {
+                              notificationsService,
+                              breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.collection'),
+      breadcrumbService.forStateWithFunc('home.collection.study', function () {
+        return vm.study.name;
+      }),
+      breadcrumbService.forState('home.collection.study.participantAdd')
+    ];
 
     vm.participant = new Participant({ uniqueId: vm.uniqueId }, vm.study);
     vm.submit      = submit;

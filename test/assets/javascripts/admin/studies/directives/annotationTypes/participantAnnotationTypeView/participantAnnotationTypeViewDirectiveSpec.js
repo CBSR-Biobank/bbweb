@@ -56,7 +56,8 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
         '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
-        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html');
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('should have  valid scope', function() {

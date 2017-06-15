@@ -2,13 +2,14 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       {{vm.study.name}}
-      <span class="btn-group pull-right">
+      <span class="pull-right">
         <button class="btn btn-xs btn-success"
                 ng-click="vm.changeState('enable')"
                 title="{{'Enable'|translate}}"
                 ng-if="vm.study.isDisabled()"
                 ng-disabled="!vm.hasSpecimenDescriptions">
           <i class="glyphicon glyphicon-ok-circle"></i>
+          <translate>Enable</translate>
         </button>
 
         <button class="btn btn-xs btn-danger"
@@ -16,6 +17,7 @@
                 title="{{'Disable'|translate}}"
                 ng-if="vm.study.isEnabled()">
           <i class="glyphicon glyphicon-cog"></i>
+          <translate>Disable</translate>
         </button>
 
         <button class="btn btn-xs btn-danger"
@@ -23,6 +25,7 @@
                 title="{{'Retire'|translate}}"
                 ng-if="vm.study.isDisabled()">
           <i class="glyphicon glyphicon-arrow-down"></i>
+          <translate>Retire</translate>
         </button>
 
         <button class="btn btn-xs btn-danger"
@@ -30,6 +33,7 @@
                 title="{{'Unretire'|translate}}"
                 ng-if="vm.study.isRetired()">
           <i class="glyphicon glyphicon-arrow-up"></i>
+          <translate>Unretire</translate>
         </button>
 
       </span>

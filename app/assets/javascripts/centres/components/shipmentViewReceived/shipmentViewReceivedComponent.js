@@ -22,7 +22,6 @@ define(function (require) {
     'notificationsService',
     'timeService',
     'modalService',
-    'stateHelper',
     'SHIPMENT_RECEIVE_PROGRESS_ITEMS'
   ];
 
@@ -36,7 +35,6 @@ define(function (require) {
                                           notificationsService,
                                           timeService,
                                           modalService,
-                                          stateHelper,
                                           SHIPMENT_RECEIVE_PROGRESS_ITEMS) {
     var vm = this;
 

@@ -1,0 +1,12 @@
+<breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
+<div class="page-header">
+  <h1 translate>User administration</h1>
+</div>
+<div class="alert alert-warning" ng-if="! vm.haveUsers">
+  <span class="glyphicon glyphicon-warning-sign"></span>
+  <translate>
+    No users have been added yet.
+  </translate>
+</div>
+
+<users-table ng-if="vm.haveUsers" user-counts="vm.userCounts"></users-table>

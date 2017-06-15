@@ -47,7 +47,8 @@ define([
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/studiesAdmin/studiesAdmin.html',
         '/assets/javascripts/admin/studies/components/studiesPagedList/studiesPagedList.html',
-        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html');
+        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('scope is valid on startup', function() {

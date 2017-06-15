@@ -31,8 +31,7 @@ define(['lodash'], function (_) {
     'modalInput',
     'domainNotificationService',
     'notificationsService',
-    'CollectionEventAnnotationTypeModals',
-    'stateHelper'
+    'CollectionEventAnnotationTypeModals'
   ];
 
   function CeventTypeViewCtrl($state,
@@ -41,8 +40,7 @@ define(['lodash'], function (_) {
                               modalInput,
                               domainNotificationService,
                               notificationsService,
-                              CollectionEventAnnotationTypeModals,
-                              stateHelper) {
+                              CollectionEventAnnotationTypeModals) {
     var vm = this;
 
     _.extend(vm, new CollectionEventAnnotationTypeModals());
@@ -79,11 +77,8 @@ define(['lodash'], function (_) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.ceventType.updateName(name)
-            .then(function (ceventType) {
-              stateHelper.updateBreadcrumbs();
-              postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                         gettextCatalog.getString('Change successful'))(ceventType);
-            })
+            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                         gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }

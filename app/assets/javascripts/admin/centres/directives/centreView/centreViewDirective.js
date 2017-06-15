@@ -28,15 +28,26 @@ define(['lodash'], function (_) {
     '$controller',
     '$scope',
     '$state',
-    'gettextCatalog'
+    'gettextCatalog',
+    'breadcrumbService'
   ];
 
   function CentreViewCtrl($window,
                           $controller,
                           $scope,
                           $state,
-                          gettextCatalog) {
+                          gettextCatalog,
+                          breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.centres'),
+      breadcrumbService.forStateWithFunc('home.admin.centres.centre', function () {
+        return vm.centre.name;
+      })
+    ];
 
     // initialize this controller's base class
     $controller('TabbedPageController',
@@ -64,11 +75,12 @@ define(['lodash'], function (_) {
       },
     ];
 
+    $scope.$on('centre-name-changed', centreNameUpdated);
     init();
 
     //--
 
-    /**
+    /*
      * initialize the panels to open state when viewing a new centre
      */
     function init() {
@@ -80,6 +92,11 @@ define(['lodash'], function (_) {
         $window.localStorage.setItem('centre.panel.centreId', vm.centre.id);
       }
     }
+
+     function centreNameUpdated(event, centre) {
+      event.stopPropagation();
+      vm.centre = centre;
+     }
 
   }
 

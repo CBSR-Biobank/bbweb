@@ -57,7 +57,8 @@ define(function (require) {
       _.extend(this, SuiteMixin.prototype);
       this.putHtmlTemplates(
         '/assets/javascripts/centres/components/shipmentAdd/shipmentAdd.html',
-        '/assets/javascripts/common/components/progressTracker/progressTracker.html');
+        '/assets/javascripts/common/components/progressTracker/progressTracker.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.injectDependencies('$q',
                               '$rootScope',

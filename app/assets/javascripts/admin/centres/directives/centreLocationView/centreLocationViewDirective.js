@@ -2,10 +2,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
 
-  /**
+  var _       = require('lodash'),
+      sprintf = require('sprintf-js').sprintf;
+
+  /*
    *
    */
   function centreLocationViewDirective() {
@@ -29,15 +32,29 @@ define(['lodash'], function (_) {
     'gettextCatalog',
     'modalInput',
     'notificationsService',
-    'stateHelper'
+    'breadcrumbService'
   ];
 
   function CentreLocationViewCtrl($state,
                                   gettextCatalog,
                                   modalInput,
                                   notificationsService,
-                                  stateHelper) {
+                                  breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.centres'),
+      breadcrumbService.forStateWithFunc(
+        sprintf('home.admin.centres.centre.locations({ centreId: "%s", locationId: "%s" })',
+                vm.centre.id,
+                vm.location.id),
+        function () { return vm.centre.name; }),
+      breadcrumbService.forStateWithFunc(
+        'home.admin.centres.centre.locations.locationsView',
+        function () { return vm.location.name; })
+    ];
 
     vm.back               = back;
     vm.editName           = editName;
@@ -71,11 +88,8 @@ define(['lodash'], function (_) {
         .then(function (name) {
           vm.location.name = name;
           vm.centre.updateLocation(vm.location)
-            .then(function (centre) {
-              stateHelper.updateBreadcrumbs();
-              postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                         gettextCatalog.getString('Change successful'))(centre);
-            })
+            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                         gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
         });
     }

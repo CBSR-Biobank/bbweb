@@ -5,8 +5,10 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  /**
+  /*
+   * Displays a single participant annotation type to the user.
    *
+   * The user is allowed to change any of the attributes of the annotation type.
    */
   function participantAnnotationTypeViewDirective() {
     var directive = {
@@ -27,13 +29,33 @@ define(['lodash'], function (_) {
   ParticipantAnnotationTypeViewCtrl.$inject = [
     '$q',
     'gettextCatalog',
-    'notificationsService'
+    'notificationsService',
+    'breadcrumbService'
   ];
 
   function ParticipantAnnotationTypeViewCtrl($q,
                                              gettextCatalog,
-                                             notificationsService) {
+                                             notificationsService,
+                                             breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.studies'),
+      breadcrumbService.forStateWithFunc(
+        'home.admin.studies.study.participants',
+        function () { return vm.study.name; }),
+      breadcrumbService.forStateWithFunc(
+        'home.admin.studies.study.participant.annotationTypeView',
+        function () {
+          if (_.isUndefined(vm.annotationType)) {
+            return gettextCatalog.getString('Error');
+          }
+          return gettextCatalog.getString(
+            'Participant annotation: {{name}}', { name: vm.annotationType.name });
+        })
+    ];
 
     vm.onUpdate = onUpdate;
 

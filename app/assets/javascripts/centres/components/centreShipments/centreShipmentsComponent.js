@@ -23,7 +23,8 @@ define(function () {
     '$state',
     'Shipment',
     'ShipmentState',
-    'gettextCatalog'
+    'gettextCatalog',
+    'breadcrumbService'
   ];
 
   /*
@@ -34,8 +35,17 @@ define(function () {
                                      $state,
                                      Shipment,
                                      ShipmentState,
-                                     gettextCatalog) {
+                                     gettextCatalog,
+                                     breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.shipping'),
+      breadcrumbService.forStateWithFunc('home.shipping.centre', function () {
+        return vm.centre.name;
+      })
+    ];
 
     // initialize this controller's base class
     $controller('TabbedPageController',

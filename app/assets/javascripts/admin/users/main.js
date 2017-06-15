@@ -13,7 +13,11 @@ define(function (require) {
 
   module = angular.module(name, [ 'biobank.studies' ]);
 
-  module.config(require('./states'));
+  module
+    .config(require('./states'))
+    .component('userAdmin',  require('./components/userAdmin/userAdminComponent'))
+    .component('usersTable', require('./components/usersTable/usersTableComponent'));
+
 
   return {
     name: name,

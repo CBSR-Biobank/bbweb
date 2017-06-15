@@ -21,7 +21,6 @@ define(function (require) {
     'modalInput',
     'notificationsService',
     'timeService',
-    'stateHelper',
     'modalService',
     'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
     'shipmentSkipToUnpackedModalService'
@@ -36,7 +35,6 @@ define(function (require) {
                                       modalInput,
                                       notificationsService,
                                       timeService,
-                                      stateHelper,
                                       modalService,
                                       SHIPMENT_RECEIVE_PROGRESS_ITEMS,
                                       shipmentSkipToUnpackedModalService) {

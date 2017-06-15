@@ -27,12 +27,12 @@ define(function (require) {
                               'Study',
                               'CollectionEventType',
                               'CollectionSpecimenDescription',
-                              'stateHelper',
                               'factory');
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
-        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html');
+        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       self.jsonSpecimenDescription    = self.factory.collectionSpecimenDescription();
       self.jsonCeventType      = self.factory.collectionEventType({
@@ -67,8 +67,6 @@ define(function (require) {
         self.scope.$digest();
         self.controller = self.element.controller('collectionSpecimenDescriptionView');
       };
-
-      spyOn(self.stateHelper, 'updateBreadcrumbs').and.returnValue(null);
     }));
 
     it('should have valid scope', function() {

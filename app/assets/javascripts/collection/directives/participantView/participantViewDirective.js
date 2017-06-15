@@ -28,18 +28,27 @@ define(['lodash'], function (_) {
     '$scope',
     '$state',
     'gettextCatalog',
-    'stateHelper'
+    'breadcrumbService'
   ];
 
-  /**
-   *
-   */
   function ParticipantViewCtrl($window,
                                $scope,
                                $state,
                                gettextCatalog,
-                               stateHelper) {
+                               breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.collection'),
+      breadcrumbService.forStateWithFunc('home.collection.study', function () {
+        return vm.study.name;
+      }),
+      breadcrumbService.forStateWithFunc('home.collection.study.participant', function () {
+        return gettextCatalog.getString('Participant {{uniqueId}}',
+                                        { uniqueId: vm.participant.uniqueId });
+      })
+    ];
 
     vm.tabs = [
       {

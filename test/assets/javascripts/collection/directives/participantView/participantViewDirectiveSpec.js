@@ -49,7 +49,8 @@ define([
                               'factory');
 
       self.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/participantView/participantView.html');
+        '/assets/javascripts/collection/directives/participantView/participantView.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       self.jsonParticipant = self.factory.participant();
       self.jsonStudy       = self.factory.defaultStudy();

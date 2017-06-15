@@ -1,6 +1,6 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 define(function() {
   'use strict';
@@ -14,10 +14,25 @@ define(function() {
     var directive = {
       restrict: 'E',
       scope: {},
-      templateUrl : '/assets/javascripts/admin/studies/directives/studiesAdmin/studiesAdmin.html'
+      templateUrl : '/assets/javascripts/admin/studies/directives/studiesAdmin/studiesAdmin.html',
+      controller: StudiesAdminCtrl,
+      controllerAs: 'vm'
     };
 
     return directive;
+  }
+
+  StudiesAdminCtrl.$inject = ['breadcrumbService'];
+
+  function StudiesAdminCtrl(breadcrumbService) {
+    var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.studies')
+    ];
+
   }
 
   return studiesAdminDirective;

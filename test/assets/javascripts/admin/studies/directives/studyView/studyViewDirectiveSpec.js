@@ -43,7 +43,8 @@ define([
       self.study = new self.Study(self.factory.study());
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/studyView/studyView.html');
+        '/assets/javascripts/admin/studies/directives/studyView/studyView.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('should contain a valid study', function() {

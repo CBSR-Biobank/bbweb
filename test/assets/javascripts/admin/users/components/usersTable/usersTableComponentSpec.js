@@ -29,7 +29,7 @@ define([
                               'UserViewer',
                               'factory');
       this.putHtmlTemplates(
-        '/assets/javascripts/admin/components/users/usersTable/usersTable.html',
+        '/assets/javascripts/admin/users/components/usersTable/usersTable.html',
         '/assets/javascripts/common/directives/pagination.html');
 
       this.createScope = function (userCounts) {

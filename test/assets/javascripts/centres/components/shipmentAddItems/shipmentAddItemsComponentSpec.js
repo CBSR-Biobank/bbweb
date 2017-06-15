@@ -21,7 +21,8 @@ define(function (require) {
         '/assets/javascripts/centres/components/shipmentSpecimensAdd/shipmentSpecimensAdd.html',
         '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html',
         '/assets/javascripts/shipmentSpecimens/components/ssSpecimensPagedTable/ssSpecimensPagedTable.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html');
+        '/assets/javascripts/common/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -219,10 +220,12 @@ define(function (require) {
     });
 
     it('removeShipment does nothing if shipment is not defined', function() {
+      var shipment = this.createShipment();
+
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
       spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
-      this.createScope();
+      this.createScope(shipment);
       this.controller.removeShipment();
       this.scope.$digest();
 

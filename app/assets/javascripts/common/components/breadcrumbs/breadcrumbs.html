@@ -1,0 +1,10 @@
+<ol class="breadcrumb">
+  <li ng-repeat="crumb in vm.crumbs"
+      ng-class="{ active: $last }"
+      ng-cloak>
+    <a ui-sref="{{ crumb.route }}" ui-sref-opts="{reload: true}" ng-if="!$last">
+      {{ crumb.displayNameFn() }}&nbsp;
+    </a>
+    <span ng-show="$last">{{ crumb.displayNameFn() }}</span>
+  </li>
+</ol>

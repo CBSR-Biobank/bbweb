@@ -2,8 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(function (require) {
   'use strict';
+
+  var _ = require('lodash');
 
   var component = {
     templateUrl : '/assets/javascripts/users/components/userProfile/userProfile.html',
@@ -20,7 +22,8 @@ define(function () {
     'modalInput',
     'notificationsService',
     'usersService',
-    'User'
+    'User',
+    'breadcrumbService'
   ];
 
   /*
@@ -32,8 +35,21 @@ define(function () {
                                  modalInput,
                                  notificationsService,
                                  usersService,
-                                 User) {
+                                 User,
+                                 breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forStateWithFunc(
+        'home.users.profile',
+        function () {
+          if (!_.isUndefined(vm.user)) {
+            return gettextCatalog.getString('User: {{name}}', { name: vm.user.name });
+          }
+          return gettextCatalog.getString('User:');
+        }),
+    ];
 
     vm.$onInit           = onInit;
     vm.studyMemberships  = '';

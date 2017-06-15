@@ -20,12 +20,12 @@ define(function (require) {
     }
   };
 
-  SpecimenViewController.$inject = ['$state'];
+  SpecimenViewController.$inject = ['$state', 'gettextCatalog', 'breadcrumbService'];
 
   /*
    * Displays the details for a single specimen and also allows the user to update certain fields.
    */
-  function SpecimenViewController($state) {
+  function SpecimenViewController($state, gettextCatalog, breadcrumbService) {
     var vm = this;
 
     vm.specimenDescription = _.find(vm.collectionEventType.specimenDescriptions,
@@ -33,6 +33,29 @@ define(function (require) {
 
     vm.editParticipant = editParticipant;
     vm.back            = back;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.collection'),
+      breadcrumbService.forStateWithFunc(
+        'home.collection.study',
+        function () { return vm.study.name; }),
+      breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents',
+        function () {
+          return gettextCatalog.getString('Participant {{uniqueId}}',
+                                          { uniqueId: vm.participant.uniqueId });
+        }),
+      breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents.details',
+        function () {
+          return gettextCatalog.getString('Visit # {{vnumber}}',
+                                          { vnumber: vm.collectionEvent.visitNumber });
+        }),
+      breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents.details.specimen',
+        function () { return vm.specimen.inventoryId; })
+    ];
 
     //---
 

@@ -36,7 +36,8 @@ define([
                               'usersService',
                               'factory');
 
-      self.putHtmlTemplates('/assets/javascripts/home/directives/home/home.html');
+      self.putHtmlTemplates('/assets/javascripts/home/directives/home/home.html',
+                            '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('has valid scope', function() {

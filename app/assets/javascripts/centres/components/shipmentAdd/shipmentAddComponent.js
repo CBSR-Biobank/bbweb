@@ -19,7 +19,8 @@ define(['lodash'], function (_) {
     'Shipment',
     'domainNotificationService',
     'notificationsService',
-    'SHIPMENT_SEND_PROGRESS_ITEMS'
+    'SHIPMENT_SEND_PROGRESS_ITEMS',
+    'breadcrumbService'
   ];
 
   /**
@@ -31,8 +32,15 @@ define(['lodash'], function (_) {
                                  Shipment,
                                  domainNotificationService,
                                  notificationsService,
-                                 SHIPMENT_SEND_PROGRESS_ITEMS) {
+                                 SHIPMENT_SEND_PROGRESS_ITEMS,
+                                 breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.shipping'),
+      breadcrumbService.forState('home.shipping.add')
+    ];
 
     vm.progressInfo = {
       items: SHIPMENT_SEND_PROGRESS_ITEMS,

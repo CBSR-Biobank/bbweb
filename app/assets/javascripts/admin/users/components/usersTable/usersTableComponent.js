@@ -6,7 +6,7 @@ define(['lodash'], function(_) {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/components/users/usersTable/usersTable.html',
+    templateUrl : '/assets/javascripts/admin/users/components/usersTable/usersTable.html',
     controller: UsersTableController,
     controllerAs: 'vm',
     bindings: {

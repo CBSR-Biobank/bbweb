@@ -6,18 +6,24 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/components/users/userAdmin/userAdmin.html',
+    templateUrl : '/assets/javascripts/admin/users/components/userAdmin/userAdmin.html',
     controller: UserAdminController,
     controllerAs: 'vm'
   };
 
-  UserAdminController.$inject = ['UserCounts'];
+  UserAdminController.$inject = ['UserCounts', 'breadcrumbService'];
 
-  /**
-   *
+  /*
+   * Shows a table of users.
    */
-  function UserAdminController(UserCounts) {
+   function UserAdminController(UserCounts, breadcrumbService) {
     var vm = this;
+
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.users')
+    ];
 
     vm.$onInit = onInit;
     vm.haveUsers = false;

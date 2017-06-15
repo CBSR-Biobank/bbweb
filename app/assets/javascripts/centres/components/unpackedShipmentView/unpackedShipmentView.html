@@ -1,3 +1,4 @@
+<breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
 <div ng-if="vm.shipment.isUnpacked()">
   <progress-tracker
       items="vm.progressInfo.items"
@@ -12,12 +13,13 @@
                 title="{{'Return shipment to received'|translate}}"
                 ng-click="vm.returnToReceivedState()">
           <i class="glyphicon glyphicon-chevron-left"></i>
-          <translate>Previous step</translate>
+          <translate>Back to received</translate>
         </button>
         <button class="btn btn-xs btn-primary"
                 title="{{'Mark shipment as completed'|translate}}"
                 ng-click="vm.completeShipment()">
           <translate>Tag as complete</translate>
+          <i class="glyphicon glyphicon-chevron-right"></i>
         </button>
       </div>
     </h1>
