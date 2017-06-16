@@ -113,22 +113,22 @@ package dto {
     implicit val userCountsByStatusWriter: Writes[UserCountsByStatus] = Json.writes[UserCountsByStatus]
   }
 
-  final case class SpecimenDto(id:                    String,
-                               state:                 EntityState,
-                               inventoryId:           String,
-                               collectionEventId:     String,
-                               specimenDescriptionId: String,
-                               specimenSpecName:      String,
-                               version:               Long,
-                               timeAdded:             DateTime,
-                               timeModified:          Option[DateTime],
-                               originLocationInfo:    CentreLocationInfo,
-                               locationInfo:          CentreLocationInfo,
-                               containerId:           Option[String],
-                               positionId:            Option[String],
-                               timeCreated:           DateTime,
-                               amount:                BigDecimal,
-                               units:                 String)
+  final case class SpecimenDto(id:                      String,
+                               state:                   EntityState,
+                               inventoryId:             String,
+                               collectionEventId:       String,
+                               specimenDescriptionId:   String,
+                               specimenDescriptionName: String,
+                               version:                 Long,
+                               timeAdded:               DateTime,
+                               timeModified:            Option[DateTime],
+                               originLocationInfo:      CentreLocationInfo,
+                               locationInfo:            CentreLocationInfo,
+                               containerId:             Option[String],
+                               positionId:              Option[String],
+                               timeCreated:             DateTime,
+                               amount:                  BigDecimal,
+                               units:                   String)
 
   object SpecimenDto {
 
@@ -230,7 +230,7 @@ package dto {
       (a.state compareTo b.state) < 0
 
     def compareBySpecName(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
-      (a.specimen.specimenSpecName compareTo b.specimen.specimenSpecName) < 0
+      (a.specimen.specimenDescriptionName compareTo b.specimen.specimenDescriptionName) < 0
 
     def compareByTimeCreated(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
       (a.specimen.timeCreated compareTo b.specimen.timeCreated) < 0

@@ -55,22 +55,22 @@ sealed trait Specimen
                 specimenDesc:       CollectionSpecimenDescription,
                 originLocationInfo: CentreLocationInfo,
                 locationInfo:       CentreLocationInfo): SpecimenDto =
-    SpecimenDto(id                    = this.id.id,
-                state                 = this.state,
-                inventoryId           = this.inventoryId,
-                collectionEventId     = collectionEvent.id.id,
-                specimenDescriptionId = this.specimenDescriptionId.id,
-                specimenSpecName      = specimenDesc.name,
-                version               = this.version,
-                timeAdded             = this.timeAdded,
-                timeModified          = this.timeModified,
-                originLocationInfo    = originLocationInfo,
-                locationInfo          = locationInfo,
-                containerId           = this.containerId.map(_.id),
-                positionId            = this.positionId.map(_.id),
-                timeCreated           = this.timeCreated,
-                amount                = this.amount,
-                units                 = specimenDesc.units)
+    SpecimenDto(id                      = this.id.id,
+                state                   = this.state,
+                inventoryId             = this.inventoryId,
+                collectionEventId       = collectionEvent.id.id,
+                specimenDescriptionId   = this.specimenDescriptionId.id,
+                specimenDescriptionName = specimenDesc.name,
+                version                 = this.version,
+                timeAdded               = this.timeAdded,
+                timeModified            = this.timeModified,
+                originLocationInfo      = originLocationInfo,
+                locationInfo            = locationInfo,
+                containerId             = this.containerId.map(_.id),
+                positionId              = this.positionId.map(_.id),
+                timeCreated             = this.timeCreated,
+                amount                  = this.amount,
+                units                   = specimenDesc.units)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
