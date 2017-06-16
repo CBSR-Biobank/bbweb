@@ -10,28 +10,9 @@ define(function (require) {
   var angular                = require('angular'),
       mocks                  = require('angularMocks'),
       _                      = require('lodash'),
-      entityUpdateSharedSpec = require('../../../../../test/entityUpdateSharedSpec');
+      entityUpdateSharedSpec = require('../../../../test/entityUpdateSharedSpec');
 
-  describe('ceventTypeViewDirective', function() {
-
-    var createController = function (study, collectionEventType) {
-      this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
-
-      study = study || this.study;
-      collectionEventType = collectionEventType || this.collectionEventType;
-
-      this.element = angular.element(
-        '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>');
-
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        study:      study,
-        ceventType: collectionEventType
-      };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('ceventTypeView');
-    };
+  describe('ceventTypeViewComponent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -62,22 +43,42 @@ define(function (require) {
       spyOn(this.$state, 'go').and.returnValue(true);
 
       this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/collection/ceventTypeView/ceventTypeView.html',
+        '/assets/javascripts/admin/studies/components/ceventTypeView/ceventTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/common/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
+
+      this.createController = function (study, collectionEventType) {
+        this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
+
+        study = study || this.study;
+        collectionEventType = collectionEventType || this.collectionEventType;
+
+        this.element = angular.element(
+          '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>');
+
+        this.scope = this.$rootScope.$new();
+        this.scope.vm = {
+          study:      study,
+          ceventType: collectionEventType
+        };
+        this.$compile(this.element)(this.scope);
+        this.scope.$digest();
+        this.controller = this.element.controller('ceventTypeView');
+      };
+
     }));
 
     it('scope should be valid', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.ceventType).toBe(this.collectionEventType);
     });
 
     it('calling addAnnotationType should change to the correct state', function() {
-      createController.call(this);
+      this.createController();
       this.controller.addAnnotationType();
       this.scope.$digest();
       expect(this.$state.go)
@@ -85,7 +86,7 @@ define(function (require) {
     });
 
     it('calling addSpecimenDescription should change to the correct state', function() {
-      createController.call(this);
+      this.createController();
       this.controller.addSpecimenDescription();
       this.scope.$digest();
       expect(this.$state.go)
@@ -95,7 +96,7 @@ define(function (require) {
     it('calling editAnnotationType should change to the correct state', function() {
       var annotType = new this.AnnotationType(this.factory.annotationType());
 
-      createController.call(this);
+      this.createController();
       this.controller.editAnnotationType(annotType);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
@@ -108,8 +109,9 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
+        var self = this;
         context.entity             = this.CollectionEventType;
-        context.createController   = createController;
+        context.createController   = function () { self.createController(); };
         context.updateFuncName     = 'updateName';
         context.controllerFuncName = 'editName';
         context.modalInputFuncName = 'text';
@@ -125,8 +127,9 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
+        var self = this;
         context.entity             = this.CollectionEventType;
-        context.createController   = createController;
+        context.createController   = function () { self.createController(); };
         context.updateFuncName     = 'updateDescription';
         context.controllerFuncName = 'editDescription';
         context.modalInputFuncName = 'textArea';
@@ -142,12 +145,13 @@ define(function (require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.entity               = this.CollectionEventType;
-        context.createController   = createController;
-        context.updateFuncName       = 'updateRecurring';
-        context.controllerFuncName   = 'editRecurring';
+        var self = this;
+        context.entity             = this.CollectionEventType;
+        context.createController   = function () { self.createController(); };
+        context.updateFuncName     = 'updateRecurring';
+        context.controllerFuncName = 'editRecurring';
         context.modalInputFuncName = 'boolean';
-        context.newValue             = false;
+        context.newValue           = false;
       }));
 
       entityUpdateSharedSpec(context);
@@ -158,7 +162,7 @@ define(function (require) {
       var specimenDescription =
           new this.CollectionSpecimenDescription(this.factory.collectionSpecimenDescription());
 
-      createController.call(this);
+      this.createController();
       this.controller.editSpecimenDescription(specimenDescription);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
@@ -180,7 +184,7 @@ define(function (require) {
         spyOn(this.CollectionEventType.prototype, 'removeSpecimenDescription')
           .and.returnValue(this.$q.when(ceventType));
 
-        createController.call(this);
+        this.createController();
         this.controller.modificationsAllowed = true;
         this.controller.removeSpecimenDescription(ceventType.specimenDescriptions[0]);
         this.scope.$digest();
@@ -198,7 +202,7 @@ define(function (require) {
 
         _([self.StudyState.ENABLED, self.StudyState.RETIRED]).forEach(function (state) {
           self.study.state = state;
-          createController.call(self);
+          self.createController();
           expect(function () {
             self.controller.removeSpecimenDescription(specimenDescription);
           }).toThrowError('modifications not allowed');
@@ -219,7 +223,7 @@ define(function (require) {
         spyOn(this.CollectionEventType.prototype, 'removeAnnotationType')
           .and.returnValue(this.$q.when(ceventType));
 
-        createController.call(this);
+        this.createController();
         this.controller.annotationTypeIdsInUse = [];
         this.controller.removeAnnotationType(ceventType.annotationTypes[0]);
         this.scope.$digest();
@@ -234,7 +238,7 @@ define(function (require) {
         spyOn(this.modalService, 'modalOk').and.returnValue(null);
         spyOn(this.CollectionEventType.prototype, 'removeAnnotationType').and.callThrough();
 
-        createController.call(this);
+        this.createController();
         this.controller.annotationTypeIdsInUse = [ annotationType.id ];
         this.controller.removeAnnotationType(annotationType);
 
@@ -249,7 +253,7 @@ define(function (require) {
         spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
         _([self.StudyState.ENABLED, self.StudyState.RETIRED]).forEach(function (state) {
-          createController.call(self);
+          self.createController();
           self.study.state = state;
 
           expect(function () {
@@ -263,7 +267,7 @@ define(function (require) {
     it('updates state when panel button is clicked', function() {
       var panelState;
 
-      createController.call(this);
+      this.createController();
       panelState = this.controller.isPanelCollapsed;
       this.controller.panelButtonClicked();
       this.scope.$digest();
@@ -281,7 +285,7 @@ define(function (require) {
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
         spyOn(this.notificationsService, 'success').and.returnValue(null);
 
-        createController.call(this);
+        this.createController();
         this.controller.removeCeventType();
         this.scope.$digest();
 
@@ -296,7 +300,7 @@ define(function (require) {
         spyOn(this.CollectionEventType.prototype, 'inUse').and.returnValue(this.$q.when(true));
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
 
-        createController.call(this);
+        this.createController();
         this.controller.removeCeventType();
         this.scope.$digest();
 

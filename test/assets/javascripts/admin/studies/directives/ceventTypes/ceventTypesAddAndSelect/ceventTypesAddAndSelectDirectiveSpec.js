@@ -14,23 +14,9 @@ define([
 
   describe('ceventTypesAddAndSelectDirective', function() {
 
-    var createController = function () {
-      this.element = angular.element([
-        '<cevent-types-add-and-select',
-        '   study="vm.study">',
-        '</cevent-types-add-and-select>'
-      ].join(''));
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { study: this.study };
-
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('ceventTypesAddAndSelect');
-    };
-
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
+    beforeEach(inject(function(TestSuiteMixin) {
       var self = this, jsonStudy, jsonCet;
 
       _.extend(self, TestSuiteMixin.prototype);
@@ -48,29 +34,42 @@ define([
 
       self.study = new self.Study(jsonStudy);
       self.collectionEventType = new self.CollectionEventType(jsonCet);
-      self.createController = createController;
 
       spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ self.collectionEventType ]));
       spyOn(this.$state, 'go').and.callFake(function () {});
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/collection/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
+
+      this.createController = function (collectionEventTypes) {
+        collectionEventTypes = collectionEventTypes || self.collectionEventTypes;
+
+        self.element = angular.element(
+          '<cevent-types-add-and-select collection-event-types="vm.collectionEventTypes">' +
+            '</cevent-types-add-and-select>');
+        self.scope = self.$rootScope.$new();
+        self.scope.vm = { study: collectionEventTypes };
+
+        self.$compile(self.element)(self.scope);
+        self.scope.$digest();
+        self.controller = self.element.controller('ceventTypesAddAndSelect');
+      };
     }));
 
     it('has valid scope', function() {
-      createController.call(this);
-      expect(this.controller.study).toBe(this.study);
+      this.createController();
+      expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
     });
 
     it('function add switches to correct state', function() {
-      createController.call(this);
+      this.createController();
       this.controller.add();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection.ceventTypeAdd');
     });
 
     it('function select switches to correct state', function() {
-      createController.call(this);
+      this.createController();
       this.controller.select(this.collectionEventType);
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType',
@@ -78,7 +77,7 @@ define([
     });
 
     it('function recurring returns a valid result', function() {
-      createController.call(this);
+      this.createController();
       this.collectionEventType.recurring = false;
       expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('Not recurring');
       this.collectionEventType.recurring = true;

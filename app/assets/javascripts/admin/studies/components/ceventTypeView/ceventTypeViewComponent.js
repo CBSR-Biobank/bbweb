@@ -1,30 +1,23 @@
 /**
- * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ *
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
 
-  /**
-   *
-   */
-  function ceventTypeViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
+  var _ = require('lodash');
+
+  var component = {
+    templateUrl : '/assets/javascripts/admin/studies/components/ceventTypeView/ceventTypeView.html',
+    controller: CeventTypeViewController,
+    controllerAs: 'vm',
+    bindings: {
         study:      '=',
         ceventType: '='
-      },
-      templateUrl : '/assets/javascripts/admin/studies/directives/collection/ceventTypeView/ceventTypeView.html',
-      controller: CeventTypeViewCtrl,
-      controllerAs: 'vm'
-    };
+    }
+  };
 
-    return directive;
-  }
-
-  CeventTypeViewCtrl.$inject = [
+  CeventTypeViewController.$inject = [
+    '$scope',
     '$state',
     'gettextCatalog',
     'modalService',
@@ -34,13 +27,17 @@ define(['lodash'], function (_) {
     'CollectionEventAnnotationTypeModals'
   ];
 
-  function CeventTypeViewCtrl($state,
-                              gettextCatalog,
-                              modalService,
-                              modalInput,
-                              domainNotificationService,
-                              notificationsService,
-                              CollectionEventAnnotationTypeModals) {
+  /*
+   * Controller for this component.
+   */
+  function CeventTypeViewController($scope,
+                                    $state,
+                                    gettextCatalog,
+                                    modalService,
+                                    modalInput,
+                                    domainNotificationService,
+                                    notificationsService,
+                                    CollectionEventAnnotationTypeModals) {
     var vm = this;
 
     _.extend(vm, new CollectionEventAnnotationTypeModals());
@@ -77,8 +74,11 @@ define(['lodash'], function (_) {
                       { required: true, minLength: 2 }).result
         .then(function (name) {
           vm.ceventType.updateName(name)
-            .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                         gettextCatalog.getString('Change successful')))
+            .then(function (ceventType) {
+              $scope.$emit('collection-event-type-name-changed', ceventType);
+              postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                         gettextCatalog.getString('Change successful'))(ceventType);
+            })
             .catch(notificationsService.updateError);
         });
     }
@@ -201,6 +201,5 @@ define(['lodash'], function (_) {
     }
   }
 
-  return ceventTypeViewDirective;
-
+  return component;
 });

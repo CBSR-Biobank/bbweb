@@ -19,8 +19,6 @@ define(function (require) {
                    require('./ceventTypeAdd/ceventTypeAddDirective'));
   module.directive('ceventTypesAddAndSelect',
                    require('./ceventTypesAddAndSelect/ceventTypesAddAndSelectDirective'));
-  module.directive('ceventTypeView',
-                   require('./ceventTypeView/ceventTypeViewDirective'));
   module.directive('collectionSpecimenDescriptionAdd',
                    require('./collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddDirective'));
   module.directive('collectionSpecimenDescriptionSummary',

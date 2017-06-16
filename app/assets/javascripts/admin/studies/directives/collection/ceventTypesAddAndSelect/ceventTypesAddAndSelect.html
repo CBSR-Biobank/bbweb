@@ -24,9 +24,7 @@
     <tbody>
       <tr ng-repeat="ceventType in vm.collectionEventTypes">
         <td>
-          <a href ng-click="vm.select(ceventType)">
-            {{ceventType.name}}
-          </a>
+          <a href ng-click="vm.select(ceventType)">{{ceventType.name}}</a>
         </td>
         <td>
           <span class="badge">{{vm.getRecurringLabel(ceventType)}}</span>

@@ -25,20 +25,22 @@ define(function (require) {
     'biobank.users'
   ]);
 
-  module.component('studiesPagedList',        require('./components/studiesPagedList/studiesPagedListComponent'));
+  module
+    .component('studiesPagedList',        require('./components/studiesPagedList/studiesPagedListComponent'))
+    .component('ceventTypeView',          require('./components/ceventTypeView/ceventTypeViewComponent'))
 
-  module.directive('studiesAdmin',            require('./directives/studiesAdmin/studiesAdminDirective'));
-  module.directive('studyAdd',                require('./directives/studyAdd/studyAddDirective'));
-  module.directive('studyCollection',         require('./directives/studyCollection/studyCollectionDirective'));
-  module.directive('studyParticipantsTab',    require('./directives/studyParticipantsTab/studyParticipantsTabDirective'));
-  module.directive('studySummary',            require('./directives/studySummary/studySummaryDirective'));
-  module.directive('studyView',               require('./directives/studyView/studyViewDirective'));
-  module.directive('studyNotDisabledWarning',
-                   require('./directives/studyNotDisabledWarning/studyNotDisabledWarningDirective'));
+    .directive('studiesAdmin',            require('./directives/studiesAdmin/studiesAdminDirective'))
+    .directive('studyAdd',                require('./directives/studyAdd/studyAddDirective'))
+    .directive('studyCollection',         require('./directives/studyCollection/studyCollectionDirective'))
+    .directive('studyParticipantsTab',    require('./directives/studyParticipantsTab/studyParticipantsTabDirective'))
+    .directive('studySummary',            require('./directives/studySummary/studySummaryDirective'))
+    .directive('studyView',               require('./directives/studyView/studyViewDirective'))
+    .directive('studyNotDisabledWarning',
+               require('./directives/studyNotDisabledWarning/studyNotDisabledWarningDirective'))
 
-  module.config(require('./states'));
-  module.config(require('./ceventTypes/states'));
-  module.config(require('./participants/states'));
+    .config(require('./states'))
+    .config(require('./ceventTypes/states'))
+    .config(require('./participants/states'));
 
   return {
     name: name,

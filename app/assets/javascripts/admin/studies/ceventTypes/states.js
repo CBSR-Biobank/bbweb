@@ -29,16 +29,7 @@ define(['lodash'], function (_) {
         },
         views: {
           'ceventTypeDetails': {
-            template: '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>',
-            controller: [
-              'study',
-              'ceventType',
-              function (study, ceventType) {
-                this.study = study;
-                this.ceventType = ceventType;
-              }
-            ],
-            controllerAs: 'vm'
+            component: 'ceventTypeView'
           }
         }
       })
