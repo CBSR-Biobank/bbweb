@@ -29,7 +29,7 @@ define(['angular'], function(angular) {
         url: 'about',
         views: {
           'main@': {
-            template: '<about></about>'
+            component: 'about'
           }
         }
       })

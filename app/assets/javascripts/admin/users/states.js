@@ -29,7 +29,7 @@ define(function () {
       },
       views: {
         'main@': {
-          template: '<user-admin></user-admin>'
+          component: 'userAdmin'
         }
       }
     });

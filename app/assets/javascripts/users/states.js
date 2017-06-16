@@ -39,7 +39,7 @@ define(function () {
         },
         views: {
           'main@': {
-            template: '<forgot-password></forgot-password>'
+            component: 'forgotPassword'
           }
         }
       })
@@ -62,7 +62,7 @@ define(function () {
         url: '^/register',
         views: {
           'main@': {
-            template: '<register-user></register-user>'
+            component: 'registerUser'
           }
         }
       })
@@ -70,7 +70,7 @@ define(function () {
         url: '^/profile',
         views: {
           'main@': {
-            template: '<user-profile></user-profile>'
+            component: 'userProfile'
           }
         }
       });

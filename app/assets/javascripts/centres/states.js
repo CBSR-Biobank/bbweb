@@ -27,7 +27,7 @@ define(function () {
         url: 'shipping',
         views: {
           'main@': {
-            template: '<shipping-home></shipping-home>'
+            component: 'shippingHome'
           }
         }
       })
@@ -41,22 +41,15 @@ define(function () {
         },
         views: {
           'main@': {
-            template: '<centre-shipments centre="vm.centre"></centre-shipments>',
-            controller: CentreController,
-            controllerAs: 'vm'
+            component: 'centreShipments'
           }
-        },
-        data: {
-          breadcrumProxy: 'home.shipping.centre.incoming'
         }
       })
       .state('home.shipping.centre.incoming', {
         url: '/incoming',
         views: {
           'shipments': {
-            template: '<shipments-incoming centre="vm.centre"></shipments-incoming>',
-            controller: CentreController,
-            controllerAs: 'vm'
+            component: 'shipmentsIncoming'
           }
         }
       })
@@ -64,9 +57,7 @@ define(function () {
         url: '/outgoing',
         views: {
           'shipments': {
-            template: '<shipments-outgoing centre="vm.centre"></shipments-outgoing>',
-            controller: CentreController,
-            controllerAs: 'vm'
+            component: 'shipmentsOutgoing'
           }
         }
       })
@@ -74,9 +65,7 @@ define(function () {
         url: '/completed',
         views: {
           'shipments': {
-            template: '<shipments-completed centre="vm.centre"></shipments-completed>',
-            controller: CentreController,
-            controllerAs: 'vm'
+            component: 'shipmentsCompleted'
           }
         }
       })
@@ -84,7 +73,7 @@ define(function () {
         url: '/add',
         views: {
           'main@': {
-            template: '<shipment-add></shipment-add>'
+            component: 'shipmentAdd'
           }
         }
       })
@@ -95,9 +84,7 @@ define(function () {
         },
         views: {
           'main@': {
-            template: '<shipment-add-items shipment="vm.shipment"></shipment-add-items>',
-            controller: ShipmentController,
-            controllerAs: 'vm'
+            component: 'shipmentAddItems'
           }
         }
       })
@@ -108,9 +95,7 @@ define(function () {
         },
         views: {
           'main@': {
-            template: '<shipment-view shipment="vm.shipment"></shipment-view>',
-            controller: ShipmentController,
-            controllerAs: 'vm'
+            component: 'shipmentView'
           }
         }
       })
@@ -119,9 +104,7 @@ define(function () {
         url: '/unpack',
         views: {
           'main@': {
-            template: '<unpacked-shipment-view shipment="vm.shipment"></unpacked-shipment-view>',
-            controller: ShipmentController,
-            controllerAs: 'vm'
+            component: 'unpackedShipmentView'
           }
         }
       })
@@ -129,9 +112,7 @@ define(function () {
         url: '/information',
         views: {
           'unpackedShipmentDetails': {
-            template: '<unpacked-shipment-info shipment="vm.shipment"></unpacked-shipment-info>',
-            controller: ShipmentController,
-            controllerAs: 'vm'
+            component: 'unpackedShipmentInfo'
           }
         }
       })
@@ -139,31 +120,20 @@ define(function () {
         url: '/unpack',
         views: {
           'unpackedShipmentDetails': {
-            template: '<unpacked-shipment-unpack shipment="vm.shipment"></unpacked-shipment-unpack>',
-            controller: ShipmentController,
-            controllerAs: 'vm'
+            component: 'unpackedShipmentUnpack'
           }
         }
       })
       .state('home.shipping.shipment.unpack.received', {
         url: '/received',
+        resolve: {
+          itemState: ['ShipmentItemState', function (ShipmentItemState) {
+            return ShipmentItemState.RECEIVED;
+          }]
+        },
         views: {
           'unpackedShipmentDetails': {
-            template: [
-              '<unpacked-shipment-items ',
-              '  shipment="vm.shipment"',
-              '  item-state="{{vm.itemState}}">',
-              '</unpacked-shipment-items>'
-            ].join(''),
-            controller: [
-              'shipment',
-              'ShipmentItemState',
-              function (shipment, ShipmentItemState) {
-                this.shipment = shipment;
-                this.itemState = ShipmentItemState.RECEIVED;
-              }
-            ],
-            controllerAs: 'vm'
+            component: 'unpackedShipmentItems'
           }
         }
       })
@@ -193,9 +163,7 @@ define(function () {
         url: '/extra',
         views: {
           'unpackedShipmentDetails': {
-            template: '<unpacked-shipment-extra shipment="vm.shipment"></unpacked-shipment-extra>',
-            controller: ShipmentController,
-            controllerAs: 'vm'
+            component: 'unpackedShipmentExtra'
           }
         }
       });

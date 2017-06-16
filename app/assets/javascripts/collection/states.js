@@ -19,7 +19,7 @@ define(['lodash'], function(_) {
         url: '^/collection',
         views: {
           'main@': {
-            template: '<collection></collection>'
+            component: 'collection'
           }
         }
       })
@@ -154,21 +154,18 @@ define(['lodash'], function(_) {
       .state('home.collection.study.participant.cevents.details.specimen', {
         url: '/{inventoryId}',
         resolve: {
+          collectionEventType: [
+            'collectionEvent',
+            'collectionEventTypes',
+            function (collectionEvent, collectionEventTypes) {
+              return findCollectionEventType(collectionEventTypes, collectionEvent.collectionEventTypeId);
+            }
+          ],
           specimen: resolveSpecimen
         },
         views: {
           'main@': {
-            template: [
-              '<specimen-view',
-              '  study="vm.study"',
-              '  participant="vm.participant"',
-              '  collection-event-type="vm.collectionEventType"',
-              '  collection-event="vm.collectionEvent"',
-              '  specimen="vm.specimen">',
-              '</specimen-view>'
-            ].join(''),
-            controller: CeventSpecimenCtrl,
-            controllerAs: 'vm'
+            component: 'specimenView'
           }
         }
       });
@@ -337,24 +334,6 @@ define(['lodash'], function(_) {
       this.study = study;
       this.collectionEventTypes = collectionEventTypes;
       this.collectionEvent = collectionEvent;
-    }
-
-    CeventSpecimenCtrl.$inject = [
-      'study',
-      'participant',
-      'collectionEventTypes',
-      'collectionEvent',
-      'specimen'
-    ];
-
-    function CeventSpecimenCtrl(study, participant, collectionEventTypes, collectionEvent, specimen) {
-      this.study           = study;
-      this.participant     = participant;
-      this.collectionEvent = collectionEvent;
-      this.specimen        = specimen;
-
-      this.collectionEventType = findCollectionEventType(collectionEventTypes,
-                                                         collectionEvent.collectionEventTypeId);
     }
   }
 
