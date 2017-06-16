@@ -12,11 +12,16 @@
 <div class="row" ng-cloak>
   <div class="col-md-12"  ng-if="!vm.hasValidCentres">
     <div class="alert alert-warning" role="alert">
-      <translate>
-        Two or more centres, or one centre with more than one location required for shipping.
-      </translate>
+      <span class="glyphicon glyphicon-warning-sign"></span>
+      <strong>
+        <translate>
+          Two or more centres, or one centre with more than one location required for shipping.
+        </translate>
+      </strong>
       <br>
-      <translate>Please configure more centres and / or locations.</translate>
+      <p translate>
+        Please configure more centres and / or locations.
+      </p>
     </div>
   </div>
   <div class="col-md-6" ng-if="vm.hasValidCentres">

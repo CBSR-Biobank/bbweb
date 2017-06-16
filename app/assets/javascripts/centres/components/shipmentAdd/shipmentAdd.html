@@ -9,13 +9,16 @@
 <div class="row" ng-if="!vm.hasValidCentres">
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
-      <translate>
-        Two or more centres, or one centre with more than one location required for shipping.
-      </translate>
+      <span class="glyphicon glyphicon-warning-sign"></span>
+      <strong>
+        <translate>
+          Two or more centres, or one centre with more than one location required for shipping.
+        </translate>
+      </strong>
       <br>
-      <translate>
+      <p translate>
         Please configure more centres and / or locations.
-      </translate>
+      </p>
     </div>
   </div>
 </div>
