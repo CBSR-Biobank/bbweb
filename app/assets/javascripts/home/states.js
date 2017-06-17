@@ -7,14 +7,9 @@
 define(['angular'], function(angular) {
   'use strict';
 
-  config.$inject = [
-    '$urlRouterProvider',
-    '$stateProvider'
-  ];
+  config.$inject = [ '$stateProvider' ];
 
-  function config($urlRouterProvider, $stateProvider) {
-
-    $urlRouterProvider.otherwise('/#');
+  function config($stateProvider) {
 
     $stateProvider
       .state('home', {

@@ -5,15 +5,9 @@
 define(function () {
   'use strict';
 
-  config.$inject = [
-    '$urlRouterProvider',
-    '$stateProvider'
-  ];
+  config.$inject = [ '$stateProvider' ];
 
-  function config($urlRouterProvider, $stateProvider) {
-    // FIXME does this need to be in each state definition file?
-    $urlRouterProvider.otherwise('/');
-
+  function config($stateProvider) {
     $stateProvider
       .state('home.admin.studies.study.specimens.groupAdd', {
         url: '/spcgroup/add',

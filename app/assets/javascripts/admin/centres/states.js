@@ -7,14 +7,9 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  centreStates.$inject = [
-    '$urlRouterProvider',
-    '$stateProvider'
-  ];
+  centreStates.$inject = [ '$stateProvider' ];
 
-  function centreStates($urlRouterProvider, $stateProvider) {
-
-    $urlRouterProvider.otherwise('/');
+  function centreStates($stateProvider) {
 
     $stateProvider
       .state('home.admin.centres', {

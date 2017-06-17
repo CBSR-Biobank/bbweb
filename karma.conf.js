@@ -14,6 +14,10 @@ module.exports = function(config) {
 
   config.set({
 
+    client: {
+      captureConsole: false
+    },
+
     // If using jasmine-core 2.6.0 the follwing settings are required
     // browserNoActivityTimeout: 60000,
     // browserDisconnectTimeout: 30000,

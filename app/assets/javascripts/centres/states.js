@@ -7,12 +7,9 @@
 define(function () {
   'use strict';
 
-  config.$inject = [
-    '$urlRouterProvider',
-    '$stateProvider'
-  ];
+  config.$inject = [ '$stateProvider' ];
 
-  function config($urlRouterProvider, $stateProvider) {
+  function config($stateProvider) {
 
     resolveShipment.$inject = ['Shipment', '$transition$', '$state'];
     function resolveShipment(Shipment, $transition$, $state) {

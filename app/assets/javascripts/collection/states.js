@@ -7,12 +7,9 @@
 define(['lodash'], function(_) {
   'use strict';
 
-  config.$inject = [
-    '$urlRouterProvider',
-    '$stateProvider'
-  ];
+  config.$inject = [ '$stateProvider' ];
 
-  function config($urlRouterProvider, $stateProvider) {
+  function config($stateProvider) {
 
     $stateProvider
       .state('home.collection', {
