@@ -5,6 +5,7 @@ import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.study._
 import org.biobank.domain.user._
+import org.biobank.service.{FilterString, SortString}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -174,13 +175,13 @@ class CollectionEventTypeServiceSpec
 
     }
 
-    describe("when getting all collection event types for a study") {
+    describe("when getting collection event types for a study") {
 
       it("users can access") {
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          ceventTypeService.collectionEventTypesForStudy(user.id, f.study.id)
+          ceventTypeService.list(user.id, f.study.id, new FilterString(""), new SortString(""))
             .mustSucceed { result =>
               result must have size 1
             }
@@ -190,11 +191,11 @@ class CollectionEventTypeServiceSpec
       it("users cannot access") {
         val f = new UsersCeventTypeFixture
         info("no membership user")
-        ceventTypeService.collectionEventTypesForStudy(f.noMembershipUser.id, f.study.id)
+        ceventTypeService.list(f.noMembershipUser.id, f.study.id, new FilterString(""), new SortString(""))
           .mustFail("Unauthorized")
 
         info("no permission user")
-        ceventTypeService.collectionEventTypesForStudy(f.nonStudyPermissionUser.id, f.study.id)
+        ceventTypeService.list(f.nonStudyPermissionUser.id, f.study.id, new FilterString(""), new SortString(""))
           .mustFail("Unauthorized")
       }
 

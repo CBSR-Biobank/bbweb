@@ -1,18 +1,31 @@
 package org.biobank.controllers.study
 
-import org.biobank.fixture._
+import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.AnnotationType
-import org.biobank.domain.study.{ CollectionEventType, Study }
-import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.study._
-
-import play.api.test.Helpers._
-import play.api.libs.json._
+import org.biobank.domain.study.{ CollectionEventType, Study }
+import org.biobank.fixture.ControllerFixture
+import org.biobank.fixture._
 import org.joda.time.DateTime
+import org.scalatest.prop.TableDrivenPropertyChecks._
+import play.api.libs.json._
+import play.api.test.Helpers._
 
 class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
+
+  class MultipleCeTypes(numCeTypes: Int) {
+    val study = factory.createDisabledStudy
+    val ceTypes = 1.to(numCeTypes).map { index =>
+        factory.createCollectionEventType.copy(
+          specimenDescriptions = Set(factory.createCollectionSpecimenDescription),
+          annotationTypes      = Set(factory.createAnnotationType))
+      }
+
+    addToRepository(study)
+    ceTypes.foreach(addToRepository)
+  }
 
   private def uri(): String = "/studies/cetypes"
 
@@ -24,19 +37,13 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
   private def uri(ceventType: CollectionEventType, path: String): String =
     uri + s"/$path/${ceventType.id.id}"
 
-  private def uriWithQuery(study: Study, ceventType: CollectionEventType): String =
-    uri(study) + s"?cetId=${ceventType.id.id}"
-
   private def uri(study: Study, ceventType: CollectionEventType, version: Long): String =
     uri(study, ceventType) + s"/$version"
 
   private def createEntities(fn: (Study, CollectionEventType) => Unit): Unit = {
     val disabledStudy = factory.createDisabledStudy
-    studyRepository.put(disabledStudy)
-
     val cet = factory.createCollectionEventType
-    collectionEventTypeRepository.put(cet)
-
+    Set(disabledStudy, cet).foreach(addToRepository)
     fn(disabledStudy, cet)
   }
 
@@ -159,32 +166,11 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Collection Event Type REST API") {
 
-    describe("GET /studies/cetypes") {
-
-      it("list none") {
-        val study = factory.createDisabledStudy
-        studyRepository.put(study)
-
-        val json = makeRequest(GET, uri(study))
-                              (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 0
-      }
-
-      it("list a single collection event type") {
-        createEntities { (study, cet) =>
-          val json = makeRequest(GET, uri(study))
-
-          (json \ "status").as[String] must include ("success")
-          val jsonList = (json \ "data").as[List[JsObject]]
-          jsonList must have size 1
-          compareObj(jsonList(0), cet)
-        }
-      }
+    describe("GET /studies/cetypes/:studyId/:ceventId") {
 
       it("get a single collection event type") {
         createEntities { (study, cet) =>
-          val json = makeRequest(GET, uriWithQuery(study, cet))
+          val json = makeRequest(GET, uri(study, cet))
 
           (json \ "status").as[String] must include ("success")
           val jsonObj = (json \ "data").as[JsObject]
@@ -192,43 +178,11 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         }
       }
 
-      it("list multiple collection event types") {
-        createEntities { (study, cet) =>
-          val cet2 = factory.createCollectionEventType.copy(
-              specimenDescriptions = Set(factory.createCollectionSpecimenDescription),
-              annotationTypes      = Set(factory.createAnnotationType))
-
-          val cetypes = List(cet, cet2)
-          cetypes.foreach(collectionEventTypeRepository.put)
-
-          val json = makeRequest(GET, uri(study))
-                                (json \ "status").as[String] must include ("success")
-          val jsonList = (json \ "data").as[List[JsObject]]
-          jsonList must have size cetypes.size.toLong
-
-          jsonList.foreach { jsonCet =>
-            val jsonId = (jsonCet \ "id").as[String]
-            val cet = cetypes.find { x => x.id.id == jsonId }.value
-            compareObj(jsonCet, cet)
-          }
-        }
-      }
-
-      it("fail for invalid study id") {
-        val study = factory.createDisabledStudy
-
-        val json = makeRequest(GET, uri(study), NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex("IdNotFound.*study")
-      }
-
-      it("fail for an invalid study ID when using a collection event type id") {
+      it("fail for an invalid study ID") {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
 
-        val json = makeRequest(GET, uriWithQuery(study, cet), NOT_FOUND)
+        val json = makeRequest(GET, uri(study, cet), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -241,11 +195,114 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val cet = factory.createCollectionEventType
 
-        val json = makeRequest(GET, uriWithQuery(study, cet), NOT_FOUND)
+        val json = makeRequest(GET, uri(study, cet), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
         (json \ "message").as[String] must include regex("IdNotFound.*collection event type")
+      }
+
+    }
+
+    describe("GET /studies/cetypes") {
+
+      it("list none") {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+        PagedResultsSpec(this).emptyResults(uri(study))
+      }
+
+      it("list a single collection event type") {
+        val f = new MultipleCeTypes(1)
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+            uri = uri(f.study),
+            offset = 0,
+            total = 1,
+            maybeNext = None,
+            maybePrev = None)
+        jsonItems must have size 1
+        compareObj(jsonItems(0), f.ceTypes(0))
+      }
+
+      it("get all collection event types for a study") {
+        val f = new MultipleCeTypes(3)
+        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+            uri       = uri(f.study),
+            offset    = 0,
+            total     = f.ceTypes.size.toLong,
+            maybeNext = None,
+            maybePrev = None)
+        jsonItems must have size f.ceTypes.size.toLong
+
+        jsonItems.foreach { jsonCet =>
+          val jsonId = (jsonCet \ "id").as[String]
+          val cet = f.ceTypes.find { x => x.id.id == jsonId }.value
+          compareObj(jsonCet, cet)
+        }
+      }
+
+      it("list collection event types sorted by name") {
+        val f = new MultipleCeTypes(3)
+        val sortExprs = Table("sort expressions", "name", "-name")
+        forAll(sortExprs) { sortExpr =>
+          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+              uri         = uri(f.study),
+              queryParams = Map("sort" -> sortExpr),
+              offset      = 0,
+              total       = f.ceTypes.size.toLong,
+              maybeNext   = None,
+              maybePrev   = None)
+          jsonItems must have size f.ceTypes.size.toLong
+          if (sortExpr == sortExprs(0)) {
+            compareObj(jsonItems(0), f.ceTypes(0))
+            compareObj(jsonItems(1), f.ceTypes(1))
+            compareObj(jsonItems(2), f.ceTypes(2))
+          } else {
+            compareObj(jsonItems(0), f.ceTypes(2))
+            compareObj(jsonItems(1), f.ceTypes(1))
+            compareObj(jsonItems(2), f.ceTypes(0))
+          }
+        }
+      }
+
+      it("list the first Collection Event Type in a paged query") {
+        val f = new MultipleCeTypes(3)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(
+            uri         = uri(f.study),
+            queryParams = Map("filter" -> s"name::${f.ceTypes(0).name}"),
+            total       = 1)
+
+        compareObj(jsonItem, f.ceTypes(0))
+      }
+
+      it("list the last Collection Event Type in a paged query") {
+        val f = new MultipleCeTypes(3)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(
+            uri         = uri(f.study),
+            queryParams = Map("filter" -> s"name::${f.ceTypes(2).name}"),
+            total       = 1)
+
+        compareObj(jsonItem, f.ceTypes(2))
+      }
+
+      it("111 fail for invalid study id") {
+        val study = factory.createDisabledStudy
+        val json = makeRequest(GET, uri(study), NOT_FOUND)
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include regex("IdNotFound.*study")
+      }
+
+      it("fail when using an invalid query parameters") {
+        val f = new MultipleCeTypes(3)
+        val url = uri(f.study)
+
+        PagedResultsSpec(this).failWithNegativePageNumber(url)
+        PagedResultsSpec(this).failWithInvalidPageNumber(url)
+        PagedResultsSpec(this).failWithNegativePageSize(url)
+        PagedResultsSpec(this).failWithInvalidPageSize(url, 100);
+        PagedResultsSpec(this).failWithInvalidSort(url)
       }
 
     }

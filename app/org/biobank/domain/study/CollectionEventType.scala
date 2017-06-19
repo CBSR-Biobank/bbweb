@@ -8,6 +8,16 @@ import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
+/**
+ * Predicates that can be used to filter collections of [[CollectionEventType]]s.
+ *
+ */
+trait CollectionEventTypePredicates extends HasNamePredicates[CollectionEventType] {
+
+  type CollectionEventTypeFilter = CollectionEventType => Boolean
+
+}
+
 trait CollectionEventTypeValidations {
 
   case object MaxCountInvalid extends ValidationKey
@@ -16,7 +26,6 @@ trait CollectionEventTypeValidations {
 
   case object StudyIdRequired extends ValidationKey
 }
-
 
 /**
   * Defines a classification name, unique to the Study, to a participant visit.
@@ -184,5 +193,11 @@ object CollectionEventType extends CollectionEventTypeValidations {
                                                         annotationTypes)
     }
   }
+
+  val sort2Compare: Map[String, (CollectionEventType, CollectionEventType) => Boolean] =
+    Map[String, (CollectionEventType, CollectionEventType) => Boolean]("name"  -> compareByName)
+
+  def compareByName(a: CollectionEventType, b: CollectionEventType): Boolean =
+    (a.name compareToIgnoreCase b.name) < 0
 
 }

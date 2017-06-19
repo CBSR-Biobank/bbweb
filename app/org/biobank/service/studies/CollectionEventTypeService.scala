@@ -8,6 +8,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.study._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.user.UserId
+import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.service._
@@ -36,8 +37,10 @@ trait CollectionEventTypeService extends BbwebService {
   def collectionEventTypeInUse(requestUserId: UserId, collectionEventTypeId: CollectionEventTypeId)
       : ServiceValidation[Boolean]
 
-  def collectionEventTypesForStudy(requestUserId: UserId, studyId: StudyId)
-      : ServiceValidation[Set[CollectionEventType]]
+  def list(requestUserId: UserId,
+           studyId:       StudyId,
+           filter:        FilterString,
+           sort:          SortString): ServiceValidation[Seq[CollectionEventType]]
 
   def processCommand(cmd: CollectionEventTypeCommand)
       : Future[ServiceValidation[CollectionEventType]]
@@ -87,14 +90,31 @@ class CollectionEventTypeServiceImpl @Inject()(
     }
   }
 
-  def collectionEventTypesForStudy(requestUserId: UserId, studyId: StudyId)
-      : ServiceValidation[Set[CollectionEventType]] = {
+  def list(requestUserId: UserId,
+           studyId:       StudyId,
+           filter:        FilterString,
+           sort:          SortString): ServiceValidation[Seq[CollectionEventType]] = {
     whenPermittedAndIsMember(requestUserId,
                              PermissionId.StudyRead,
                              Some(studyId),
                              None) { () =>
-      withStudy(studyId) { study =>
-        collectionEventTypeRepository.allForStudy(study.id).successNel[String]
+      val allCeventTypes = collectionEventTypeRepository.allForStudy(studyId).toSet
+      val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                    else sort
+
+      for {
+        study           <- studyRepository.getByKey(studyId)
+        ceventTypes     <- CollectionEventTypeFilter.filterCollectionEvents(allCeventTypes, filter)
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { CollectionEventType.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = ceventTypes.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
       }
     }
   }
