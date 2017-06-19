@@ -11,20 +11,17 @@ define(function (require) {
       name = 'admin.studies.directives.collection',
       module;
 
-  module = angular.module(name, [
-    'biobank.users'
-  ]);
+  module = angular.module(name, [ 'biobank.users' ]);
 
-  module.directive('ceventTypeAdd',
-                   require('./ceventTypeAdd/ceventTypeAddDirective'));
-  module.directive('ceventTypesAddAndSelect',
-                   require('./ceventTypesAddAndSelect/ceventTypesAddAndSelectDirective'));
-  module.directive('collectionSpecimenDescriptionAdd',
-                   require('./collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddDirective'));
-  module.directive('collectionSpecimenDescriptionSummary',
-                   require('./collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummaryDirective'));
-  module.directive('collectionSpecimenDescriptionView',
-                   require('./collectionSpecimenDescriptionView/collectionSpecimenDescriptionViewDirective'));
+  module
+    .directive('ceventTypeAdd',
+               require('./ceventTypeAdd/ceventTypeAddDirective'))
+    .directive('collectionSpecimenDescriptionAdd',
+               require('./collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddDirective'))
+    .directive('collectionSpecimenDescriptionSummary',
+               require('./collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummaryDirective'))
+    .directive('collectionSpecimenDescriptionView',
+               require('./collectionSpecimenDescriptionView/collectionSpecimenDescriptionViewDirective'));
 
   return {
     name: name,

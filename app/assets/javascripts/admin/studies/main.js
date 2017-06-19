@@ -28,6 +28,8 @@ define(function (require) {
   module
     .component('studiesPagedList',        require('./components/studiesPagedList/studiesPagedListComponent'))
     .component('ceventTypeView',          require('./components/ceventTypeView/ceventTypeViewComponent'))
+    .component('ceventTypesAddAndSelect',
+               require('./components/ceventTypesAddAndSelect/ceventTypesAddAndSelectComponent'))
 
     .directive('studiesAdmin',            require('./directives/studiesAdmin/studiesAdminDirective'))
     .directive('studyAdd',                require('./directives/studyAdd/studyAddDirective'))

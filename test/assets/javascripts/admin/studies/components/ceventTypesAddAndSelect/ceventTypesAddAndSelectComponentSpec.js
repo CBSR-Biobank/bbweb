@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('ceventTypesAddAndSelectDirective', function() {
+  fdescribe('ceventTypesAddAndSelectComponent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -39,7 +39,7 @@ define([
       spyOn(this.$state, 'go').and.callFake(function () {});
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/collection/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
+        '/assets/javascripts/admin/studies/components/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
 
       this.createController = function (collectionEventTypes) {
         collectionEventTypes = collectionEventTypes || self.collectionEventTypes;
