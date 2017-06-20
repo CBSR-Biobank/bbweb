@@ -24,6 +24,9 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
     case GET(p"/valuetypes") =>
       controller.valueTypes
 
+    case GET(p"/enableAllowed/${studyId(id)}") =>
+      controller.enableAllowed(id)
+
     case GET(p"/anatomicalsrctypes") =>
       controller.anatomicalSourceTypes
 

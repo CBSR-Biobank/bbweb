@@ -460,6 +460,16 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
       return biobankApi.get('/studies/centres/' + this.id);
     };
 
+    /**
+     * Weather the study can be enabled or not.
+     *
+     * @return {Promise<boolean>} If the promise is successful and it's value is TRUE, then the Study can be
+     * enabled.
+     */
+    Study.prototype.isEnableAllowed = function () {
+      return biobankApi.get('/studies/enableAllowed/' + this.id);
+    };
+
     function createStudiesFromPagedResult(reply) {
       var deferred = $q.defer();
       try {

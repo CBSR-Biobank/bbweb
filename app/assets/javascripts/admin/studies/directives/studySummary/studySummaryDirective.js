@@ -31,8 +31,7 @@ define(['lodash'], function(_) {
     'gettextCatalog',
     'modalService',
     'modalInput',
-    'notificationsService',
-    'CollectionEventType'
+    'notificationsService'
   ];
 
   function StudySummaryCtrl($scope,
@@ -40,13 +39,12 @@ define(['lodash'], function(_) {
                             gettextCatalog,
                             modalService,
                             modalInput,
-                            notificationsService,
-                            CollectionEventType) {
+                            notificationsService) {
 
     var vm = this;
 
     vm.descriptionToggleLength = 100;
-    vm.hasSpecimenDescriptions = false;
+    vm.isEnableAllowed         = false;
     vm.changeState             = changeState;
     vm.editName                = editName;
     vm.editDescription         = editDescription;
@@ -59,9 +57,9 @@ define(['lodash'], function(_) {
       // updates the selected tab in 'studyViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
 
-      CollectionEventType.list(vm.study.id).then(function (ceTypes) {
-        var specimenDescriptions = _.flatMap(ceTypes, function(ceType) { return ceType.specimenDescriptions; });
-        vm.hasSpecimenDescriptions = (specimenDescriptions.length > 0);
+      // replace this with an API call
+      vm.study.isEnableAllowed().then(function (enableAllowed) {
+        vm.isEnableAllowed = enableAllowed;
       });
     }
 

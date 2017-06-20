@@ -82,6 +82,12 @@ class StudiesController @Inject() (val action:  BbwebAction,
       validationReply(service.getStudy(request.authInfo.userId, id))
     }
 
+  def enableAllowed(id: StudyId): Action[Unit] =
+    action(parse.empty) { implicit request =>
+      validationReply(service.enableAllowed(request.authInfo.userId, id))
+    }
+
+
   def centresForStudy(studyId: StudyId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       validationReply(Future(service.getCentresForStudy(request.authInfo.userId, studyId)))

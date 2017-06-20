@@ -59,6 +59,8 @@ trait StudiesService extends BbwebService {
 
   def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]]
 
+  def enableAllowed(requestUserId: UserId, studyId: StudyId): ServiceValidation[Boolean]
+
   def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : ServiceValidation[ProcessingType]
 
@@ -191,6 +193,18 @@ class StudiesServiceImpl @Inject()(
           CentreLocation(centre.id.id, location.id.id, centre.name, location.name)
         }
       }.successNel[String]
+    }
+  }
+
+  def enableAllowed(requestUserId: UserId, studyId: StudyId): ServiceValidation[Boolean] = {
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.StudyRead,
+                             Some(studyId),
+                             None) { () =>
+      val specimenDescriptions = collectionEventTypeRepository.allForStudy(studyId).map { ceTypes =>
+          ceTypes.specimenDescriptions
+        }
+      (specimenDescriptions.size > 0).successNel[String]
     }
   }
 
