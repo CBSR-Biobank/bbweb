@@ -12,7 +12,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  fdescribe('ceventTypesAddAndSelectComponent', function() {
+  describe('ceventTypesAddAndSelectComponent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -41,14 +41,28 @@ define([
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/components/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
 
-      this.createController = function (collectionEventTypes) {
-        collectionEventTypes = collectionEventTypes || self.collectionEventTypes;
+      this.createController = function (study, collectionEventType) {
+        var collectionEventTypes;
+        study = study || self.study;
+        collectionEventType = collectionEventType || self.collectionEventType;
+
+        if (_.isUndefined(collectionEventType)) {
+          collectionEventTypes = [];
+        } else {
+          collectionEventTypes = [ collectionEventType ];
+        }
+
+        self.CollectionEventType.list =
+          jasmine.createSpy().and.returnValue(self.$q.when(self.factory.pagedResult(collectionEventTypes)));
 
         self.element = angular.element(
-          '<cevent-types-add-and-select collection-event-types="vm.collectionEventTypes">' +
+          '<cevent-types-add-and-select study="vm.study" collection-event-types="vm.collectionEventTypes">' +
             '</cevent-types-add-and-select>');
         self.scope = self.$rootScope.$new();
-        self.scope.vm = { study: collectionEventTypes };
+        self.scope.vm = {
+          study:                study,
+          collectionEventTypes: collectionEventType
+        };
 
         self.$compile(self.element)(self.scope);
         self.scope.$digest();
@@ -57,8 +71,9 @@ define([
     }));
 
     it('has valid scope', function() {
-      this.createController();
-      expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
+      this.collectionEventType = undefined;
+      this.createController(this.study, undefined);
+      expect(this.controller.collectionEventTypes).toBeArrayOfSize(0);
     });
 
     it('function add switches to correct state', function() {
@@ -82,6 +97,43 @@ define([
       expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('Not recurring');
       this.collectionEventType.recurring = true;
       expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('Recurring');
+    });
+
+    it('function pageChanged switches to correct state', function() {
+      this.createController();
+      this.controller.pageChanged();
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection');
+    });
+
+    describe('for updating name filter', function() {
+
+      it('filter is updated when user enters a value', function() {
+        var name = this.factory.stringNext();
+        this.createController();
+
+        this.CollectionEventType.list =
+          jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult([])));
+
+        this.controller.nameFilter = name;
+        this.controller.nameFilterUpdated();
+        this.scope.$digest();
+
+        expect(this.controller.pagerOptions.filter).toEqual('name:like:' + name);
+        expect(this.controller.pagerOptions.page).toEqual(1);
+        expect(this.controller.displayState).toBe(this.controller.displayStates.NO_RESULTS);
+      });
+
+      it('filter is updated when user clears the value', function() {
+        this.createController();
+        this.controller.nameFilter = '';
+        this.controller.nameFilterUpdated();
+        this.scope.$digest();
+
+        expect(this.controller.pagerOptions.filter).toBeEmptyString();
+        expect(this.controller.pagerOptions.page).toEqual(1);
+      });
+
     });
 
   });

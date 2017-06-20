@@ -30,10 +30,10 @@ define(function (require) {
     .component('ceventTypeView',          require('./components/ceventTypeView/ceventTypeViewComponent'))
     .component('ceventTypesAddAndSelect',
                require('./components/ceventTypesAddAndSelect/ceventTypesAddAndSelectComponent'))
+    .component('studyCollection',         require('./components/studyCollection/studyCollectionComponent'))
 
     .directive('studiesAdmin',            require('./directives/studiesAdmin/studiesAdminDirective'))
     .directive('studyAdd',                require('./directives/studyAdd/studyAddDirective'))
-    .directive('studyCollection',         require('./directives/studyCollection/studyCollectionDirective'))
     .directive('studyParticipantsTab',    require('./directives/studyParticipantsTab/studyParticipantsTabDirective'))
     .directive('studySummary',            require('./directives/studySummary/studySummaryDirective'))
     .directive('studyView',               require('./directives/studyView/studyViewDirective'))

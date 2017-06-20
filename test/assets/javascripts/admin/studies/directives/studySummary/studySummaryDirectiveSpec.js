@@ -49,7 +49,13 @@ define(function (require) {
         '/assets/javascripts/common/directives/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 
-      self.createController = function () {
+      self.createController = function (enableAllowed) {
+        if (_.isUndefined(enableAllowed)) {
+          enableAllowed = true;
+        }
+        self.Study.prototype.isEnableAllowed =
+          jasmine.createSpy().and.returnValue(self.$q.when(enableAllowed));
+
         self.element = angular.element('<study-summary study="vm.study"></study-summary>');
         self.scope = self.$rootScope.$new();
         self.scope.vm = { study: self.study };
@@ -67,14 +73,13 @@ define(function (require) {
       this.createController();
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.descriptionToggleLength).toBeDefined();
-      expect(this.controller.hasSpecimenDescriptions).toBeTrue();
+      expect(this.controller.isEnableAllowed).toBeTrue();
       expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
     it('should have valid settings when study has no collection event types', function() {
-      this.CollectionEventType.list = jasmine.createSpy().and.returnValue(this.$q.when([ ]));
-      this.createController(this);
-      expect(this.controller.hasSpecimenDescriptions).toBeFalse();
+      this.createController(false);
+      expect(this.controller.isEnableAllowed).toBeFalse();
     });
 
     describe('updates to name', function () {
@@ -94,7 +99,6 @@ define(function (require) {
     });
 
     describe('updates to description', function () {
-
       var context = {};
 
       beforeEach(inject(function () {

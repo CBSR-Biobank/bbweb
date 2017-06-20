@@ -13,8 +13,15 @@
   </div>
 
   <div class="panel-body" ng-if="vm.collectionEventTypes.length <= 0">
-    <div class="alert alert-warning" translate>
+    <div class="alert alert-warning"
+         ng-if="vm.displayState === vm.displayStates.NOT_CONFIGURED"
+         translate>
       No collection events added to this study yet.
+    </div>
+    <div class="alert alert-warning"
+         ng-if="vm.displayState === vm.displayStates.NO_RESULTS"
+         translate>
+      No Events match the criteria.
     </div>
   </div>
 
@@ -33,7 +40,6 @@
     </tbody>
   </table>
 
-  <!-- TODO: add pagination -->
   <div class="panel-footer text-center"
        style="padding:5px 10px;"
        ng-if="vm.showPagination">
@@ -41,7 +47,7 @@
         class="pagination-sm"
         style="margin:0;"
         boundary-links="true"
-        total-items="vm.collectionEventsPagedResult.total"
+        total-items="vm.pagedResult.total"
         items-per-page="vm.pagerOptions.limit"
         ng-model="vm.pagerOptions.page"
         ng-change="vm.pageChanged()"
@@ -55,19 +61,19 @@
   </div>
 
   <div class="panel-footer"
-       ng-if="vm.showPagination">
+       ng-if="vm.displayState !== vm.displayStates.NOT_CONFIGURED">
     <form class="form-inline" name="filters">
       <div class="form-group">
         <label for="nameFilter"
                class="small"
                translate
-               translate-context="a search filter used to search by visit number">
-          Visit# filter:
+               translate-context="a search filter used to search by Collection Event Type name">
+          Name filter:
         </label>
         <input type="text"
                class="form-control input-sm"
                name="nameFilter"
-               ng-model="vm.pagerOptions.filter"
+               ng-model="vm.nameFilter"
                ng-model-options="{ debounce: 500 }"
                ng-change="vm.nameFilterUpdated()">
       </div>

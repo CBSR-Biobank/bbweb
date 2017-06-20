@@ -43,10 +43,12 @@ define([
       this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
 
       this.createDirective = function () {
+        self.CollectionEvent.list =
+          jasmine.createSpy().and.returnValue(self.$q.when(self.factory.pagedResult(this.pagedResult)));
+
         this.element = angular.element([
           '<cevents-list',
           '  participant="vm.participant"',
-          '  collection-events-paged-result="vm.collectionEventsPagedResult"',
           '  collection-event-types="vm.collectionEventTypes">',
           '</cevents-list>'
         ].join(''));
@@ -67,7 +69,6 @@ define([
       this.createDirective();
 
       expect(this.controller.participant).toBe(this.participant);
-      expect(this.controller.collectionEventsPagedResult).toBe(this.pagedResult);
       expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
     });
 

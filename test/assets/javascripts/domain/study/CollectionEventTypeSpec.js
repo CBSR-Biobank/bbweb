@@ -34,7 +34,7 @@ define(function (require) {
       expect(error).toBeUndefined();
     };
 
-    /**
+    /*
      * Returns 3 collection event types, each one with a different missing field.
      */
     SuiteMixin.prototype.getBadCollectionEventTypes = function () {
@@ -152,10 +152,7 @@ define(function (require) {
     });
 
    it('can retrieve a collection event type', function() {
-      var url = sprintf('%s/%s?cetId=%s',
-                        this.uri(),
-                        this.jsonStudy.id,
-                        this.jsonCet.id);
+      var url = sprintf('%s/%s/%s', this.uri(), this.jsonStudy.id, this.jsonCet.id);
 
       this.$httpBackend.whenGET(url).respond(this.reply(this.jsonCet));
       CollectionEventType.get(this.jsonStudy.id, this.jsonCet.id)
@@ -168,10 +165,7 @@ define(function (require) {
           data = self.getBadCollectionEventTypes();
 
       _.each(data, function (badCet) {
-        var url = sprintf('%s/%s?cetId=%s',
-                          self.uri(),
-                          self.jsonStudy.id,
-                          badCet.cet.id);
+        var url = sprintf('%s/%s/%s', self.uri(), self.jsonStudy.id, badCet.cet.id);
 
         self.$httpBackend.whenGET(url).respond(self.reply(badCet.cet));
         CollectionEventType.get(self.jsonStudy.id, badCet.cet.id)
@@ -189,16 +183,18 @@ define(function (require) {
     });
 
     it('can list collection event types', function() {
-      var url = sprintf('%s/%s', this.uri(), this.jsonStudy.id);
+      var url = sprintf('%s/%s', this.uri(), this.jsonStudy.id),
+          reply = this.factory.pagedResult([ this.jsonCet ]);
 
-      this.$httpBackend.whenGET(url).respond(this.reply([ this.jsonCet ]));
+      this.$httpBackend.whenGET(url).respond(this.reply(reply));
       CollectionEventType.list(this.jsonStudy.id)
-        .then(expectCetArray).catch(this.failTest);
+        .then(expectPagedResult)
+        .catch(this.failTest);
       this.$httpBackend.flush();
 
-      function expectCetArray(array) {
-        expect(array).toBeArrayOfSize(1);
-        expect(array[0]).toEqual(jasmine.any(CollectionEventType));
+      function expectPagedResult(pagedResult) {
+        expect(pagedResult.items).toBeArrayOfSize(1);
+        expect(pagedResult.items[0]).toEqual(jasmine.any(CollectionEventType));
       }
     });
 
@@ -211,7 +207,7 @@ define(function (require) {
           reqHandler = self.$httpBackend.whenGET(url);
 
       data.forEach(function (item) {
-        reqHandler.respond(self.reply([ item.cet ]));
+        reqHandler.respond(self.reply(self.factory.pagedResult([ item.cet ])));
         CollectionEventType.list(self.jsonStudy.id).then(getFail).catch(shouldFail);
         self.$httpBackend.flush();
 
@@ -220,7 +216,7 @@ define(function (require) {
         }
 
         function shouldFail(error) {
-          expect(error.message).toMatch(item.errMsg);
+          expect(error).toMatch(item.errMsg);
         }
       });
     });

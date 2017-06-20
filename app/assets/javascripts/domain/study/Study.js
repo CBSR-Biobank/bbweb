@@ -114,7 +114,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     Study.isValid = function (obj) {
-      return ConcurrencySafeEntity.isValid(schema, null, obj);
+      return ConcurrencySafeEntity.isValid(schema, [ AnnotationType.SCHEMA ], obj);
     };
 
     /**
@@ -134,14 +134,10 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
         $log.error(validation.message);
         throw new DomainError(validation.message);
       }
-      try {
-        if (obj.annotationTypes) {
-          annotationTypes = obj.annotationTypes.map(function (annotationType) {
-            return AnnotationType.create(annotationType);
-          });
-        }
-      } catch (e) {
-        throw new DomainError('bad annotation types');
+      if (obj.annotationTypes) {
+        annotationTypes = obj.annotationTypes.map(function (annotationType) {
+          return AnnotationType.create(annotationType);
+        });
       }
       return new Study(obj, annotationTypes);
     };

@@ -207,15 +207,15 @@ class TestData @Inject() (config:                        Configuration,
       val salt = passwordHasher.generateSalt
       val hashids = Hashids("test-data-users")
       val users = userData.zipWithIndex.map { case((name, email), index) =>
-        ActiveUser(id           = UserId(hashids.encode(index.toLong)),
-                   version      = 0L,
-                   timeAdded    = Global.StartOfTime,
-                   timeModified = None,
-                   name         = name,
-                   email        = email,
-                   password     = passwordHasher.encrypt(plainPassword, salt),
-                   salt         = salt,
-                   avatarUrl    = None)
+          ActiveUser(id           = UserId(hashids.encode(index.toLong)),
+                     version      = 0L,
+                     timeAdded    = Global.StartOfTime,
+                     timeModified = None,
+                     name         = name,
+                     email        = email,
+                     password     = passwordHasher.encrypt(plainPassword, salt),
+                     salt         = salt,
+                     avatarUrl    = None)
         }
 
       users.foreach(userRepository.put)
@@ -350,31 +350,31 @@ class TestData @Inject() (config:                        Configuration,
       .find { s => s.name == "BBPSP"}
       .foreach { bbpsp =>
 
-      // Use a list since "id" is determined at the time of adding to the repository
-      val ceventTypes =
-        List(CollectionEventType(studyId              = bbpsp.id,
-                                 id                   = CollectionEventTypeId(hashids.encode(1)),
-                                 version              = 0L,
-                                 timeAdded            = Global.StartOfTime,
-                                 timeModified         = None,
-                                 name                 = "Default Event ",
-                                 description          = None,
-                                 recurring            = true,
-                                 specimenDescriptions = getBbpspSpecimenDescriptions,
-                                 annotationTypes      = getBbpspCeventAnnotationTypes),
-             CollectionEventType(studyId              = bbpsp.id,
-                                 id                   = CollectionEventTypeId(hashids.encode(2)),
-                                 version              = 0L,
-                                 timeAdded            = Global.StartOfTime,
-                                 timeModified         = None,
-                                 name                 = "Second Event ",
-                                 description          = Some("Example event"),
-                                 recurring            = false,
-                                 specimenDescriptions = getBbpspSpecimenDescriptions,
-                                 annotationTypes      = Set.empty))
+        // Use a list since "id" is determined at the time of adding to the repository
+        val ceventTypes =
+          List(CollectionEventType(studyId              = bbpsp.id,
+                                   id                   = CollectionEventTypeId(hashids.encode(1)),
+                                   version              = 0L,
+                                   timeAdded            = Global.StartOfTime,
+                                   timeModified         = None,
+                                   name                 = "Default Event ",
+                                   description          = None,
+                                   recurring            = true,
+                                   specimenDescriptions = getBbpspSpecimenDescriptions,
+                                   annotationTypes      = getBbpspCeventAnnotationTypes),
+               CollectionEventType(studyId              = bbpsp.id,
+                                   id                   = CollectionEventTypeId(hashids.encode(2)),
+                                   version              = 0L,
+                                   timeAdded            = Global.StartOfTime,
+                                   timeModified         = None,
+                                   name                 = "Second Event ",
+                                   description          = Some("Example event"),
+                                   recurring            = false,
+                                   specimenDescriptions = getBbpspSpecimenDescriptions,
+                                   annotationTypes      = Set.empty))
 
-      ceventTypes.foreach { cet => collectionEventTypeRepository.put(cet) }
-    }
+        ceventTypes.foreach { cet => collectionEventTypeRepository.put(cet) }
+      }
   }
 
   def getBbpspSpecimenDescriptions(): Set[CollectionSpecimenDescription] = {
@@ -401,54 +401,52 @@ class TestData @Inject() (config:                        Configuration,
           preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
           specimenType                = SpecimenType.Paxgene,
           maxCount                    = 1,
-          amount                      = 10.0)
-          //,
-          // CollectionSpecimenDescription(
-          //   id                          = SpecimenDescriptionId(hashids.encode(3)),
-          //   name                        = "3mL Lavender top EDTA tube",
-          //   description                 = None,
-          //   units                       = "mL",
-          //   anatomicalSourceType        = AnatomicalSourceType.Blood,
-          //   preservationType            = PreservationType.FreshSpecimen,
-          //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
-          //   specimenType                = SpecimenType.WholeBloodEdta,
-          //   maxCount                    = 1,
-          //   amount                      = Some(3)),
-          // CollectionSpecimenDescription(
-          //   id                          = SpecimenDescriptionId(hashids.encode(4)),
-          //   name                        = "4ml lavender top EDTA tube",
-          //   description                 = None,
-          //   units                       = "mL",
-          //   anatomicalSourceType        = AnatomicalSourceType.Blood,
-          //   preservationType            = PreservationType.FreshSpecimen,
-          //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
-          //   specimenType                = SpecimenType.WholeBloodEdta,
-          //   maxCount                    = 1,
-          //   amount                      = Some(4)),
-          // CollectionSpecimenDescription(
-          //   id                          = SpecimenDescriptionId(hashids.encode(5)),
-          //   name                        = "9ml CPDA yellow top tube",
-          //   description                 = None,
-          //   units                       = "mL",
-          //   anatomicalSourceType        = AnatomicalSourceType.Blood,
-          //   preservationType            = PreservationType.FreshSpecimen,
-          //   preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
-          //   specimenType                = SpecimenType.WholeBloodEdta,
-          //   maxCount                    = 1,
-          //   amount                      = Some(9)),
-          // CollectionSpecimenDescription(
-          //   id                          = SpecimenDescriptionId(hashids.encode(6)),
-          //   name                        = "Urine cup",
-          //   description                 = None,
-          //   units                       = "mL",
-          //   anatomicalSourceType        = AnatomicalSourceType.Urine,
-          //   preservationType            = PreservationType.FreshSpecimen,
-          //   preservationTemperatureType = PreservationTemperatureType.Plus4celcius,
-          //   specimenType                = SpecimenType.CdpaPlasma,
-          //   maxCount                    = 1,
-          // amount                      = Some(15)
-          //)
-    )
+          amount                      = 10.0),
+        CollectionSpecimenDescription(
+          id                          = SpecimenDescriptionId(hashids.encode(3)),
+          name                        = "3mL Lavender top EDTA tube",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          specimenType                = SpecimenType.WholeBloodEdta,
+          maxCount                    = 1,
+          amount                      = 3),
+        CollectionSpecimenDescription(
+          id                          = SpecimenDescriptionId(hashids.encode(4)),
+          name                        = "4ml lavender top EDTA tube",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          specimenType                = SpecimenType.WholeBloodEdta,
+          maxCount                    = 1,
+          amount                      = 4),
+        CollectionSpecimenDescription(
+          id                          = SpecimenDescriptionId(hashids.encode(5)),
+          name                        = "9ml CPDA yellow top tube",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Blood,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.RoomTemperature,
+          specimenType                = SpecimenType.WholeBloodEdta,
+          maxCount                    = 1,
+          amount                      = 9),
+        CollectionSpecimenDescription(
+          id                          = SpecimenDescriptionId(hashids.encode(6)),
+          name                        = "Urine cup",
+          description                 = None,
+          units                       = "mL",
+          anatomicalSourceType        = AnatomicalSourceType.Urine,
+          preservationType            = PreservationType.FreshSpecimen,
+          preservationTemperatureType = PreservationTemperatureType.Plus4celcius,
+          specimenType                = SpecimenType.CdpaPlasma,
+          maxCount                    = 1,
+          amount                      = 15)
+        )
   }
 
   def getBbpspParticipantAnnotationTypes(): Set[AnnotationType] = {
@@ -503,17 +501,17 @@ class TestData @Inject() (config:                        Configuration,
         .find { s => s.name == "BBPSP"}
         .foreach { bbpsp =>
 
-        (0 to 3).foreach { index =>
-          participantRepository.put(
-            Participant(id           = ParticipantId(hashids.encode(index.toLong)),
-                        studyId      = bbpsp.id,
-                        version      = 0L,
-                        timeAdded    = Global.StartOfTime,
-                        timeModified = None,
-                        uniqueId     = f"P$index%05d",
-                        annotations  = Set.empty[Annotation]))
+          (0 to 3).foreach { index =>
+            participantRepository.put(
+              Participant(id           = ParticipantId(hashids.encode(index.toLong)),
+                          studyId      = bbpsp.id,
+                          version      = 0L,
+                          timeAdded    = Global.StartOfTime,
+                          timeModified = None,
+                          uniqueId     = f"P$index%05d",
+                          annotations  = Set.empty[Annotation]))
+          }
         }
-      }
     }
   }
 
@@ -526,26 +524,26 @@ class TestData @Inject() (config:                        Configuration,
       studyRepository.getValues
         .find { s => s.name == "BBPSP"}
         .foreach { bbpsp =>
-        participantRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
-          case (participant, pIndex) =>
-            collectionEventTypeRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
-              case (ceventType, cetIndex) =>
-                log.debug(s"addBbpspCevents: adding collection event for participant ${participant.uniqueId}")
+          participantRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
+            case (participant, pIndex) =>
+              collectionEventTypeRepository.allForStudy(bbpsp.id).zipWithIndex.foreach {
+                case (ceventType, cetIndex) =>
+                  log.debug(s"addBbpspCevents: adding collection event for participant ${participant.uniqueId}")
 
-                val id = CollectionEventId(hashids.encode(10L * pIndex.toLong + cetIndex.toLong))
-                collectionEventRepository.put(
-                  CollectionEvent(id                    = id,
-                                  participantId         = participant.id,
-                                  collectionEventTypeId = ceventType.id,
-                                  version               = 0L,
-                                  timeAdded             = Global.StartOfTime,
-                                  timeModified          = None,
-                                  timeCompleted         = DateTime.now.minusDays(1),
-                                  visitNumber           = cetIndex + 1,
-                                  annotations           = Set.empty[Annotation]))
-            }
+                  val id = CollectionEventId(hashids.encode(10L * pIndex.toLong + cetIndex.toLong))
+                  collectionEventRepository.put(
+                    CollectionEvent(id                    = id,
+                                    participantId         = participant.id,
+                                    collectionEventTypeId = ceventType.id,
+                                    version               = 0L,
+                                    timeAdded             = Global.StartOfTime,
+                                    timeModified          = None,
+                                    timeCompleted         = DateTime.now.minusDays(1),
+                                    visitNumber           = cetIndex + 1,
+                                    annotations           = Set.empty[Annotation]))
+              }
+          }
         }
-      }
     }
   }
 

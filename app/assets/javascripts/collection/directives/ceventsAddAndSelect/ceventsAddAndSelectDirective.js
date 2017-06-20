@@ -14,7 +14,6 @@ define(['lodash'], function(_) {
       scope: {},
       bindToController: {
         participant: '=',
-        collectionEventsPagedResult: '=',
         collectionEventTypes: '='
       },
       transclude: true,
@@ -30,7 +29,7 @@ define(['lodash'], function(_) {
     'CollectionEvent'
   ];
 
-  /**
+  /*
    *
    */
   function CeventsAddAndSelectCtrl($state,
@@ -43,13 +42,9 @@ define(['lodash'], function(_) {
 
     vm.displayStates = {
       NO_RESULTS: 0,
-      HAVE_RESULTS: 1
+      HAVE_RESULTS: 1,
+      NONE_ADDED: 2
     };
-
-    vm.collectionEvents = setCollectionEventType(vm.collectionEventsPagedResult.items);
-    vm.visitNumberFilter = '';
-    vm.displayState     = getDisplayState();
-    vm.showPagination   = getShowPagination();
 
     vm.pagerOptions = {
       page:      1,
@@ -57,37 +52,48 @@ define(['lodash'], function(_) {
       sortField: 'visitNumber'
     };
 
+    vm.visitNumberFilter = '';
     vm.pageChanged          = pageChanged;
     vm.add                  = add;
     vm.eventInformation     = eventInformation;
     vm.visitFilterUpdated   = visitFilterUpdated;
+    vm.collectionEventError = false;
+
+    init();
 
     // --
+
+    function init() {
+      updateCollectionEvents();
+    }
 
     function setCollectionEventType(cevents) {
       _.map(cevents, function (cevent) {
         var ceventType = _.find(vm.collectionEventTypes, { id: cevent.collectionEventTypeId });
         if (_.isUndefined(ceventType)) {
-          throw new Error('collection event type ID not found: ' + cevent.collectionEventTypeId);
+          vm.collectionEventError = true;
+        } else {
+          cevent.setCollectionEventType(ceventType);
         }
-        cevent.setCollectionEventType(ceventType);
       });
       return cevents;
     }
 
     function getDisplayState() {
-      return (vm.collectionEventsPagedResult.total > 0) ?
-        vm.displayStates.HAVE_RESULTS : vm.displayStates.NO_RESULTS;
+      if (vm.pagedResult.total > 0) {
+        return vm.displayStates.HAVE_RESULTS;
+      }
+      return (vm.visitNumberFilter === '') ? vm.displayStates.NONE_ADDED : vm.displayStates.NO_RESULTS;
     }
 
     function getShowPagination() {
       return (vm.displayState === vm.displayStates.HAVE_RESULTS) &&
-        (vm.collectionEventsPagedResult.maxPages > 1);
+        (vm.pagedResult.maxPages > 1);
     }
 
     function updateCollectionEvents() {
       CollectionEvent.list(vm.participant.id, vm.pagerOptions).then(function (pagedResult) {
-        vm.collectionEventsPagedResult = pagedResult;
+        vm.pagedResult = pagedResult;
         vm.collectionEvents = setCollectionEventType(pagedResult.items);
         vm.displayState = getDisplayState();
         vm.showPagination = getShowPagination();

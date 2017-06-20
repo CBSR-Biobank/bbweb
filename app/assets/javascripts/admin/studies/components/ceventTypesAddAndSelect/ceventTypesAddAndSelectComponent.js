@@ -10,14 +10,16 @@ define(function () {
     controller: CeventTypesAddAndSelectController,
     controllerAs: 'vm',
     bindings: {
-      collectionEventTypes: '='
+      study:                '<',
+      collectionEventTypes: '<'
     }
   };
 
   CeventTypesAddAndSelectController.$inject = [
     '$scope',
     '$state',
-    'gettextCatalog'
+    'gettextCatalog',
+    'CollectionEventType'
   ];
 
   /*
@@ -25,15 +27,63 @@ define(function () {
    */
   function CeventTypesAddAndSelectController($scope,
                                              $state,
-                                             gettextCatalog) {
+                                             gettextCatalog,
+                                             CollectionEventType) {
     var vm = this;
 
-    vm.showPagination    = false;
+    vm.displayStates = {
+      NO_RESULTS: 0,
+      HAVE_RESULTS: 1,
+      NOT_CONFIGURED: 2
+    };
+
+    vm.pagerOptions = {
+      page:   1,
+      limit:  5,
+      sortField: 'name'
+    };
+
+    vm.nameFilter        = '';
+    vm.displayState      = vm.displayStates.NOT_CONFIGURED;
     vm.add               = add;
     vm.select            = select;
     vm.getRecurringLabel = getRecurringLabel;
+    vm.pageChanged       = pageChanged;
+    vm.nameFilterUpdated = nameFilterUpdated;
+
+    init();
 
     //--
+
+    function init() {
+      updateCollectionEvents();
+    }
+
+    function updateCollectionEvents() {
+      CollectionEventType.list(vm.study.id, vm.pagerOptions).then(function (pagedResult) {
+        vm.pagedResult          = pagedResult;
+        vm.collectionEventTypes = CollectionEventType.sortByName(pagedResult.items);
+        vm.displayState         = getDisplayState();
+        vm.showPagination       = getShowPagination();
+        vm.paginationNumPages   = pagedResult.maxPages;
+      });
+    }
+
+    function getDisplayState() {
+      if (vm.pagedResult.total > 0) {
+        return vm.displayStates.HAVE_RESULTS;
+      }
+      return (vm.nameFilter === '') ? vm.displayStates.NOT_CONFIGURED: vm.displayStates.NO_RESULTS;
+    }
+
+    function getShowPagination() {
+      return (vm.displayState === vm.displayStates.HAVE_RESULTS) && (vm.pagedResult.maxPages > 1);
+    }
+
+    function pageChanged() {
+      updateCollectionEvents();
+      $state.go('home.admin.studies.study.collection');
+    }
 
     function add() {
       $state.go('home.admin.studies.study.collection.ceventTypeAdd');
@@ -46,6 +96,16 @@ define(function () {
     function getRecurringLabel(ceventType) {
       return ceventType.recurring ?
         gettextCatalog.getString('Recurring') : gettextCatalog.getString('Not recurring');
+    }
+
+    function nameFilterUpdated() {
+      if (vm.nameFilter) {
+        vm.pagerOptions.filter = 'name:like:' + vm.nameFilter;
+      } else {
+        vm.pagerOptions.filter = '';
+      }
+      vm.pagerOptions.page = 1;
+      pageChanged();
     }
   }
 

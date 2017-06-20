@@ -461,6 +461,18 @@ define(function (require) {
       self.$httpBackend.flush();
     });
 
+    it('can query if a study can be enabled', function() {
+      var study = new this.Study(this.jsonStudy);
+      this.$httpBackend.whenGET('/studies/enableAllowed/' + study.id).respond(this.reply(false));
+      study.isEnableAllowed()
+        .then(function (reply) {
+          expect(reply).toBeFalse();
+        })
+        .catch(this.failTest);
+      this.$httpBackend.flush();
+    });
+
+
     function changeStatusBehaviour(context) {
 
       describe('change state shared behaviour', function() {

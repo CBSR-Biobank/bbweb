@@ -14,7 +14,6 @@ define(['lodash'], function(_) {
       scope: {},
       bindToController: {
         participant: '=',
-        collectionEventsPagedResult: '=',
         collectionEventTypes: '='
       },
       templateUrl : '/assets/javascripts/collection/directives/ceventsList/ceventsList.html',
@@ -26,7 +25,7 @@ define(['lodash'], function(_) {
 
   //CeventsListCtrl.$inject = [];
 
-  /**
+  /*
    *
    */
   function CeventsListCtrl() {

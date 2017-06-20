@@ -71,12 +71,14 @@ define(['lodash'], function(_) {
       .state('home.collection.study.participant.cevents', {
         url: '/cevents',
         resolve: {
-          collectionEventsPagedResult: resolveCollectionEventsPagedResult,
           collectionEventTypes: [
             'CollectionEventType',
             'study',
             function(CollectionEventType, study) {
-              return CollectionEventType.list(study.id);
+              return CollectionEventType.list(study.id)
+                .then(function (pagedResults) {
+                  return pagedResults.items;
+                });
             }]
         },
         views: {
@@ -84,7 +86,6 @@ define(['lodash'], function(_) {
             template: [
               '<cevents-list',
               '  participant="vm.participant"',
-              '  collection-events-paged-result="vm.collectionEventsPagedResult"',
               '  collection-event-types="vm.collectionEventTypes">',
               '</cevents-list>'
             ].join(''),
@@ -186,12 +187,6 @@ define(['lodash'], function(_) {
       return Participant.getByUniqueId($transition$.params().studyId, $transition$.params().uniqueId);
     }
 
-    resolveCollectionEventsPagedResult.$inject = ['CollectionEvent', 'participant'];
-    function resolveCollectionEventsPagedResult(CollectionEvent, participant) {
-      // returns all collection events for a participant
-      return CollectionEvent.list(participant.id);
-    }
-
     resolveNewCollectionEvent.$inject = [
       'CollectionEvent',
       'participant',
@@ -274,13 +269,11 @@ define(['lodash'], function(_) {
 
     ParticipantCeventsController.$inject = [
       'participant',
-      'collectionEventsPagedResult',
       'collectionEventTypes'
     ];
 
-    function ParticipantCeventsController(participant, collectionEventsPagedResult, collectionEventTypes) {
+    function ParticipantCeventsController(participant, collectionEventTypes) {
       this.participant = participant;
-      this.collectionEventsPagedResult = collectionEventsPagedResult;
       this.collectionEventTypes = collectionEventTypes;
     }
 

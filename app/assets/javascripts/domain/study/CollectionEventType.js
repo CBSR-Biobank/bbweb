@@ -227,7 +227,7 @@ define(function(require) {
      * @returns {Promise<domain.studies.CollectionEventType>} The collection event type within a promise.
      */
     CollectionEventType.get = function(studyId, id) {
-      return biobankApi.get(uri(studyId) + '?cetId=' + id).then(function(reply) {
+      return biobankApi.get(uri(studyId) + '/' + id).then(function(reply) {
         return CollectionEventType.prototype.asyncCreate(reply);
       });
     };
@@ -238,20 +238,46 @@ define(function(require) {
      * @returns {Promise<Array<domain.studies.CollectionEventType>>} An array of collection event types within
      * a promise.
      */
-    CollectionEventType.list = function(studyId) {
-      return biobankApi.get(uri(studyId)).then(function(reply) {
-        var deferred = $q.defer(),
-            result;
+    CollectionEventType.list = function(studyId, options) {
+      var url = uri(studyId),
+          params,
+          validKeys = [
+            'filter',
+            'sort',
+            'page',
+            'limit'
+          ];
+
+      options = options || {};
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
+      });
+
+      return biobankApi.get(url, params).then(function(reply) {
+        var deferred = $q.defer();
 
         try {
-          result = _.map(reply, function (cet) {
-            return CollectionEventType.create(cet);
+          reply.items = _.map(reply.items, function(obj){
+            return CollectionEventType.create(obj);
           });
-          deferred.resolve(result);
+          deferred.resolve(reply);
         } catch (e) {
           deferred.reject(e);
         }
         return deferred.promise;
+      });
+    };
+
+    /**
+     * Sorts an array of Collection Event Types by name.
+     *
+     * @param {Array<CollectionEventType>} collectionEventTypes The array to sort.
+     *
+     * @return {Array<CollectionEventType>} A new array sorted by name.
+     */
+    CollectionEventType.sortByName = function(collectionEventTypes) {
+      return _.sortBy(collectionEventTypes, function (collectionEventType) {
+        return collectionEventType.name;
       });
     };
 
