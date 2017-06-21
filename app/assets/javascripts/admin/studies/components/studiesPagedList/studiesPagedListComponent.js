@@ -23,6 +23,7 @@ define(function (require) {
   StudiesPagedListController.$inject = [
     '$controller',
     '$scope',
+    '$state',
     'Study',
     'StudyState',
     'StudyCounts',
@@ -34,6 +35,7 @@ define(function (require) {
    */
   function StudiesPagedListController($controller,
                                       $scope,
+                                      $state,
                                       Study,
                                       StudyState,
                                       StudyCounts,
@@ -61,9 +63,15 @@ define(function (require) {
     //--
 
     function onInit() {
-      return StudyCounts.get().then(function (counts) {
-        vm.counts = counts;
-      });
+      return StudyCounts.get()
+        .then(function (counts) {
+          vm.counts = counts;
+        })
+        .catch(function (error) {
+          if (error.status && (error.status === 401)) {
+            $state.go('home.users.login', {}, { reload: true });
+          }
+        });
     }
 
     function getItems(options) {
