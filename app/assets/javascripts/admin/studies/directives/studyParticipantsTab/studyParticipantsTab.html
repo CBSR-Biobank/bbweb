@@ -19,17 +19,19 @@
     </h3>
   </div>
   <ul class="list-group">
-    <li class="list-group-item" translate>
-      Participant annotations allow a study to collect custom named and defined pieces of data for each
-      participant. Annotations are optional and are not required to be defined.
+    <li class="list-group-item">
+      <p class="text-primary" translate>
+        Participant annotations allow a study to collect custom named and defined pieces of data for each
+        participant. Annotations are optional and are not required to be defined.
+      </p>
     </li>
     <li class="list-group-item" ng-if="vm.study.annotationTypes.length <= 0">
       <div class="alert alert-warning">
         No annotations have been entered yet.
       </div>
     </li>
-    <li class="list-group-item" ng-if="vm.study.annotationTypes.length > 0" translate>
-      <p class="text-info">The following annotations have been entered:</p>
+    <li class="list-group-item" ng-if="vm.study.annotationTypes.length > 0">
+      <p translate>The following annotations have been entered:</p>
     </li>
     <li class="list-group-item" ng-repeat="annotationType in vm.study.annotationTypes">
       <div class="row">
