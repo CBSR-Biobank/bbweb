@@ -7,12 +7,18 @@ define(function (require) {
 
   var _ = require('lodash');
 
-  PagedListController.$inject = ['vm', '$scope', 'gettextCatalog'];
+  PagedListController.$inject = ['vm', 'gettextCatalog'];
 
   /**
    * Base class for controllers that display items in a paged fashion.
    *
+   * Allows items to be filtered by name and / or state. Additional filters can be used by defining
+   * <code>vm.getAdditionalFilters</code> and <code>vm.clearAdditionalFilters</code>.
+   *
    * @param {object} vm - The derived controller object.
+   *
+   * @param {function} vm.getItems - A function that returns a promise of PagedResult to display on a single
+   * page.
    *
    * @param {int[]} vm.counts - The entity counts.
    *
@@ -27,7 +33,7 @@ define(function (require) {
    *
    * @return {object} The base class object.
    */
-  function PagedListController(vm, $scope, gettextCatalog) {
+  function PagedListController(vm, gettextCatalog) {
     vm.nameFilter         = '';
     vm.pagedResult        = { total: 0 };
     vm.sortFields         = [ gettextCatalog.getString('Name'), gettextCatalog.getString('State') ];
@@ -37,6 +43,8 @@ define(function (require) {
     vm.pageChanged        = pageChanged;
     vm.sortFieldSelected  = sortFieldSelected;
     vm.filtersCleared     = filtersCleared;
+    vm.getFilters         = getFilters;
+    vm.updateItems        = updateItems;
 
     vm.pagerOptions = {
       filter: '',
@@ -52,6 +60,7 @@ define(function (require) {
     };
 
     vm.displayState = displayState();
+    vm.displayState = displayState;
 
     updateItems();
 
@@ -68,8 +77,16 @@ define(function (require) {
       return vm.displayStates.NO_ENTITIES;
     }
 
-    function updateItems() {
-      var filters = [];
+    function getFilters() {
+      var filters = [],
+          additionalFilters = [];
+
+      if (vm.getAdditionalFilters) {
+        additionalFilters = vm.getAdditionalFilters();
+        if (additionalFilters.length > 0) {
+          filters.push(additionalFilters);
+        }
+      }
 
       if (vm.nameFilter !== '') {
         filters.push('name:like:' + vm.nameFilter);
@@ -79,6 +96,11 @@ define(function (require) {
         filters.push('state::' + vm.selectedState);
       }
 
+      return filters;
+    }
+
+    function updateItems() {
+      var filters = vm.getFilters();
       _.extend(vm.pagerOptions, { filter: filters.join(';') });
 
       vm.getItems(vm.pagerOptions).then(function (pagedResult) {
@@ -87,7 +109,7 @@ define(function (require) {
           entity.icon = vm.getItemIcon(entity);
           return entity;
         });
-        vm.displayState = displayState();
+        vm.displayState = displayState.call(vm);
       });
     }
 
@@ -120,6 +142,9 @@ define(function (require) {
     }
 
     function filtersCleared() {
+      if (vm.clearAdditionalFilters) {
+        vm.clearAdditionalFilters();
+      }
       vm.nameFilter = '';
       vm.selectedState = 'all';
       updateItems();

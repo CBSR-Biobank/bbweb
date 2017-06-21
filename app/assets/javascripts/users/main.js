@@ -13,18 +13,19 @@ define(function (require) {
 
   module = angular.module(name, [ 'biobank.common' ]);
 
-  module.config(require('./states'));
+  module
+    .config(require('./states'))
+    .component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'))
+    .component('registerUser',   require('./components/registerUser/registerUserComponent'))
+    .component('userProfile',    require('./components/userProfile/userProfileComponent'))
 
-  module.component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'));
-  module.component('registerUser',   require('./components/registerUser/registerUserComponent'));
-  module.component('userProfile',    require('./components/userProfile/userProfileComponent'));
+    .directive('login',         require('./directives/login/loginDirective'))
+    .directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'))
+    .directive('passwordSent',  require('./directives/passwordSent/passwordSentDirective'))
+    .directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'))
 
-  module.directive('login',         require('./directives/login/loginDirective'));
-  module.directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'));
-  module.directive('passwordSent',  require('./directives/passwordSent/passwordSentDirective'));
-  module.directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'));
-
-  module.service('usersService',    require('./usersService'));
+    .service('usersService',   require('./usersService'))
+    .service('userStateLabel', require('./userStateLabelService'));
 
   return {
     name: name,

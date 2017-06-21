@@ -14,54 +14,71 @@ define([
 
   describe('Component: userAdminComponent', function() {
 
-    var createUserCounts = function (registered, active, locked) {
-      registered = registered || faker.random.number();
-      active = active || faker.random.number();
-      locked = locked || faker.random.number();
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      return new this.UserCounts({
-        total:      registered + active + locked,
-        registered: registered,
-        active:     active,
-        locked:     locked
-      });
-    };
+      function SuiteMixin() {
+      }
 
-    /**
-     * Have to create controller as a directive so that $onInit() is fired on the controller.
-     */
-    var createController = function (userCounts) {
-      this.UserCounts.get = jasmine.createSpy('get').and.returnValue(this.$q.when(userCounts));
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-      this.element = angular.element('<user-admin></user-admin>');
-      this.scope = this.$rootScope.$new();
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('userAdmin');
-    };
+      SuiteMixin.prototype.createUserCounts = function (registered, active, locked) {
+        registered = registered || faker.random.number();
+        active = active || faker.random.number();
+        locked = locked || faker.random.number();
+
+        return new this.UserCounts({
+          total:      registered + active + locked,
+          registered: registered,
+          active:     active,
+          locked:     locked
+        });
+      };
+
+      /*
+       * Have to create controller as a directive so that $onInit() is fired on the controller.
+       */
+      SuiteMixin.prototype.createController = function (userCounts) {
+        this.UserCounts.get = jasmine.createSpy('get').and.returnValue(this.$q.when(userCounts));
+
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          '<user-admin></user-admin>',
+          undefined,
+          'userAdmin');
+      };
+
+      SuiteMixin.prototype.createUserListSpy = function (users) {
+        var reply = this.factory.pagedResult(users);
+        spyOn(this.User, 'list').and.returnValue(this.$q.when(reply));
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              'UserCounts');
+                              'User',
+                              'UserCounts',
+                              'factory');
 
-      self.putHtmlTemplates(
+      this.putHtmlTemplates(
         '/assets/javascripts/admin/users/components/userAdmin/userAdmin.html',
-        '/assets/javascripts/admin/users/components/usersTable/usersTable.html',
-        '/assets/javascripts/common/directives/pagination.html',
+        '/assets/javascripts/admin/users/components/usersPagedList/usersPagedList.html',
+        '/assets/javascripts/admin/users/components/nameEmailStateFilters/nameEmailStateFilters.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('scope is valid on startup', function() {
-      var counts = createUserCounts.call(this, 1, 2, 3);
-      createController.call(this, counts);
+      var counts = this.createUserCounts(1, 2, 3);
+      this.createUserListSpy([]);
+      this.createController(counts);
       expect(this.controller.haveUsers).toBe(counts.total > 0);
     });
 

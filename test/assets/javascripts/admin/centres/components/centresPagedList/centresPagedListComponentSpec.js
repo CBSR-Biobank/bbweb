@@ -19,7 +19,7 @@ define(function (require) {
     SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function () {
+    SuiteMixin.prototype.createController = function () {
       ComponentTestSuiteMixin.prototype.createScope.call(
         this,
         '<centres-paged-list></centres-paged-list',
@@ -67,6 +67,7 @@ define(function (require) {
                               'Centre',
                               'CentreCounts',
                               'CentreState',
+                              '$state',
                               'factory');
 
     }));
@@ -74,13 +75,28 @@ define(function (require) {
     it('scope is valid on startup', function() {
       this.createCountsSpy(2, 5);
       this.createPagedResultsSpy([]);
-      this.createScope();
+      this.createController();
 
       expect(this.controller.limit).toBeDefined();
       expect(this.controller.stateData).toBeArrayOfObjects();
       expect(this.controller.stateData).toBeNonEmptyArray();
       expect(this.controller.getItems).toBeFunction();
       expect(this.controller.getItemIcon).toBeFunction();
+    });
+
+    it('on startup, state changed to login page if user is not authorized', function() {
+      this.CentreCounts.get = jasmine.createSpy()
+        .and.returnValue(this.$q.reject({ status: 401, message: 'unauthorized'}));
+      spyOn(this.$state, 'go').and.returnValue(null);
+      this.createController();
+      expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
+    });
+
+    it('when centre counts fails', function() {
+      this.CentreCounts.get = jasmine.createSpy()
+        .and.returnValue(this.$q.reject({ status: 400, message: 'testing'}));
+      this.createController();
+      expect(this.controller.counts).toEqual({});
     });
 
     describe('centres', function () {
@@ -96,7 +112,7 @@ define(function (require) {
           centres = _.map(_.range(centresCount), self.createEntity.bind(self));
           self.createCountsSpy(2, 5);
           self.createPagedResultsSpy(centres);
-          self.createScope();
+          self.createController();
         };
 
         context.getEntitiesLastCallArgs = function () {
@@ -114,7 +130,7 @@ define(function (require) {
       beforeEach(function() {
         this.createCountsSpy(2, 5);
         this.createPagedResultsSpy([]);
-        this.createScope();
+        this.createController();
       });
 
       it('getItemIcon returns a valid icon', function() {

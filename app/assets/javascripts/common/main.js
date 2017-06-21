@@ -16,8 +16,9 @@ define(function (require) {
 
   module = angular.module('biobank.common', [ modalInputModule.name, annotationsInputModule.name ])
 
-    .controller('TabbedPageController',   require('./controllers/TabbedPageController'))
-    .controller('PagedListController',    require('./controllers/PagedListController'))
+    .controller('TabbedPageController',          require('./controllers/TabbedPageController'))
+    .controller('PagedListController',           require('./controllers/PagedListController'))
+    .controller('NameAndStateFiltersController', require('./controllers/NameAndStateFiltersController'))
 
     .component('breadcrumbs',             require('./components/breadcrumbs/breadcrumbsComponent'))
     .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))

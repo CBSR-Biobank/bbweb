@@ -29,7 +29,7 @@ define([
     return SuiteMixin;
   }
 
-  fdescribe('Component: studiesAdmin', function() {
+  describe('Component: studiesAdmin', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

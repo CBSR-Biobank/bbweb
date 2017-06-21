@@ -86,10 +86,8 @@ define(function () {
 
       it('has valid display state when there are entities for criteria', function() {
         context.createController(1);
-
         this.controller.stateFilterUpdated('test');
         this.scope.$digest();
-
         expect(this.controller.displayState).toBe(2); // NO_RESULTS
       });
 
@@ -97,6 +95,17 @@ define(function () {
         context.createController(0);
         expect(this.controller.displayState).toBe(0); // NO_ENTITIES
       });
+
+      it('filters are cleared', function() {
+        context.createController(1);
+        this.controller.nameFilter = this.factory.stringNext();
+        this.controller.selectedState = this.factory.stringNext();
+        this.controller.filtersCleared();
+        this.scope.$digest();
+        expect(this.controller.nameFilter).toBeEmptyString();
+        expect(this.controller.selectedState).toBe('all');
+      });
+
 
     });
   }

@@ -1,0 +1,35 @@
+<form class="form-inline" name="filters">
+  <div class="form-group">
+    <label class="small" translate>Name filter:</label>
+    <input type="text"
+           class="form-control input-sm"
+           name="nameFilter"
+           ng-model="vm.nameFilter"
+           ng-model-options="{ debounce: 500 }"
+           ng-change="vm.nameFilterUpdated()">
+  </div>
+  <div class="form-group">
+    <label class="small" translate>Email filter:</label>
+    <input type="text"
+           class="form-control input-sm"
+           name="emailFilter"
+           ng-model="vm.emailFilter"
+           ng-model-options="{ debounce: 500 }"
+           ng-change="vm.emailFilterUpdated()">
+  </div>
+  <div class="form-group">
+    <label for="state" class="small" translate>State filter:</label>
+    <select class="form-control input-sm"
+            name="state"
+            ng-model="vm.selectedState"
+            ng-options="state.id as state.label for state in vm.stateData"
+            ng-change="vm.stateFilterUpdated()">
+    </select>
+  </div>
+  <div class="form-group">
+    <button class="btn btn-sm" ng-click="vm.clearFilters()">
+      <translate>Clear filters</translate>
+      <i class="glyphicon glyphicon-erase"></i>
+    </button>
+  </div>
+</form>

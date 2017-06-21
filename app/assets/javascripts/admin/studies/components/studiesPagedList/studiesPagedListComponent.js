@@ -53,12 +53,10 @@ define(function (require) {
     });
 
     // initialize this controller's base class
-    $controller('PagedListController',
-                {
-                  vm:             vm,
-                  $scope:         $scope,
-                  gettextCatalog: gettextCatalog
-                });
+    $controller('PagedListController', {
+      vm:             vm,
+      gettextCatalog: gettextCatalog
+    });
 
     //--
 

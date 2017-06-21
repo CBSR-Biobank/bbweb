@@ -27,6 +27,7 @@ define(function (require) {
     'Centre',
     'CentreState',
     'CentreCounts',
+    '$state',
     'gettextCatalog'
   ];
 
@@ -38,6 +39,7 @@ define(function (require) {
                                       Centre,
                                       CentreState,
                                       CentreCounts,
+                                      $state,
                                       gettextCatalog) {
     var vm = this;
 
@@ -52,19 +54,23 @@ define(function (require) {
     });
 
     // initialize this controller's base class
-    $controller('PagedListController',
-                {
-                  vm:             vm,
-                  $scope:         $scope,
-                  gettextCatalog: gettextCatalog
-                });
+    $controller('PagedListController', {
+      vm:             vm,
+      gettextCatalog: gettextCatalog
+    });
 
     //--
 
     function onInit() {
-      CentreCounts.get().then(function (counts) {
-        vm.counts = counts;
-      });
+      CentreCounts.get()
+        .then(function (counts) {
+          vm.counts = counts;
+        })
+        .catch(function (error) {
+          if (error.status && (error.status === 401)) {
+            $state.go('home.users.login', {}, { reload: true });
+          }
+        });
     }
 
     function getItems(options) {

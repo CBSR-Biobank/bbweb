@@ -22,9 +22,9 @@ define(function (require) {
     SuiteMixin.prototype.createController = function () {
       ComponentTestSuiteMixin.prototype.createScope.call(
         this,
-        '<studies-paged-list></studies-paged-list',
+        '<users-paged-list></users-paged-list',
         undefined,
-        'studiesPagedList');
+        'usersPagedList');
     };
 
     SuiteMixin.prototype.createCountsSpy = function (disabled, enabled, retired) {
@@ -35,23 +35,23 @@ define(function (require) {
         retired:  retired
       };
 
-      spyOn(this.StudyCounts, 'get').and.returnValue(this.$q.when(counts));
+      spyOn(this.UserCounts, 'get').and.returnValue(this.$q.when(counts));
     };
 
-    SuiteMixin.prototype.createPagedResultsSpy = function (studies) {
-      var reply = this.factory.pagedResult(studies);
-      spyOn(this.Study, 'list').and.returnValue(this.$q.when(reply));
+    SuiteMixin.prototype.createUserListSpy = function (users) {
+      var reply = this.factory.pagedResult(users);
+      spyOn(this.User, 'list').and.returnValue(this.$q.when(reply));
     };
 
     SuiteMixin.prototype.createEntity = function () {
-      var entity = new this.Study(this.factory.study());
+      var entity = new this.User(this.factory.user());
       return entity;
     };
 
     return SuiteMixin;
   }
 
-  describe('studiesPagedListComponent', function() {
+  describe('usersPagedListComponent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -59,15 +59,15 @@ define(function (require) {
       _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/studiesPagedList/studiesPagedList.html',
-        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html');
+        '/assets/javascripts/admin/users/components/usersPagedList/usersPagedList.html',
+        '/assets/javascripts/admin/users/components/nameEmailStateFilters/nameEmailStateFilters.html');
 
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              'Study',
-                              'StudyCounts',
-                              'StudyState',
+                              'User',
+                              'UserCounts',
+                              'UserState',
                               '$state',
                               'factory');
 
@@ -75,7 +75,7 @@ define(function (require) {
 
     it('scope is valid on startup', function() {
       this.createCountsSpy(2, 5);
-      this.createPagedResultsSpy([]);
+      this.createUserListSpy([]);
       this.createController();
 
       expect(this.controller.limit).toBeDefined();
@@ -86,38 +86,38 @@ define(function (require) {
     });
 
     it('on startup, state changed to login page if user is not authorized', function() {
-      this.StudyCounts.get = jasmine.createSpy()
+      this.UserCounts.get = jasmine.createSpy()
         .and.returnValue(this.$q.reject({ status: 401, message: 'unauthorized'}));
       spyOn(this.$state, 'go').and.returnValue(null);
       this.createController();
       expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
     });
 
-    it('when study counts fails', function() {
-      this.StudyCounts.get = jasmine.createSpy()
+    it('when user counts fails', function() {
+      this.UserCounts.get = jasmine.createSpy()
         .and.returnValue(this.$q.reject({ status: 400, message: 'testing'}));
       this.createController();
       expect(this.controller.counts).toEqual({});
     });
 
-    describe('studies', function () {
+    describe('users', function () {
 
       var context = {};
 
       beforeEach(inject(function () {
         var self = this;
 
-        context.createController = function (studiesCount) {
-          var studies;
-          studiesCount = studiesCount || 0;
-          studies = _.map(_.range(studiesCount), self.createEntity.bind(self));
+        context.createController = function (usersCount) {
+          var users;
+          usersCount = usersCount || 0;
+          users = _.map(_.range(usersCount), self.createEntity.bind(self));
           self.createCountsSpy(2, 5, 3);
-          self.createPagedResultsSpy(studies);
+          self.createUserListSpy(users);
           self.createController();
         };
 
         context.getEntitiesLastCallArgs = function () {
-          return self.Study.list.calls.mostRecent().args;
+          return self.User.list.calls.mostRecent().args;
         };
 
       }));
@@ -130,33 +130,58 @@ define(function (require) {
 
       beforeEach(function() {
         this.createCountsSpy(2, 5);
-        this.createPagedResultsSpy([]);
+        this.createUserListSpy([]);
         this.createController();
       });
 
       it('getItemIcon returns a valid icon', function() {
         var self = this,
             statesInfo = [
-              { state: this.StudyState.DISABLED, icon: 'glyphicon-cog' },
-              { state: this.StudyState.ENABLED,  icon: 'glyphicon-ok-circle' },
-              { state: this.StudyState.RETIRED,  icon: 'glyphicon-remove-sign' }
+              { state: this.UserState.REGISTERED, icon: 'glyphicon-cog' },
+              { state: this.UserState.ACTIVE,     icon: 'glyphicon-user' },
+              { state: this.UserState.LOCKED,     icon: 'glyphicon-lock' }
             ];
 
         statesInfo.forEach(function (info) {
-          var study = new self.Study(self.factory.study({ state: info.state }));
-          expect(self.controller.getItemIcon(study)).toEqual(info.icon);
+          var user = new self.User(self.factory.user({ state: info.state }));
+          expect(self.controller.getItemIcon(user)).toEqual(info.icon);
         });
       });
 
       it('getItemIcon throws an error for and invalid state', function() {
         var self = this,
-            study = new this.Study(this.factory.study({ state: this.factory.stringNext() }));
+            user = new this.User(this.factory.user({ state: this.factory.stringNext() }));
 
         expect(function () {
-          self.controller.getItemIcon(study);
-        }).toThrowError(/invalid study state/);
+          self.controller.getItemIcon(user);
+        }).toThrowError(/invalid user state/);
       });
 
+    });
+
+    it('updates items when email filter is updated', function() {
+      var emailFilterValue = 'test@test.com',
+          spyArgs;
+
+      this.createCountsSpy(2, 5);
+      this.createUserListSpy([]);
+      this.createController();
+      this.controller.emailFilterUpdated(emailFilterValue);
+      this.scope.$digest();
+
+      spyArgs = this.User.list.calls.mostRecent().args[0];
+      expect(spyArgs).toBeObject();
+      expect(spyArgs.filter).toEqual('email:like:' + emailFilterValue);
+    });
+
+    it('filters are cleared', function() {
+      this.createCountsSpy(2, 5);
+      this.createUserListSpy([]);
+      this.createController();
+      this.controller.emailFilter = 'test@test.com';
+      this.controller.filtersCleared();
+      this.scope.$digest();
+      expect(this.controller.emailFilter).toBeEmptyString();
     });
 
   });

@@ -1,0 +1,109 @@
+<div style="margin-bottom: 20px;">
+  <name-email-state-filters
+     state-data="vm.stateData"
+     on-name-filter-updated="vm.nameFilterUpdated"
+     on-email-filter-updated="vm.emailFilterUpdated"
+     on-state-filter-updated="vm.stateFilterUpdated"
+     on-filters-cleared="vm.filtersCleared">
+  </name-email-state-filters>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <i class="glyphicon glyphicon-cog"></i> {{vm.counts.registered}} {{'Registered'|translate}},
+    <i class="glyphicon glyphicon-user"></i> {{vm.counts.active}} {{'Active'|translate}},
+    <i class="glyphicon glyphicon-lock"></i> {{vm.counts.locked}} {{'Locked'|translate}}
+    <div class="dropdown pull-right">
+      <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+        <small class="text-muted"><translate>Sort</translate> <b class="caret"></b></small>
+      </a>
+      <ul class="dropdown-menu" role="menu">
+        <li role="presentation" class="dropdown-header" translate>Sort by</li>
+        <li ng-repeat="sortField in vm.sortFields">
+          <a ng-click="vm.sortFieldSelected(sortField)">{{sortField}}</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.NO_ENTITIES">
+    <li class="list-group-item">
+      <p class="alert alert-warning" role="alert">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        {{'No users have been added yet.'|translate}}
+      </p>
+    </li>
+  </ul>
+
+  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.NO_RESULTS">
+    <li class="list-group-item">
+      <p class="alert alert-warning" role="alert">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        {{'No users match the criteria.'|translate}}
+      </p>
+    </li>
+  </ul>
+
+  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
+    <li class="list-group-item" ng-repeat="entity in vm.pagedResult.items">
+      <div class="row">
+        <div class="col-md-12">
+          <strong>
+            <a ui-sref="home.admin.users.user.summary({ userId: entity.id })">
+              <i class="glyphicon" ng-class="vm.getItemIcon(entity)"></i>
+              {{entity.name}}
+            </a>
+          </strong>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <small class="text-info">
+            <translate>Email</translate>:
+            <a href="mailto:{{entity.email}}" target="_top">{{entity.email}}</a>
+          </small>
+        </div>
+        <div class="col-md-6" ng-if="entity.avatarUrl">
+          <small class="text-info">
+            <translate>Avatar</translate>:
+            <a href="{{entity.avatarUrl}}" target="_top">{{entity.avatarUrl}}</a>
+          </small>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-5">
+          <small class="text-info">
+            <strong translate>State:</strong> {{ vm.stateLabels[entity.state] }}
+          </small>
+        </div>
+        <div class="col-md-3">
+          <small class="text-muted">
+            <strong translate>Added:</strong> {{entity.timeAdded | timeago}}
+          </small>
+        </div>
+        <div class="col-md-3" data-ng-if="entity.timeModified">
+          <small class="text-muted">
+            <strong translate>Updated:</strong> {{entity.timeModified | timeago}}
+          </small>
+        </div>
+      </div>
+    </li>
+  </ul>
+
+</div>
+
+<ul uib-pagination
+    class="pagination-sm"
+    total-items="vm.pagedResult.total"
+    ng-model="vm.pagerOptions.page"
+    ng-change="vm.pageChanged()"
+    items-per-page="vm.pagerOptions.limit"
+    max-size="5"
+    rotate="false"
+    boundary-links="true"
+    previous-text="&lsaquo;"
+    next-text="&rsaquo;"
+    first-text="&laquo;"
+    last-text="&raquo;"
+    ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
+</ul>
