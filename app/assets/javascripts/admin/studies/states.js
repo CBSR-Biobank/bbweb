@@ -10,13 +10,12 @@ define(function () {
   config.$inject = [ '$stateProvider' ];
 
   function config($stateProvider) {
-
     $stateProvider
       .state('home.admin.studies', {
         url: '/studies',
         views: {
           'main@': {
-            template: '<studies-admin></studies-admin>'
+            component: 'studiesAdmin'
           }
         }
       })

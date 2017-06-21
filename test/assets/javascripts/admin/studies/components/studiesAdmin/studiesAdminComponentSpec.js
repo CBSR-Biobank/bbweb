@@ -23,13 +23,13 @@ define([
       this.scope = this.$rootScope.$new();
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
+      this.controller = this.element.controller('studiesAdmin');
     };
 
     return SuiteMixin;
   }
 
-  describe('Directive: studiesAdminDirective', function() {
-
+  fdescribe('Component: studiesAdmin', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -45,7 +45,7 @@ define([
                               'factory');
 
       this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/studiesAdmin/studiesAdmin.html',
+        '/assets/javascripts/admin/studies/components/studiesAdmin/studiesAdmin.html',
         '/assets/javascripts/admin/studies/components/studiesPagedList/studiesPagedList.html',
         '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
@@ -60,7 +60,7 @@ define([
       }));
       spyOn(this.Study, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
       this.createScope();
-      expect(this.scope).toBeDefined();
+      expect(this.controller.breadcrumbs).toBeDefined();
     });
 
   });

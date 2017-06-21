@@ -31,8 +31,8 @@ define(function (require) {
     .component('ceventTypesAddAndSelect',
                require('./components/ceventTypesAddAndSelect/ceventTypesAddAndSelectComponent'))
     .component('studyCollection',         require('./components/studyCollection/studyCollectionComponent'))
+    .component('studiesAdmin',            require('./components/studiesAdmin/studiesAdminComponent'))
 
-    .directive('studiesAdmin',            require('./directives/studiesAdmin/studiesAdminDirective'))
     .directive('studyAdd',                require('./directives/studyAdd/studyAddDirective'))
     .directive('studyParticipantsTab',    require('./directives/studyParticipantsTab/studyParticipantsTabDirective'))
     .directive('studySummary',            require('./directives/studySummary/studySummaryDirective'))
