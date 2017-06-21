@@ -43,8 +43,7 @@ define(['lodash'], function (_) {
     var vm = this;
 
     vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabel();
-    vm.requiredLabel = vm.annotationType.required ?
-      gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
+    updateRequiredLabel(vm.annotationType);
 
     vm.editName             = editName;
     vm.editRequired         = editRequired;
@@ -72,6 +71,7 @@ define(['lodash'], function (_) {
                          { required: true }).result
         .then(function (required) {
           vm.annotationType.required = (required === 'true' );
+          updateRequiredLabel(vm.annotationType);
           vm.onUpdate()(vm.annotationType);
         });
     }
@@ -95,6 +95,11 @@ define(['lodash'], function (_) {
 
     function back() {
       $state.go(vm.returnState, {}, { reload: true });
+    }
+
+    function updateRequiredLabel(annotationType) {
+      vm.requiredLabel = vm.annotationType.required ?
+        gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
     }
   }
 
