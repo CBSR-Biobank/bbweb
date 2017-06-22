@@ -31,10 +31,8 @@
     <tbody>
       <tr ng-repeat="ceventType in vm.collectionEventTypes">
         <td>
-          <a href ng-click="vm.select(ceventType)">{{ceventType.name}}</a>
-        </td>
-        <td>
-          <span class="badge">{{vm.getRecurringLabel(ceventType)}}</span>
+          <a href ng-click="vm.select(ceventType)">{{ceventType.name | truncate:18}}</a>
+          <span class="pull-right badge">{{vm.getRecurringLabel(ceventType)}}</span>
         </td>
       </tr>
     </tbody>

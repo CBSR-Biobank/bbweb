@@ -95,7 +95,7 @@ define(function () {
 
     function getRecurringLabel(ceventType) {
       return ceventType.recurring ?
-        gettextCatalog.getString('Recurring') : gettextCatalog.getString('Not recurring');
+        gettextCatalog.getString('Rec') : gettextCatalog.getString('NonRec');
     }
 
     function nameFilterUpdated() {
