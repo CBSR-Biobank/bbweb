@@ -6,10 +6,12 @@ import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.Global
 import org.biobank.domain.access._
+import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.access.RoleId._
 import org.biobank.domain.user.{ActiveUser, User, UserId, UserRepository}
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.centre.{CentreId, CentreRepository}
+import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.event.AccessEvents._
 import org.biobank.service._
@@ -23,6 +25,10 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[AccessServiceImpl])
 trait AccessService extends BbwebService {
 
+  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]]
+
+  def getUserRoles(userId: UserId): Set[RoleId]
+
   def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]]
 
   def hasPermission(userId: UserId, permissionId: AccessItemId): ServiceValidation[Boolean]
@@ -35,8 +41,6 @@ trait AccessService extends BbwebService {
                                permissionId: AccessItemId,
                                studyId:      Option[StudyId],
                                centreId:     Option[CentreId]): ServiceValidation[Boolean]
-
-  def getRoles(userId: UserId): Set[RoleId]
 
   def getMembership(userId: UserId): ServiceValidation[Membership]
 
@@ -52,9 +56,35 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     extends AccessService
     with BbwebServiceImpl {
 
+  import org.biobank.CommonValidations._
   import org.biobank.domain.access.AccessItem._
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
+
+  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]] = {
+    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
+      val allRoles = accessItemRepository.getRoles
+      val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                    else sort
+      for {
+        roles           <- AccessItemFilter.filterRoles(allRoles, filter)
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = roles.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
+      }
+    }
+  }
+
+  def getUserRoles(userId: UserId): Set[RoleId] = {
+    accessItemRepository.rolesForUser(userId).map(r => RoleId.withName(r.id.id))
+  }
 
   def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]] = {
     for {
@@ -95,10 +125,6 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
       permission <- hasPermissionInternal(userId, permissionId)
       member     <- isMemberInternal(userId, studyId, centreId)
     } yield (permission && member)
-  }
-
-  def getRoles(userId: UserId): Set[RoleId] = {
-    accessItemRepository.rolesForUser(userId).map(r => RoleId.withName(r.id.id))
   }
 
   def getMembership(userId: UserId): ServiceValidation[Membership] = {
@@ -163,6 +189,15 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
 
     log.debug(s"isMemberInternal: userId: $userId, studyId: $studyId, centreId: $centreId, membership: $membership")
     membership
+  }
+
+  private def whenPermitted[T](requestUserId: UserId, permissionId: PermissionId)
+                           (block: () => ServiceValidation[T]): ServiceValidation[T] = {
+    hasPermission(requestUserId, permissionId).fold(
+      err        => err.failure[T],
+      permission => if (permission) block()
+                    else Unauthorized.failureNel[T]
+    )
   }
 
   /**

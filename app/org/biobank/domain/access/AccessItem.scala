@@ -9,6 +9,16 @@ import org.biobank.infrastructure.JsonUtils._
 import org.joda.time.DateTime
 import play.api.libs.json._
 
+/**
+ * Predicates that can be used to filter collections of accessItems.
+ *
+ */
+trait AccessItemPredicates extends HasNamePredicates[AccessItem] {
+
+  type AccessItemFilter = AccessItem => Boolean
+
+}
+
 class AccessItemType(val id: String) extends AnyVal {
   override def toString: String = id
 }
@@ -100,6 +110,12 @@ object AccessItem {
   implicit val disabledStudyFormat: Reads[Role] = Json.format[Role]
   implicit val permissionFormat: Reads[Permission] = Json.format[Permission]
 
+  val sort2Compare: Map[String, (Role, Role) => Boolean] =
+    Map[String, (Role, Role) => Boolean]("name"  -> compareByName)
+
+  def compareByName(a: Role, b: Role): Boolean = {
+    (a.name compareToIgnoreCase b.name) < 0
+  }
 }
 
 final case class Role(id:           AccessItemId,

@@ -71,11 +71,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
   }
 
   private def multipleItemsResultWithDefaultUser(uri:         String,
-                                         queryParams: Map[String, String] =  Map.empty,
-                                         offset:      Long,
-                                         total:       Long,
-                                         maybeNext:   Option[Int],
-                                         maybePrev:   Option[Int]) = {
+                                                 queryParams: Map[String, String] =  Map.empty,
+                                                 offset:      Long,
+                                                 total:       Long,
+                                                 maybeNext:   Option[Int],
+                                                 maybePrev:   Option[Int]) = {
     val jsonUsers = PagedResultsSpec(this).multipleItemsResult(uri,
                                                                queryParams,
                                                                offset,

@@ -23,8 +23,9 @@ import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[UsersServiceImpl])
 trait UsersService extends BbwebService {
+
   /**
-   * Returns a users.
+   * Returns a user.
    *
    * @param requestUserId the ID of the user making the request.
    *
@@ -252,7 +253,7 @@ class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val proc
             name         = user.name,
             email        = user.email,
             avatarUrl    = user.avatarUrl,
-            roles        = accessService.getRoles(user.id),
+            roles        = accessService.getUserRoles(user.id),
             membership   = membership.toOption)
   }
 

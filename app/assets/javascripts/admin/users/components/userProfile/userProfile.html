@@ -1,6 +1,6 @@
 <breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
 <div class="page-header">
-  <h1>{{vm.user.name}} <small>Profile</small></h1>
+  <h1><translate>User</translate>: {{vm.user.name}}</h1>
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
@@ -73,7 +73,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3"><strong translate>Roles</strong></div>
-        <div class="col-md-9">{{vm.user.roles.sort().join(', ')}}</div>
+        <div class="col-md-7">{{vm.rolesValue}}</div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="{{'Update roles'|translate}}"
+                  ng-click="vm.updateRoles()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
       </div>
     </li>
 
@@ -81,7 +88,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3"><strong translate>Study Memberhips</strong></div>
-        <div class="col-md-9">{{vm.studyMemberships}}</div>
+        <div class="col-md-7">{{vm.studyMemberships}}</div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="{{'Update study memberships'|translate}}"
+                  ng-click="vm.updateStudyMemberships()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
       </div>
     </li>
 
@@ -89,7 +103,14 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3"><strong translate>Centre Memberships</strong></div>
-        <div class="col-md-9">{{vm.centreMemberships}}</div>
+        <div class="col-md-7">{{vm.centreMemberships}}</div>
+        <div class="col-md-2">
+          <button class="btn btn-xs btn-primary pull-right"
+                  title="{{'Update centre memberships'|translate}}"
+                  ng-click="vm.updateCentreMemberships()">
+            <i class="glyphicon glyphicon-edit"></i>
+          </button>
+        </div>
       </div>
     </li>
   </ul>

@@ -15,6 +15,7 @@
 ->      /centres                                org.biobank.controllers.centres.CentresRouter
 ->      /shipments                              org.biobank.controllers.centres.ShipmentsRouter
 ->      /users                                  org.biobank.controllers.users.UsersRouter
+->      /access                                 org.biobank.controllers.access.AccessRouter
 ->      /                                       org.biobank.controllers.ApplicationRouter
 
 GET     /assets/*file                           controllers.Assets.versioned(path="/public", file)

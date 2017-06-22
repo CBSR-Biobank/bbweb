@@ -18,6 +18,7 @@ define(function (require) {
     .component('userAdmin',      require('./components/userAdmin/userAdminComponent'))
     .component('usersPagedList', require('./components/usersPagedList/usersPagedListComponent'))
     .component('userProfile',    require('./components/userProfile/userProfileComponent'))
+    .component('userRoles',      require('./components/userRoles/userRolesComponent'))
     .component('nameEmailStateFilters',
                require('./components/nameEmailStateFilters/nameEmailStateFiltersComponent'));
 

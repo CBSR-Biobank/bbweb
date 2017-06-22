@@ -5,8 +5,6 @@
 define(function (require) {
   'use strict';
 
-  var _ = require('lodash');
-
   var component = {
     templateUrl : '/assets/javascripts/admin/users/components/userProfile/userProfile.html',
     controller: UserProfileController,
@@ -49,14 +47,18 @@ define(function (require) {
         function () { return gettextCatalog.getString('User: {{name}}', { name: vm.user.name }); })
     ];
 
-    vm.$onInit           = onInit;
-    vm.studyMemberships  = '';
-    vm.centreMemberships = '';
-    vm.updateName        = updateName;
-    vm.updateEmail       = updateEmail;
-    vm.updatePassword    = updatePassword;
-    vm.updateAvatarUrl   = updateAvatarUrl;
-    vm.removeAvatarUrl   = removeAvatarUrl;
+    vm.$onInit                 = onInit;
+    vm.studyMemberships        = '';
+    vm.centreMemberships       = '';
+    vm.updateName              = updateName;
+    vm.updateEmail             = updateEmail;
+    vm.updatePassword          = updatePassword;
+    vm.updateAvatarUrl         = updateAvatarUrl;
+    vm.removeAvatarUrl         = removeAvatarUrl;
+    vm.updateStudyMemberships  = updateStudyMemberships;
+    vm.updateCentreMemberships = updateCentreMemberships;
+    vm.updateRoles             = updateRoles;
+    vm.rolesValue              = getRolesValue();
 
     //--
 
@@ -169,6 +171,25 @@ define(function (require) {
               }
             });
         });
+    }
+
+    function updateRoles() {
+      $state.go('home.admin.users.user.roles');
+    }
+
+    function updateStudyMemberships() {
+      console.log('here');
+    }
+
+    function updateCentreMemberships() {
+      console.log('here');
+    }
+
+    function getRolesValue() {
+      if (vm.user.roles.length > 0) {
+        return vm.user.roles.sort().join(', ');
+      }
+      return gettextCatalog.getString('None');
     }
   }
 

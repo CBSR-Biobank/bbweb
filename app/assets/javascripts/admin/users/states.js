@@ -30,6 +30,14 @@ define(function () {
             component: 'userProfile'
           }
         }
+      })
+      .state('home.admin.users.user.roles', {
+        url: '/roles',
+        views: {
+          'main@': {
+            component: 'userRoles'
+          }
+        }
       });
 
     resolveUserCounts.$inject = ['UserCounts'];

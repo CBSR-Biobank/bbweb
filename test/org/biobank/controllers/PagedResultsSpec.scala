@@ -70,7 +70,7 @@ case class PagedResultsSpec(fakeApp: BbwebFakeApplication) extends MustMatchers 
 
   def failWithInvalidPageNumber(uri: String) = {
     // assumes the result will be empty
-    val json = fakeApp.makeRequest(GET, uri + "?page=2", BAD_REQUEST)
+    val json = fakeApp.makeRequest(GET, uri + "?page=9999", BAD_REQUEST)
     (json \ "status").as[String] must include ("error")
     (json \ "message").as[String] must include ("page exceeds limit")
   }
