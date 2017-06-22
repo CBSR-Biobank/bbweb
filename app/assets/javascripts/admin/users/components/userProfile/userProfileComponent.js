@@ -8,10 +8,11 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl : '/assets/javascripts/users/components/userProfile/userProfile.html',
+    templateUrl : '/assets/javascripts/admin/users/components/userProfile/userProfile.html',
     controller: UserProfileController,
     controllerAs: 'vm',
     bindings: {
+      user: '<'
     }
   };
 
@@ -41,14 +42,11 @@ define(function (require) {
 
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.users'),
       breadcrumbService.forStateWithFunc(
-        'home.users.profile',
-        function () {
-          if (!_.isUndefined(vm.user)) {
-            return gettextCatalog.getString('User: {{name}}', { name: vm.user.name });
-          }
-          return gettextCatalog.getString('User:');
-        }),
+        'home.admin.users.user',
+        function () { return gettextCatalog.getString('User: {{name}}', { name: vm.user.name }); })
     ];
 
     vm.$onInit           = onInit;
@@ -63,36 +61,27 @@ define(function (require) {
     //--
 
     function onInit() {
-      usersService.requestCurrentUser()
-        .then(function (user) {
-          vm.user = User.create(user);
-          vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
-          if (vm.user.membership) {
-            if (vm.user.membership.studyInfo.all) {
-              vm.studyMemberships = gettextCatalog.getString('All Studies');
-            } else if (vm.user.membership.studyInfo.names.length > 0){
-              vm.studyMemberships = vm.user.membership.studyInfo.names.join(', ');
-            } else {
-              vm.studyMemberships = gettextCatalog.getString('None');
-            }
+      vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
+      if (vm.user.membership) {
+        if (vm.user.membership.studyInfo.all) {
+          vm.studyMemberships = gettextCatalog.getString('All Studies');
+        } else if (vm.user.membership.studyInfo.names.length > 0){
+          vm.studyMemberships = vm.user.membership.studyInfo.names.join(', ');
+        } else {
+          vm.studyMemberships = gettextCatalog.getString('None');
+        }
 
-            if (vm.user.membership.centreInfo.all) {
-              vm.centreMemberships = gettextCatalog.getString('All Centres');
-            } else if (vm.user.membership.centreInfo.names.length > 0){
-              vm.centreMemberships = vm.user.membership.centreInfo.names.join(', ');
-            } else {
-              vm.centreMemberships = gettextCatalog.getString('None');
-            }
-          } else {
-            vm.studyMemberships = gettextCatalog.getString('None');
-            vm.centreMemberships = gettextCatalog.getString('None');
-          }
-        })
-        .catch(function (error) {
-          if (error.status && (error.status === 401)) {
-            $state.go('home.users.login', {}, { reload: true });
-          }
-        });
+        if (vm.user.membership.centreInfo.all) {
+          vm.centreMemberships = gettextCatalog.getString('All Centres');
+        } else if (vm.user.membership.centreInfo.names.length > 0){
+          vm.centreMemberships = vm.user.membership.centreInfo.names.join(', ');
+        } else {
+          vm.centreMemberships = gettextCatalog.getString('None');
+        }
+      } else {
+        vm.studyMemberships = gettextCatalog.getString('None');
+        vm.centreMemberships = gettextCatalog.getString('None');
+      }
     }
 
     function updateError(err) {
@@ -122,7 +111,7 @@ define(function (require) {
             .then(function (user) {
               postUpdate(gettextCatalog.getString('User name updated successfully.'),
                          gettextCatalog.getString('Update successful'))(user);
-              usersService.retrieveCurrentUser();
+              vm.user = user;
             })
             .catch(updateError);
         });

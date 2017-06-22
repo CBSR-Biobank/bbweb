@@ -60,14 +60,6 @@ define(function () {
             component: 'registerUser'
           }
         }
-      })
-      .state('home.users.profile', {
-        url: '^/profile',
-        views: {
-          'main@': {
-            component: 'userProfile'
-          }
-        }
       });
 
   }

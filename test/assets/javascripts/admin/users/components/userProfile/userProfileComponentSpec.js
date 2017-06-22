@@ -7,32 +7,36 @@
 define(function (require) {
   'use strict';
 
-  var angular = require('angular'),
-      mocks   = require('angularMocks'),
-      _       = require('lodash');
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-  describe('Directive: userProfileDirective', function() {
+  fdescribe('Directive: userProfileDirective', function() {
 
-    var createController = function (user) {
-      this.usersService.requestCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(user));
-      this.usersService.retrieveCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(user));
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      this.element = angular.element('<user-profile user="vm.user"></user-profile>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { user: user};
+      function SuiteMixin() {
+      }
 
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('userProfile');
-    };
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (user) {
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          '<user-profile user="vm.user"></user-profile>',
+          { user: user },
+          'userProfile');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, TestSuiteMixin) {
-      var self = this;
-      _.extend(self, TestSuiteMixin.prototype);
+    beforeEach(inject(function($rootScope, $compile, ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
                               'factory',
@@ -40,13 +44,12 @@ define(function (require) {
                               'modalService',
                               'modalInput',
                               'User',
-                              'notificationsService',
-                              'usersService');
+                              'notificationsService');
 
-      self.ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
+      this.ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/users/components/userProfile/userProfile.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/users/components/userProfile/userProfile.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/common/modalInput/modalInput.html',
         '/assets/javascripts/common/modalInput/boolean.html',
@@ -66,11 +69,43 @@ define(function (require) {
     }));
 
     it('should have valid scope', function() {
-      var user = this.factory.user();
-
-      createController.call(this, user);
+      var user = new this.User(this.factory.user());
+      this.createController(user);
       expect(this.controller.user.id).toEqual(user.id);
       expect(this.controller.user).toEqual(jasmine.any(this.User));
+    });
+
+    it('correct display when user has no memberships', function() {
+      var user = new this.User(this.factory.user({ membership: undefined }));
+      this.createController(user);
+      expect(this.controller.studyMemberships).toEqual('None');
+      expect(this.controller.centreMemberships).toEqual('None');
+    });
+
+    it('correct display when user has membership to all studies and centres', function() {
+      var user = new this.User(this.factory.user({
+        membership: {
+          studyInfo:  { all: true, names: [] },
+          centreInfo: { all: true, names: [] }
+        }
+      }));
+      this.createController(user);
+      expect(this.controller.studyMemberships).toEqual('All Studies');
+      expect(this.controller.centreMemberships).toEqual('All Centres');
+    });
+
+    it('correct display when user has membership to some studies and centres', function() {
+      var studyName = this.factory.stringNext(),
+          centreName = this.factory.stringNext(),
+          user = new this.User(this.factory.user({
+            membership: {
+              studyInfo:  { all: false, names: [ studyName ] },
+              centreInfo: { all: false, names: [ centreName ] }
+            }
+          }));
+      this.createController(user);
+      expect(this.controller.studyMemberships).toEqual(studyName);
+      expect(this.controller.centreMemberships).toEqual(centreName);
     });
 
     describe('updates to name', function () {
@@ -125,7 +160,7 @@ define(function (require) {
       spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(this.$q.when(new this.User()));
       spyOn(this.notificationsService, 'success').and.returnValue(null);
 
-      createController.call(this, user);
+      this.createController(user);
       this.controller.removeAvatarUrl();
       this.scope.$digest();
       expect(this.notificationsService.success).toHaveBeenCalled();
@@ -141,7 +176,7 @@ define(function (require) {
 
       deferred.reject({ data: { message: 'xxx' } });
 
-      createController.call(this, user);
+      this.createController(user);
       this.controller.removeAvatarUrl();
       this.scope.$digest();
       expect(this.notificationsService.updateError).toHaveBeenCalled();
@@ -155,7 +190,7 @@ define(function (require) {
       spyOn(this.User.prototype, 'updatePassword').and.returnValue(this.$q.when(new this.User()));
       spyOn(this.notificationsService, 'success').and.callFake(function () {});
 
-      createController.call(this, user);
+      this.createController(user);
       this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.success).toHaveBeenCalled();
@@ -170,7 +205,7 @@ define(function (require) {
         this.$q.reject({ data: { message: 'invalid password' } }));
       spyOn(this.notificationsService, 'error').and.callFake(function () {});
 
-      createController.call(this, user);
+      this.createController(user);
       this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();
@@ -185,7 +220,7 @@ define(function (require) {
         this.$q.reject({ data: { message: 'xxx' } }));
       spyOn(this.notificationsService, 'updateError').and.returnValue(null);
 
-      createController.call(this, user);
+      this.createController(user);
       this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.updateError).toHaveBeenCalled();
@@ -207,7 +242,7 @@ define(function (require) {
             .and.returnValue(this.$q.when(this.user));
           spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-          createController.call(this, this.user);
+          this.createController(this.user);
           expect(this.controller[context.controllerFuncName]).toBeFunction();
           this.controller[context.controllerFuncName]();
           this.scope.$digest();
@@ -222,7 +257,7 @@ define(function (require) {
             .and.returnValue(this.$q.reject({ data: { message: 'simulated error'}}));
           spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-          createController.call(this, this.user);
+          this.createController(this.user);
           this.controller[context.controllerFuncName]();
           this.scope.$digest();
 

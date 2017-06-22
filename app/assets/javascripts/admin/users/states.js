@@ -8,26 +8,39 @@ define(function () {
   config.$inject = [ '$stateProvider' ];
 
   function config($stateProvider) {
+    $stateProvider
+      .state('home.admin.users', {
+        url: '/users',
+        resolve: {
+          userCounts: resolveUserCounts
+        },
+        views: {
+          'main@': {
+            component: 'userAdmin'
+          }
+        }
+      })
+      .state('home.admin.users.user', {
+        url: '/:userId',
+        resolve: {
+          user: resolveUser
+        },
+        views: {
+          'main@': {
+            component: 'userProfile'
+          }
+        }
+      });
 
     resolveUserCounts.$inject = ['UserCounts'];
     function resolveUserCounts(UserCounts) {
       return UserCounts.get();
     }
 
-    /**
-     * Displays all users in a table
-     */
-    $stateProvider.state('home.admin.users', {
-      url: '/users',
-      resolve: {
-        userCounts: resolveUserCounts
-      },
-      views: {
-        'main@': {
-          component: 'userAdmin'
-        }
-      }
-    });
+    resolveUser.$inject = ['$transition$', 'User'];
+    function resolveUser($transition$, User) {
+      return User.get($transition$.params().userId);
+    }
 
   }
 

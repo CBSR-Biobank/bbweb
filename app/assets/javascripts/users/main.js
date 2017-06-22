@@ -17,7 +17,6 @@ define(function (require) {
     .config(require('./states'))
     .component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'))
     .component('registerUser',   require('./components/registerUser/registerUserComponent'))
-    .component('userProfile',    require('./components/userProfile/userProfileComponent'))
 
     .directive('login',         require('./directives/login/loginDirective'))
     .directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'))

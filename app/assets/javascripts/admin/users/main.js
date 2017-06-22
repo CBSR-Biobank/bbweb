@@ -15,8 +15,9 @@ define(function (require) {
 
   module
     .config(require('./states'))
-    .component('userAdmin',  require('./components/userAdmin/userAdminComponent'))
+    .component('userAdmin',      require('./components/userAdmin/userAdminComponent'))
     .component('usersPagedList', require('./components/usersPagedList/usersPagedListComponent'))
+    .component('userProfile',    require('./components/userProfile/userProfileComponent'))
     .component('nameEmailStateFilters',
                require('./components/nameEmailStateFilters/nameEmailStateFiltersComponent'));
 
