@@ -94,9 +94,9 @@ define([
     it('function recurring returns a valid result', function() {
       this.createController();
       this.collectionEventType.recurring = false;
-      expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('Not recurring');
+      expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('NonRec');
       this.collectionEventType.recurring = true;
-      expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('Recurring');
+      expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('Rec');
     });
 
     it('function pageChanged switches to correct state', function() {

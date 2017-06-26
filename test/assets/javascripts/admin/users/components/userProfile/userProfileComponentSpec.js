@@ -10,7 +10,7 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  fdescribe('Directive: userProfileDirective', function() {
+  describe('Directive: userProfileDirective', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
