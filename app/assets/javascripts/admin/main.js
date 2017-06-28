@@ -24,13 +24,13 @@ define(function (require) {
   module
     .config(require('./states'))
 
-    .directive('annotationTypeAdd',     require('./directives/annotationTypeAdd/annotationTypeAddDirective'))
-    .directive('annotationTypeView',    require('./directives/annotationTypeView/annotationTypeViewDirective'))
-    .directive('locationAdd',           require('./directives/locationAdd/locationAddDirective'))
-    .directive('biobankAdmin',          require('./directives/biobankAdmin/biobankAdminDirective'))
-
     .component('annotationTypeSummary',
                require('./components/annotationTypeSummary/annotationTypeSummaryComponent'))
+    .component('locationAdd',           require('./components/locationAdd/locationAddComponent'))
+
+    .directive('annotationTypeAdd',     require('./directives/annotationTypeAdd/annotationTypeAddDirective'))
+    .directive('annotationTypeView',    require('./directives/annotationTypeView/annotationTypeViewDirective'))
+    .directive('biobankAdmin',          require('./directives/biobankAdmin/biobankAdminDirective'))
 
     .service('adminService',               require('./services/adminService'))
 

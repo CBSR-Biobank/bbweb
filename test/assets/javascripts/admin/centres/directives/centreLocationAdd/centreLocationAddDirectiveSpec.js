@@ -46,7 +46,7 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/centres/directives/centreLocationAdd/centreLocationAdd.html',
-        '/assets/javascripts/admin/directives/locationAdd/locationAdd.html');
+        '/assets/javascripts/admin/components/locationAdd/locationAdd.html');
     }));
 
     it('scope should be valid', function() {
