@@ -1,27 +1,27 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
   /**
-   *
+   * Home page for Administration tasks.
    */
-  function biobankAdminDirective() {
-    var directive = {
-      restrict: 'E',
-      templateUrl : '/assets/javascripts/admin/directives/biobankAdmin/biobankAdmin.html',
-      controller: BiobankAdminCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/components/biobankAdmin/biobankAdmin.html',
+    controller: BiobankAdminController,
+    controllerAs: 'vm',
+    bindings: {
+    }
+  };
 
-    return directive;
-  }
+  BiobankAdminController.$inject = ['adminService', 'usersService', 'User', 'breadcrumbService'];
 
-  BiobankAdminCtrl.$inject = ['adminService', 'usersService', 'User', 'breadcrumbService'];
-
-  function BiobankAdminCtrl(adminService, usersService, User, breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function BiobankAdminController(adminService, usersService, User, breadcrumbService) {
     var vm = this;
 
     vm.counts = {};
@@ -48,5 +48,5 @@ define(function () {
     }
   }
 
-  return biobankAdminDirective;
+  return component;
 });

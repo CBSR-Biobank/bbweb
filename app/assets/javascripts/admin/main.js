@@ -26,11 +26,11 @@ define(function (require) {
 
     .component('annotationTypeSummary',
                require('./components/annotationTypeSummary/annotationTypeSummaryComponent'))
+    .component('biobankAdmin',          require('./components/biobankAdmin/biobankAdminComponent'))
     .component('locationAdd',           require('./components/locationAdd/locationAddComponent'))
 
     .directive('annotationTypeAdd',     require('./directives/annotationTypeAdd/annotationTypeAddDirective'))
     .directive('annotationTypeView',    require('./directives/annotationTypeView/annotationTypeViewDirective'))
-    .directive('biobankAdmin',          require('./directives/biobankAdmin/biobankAdminDirective'))
 
     .service('adminService',               require('./services/adminService'))
 
