@@ -17,7 +17,7 @@ define(function (require) {
       this.putHtmlTemplates(
         '/assets/javascripts/centres/components/shippingInfoView/shippingInfoView.html',
         '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 
       this.injectDependencies('$q',

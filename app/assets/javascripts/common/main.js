@@ -25,6 +25,7 @@ define(function (require) {
     .component('collapsiblePanel',        require('./components/collapsiblePanel/collapsiblePanelComponent'))
     .component('nameAndStateFilters',     require('./components/nameAndStateFilters/nameAndStateFiltersComponent'))
     .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))
+    .component('statusLine',              require('./components/statusLine/statusLineComponent'))
 
     .directive('focusMe',                 require('./directives/focusMeDirective'))
     .directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'))
@@ -36,7 +37,6 @@ define(function (require) {
     .directive('pageSelect',              require('./directives/pageSelectDirective'))
     .directive('positiveFloat',           require('./directives/positiveFloat/positiveFloatDirective'))
     .directive('naturalNumber',           require('./directives/naturalNumber/naturalNumberDirective'))
-    .directive('statusLine',              require('./directives/statusLine/statusLineDirective'))
     .directive('truncateToggle',          require('./directives/truncateToggle/truncateToggleDirective'))
 
     .filter('localTime',                  require('./filters/localTimeFilter'))

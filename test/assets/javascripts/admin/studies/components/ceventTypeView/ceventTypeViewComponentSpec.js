@@ -48,7 +48,7 @@ define(function (require) {
         '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 
       this.createController = function (study, collectionEventType) {

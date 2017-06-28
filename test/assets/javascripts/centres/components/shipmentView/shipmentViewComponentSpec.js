@@ -21,7 +21,7 @@ define(function (require) {
         '/assets/javascripts/centres/components/shipmentViewPacked/shipmentViewPacked.html',
         '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html',
         '/assets/javascripts/common/components/progressTracker/progressTracker.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/centres/components/shipmentViewSent/shipmentViewSent.html',
         '/assets/javascripts/centres/components/shipmentViewReceived/shipmentViewReceived.html',
         '/assets/javascripts/centres/components/shipmentViewCompleted/shipmentViewCompleted.html',

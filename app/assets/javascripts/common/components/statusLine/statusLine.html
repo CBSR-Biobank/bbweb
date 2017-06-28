@@ -1,0 +1,23 @@
+<table class="table table-condensed" style="margin-bottom:0;">
+  <!-- Meant to be used within a bootstrap panel -->
+  <tr>
+    <td ng-if="vm.showState">
+      <small class="text-muted text-info">
+        <translate>State:</translate>
+        <strong>{{vm.item.state}}</strong>
+      </small>
+    </td>
+    <td>
+      <small class="text-muted text-info">
+        <translate>Added:</translate>
+        <strong>{{vm.item.timeAdded | timeago}}</strong></small>
+    </td>
+    <td>
+      <small class="text-muted text-info">
+        <translate>Modified:</translate>
+        <strong ng-if="!!vm.item.timeModified">{{vm.item.timeModified | timeago}}</strong>
+        <strong ng-if="! vm.item.timeModified" translate>Never</strong>
+      </small>
+    </td>
+  </tr>
+</table>

@@ -102,14 +102,15 @@ define(function(require) {
   uiRouterIsAuthorized.$inject = ['$transitions'];
 
   function uiRouterIsAuthorized($transitions) {
-    $transitions.onStart({ to: 'admin.**' }, checkIsAuthenticated);
-    $transitions.onStart({ to: 'collection.**' }, checkIsAuthenticated);
+    $transitions.onStart({ to: 'home.admin.**' }, checkIsAuthenticated);
+    $transitions.onStart({ to: 'home.collection.**' }, checkIsAuthenticated);
+    $transitions.onStart({ to: 'home.shipping.**' }, checkIsAuthenticated);
 
     function checkIsAuthenticated(trans) {
       var auth = trans.injector().get('usersService');
       if (!auth.isAuthenticated()) {
         // User isn't authenticated. Redirect to a new Target State
-        return trans.router.stateService.target('login');
+        return trans.router.stateService.target('home.users.login');
       }
       return null;
     }

@@ -29,7 +29,7 @@ define(function (require) {
                               'factory');
       this.putHtmlTemplates(
         '/assets/javascripts/collection/components/specimenView/specimenView.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.createController = function (study,

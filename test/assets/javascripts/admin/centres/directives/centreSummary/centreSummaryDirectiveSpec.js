@@ -58,7 +58,7 @@ define(function (require) {
         '/assets/javascripts/admin/centres/directives/centreView/centreView.html',
         '/assets/javascripts/admin/centres/directives/centreSummary/centreSummary.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html');
+        '/assets/javascripts/common/components/statusLine/statusLine.html');
 
       spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
     }));

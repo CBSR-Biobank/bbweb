@@ -90,7 +90,7 @@ define(function(require) {
 
       this.putHtmlTemplates(
         '/assets/javascripts/collection/directives/participantSummary/participantSummary.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html');
+        '/assets/javascripts/common/components/statusLine/statusLine.html');
 
       this.jsonParticipant = this.factory.participant();
       this.jsonStudy       = this.factory.defaultStudy();

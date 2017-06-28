@@ -46,7 +46,7 @@ define(function (require) {
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/studySummary/studySummary.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 
       self.createController = function (enableAllowed) {
