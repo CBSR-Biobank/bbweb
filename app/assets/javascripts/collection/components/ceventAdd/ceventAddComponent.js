@@ -1,30 +1,25 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function () {
   'use strict';
 
   /**
-   *
+   * Used to add a collection event.
    */
-  function ceventAddDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
+   var component = {
+      templateUrl: '/assets/javascripts/collection/components/ceventAdd/ceventAdd.html',
+      controller: CeventAddController,
+      controllerAs: 'vm',
+      bindings: {
         study: '=',
         participant: '=',
         collectionEventType: '='
-      },
-      templateUrl : '/assets/javascripts/collection/directives/ceventAdd/ceventAdd.html',
-      controller: CollectionAddCtrl,
-      controllerAs: 'vm'
-    };
-    return directive;
-  }
+      }
+   };
 
-  CollectionAddCtrl.$inject = [
+   CeventAddController.$inject = [
     '$state',
     'gettextCatalog',
     'AppConfig',
@@ -35,17 +30,17 @@ define(['lodash'], function(_) {
     'breadcrumbService'
   ];
 
-  /**
-   * Used to add or edit a collection event.
-   */
-  function CollectionAddCtrl($state,
-                             gettextCatalog,
-                             AppConfig,
-                             notificationsService,
-                             domainNotificationService,
-                             timeService,
-                             CollectionEvent,
-                             breadcrumbService) {
+   /*
+    * Controller for this component.
+    */
+   function CeventAddController($state,
+                                gettextCatalog,
+                                AppConfig,
+                                notificationsService,
+                                domainNotificationService,
+                                timeService,
+                                CollectionEvent,
+                                breadcrumbService) {
     var vm = this;
 
     vm.collectionEvent = new CollectionEvent({ participantId: vm.participant.id },
@@ -111,5 +106,5 @@ define(['lodash'], function(_) {
     }
   }
 
-  return ceventAddDirective;
+   return component;
 });

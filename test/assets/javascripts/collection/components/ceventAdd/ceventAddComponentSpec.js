@@ -4,43 +4,49 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  describe('ceventAddDirective', function() {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    var createDirective = function () {
-      this.element = angular.element([
-        '<cevent-add',
-        '  study="vm.study"',
-        '  participant="vm.participant"',
-        '  collection-event-type="vm.collectionEventType">',
-        '</cevent-add>'
-      ].join(''));
+  describe('Component: ceventAdd', function() {
 
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        study:               this.study,
-        participant:         this.participant,
-        collectionEventType: this.collectionEventType
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          [
+            '<cevent-add',
+            '  study="vm.study"',
+            '  participant="vm.participant"',
+            '  collection-event-type="vm.collectionEventType">',
+            '</cevent-add>'
+          ].join(''),
+          {
+            study:               this.study,
+            participant:         this.participant,
+            collectionEventType: this.collectionEventType
+          },
+          'ceventAdd');
       };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('ceventAdd');
-    };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               '$state',
@@ -51,8 +57,8 @@ define([
                               'CollectionEventType',
                               'factory');
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/ceventAdd/ceventAdd.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/collection/components/ceventAdd/ceventAdd.html',
         '/assets/javascripts/common/annotationsInput/annotationsInput.html',
         '/assets/javascripts/common/annotationsInput/textAnnotation.html',
         '/assets/javascripts/common/annotationsInput/numberAnnotation.html',
@@ -62,19 +68,19 @@ define([
         '/assets/javascripts/common/components/dateTimePicker/dateTimePicker.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
-      self.jsonCevent      = self.factory.collectionEvent();
-      self.jsonCeventType  = self.factory.defaultCollectionEventType();
-      self.jsonParticipant = self.factory.defaultParticipant();
-      self.jsonStudy       = self.factory.defaultStudy();
+      this.jsonCevent      = this.factory.collectionEvent();
+      this.jsonCeventType  = this.factory.defaultCollectionEventType();
+      this.jsonParticipant = this.factory.defaultParticipant();
+      this.jsonStudy       = this.factory.defaultStudy();
 
-      self.study               = new self.Study(self.jsonStudy);
-      self.participant         = new self.Participant(self.jsonParticipant);
-      self.collectionEventType = new self.CollectionEventType(self.jsonCeventType);
-      self.collectionEvent    = new self.CollectionEvent(self.jsonCevent);
+      this.study               = new this.Study(this.jsonStudy);
+      this.participant         = new this.Participant(this.jsonParticipant);
+      this.collectionEventType = new this.CollectionEventType(this.jsonCeventType);
+      this.collectionEvent     = new this.CollectionEvent(this.jsonCevent);
     }));
 
     it('has valid scope', function() {
-      createDirective.call(this);
+      this.createController();
 
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.participant).toBe(this.participant);
@@ -92,7 +98,7 @@ define([
       spyOn(this.CollectionEvent.prototype, 'add').and.returnValue(this.$q.when(this.collectionEvent));
       spyOn(this.$state, 'go').and.returnValue('ok');
 
-      createDirective.call(this);
+      this.createController();
       this.controller.submit();
       this.scope.$digest();
 
@@ -109,7 +115,7 @@ define([
           .and.returnValue(this.$q.reject('simulated update failure'));
         spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('ok'));
 
-        createDirective.call(this);
+        this.createController();
         this.controller.submit();
         this.scope.$digest();
 
@@ -123,7 +129,7 @@ define([
           .and.returnValue(this.$q.reject('cancel button pressed'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
-        createDirective.call(this);
+        this.createController();
         this.controller.submit();
         this.scope.$digest();
 
@@ -136,7 +142,7 @@ define([
     it('changes state when forms Cancel button is pressed', function() {
       spyOn(this.$state, 'go').and.returnValue('ok');
 
-      createDirective.call(this);
+      this.createController();
       this.controller.cancel();
       this.scope.$digest();
 
@@ -146,13 +152,12 @@ define([
     it('time completed is updated when edited', function() {
       var timeNow = new Date();
 
-      createDirective.call(this);
+      this.createController();
       this.controller.dateTimeOnEdit(timeNow);
       this.scope.$digest();
 
       expect(this.controller.timeCompleted).toEqual(timeNow);
     });
-
 
   });
 

@@ -21,6 +21,7 @@ define(function (require) {
 
     .component('specimenView',        require('./components/specimenView/specimenViewComponent'))
     .component('collection',          require('./components/collection/collectionComponent'))
+    .component('ceventAdd',           require('./components/ceventAdd/ceventAddComponent'))
 
     .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
 
@@ -33,7 +34,6 @@ define(function (require) {
 
     .directive('participantView',     require('./directives/participantView/participantViewDirective'))
 
-    .directive('ceventAdd',           require('./directives/ceventAdd/ceventAddDirective'))
     .directive('ceventGetType',       require('./directives/ceventGetType/ceventGetTypeDirective'))
     .directive('ceventView',          require('./directives/ceventView/ceventViewDirective'))
     .directive('ceventsAddAndSelect',
