@@ -7,83 +7,80 @@
 define(function(require) {
   'use strict';
 
-  var angular                         = require('angular'),
-      mocks                           = require('angularMocks'),
+  var mocks                           = require('angularMocks'),
       _                               = require('lodash'),
       faker                           = require('faker'),
       annotationUpdateSharedBehaviour = require('../../../test/annotationUpdateSharedBehaviour');
 
-  function SuiteMixinFactory(TestSuiteMixin) {
+  describe('Component: ceventView', function() {
 
-    function SuiteMixin() {
-      TestSuiteMixin.call(this);
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.collectionEventWithAnnotation = function (valueType, maxValueCount) {
+        var jsonAnnotationType,
+            value,
+            jsonAnnotation,
+            jsonCeventType,
+            jsonCevent;
+
+        maxValueCount = maxValueCount || 0;
+
+        jsonAnnotationType  = this.factory.annotationType({ valueType: valueType,
+                                                            maxValueCount: maxValueCount });
+        jsonCeventType      = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ]});
+        value               = this.factory.valueForAnnotation(jsonAnnotationType);
+        jsonAnnotation      = this.factory.annotation({ value: value }, jsonAnnotationType);
+        jsonCevent          = this.factory.collectionEvent({ collectionEvent: jsonCeventType,
+                                                             annotations: [ jsonAnnotation ]});
+        return this.CollectionEvent.create(jsonCevent);
+      };
+
+      SuiteMixin.prototype.createController = function (study, collectionEventTypes, collectionEvent) {
+        if (_.isUndefined(collectionEventTypes)) {
+          fail('collectionEventTypes is undefined');
+        }
+
+        if (_.isUndefined(collectionEvent)) {
+          fail('collectionEvent is undefined');
+        }
+
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          [
+            '<cevent-view',
+            '  study="vm.study"',
+            '  collection-event-types="vm.collectionEventTypes"',
+            '  collection-event="vm.collectionEvent">',
+            '</cevent-view>'
+          ].join(''),
+          {
+            study:                study,
+            collectionEvent:      collectionEvent,
+            collectionEventTypes: collectionEventTypes
+          },
+          'ceventView');
+      };
+
+      return SuiteMixin;
     }
 
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    SuiteMixin.prototype.collectionEventWithAnnotation = function (valueType, maxValueCount) {
-      var jsonAnnotationType,
-          value,
-          jsonAnnotation,
-          jsonCeventType,
-          jsonCevent;
-
-      maxValueCount = maxValueCount || 0;
-
-      jsonAnnotationType  = this.factory.annotationType({ valueType: valueType,
-                                                          maxValueCount: maxValueCount });
-      jsonCeventType      = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ]});
-      value               = this.factory.valueForAnnotation(jsonAnnotationType);
-      jsonAnnotation      = this.factory.annotation({ value: value }, jsonAnnotationType);
-      jsonCevent          = this.factory.collectionEvent({ collectionEvent: jsonCeventType,
-                                                           annotations: [ jsonAnnotation ]});
-      return this.CollectionEvent.create(jsonCevent);
-    };
-
-    SuiteMixin.prototype.createDirective = function (collectionEventTypes, collectionEvent) {
-      if (_.isUndefined(collectionEventTypes)) {
-        fail('collectionEventTypes is undefined');
-      }
-
-      if (_.isUndefined(collectionEvent)) {
-        fail('collectionEvent is undefined');
-      }
-
-      this.element = angular.element([
-        '<cevent-view',
-        '  collection-event-types="vm.collectionEventTypes"',
-        '  collection-event="vm.collectionEvent">',
-        '</cevent-view>'
-      ].join(''));
-
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        collectionEventTypes: collectionEventTypes,
-        collectionEvent:      collectionEvent
-      };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('ceventView');
-    };
-
-    return SuiteMixin;
-  }
-
-  describe('directive: ceventViewDirective', function() {
-
-    mocks.module.sharedInjector();
-
-    beforeAll(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
                               '$state',
+                              'Study',
                               'Participant',
                               'CollectionEvent',
                               'CollectionEventType',
@@ -96,9 +93,9 @@ define(function(require) {
                               'factory');
 
       this.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/ceventView/ceventView.html',
+        '/assets/javascripts/collection/components/ceventView/ceventView.html',
         '/assets/javascripts/collection/components/ceventSpecimensView/ceventSpecimensView.html',
-        '/assets/javascripts/common/directives/statusLine/statusLine.html',
+        '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/common/directives/pagination.html');
 
       this.jsonCevent      = this.factory.collectionEvent();
@@ -113,9 +110,10 @@ define(function(require) {
     it('has valid scope', function() {
       var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                                this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-          collectionEventTypes = [ collectionEvent.collectionEventType ];
+          collectionEventTypes = [ collectionEvent.collectionEventType ],
+          study = new this.Study(this.factory.defaultStudy());
 
-      this.createDirective(collectionEventTypes, collectionEvent);
+      this.createController(study, collectionEventTypes, collectionEvent);
 
       expect(this.controller.collectionEventTypes).toBe(collectionEventTypes);
       expect(this.controller.collectionEvent).toBe(collectionEvent);
@@ -129,9 +127,10 @@ define(function(require) {
     it('panel can be closed and opened', function() {
       var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                                this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-          collectionEventTypes = [ collectionEvent.collectionEventType ];
+          collectionEventTypes = [ collectionEvent.collectionEventType ],
+          study = new this.Study(this.factory.defaultStudy());
 
-      this.createDirective(collectionEventTypes, collectionEvent);
+      this.createController(study, collectionEventTypes, collectionEvent);
       this.controller.panelButtonClicked();
       this.scope.$digest();
       expect(this.controller.panelOpen).toBeFalse();
@@ -170,7 +169,8 @@ define(function(require) {
 
         beforeEach(inject(function () {
           var self = this,
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT);
+              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT),
+              study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
           context.createDirective          = createDirective;
@@ -180,7 +180,7 @@ define(function(require) {
           context.newValue                 = faker.random.word();
 
           function createDirective() {
-            return self.createDirective([ collectionEvent.collectionEventType ], collectionEvent);
+            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
 
@@ -193,7 +193,8 @@ define(function(require) {
         beforeEach(inject(function () {
           var self = this,
               newValue = faker.date.recent(10),
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME);
+              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME),
+              study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
           context.createDirective          = createDirective;
@@ -203,7 +204,7 @@ define(function(require) {
           context.newValue                 = { date: newValue, time: newValue };
 
           function createDirective() {
-            return self.createDirective([ collectionEvent.collectionEventType ], collectionEvent);
+            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
 
@@ -215,7 +216,8 @@ define(function(require) {
 
         beforeEach(inject(function () {
           var self = this,
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER);
+              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER),
+              study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
           context.createDirective          = createDirective;
@@ -225,7 +227,7 @@ define(function(require) {
           context.newValue                 = 10;
 
           function createDirective() {
-            return self.createDirective([ collectionEvent.collectionEventType ], collectionEvent);
+            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
 
@@ -238,7 +240,8 @@ define(function(require) {
         beforeEach(inject(function () {
           var self = this,
               collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                   this.AnnotationMaxValueCount.SELECT_SINGLE);
+                                                                   this.AnnotationMaxValueCount.SELECT_SINGLE),
+              study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
           context.createDirective          = createDirective;
@@ -248,7 +251,7 @@ define(function(require) {
           context.newValue                 = collectionEvent.annotations[0].annotationType.options[0];
 
           function createDirective() {
-            return self.createDirective([ collectionEvent.collectionEventType ], collectionEvent);
+            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
 
@@ -261,7 +264,8 @@ define(function(require) {
         beforeEach(inject(function () {
           var self = this,
               collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                   this.AnnotationMaxValueCount.SELECT_MULTIPLE);
+                                                                   this.AnnotationMaxValueCount.SELECT_MULTIPLE),
+              study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
           context.createDirective          = createDirective;
@@ -271,7 +275,7 @@ define(function(require) {
           context.newValue                 = collectionEvent.annotations[0].annotationType.options;
 
           function createDirective() {
-            return self.createDirective([ collectionEvent.collectionEventType ], collectionEvent);
+            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
 
@@ -293,6 +297,8 @@ define(function(require) {
             this.AnnotationValueType.SELECT,
             this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
+          this.study = new this.Study(this.factory.defaultStudy());
+
         }));
 
 
@@ -303,7 +309,9 @@ define(function(require) {
             .and.returnValue(this.$q.when(context.collectionEvent));
           spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-          this.createDirective([ this.collectionEvent.collectionEventType ], this.collectionEvent);
+          this.createController(this.study,
+                                [ this.collectionEvent.collectionEventType ],
+                                this.collectionEvent);
           this.controller[context.controllerUpdateFuncName]();
           this.scope.$digest();
 
@@ -318,7 +326,9 @@ define(function(require) {
             .and.returnValue(this.$q.reject('simulated error'));
           spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-          this.createDirective([ this.collectionEvent.collectionEventType ], this.collectionEvent);
+          this.createController(this.study,
+                                [ this.collectionEvent.collectionEventType ],
+                                this.collectionEvent);
           this.controller[context.controllerUpdateFuncName]();
           this.scope.$digest();
 
@@ -332,6 +342,7 @@ define(function(require) {
 
       beforeEach(function() {
         this.collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER);
+        this.study = new this.Study(this.factory.defaultStudy());
       });
 
       it('can remove the collection event when cevent has no specimens', function() {
@@ -354,7 +365,7 @@ define(function(require) {
         this.$state.go =
           jasmine.createSpy('state.go').and.returnValue(null);
 
-        this.createDirective(collectionEventTypes, collectionEvent);
+        this.createController(this.study, collectionEventTypes, collectionEvent);
         this.controller.remove();
         this.scope.$digest();
         expect(this.CollectionEvent.prototype.remove).toHaveBeenCalled();
@@ -382,7 +393,7 @@ define(function(require) {
         this.$state.go =
           jasmine.createSpy('state.go').and.returnValue(null);
 
-        this.createDirective(collectionEventTypes, collectionEvent);
+        this.createController(this.study, collectionEventTypes, collectionEvent);
         this.controller.remove();
         this.scope.$digest();
         expect(this.CollectionEvent.prototype.remove).toHaveBeenCalled();
@@ -402,7 +413,7 @@ define(function(require) {
         this.modalService.modalOk =
           jasmine.createSpy('modalOk').and.returnValue(this.$q.when('OK'));
 
-        this.createDirective(collectionEventTypes, collectionEvent);
+        this.createController(this.study, collectionEventTypes, collectionEvent);
         this.controller.remove();
         this.scope.$digest();
         expect(this.modalService.modalOk).toHaveBeenCalled();

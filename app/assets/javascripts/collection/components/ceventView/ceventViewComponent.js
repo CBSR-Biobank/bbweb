@@ -1,32 +1,24 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 define(function (require) {
   'use strict';
 
   var _ = require('lodash');
 
-  /**
-   *
-   */
-  function ceventViewDirective() {
-    var directive = {
-      restrict: 'EA',
-      scope: {},
-      bindToController: {
-        study:                '=',
-        collectionEventTypes: '=',
-        collectionEvent:      '='
-      },
-      templateUrl : '/assets/javascripts/collection/directives/ceventView/ceventView.html',
-      controller: CeventViewCtrl,
-      controllerAs: 'vm'
-    };
-    return directive;
-  }
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/ceventView/ceventView.html',
+    controller: CeventViewController,
+    controllerAs: 'vm',
+    bindings: {
+      study:                '=',
+      collectionEvent:      '=',
+      collectionEventTypes: '='
+    }
+  };
 
-  CeventViewCtrl.$inject = [
+  CeventViewController.$inject = [
     '$state',
     'gettextCatalog',
     'CollectionEvent',
@@ -39,19 +31,19 @@ define(function (require) {
     'annotationUpdate'
   ];
 
-  /**
-   *
+  /*
+   * Controller for this component.
    */
-  function CeventViewCtrl($state,
-                          gettextCatalog,
-                          CollectionEvent,
-                          Specimen,
-                          timeService,
-                          modalService,
-                          modalInput,
-                          domainNotificationService,
-                          notificationsService,
-                          annotationUpdate) {
+  function CeventViewController($state,
+                                gettextCatalog,
+                                CollectionEvent,
+                                Specimen,
+                                timeService,
+                                modalService,
+                                modalInput,
+                                domainNotificationService,
+                                notificationsService,
+                                annotationUpdate) {
     var vm = this;
 
     vm.collectionEventType = _.find(vm.collectionEventTypes, { id: vm.collectionEvent.collectionEventTypeId });
@@ -138,5 +130,5 @@ define(function (require) {
 
   }
 
-  return ceventViewDirective;
+  return component;
 });
