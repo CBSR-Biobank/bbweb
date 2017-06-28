@@ -16,11 +16,11 @@ define(function (require) {
   module
     .config(require('./states'))
     .component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'))
+    .component('passwordSent',   require('./components/passwordSent/passwordSentComponent'))
     .component('registerUser',   require('./components/registerUser/registerUserComponent'))
 
     .directive('login',         require('./directives/login/loginDirective'))
     .directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'))
-    .directive('passwordSent',  require('./directives/passwordSent/passwordSentDirective'))
     .directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'))
 
     .service('usersService',   require('./usersService'))
