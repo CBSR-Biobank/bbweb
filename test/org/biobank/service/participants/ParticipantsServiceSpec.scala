@@ -46,7 +46,7 @@ class ParticipantsServiceSpec
             expectedVersion = participant.version,
             uniqueId        = participant.uniqueId
           ),
-          ParticipantAddAnnotationCmd(
+          ParticipantUpdateAnnotationCmd(
             sessionUserId    = sessionUserId.id,
             id               = participant.id.id,
             expectedVersion  = participant.version,
@@ -160,7 +160,7 @@ class ParticipantsServiceSpec
           info(label)
           forAll(commandsTable(user.id, f.participant, f.annotation)) { cmd =>
             val participant = cmd match {
-                case c: ParticipantAddAnnotationCmd => f.participant.copy(annotations = Set.empty[Annotation])
+                case c: ParticipantUpdateAnnotationCmd => f.participant.copy(annotations = Set.empty[Annotation])
                 case _ => f.participant
               }
             participantRepository.put(participant)

@@ -87,7 +87,7 @@ class CollectionEventsProcessor @Inject() (
     case cmd: UpdateCollectionEventTimeCompletedCmd =>
       processUpdateCmd(cmd, updateTimeCompletedCmdToEvent, applyTimeCompletedUpdatedEvent)
 
-    case cmd: AddCollectionEventAnnotationCmd =>
+    case cmd: CollectionEventUpdateAnnotationCmd =>
       processUpdateCmd(cmd, updateAnnotationCmdToEvent, applyAnnotationUpdatedEvent)
 
     case cmd: RemoveCollectionEventAnnotationCmd =>
@@ -198,20 +198,23 @@ class CollectionEventsProcessor @Inject() (
     }
   }
 
-  private def updateAnnotationCmdToEvent(cmd:                 AddCollectionEventAnnotationCmd,
+  private def updateAnnotationCmdToEvent(cmd:                 CollectionEventUpdateAnnotationCmd,
                                          participant:         Participant,
                                          collectionEventType: CollectionEventType,
                                          cevent:              CollectionEvent)
       : ServiceValidation[CollectionEventEvent] = {
+    val id = AnnotationTypeId(cmd.annotationTypeId)
     for {
-      annotation      <- Annotation.create(AnnotationTypeId(cmd.annotationTypeId),
-                                           cmd.stringValue,
-                                           cmd.numberValue,
-                                           cmd.selectedValues)
-      allAnnotations  <- (cevent.annotations + annotation).successNel[String]
-      validAnnotation <- Annotation.validateAnnotations(collectionEventType.annotationTypes,
-                                                        allAnnotations.toList)
-      updatedCevent   <- cevent.withAnnotation(annotation)
+      hasAnnotationType  <- {
+        collectionEventType.annotationTypes
+          .find(at => at.id == id)
+          .toSuccessNel(s"IdNotFound: Collection Event Type does not have annotation type: $id")
+      }
+      annotation     <- Annotation.create(id,
+                                          cmd.stringValue,
+                                          cmd.numberValue,
+                                          cmd.selectedValues)
+      updatedCevent  <- cevent.withAnnotation(annotation)
     } yield CollectionEventEvent(updatedCevent.id.id).update(
       _.participantId                := participant.id.id,
       _.collectionEventTypeId        := updatedCevent.collectionEventTypeId.id,

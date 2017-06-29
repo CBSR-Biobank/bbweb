@@ -67,7 +67,7 @@ class CollectionEventsController @Inject() (val action:       BbwebAction,
     commandAction[UpdateCollectionEventTimeCompletedCmd](Json.obj("id" -> ceventId))(processCommand)
 
   def addAnnotation(ceventId: CollectionEventId): Action[JsValue] =
-    commandAction[AddCollectionEventAnnotationCmd](Json.obj("id" -> ceventId))(processCommand)
+    commandAction[CollectionEventUpdateAnnotationCmd](Json.obj("id" -> ceventId))(processCommand)
 
   def removeAnnotation(ceventId: CollectionEventId,
                        annotTypeId:   String,

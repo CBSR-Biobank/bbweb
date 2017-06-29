@@ -17,7 +17,7 @@ message ParticipantEvent {
       optional string uniqueId        = 2;
    }
 
-   message AnnotationAdded {
+   message AnnotationUpdated {
       optional int64      version     = 1;
       optional Annotation annotation  = 2;
    }
@@ -34,7 +34,7 @@ message ParticipantEvent {
    oneof event_type {
       Added             added             = 4;
       UniqueIdUpdated   uniqueIdUpdated   = 5;
-      AnnotationAdded   annotationAdded   = 6;
+      AnnotationUpdated annotationUpdated = 6;
       AnnotationRemoved annotationRemoved = 7;
    }
 }

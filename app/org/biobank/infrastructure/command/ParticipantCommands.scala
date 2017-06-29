@@ -25,7 +25,7 @@ object ParticipantCommands {
                                                 uniqueId:        String)
       extends ParticipantModifyCommand
 
-  final case class ParticipantAddAnnotationCmd(sessionUserId:    String,
+  final case class ParticipantUpdateAnnotationCmd(sessionUserId:    String,
                                                id:               String,
                                                expectedVersion:  Long,
                                                annotationTypeId: String,
@@ -46,8 +46,8 @@ object ParticipantCommands {
   implicit val updateParticipantUniqueIdCmdReads: Reads[UpdateParticipantUniqueIdCmd] =
     Json.reads[UpdateParticipantUniqueIdCmd]
 
-  implicit val participantAddAnnotationCmdReads: Reads[ParticipantAddAnnotationCmd] =
-    Json.reads[ParticipantAddAnnotationCmd]
+  implicit val participantAddAnnotationCmdReads: Reads[ParticipantUpdateAnnotationCmd] =
+    Json.reads[ParticipantUpdateAnnotationCmd]
 
   implicit val participantRemoveAnnotationCmdReads: Reads[ParticipantRemoveAnnotationCmd] =
     Json.reads[ParticipantRemoveAnnotationCmd]

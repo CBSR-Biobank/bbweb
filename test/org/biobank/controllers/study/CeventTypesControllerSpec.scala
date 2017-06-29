@@ -285,7 +285,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItem, f.ceTypes(2))
       }
 
-      it("111 fail for invalid study id") {
+      it("fail for invalid study id") {
         val study = factory.createDisabledStudy
         val json = makeRequest(GET, uri(study), NOT_FOUND)
 

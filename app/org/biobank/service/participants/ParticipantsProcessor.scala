@@ -51,7 +51,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       event.eventType match {
         case et: EventType.Added             => applyAddedEvent(event)
         case et: EventType.UniqueIdUpdated   => applyUniqueIdUpdatedEvent(event)
-        case et: EventType.AnnotationAdded   => applyAnnotationAddedEvent(event)
+        case et: EventType.AnnotationUpdated => applyAnnotationUpdatedEvent(event)
         case et: EventType.AnnotationRemoved => applyAnnotationRemovedEvent(event)
 
         case event => log.error(s"event not handled: $event")
@@ -79,8 +79,8 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
     case cmd: UpdateParticipantUniqueIdCmd =>
       processUpdateCmd(cmd, updateUniqueIdCmdToEvent, applyUniqueIdUpdatedEvent)
 
-    case cmd: ParticipantAddAnnotationCmd =>
-      processUpdateCmd(cmd, addAnnotationCmdToEvent, applyAnnotationAddedEvent)
+    case cmd: ParticipantUpdateAnnotationCmd =>
+      processUpdateCmd(cmd, updateAnnotationCmdToEvent, applyAnnotationUpdatedEvent)
 
     case cmd: ParticipantRemoveAnnotationCmd =>
       processUpdateCmd(cmd, removeAnnotationCmdToEvent, applyAnnotationRemovedEvent)
@@ -155,23 +155,26 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       _.uniqueIdUpdated.uniqueId := cmd.uniqueId)
   }
 
-  private def addAnnotationCmdToEvent(cmd:          ParticipantAddAnnotationCmd,
-                                      study:       Study,
-                                      participant: Participant): ServiceValidation[ParticipantEvent] = {
+  private def updateAnnotationCmdToEvent(cmd:          ParticipantUpdateAnnotationCmd,
+                                         study:       Study,
+                                         participant: Participant): ServiceValidation[ParticipantEvent] = {
+    val id = AnnotationTypeId(cmd.annotationTypeId)
     for {
-      annotation         <- Annotation.create(AnnotationTypeId(cmd.annotationTypeId),
+      hasAnnotationType  <- {
+        study.annotationTypes
+          .find(at => at.id == id)
+          .toSuccessNel(s"IdNotFound: study does not have annotation type: $id")
+      }
+      annotation         <- Annotation.create(id,
                                               cmd.stringValue,
                                               cmd.numberValue,
                                               cmd.selectedValues)
-      allAnnotations     <- (participant.annotations + annotation).successNel[String]
-      validAnnotation    <- Annotation.validateAnnotations(study.annotationTypes,
-                                                           allAnnotations.toList)
       updatedParticipant <- participant.withAnnotation(annotation)
     } yield ParticipantEvent(updatedParticipant.id.id).update(
-      _.sessionUserId              := cmd.sessionUserId,
-      _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
-      _.annotationAdded.version    := cmd.expectedVersion,
-      _.annotationAdded.annotation := annotationToEvent(annotation))
+      _.sessionUserId                := cmd.sessionUserId,
+      _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.annotationUpdated.version    := cmd.expectedVersion,
+      _.annotationUpdated.annotation := annotationToEvent(annotation))
   }
 
   private def removeAnnotationCmdToEvent(cmd:        ParticipantRemoveAnnotationCmd,
@@ -266,11 +269,11 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
     }
   }
 
-  private def applyAnnotationAddedEvent(event: ParticipantEvent) = {
+  private def applyAnnotationUpdatedEvent(event: ParticipantEvent) = {
     onValidEventAndVersion(event,
-                           event.eventType.isAnnotationAdded,
-                           event.getAnnotationAdded.getVersion) { (participant, eventTime) =>
-      val v = participant.withAnnotation(annotationFromEvent(event.getAnnotationAdded.getAnnotation))
+                           event.eventType.isAnnotationUpdated,
+                           event.getAnnotationUpdated.getVersion) { (participant, eventTime) =>
+      val v = participant.withAnnotation(annotationFromEvent(event.getAnnotationUpdated.getAnnotation))
       v.foreach( p => participantRepository.put(p.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }

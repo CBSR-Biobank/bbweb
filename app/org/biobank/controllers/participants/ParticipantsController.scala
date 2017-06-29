@@ -45,7 +45,7 @@ class ParticipantsController @Inject() (val action:              BbwebAction,
     commandAction[UpdateParticipantUniqueIdCmd](Json.obj("id" -> id))(processCommand)
 
   def addAnnotation(id: ParticipantId): Action[JsValue] =
-    commandAction[ParticipantAddAnnotationCmd](Json.obj("id" -> id))(processCommand)
+    commandAction[ParticipantUpdateAnnotationCmd](Json.obj("id" -> id))(processCommand)
 
   def removeAnnotation(participantId: ParticipantId, annotTypeId: String, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>

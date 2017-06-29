@@ -55,7 +55,7 @@ class CollectionEventServiceSpec
             expectedVersion = cevent.version,
             timeCompleted   = cevent.timeCompleted
           ),
-          AddCollectionEventAnnotationCmd(
+          CollectionEventUpdateAnnotationCmd(
             sessionUserId    = sessionUserId.id,
             id               = cevent.id.id,
             expectedVersion  = cevent.version,
@@ -211,7 +211,7 @@ class CollectionEventServiceSpec
           info(label)
           forAll(updateCommandsTable(user.id, f.cevent, f.ceventAnnotation)) { cmd =>
             val cevent = cmd match {
-                case _: AddCollectionEventAnnotationCmd =>
+                case _: CollectionEventUpdateAnnotationCmd =>
                   f.cevent.copy(annotations = Set.empty[Annotation])
                 case _ =>
                   f.cevent

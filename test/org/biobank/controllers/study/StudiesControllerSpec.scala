@@ -128,13 +128,13 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         compareObj(jsonItem, f.study)
       }
 
-      it("111 when study disabled, returns zero studies") {
+      it("when study disabled, returns zero studies") {
         val f = new CollectionFixture
         f.study.disable.map(addToRepository)
         PagedResultsSpec(this).emptyResults(uri("collectionStudies"))
       }
 
-      it("111 when centre disabled, returns zero studies") {
+      it("when centre disabled, returns zero studies") {
         val f = new CollectionFixture
         f.centre.disable.map(addToRepository)
         PagedResultsSpec(this).emptyResults(uri("collectionStudies"))

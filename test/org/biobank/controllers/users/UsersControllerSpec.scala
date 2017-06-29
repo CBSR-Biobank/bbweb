@@ -752,7 +752,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("111 POST /users/login") {
+    describe("POST /users/login") {
 
       it("allow a user to log in") {
         val plainPassword = nameGenerator.next[String]

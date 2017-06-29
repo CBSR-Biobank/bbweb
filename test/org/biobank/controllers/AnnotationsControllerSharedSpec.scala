@@ -84,18 +84,15 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
 
     it(s"fail when adding annotation and ${entityName} parent does not have annotation types") {
       val annotation = factory.createAnnotation
-
       val entity = createEntity(Set.empty, Set(annotation))
-
       val json = makeRequest(POST,
                              updateUri(entity),
-                             BAD_REQUEST,
-                             Json.obj("expectedVersion" -> entity.version) ++
-                               annotationToJson(annotation))
+                             NOT_FOUND,
+                             Json.obj("expectedVersion" -> entity.version) ++ annotationToJson(annotation))
 
       (json \ "status").as[String] must include ("error")
 
-      (json \ "message").as[String] must include ("no annotation types")
+      (json \ "message").as[String] must include regex "does not have annotation type"
     }
 
     it("fail when adding annotation and annotation has invalid annotation type id") {
@@ -107,13 +104,13 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
 
       val json = makeRequest(POST,
                              updateUri(entity),
-                             BAD_REQUEST,
+                             NOT_FOUND,
                              Json.obj("expectedVersion" -> entity.version) ++
                                annotationToJson(annotation))
 
       (json \ "status").as[String] must include ("error")
 
-      (json \ "message").as[String] must include ("annotation(s) do not belong to annotation types")
+      (json \ "message").as[String] must include regex "does not have annotation type"
     }
 
     it("fail when adding annotation with an invalid version") {
