@@ -15,13 +15,13 @@ define(function (require) {
 
   module = angular.module(name, []);
 
-  module.config(require('./states'));
+  module
+    .config(require('./states'))
+    .component('about',         require('./components/about/aboutComponent'))
+    .component('biobankFooter', require('./components/biobankFooter/biobankFooterComponent'))
 
-  module.component('about', require('./components/about/aboutComponent'));
-
-  module.directive('biobankFooter', require('./directives/biobankFooter/biobankFooterDirective'));
-  module.directive('biobankHeader', require('./directives/biobankHeader/biobankHeaderDirective'));
-  module.directive('home',            require('./directives/home/homeDirective'));
+    .directive('biobankHeader', require('./directives/biobankHeader/biobankHeaderDirective'))
+    .directive('home',          require('./directives/home/homeDirective'));
 
   return {
     name: name,
