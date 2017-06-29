@@ -168,9 +168,18 @@ define(['lodash'], function(_) {
         }
       });
 
-    resolveStudy.$inject = ['$transition$', 'Study'];
-    function resolveStudy($transition$, Study) {
-      return Study.get($transition$.params().studyId);
+    function redirectToLogin($state) {
+      return function (error) {
+        if (error.status && (error.status === 401)) {
+          $state.go('home.users.login', {}, { reload: true });
+        }
+      };
+    }
+
+    resolveStudy.$inject = ['$state', '$transition$', 'Study'];
+    function resolveStudy($state, $transition$, Study) {
+      return Study.get($transition$.params().studyId)
+        .catch(redirectToLogin($state));
     }
 
     resolveParticipant.$inject = ['$transition$', 'Participant', 'study'];
