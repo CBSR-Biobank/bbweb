@@ -33,7 +33,7 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, ComponentTestSuiteMixin) {
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
       _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.injectDependencies('$rootScope',

@@ -1,25 +1,18 @@
 /**
- * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ *
  */
 define(function () {
   'use strict';
 
-  /**
-   *
-   */
-  function biobankHeaderDirective() {
-    var directive = {
-      restrict: 'E',
-      templateUrl: '/assets/javascripts/home/directives/biobankHeader/biobankHeader.html',
-      controller: BiobankHeaderCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/home/components/biobankHeader/biobankHeader.html',
+    controller: BiobankHeaderController,
+    controllerAs: 'vm',
+    bindings: {
+    }
+  };
 
-    return directive;
-  }
-
-  BiobankHeaderCtrl.$inject = [
+  BiobankHeaderController.$inject = [
     '$scope',
     '$state',
     '$log',
@@ -27,11 +20,14 @@ define(function () {
     'usersService'
   ];
 
-  function BiobankHeaderCtrl($scope,
-                             $state,
-                             $log,
-                             languageService,
-                             usersService) {
+  /*
+   * Controller for this component.
+   */
+  function BiobankHeaderController($scope,
+                                   $state,
+                                   $log,
+                                   languageService,
+                                   usersService) {
     var vm = this;
     vm.navCollapsed = true;
     vm.logout = logout;
@@ -67,5 +63,5 @@ define(function () {
     }
   }
 
-  return biobankHeaderDirective;
+  return component;
 });

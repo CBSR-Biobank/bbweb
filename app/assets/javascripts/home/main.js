@@ -19,8 +19,8 @@ define(function (require) {
     .config(require('./states'))
     .component('about',         require('./components/about/aboutComponent'))
     .component('biobankFooter', require('./components/biobankFooter/biobankFooterComponent'))
+    .component('biobankHeader', require('./components/biobankHeader/biobankHeaderComponent'))
 
-    .directive('biobankHeader', require('./directives/biobankHeader/biobankHeaderDirective'))
     .directive('home',          require('./directives/home/homeDirective'));
 
   return {
