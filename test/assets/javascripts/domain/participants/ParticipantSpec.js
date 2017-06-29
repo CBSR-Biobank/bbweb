@@ -314,7 +314,7 @@ define(function(require) {
 
         _.each(participant.annotations, function (annotation) {
           annotation.required = true;
-          expect(annotation.getValue()).toBeFalsy();
+          expect(annotation.getDisplayValue()).toBeFalsy();
         });
 
         participant.add().then(failTest).catch(checkErrorMsg);

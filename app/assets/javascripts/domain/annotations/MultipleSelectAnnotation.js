@@ -36,8 +36,11 @@ define(['lodash'], function(_) {
     MultipleSelectAnnotation.prototype = Object.create(Annotation.prototype);
 
     MultipleSelectAnnotation.prototype.getValue = function () {
-      this.displayValue = getValueAsArray(this.values).join(', ');
-      return this.displayValue;
+      return getValueAsArray(this.values);
+    };
+
+    MultipleSelectAnnotation.prototype.getDisplayValue = function () {
+      return this.getValue().join(', ');
     };
 
     MultipleSelectAnnotation.prototype.setValue = function (value) {
@@ -53,6 +56,21 @@ define(['lodash'], function(_) {
         annotationTypeId: self.getAnnotationTypeId(),
         selectedValues:   getValueAsArray(self.values)
       };
+    };
+
+    /**
+     * For non requried annotation types, this always returns true. For required annotation types,
+     * returns true if the value is not empty.
+     */
+    MultipleSelectAnnotation.prototype.isValueValid = function () {
+      var value;
+
+      if (!this.required) {
+        return true;
+      }
+
+      value = this.getValue();
+      return !(_.isUndefined(value) || _.isNull(value) || (_.isArray(value) && (value.length === 0)));
     };
 
     function getValueAsArray(values) {

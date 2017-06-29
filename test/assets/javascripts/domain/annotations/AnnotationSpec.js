@@ -161,7 +161,7 @@ define(function(require) {
           annotationType = self.createAnnotationType(annotationTypeOptions);
           jsonAnnotation = self.factory.annotation(null, annotationType);
           annotation = self.annotationFactory.create(jsonAnnotation, annotationType);
-          expect(annotation.getValue()).toBeFalsy();
+          expect(annotation.getDisplayValue()).toBeFalsy();
         });
       });
 
@@ -412,7 +412,7 @@ define(function(require) {
       expect(annotation.getValue()).toEqual(serverAnnotation.selectedValues[0]);
     });
 
-    it('getValue returns valid results for MULTIPLE SELECT', function() {
+    it('getDisplayValue returns valid results for MULTIPLE SELECT', function() {
       var annotationType, annotation, serverAnnotation, value;
 
       annotationType = this.createAnnotationType({
@@ -426,7 +426,7 @@ define(function(require) {
       serverAnnotation = this.factory.annotation({ value: value }, annotationType);
       annotation = this.annotationFactory.create(serverAnnotation, annotationType);
 
-      expect(annotation.getValue()).toEqual(serverAnnotation.selectedValues.join(', '));
+      expect(annotation.getDisplayValue()).toEqual(serverAnnotation.selectedValues.join(', '));
     });
 
     it('getServerAnnotation returns valid results for non select annotation types', function() {

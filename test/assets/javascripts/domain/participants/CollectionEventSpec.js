@@ -525,7 +525,7 @@ define(function (require) {
         collectionEvent = new self.CollectionEvent(jsonCevent, ceventType);
 
         _.each(collectionEvent.annotations, function (annotation) {
-          expect(annotation.getValue()).toBeFalsy();
+          expect(annotation.getDisplayValue()).toBeFalsy();
         });
 
         expect(function () {

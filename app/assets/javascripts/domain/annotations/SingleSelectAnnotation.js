@@ -37,6 +37,10 @@ define(['lodash'], function(_) {
       return this.value;
     };
 
+    SingleSelectAnnotation.prototype.getDisplayValue = function () {
+      return this.value;
+    };
+
     SingleSelectAnnotation.prototype.getServerAnnotation = function () {
       var self = this,
           selectedValues = [];

@@ -9,7 +9,7 @@ define(['moment', 'lodash'], function(moment, _) {
 
   function DateTimeAnnotationFactory(Annotation, timeService) {
 
-    /**
+    /*
      * Please use annotationFactory.create to create annotation objects.
      */
     function DateTimeAnnotation(obj, annotationType) {
@@ -30,7 +30,7 @@ define(['moment', 'lodash'], function(moment, _) {
 
     DateTimeAnnotation.prototype = Object.create(Annotation.prototype);
 
-    /**
+    /*
      * Must return a string.
      */
     DateTimeAnnotation.prototype.getValue = function () {
@@ -38,6 +38,10 @@ define(['moment', 'lodash'], function(moment, _) {
         return null;
       }
       return timeService.dateToDisplayString(this.value);
+    };
+
+    DateTimeAnnotation.prototype.getDisplayValue = function () {
+      return this.getValue();
     };
 
     DateTimeAnnotation.prototype.setValue = function (value) {
@@ -48,7 +52,7 @@ define(['moment', 'lodash'], function(moment, _) {
       }
     };
 
-    /**
+    /*
      *
      */
     DateTimeAnnotation.prototype.getServerAnnotation = function () {

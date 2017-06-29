@@ -29,6 +29,10 @@ define(function() {
       return this.value;
     };
 
+    TextAnnotation.prototype.getDisplayValue = function () {
+      return this.value;
+    };
+
     TextAnnotation.prototype.getServerAnnotation = function () {
       return {
         annotationTypeId: this.getAnnotationTypeId(),

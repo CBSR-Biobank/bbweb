@@ -46,7 +46,7 @@ define(['lodash'], function (_) {
       } else if (annotation instanceof MultipleSelectAnnotation) {
         return modalInput.selectMultiple(title,
                                          annotation.annotationType.name,
-                                         annotation.selectedValues,
+                                         annotation.getValue(),
                                          {
                                            required: annotation.required,
                                            selectOptions: annotation.annotationType.options

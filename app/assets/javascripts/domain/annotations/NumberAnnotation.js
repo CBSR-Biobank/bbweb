@@ -30,6 +30,10 @@ define(['lodash'], function(_) {
       return this.value;
     };
 
+    NumberAnnotation.prototype.getDisplayValue = function () {
+      return this.value;
+    };
+
     NumberAnnotation.prototype.getServerAnnotation = function () {
       var value = (this.value) ? this.value.toString() : '';
       return {
