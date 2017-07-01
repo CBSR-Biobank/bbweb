@@ -4,43 +4,51 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  describe('ceventGetTypeDirective', function() {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    var createDirective = function () {
-      this.element = angular.element([
-        '<cevent-get-type',
-        '  study="vm.study"',
-        '  participant="vm.participant"',
-        '  collection-event-types="vm.collectionEventTypes">',
-        '</cevent-get-type>'
-      ].join(''));
+  describe('Component: ceventGetType', function() {
 
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        study:                this.study,
-        participant:          this.participant,
-        collectionEventTypes: this.collectionEventTypes
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          [
+            '<cevent-get-type',
+            '  study="vm.study"',
+            '  participant="vm.participant"',
+            '  collection-event-types="vm.collectionEventTypes">',
+            '</cevent-get-type>'
+          ].join(''),
+          {
+            study:                this.study,
+            participant:          this.participant,
+            collectionEventTypes: this.collectionEventTypes
+          },
+          'ceventGetType');
       };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('ceventGetType');
-    };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
+    beforeEach(inject(function(ComponentTestSuiteMixin, testUtils) {
       var self = this;
 
-      _.extend(self, TestSuiteMixin.prototype);
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               '$state',
@@ -49,20 +57,20 @@ define([
                               'CollectionEventType',
                               'factory');
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/ceventGetType/ceventGetType.html');
+      this.putHtmlTemplates(
+        '/assets/javascripts/collection/components/ceventGetType/ceventGetType.html');
 
-      self.jsonCeventTypes = _.map(_.range(2), function () {
+      this.jsonCeventTypes = _.map(_.range(2), function () {
         return self.factory.collectionEventType();
       });
-      self.jsonParticipant = self.factory.participant();
-      self.jsonStudy       = self.factory.defaultStudy();
+      this.jsonParticipant = this.factory.participant();
+      this.jsonStudy       = this.factory.defaultStudy();
 
-      self.collectionEventTypes = _.map(self.jsonCeventTypes, function (jsonCeventType){
+      this.collectionEventTypes = _.map(this.jsonCeventTypes, function (jsonCeventType){
         return new self.CollectionEventType(jsonCeventType);
       });
-      self.participant = new self.Participant(self.jsonParticipant);
-      self.study       = new self.Study(self.jsonStudy);
+      this.participant = new this.Participant(this.jsonParticipant);
+      this.study       = new this.Study(this.jsonStudy);
 
       testUtils.addCustomMatchers();
 
@@ -70,7 +78,7 @@ define([
     }));
 
     it('has valid scope', function() {
-      createDirective.call(this);
+      this.createController();
 
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.participant).toBe(this.participant);
@@ -87,7 +95,7 @@ define([
       it('changes to correct state selection is valid', function() {
         var ceventTypeId = this.collectionEventTypes[0].id;
 
-        createDirective.call(this);
+        this.createController();
         this.controller.collectionEvent.collectionEventTypeId = ceventTypeId;
         this.controller.updateCollectionEventType();
         this.scope.$digest();
@@ -98,7 +106,7 @@ define([
       });
 
       it('does nothing when selection is not valid', function() {
-        createDirective.call(this);
+        this.createController();
         this.controller.collectionEvent.collectionEventTypeId = undefined;
         this.controller.updateCollectionEventType();
         this.scope.$digest();

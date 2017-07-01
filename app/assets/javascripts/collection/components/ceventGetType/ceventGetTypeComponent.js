@@ -1,39 +1,31 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
-  /**
-   *
-   */
-  function ceventGetTypeDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study: '=',
-        participant: '=',
-        collectionEventTypes: '='
-      },
-      templateUrl : '/assets/javascripts/collection/directives/ceventGetType/ceventGetType.html',
-      controller: CeventGetTypeCtrl,
-      controllerAs: 'vm'
-    };
-    return directive;
-  }
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/ceventGetType/ceventGetType.html',
+    controller: CeventGetTypeController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '=',
+      participant: '=',
+      collectionEventTypes: '='
+    }
+  };
 
-  CeventGetTypeCtrl.$inject = [
+  CeventGetTypeController.$inject = [
     '$state',
     'CollectionEvent',
     'gettextCatalog'
   ];
 
-  /**
-   * Used to add or edit a collection event.
+  /*
+   * Controller for this component.
    */
-  function CeventGetTypeCtrl($state, CollectionEvent, gettextCatalog) {
+  function CeventGetTypeController($state, CollectionEvent, gettextCatalog) {
     var vm = this;
 
     vm.title = gettextCatalog.getString(
@@ -52,5 +44,5 @@ define(function () {
     }
   }
 
-  return ceventGetTypeDirective;
+  return component;
 });

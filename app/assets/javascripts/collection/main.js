@@ -22,6 +22,7 @@ define(function (require) {
     .component('specimenView',        require('./components/specimenView/specimenViewComponent'))
     .component('collection',          require('./components/collection/collectionComponent'))
     .component('ceventAdd',           require('./components/ceventAdd/ceventAddComponent'))
+    .component('ceventGetType',       require('./components/ceventGetType/ceventGetTypeComponent'))
     .component('ceventView',          require('./components/ceventView/ceventViewComponent'))
     .component('ceventsList',         require('./components/ceventsList/ceventsListComponent'))
     .component('selectStudy',         require('./components/selectStudy/selectStudyComponent'))
@@ -33,8 +34,6 @@ define(function (require) {
 
     .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
 
-
-    .directive('ceventGetType',       require('./directives/ceventGetType/ceventGetTypeDirective'))
     .directive('ceventsAddAndSelect',
                require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'));
 
