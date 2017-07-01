@@ -1,41 +1,35 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function () {
   'use strict';
 
-  /**
-   *
-   */
-  function studyAddDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study: '='
-      },
-      templateUrl : '/assets/javascripts/admin/studies/directives/studyAdd/studyAdd.html',
-      controller: StudyAddCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl : '/assets/javascripts/admin/studies/components/studyAdd/studyAdd.html',
+    controller: StudyAddController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '='
+    }
+  };
 
-    return directive;
-  }
+  var returnState = 'home.admin.studies';
 
-  StudyAddCtrl.$inject = [
+  StudyAddController.$inject = [
     '$state',
     'gettextCatalog',
     'notificationsService',
     'domainNotificationService'
   ];
 
-  var returnState = 'home.admin.studies';
-
-  function StudyAddCtrl($state,
-                        gettextCatalog,
-                        notificationsService,
-                        domainNotificationService) {
+  /*
+   * Controller for this component.
+   */
+  function StudyAddController($state,
+                              gettextCatalog,
+                              notificationsService,
+                              domainNotificationService) {
 
     var vm = this;
 
@@ -64,6 +58,5 @@ define(['lodash'], function(_) {
     }
   }
 
-  return studyAddDirective;
-
+  return component;
 });
