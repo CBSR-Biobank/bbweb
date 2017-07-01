@@ -1,41 +1,40 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function (require) {
   'use strict';
 
+  var _ = require('lodash');
+
   /*
-   * This directive allows the user to select a {@link Study} from the list provided by function getStudies().
+   * This component allows the user to select a {@link Study} from the list provided by function getStudies().
    */
-  function selectStudyDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        getHeader:              '&',
-        getStudies:             '&',
-        limit:                  '=',
-        messageNoResults:       '@',
-        icon:                   '@',
-        navigateStateName:      '@',
-        navigateStateParamName: '@'
-      },
-      templateUrl : '/assets/javascripts/collection/directives/selectStudy/selectStudy.html',
-      controller: SelectStudyCtr,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/selectStudy/selectStudy.html',
+    controller: SelectStudyController,
+    controllerAs: 'vm',
+    bindings: {
+      getHeader:              '&',
+      getStudies:             '&',
+      limit:                  '=',
+      messageNoResults:       '@',
+      icon:                   '@',
+      navigateStateName:      '@',
+      navigateStateParamName: '@'
+    }
+  };
 
-    return directive;
-  }
-
-  SelectStudyCtr.$inject = [
+  SelectStudyController.$inject = [
     '$state',
     'gettextCatalog',
     'modalService'
   ];
 
-  function SelectStudyCtr($state, gettextCatalog, modalService) {
+  /*
+   * Controller for this component.
+   */
+  function SelectStudyController($state, gettextCatalog, modalService) {
     var vm = this;
 
     vm.displayStates = {
@@ -133,5 +132,5 @@ define(['lodash'], function(_) {
     }
   }
 
-  return selectStudyDirective;
+  return component;
 });

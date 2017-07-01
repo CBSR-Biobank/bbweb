@@ -10,7 +10,7 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  fdescribe('Component: ceventList', function() {
+  describe('Component: ceventList', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 

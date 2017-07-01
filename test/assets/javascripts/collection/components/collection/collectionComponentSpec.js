@@ -28,7 +28,7 @@ define([
 
       this.putHtmlTemplates(
         '/assets/javascripts/collection/components/collection/collection.html',
-        '/assets/javascripts/collection/directives/selectStudy/selectStudy.html',
+        '/assets/javascripts/collection/components/selectStudy/selectStudy.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.createController = function () {

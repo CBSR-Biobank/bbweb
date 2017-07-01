@@ -24,10 +24,10 @@ define(function (require) {
     .component('ceventAdd',           require('./components/ceventAdd/ceventAddComponent'))
     .component('ceventView',          require('./components/ceventView/ceventViewComponent'))
     .component('ceventsList',         require('./components/ceventsList/ceventsListComponent'))
+    .component('selectStudy',         require('./components/selectStudy/selectStudyComponent'))
 
     .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
 
-    .directive('selectStudy',         require('./directives/selectStudy/selectStudyDirective'))
 
     .directive('participantAdd',      require('./directives/participantAdd/participantAddDirective'))
     .directive('participantGet',      require('./directives/participantGet/participantGetDirective'))
