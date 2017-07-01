@@ -15,9 +15,7 @@ define(['lodash'], function(_) {
       .state('home.collection', {
         url: '^/collection',
         views: {
-          'main@': {
-            component: 'collection'
-          }
+          'main@': 'collection'
         }
       })
       .state('home.collection.study', {
@@ -26,21 +24,16 @@ define(['lodash'], function(_) {
           study: resolveStudy
         },
         views: {
-          'main@': {
-            template: '<participant-get study="vm.study"></participant-get>',
-            controller: CollectionStudyCtrl,
-            controllerAs: 'vm'
-          }
+          'main@': 'participantGet'
         }
       })
       .state('home.collection.study.participantAdd', {
         url: '/add/{uniqueId}',
+        resolve: {
+          uniqueId: resolveParticipantUniqueId
+        },
         views: {
-          'main@': {
-            template: '<participant-add study="vm.study" unique-id="{{vm.uniqueId}}"></participant-add>',
-            controller: ParticipantAddCtrl,
-            controllerAs: 'vm'
-          }
+          'main@': 'participantAdd'
         }
       })
       .state('home.collection.study.participant', {
@@ -50,22 +43,13 @@ define(['lodash'], function(_) {
           participant: resolveParticipant
         },
         views: {
-          'main@': {
-            template: '<participant-view study="vm.study" participant="vm.participant"></participant-view>',
-            controller: StudyParticipantCtrl,
-            controllerAs: 'vm'
-          }
+          'main@': 'participantView'
         }
       })
       .state('home.collection.study.participant.summary', {
         url: '/summary',
         views: {
-          'participantDetails': {
-            template:
-            '<participant-summary study="vm.study" participant="vm.participant"> </participant-summary>',
-            controller: StudyParticipantCtrl,
-            controllerAs: 'vm'
-          }
+          'participantDetails': 'participantSummary'
         }
       })
       .state('home.collection.study.participant.cevents', {
@@ -82,52 +66,23 @@ define(['lodash'], function(_) {
             }]
         },
         views: {
-          'participantDetails': {
-            template: [
-              '<cevents-list',
-              '  participant="vm.participant"',
-              '  collection-event-types="vm.collectionEventTypes">',
-              '</cevents-list>'
-            ].join(''),
-            controller: ParticipantCeventsController,
-            controllerAs: 'vm'
-          }
+          'participantDetails': 'ceventsList'
         }
       })
       .state('home.collection.study.participant.cevents.add', {
         url: '/cevent/add',
         views: {
-          'main@': {
-            template: [
-              '<cevent-get-type',
-              '  study="vm.study"',
-              '  participant="vm.participant"',
-              '  collection-event-types="vm.collectionEventTypes">',
-              '</ceven-get-type>'
-            ].join(''),
-            controller: ParticipantCeventsAddController,
-            controllerAs: 'vm'
-          }
+          'main@': 'ceventGetType'
         }
       })
       .state('home.collection.study.participant.cevents.add.details', {
         url: '/{collectionEventTypeId}',
         resolve: {
+          collectionEventType: resolveCollectionEventType,
           collectionEvent: resolveNewCollectionEvent
         },
         views: {
-          'main@': {
-            template: [
-              '<cevent-add',
-              '  study="vm.study"',
-              '  participant="vm.participant"',
-              '  collection-event-type="vm.collectionEventType">',
-              '  collection-event="vm.collectionEvent">',
-              '</cevent-add>'
-            ].join(''),
-            controller: CeventAddCtrl,
-            controllerAs: 'vm'
-          }
+          'main@': 'ceventAdd'
         }
       })
       .state('home.collection.study.participant.cevents.details', {
@@ -136,17 +91,7 @@ define(['lodash'], function(_) {
           collectionEvent: resolveCollectionEvent
         },
         views: {
-          'eventDetails': {
-            template: [
-              '<cevent-view',
-              '  study="vm.study"',
-              '  collection-event-types="vm.collectionEventTypes"',
-              '  collection-event="vm.collectionEvent">',
-              '</cevents-view>'
-            ].join(''),
-            controller: CeventDetailsCtrl,
-            controllerAs: 'vm'
-          }
+          'eventDetails': 'ceventView'
         }
       })
       .state('home.collection.study.participant.cevents.details.specimen', {
@@ -162,12 +107,11 @@ define(['lodash'], function(_) {
           specimen: resolveSpecimen
         },
         views: {
-          'main@': {
-            component: 'specimenView'
-          }
+          'main@': 'specimenView'
         }
       });
 
+    // FIXME: should be moved to state service, so this function can be used by other code
     function redirectToLogin($state) {
       return function (error) {
         if (error.status && (error.status === 401)) {
@@ -180,6 +124,11 @@ define(['lodash'], function(_) {
     function resolveStudy($state, $transition$, Study) {
       return Study.get($transition$.params().studyId)
         .catch(redirectToLogin($state));
+    }
+
+    resolveParticipantUniqueId.$inject = ['$transition$'];
+    function resolveParticipantUniqueId($transition$) {
+      return $transition$.params().uniqueId;
     }
 
     resolveParticipant.$inject = ['$transition$', 'Participant', 'study'];
@@ -249,63 +198,6 @@ define(['lodash'], function(_) {
       return Specimen.getByInventoryId($transition$.params().inventoryId);
     }
 
-    CollectionCtrl.$inject = [ 'studyCounts', 'centreCounts' ];
-
-    function CollectionCtrl(studyCounts, centreCounts) {
-      this.studyCounts = studyCounts;
-      this.centreCounts = centreCounts;
-    }
-
-    CollectionStudyCtrl.$inject = [ 'study' ];
-
-    function CollectionStudyCtrl(study) {
-      this.study = study;
-    }
-
-    ParticipantAddCtrl.$inject = [ '$transition$', 'study' ];
-
-    function ParticipantAddCtrl($transition$, study) {
-      this.study    = study;
-      this.uniqueId = $transition$.params().uniqueId;
-    }
-
-    StudyParticipantCtrl.$inject = [ 'study', 'participant' ];
-
-    function StudyParticipantCtrl(study, participant) {
-      this.study = study;
-      this.participant = participant;
-    }
-
-    ParticipantCeventsController.$inject = [
-      'participant',
-      'collectionEventTypes'
-    ];
-
-    function ParticipantCeventsController(participant, collectionEventTypes) {
-      this.participant = participant;
-      this.collectionEventTypes = collectionEventTypes;
-    }
-
-    ParticipantCeventsAddController.$inject = [
-      'study',
-      'participant',
-      'collectionEventTypes'
-    ];
-
-    function ParticipantCeventsAddController(study, participant, collectionEventTypes) {
-      this.study = study;
-      this.participant = participant;
-      this.collectionEventTypes = collectionEventTypes;
-    }
-
-    CeventAddCtrl.$inject = [
-      '$transition$',
-      'study',
-      'participant',
-      'collectionEventTypes',
-      'collectionEvent'
-    ];
-
     function findCollectionEventType(collectionEventTypes, id) {
       var collectionEventType = _.find(collectionEventTypes, { id: id });
       if (_.isUndefined(collectionEventType)) {
@@ -314,25 +206,10 @@ define(['lodash'], function(_) {
       return collectionEventType;
     }
 
-    function CeventAddCtrl($transition$, study, participant, collectionEventTypes, collectionEvent) {
-      this.study = study;
-      this.participant = participant;
-      this.collectionEvent = collectionEvent;
-
-      this.collectionEventType = findCollectionEventType(collectionEventTypes,
-                                                         $transition$.params().collectionEventTypeId);
-    }
-
-    CeventDetailsCtrl.$inject = [
-      'study',
-      'collectionEventTypes',
-      'collectionEvent'
-    ];
-
-    function CeventDetailsCtrl(study, collectionEventTypes, collectionEvent) {
-      this.study = study;
-      this.collectionEventTypes = collectionEventTypes;
-      this.collectionEvent = collectionEvent;
+    resolveCollectionEventType.$inject = ['$transition$', 'collectionEventTypes' ];
+    function resolveCollectionEventType($transition$, collectionEventTypes) {
+      return findCollectionEventType(collectionEventTypes,
+                                     $transition$.params().collectionEventTypeId);
     }
   }
 
