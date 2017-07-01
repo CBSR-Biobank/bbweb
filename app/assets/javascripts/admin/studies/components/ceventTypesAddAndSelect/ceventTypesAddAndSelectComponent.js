@@ -43,6 +43,7 @@ define(function () {
       sortField: 'name'
     };
 
+    vm.$onInit           = onInit;
     vm.nameFilter        = '';
     vm.displayState      = vm.displayStates.NOT_CONFIGURED;
     vm.add               = add;
@@ -51,11 +52,9 @@ define(function () {
     vm.pageChanged       = pageChanged;
     vm.nameFilterUpdated = nameFilterUpdated;
 
-    init();
-
     //--
 
-    function init() {
+    function onInit() {
       updateCollectionEvents();
     }
 

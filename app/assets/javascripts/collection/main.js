@@ -31,11 +31,10 @@ define(function (require) {
     .component('participantView',     require('./components/participantView/participantViewComponent'))
     .component('participantSummary',
                require('./components/participantSummary/participantSummaryComponent'))
+    .component('ceventsAddAndSelect',
+               require('./components/ceventsAddAndSelect/ceventsAddAndSelectComponent'))
 
-    .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
-
-    .directive('ceventsAddAndSelect',
-               require('./directives/ceventsAddAndSelect/ceventsAddAndSelectDirective'));
+    .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'));
 
   return {
     name: name,

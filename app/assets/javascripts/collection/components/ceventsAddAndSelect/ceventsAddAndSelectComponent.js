@@ -1,39 +1,31 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function (require) {
   'use strict';
 
-  /**
-   *
-   */
-  function ceventsAddAndSelectDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        participant: '=',
-        collectionEventTypes: '='
-      },
-      transclude: true,
-      templateUrl : '/assets/javascripts/collection/directives/ceventsAddAndSelect/ceventsAddAndSelect.html',
-      controller: CeventsAddAndSelectCtrl,
-      controllerAs: 'vm'
-    };
-    return directive;
-  }
+  var _ = require('lodash');
 
-  CeventsAddAndSelectCtrl.$inject = [
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/ceventsAddAndSelect/ceventsAddAndSelect.html',
+    controller: CeventsAddAndSelectDirective,
+    controllerAs: 'vm',
+    bindings: {
+      participant: '=',
+      collectionEventTypes: '='
+    }
+  };
+
+  CeventsAddAndSelectDirective.$inject = [
     '$state',
     'CollectionEvent'
   ];
 
   /*
-   *
+   * Controller for this component.
    */
-  function CeventsAddAndSelectCtrl($state,
-                                   CollectionEvent) {
+  function CeventsAddAndSelectDirective($state, CollectionEvent) {
     var vm = this;
 
     if (vm.collectionEventTypes.length <= 0) {
@@ -52,18 +44,17 @@ define(['lodash'], function(_) {
       sortField: 'visitNumber'
     };
 
-    vm.visitNumberFilter = '';
+    vm.visitNumberFilter    = '';
     vm.pageChanged          = pageChanged;
     vm.add                  = add;
     vm.eventInformation     = eventInformation;
     vm.visitFilterUpdated   = visitFilterUpdated;
     vm.collectionEventError = false;
-
-    init();
+    vm.$onInit              = onInit;
 
     // --
 
-    function init() {
+    function onInit() {
       updateCollectionEvents();
     }
 
@@ -131,5 +122,5 @@ define(['lodash'], function(_) {
     }
   }
 
-  return ceventsAddAndSelectDirective;
+  return component;
 });

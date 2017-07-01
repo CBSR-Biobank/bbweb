@@ -58,7 +58,7 @@ define(function (require) {
 
       this.putHtmlTemplates(
         '/assets/javascripts/collection/components/ceventsList/ceventsList.html',
-        '/assets/javascripts/collection/directives/ceventsAddAndSelect/ceventsAddAndSelect.html');
+        '/assets/javascripts/collection/components/ceventsAddAndSelect/ceventsAddAndSelect.html');
 
       this.jsonCevent      = this.factory.collectionEvent();
       this.jsonCeventType  = this.factory.defaultCollectionEventType();

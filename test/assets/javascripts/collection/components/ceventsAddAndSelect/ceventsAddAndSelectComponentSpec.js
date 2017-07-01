@@ -4,43 +4,24 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   describe('ceventsAddAndSelectDirective', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
 
-      _.extend(self, TestSuiteMixin.prototype);
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-      self.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
-                              '$state',
-                              'Participant',
-                              'CollectionEvent',
-                              'CollectionEventType',
-                              'factory');
-
-      self.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/ceventsAddAndSelect/ceventsAddAndSelect.html');
-
-      this.jsonCevent      = this.factory.collectionEvent();
-      this.jsonParticipant = this.factory.defaultParticipant();
-      this.jsonCeventType  = this.factory.defaultCollectionEventType();
-
-      this.participant          = this.Participant.create(this.jsonParticipant);
-      this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
-      this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
-
-      this.createController = function (participant, collectionEventTypes, collectionEvent) {
+      SuiteMixin.prototype.createController = function (participant, collectionEventTypes, collectionEvent) {
         var replyItems;
 
         participant = participant || this.participant;
@@ -53,26 +34,51 @@ define([
           replyItems = [ collectionEvent ];
         }
 
-        self.CollectionEvent.list =
-          jasmine.createSpy().and.returnValue(self.$q.when(self.factory.pagedResult(replyItems)));
+        this.CollectionEvent.list =
+          jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult(replyItems)));
 
-        this.element = angular.element([
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          [
           '<cevents-add-and-select',
           '  participant="vm.participant"',
           '  collection-event-types="vm.collectionEventTypes">',
           '</cevents-add-and-select>'
-        ].join(''));
-
-        this.scope = this.$rootScope.$new();
-        this.scope.vm = {
+          ].join(''),
+          {
           participant:          participant,
           collectionEventTypes: collectionEventTypes
-        };
-
-        this.$compile(this.element)(this.scope);
-        this.scope.$digest();
-        this.controller = this.element.controller('ceventsAddAndSelect');
+          },
+          'ceventsAddAndSelect');
       };
+
+      return SuiteMixin;
+    }
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Participant',
+                              'CollectionEvent',
+                              'CollectionEventType',
+                              'factory');
+
+      this.putHtmlTemplates(
+        '/assets/javascripts/collection/components/ceventsAddAndSelect/ceventsAddAndSelect.html');
+
+      this.jsonCevent      = this.factory.collectionEvent();
+      this.jsonParticipant = this.factory.defaultParticipant();
+      this.jsonCeventType  = this.factory.defaultCollectionEventType();
+
+      this.participant          = this.Participant.create(this.jsonParticipant);
+      this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
+      this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
     }));
 
     it('has valid scope', function() {
