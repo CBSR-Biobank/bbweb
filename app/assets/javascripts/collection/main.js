@@ -25,11 +25,11 @@ define(function (require) {
     .component('ceventView',          require('./components/ceventView/ceventViewComponent'))
     .component('ceventsList',         require('./components/ceventsList/ceventsListComponent'))
     .component('selectStudy',         require('./components/selectStudy/selectStudyComponent'))
+    .component('participantAdd',      require('./components/participantAdd/participantAddComponent'))
 
     .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
 
 
-    .directive('participantAdd',      require('./directives/participantAdd/participantAddDirective'))
     .directive('participantGet',      require('./directives/participantGet/participantGetDirective'))
     .directive('participantSummary',
                require('./directives/participantSummary/participantSummaryDirective'))

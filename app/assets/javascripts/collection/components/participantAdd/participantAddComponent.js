@@ -1,29 +1,24 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function () {
   'use strict';
 
   /**
-   * Description
+   * This component is used for adding a participant.
    */
-  function participantAddDirective() {
-    var directive = {
-      scope: {},
-      bindToController: {
-        study:    '=',
-        uniqueId: '@'
-      },
-      restrict: 'E',
-      templateUrl : '/assets/javascripts/collection/directives/participantAdd/participantAdd.html',
-      controller: ParticipantAddCtrl,
-      controllerAs: 'vm'
-    };
-    return directive;
-  }
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/participantAdd/participantAdd.html',
+    controller: ParticipantAddController,
+    controllerAs: 'vm',
+    bindings: {
+      study:    '=',
+      uniqueId: '@'
+    }
+  };
 
-  ParticipantAddCtrl.$inject = [
+  ParticipantAddController.$inject = [
     '$state',
     'gettextCatalog',
     'Participant',
@@ -32,15 +27,15 @@ define(['lodash'], function(_) {
     'breadcrumbService'
   ];
 
-  /**
-   * This controller is used for adding or editing a participant.
+  /*
+   * Controller for this component.
    */
-  function ParticipantAddCtrl($state,
-                              gettextCatalog,
-                              Participant,
-                              domainNotificationService,
-                              notificationsService,
-                              breadcrumbService) {
+  function ParticipantAddController($state,
+                                    gettextCatalog,
+                                    Participant,
+                                    domainNotificationService,
+                                    notificationsService,
+                                    breadcrumbService) {
     var vm = this;
 
     vm.breadcrumbs = [
@@ -81,5 +76,5 @@ define(['lodash'], function(_) {
     }
   }
 
-  return participantAddDirective;
+  return component;
 });

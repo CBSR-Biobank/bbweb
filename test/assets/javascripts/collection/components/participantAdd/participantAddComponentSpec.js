@@ -4,38 +4,62 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  describe('participantAddDirective', function() {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    var createDirective = function () {
-      this.element = angular.element([
-        '<participant-add',
-        ' study="vm.study"',
-        ' unique-id="' + this.uniqueId + '">',
-        '</participant-add>'
-      ].join(''));
+  describe('Component: participantAdd', function() {
 
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { study: this.study };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('participantAdd');
-    };
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (study, uniqueId) {
+        study = study || this.study;
+        uniqueId = uniqueId || this.uniqueId;
+
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          [
+            '<participant-add',
+            ' study="vm.study"',
+            ' unique-id="' + uniqueId + '">',
+            '</participant-add>'
+          ].join(''),
+          { study: study },
+          'participantAdd');
+      };
+
+      SuiteMixin.prototype.createStudies = function (numStudies) {
+        var self = this;
+        return _.map(_.range(numStudies), function () {
+          return self.Study.create(self.factory.study());
+        });
+      };
+
+      SuiteMixin.prototype.createGetStudiesFn = function (studies) {
+        var self = this;
+        return function (pagerOptions) {
+          return self.$q.when(_.extend(self.factory.pagedResult(studies, pagerOptions),
+                                       { items: studies.slice(0, pagerOptions.limit) }));
+        };
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               '$state',
@@ -45,8 +69,8 @@ define([
                               'Participant',
                               'factory');
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/participantAdd/participantAdd.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/collection/components/participantAdd/participantAdd.html',
         '/assets/javascripts/common/annotationsInput/annotationsInput.html',
         '/assets/javascripts/common/annotationsInput/dateTimeAnnotation.html',
         '/assets/javascripts/common/annotationsInput/multipleSelectAnnotation.html',
@@ -55,16 +79,16 @@ define([
         '/assets/javascripts/common/annotationsInput/textAnnotation.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
-      self.jsonParticipant = self.factory.participant();
-      self.jsonStudy       = self.factory.defaultStudy();
-      self.study           = new self.Study(self.jsonStudy);
-      self.uniqueId        = self.jsonParticipant.uniqueId;
+      this.jsonParticipant = this.factory.participant();
+      this.jsonStudy       = this.factory.defaultStudy();
+      this.study           = new this.Study(this.jsonStudy);
+      this.uniqueId        = this.jsonParticipant.uniqueId;
 
       spyOn(this.$state, 'go').and.returnValue('ok');
     }));
 
     it('has valid scope', function() {
-      createDirective.call(this);
+      this.createController();
 
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.uniqueId).toBe(this.uniqueId);
@@ -84,7 +108,7 @@ define([
       it('changes to correct state on valid submit', function() {
         spyOn(this.Participant.prototype, 'add').and.returnValue(this.$q.when(this.participant));
 
-        createDirective.call(this);
+        this.createController();
         this.controller.submit(this.participant);
         this.scope.$digest();
 
@@ -104,7 +128,7 @@ define([
           spyOn(this.Participant.prototype, 'add').and.returnValue(participantAddDeferred.promise);
           spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
 
-          createDirective.call(this);
+          this.createController();
           this.controller.submit(this.participant);
           this.scope.$digest();
 
@@ -122,7 +146,7 @@ define([
           spyOn(this.domainNotificationService, 'updateErrorModal')
             .and.returnValue(updateErrorModalDeferred.promise);
 
-          createDirective.call(this);
+          this.createController();
           this.controller.submit(this.participant);
           this.scope.$digest();
 
@@ -137,13 +161,12 @@ define([
     });
 
     it('changes to correct state on cancel', function() {
-        createDirective.call(this);
+        this.createController();
         this.controller.cancel();
         this.scope.$digest();
 
-        expect(this.$state.go).toHaveBeenCalledWith(
-          'home.collection.study',
-          { studyId: this.study.id });
+        expect(this.$state.go).toHaveBeenCalledWith('home.collection.study',
+                                                    { studyId: this.study.id });
 
     });
 
