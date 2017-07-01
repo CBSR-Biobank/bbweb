@@ -4,32 +4,56 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   describe('participantGetDirective', function() {
 
-    var createDirective = function () {
-      this.element = angular.element('<participant-get study="vm.study"></participant-get>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { study: this.study };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('participantGet');
-    };
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (study) {
+        study = study || this.study;
+
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          '<participant-get study="vm.study"></participant-get>',
+          { study: study },
+          'participantGet');
+      };
+
+      SuiteMixin.prototype.createStudies = function (numStudies) {
+        var self = this;
+        return _.map(_.range(numStudies), function () {
+          return self.Study.create(self.factory.study());
+        });
+      };
+
+      SuiteMixin.prototype.createGetStudiesFn = function (studies) {
+        var self = this;
+        return function (pagerOptions) {
+          return self.$q.when(_.extend(self.factory.pagedResult(studies, pagerOptions),
+                                       { items: studies.slice(0, pagerOptions.limit) }));
+        };
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$log',
                               '$rootScope',
                               '$compile',
@@ -38,8 +62,8 @@ define([
                               'Study',
                               'Participant',
                               'factory');
-      self.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/participantGet/participantGet.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/collection/components/participantGet/participantGet.html',
         '/assets/javascripts/common/services/modalService/modal.html',
         '/assets/javascripts/common/services/modalService/modalOk.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
@@ -51,8 +75,7 @@ define([
     }));
 
     it('has valid scope', function() {
-      createDirective.call(this);
-
+      this.createController();
       expect(this.controller).toBeDefined();
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.onSubmit).toBeFunction();
@@ -63,7 +86,7 @@ define([
       it('does nothing with an empty participant ID', function() {
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.when(this.participant));
 
-        createDirective.call(this);
+        this.createController();
         this.controller.uniqueId = '';
         this.controller.onSubmit();
         this.scope.$digest();
@@ -75,7 +98,7 @@ define([
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.when(this.participant));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
-        createDirective.call(this);
+        this.createController();
         this.controller.uniqueId = this.factory.stringNext();
         this.controller.onSubmit();
         this.scope.$digest();
@@ -96,7 +119,7 @@ define([
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
-        createDirective.call(this);
+        this.createController();
         this.controller.uniqueId = uniqueId;
         this.controller.onSubmit();
         this.scope.$digest();
@@ -118,7 +141,7 @@ define([
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
         spyOn(this.$state, 'reload').and.returnValue(null);
 
-        createDirective.call(this);
+        this.createController();
         this.controller.uniqueId = uniqueId;
         this.controller.onSubmit();
         this.scope.$digest();
@@ -135,7 +158,7 @@ define([
           }));
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('Ok'));
 
-        createDirective.call(this);
+        this.createController();
         this.controller.uniqueId = this.factory.stringNext();
         this.controller.onSubmit();
         this.scope.$digest();
@@ -148,7 +171,7 @@ define([
           { status: 400, data: { message: 'xxx' } }));
         spyOn(this.$log, 'error').and.callThrough();
 
-        createDirective.call(this);
+        this.createController();
         this.controller.uniqueId = this.factory.stringNext();
         this.controller.onSubmit();
         this.scope.$digest();

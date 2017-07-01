@@ -1,29 +1,20 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
-  /**
-   * Description
-   */
-  function participantGetDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study: '='
-      },
-      templateUrl : '/assets/javascripts/collection/directives/participantGet/participantGet.html',
-      controller: ParticipantGetCtrl,
-      controllerAs: 'vm'
-    };
-    return directive;
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/participantGet/participantGet.html',
+    controller: ParticipantGetController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '='
+    }
+  };
 
-  }
-
-  ParticipantGetCtrl.$inject = [
+  ParticipantGetController.$inject = [
     '$q',
     '$log',
     '$state',
@@ -37,16 +28,16 @@ define(function () {
 
   var studyMismatchRe = /EntityCriteriaError: participant not in study/i;
 
-  /**
-   *
+  /*
+   * Controller for this component.
    */
-  function ParticipantGetCtrl($q,
-                              $log,
-                              $state,
-                              gettextCatalog,
-                              modalService,
-                              Participant,
-                              breadcrumbService) {
+  function ParticipantGetController($q,
+                                    $log,
+                                    $state,
+                                    gettextCatalog,
+                                    modalService,
+                                    Participant,
+                                    breadcrumbService) {
     var vm = this;
 
     vm.breadcrumbs = [
@@ -109,6 +100,5 @@ define(function () {
     }
   }
 
-  return participantGetDirective;
-
+  return component;
 });
