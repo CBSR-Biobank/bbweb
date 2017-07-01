@@ -7,76 +7,69 @@
 define(function(require) {
   'use strict';
 
-  var angular                         = require('angular'),
-      mocks                           = require('angularMocks'),
+  var mocks                           = require('angularMocks'),
       _                               = require('lodash'),
       faker                           = require('faker'),
       annotationUpdateSharedBehaviour = require('../../../test/annotationUpdateSharedBehaviour');
 
-  function SuiteMixinFactory(TestSuiteMixin) {
+  describe('Component: participantSummary', function() {
 
-    function SuiteMixin() {
-      TestSuiteMixin.call(this);
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.participantWithAnnotation = function (valueType, maxValueCount) {
+        var jsonAnnotationType,
+            value,
+            jsonAnnotation,
+            jsonStudy,
+            jsonParticipant,
+            study;
+
+        maxValueCount = maxValueCount || 0;
+
+        jsonAnnotationType = this.factory.annotationType({ valueType: valueType,
+                                                           maxValueCount: maxValueCount });
+        value              = this.factory.valueForAnnotation(jsonAnnotationType);
+        jsonAnnotation     = this.factory.annotation({ value: value }, jsonAnnotationType);
+        jsonStudy          = this.factory.study({ annotationTypes: [ jsonAnnotationType ]});
+        jsonParticipant    = this.factory.participant({ annotations: [ jsonAnnotation ] });
+        study              = this.Study.create(jsonStudy);
+
+        return new this.Participant(jsonParticipant, study);
+      };
+
+      SuiteMixin.prototype.createController = function (study, participant) {
+        study = study || this.study;
+        participant = participant || this.participant;
+
+        ComponentTestSuiteMixin.prototype.createScope.call(
+          this,
+          [
+            '<participant-summary',
+            '  study="vm.study"',
+            '  participant="vm.participant">',
+            '</participant-summary>'
+          ].join(''),
+          {
+            study:       study,
+            participant: participant
+          },
+          'participantSummary');
+      };
+
+      return SuiteMixin;
     }
 
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    SuiteMixin.prototype.participantWithAnnotation = function (valueType, maxValueCount) {
-      var jsonAnnotationType,
-          value,
-          jsonAnnotation,
-          jsonStudy,
-          jsonParticipant,
-          study;
-
-      maxValueCount = maxValueCount || 0;
-
-      jsonAnnotationType = this.factory.annotationType({ valueType: valueType,
-                                                         maxValueCount: maxValueCount });
-      value              = this.factory.valueForAnnotation(jsonAnnotationType);
-      jsonAnnotation     = this.factory.annotation({ value: value }, jsonAnnotationType);
-      jsonStudy          = this.factory.study({ annotationTypes: [ jsonAnnotationType ]});
-      jsonParticipant    = this.factory.participant({ annotations: [ jsonAnnotation ] });
-      study              = this.Study.create(jsonStudy);
-
-      return new this.Participant(jsonParticipant, study);
-    };
-
-    SuiteMixin.prototype.createDirective = function (study, participant) {
-      study = study || this.study;
-      participant = participant || this.participant;
-
-      this.element = angular.element([
-        '<participant-summary',
-        '  study="vm.study"',
-        '  participant="vm.participant">',
-        '</participant-summary>'
-      ].join(''));
-
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        study:       study,
-        participant: participant
-      };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('participantSummary');
-    };
-
-    return SuiteMixin;
-  }
-
-  describe('participantSummaryDirective', function() {
-
-    mocks.module.sharedInjector();
-
-    beforeAll(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -89,7 +82,7 @@ define(function(require) {
                               'factory');
 
       this.putHtmlTemplates(
-        '/assets/javascripts/collection/directives/participantSummary/participantSummary.html',
+        '/assets/javascripts/collection/components/participantSummary/participantSummary.html',
         '/assets/javascripts/common/components/statusLine/statusLine.html');
 
       this.jsonParticipant = this.factory.participant();
@@ -100,7 +93,7 @@ define(function(require) {
     }));
 
     it('has valid scope', function() {
-      this.createDirective(this.study, this.participant);
+      this.createController(this.study, this.participant);
 
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.participant).toBe(this.participant);
@@ -116,15 +109,15 @@ define(function(require) {
       beforeEach(inject(function () {
         var self = this;
 
-        context.createDirective           = createDirective;
+        context.createController           = createController;
         context.controllerUpdateFuncName  = 'editUniqueId';
         context.modalInputFuncName        = 'text';
         context.participantUpdateFuncName = 'updateUniqueId';
         context.participant               = self.participant;
         context.newValue                  = faker.random.word();
 
-        function createDirective() {
-          return self.createDirective(self.study, self.participant);
+        function createController() {
+          return self.createController(self.study, self.participant);
         }
       }));
 
@@ -147,14 +140,14 @@ define(function(require) {
           var self = this,
               participant = self.participantWithAnnotation(self.AnnotationValueType.TEXT);
 
-          context.createDirective           = createDirective;
+          context.createController           = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'text';
           context.annotation               = participant.annotations[0];
           context.newValue                 = faker.random.word();
 
-          function createDirective() {
-            return self.createDirective(self.study, participant);
+          function createController() {
+            return self.createController(self.study, participant);
           }
         }));
 
@@ -168,14 +161,14 @@ define(function(require) {
           var self = this,
               participant = self.participantWithAnnotation(self.AnnotationValueType.DATE_TIME);
 
-          context.createDirective           = createDirective;
+          context.createController           = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'dateTime';
           context.annotation               = participant.annotations[0];
           context.newValue                 = faker.date.recent(10);
 
-          function createDirective() {
-            return self.createDirective(self.study, participant);
+          function createController() {
+            return self.createController(self.study, participant);
           }
         }));
 
@@ -189,14 +182,14 @@ define(function(require) {
           var self = this,
               participant = self.participantWithAnnotation(self.AnnotationValueType.NUMBER);
 
-          context.createDirective           = createDirective;
+          context.createController           = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'number';
           context.annotation               = participant.annotations[0];
           context.newValue                 = 10;
 
-          function createDirective() {
-            return self.createDirective(self.study, participant);
+          function createController() {
+            return self.createController(self.study, participant);
           }
         }));
 
@@ -211,14 +204,14 @@ define(function(require) {
               participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
                                                            self.AnnotationMaxValueCount.SELECT_SINGLE);
 
-          context.createDirective           = createDirective;
+          context.createController           = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'select';
           context.annotation               = participant.annotations[0];
           context.newValue                 = participant.annotations[0].annotationType.options[0];
 
-          function createDirective() {
-            return self.createDirective(self.study, participant);
+          function createController() {
+            return self.createController(self.study, participant);
           }
         }));
 
@@ -233,14 +226,14 @@ define(function(require) {
               participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
                                                            self.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
-          context.createDirective           = createDirective;
+          context.createController           = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'selectMultiple';
           context.annotation               = participant.annotations[0];
           context.newValue                 = participant.annotations[0].annotationType.options;
 
-          function createDirective() {
-            return self.createDirective(self.study, participant);
+          function createController() {
+            return self.createController(self.study, participant);
           }
         }));
 
@@ -270,7 +263,7 @@ define(function(require) {
             .and.returnValue(this.$q.when(context.participant));
           spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-          this.createDirective();
+          this.createController();
           this.controller[context.controllerUpdateFuncName]();
           this.scope.$digest();
 
@@ -291,7 +284,7 @@ define(function(require) {
             .and.returnValue(updateDeferred.promise);
           spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-          this.createDirective();
+          this.createController();
           this.controller[context.controllerUpdateFuncName]();
           this.scope.$digest();
 

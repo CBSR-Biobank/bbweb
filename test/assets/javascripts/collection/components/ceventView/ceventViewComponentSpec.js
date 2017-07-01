@@ -173,13 +173,13 @@ define(function(require) {
               study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
-          context.createDirective          = createDirective;
+          context.createController         = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'text';
           context.annotation               = collectionEvent.annotations[0];
           context.newValue                 = faker.random.word();
 
-          function createDirective() {
+          function createController() {
             return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
@@ -197,13 +197,13 @@ define(function(require) {
               study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
-          context.createDirective          = createDirective;
+          context.createController         = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'dateTime';
           context.annotation               = collectionEvent.annotations[0];
           context.newValue                 = { date: newValue, time: newValue };
 
-          function createDirective() {
+          function createController() {
             return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
@@ -220,13 +220,13 @@ define(function(require) {
               study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
-          context.createDirective          = createDirective;
+          context.createController          = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'number';
           context.annotation               = collectionEvent.annotations[0];
           context.newValue                 = 10;
 
-          function createDirective() {
+          function createController() {
             return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
@@ -244,13 +244,13 @@ define(function(require) {
               study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
-          context.createDirective          = createDirective;
+          context.createController         = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'select';
           context.annotation               = collectionEvent.annotations[0];
           context.newValue                 = collectionEvent.annotations[0].annotationType.options[0];
 
-          function createDirective() {
+          function createController() {
             return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));
@@ -268,13 +268,13 @@ define(function(require) {
               study = new this.Study(this.factory.defaultStudy());
 
           context.entityInstance           = collectionEvent;
-          context.createDirective          = createDirective;
+          context.createController          = createController;
           context.controllerUpdateFuncName = 'editAnnotation';
           context.modalInputFuncName       = 'selectMultiple';
           context.annotation               = collectionEvent.annotations[0];
           context.newValue                 = collectionEvent.annotations[0].annotationType.options;
 
-          function createDirective() {
+          function createController() {
             return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
           }
         }));

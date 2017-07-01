@@ -28,12 +28,10 @@ define(function (require) {
     .component('participantAdd',      require('./components/participantAdd/participantAddComponent'))
     .component('participantGet',      require('./components/participantGet/participantGetComponent'))
     .component('participantView',     require('./components/participantView/participantViewComponent'))
+    .component('participantSummary',
+               require('./components/participantSummary/participantSummaryComponent'))
 
     .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
-
-
-    .directive('participantSummary',
-               require('./directives/participantSummary/participantSummaryDirective'))
 
 
     .directive('ceventGetType',       require('./directives/ceventGetType/ceventGetTypeDirective'))

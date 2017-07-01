@@ -1,43 +1,34 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';
 
-  /**
-   *
-   */
-  function participantSummaryDirective() {
-    var directive = {
-      restrict: 'EA',
-      scope: {},
-      bindToController: {
-        study: '=',
-        participant: '='
-      },
-      templateUrl : '/assets/javascripts/collection/directives/participantSummary/participantSummary.html',
-      controller: ParticipantSummaryCtrl,
-      controllerAs: 'vm'
-    };
-    return directive;
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/participantSummary/participantSummary.html',
+    controller: ParticipantSummaryController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '=',
+      participant: '='
+    }
+  };
 
-  }
-
-  ParticipantSummaryCtrl.$inject = [
+  ParticipantSummaryController.$inject = [
     'gettextCatalog',
     'annotationUpdate',
     'notificationsService',
     'modalInput'
   ];
 
-  /**
-   *
+  /*
+   * Controller for this component.
    */
-  function ParticipantSummaryCtrl(gettextCatalog,
-                                  annotationUpdate,
-                                  notificationsService,
-                                  modalInput) {
+  function ParticipantSummaryController(gettextCatalog,
+                                        annotationUpdate,
+                                        notificationsService,
+                                        modalInput) {
     var vm = this;
 
     vm.editUniqueId                   = editUniqueId;
@@ -82,6 +73,5 @@ define(function () {
     }
   }
 
-
-  return participantSummaryDirective;
+  return component;
 });

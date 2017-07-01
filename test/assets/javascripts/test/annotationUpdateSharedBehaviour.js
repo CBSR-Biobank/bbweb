@@ -18,7 +18,7 @@ define(function () {
    *
    * The context object needs the following attributes.
    *
-   *   @param {function} context.createDirective - a function that creates the directive. This function can
+   *   @param {function} context.createController - a function that creates the directive. This function can
    *   also create the members listed below. Called using "call" and with this being the test suite "user
    *   context" (i.e. this).
    *
@@ -54,7 +54,7 @@ define(function () {
           .and.returnValue(this.$q.when(context.entityInstance));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-        context.createDirective.call(this);
+        context.createController.call(this);
         this.controller[context.controllerUpdateFuncName](context.annotation);
         this.scope.$digest();
 
@@ -75,7 +75,7 @@ define(function () {
           .and.returnValue(updateDeferred.promise);
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        context.createDirective.call(this);
+        context.createController.call(this);
         this.controller[context.controllerUpdateFuncName](context.annotation);
         this.scope.$digest();
 
@@ -91,7 +91,7 @@ define(function () {
               getLabel: function () { return null; }
             };
 
-        context.createDirective.call(this);
+        context.createController.call(this);
 
         expect(function () {
           self.controller[context.controllerUpdateFuncName](annotation);
