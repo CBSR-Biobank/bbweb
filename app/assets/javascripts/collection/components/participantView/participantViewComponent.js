@@ -1,29 +1,23 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
 
-  /**
-   *
-   */
-  function participantViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study: '=',
-        participant: '='
-      },
-      templateUrl : '/assets/javascripts/collection/directives/participantView/participantView.html',
-      controller: ParticipantViewCtrl,
-      controllerAs: 'vm'
-    };
-    return directive;
-  }
+  var _ = require('lodash');
 
-  ParticipantViewCtrl.$inject = [
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/participantView/participantView.html',
+    controller: ParticipantViewController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '=',
+      participant: '='
+    }
+  };
+
+  ParticipantViewController.$inject = [
     '$window',
     '$scope',
     '$state',
@@ -31,13 +25,17 @@ define(['lodash'], function (_) {
     'breadcrumbService'
   ];
 
-  function ParticipantViewCtrl($window,
-                               $scope,
-                               $state,
-                               gettextCatalog,
-                               breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function ParticipantViewController($window,
+                                     $scope,
+                                     $state,
+                                     gettextCatalog,
+                                     breadcrumbService) {
     var vm = this;
 
+    vm.$onInit = onInit;
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
       breadcrumbService.forState('home.collection'),
@@ -63,11 +61,9 @@ define(['lodash'], function (_) {
       }
     ];
 
-    init();
-
     //--
 
-    function init() {
+    function onInit() {
       _.each(vm.tabs, function (tab, index) {
         tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
         if (tab.active) {
@@ -78,5 +74,5 @@ define(['lodash'], function (_) {
 
   }
 
-  return participantViewDirective;
+  return component;
 });

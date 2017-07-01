@@ -27,6 +27,7 @@ define(function (require) {
     .component('selectStudy',         require('./components/selectStudy/selectStudyComponent'))
     .component('participantAdd',      require('./components/participantAdd/participantAddComponent'))
     .component('participantGet',      require('./components/participantGet/participantGetComponent'))
+    .component('participantView',     require('./components/participantView/participantViewComponent'))
 
     .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'))
 
@@ -34,7 +35,6 @@ define(function (require) {
     .directive('participantSummary',
                require('./directives/participantSummary/participantSummaryDirective'))
 
-    .directive('participantView',     require('./directives/participantView/participantViewDirective'))
 
     .directive('ceventGetType',       require('./directives/ceventGetType/ceventGetTypeDirective'))
     .directive('ceventsAddAndSelect',
