@@ -8,23 +8,18 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  describe('specimenTableActionDirective', function() {
+  describe('Component: specimenTableAction', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    beforeEach(inject(function(DirectiveTestSuiteMixin, testUtils) {
-      _.extend(this, DirectiveTestSuiteMixin.prototype);
-      this.putHtmlTemplates(
-        '/assets/javascripts/shipmentSpecimens/directives/specimenTableAction/specimenTableAction.html');
+      function SuiteMixin() {
+      }
 
-      this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
-                              'factory');
-      testUtils.addCustomMatchers();
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-      this.createScope = function (action, onActionSelected) {
-        DirectiveTestSuiteMixin.prototype.createScope.call(
+      SuiteMixin.prototype.createController = function (action, onActionSelected) {
+        ComponentTestSuiteMixin.prototype.createScope.call(
           this,
           '<specimen-table-action ' +
             ' action="action"' +
@@ -36,6 +31,24 @@ define(function (require) {
           },
           'specimenTableAction');
       };
+
+      return SuiteMixin;
+    }
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(ComponentTestSuiteMixin, testUtils) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+
+      this.putHtmlTemplates(
+        '/assets/javascripts/shipmentSpecimens/components/specimenTableAction/specimenTableAction.html');
+
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              'factory');
+      testUtils.addCustomMatchers();
+
     }));
 
     it('has valid scope', function() {
@@ -45,7 +58,7 @@ define(function (require) {
                      icon:  'glyphicon-remove'
                    },
           onActionSelected = jasmine.createSpy('onActionSelected').and.returnValue(null);
-      this.createScope(action, onActionSelected);
+      this.createController(action, onActionSelected);
 
       expect(this.scope.vm.action).toBe(action);
       expect(this.scope.vm.onActionSelected).toBeFunction();
@@ -54,7 +67,7 @@ define(function (require) {
     it('can invoke callback function', function() {
       var action = {},
           onActionSelected = jasmine.createSpy('onActionSelected').and.returnValue(null);
-      this.createScope(action, onActionSelected);
+      this.createController(action, onActionSelected);
 
       this.scope.vm.onActionSelected();
       this.scope.$digest();

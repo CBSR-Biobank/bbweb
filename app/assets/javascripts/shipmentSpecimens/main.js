@@ -12,12 +12,10 @@ define(function (require) {
       module;
 
   module = angular.module(name, [])
-    .component(
-      'ssSpecimensPagedTable',
-      require('./components/ssSpecimensPagedTable/ssSpecimensPagedTableComponent'))
-    .directive(
-      'specimenTableAction',
-      require('./directives/specimenTableAction/specimenTableActionDirective'));
+    .component('ssSpecimensPagedTable',
+               require('./components/ssSpecimensPagedTable/ssSpecimensPagedTableComponent'))
+    .component('specimenTableAction',
+               require('./components/specimenTableAction/specimenTableActionComponent'));
 
   return module;
 });
