@@ -26,9 +26,9 @@ define(function (require) {
                               '$compile',
                               'Shipment',
                               'factory');
-      this.createScope = function (shipment, readOnly) {
+      this.createController = function (shipment, readOnly) {
         readOnly = readOnly || false;
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<shipment-specimens-view shipment="vm.shipment" read-only="vm.readOnly"></shipment-specimens-view',
           {
@@ -43,7 +43,7 @@ define(function (require) {
       var shipment = this.createShipment(),
           readOnly = true;
 
-      this.createScope(shipment, readOnly);
+      this.createController(shipment, readOnly);
 
       expect(this.controller.shipment).toBe(shipment);
       expect(this.controller.readOnly).toBe(readOnly);

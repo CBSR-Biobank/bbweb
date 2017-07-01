@@ -18,7 +18,7 @@ define([
     SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function () {
+    SuiteMixin.prototype.createController = function () {
       this.element = angular.element('<centres-admin></centres-admin>');
       this.scope = this.$rootScope.$new();
       this.$compile(this.element)(this.scope);
@@ -54,7 +54,7 @@ define([
     it('scope is valid on startup', function() {
       spyOn(this.CentreCounts, 'get').and.returnValue(this.$q.when({ total: 0, disabled: 0, enabled: 0 }));
       spyOn(this.Centre, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
-      this.createScope();
+      this.createController();
       expect(this.scope).toBeDefined();
     });
 

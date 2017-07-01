@@ -23,7 +23,7 @@ define(function (require) {
       SuiteMixin.prototype.createController = function (study) {
         study = study || this.study;
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<participant-get study="vm.study"></participant-get>',
           { study: study },

@@ -28,7 +28,7 @@ define(function (require) {
       SuiteMixin.prototype.constructor = SuiteMixin;
 
       SuiteMixin.prototype.createController = function (scopeVars) {
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
              '<select-study get-header="vm.getHeader"',

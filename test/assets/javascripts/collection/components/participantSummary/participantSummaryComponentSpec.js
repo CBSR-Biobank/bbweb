@@ -48,7 +48,7 @@ define(function(require) {
         study = study || this.study;
         participant = participant || this.participant;
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
             '<participant-summary',

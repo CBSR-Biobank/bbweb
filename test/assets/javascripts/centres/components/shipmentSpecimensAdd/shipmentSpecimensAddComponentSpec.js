@@ -30,8 +30,8 @@ define(function (require) {
                               'modalService',
                               'factory');
 
-      this.createScope = function (shipment, readOnly) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment, readOnly) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<shipment-specimens-add shipment="vm.shipment" read-only="vm.readOnly"></shipment-specimens-add>',
           {
@@ -46,7 +46,7 @@ define(function (require) {
       var shipment = this.createShipment(),
           readOnly = true;
 
-      this.createScope(shipment, readOnly);
+      this.createController(shipment, readOnly);
 
       expect(this.controller.shipment).toBe(shipment);
       expect(this.controller.readOnly).toBe(readOnly);
@@ -65,7 +65,7 @@ define(function (require) {
         spyOn(this.Shipment.prototype, 'addSpecimens').and.returnValue(this.$q.when(shipment));
         spyOn(this.notificationsService, 'success').and.returnValue(null);
 
-        this.createScope(shipment);
+        this.createController(shipment);
         this.controller.inventoryIds = this.factory.stringNext();
         refreshCount = this.controller.refreshSpecimensTable;
         this.controller.addSpecimens();
@@ -89,7 +89,7 @@ define(function (require) {
         spyOn(this.Shipment.prototype, 'addSpecimens').and.returnValues.apply(null, errors);
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when(null));
 
-        this.createScope(this.createShipment());
+        this.createController(this.createShipment());
         this.controller.inventoryIds = this.factory.stringNext();
 
         errors.forEach(function (error, index) {
@@ -102,8 +102,8 @@ define(function (require) {
       it('nothing done when user has not entered any inventory IDs', function() {
         spyOn(this.Shipment.prototype, 'addSpecimens').and.returnValue(null);
 
-        this.createScope(this.createShipment());
-        this.createScope(this.createShipment());
+        this.createController(this.createShipment());
+        this.createController(this.createShipment());
         this.controller.inventoryIds = '';
         this.controller.addSpecimens();
         this.scope.$digest();
@@ -126,7 +126,7 @@ define(function (require) {
         spyOn(this.notificationsService, 'success').and.returnValue(null);
         spyOn(this.$state, 'go').and.returnValue(null);
 
-        this.createScope(shipment);
+        this.createController(shipment);
         refreshCount = this.controller.refreshSpecimensTable;
         this.controller.removeShipmentSpecimen(shipmentSpecimen);
         this.scope.$digest();
@@ -145,7 +145,7 @@ define(function (require) {
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
         spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
-        this.createScope(shipment);
+        this.createController(shipment);
         refreshCount = this.controller.refreshSpecimensTable;
         this.controller.removeShipmentSpecimen(shipmentSpecimen);
         this.scope.$digest();

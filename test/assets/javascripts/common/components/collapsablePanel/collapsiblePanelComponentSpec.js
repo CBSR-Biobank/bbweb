@@ -22,8 +22,8 @@ define(function (require) {
                               '$compile',
                               'factory');
 
-      this.createScope = function (heading) {
-        ComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (heading) {
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<collapsible-panel heading="' + heading + '"><collapsible-panel>',
           undefined,
@@ -33,7 +33,7 @@ define(function (require) {
 
     it('has valid scope', function() {
       var heading = this.factory.stringNext();
-      this.createScope(heading);
+      this.createController(heading);
       expect(this.controller.heading).toEqual(heading);
       expect(this.controller.panelOpen).toBeTrue();
     });
@@ -41,7 +41,7 @@ define(function (require) {
     it('panel can be collapsed', function() {
       var heading = this.factory.stringNext(),
           panelState;
-      this.createScope(heading);
+      this.createController(heading);
       panelState = this.controller.panelOpen;
       this.controller.panelButtonClicked();
       expect(this.controller.panelOpen).toBe(!panelState);

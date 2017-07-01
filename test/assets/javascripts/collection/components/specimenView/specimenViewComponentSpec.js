@@ -37,7 +37,7 @@ define(function (require) {
                                         collectionEventType,
                                         collectionEvent,
                                         specimen) {
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           self,
           '<specimen-view study="vm.study"' +
             '             participant="vm.participant"' +

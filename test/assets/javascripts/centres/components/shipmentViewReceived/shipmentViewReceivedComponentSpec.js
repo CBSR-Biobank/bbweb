@@ -32,8 +32,8 @@ define(function (require) {
                               'modalService',
                               'factory');
       testUtils.addCustomMatchers();
-      this.createScope = function (shipment) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<shipment-view-received shipment="vm.shipment"></shipment-view-received>',
           { shipment: shipment },
@@ -43,7 +43,7 @@ define(function (require) {
 
     it('has valid scope', function() {
       var shipment = this.createShipment();
-      this.createScope(shipment);
+      this.createController(shipment);
 
       expect(this.controller.progressInfo).toBeDefined();
       expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_RECEIVE_PROGRESS_ITEMS.length);
@@ -56,7 +56,7 @@ define(function (require) {
       beforeEach(function() {
         spyOn(this.modalInput, 'dateTime').and.returnValue({ result: this.$q.when(new Date()) });
         this.shipment = this.createShipment();
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
       });
 
       it('can unpack the shipment', function() {
@@ -112,7 +112,7 @@ define(function (require) {
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
         spyOn(this.$state, 'reload').and.returnValue(null);
 
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
       });
 
       it('user can return shipment to sent state', function() {

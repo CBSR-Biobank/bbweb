@@ -22,7 +22,7 @@ define(function (require) {
                               '$compile',
                               'factory');
 
-      this.createScope = function (label, defaultValue, required, onEdit, labelCols, inputCols) {
+      this.createController = function (label, defaultValue, required, onEdit, labelCols, inputCols) {
         var openTag = '<date-time-picker label="' + label + '"' +
             '                            default-value="vm.defaultValue"' +
             '                            required="vm.required"' +
@@ -37,7 +37,7 @@ define(function (require) {
           openTag += ' input-cols="' + inputCols + '"';
         }
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           openTag + closeTag,
           {
@@ -57,7 +57,7 @@ define(function (require) {
           labelCols    = 'col-md-2',
           inputCols    = 'col-md-10';
 
-      this.createScope(label, defaultValue, required, onEdit, labelCols, inputCols);
+      this.createController(label, defaultValue, required, onEdit, labelCols, inputCols);
       expect(this.controller.label).toEqual(label);
       expect(this.controller.defaultValue).toEqual(defaultValue);
       expect(this.controller.required).toEqual(required);
@@ -70,7 +70,7 @@ define(function (require) {
       var defaultValue = new Date(),
           onEdit       = jasmine.createSpy().and.returnValue(null);
 
-      this.createScope(this.factory.stringNext(), defaultValue, true, onEdit);
+      this.createController(this.factory.stringNext(), defaultValue, true, onEdit);
       this.controller.onChange();
       this.scope.$digest();
       expect(onEdit).toHaveBeenCalledWith(defaultValue);

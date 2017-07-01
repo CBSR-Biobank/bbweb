@@ -31,10 +31,10 @@ define(function (require) {
                               'notificationsService',
                               'factory');
 
-      this.createScope = function (shipment) {
+      this.createController = function (shipment) {
         self.Shipment.get = jasmine.createSpy().and.returnValue(self.$q.when(shipment));
 
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<unpacked-shipment-view shipment="vm.shipment"><unpacked-shipment-view>',
           { shipment: shipment },
@@ -46,7 +46,7 @@ define(function (require) {
 
     it('has valid scope', function() {
       var shipment = this.createShipment();
-      this.createScope(shipment);
+      this.createController(shipment);
 
       expect(this.controller.active).toEqual(0);
       expect(this.controller.tabs).toBeNonEmptyArray();
@@ -65,7 +65,7 @@ define(function (require) {
             'Extra specimens'
           ];
 
-      this.createScope(this.createShipment());
+      this.createController(this.createShipment());
       expect(this.controller.tabs[0].active).toBeTrue();
       expect(this.controller.tabs).toBeArrayOfSize(expectedHeadings.length);
       this.controller.tabs.forEach(function (tab, index) {
@@ -80,7 +80,7 @@ define(function (require) {
       beforeEach(function() {
         this.injectDependencies('ShipmentSpecimen');
         this.shipment = this.createShipment();
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
       });
 
       it('user can return shipment to received state', function() {
@@ -115,7 +115,7 @@ define(function (require) {
       beforeEach(function() {
         this.injectDependencies('ShipmentSpecimen');
         this.shipment = this.createShipment();
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
       });
 
       it('user can place shipment in completed state', function() {

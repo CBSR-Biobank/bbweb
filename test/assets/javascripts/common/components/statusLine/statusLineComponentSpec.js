@@ -24,7 +24,7 @@ define(function (require) {
       SuiteMixin.prototype.createController = function (entity, showState) {
         showState = showState || true;
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           sprintf('<status-line item="vm.entity" show-state="%s"></status-line>', showState.toString()),
           { entity: entity },

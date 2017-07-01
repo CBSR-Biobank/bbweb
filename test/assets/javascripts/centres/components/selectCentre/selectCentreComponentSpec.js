@@ -21,7 +21,7 @@ define([
     SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function (options) {
+    SuiteMixin.prototype.createController = function (options) {
       this.element = angular.element([
         '<select-centre panel-header="{{model.panelHeader}}"',
         '               get-centres="model.getCentres"',
@@ -74,7 +74,7 @@ define([
           centres = _.map(_.range(20), function () { return self.factory.centre(); }),
           limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
+      self.createController({ getCentres: self.createGetCentresFn(centres), limit: limit });
 
       expect(self.element.find('li.list-group-item').length).toBe(limit);
       expect(self.element.find('input').length).toBe(1);
@@ -85,13 +85,13 @@ define([
           centres = _.map(_.range(20), function () { return self.factory.centre(); }),
           limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
+      self.createController({ getCentres: self.createGetCentresFn(centres), limit: limit });
       expect(self.element.find('h3').text()).toBe(panelHeader);
     });
 
     it('has a name filter', function() {
       var centres = [ this.factory.centre() ];
-      this.createScope({ getCentres: this.createGetCentresFn(centres), limit: centres.length });
+      this.createController({ getCentres: this.createGetCentresFn(centres), limit: centres.length });
       expect(this.element.find('input').length).toBe(1);
     });
 
@@ -101,7 +101,7 @@ define([
           centres = _.map(_.range(20), function () { return self.factory.centre(); }),
           limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
+      self.createController({ getCentres: self.createGetCentresFn(centres), limit: limit });
       expect(self.controller.showPagination).toBe(true);
       expect(self.element.find('ul.pagination-sm').length).toBe(1);
     });
@@ -111,7 +111,7 @@ define([
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
           limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
+      self.createController({ getCentres: self.createGetCentresFn(centres), limit: limit });
       spyOn(self.scope.model, 'getCentres').and.callThrough();
 
       _.forEach([
@@ -129,7 +129,7 @@ define([
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
           limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
+      self.createController({ getCentres: self.createGetCentresFn(centres), limit: limit });
       spyOn(self.scope.model, 'getCentres').and.callThrough();
       self.controller.pageChanged();
       expect(self.scope.model.getCentres).toHaveBeenCalled();
@@ -140,7 +140,7 @@ define([
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
           limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
+      self.createController({ getCentres: self.createGetCentresFn(centres), limit: limit });
       spyOn(self.scope.model, 'getCentres').and.callThrough();
       self.controller.clearFilter();
       expect(self.scope.model.getCentres).toHaveBeenCalled();
@@ -151,7 +151,7 @@ define([
           centres = _.map(_.range(8), function () { return self.factory.centre(); }),
           limit = centres.length / 2;
 
-      self.createScope({ getCentres: self.createGetCentresFn(centres), limit: limit });
+      self.createController({ getCentres: self.createGetCentresFn(centres), limit: limit });
       expect(self.controller.centreGlyphicon())
         .toEqual('<i class="glyphicon glyphicon-ok-circle"></i>');
     });

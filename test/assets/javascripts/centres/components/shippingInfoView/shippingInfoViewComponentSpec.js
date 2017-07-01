@@ -30,8 +30,8 @@ define(function (require) {
                               'centreLocationsModalService',
                               'factory');
 
-      this.createScope = function (shipment) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<shipping-info-view shipment="vm.shipment"><shipping-info-view>',
           { shipment: shipment },
@@ -105,7 +105,7 @@ define(function (require) {
           spyOn(this[context.modalService], context.modalInputFuncName)
             .and.returnValue({ result: this.$q.when(context.modalInputReturnValue)});
 
-          this.createScope(this.shipment);
+          this.createController(this.shipment);
         });
 
         it('can update', function() {

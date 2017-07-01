@@ -7,43 +7,43 @@ define(function (require) {
 
   /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
 
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
-      _               = require('lodash');
+  var angular = require('angular'),
+      mocks   = require('angularMocks'),
+      _       = require('lodash');
 
-  function SuiteMixinFactory(TestSuiteMixin) {
+  fdescribe('createController', function() {
 
-    function SuiteMixin() {
-    }
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.createScope = function (centre) {
-      centre = centre || this.centre;
-
-      if (!centre) {
-        throw new Error('no centre to create component with');
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
       }
 
-      this.element = angular.element('<centre-shipments centre="vm.centre"></centre-shipments');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { centre:  centre };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('centreShipments');
-    };
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-    return SuiteMixin;
-  }
+      SuiteMixin.prototype.createController = function (centre) {
+        centre = centre || this.centre;
 
-  describe('centreShipmentsComponent', function() {
+        if (!centre) {
+          throw new Error('no centre to create component with');
+        }
+
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<centre-shipments centre="vm.centre"></centre-shipments',
+          { centre:  centre },
+          'centreShipments');
+      };
+
+      return SuiteMixin;
+    }
+
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.putHtmlTemplates(
         '/assets/javascripts/centres/components/centreShipments/centreShipments.html',
@@ -59,8 +59,7 @@ define(function (require) {
     }));
 
     it('should have valid scope', function() {
-      this.createScope(new this.Centre(this.factory.centre()));
-
+      this.createController(new this.Centre(this.factory.centre()));
       expect(this.controller.tabs).toBeNonEmptyArray();
     });
 

@@ -41,7 +41,7 @@ define([
       SuiteMixin.prototype.createController = function (userCounts) {
         this.UserCounts.get = jasmine.createSpy('get').and.returnValue(this.$q.when(userCounts));
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<user-admin></user-admin>',
           undefined,

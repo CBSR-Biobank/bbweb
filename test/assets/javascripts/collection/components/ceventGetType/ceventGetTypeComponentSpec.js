@@ -21,7 +21,7 @@ define(function (require) {
       SuiteMixin.prototype.constructor = SuiteMixin;
 
       SuiteMixin.prototype.createController = function () {
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
             '<cevent-get-type',

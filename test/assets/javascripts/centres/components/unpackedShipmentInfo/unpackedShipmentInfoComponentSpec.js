@@ -24,8 +24,8 @@ define(function (require) {
                               '$compile',
                               'factory');
 
-      this.createScope = function (shipment) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<unpacked-shipment-info shipment="vm.shipment"><unpacked-shipment-info>',
           { shipment: shipment },
@@ -42,7 +42,7 @@ define(function (require) {
         eventEmitted = true;
       });
 
-      this.createScope(shipment);
+      this.createController(shipment);
       expect(eventEmitted).toBeTrue();
     });
 

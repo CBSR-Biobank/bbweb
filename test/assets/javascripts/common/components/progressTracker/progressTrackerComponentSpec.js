@@ -19,7 +19,7 @@ define([
     SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function (items, current) {
+    SuiteMixin.prototype.createController = function (items, current) {
       this.element = angular.element([
         '<progress-tracker',
         '  items="vm.progressInfo.items"',
@@ -52,7 +52,7 @@ define([
       var self = this,
           items = _.map(_.range(3), function () { return self.factory.stringNext(); }),
           current = items[0];
-      self.createScope(items, current);
+      self.createController(items, current);
       expect(self.controller.numSteps).toBe(items.length);
       expect(self.controller.steps).toBeArrayOfSize(items.length);
     });
@@ -60,7 +60,7 @@ define([
     it('all steps can be marked as todo', function() {
       var self = this,
           items = _.map(_.range(3), function () { return self.factory.stringNext(); });
-      self.createScope(items, 0);
+      self.createController(items, 0);
       expect(self.controller.numSteps).toBe(items.length);
       _.each(self.controller.steps, function (step) {
         expect(step.class).toBe('progtrckr-todo');
@@ -70,7 +70,7 @@ define([
     it('all steps can be marked as done', function() {
       var self = this,
           items = _.map(_.range(3), function () { return self.factory.stringNext(); });
-      self.createScope(items, items.length);
+      self.createController(items, items.length);
       expect(self.controller.numSteps).toBe(items.length);
       _.each(self.controller.steps, function (step) {
         expect(step.class).toBe('progtrckr-done');

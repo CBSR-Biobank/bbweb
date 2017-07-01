@@ -21,7 +21,7 @@ define(function (require) {
     SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function (bindings) {
+    SuiteMixin.prototype.createController = function (bindings) {
       var self = this,
           defaultBindings = {},
           actualBindings = {};
@@ -70,7 +70,7 @@ define(function (require) {
     }));
 
     it('has valid scope', function() {
-      this.createScope();
+      this.createController();
 
       expect(this.controller.nameFilter).toBeEmptyString();
       expect(this.controller.selectedState).toBe('all');
@@ -82,7 +82,7 @@ define(function (require) {
     });
 
     it('invokes the callback when the name filter is updated', function() {
-      this.createScope();
+      this.createController();
 
       this.controller.nameFilter = 'test';
       this.controller.nameFilterUpdated();
@@ -92,7 +92,7 @@ define(function (require) {
     });
 
     it('invokes the callback when the name state is updated', function() {
-      this.createScope();
+      this.createController();
 
       this.controller.selectedState = 'enabled';
       this.controller.stateFilterUpdated();
@@ -102,7 +102,7 @@ define(function (require) {
     });
 
     it('invokes the callback when the filters are cleared', function() {
-      this.createScope();
+      this.createController();
 
       this.controller.clearFilters();
       this.scope.$digest();

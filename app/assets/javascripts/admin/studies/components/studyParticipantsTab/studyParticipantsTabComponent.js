@@ -1,25 +1,24 @@
-define(['lodash'], function (_) {
+/**
+ *
+ */
+define(function (require) {
   'use strict';
+
+  var _ = require('lodash');
 
   /**
    * Displays the participant annotations defined for a study.
    */
-  function studyParticipantsTabDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study: '='
-      },
-      templateUrl : '/assets/javascripts/admin/studies/directives/studyParticipantsTab/studyParticipantsTab.html',
-      controller: StudyParticipantsTabCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl : '/assets/javascripts/admin/studies/components/studyParticipantsTab/studyParticipantsTab.html',
+    controller: StudyParticipantsTabController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '='
+    }
+  };
 
-    return directive;
-  }
-
-  StudyParticipantsTabCtrl.$inject = [
+  StudyParticipantsTabController.$inject = [
     '$scope',
     '$state',
     'ParticipantAnnotationTypeModals',
@@ -27,14 +26,14 @@ define(['lodash'], function (_) {
     'gettextCatalog'
   ];
 
-  /**
-   * Controller for studyParticipantsTabDirective.
+  /*
+   * Controller for this component.
    */
-  function StudyParticipantsTabCtrl($scope,
-                                    $state,
-                                    ParticipantAnnotationTypeModals,
-                                    notificationsService,
-                                    gettextCatalog) {
+  function StudyParticipantsTabController($scope,
+                                          $state,
+                                          ParticipantAnnotationTypeModals,
+                                          notificationsService,
+                                          gettextCatalog) {
     var vm = this;
 
     _.extend(vm, new ParticipantAnnotationTypeModals());
@@ -43,15 +42,14 @@ define(['lodash'], function (_) {
     vm.annotationTypeIdsInUse = [];
     vm.modificationsAllowed = vm.study.isDisabled();
 
-    vm.add = add;
-    vm.editAnnotationType = editAnnotationType;
+    vm.$onInit              = onInit;
+    vm.add                  = add;
+    vm.editAnnotationType   = editAnnotationType;
     vm.removeAnnotationType = removeAnnotationType;
-
-    init();
 
     //--
 
-    function init() {
+    function onInit() {
       // updates the selected tab in 'studyViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
     }
@@ -84,7 +82,5 @@ define(['lodash'], function (_) {
     }
   }
 
-
-  return studyParticipantsTabDirective;
-
+  return component;
 });

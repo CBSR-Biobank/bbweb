@@ -19,7 +19,7 @@ define(function (require) {
     SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function () {
+    SuiteMixin.prototype.createController = function () {
       this.element = angular.element('<shipment-add centre="vm.centre"></shipment-add');
       this.scope = this.$rootScope.$new();
       this.$compile(this.element)(this.scope);
@@ -76,7 +76,7 @@ define(function (require) {
 
     it('should have valid scope', function() {
       this.createCentreLocationsSpy([]);
-      this.createScope();
+      this.createController();
       expect(this.controller.progressInfo).toBeDefined();
       expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_SEND_PROGRESS_ITEMS.length);
       expect(this.controller.progressInfo.items).toContainAll(this.SHIPMENT_SEND_PROGRESS_ITEMS);
@@ -90,7 +90,7 @@ define(function (require) {
     it('checks for valid centres', function() {
       var centreLocs = this.centreLocations(2);
       this.createCentreLocationsSpy(centreLocs);
-      this.createScope();
+      this.createController();
       expect(this.controller.hasValidCentres).toBeTrue();
     });
 
@@ -101,7 +101,7 @@ define(function (require) {
       spyOn(this.Shipment.prototype, 'add').and.returnValue(this.$q.when(shipment));
 
       this.createCentreLocationsSpy([]);
-      this.createScope();
+      this.createController();
       this.controller.submit();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.shipping.addItems', { shipmentId: shipment.id});
@@ -111,7 +111,7 @@ define(function (require) {
       spyOn(this.Shipment.prototype, 'add').and.returnValue(this.$q.reject('simulated error'));
       spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
       this.createCentreLocationsSpy([]);
-      this.createScope();
+      this.createController();
       this.controller.submit();
       this.scope.$digest();
       expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();
@@ -120,7 +120,7 @@ define(function (require) {
     it('when cancel button is pressed', function() {
       spyOn(this.$state, 'go').and.returnValue(null);
       this.createCentreLocationsSpy([]);
-      this.createScope();
+      this.createController();
       this.controller.cancel();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.shipping');
@@ -130,7 +130,7 @@ define(function (require) {
       var centreLocs = this.centreLocations(2);
 
       this.createCentreLocationsSpy(centreLocs);
-      this.createScope();
+      this.createController();
       this.controller.shipment.fromLocationInfo = centreLocs[0];
       this.controller.getToCentreLocationInfo().then(function (toLocationInfos) {
         expect(toLocationInfos).toBeArrayOfSize(1);
@@ -143,7 +143,7 @@ define(function (require) {
       var centreLocs = this.centreLocations(2);
 
       this.createCentreLocationsSpy(centreLocs);
-      this.createScope();
+      this.createController();
       this.controller.getToCentreLocationInfo().then(function (toLocationInfos) {
         expect(toLocationInfos).toBeArrayOfSize(2);
       });
@@ -154,7 +154,7 @@ define(function (require) {
       var centreLocs = this.centreLocations(2);
 
       this.createCentreLocationsSpy(centreLocs);
-      this.createScope();
+      this.createController();
       this.controller.shipment.toLocationInfo = centreLocs[0];
       this.controller.getFromCentreLocationInfo().then(function (fromLocationInfos) {
         expect(fromLocationInfos).toBeArrayOfSize(1);
@@ -167,7 +167,7 @@ define(function (require) {
       var centreLocs = this.centreLocations(2);
 
       this.createCentreLocationsSpy(centreLocs);
-      this.createScope();
+      this.createController();
       this.controller.getFromCentreLocationInfo().then(function (fromLocationInfos) {
         expect(fromLocationInfos).toBeArrayOfSize(2);
       });

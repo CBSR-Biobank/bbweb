@@ -18,7 +18,7 @@ define([
     SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function () {
+    SuiteMixin.prototype.createController = function () {
       this.element = angular.element('<studies-admin></studies-admin>');
       this.scope = this.$rootScope.$new();
       this.$compile(this.element)(this.scope);
@@ -59,7 +59,7 @@ define([
         retired: 0
       }));
       spyOn(this.Study, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
-      this.createScope();
+      this.createController();
       expect(this.controller.breadcrumbs).toBeDefined();
     });
 

@@ -19,7 +19,7 @@ define(function (require) {
       SuiteMixin.prototype.constructor = SuiteMixin;
 
       SuiteMixin.prototype.createController = function (action, onActionSelected) {
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<specimen-table-action ' +
             ' action="action"' +

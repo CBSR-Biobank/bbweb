@@ -4,41 +4,51 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  describe('studyParticipantsTabDirectiveDirective', function() {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    var createDirective = function () {
-      this.element = angular.element([
-        '<study-participants-tab',
-        ' study="vm.study">',
-        '</study-participants-tab>'
-      ].join(''));
+  fdescribe('studyParticipantsTabDirectiveDirective', function() {
 
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { study: this.study };
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
-      this.scope.$on('tabbed-page-update', this.eventRxFunc);
+      function SuiteMixin() {
+      }
 
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('studyParticipantsTab');
-    };
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createScope = function () {
+        var scope = ComponentTestSuiteMixin.prototype.createScope.call(this, { study: this.study });
+        this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+        scope.$on('tabbed-page-update', this.eventRxFunc);
+        return scope;
+      };
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          [
+            '<study-participants-tab',
+            ' study="vm.study">',
+            '</study-participants-tab>'
+          ].join(''),
+          this.createScope(),
+          'studyParticipantsTab');
+
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               '$state',
@@ -48,20 +58,20 @@ define([
                               'AnnotationType',
                               'factory');
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/studyParticipantsTab/studyParticipantsTab.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/studyParticipantsTab/studyParticipantsTab.html',
         '/assets/javascripts/admin/studies/directives/studyNotDisabledWarning/studyNotDisabledWarning.html',
         '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
 
-      self.jsonStudy = self.factory.study();
-      self.study     = new self.Study(self.jsonStudy);
+      this.jsonStudy = this.factory.study();
+      this.study     = new this.Study(this.jsonStudy);
 
       spyOn(this.$state, 'go').and.returnValue('ok');
     }));
 
     it('initialization is valid', function() {
-      createDirective.call(this);
+      this.createController();
 
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.add).toBeFunction();
@@ -71,7 +81,7 @@ define([
     });
 
     it('invoking add changes state', function() {
-      createDirective.call(this);
+      this.createController();
 
       this.controller.add();
       this.scope.$digest();
@@ -87,7 +97,7 @@ define([
       });
 
       it('invoking editAnnotationType changes state', function() {
-        createDirective.call(this);
+        this.createController();
 
         this.controller.editAnnotationType(this.annotationType);
         this.scope.$digest();
@@ -104,7 +114,7 @@ define([
           spyOn(this.Study.prototype, 'removeAnnotationType')
             .and.returnValue(this.$q.when(this.study));
 
-          createDirective.call(this);
+          this.createController();
           this.controller.removeAnnotationType(this.annotationType);
           this.scope.$digest();
 
@@ -114,7 +124,7 @@ define([
         it('displays a modal when it cant be removed', function() {
           spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
 
-          createDirective.call(this);
+          this.createController();
 
           this.controller.annotationTypeIdsInUse = [ this.annotationType.uniqueId ];
           this.controller.removeAnnotationType(this.annotationType);
@@ -126,7 +136,7 @@ define([
         it('throws an error when it cant be removed', function() {
           var self = this;
 
-          createDirective.call(this);
+          this.createController();
           this.controller.annotationTypeIdsInUse = [ ];
           this.controller.modificationsAllowed = false;
 

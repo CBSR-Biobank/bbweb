@@ -31,8 +31,8 @@ define(function (require) {
                               'notificationsService',
                               'factory');
 
-      this.createScope = function (shipment) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<unpacked-shipment-extra shipment="vm.shipment"><unpacked-shipment-extra>',
           { shipment: shipment },
@@ -43,7 +43,7 @@ define(function (require) {
     it('has valid scope', function() {
       var shipment = this.createShipment();
 
-      this.createScope(shipment);
+      this.createController(shipment);
       expect(this.controller.refreshTable).toEqual(0);
       expect(this.controller.actions).toBeNonEmptyArray();
     });
@@ -57,7 +57,7 @@ define(function (require) {
         eventEmitted = true;
       });
 
-      this.createScope(shipment);
+      this.createController(shipment);
       expect(eventEmitted).toBeTrue();
     });
 
@@ -73,7 +73,7 @@ define(function (require) {
         spyOn(this.ShipmentSpecimen, 'list')
           .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
 
-        this.createScope(shipment);
+        this.createController(shipment);
         this.controller.getExtraSpecimens().then(function (result) {
           expect(result.items).toBeArrayOfSize(1);
           expect(result.items[0]).toEqual(jasmine.any(self.ShipmentSpecimen));
@@ -93,7 +93,7 @@ define(function (require) {
         spyOn(this.ShipmentSpecimen, 'list')
           .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
 
-        this.createScope();
+        this.createController();
         this.controller.shipment = undefined;
         this.controller.getExtraSpecimens().then(function (result) {
           expect(result.items).toBeArrayOfSize(0);
@@ -114,7 +114,7 @@ define(function (require) {
 
         spyOn(this.Shipment.prototype, 'tagSpecimensAsExtra').and.returnValue(this.$q.when(true));
 
-        this.createScope(shipment);
+        this.createController(shipment);
         this.controller.inventoryIds = this.factory.stringNext() + ','  + this.factory.stringNext();
         tableRefreshCount = this.controller.refreshTable;
         this.controller.onInventoryIdsSubmit();
@@ -143,7 +143,7 @@ define(function (require) {
         spyOn(this.Shipment.prototype, 'tagSpecimensAsExtra').and.returnValues.apply(null, errors);
         spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
 
-        this.createScope(shipment);
+        this.createController(shipment);
         this.controller.inventoryIds = this.factory.stringNext() + ','  + this.factory.stringNext();
         tableRefreshCount = this.controller.refreshTable;
 
@@ -188,7 +188,7 @@ define(function (require) {
         spyOn(this.ShipmentSpecimen.prototype, 'remove').and.returnValue(this.$q.when(true));
         spyOn(this.modalService, 'modalOkCancel').and.returnValues.apply(null, modalOkResults);
 
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
         tableRefreshCount = this.controller.refreshTable;
         this.controller.tableActionSelected(this.shipmentSpecimen);
         this.scope.$digest();
@@ -204,7 +204,7 @@ define(function (require) {
         spyOn(this.ShipmentSpecimen.prototype, 'remove').and.returnValue(this.$q.when(true));
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
 
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
         tableRefreshCount = this.controller.refreshTable;
         this.controller.tableActionSelected(this.shipmentSpecimen);
         this.scope.$digest();

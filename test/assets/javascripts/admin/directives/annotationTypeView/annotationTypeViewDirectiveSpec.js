@@ -20,7 +20,7 @@ define([
     SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function (options) {
+    SuiteMixin.prototype.createController = function (options) {
       options = options || {};
       options.study = options.study || this.study;
       options.annotationType = options.annotationType || this.annotationType;
@@ -82,7 +82,7 @@ define([
     }));
 
     it('should have valid scope', function() {
-      this.createScope();
+      this.createController();
       expect(this.controller.annotationType).toBe(this.annotationType);
       expect(this.controller.returnState).toBe(this.returnState);
       expect(this.controller.onUpdate).toBeFunction();
@@ -91,7 +91,7 @@ define([
     it('call to back function returns to valid state', function() {
       spyOn(this.$state, 'go').and.returnValue(0);
 
-      this.createScope();
+      this.createController();
       this.controller.back();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(this.returnState, {}, { reload: true });
@@ -148,7 +148,7 @@ define([
           }));
         spyOn(annotationTypeUpdateModal, 'openModal').and.returnValue({ result: this.$q.when([]) });
 
-        this.createScope({ study: undefined, annotationType: annotationType });
+        this.createController({ study: undefined, annotationType: annotationType });
         this.controller.editSelectionOptions();
         this.scope.$digest();
         expect(annotationTypeUpdateModal.openModal).toHaveBeenCalled();
@@ -168,7 +168,7 @@ define([
 
         _.each(annotationTypes, function (annotationType) {
           expect(function () {
-            self.createScope({ study: undefined, annotationType: annotationType });
+            self.createController({ study: undefined, annotationType: annotationType });
             self.controller.editSelectionOptions();
           }).toThrowError(/invalid annotation type:/);
         });
@@ -186,7 +186,7 @@ define([
           spyOn(this.modalInput, context.modalInputFuncName).and.returnValue(
             { result: this.$q.when(newValue)});
 
-          this.createScope();
+          this.createController();
           expect(this.controller[context.controllerFuncName]).toBeFunction();
           this.controller[context.controllerFuncName]();
           this.scope.$digest();

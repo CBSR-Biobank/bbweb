@@ -47,7 +47,7 @@ define([
         study = study || self.study;
         collectionEvent = collectionEvent || self.collectionEvent;
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           self,
           '<cevent-specimens-view study="vm.study" collection-event="vm.collectionEvent">' +
             '<cevent-specimens-view>',

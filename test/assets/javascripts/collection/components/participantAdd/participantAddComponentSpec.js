@@ -24,7 +24,7 @@ define(function (require) {
         study = study || this.study;
         uniqueId = uniqueId || this.uniqueId;
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
             '<participant-add',

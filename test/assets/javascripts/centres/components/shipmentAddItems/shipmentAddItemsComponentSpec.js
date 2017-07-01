@@ -39,8 +39,8 @@ define(function (require) {
                               'factory');
       testUtils.addCustomMatchers();
 
-      this.createScope = function (shipment) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<shipment-add-items shipment="vm.shipment"></shipment-add-items',
           { shipment: shipment },
@@ -50,7 +50,7 @@ define(function (require) {
 
     it('should have valid scope', function() {
       var shipment = this.createShipment();
-      this.createScope(shipment);
+      this.createController(shipment);
       expect(this.controller.shipment).toBe(shipment);
       expect(this.controller.progressInfo).toBeDefined();
       expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_SEND_PROGRESS_ITEMS.length);
@@ -77,7 +77,7 @@ define(function (require) {
         spyOn(this.Shipment.prototype, 'pack').and.returnValue(this.$q.when(this.shipment));
         spyOn(this.modalInput, 'dateTime').and.returnValue({ result: this.$q.when(new Date()) });
 
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
         this.controller.tagAsPacked().then(function () {
           expect(self.Shipment.prototype.pack).toHaveBeenCalled();
           expect(self.$state.go).toHaveBeenCalledWith('home.shipping.shipment',
@@ -111,7 +111,7 @@ define(function (require) {
         spyOn(this.$state, 'go').and.returnValue(null);
         spyOn(this.Shipment.prototype, 'skipToStateSent').and.returnValue(this.$q.when(this.shipment));
 
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
         this.controller.tagAsSent().then(function () {
           expect(self.Shipment.prototype.skipToStateSent).toHaveBeenCalled();
           expect(self.$state.go).toHaveBeenCalledWith('home.shipping.shipment',
@@ -136,7 +136,7 @@ define(function (require) {
         spyOn(this.Shipment.prototype, 'skipToStateSent').and.returnValues.apply(null, errorPromises);
         spyOn(this.toastr, 'error').and.returnValue(null);
 
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
 
         errorMsgs.forEach(function (errMsg, index) {
           var args;
@@ -160,7 +160,7 @@ define(function (require) {
         this.shipment = this.createShipmentWithSpecimens(0);
         spyOn(this.Shipment, 'get').and.returnValue(this.$q.when(this.shipment));
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
-        this.createScope(this.shipment);
+        this.createController(this.shipment);
       });
 
       it('to packed when no specimens in shipment', function() {
@@ -197,7 +197,7 @@ define(function (require) {
       spyOn(this.notificationsService, 'success').and.returnValue(null);
       spyOn(this.$state, 'go').and.returnValue(null);
 
-      this.createScope(shipment);
+      this.createController(shipment);
       this.controller.removeShipment();
       this.scope.$digest();
 
@@ -212,7 +212,7 @@ define(function (require) {
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
       spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
-      this.createScope(shipment);
+      this.createController(shipment);
       this.controller.removeShipment();
       this.scope.$digest();
 
@@ -225,7 +225,7 @@ define(function (require) {
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
       spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
-      this.createScope(shipment);
+      this.createController(shipment);
       this.controller.removeShipment();
       this.scope.$digest();
 

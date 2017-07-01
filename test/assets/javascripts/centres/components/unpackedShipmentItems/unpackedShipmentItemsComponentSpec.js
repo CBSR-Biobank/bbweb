@@ -28,8 +28,8 @@ define(function (require) {
                               'modalService',
                               'factory');
 
-      this.createScope = function (shipment, itemState) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment, itemState) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<unpacked-shipment-items shipment="vm.shipment" item-state="' +
             itemState + '"><unpacked-shipment-items>',
@@ -41,7 +41,7 @@ define(function (require) {
     it('has valid scope for shipment item state RECEIVED', function() {
       var shipment = this.createShipment();
 
-      this.createScope(shipment, this.ShipmentItemState.RECEIVED);
+      this.createController(shipment, this.ShipmentItemState.RECEIVED);
       expect(this.controller.actions).toBeNonEmptyArray();
       expect(this.controller.panelHeading).toBe('Received specimens in this shipment');
       expect(this.controller.noSpecimensMessage).toBe('No received specimens present in this shipment');
@@ -50,7 +50,7 @@ define(function (require) {
     it('has valid scope for shipment item state MISSING', function() {
       var shipment = this.createShipment();
 
-      this.createScope(shipment, this.ShipmentItemState.MISSING);
+      this.createController(shipment, this.ShipmentItemState.MISSING);
       expect(this.controller.actions).toBeNonEmptyArray();
       expect(this.controller.panelHeading).toBe('Missing specimens in this shipment');
       expect(this.controller.noSpecimensMessage).toBe('No missing specimens present in this shipment');
@@ -61,7 +61,7 @@ define(function (require) {
           shipment = this.createShipment();
 
       expect(function () {
-        self.createScope(shipment, self.ShipmentItemState.EXTRA);
+        self.createController(shipment, self.ShipmentItemState.EXTRA);
       }).toThrowError(/invalid item state/);
     });
 
@@ -74,7 +74,7 @@ define(function (require) {
         eventEmitted = true;
       });
 
-      this.createScope(shipment, this.ShipmentItemState.MISSING);
+      this.createController(shipment, this.ShipmentItemState.MISSING);
       expect(eventEmitted).toBeTrue();
     });
 
@@ -84,8 +84,8 @@ define(function (require) {
       beforeEach(function() {
         var self = this;
 
-        context.createScope = function () {
-          self.createScope(self.createShipment(), self.ShipmentItemState.RECEIVED);
+        context.createController = function () {
+          self.createController(self.createShipment(), self.ShipmentItemState.RECEIVED);
         };
       });
 
@@ -98,8 +98,8 @@ define(function (require) {
       beforeEach(function() {
         var self = this;
 
-        context.createScope = function () {
-          self.createScope(self.createShipment(), self.ShipmentItemState.MISSING);
+        context.createController = function () {
+          self.createController(self.createShipment(), self.ShipmentItemState.MISSING);
         };
       });
 
@@ -113,7 +113,7 @@ define(function (require) {
         this.shipmentSpecimen = new this.ShipmentSpecimen(this.factory.shipmentSpecimen());
 
         spyOn(this.Shipment.prototype, 'tagSpecimensAsPresent').and.returnValue(this.$q.when(this.shipment));
-        this.createScope(this.shipment, this.ShipmentItemState.RECEIVED);
+        this.createController(this.shipment, this.ShipmentItemState.RECEIVED);
         this.tableUpdateCount = this.controller.refreshSpecimensTable;
       });
 
@@ -152,7 +152,7 @@ define(function (require) {
           spyOn(this.ShipmentSpecimen, 'list')
             .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
 
-          context.createScope();
+          context.createController();
           this.controller.getSpecimens().then(function (result) {
             expect(result.items).toBeArrayOfSize(1);
             expect(result.items[0]).toEqual(jasmine.any(self.ShipmentSpecimen));
@@ -170,7 +170,7 @@ define(function (require) {
           spyOn(this.ShipmentSpecimen, 'list')
             .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
 
-          context.createScope();
+          context.createController();
           this.controller.shipment = undefined;
           this.controller.getSpecimens().then(function (result) {
             expect(result.items).toBeArrayOfSize(0);

@@ -34,8 +34,8 @@ define(function (require) {
                               'Shipment',
                               'ShipmentState',
                               'factory');
-      this.createScope = function (shipment) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<shipment-view shipment="vm.shipment"></shipment-view>',
           { shipment: shipment },
@@ -59,7 +59,7 @@ define(function (require) {
       _.forEach(_.keys(this.ShipmentState), function (key) {
         var state = self.ShipmentState[key];
         shipment = self.createShipment(state);
-        self.createScope(shipment);
+        self.createController(shipment);
         expect(self.controller.pageHeader).toBe(headerByState[state]);
       });
     });

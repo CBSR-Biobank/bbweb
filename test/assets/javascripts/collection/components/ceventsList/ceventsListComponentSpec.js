@@ -24,7 +24,7 @@ define(function (require) {
         participant = participant || this.participant;
         collectionEventTypes = collectionEventTypes || this.collectionEventTypes;
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
             '<cevents-list',

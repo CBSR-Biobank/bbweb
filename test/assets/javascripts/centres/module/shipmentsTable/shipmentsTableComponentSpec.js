@@ -16,10 +16,10 @@ define(function (require) {
     SuiteMixin.prototype = Object.create(ShippingComponentTestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function (centre, shipmentTypes, statesToDisplay) {
+    SuiteMixin.prototype.createController = function (centre, shipmentTypes, statesToDisplay) {
       shipmentTypes = shipmentTypes || this.SHIPMENT_TYPES.INCOMING;
       statesToDisplay = statesToDisplay || [];
-      ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      ShippingComponentTestSuiteMixin.prototype.createController.call(
         this,
         '<shipments-table' +
           ' centre="vm.centre"' +
@@ -85,7 +85,7 @@ define(function (require) {
     }));
 
     it('scope is valid on startup', function() {
-      this.createScope(this.centre);
+      this.createController(this.centre);
       expect(this.controller.tableDataLoading).toBeTrue();
       expect(_.map(this.controller.states, 'label')).toContain('any');
 
@@ -113,7 +113,7 @@ define(function (require) {
       ];
 
       shipmentTypes.forEach(function (shipmentType) {
-        self.createScope(self.centre, shipmentType);
+        self.createController(self.centre, shipmentType);
 
         searchPredicateObjects.forEach(function (searchPredicateObjects, index) {
           self.controller.getTableData(self.createTableState(searchPredicateObjects, 'courierName', true));
@@ -132,7 +132,7 @@ define(function (require) {
 
       spyOn(this.$state, 'go').and.returnValue(null);
 
-      this.createScope(this.centre);
+      this.createController(this.centre);
       _.forEach(this.ShipmentState, function (state) {
         var shipment = self.factory.shipment({ state: state }),
             args;

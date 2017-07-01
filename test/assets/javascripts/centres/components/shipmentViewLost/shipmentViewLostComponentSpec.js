@@ -26,8 +26,8 @@ define(function (require) {
                               'notificationsService',
                               'factory');
 
-      this.createScope = function (shipment) {
-        ShippingComponentTestSuiteMixin.prototype.createScope.call(
+      this.createController = function (shipment) {
+        ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<shipment-view-lost shipment="vm.shipment"></shipment-view-lost>',
           { shipment: shipment },
@@ -37,7 +37,7 @@ define(function (require) {
 
     it('has valid scope', function() {
       var shipment = this.createShipment();
-      this.createScope(shipment);
+      this.createController(shipment);
       expect(this.controller.shipment).toBe(shipment);
     });
 
@@ -47,7 +47,7 @@ define(function (require) {
       spyOn(this.$state, 'go').and.returnValue(null);
 
       this.shipment = this.createShipment();
-      this.createScope(this.shipment);
+      this.createController(this.shipment);
       this.controller.returnToSentState();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.shipping.shipment',

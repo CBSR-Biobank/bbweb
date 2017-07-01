@@ -51,7 +51,7 @@ define(function(require) {
           fail('collectionEvent is undefined');
         }
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
             '<cevent-view',

@@ -24,7 +24,7 @@ define(function () {
         spyOn(this.ShipmentSpecimen, 'list')
           .and.returnValue(this.$q.when(this.factory.pagedResult([], { maxPages: 1 })));
 
-        this.createScope(shipment);
+        this.createController(shipment);
         this.controller.getSpecimens({}).then(function (result) {
           expect(result).toBeObject();
           expect(result.items).toBeEmptyArray();
@@ -36,7 +36,7 @@ define(function () {
       });
 
       it('valid results if shipment is invalid', function() {
-        this.createScope();
+        this.createController();
         this.controller.getSpecimens({}).then(function (result) {
           expect(result).toBeObject();
         });

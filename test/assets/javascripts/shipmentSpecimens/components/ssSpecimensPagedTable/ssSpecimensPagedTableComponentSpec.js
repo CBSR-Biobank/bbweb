@@ -24,14 +24,14 @@ define(function (require) {
                               'ShipmentSpecimen',
                               'factory');
 
-      this.createScope = function (defaultSortField,
+      this.createController = function (defaultSortField,
                                    refresh,
                                    showItemState,
                                    onGetSpecimens,
                                    noSpecimensMessage,
                                    actions,
                                    onActionSelected) {
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<ss-specimens-paged-table' +
             ' default-sort-field="' + defaultSortField + '"' +
@@ -86,7 +86,7 @@ define(function (require) {
           actions            = [],
           onActionSelected   = jasmine.createSpy('onActionSelected').and.returnValue(null);
 
-      this.createScope(defaultSortField,
+      this.createController(defaultSortField,
                        refreshTable,
                        showItemState,
                        onGetSpecimens,
@@ -117,7 +117,7 @@ define(function (require) {
       onGetSpecimens     = jasmine.createSpy('onGetSpecimens')
         .and.returnValue(this.$q.when(this.factory.pagedResult([])));
 
-      this.createScope('inventoryId',
+      this.createController('inventoryId',
                        refreshTable,
                        true,
                        onGetSpecimens,
@@ -144,7 +144,7 @@ define(function (require) {
           onActionSelected = jasmine.createSpy('onActionSelected').and.returnValue(null),
           shipmentSpecimen = new this.ShipmentSpecimen(this.factory.shipmentSpecimen());
 
-      this.createScope('inventoryId',
+      this.createController('inventoryId',
                        refreshTable,
                        true,
                        onGetSpecimens,

@@ -21,7 +21,7 @@ define(function (require) {
       SuiteMixin.prototype.constructor = SuiteMixin;
 
       SuiteMixin.prototype.createController = function (onSubmit, onCancel) {
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<location-add on-submit="vm.onSubmit" on-cancel="vm.onCancel"> </location-add>',
           {

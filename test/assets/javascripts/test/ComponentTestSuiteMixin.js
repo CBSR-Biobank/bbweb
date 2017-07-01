@@ -18,14 +18,17 @@ define(function (require) {
     ComponentTestSuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     ComponentTestSuiteMixin.prototype.constructor = ComponentTestSuiteMixin;
 
-    ComponentTestSuiteMixin.prototype.createScope = function (htmlElement, scopeVars, controllerName) {
-      this.element = angular.element(htmlElement);
-      this.scope = this.$rootScope.$new();
-
+    ComponentTestSuiteMixin.prototype.createScope = function (scopeVars) {
+      var scope = this.$rootScope.$new();
       if (scopeVars) {
-        this.scope.vm = scopeVars;
+        scope.vm = scopeVars;
       }
+      return scope;
+    };
 
+    ComponentTestSuiteMixin.prototype.createController = function (htmlElement, scopeVars, controllerName) {
+      this.element = angular.element(htmlElement);
+      this.scope = this.createScope(scopeVars);
       this.$compile(this.element)(this.scope);
       this.scope.$digest();
       this.controller = this.element.controller(controllerName);

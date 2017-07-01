@@ -17,7 +17,7 @@ define(function (require) {
     SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createScope = function () {
+    SuiteMixin.prototype.createController = function () {
       this.element = angular.element('<shipping-home><shipping-home>');
       this.scope = this.$rootScope.$new();
       this.$compile(this.element)(this.scope);
@@ -71,7 +71,7 @@ define(function (require) {
 
       spyOn(this.Centre, 'locationsSearch').and.returnValue(this.$q.when(centreLocations));
       spyOn(this.Centre, 'list').and.returnValue(this.$q.when(centres));
-      this.createScope();
+      this.createController();
 
       expect(this.controller.hasValidCentres).toBeTrue();
       expect(this.controller.centreIcon).toBeDefined();
@@ -83,7 +83,7 @@ define(function (require) {
     it('correct setting when no centres present', function() {
       spyOn(this.Centre, 'locationsSearch').and.returnValue(this.$q.when([]));
       spyOn(this.Centre, 'list').and.returnValue(this.$q.when([]));
-      this.createScope();
+      this.createController();
       expect(this.controller.hasValidCentres).toBeFalse();
     });
 
@@ -94,7 +94,7 @@ define(function (require) {
       spyOn(this.Centre, 'locationsSearch').and.returnValue(this.$q.when([]));
       spyOn(this.Centre, 'list').and.returnValue(this.$q.when([]));
       spyOn(this.$state, 'go').and.returnValue(null);
-      this.createScope();
+      this.createController();
       this.controller.updateCentres(options);
       this.scope.$digest();
 
@@ -108,7 +108,7 @@ define(function (require) {
       spyOn(this.Centre, 'locationsSearch').and.returnValue(this.$q.when([]));
       spyOn(this.Centre, 'list').and.returnValue(this.$q.when([]));
       spyOn(this.$state, 'go').and.returnValue(null);
-      this.createScope();
+      this.createController();
       this.controller.centreSelected(centre);
       this.scope.$digest();
 

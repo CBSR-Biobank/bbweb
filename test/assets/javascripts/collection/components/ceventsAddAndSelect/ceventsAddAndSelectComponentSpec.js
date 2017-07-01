@@ -37,7 +37,7 @@ define(function (require) {
         this.CollectionEvent.list =
           jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult(replyItems)));
 
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
           '<cevents-add-and-select',

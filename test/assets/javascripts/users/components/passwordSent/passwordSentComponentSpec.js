@@ -23,7 +23,7 @@ define([
 
       SuiteMixin.prototype.createController = function (email) {
         email = email || this.email;
-        ComponentTestSuiteMixin.prototype.createScope.call(
+        ComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<password-sent email="vm.email"></password-sent>',
           { email: email },

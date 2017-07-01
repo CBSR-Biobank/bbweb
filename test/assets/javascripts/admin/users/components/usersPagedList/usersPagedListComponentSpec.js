@@ -20,7 +20,7 @@ define(function (require) {
     SuiteMixin.prototype.constructor = SuiteMixin;
 
     SuiteMixin.prototype.createController = function () {
-      ComponentTestSuiteMixin.prototype.createScope.call(
+      ComponentTestSuiteMixin.prototype.createController.call(
         this,
         '<users-paged-list></users-paged-list',
         undefined,
