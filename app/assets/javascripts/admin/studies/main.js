@@ -27,6 +27,7 @@ define(function (require) {
 
   module
     .component('studiesPagedList',        require('./components/studiesPagedList/studiesPagedListComponent'))
+    .component('ceventTypeAdd',           require('./components/ceventTypeAdd/ceventTypeAddComponent'))
     .component('ceventTypeView',          require('./components/ceventTypeView/ceventTypeViewComponent'))
     .component('ceventTypesAddAndSelect',
                require('./components/ceventTypesAddAndSelect/ceventTypesAddAndSelectComponent'))

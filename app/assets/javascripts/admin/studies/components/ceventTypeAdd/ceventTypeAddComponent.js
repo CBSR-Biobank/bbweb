@@ -2,28 +2,19 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function () {
   'use strict';
 
-  /**
-   *
-   */
-  function ceventTypeAddDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study: '='
-      },
-      templateUrl : '/assets/javascripts/admin/studies/directives/collection/ceventTypeAdd/ceventTypeAdd.html',
-      controller: CeventTypeAddCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/studies/components/ceventTypeAdd/ceventTypeAdd.html',
+    controller: CeventTypeAddController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '='
+    }
+  };
 
-    return directive;
-  }
-
-  CeventTypeAddCtrl.$inject = [
+  CeventTypeAddController.$inject = [
     '$state',
     'gettextCatalog',
     'CollectionEventType',
@@ -31,11 +22,14 @@ define(['lodash'], function(_) {
     'notificationsService'
   ];
 
-  function CeventTypeAddCtrl($state,
-                             gettextCatalog,
-                             CollectionEventType,
-                             domainNotificationService,
-                             notificationsService) {
+  /*
+   * Controller for this component.
+   */
+  function CeventTypeAddController($state,
+                                   gettextCatalog,
+                                   CollectionEventType,
+                                   domainNotificationService,
+                                   notificationsService) {
     var vm = this;
 
     vm.ceventType  = new CollectionEventType({}, { study: vm.study });
@@ -66,6 +60,5 @@ define(['lodash'], function(_) {
 
   }
 
-  return ceventTypeAddDirective;
-
+  return component;
 });

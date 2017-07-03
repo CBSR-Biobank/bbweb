@@ -4,48 +4,53 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  describe('Directive: ceventTypeAddDirective', function() {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    var createController = function (study) {
-      this.element = angular.element([
-        '<cevent-type-add',
-        '  study="vm.study">',
-        '<cevent-type-add>'
-      ].join(''));
+  describe('Component: ceventTypeAdd', function() {
 
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { study: study };
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('ceventTypeAdd');
-    };
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (study) {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<cevent-type-add study="vm.study"><cevent-type-add>',
+          { study: study },
+          'ceventTypeAdd');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               'Study',
                               'CollectionEventType',
                               'factory');
 
-      self.study = new self.Study(self.factory.study());
+      this.study = new this.Study(this.factory.study());
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/collection/ceventTypeAdd/ceventTypeAdd.html');
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/ceventTypeAdd/ceventTypeAdd.html');
 
     }));
 
     it('has valid scope when created', function () {
-      createController.call(this, this.study);
+      this.createController(this.study);
       expect(this.controller.ceventType.isNew()).toBe(true);
     });
 
@@ -56,7 +61,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
           ceventType;
 
       ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
-      createController.call(this, this.study);
+      this.createController(this.study);
 
       spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
         return $q.when();
@@ -78,7 +83,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
           ceventType;
 
       ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
-      createController.call(this, this.study);
+      this.createController(this.study);
 
       spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
         var deferred = q.defer();
@@ -98,7 +103,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       var state = this.$injector.get('$state');
 
       spyOn(state, 'go').and.callFake(function () {});
-      createController.call(this, this.study);
+      this.createController(this.study);
 
       this.controller.cancel();
       this.scope.$digest();
