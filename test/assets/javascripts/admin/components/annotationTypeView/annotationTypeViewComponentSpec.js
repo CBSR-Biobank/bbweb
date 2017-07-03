@@ -2,61 +2,55 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'biobankApp'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  function SuiteMixinFactory(TestSuiteMixin) {
-
-    function SuiteMixin() {
-    }
-
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.createController = function (options) {
-      options = options || {};
-      options.study = options.study || this.study;
-      options.annotationType = options.annotationType || this.annotationType;
-
-      this.element = angular.element([
-        '<annotation-type-view ',
-        '  study="vm.study"',
-        '  annotation-type="vm.annotationType"',
-        '  return-state="' + this.returnState  + '"',
-        '  on-update="vm.onUpdate"',
-        '</annotation-type-view>',
-      ].join(''));
-
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        study:          options.study,
-        annotationType: options.annotationType,
-        returnState:    this.returnState,
-        onUpdate:       this.onUpdate
-      };
-
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('annotationTypeView');
-    };
-
-    return SuiteMixin;
-  }
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   describe('annotationTypeViewDirective', function() {
 
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (options) {
+        options = options || {};
+        options.study = options.study || this.study;
+        options.annotationType = options.annotationType || this.annotationType;
+
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          [
+          '<annotation-type-view ',
+            '  study="vm.study"',
+            '  annotation-type="vm.annotationType"',
+            '  return-state="' + this.returnState  + '"',
+            '  on-update="vm.onUpdate"',
+            '</annotation-type-view>',
+          ].join(''),
+          {
+            study:          options.study,
+            annotationType: options.annotationType,
+            returnState:    this.returnState,
+            onUpdate:       this.onUpdate
+          },
+          'annotationTypeView');
+      };
+
+      return SuiteMixin;
+    }
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function (ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -71,7 +65,7 @@ define([
                               'factory');
 
       this.putHtmlTemplates(
-        '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
+        '/assets/javascripts/admin/components/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 

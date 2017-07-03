@@ -1,45 +1,38 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
 
-  // FIXME: right now can only be used to update study participant annotation types, should
-  // be generic to also edit collection event annotation types
+  var _ = require('lodash');
 
-  /**
-   *
-   */
-  function annotationTypeViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study:          '=',
-        annotationType: '=',
-        returnState:    '@',
-        onUpdate:       '&'
-      },
-      templateUrl : '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
-      controller: AnnotationTypeViewCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/components/annotationTypeView/annotationTypeView.html',
+    controller: AnnotationTypeViewController,
+    controllerAs: 'vm',
+    bindings: {
+      study:          '=',
+      annotationType: '=',
+      returnState:    '@',
+      onUpdate:       '&'
+    }
+  };
 
-    return directive;
-  }
-
-  AnnotationTypeViewCtrl.$inject = [
+  AnnotationTypeViewController.$inject = [
     '$state',
     'gettextCatalog',
     'modalInput',
     'annotationTypeUpdateModal'
   ];
 
-  function AnnotationTypeViewCtrl($state,
-                                  gettextCatalog,
-                                  modalInput,
-                                  annotationTypeUpdateModal) {
+  /*
+   * Controller for this component.
+   */
+  function AnnotationTypeViewController($state,
+                                        gettextCatalog,
+                                        modalInput,
+                                        annotationTypeUpdateModal) {
     var vm = this;
 
     vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabel();
@@ -103,6 +96,5 @@ define(['lodash'], function (_) {
     }
   }
 
-  return annotationTypeViewDirective;
-
+  return component;
 });

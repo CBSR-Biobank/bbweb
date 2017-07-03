@@ -1,12 +1,7 @@
 /**
  * Jasmine test suite
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'biobankApp'
-], function(angular, mocks, _) {
+define(function() {
   'use strict';
 
   /**
@@ -23,7 +18,7 @@ define([
    *
    * NOTE: requires that the test suite be extended with TestSuiteMixin.
    */
-  function annotationTypeAddDirectiveSharedSpec(context) {
+  function annotationTypeAddComponentSharedSpec(context) {
 
     describe('(shared) tests', function() {
 
@@ -62,6 +57,6 @@ define([
     });
   }
 
-  return annotationTypeAddDirectiveSharedSpec;
+  return annotationTypeAddComponentSharedSpec;
 
 });

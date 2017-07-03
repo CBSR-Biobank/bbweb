@@ -29,8 +29,7 @@ define(function (require) {
     .component('biobankAdmin',          require('./components/biobankAdmin/biobankAdminComponent'))
     .component('locationAdd',           require('./components/locationAdd/locationAddComponent'))
     .component('annotationTypeAdd',     require('./components/annotationTypeAdd/annotationTypeAddComponent'))
-
-    .directive('annotationTypeView',    require('./directives/annotationTypeView/annotationTypeViewDirective'))
+    .component('annotationTypeView',    require('./components/annotationTypeView/annotationTypeViewComponent'))
 
     .service('adminService',               require('./services/adminService'))
     .service('annotationTypeUpdateModal',

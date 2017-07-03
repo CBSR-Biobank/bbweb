@@ -1,13 +1,13 @@
 /**
  * Jasmine test suite
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  '../../../../directives/annotationTypeAddDirectiveSharedSpec'
-], function(angular, mocks, _, annotationTypeAddDirectiveSharedSpec) {
+define(function(require) {
   'use strict';
+
+  var angular                              = require('angular'),
+      mocks                                = require('angularMocks'),
+      _                                    = require('lodash'),
+      annotationTypeAddComponentSharedSpec = require('../../../../../test/annotationTypeAddComponentSharedSpec');
 
   describe('Directive: participantAnnotationTypeAddDirective', function() {
 
@@ -27,7 +27,7 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
+    beforeEach(inject(function(TestSuiteMixin) {
       var self = this;
 
       _.extend(self, TestSuiteMixin.prototype);
@@ -60,7 +60,7 @@ define([
         context.returnState               = 'home.admin.studies.study.participants';
       }));
 
-      annotationTypeAddDirectiveSharedSpec(context);
+      annotationTypeAddComponentSharedSpec(context);
     });
 
   });

@@ -7,7 +7,7 @@ define(function(require) {
   var angular                              = require('angular'),
       mocks                                = require('angularMocks'),
       _                                    = require('lodash'),
-      annotationTypeAddDirectiveSharedSpec = require('../../../../directives/annotationTypeAddDirectiveSharedSpec');
+      annotationTypeAddComponentSharedSpec = require('../../../../../test/annotationTypeAddComponentSharedSpec');
 
   describe('Directive: collectionEventAnnotationTypeAddDirective', function() {
 
@@ -27,7 +27,7 @@ define(function(require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
+    beforeEach(inject(function(TestSuiteMixin) {
       var self = this;
 
       _.extend(self, TestSuiteMixin.prototype);
@@ -62,7 +62,7 @@ define(function(require) {
         context.returnState               = 'home.admin.studies.study.collection.ceventType';
       }));
 
-      annotationTypeAddDirectiveSharedSpec(context);
+      annotationTypeAddComponentSharedSpec(context);
     });
 
   });

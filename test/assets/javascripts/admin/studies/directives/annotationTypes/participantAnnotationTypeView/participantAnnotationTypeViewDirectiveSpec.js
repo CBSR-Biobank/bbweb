@@ -4,14 +4,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  '../../../../directives/annotationTypeViewDirectiveSharedSpec',
-  'biobankApp'
-], function(angular, mocks, _, annotationTypeViewDirectiveSharedSpec) {
+define(function(require) {
   'use strict';
+
+  var angular                               = require('angular'),
+      mocks                                 = require('angularMocks'),
+      _                                     = require('lodash'),
+      annotationTypeViewComponentSharedSpec = require('../../../../../test/annotationTypeViewComponentSharedSpec');
 
   describe('participantAnnotationTypeViewDirective', function() {
 
@@ -55,7 +54,7 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
-        '/assets/javascripts/admin/directives/annotationTypeView/annotationTypeView.html',
+        '/assets/javascripts/admin/components/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
@@ -77,7 +76,7 @@ define([
         context.createController             = createController;
       }));
 
-      annotationTypeViewDirectiveSharedSpec(context);
+      annotationTypeViewComponentSharedSpec(context);
 
     });
 
