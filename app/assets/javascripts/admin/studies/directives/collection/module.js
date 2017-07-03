@@ -14,8 +14,6 @@ define(function (require) {
   module = angular.module(name, [ 'biobank.users' ]);
 
   module
-    .directive('collectionSpecimenDescriptionAdd',
-               require('./collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddDirective'))
     .directive('collectionSpecimenDescriptionSummary',
                require('./collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummaryDirective'))
     .directive('collectionSpecimenDescriptionView',

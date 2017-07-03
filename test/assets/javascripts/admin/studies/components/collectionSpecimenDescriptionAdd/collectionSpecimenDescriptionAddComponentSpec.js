@@ -4,41 +4,48 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  describe('collectionSpecimenDescriptionAddDirective', function() {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    var createDirective = function (test) {
-      this.element = angular.element([
-        '<collection-specimen-description-add',
-        ' study="vm.study"',
-        ' collection-event-type="vm.collectionEventType">',
-        '</collection-specimen-description-add>'
-      ].join(''));
+  describe('Component: collectionSpecimenDescriptionAdd', function() {
 
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        study: this.study,
-        collectionEventType: this.collectionEventType
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          [
+            '<collection-specimen-description-add',
+            ' study="vm.study"',
+            ' collection-event-type="vm.collectionEventType">',
+            '</collection-specimen-description-add>'
+          ].join(''),
+          {
+            study: this.study,
+            collectionEventType: this.collectionEventType
+          },
+          'collectionSpecimenDescriptionAdd');
       };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('collectionSpecimenDescriptionAdd');
-    };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               '$state',
@@ -49,19 +56,19 @@ define([
                               'CollectionSpecimenDescription',
                               'factory');
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAdd.html');
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAdd.html');
 
-      self.jsonCevenType       = self.factory.collectionEventType();
-      self.jsonStudy           = self.factory.defaultStudy();
-      self.collectionEventType = new self.CollectionEventType(self.jsonCevenType);
-      self.study               = new self.Study(self.jsonStudy);
+      this.jsonCevenType       = this.factory.collectionEventType();
+      this.jsonStudy           = this.factory.defaultStudy();
+      this.collectionEventType = new this.CollectionEventType(this.jsonCevenType);
+      this.study               = new this.Study(this.jsonStudy);
 
       spyOn(this.$state, 'go').and.returnValue('ok');
     }));
 
     it('has valid scope', function() {
-      createDirective.call(this);
+      this.createController();
 
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.collectionEventType).toBe(this.collectionEventType);
@@ -88,7 +95,7 @@ define([
           .and.returnValue(this.$q.when(this.collectionEventType));
         spyOn(this.notificationsService, 'submitSuccess').and.callThrough();
 
-        createDirective.call(this);
+        this.createController();
         this.controller.submit(this.specimenDescription);
         this.scope.$digest();
 
@@ -102,7 +109,7 @@ define([
           .and.returnValue(this.$q.reject('simulated error'));
         spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
 
-        createDirective.call(this);
+        this.createController();
         this.controller.submit(this.specimenDescription);
         this.scope.$digest();
 
@@ -112,7 +119,7 @@ define([
     });
 
     it('on cancel returns to correct state', function() {
-      createDirective.call(this);
+      this.createController();
       this.controller.cancel();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType');

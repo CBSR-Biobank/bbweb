@@ -31,6 +31,8 @@ define(function (require) {
     .component('ceventTypeView',          require('./components/ceventTypeView/ceventTypeViewComponent'))
     .component('ceventTypesAddAndSelect',
                require('./components/ceventTypesAddAndSelect/ceventTypesAddAndSelectComponent'))
+    .component('collectionSpecimenDescriptionAdd',
+               require('./components/collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddComponent'))
     .component('studyCollection',         require('./components/studyCollection/studyCollectionComponent'))
     .component('studiesAdmin',            require('./components/studiesAdmin/studiesAdminComponent'))
     .component('studyAdd',                require('./components/studyAdd/studyAddComponent'))
