@@ -60,7 +60,7 @@ define(function (require) {
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/components/studyParticipantsTab/studyParticipantsTab.html',
-        '/assets/javascripts/admin/studies/directives/studyNotDisabledWarning/studyNotDisabledWarning.html',
+        '/assets/javascripts/admin/studies/components/studyNotDisabledWarning/studyNotDisabledWarning.html',
         '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
 

@@ -37,7 +37,7 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/components/studyCollection/studyCollection.html',
-        '/assets/javascripts/admin/studies/directives/studyNotDisabledWarning/studyNotDisabledWarning.html',
+        '/assets/javascripts/admin/studies/components/studyNotDisabledWarning/studyNotDisabledWarning.html',
         '/assets/javascripts/admin/studies/components/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
 
       this.createController = function (study, ceTypes) {

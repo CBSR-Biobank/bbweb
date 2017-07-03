@@ -36,9 +36,8 @@ define(function (require) {
     .component('studyParticipantsTab',    require('./components/studyParticipantsTab/studyParticipantsTabComponent'))
     .component('studySummary',            require('./components/studySummary/studySummaryComponent'))
     .component('studyView',               require('./components/studyView/studyViewComponent'))
-
-    .directive('studyNotDisabledWarning',
-               require('./directives/studyNotDisabledWarning/studyNotDisabledWarningDirective'))
+    .component('studyNotDisabledWarning',
+               require('./components/studyNotDisabledWarning/studyNotDisabledWarningComponent'))
 
     .config(require('./states'))
     .config(require('./ceventTypes/states'))
