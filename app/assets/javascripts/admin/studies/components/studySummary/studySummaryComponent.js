@@ -1,8 +1,8 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function () {
   'use strict';
 
   /**
@@ -10,22 +10,16 @@ define(['lodash'], function(_) {
    *
    * Emits event 'study-name-changed' when the user updates the name on the study.
    */
-  function studySummaryDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study: '='
-      },
-      templateUrl : '/assets/javascripts/admin/studies/directives/studySummary/studySummary.html',
-      controller: StudySummaryCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl : '/assets/javascripts/admin/studies/components/studySummary/studySummary.html',
+    controller: StudySummaryController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '='
+    }
+  };
 
-    return directive;
-  }
-
-  StudySummaryCtrl.$inject = [
+  StudySummaryController.$inject = [
     '$scope',
     '$state',
     'gettextCatalog',
@@ -34,26 +28,28 @@ define(['lodash'], function(_) {
     'notificationsService'
   ];
 
-  function StudySummaryCtrl($scope,
-                            $state,
-                            gettextCatalog,
-                            modalService,
-                            modalInput,
-                            notificationsService) {
+  /*
+   * Controller for this component.
+   */
+  function StudySummaryController($scope,
+                                  $state,
+                                  gettextCatalog,
+                                  modalService,
+                                  modalInput,
+                                  notificationsService) {
 
     var vm = this;
 
+    vm.$onInit                 = onInit;
     vm.descriptionToggleLength = 100;
     vm.isEnableAllowed         = false;
     vm.changeState             = changeState;
     vm.editName                = editName;
     vm.editDescription         = editDescription;
 
-    init();
-
     //--
 
-    function init() {
+    function onInit() {
       // updates the selected tab in 'studyViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
 
@@ -135,6 +131,5 @@ define(['lodash'], function(_) {
     }
   }
 
-  return studySummaryDirective;
-
+  return component;
 });

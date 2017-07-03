@@ -34,8 +34,8 @@ define(function (require) {
     .component('studiesAdmin',            require('./components/studiesAdmin/studiesAdminComponent'))
     .component('studyAdd',                require('./components/studyAdd/studyAddComponent'))
     .component('studyParticipantsTab',    require('./components/studyParticipantsTab/studyParticipantsTabComponent'))
+    .component('studySummary',            require('./components/studySummary/studySummaryComponent'))
 
-    .directive('studySummary',            require('./directives/studySummary/studySummaryDirective'))
     .directive('studyView',               require('./directives/studyView/studyViewDirective'))
     .directive('studyNotDisabledWarning',
                require('./directives/studyNotDisabledWarning/studyNotDisabledWarningDirective'))

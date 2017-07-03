@@ -10,7 +10,7 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  fdescribe('studyParticipantsTabDirectiveDirective', function() {
+  describe('studyParticipantsTabDirectiveDirective', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -35,7 +35,7 @@ define(function (require) {
             ' study="vm.study">',
             '</study-participants-tab>'
           ].join(''),
-          this.createScope(),
+          { study: this.study },
           'studyParticipantsTab');
 
       };

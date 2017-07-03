@@ -7,21 +7,52 @@
 define(function (require) {
   'use strict';
 
-  var angular                = require('angular'),
-      mocks                  = require('angularMocks'),
+  var mocks                  = require('angularMocks'),
       _                      = require('lodash'),
       entityUpdateSharedSpec = require('../../../../test/entityUpdateSharedSpec');
 
-  describe('Directive: studySummaryDirective', function() {
+  describe('Component: studySummary', function() {
+
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createScope = function () {
+        var scope = ComponentTestSuiteMixin.prototype.createScope.call(this, { study: this.study });
+        this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+        scope.$on('tabbed-page-update', this.eventRxFunc);
+        return scope;
+      };
+
+      SuiteMixin.prototype.createController = function (enableAllowed) {
+        if (_.isUndefined(enableAllowed)) {
+          enableAllowed = true;
+        }
+        this.Study.prototype.isEnableAllowed =
+          jasmine.createSpy().and.returnValue(this.$q.when(enableAllowed));
+
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<study-summary study="vm.study"></study-summary>',
+          { study: this.study },
+          'studySummary');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
       var self = this,
           specimenDescription,
           ceventType;
 
-      _.extend(self, TestSuiteMixin.prototype);
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       self.injectDependencies('$q',
                               '$rootScope',
@@ -35,6 +66,7 @@ define(function (require) {
                               'factory');
 
       specimenDescription = self.factory.collectionSpecimenDescription();
+      this.study = this.Study.create(self.factory.study());
       ceventType = self.CollectionEventType.create(
         self.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]}));
 
@@ -44,29 +76,11 @@ define(function (require) {
       self.study = new self.Study(self.factory.study());
 
       self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/studySummary/studySummary.html',
+        '/assets/javascripts/admin/studies/components/studySummary/studySummary.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
 
-      self.createController = function (enableAllowed) {
-        if (_.isUndefined(enableAllowed)) {
-          enableAllowed = true;
-        }
-        self.Study.prototype.isEnableAllowed =
-          jasmine.createSpy().and.returnValue(self.$q.when(enableAllowed));
-
-        self.element = angular.element('<study-summary study="vm.study"></study-summary>');
-        self.scope = self.$rootScope.$new();
-        self.scope.vm = { study: self.study };
-
-        self.eventRxFunc = jasmine.createSpy().and.returnValue(null);
-        self.scope.$on('tabbed-page-update', self.eventRxFunc);
-
-        self.$compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('studySummary');
-      };
     }));
 
     it('initialization is valid', function() {
