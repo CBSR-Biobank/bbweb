@@ -1,42 +1,35 @@
 /**
- * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ *
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
 
-  /*
-   * Displays a single participant annotation type to the user.
-   *
-   * The user is allowed to change any of the attributes of the annotation type.
-   */
-  function participantAnnotationTypeViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study:          '=',
-        annotationType: '='
-      },
-      templateUrl: '/assets/javascripts/admin/studies/directives/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
-      controller: ParticipantAnnotationTypeViewCtrl,
-      controllerAs: 'vm'
-    };
+  var _       = require('lodash');
 
-    return directive;
-  }
+  var component = {
+    templateUrl: '/assets/javascripts/admin/studies/components/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
+    controller: ParticipantAnnotationTypeViewController,
+    controllerAs: 'vm',
+    bindings: {
+      study:          '=',
+      annotationType: '='
+    }
+  };
 
-  ParticipantAnnotationTypeViewCtrl.$inject = [
+  ParticipantAnnotationTypeViewController.$inject = [
     '$q',
     'gettextCatalog',
     'notificationsService',
     'breadcrumbService'
   ];
 
-  function ParticipantAnnotationTypeViewCtrl($q,
-                                             gettextCatalog,
-                                             notificationsService,
-                                             breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function ParticipantAnnotationTypeViewController($q,
+                                                   gettextCatalog,
+                                                   notificationsService,
+                                                   breadcrumbService) {
     var vm = this;
 
     vm.breadcrumbs = [
@@ -84,6 +77,5 @@ define(['lodash'], function (_) {
 
   }
 
-  return participantAnnotationTypeViewDirective;
-
+  return component;
 });

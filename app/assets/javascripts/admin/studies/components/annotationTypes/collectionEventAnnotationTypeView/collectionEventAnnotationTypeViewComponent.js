@@ -8,27 +8,18 @@ define(function (require) {
   var _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
-  /*
-   *
-   */
-  function collectionEventAnnotationTypeViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study:               '=',
-        collectionEventType: '=',
-        annotationType:      '='
-      },
-      templateUrl: '/assets/javascripts/admin/studies/directives/annotationTypes/collectionEventAnnotationTypeView/collectionEventAnnotationTypeView.html',
-      controller: CollectionEventAnnotationTypeViewCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/studies/components/annotationTypes/collectionEventAnnotationTypeView/collectionEventAnnotationTypeView.html',
+    controller: CollectionEventAnnotationTypeViewController,
+    controllerAs: 'vm',
+    bindings: {
+      study:               '=',
+      collectionEventType: '=',
+      annotationType:      '='
+    }
+  };
 
-    return directive;
-  }
-
-  CollectionEventAnnotationTypeViewCtrl.$inject = [
+  CollectionEventAnnotationTypeViewController.$inject = [
     '$q',
     'CollectionEventType',
     'gettextCatalog',
@@ -36,11 +27,14 @@ define(function (require) {
     'breadcrumbService'
   ];
 
-  function CollectionEventAnnotationTypeViewCtrl($q,
-                                                 CollectionEventType,
-                                                 gettextCatalog,
-                                                 notificationsService,
-                                                 breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function CollectionEventAnnotationTypeViewController($q,
+                                                       CollectionEventType,
+                                                       gettextCatalog,
+                                                       notificationsService,
+                                                       breadcrumbService) {
     var vm = this;
 
     vm.breadcrumbs = [
@@ -102,6 +96,5 @@ define(function (require) {
 
   }
 
-  return collectionEventAnnotationTypeViewDirective;
-
+  return component;
 });

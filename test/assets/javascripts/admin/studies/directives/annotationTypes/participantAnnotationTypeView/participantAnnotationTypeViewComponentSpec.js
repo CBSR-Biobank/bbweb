@@ -7,39 +7,46 @@
 define(function(require) {
   'use strict';
 
-  var angular                               = require('angular'),
-      mocks                                 = require('angularMocks'),
+  var mocks                                 = require('angularMocks'),
       _                                     = require('lodash'),
       annotationTypeViewComponentSharedSpec = require('../../../../../test/annotationTypeViewComponentSharedSpec');
 
-  describe('participantAnnotationTypeViewDirective', function() {
+  describe('Component: participantAnnotationTypeView', function() {
 
-    var createController = function () {
-      this.element = angular.element([
-        '<participant-annotation-type-view',
-        '  study="vm.study"',
-        '  annotation-type="vm.annotationType"',
-        '</participant-annotation-type-view>'
-      ].join(''));
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        study:          this.study,
-        annotationType: this.annotationType
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          [
+            '<participant-annotation-type-view',
+            '  study="vm.study"',
+            '  annotation-type="vm.annotationType"',
+            '</participant-annotation-type-view>'
+          ].join(''),{
+            study:          this.study,
+            annotationType: this.annotationType
+          },
+          'participantAnnotationTypeView');
       };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('participantAnnotationTypeView');
-    };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($rootScope, $compile, TestSuiteMixin) {
-      var self = this, jsonAnnotType;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      var jsonAnnotType;
 
-      _.extend(self, TestSuiteMixin.prototype);
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               'notificationsService',
@@ -47,20 +54,20 @@ define(function(require) {
                               'AnnotationType',
                               'factory');
 
-      jsonAnnotType = self.factory.annotationType();
-      self.study = self.Study.create(_.extend(self.factory.study(),
+      jsonAnnotType = this.factory.annotationType();
+      this.study = this.Study.create(_.extend(this.factory.study(),
                                            { annotationTypes: [ jsonAnnotType ]}));
-      self.annotationType = new self.AnnotationType(jsonAnnotType);
+      this.annotationType = new this.AnnotationType(jsonAnnotType);
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
         '/assets/javascripts/admin/components/annotationTypeView/annotationTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('should have  valid scope', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.study).toBe(this.study);
       expect(this.controller.annotationType).toBe(this.annotationType);
     });
@@ -73,7 +80,7 @@ define(function(require) {
         context.updateAnnotationTypeFuncName = 'updateAnnotationType';
         context.parentObject                 = this.study;
         context.annotationType               = this.annotationType;
-        context.createController             = createController;
+        context.createController             = this.createController;
       }));
 
       annotationTypeViewComponentSharedSpec(context);

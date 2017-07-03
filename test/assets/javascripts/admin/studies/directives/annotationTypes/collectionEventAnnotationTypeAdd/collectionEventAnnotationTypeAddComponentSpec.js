@@ -9,44 +9,51 @@ define(function(require) {
       _                                    = require('lodash'),
       annotationTypeAddComponentSharedSpec = require('../../../../../test/annotationTypeAddComponentSharedSpec');
 
-  describe('Directive: collectionEventAnnotationTypeAddDirective', function() {
+  describe('Component: collectionEventAnnotationTypeAdd', function() {
 
-    var createController = function () {
-      this.element = angular.element([
-        '<collection-event-annotation-type-add',
-        '  collection-event-type="vm.ceventType">',
-        '</collection-event-annotation-type-add>'
-      ].join(''));
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { ceventType: this.collectionEventType };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('collectionEventAnnotationTypeAdd');
-    };
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          [
+            '<collection-event-annotation-type-add',
+            '  collection-event-type="vm.ceventType">',
+            '</collection-event-annotation-type-add>'
+          ].join(''),
+          { ceventType: this.collectionEventType },
+          'collectionEventAnnotationTypeAdd');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
-
-      _.extend(self, TestSuiteMixin.prototype);
-      self.injectDependencies('$rootScope',
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+      this.injectDependencies('$rootScope',
                               '$compile',
                               'CollectionEventType',
                               'AnnotationType',
                               'factory');
 
-      self.collectionEventType = new self.CollectionEventType(
-        self.factory.collectionEventType(self.factory.study()));
+      this.collectionEventType = new this.CollectionEventType(
+        this.factory.collectionEventType(this.factory.study()));
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html',
         '/assets/javascripts/admin/components/annotationTypeAdd/annotationTypeAdd.html');
     }));
 
     it('should have  valid scope', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.collectionEventType).toBe(this.collectionEventType);
     });
 
@@ -54,7 +61,7 @@ define(function(require) {
       var context = {};
 
       beforeEach(inject(function () {
-        context.createController          = createController;
+        context.createController          = this.createController;
         context.scope                     = this.scope;
         context.controller                = this.controller;
         context.entity                    = this.CollectionEventType;
