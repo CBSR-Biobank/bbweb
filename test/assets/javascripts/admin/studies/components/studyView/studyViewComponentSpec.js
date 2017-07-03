@@ -13,52 +13,59 @@ define([
 
   describe('Directive: studyViewDirective', function() {
 
-    var createController = function () {
-      this.element = angular.element('<study-view study="vm.study"></study-view>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { study: this.study };
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('studyView');
-    };
+      function SuiteMixin() {
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<study-view study="vm.study"></study-view>',
+          { study: this.study },
+          'studyView');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($window, $state, TestSuiteMixin, testUtils) {
-      var self = this;
+    beforeEach(inject(function($window, ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       $window.localStorage.setItem = jasmine.createSpy().and.returnValue(null);
       $window.localStorage.getItem = jasmine.createSpy().and.returnValue(null);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$window',
                               '$state',
                               'Study',
                               'factory');
 
-      self.study = new self.Study(self.factory.study());
+      this.study = new this.Study(this.factory.study());
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/studyView/studyView.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/studyView/studyView.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('should contain a valid study', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.study).toBe(this.study);
     });
 
     it('should contain initialized tabs', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.tabs).toBeArrayOfSize(4);
     });
 
     it('should contain initialized local storage', function() {
-      createController.call(this);
+      this.createController();
 
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('study.panel.processingTypes', true);
@@ -81,7 +88,7 @@ define([
 
       _(states).forEach(function (state) {
         self.$state.current.name = state;
-        createController.call(self);
+        self.createController();
         childScope = self.element.isolateScope().$new();
         childScope.$emit('tabbed-page-update');
         self.scope.$digest();

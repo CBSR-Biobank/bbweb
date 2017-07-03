@@ -1,29 +1,20 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
 
-  /**
-   *
-   */
-  function studyViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study: '='
-      },
-      templateUrl : '/assets/javascripts/admin/studies/directives/studyView/studyView.html',
-      controller: StudyViewCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl : '/assets/javascripts/admin/studies/components/studyView/studyView.html',
+    controller: StudyViewController,
+    controllerAs: 'vm',
+    bindings: {
+      study: '='
+    }
+  };
 
-    return directive;
-  }
-
-  StudyViewCtrl.$inject = [
+  StudyViewController.$inject = [
     '$controller',
     '$scope',
     '$window',
@@ -32,13 +23,18 @@ define(['lodash'], function (_) {
     'breadcrumbService'
   ];
 
-  function StudyViewCtrl($controller,
-                         $scope,
-                         $window,
-                         $state,
-                         gettextCatalog,
-                         breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function StudyViewController($controller,
+                               $scope,
+                               $window,
+                               $state,
+                               gettextCatalog,
+                               breadcrumbService) {
     var vm = this;
+
+    vm.$onInit = onInit;
 
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
@@ -81,14 +77,13 @@ define(['lodash'], function (_) {
     ];
 
     $scope.$on('study-name-changed', studyNameUpdated);
-    init();
 
     //--
 
     /**
      * Initialize the panels to open state when viewing a new study.
      */
-    function init() {
+    function onInit() {
       if (vm.study.id !== $window.localStorage.getItem('study.panel.studyId')) {
         // this way when the user selects a new study, the panels always default to open
         $window.localStorage.setItem('study.panel.processingTypes',                true);
@@ -106,5 +101,5 @@ define(['lodash'], function (_) {
     }
   }
 
-  return studyViewDirective;
+  return component;
 });
