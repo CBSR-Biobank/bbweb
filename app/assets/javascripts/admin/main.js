@@ -28,24 +28,21 @@ define(function (require) {
                require('./components/annotationTypeSummary/annotationTypeSummaryComponent'))
     .component('biobankAdmin',          require('./components/biobankAdmin/biobankAdminComponent'))
     .component('locationAdd',           require('./components/locationAdd/locationAddComponent'))
+    .component('annotationTypeAdd',     require('./components/annotationTypeAdd/annotationTypeAddComponent'))
 
-    .directive('annotationTypeAdd',     require('./directives/annotationTypeAdd/annotationTypeAddDirective'))
     .directive('annotationTypeView',    require('./directives/annotationTypeView/annotationTypeViewDirective'))
 
     .service('adminService',               require('./services/adminService'))
-
     .service('annotationTypeUpdateModal',
              require('./services/annotationTypeUpdateModal/annotationTypeUpdateModalService'))
 
     .factory('AnnotationTypeModals',   require('./services/AnnotationTypeModals'))
-
     .factory('ParticipantAnnotationTypeModals',
              require('./services/studies/ParticipantAnnotationTypeModals'))
     .factory('CollectionEventAnnotationTypeModals',
              require('./services/studies/CollectionEventAnnotationTypeModals'))
     .factory('SpecimenLinkAnnotationTypeModals',
              require('./services/studies/SpecimenLinkAnnotationTypeModals'))
-
     .factory('annotationTypeAddMixin', require('./services/annotationTypeAddMixin'));
 
   return {

@@ -1,8 +1,8 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function () {
   'use strict';
 
   /**
@@ -13,34 +13,27 @@ define(['lodash'], function (_) {
    *
    * @return {object} An AngularJS directive.
    */
-  function annotationTypeAddDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        onSubmit: '&', // annotation type is passed as parameter
-        onCancel: '&'
-      },
-      templateUrl : '/assets/javascripts/admin/directives/annotationTypeAdd/annotationTypeAdd.html',
-      controller: AnnotationTypeAddCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl : '/assets/javascripts/admin/components/annotationTypeAdd/annotationTypeAdd.html',
+    controller: AnnotationTypeAddController,
+    controllerAs: 'vm',
+    bindings: {
+      onSubmit: '&', // annotation type is passed as parameter
+      onCancel: '&'
+    }
+  };
 
-    return directive;
-  }
-
-  AnnotationTypeAddCtrl.$inject = [
+  AnnotationTypeAddController.$inject = [
     'AnnotationType',
     'AnnotationValueType',
     'annotationValueTypeLabelService'
   ];
-
   /*
-   * The controller for this directive.
+   * Controller for this component.
    */
-  function AnnotationTypeAddCtrl(AnnotationType,
-                                 AnnotationValueType,
-                                 annotationValueTypeLabelService) {
+  function AnnotationTypeAddController(AnnotationType,
+                                       AnnotationValueType,
+                                       annotationValueTypeLabelService) {
     var vm = this;
 
     vm.annotationType        = new AnnotationType();
@@ -114,5 +107,5 @@ define(['lodash'], function (_) {
 
   }
 
-  return annotationTypeAddDirective;
+  return component;
 });

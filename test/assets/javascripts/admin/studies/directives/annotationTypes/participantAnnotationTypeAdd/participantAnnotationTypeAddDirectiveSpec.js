@@ -40,7 +40,7 @@ define([
 
       self.putHtmlTemplates(
         '/assets/javascripts/admin/studies/directives/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
-        '/assets/javascripts/admin/directives/annotationTypeAdd/annotationTypeAdd.html');
+        '/assets/javascripts/admin/components/annotationTypeAdd/annotationTypeAdd.html');
     }));
 
     it('should have  valid scope', function() {
