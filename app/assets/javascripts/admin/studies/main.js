@@ -33,6 +33,8 @@ define(function (require) {
                require('./components/ceventTypesAddAndSelect/ceventTypesAddAndSelectComponent'))
     .component('collectionSpecimenDescriptionAdd',
                require('./components/collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddComponent'))
+    .component('collectionSpecimenDescriptionSummary',
+               require('./components/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummaryComponent'))
     .component('studyCollection',         require('./components/studyCollection/studyCollectionComponent'))
     .component('studiesAdmin',            require('./components/studiesAdmin/studiesAdminComponent'))
     .component('studyAdd',                require('./components/studyAdd/studyAddComponent'))

@@ -46,7 +46,7 @@ define(function (require) {
         '/assets/javascripts/admin/studies/components/ceventTypeView/ceventTypeView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
-        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummary.html',
+        '/assets/javascripts/admin/studies/components/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummary.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
