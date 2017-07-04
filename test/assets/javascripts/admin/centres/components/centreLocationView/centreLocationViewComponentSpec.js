@@ -7,58 +7,63 @@
 define(function (require) {
   'use strict';
 
-  var angular                       = require('angular'),
-      mocks                         = require('angularMocks'),
+  var mocks                         = require('angularMocks'),
       _                             = require('lodash'),
       faker                         = require('faker'),
       locationUpdateSharedBehaviour = require('../../../../test/locationUpdateSharedBehaviourSpec');
 
-  describe('Directive: centreLocationViewDirective', function() {
+  describe('Component: centreLocationView', function() {
 
-    var createController = function (centre, location) {
-      centre = centre || this.centre;
-      location = location || this.location;
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      expect(_.find(centre.locations, { id: location.id})).toBeDefined();
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
 
-      this.element = angular.element(
-        '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = {
-        centre: centre,
-        location: location
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (centre, location) {
+        centre = centre || this.centre;
+        location = location || this.location;
+
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>',
+          {
+            centre: centre,
+            location: location
+          },
+          'centreLocationView');
       };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('centreLocationView');
-    };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($state, TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function (ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$state',
                               'Centre',
                               'Location',
                               'factory');
 
-      self.location = new self.Location(self.factory.location());
-      self.centre = new self.Centre(self.factory.centre({ locations: [ self.location ]}));
+      this.location = new this.Location(this.factory.location());
+      this.centre = new this.Centre(this.factory.centre({ locations: [ this.location ]}));
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/centreLocationView/centreLocationView.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/centres/components/centreLocationView/centreLocationView.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
-      self.returnStateName = 'home.admin.centres.centre.locations';
+      this.returnStateName = 'home.admin.centres.centre.locations';
     }));
 
     it('scope should be valid', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.centre).toBe(this.centre);
       expect(this.controller.location).toBe(this.location);
       expect(this.controller.back).toBeFunction();
@@ -72,7 +77,7 @@ define(function (require) {
     });
 
     it('should return to valid state when back is called', function() {
-      createController.call(this);
+      this.createController();
       spyOn(this.$state, 'go').and.returnValue(null);
       this.controller.back();
       expect(this.$state.go).toHaveBeenCalledWith(this.returnStateName, {}, { reload: true });
@@ -85,7 +90,7 @@ define(function (require) {
       beforeEach(inject(function () {
         context.entity                   = this.centre;
         context.entityUpdateFuncName     = 'updateLocation';
-        context.createController         = createController;
+        context.createController         = this.createController;
         context.location                 = this.centre.locations[0];
       }));
 

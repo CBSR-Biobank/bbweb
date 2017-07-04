@@ -8,26 +8,17 @@ define(function (require) {
   var _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
-  /*
-   *
-   */
-  function centreLocationViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        centre: '=',
-        location: '='
-      },
-      templateUrl : '/assets/javascripts/admin/centres/directives/centreLocationView/centreLocationView.html',
-      controller: CentreLocationViewCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/centres/components/centreLocationView/centreLocationView.html',
+    controller: CentreLocationViewController,
+    controllerAs: 'vm',
+    bindings: {
+      centre: '=',
+      location: '='
+    }
+  };
 
-    return directive;
-  }
-
-  CentreLocationViewCtrl.$inject = [
+  CentreLocationViewController.$inject = [
     '$state',
     'gettextCatalog',
     'modalInput',
@@ -35,11 +26,14 @@ define(function (require) {
     'breadcrumbService'
   ];
 
-  function CentreLocationViewCtrl($state,
-                                  gettextCatalog,
-                                  modalInput,
-                                  notificationsService,
-                                  breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function CentreLocationViewController($state,
+                                        gettextCatalog,
+                                        modalInput,
+                                        notificationsService,
+                                        breadcrumbService) {
     var vm = this;
 
     vm.breadcrumbs = [
@@ -174,5 +168,5 @@ define(function (require) {
 
   }
 
-  return centreLocationViewDirective;
+  return component;
 });

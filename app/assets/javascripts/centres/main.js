@@ -39,47 +39,23 @@ define(function (require) {
     .component('shipmentView',           require('./components/shipmentView/shipmentViewComponent'))
     .component('shipmentViewPacked',     require('./components/shipmentViewPacked/shipmentViewPackedComponent'))
     .component('shipmentViewSent',       require('./components/shipmentViewSent/shipmentViewSentComponent'))
-    .component(
-      'shipmentViewReceived',
-      require('./components/shipmentViewReceived/shipmentViewReceivedComponent'))
-    .component(
-      'shipmentViewCompleted',
-      require('./components/shipmentViewCompleted/shipmentViewCompletedComponent'))
-    .component(
-      'shipmentViewLost',
-      require('./components/shipmentViewLost/shipmentViewLostComponent'))
-    .component(
-      'shipmentSpecimensAdd',
-      require('./components/shipmentSpecimensAdd/shipmentSpecimensAddComponent'))
-    .component(
-      'shipmentSpecimensView',
-      require('./components/shipmentSpecimensView/shipmentSpecimensViewComponent'))
-    .component(
-      'unpackedShipmentExtra',
-      require('./components/unpackedShipmentExtra/unpackedShipmentExtraComponent'))
-    .component(
-      'unpackedShipmentView',
-      require('./components/unpackedShipmentView/unpackedShipmentViewComponent'))
-    .component(
-      'unpackedShipmentInfo',
-      require('./components/unpackedShipmentInfo/unpackedShipmentInfoComponent'))
-    .component(
-      'unpackedShipmentUnpack',
-      require('./components/unpackedShipmentUnpack/unpackedShipmentUnpackComponent'))
-    .component(
-      'unpackedShipmentItems',
-      require('./components/unpackedShipmentItems/unpackedShipmentItemsComponent'))
+    .component('shipmentViewReceived',   require('./components/shipmentViewReceived/shipmentViewReceivedComponent'))
+    .component('shipmentViewCompleted',  require('./components/shipmentViewCompleted/shipmentViewCompletedComponent'))
+    .component('shipmentViewLost',       require('./components/shipmentViewLost/shipmentViewLostComponent'))
+    .component('shipmentSpecimensAdd',   require('./components/shipmentSpecimensAdd/shipmentSpecimensAddComponent'))
+    .component('shipmentSpecimensView',  require('./components/shipmentSpecimensView/shipmentSpecimensViewComponent'))
+    .component('unpackedShipmentExtra',  require('./components/unpackedShipmentExtra/unpackedShipmentExtraComponent'))
+    .component('unpackedShipmentView',   require('./components/unpackedShipmentView/unpackedShipmentViewComponent'))
+    .component('unpackedShipmentInfo',   require('./components/unpackedShipmentInfo/unpackedShipmentInfoComponent'))
+    .component('unpackedShipmentUnpack', require('./components/unpackedShipmentUnpack/unpackedShipmentUnpackComponent'))
+    .component('unpackedShipmentItems',  require('./components/unpackedShipmentItems/unpackedShipmentItemsComponent'))
 
-    .service(
-      'centreLocationsModalService',
-      require('./services/centreLocationsModal/centreLocationsModalService'))
-    .service(
-      'shipmentSkipToSentModalService',
-      require('./services/shipmentSkipToSentModal/shipmentSkipToSentModalService'))
-    .service(
-      'shipmentStateLabelService',
-      require('./services/shipmentStateLabelService'))
-    .service(
-      'shipmentSkipToUnpackedModalService',
-      require('./services/shipmentSkipToUnpackedModal/shipmentSkipToUnpackedModalService'));
+    .service('centreLocationsModalService',
+             require('./services/centreLocationsModal/centreLocationsModalService'))
+    .service('shipmentSkipToSentModalService',
+             require('./services/shipmentSkipToSentModal/shipmentSkipToSentModalService'))
+    .service('shipmentStateLabelService',
+             require('./services/shipmentStateLabelService'))
+    .service('shipmentSkipToUnpackedModalService',
+             require('./services/shipmentSkipToUnpackedModal/shipmentSkipToUnpackedModalService'));
 });
