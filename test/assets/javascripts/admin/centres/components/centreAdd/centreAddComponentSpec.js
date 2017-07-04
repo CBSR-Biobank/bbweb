@@ -4,50 +4,58 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   describe('Directive: centreAddDirective()', function() {
 
-    var createController = function (centre) {
-      this.element = angular.element('<centre-add centre="vm.centre"></centre-add>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { centre: centre };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('centreAdd');
-    };
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (centre) {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<centre-add centre="vm.centre"></centre-add>',
+          { centre: centre },
+          'centreAdd');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($state, TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function (ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               'Centre',
                               'factory',
                               'notificationsService',
                               'domainNotificationService');
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/centreAdd/centreAdd.html');
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/centres/components/centreAdd/centreAdd.html');
 
-      self.centre = new self.Centre();
-      self.returnState = {
+      this.centre = new this.Centre();
+      this.returnState = {
         name: 'home.admin.centres',
         params: {}
       };
     }));
 
     it('scope should be valid', function() {
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       expect(this.scope.vm.centre).toEqual(this.centre);
       expect(this.controller.returnState.name).toBe(this.returnState.name);
       expect(this.controller.returnState.params).toEqual(this.returnState.params);
@@ -56,7 +64,7 @@ define([
     it('should return to valid state on cancel', function() {
       var $state = this.$injector.get('$state');
 
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       spyOn($state, 'go').and.callFake(function () {} );
       this.controller.cancel();
       expect($state.go).toHaveBeenCalledWith(this.returnState.name,
@@ -68,7 +76,7 @@ define([
       var $q                  = this.$injector.get('$q'),
           domainNotificationService = this.$injector.get('domainNotificationService');
 
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
       spyOn(this.Centre.prototype, 'add').and.callFake(function () {
         var deferred = $q.defer();
@@ -86,7 +94,7 @@ define([
       var $q     = this.$injector.get('$q'),
           $state = this.$injector.get('$state');
 
-      createController.call(this, this.centre);
+      this.createController(this.centre);
 
       spyOn($state, 'go').and.callFake(function () {} );
       spyOn(this.Centre.prototype, 'add').and.callFake(function () {

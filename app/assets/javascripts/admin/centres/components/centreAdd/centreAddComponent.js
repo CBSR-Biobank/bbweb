@@ -2,26 +2,20 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function (require) {
   'use strict';
 
-  /**
-   *
-   */
-  function centreAddDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {},
-      templateUrl : '/assets/javascripts/admin/centres/directives/centreAdd/centreAdd.html',
-      controller: CentreAddCtrl,
-      controllerAs: 'vm'
-    };
+  var _ = require('lodash');
 
-    return directive;
-  }
+  var component = {
+    templateUrl : '/assets/javascripts/admin/centres/components/centreAdd/centreAdd.html',
+    controller: CentreAddDirective,
+    controllerAs: 'vm',
+    bindings: {
+    }
+  };
 
-  CentreAddCtrl.$inject = [
+  CentreAddDirective.$inject = [
     '$state',
     'gettextCatalog',
     'Centre',
@@ -29,11 +23,14 @@ define(['lodash'], function(_) {
     'notificationsService'
   ];
 
-  function CentreAddCtrl($state,
-                         gettextCatalog,
-                         Centre,
-                         domainNotificationService,
-                         notificationsService) {
+  /*
+   * Controller for this component.
+   */
+  function CentreAddDirective($state,
+                              gettextCatalog,
+                              Centre,
+                              domainNotificationService,
+                              notificationsService) {
     var vm = this;
 
     vm.centre = new Centre();
@@ -70,5 +67,5 @@ define(['lodash'], function(_) {
     }
   }
 
-  return centreAddDirective;
+  return component;
 });
