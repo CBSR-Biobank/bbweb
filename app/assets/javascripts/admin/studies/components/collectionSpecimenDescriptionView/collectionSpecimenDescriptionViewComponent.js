@@ -8,27 +8,19 @@ define(function (require) {
   var _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
-  /*
-   *
-   */
-  function collectionSpecimenDescriptionViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        study:               '=',
-        collectionEventType: '=',
-        specimenDescription: '='
-      },
-      templateUrl : '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
-      controller: CollectionSpecimenDescriptionViewCtrl,
-      controllerAs: 'vm'
-    };
 
-    return directive;
-  }
+  var component = {
+    templateUrl : '/assets/javascripts/admin/studies/components/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
+    controller: CollectionSpecimenDescriptionViewController,
+    controllerAs: 'vm',
+    bindings: {
+      study:               '=',
+      collectionEventType: '=',
+      specimenDescription: '='
+    }
+  };
 
-  CollectionSpecimenDescriptionViewCtrl.$inject = [
+  CollectionSpecimenDescriptionViewController.$inject = [
     '$state',
     'gettextCatalog',
     'modalInput',
@@ -42,17 +34,20 @@ define(function (require) {
     'breadcrumbService'
   ];
 
-  function CollectionSpecimenDescriptionViewCtrl($state,
-                                                 gettextCatalog,
-                                                 modalInput,
-                                                 notificationsService,
-                                                 CollectionEventType,
-                                                 CollectionSpecimenDescription,
-                                                 AnatomicalSourceType,
-                                                 PreservationType,
-                                                 PreservationTemperatureType,
-                                                 SpecimenType,
-                                                 breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function CollectionSpecimenDescriptionViewController($state,
+                                                       gettextCatalog,
+                                                       modalInput,
+                                                       notificationsService,
+                                                       CollectionEventType,
+                                                       CollectionSpecimenDescription,
+                                                       AnatomicalSourceType,
+                                                       PreservationType,
+                                                       PreservationTemperatureType,
+                                                       SpecimenType,
+                                                       breadcrumbService) {
     var vm = this;
 
     vm.breadcrumbs = [
@@ -228,6 +223,5 @@ define(function (require) {
 
   }
 
-  return collectionSpecimenDescriptionViewDirective;
-
+  return component;
 });

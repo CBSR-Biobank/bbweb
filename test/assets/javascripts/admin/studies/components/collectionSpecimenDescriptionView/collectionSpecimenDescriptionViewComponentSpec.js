@@ -7,21 +7,51 @@
 define(function (require) {
   'use strict';
 
-  var angular                = require('angular'),
-      mocks                  = require('angularMocks'),
-      _                      = require('lodash'),
-      faker                  = require('faker');
+  var mocks = require('angularMocks'),
+      _     = require('lodash'),
+      faker = require('faker');
 
   describe('collectionSpecimenDescriptionViewDirective', function() {
 
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        this.CollectionEventType.get = jasmine.createSpy()
+          .and.returnValue(this.$q.when(this.collectionEventType));
+
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          [
+            '<collection-specimen-description-view',
+            '  study="vm.study"',
+            '  collection-event-type="vm.collectionEventType"',
+            '  specimen-description="vm.specimenDescription">',
+            '</collection-specimen-description-view>'
+          ].join(''),
+          {
+            study:               this.study,
+            collectionEventType: this.collectionEventType,
+            specimenDescription: this.specimenDescription
+          },
+          'collectionSpecimenDescriptionView');
+      };
+
+      return SuiteMixin;
+    }
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
                               'Study',
@@ -29,44 +59,20 @@ define(function (require) {
                               'CollectionSpecimenDescription',
                               'factory');
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/directives/collection/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
-      self.jsonSpecimenDescription    = self.factory.collectionSpecimenDescription();
-      self.jsonCeventType      = self.factory.collectionEventType({
-        specimenDescriptions: [ self.jsonSpecimenDescription ]
+      this.jsonSpecimenDescription = this.factory.collectionSpecimenDescription();
+      this.jsonCeventType          = this.factory.collectionEventType({
+        specimenDescriptions: [ this.jsonSpecimenDescription ]
       });
-      self.jsonStudy           = self.factory.defaultStudy;
+      this.jsonStudy           = this.factory.defaultStudy;
 
-      self.study               = new self.Study(self.jsonStudy);
-      self.collectionEventType = new self.CollectionEventType(self.jsonCeventType);
-      self.specimenDescription        = new self.CollectionSpecimenDescription(self.jsonSpecimenDescription);
-
-      self.createController = function () {
-        self.CollectionEventType.get = jasmine.createSpy()
-          .and.returnValue(self.$q.when(self.collectionEventType));
-
-        self.element = angular.element([
-          '<collection-specimen-description-view',
-          '  study="vm.study"',
-          '  collection-event-type="vm.collectionEventType"',
-          '  specimen-description="vm.specimenDescription">',
-          '</collection-specimen-description-view>'
-        ].join(''));
-
-        self.scope = self.$rootScope.$new();
-        self.scope.vm = {
-          study:               self.study,
-          collectionEventType: self.collectionEventType,
-          specimenDescription: self.specimenDescription
-        };
-
-        self.$compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('collectionSpecimenDescriptionView');
-      };
+      this.study               = new this.Study(this.jsonStudy);
+      this.collectionEventType = new this.CollectionEventType(this.jsonCeventType);
+      this.specimenDescription = new this.CollectionSpecimenDescription(this.jsonSpecimenDescription);
     }));
 
     it('should have valid scope', function() {

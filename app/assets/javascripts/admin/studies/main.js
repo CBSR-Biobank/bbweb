@@ -11,14 +11,12 @@ define(function (require) {
       name = 'biobank.admin.studies',
       module,
       annotationTypesComponents = require('./components/annotationTypes/module'),
-      collectionDirectives = require('./directives/collection/module'),
       processingDirecitves = require('./directives/processing/module'),
       processing = require('./processing/main'),
       specimenGroups = require('./specimenGroups/main');
 
   module = angular.module(name, [
     annotationTypesComponents.name,
-    collectionDirectives.name,
     processingDirecitves.name,
     processing.name,
     specimenGroups.name,
@@ -35,6 +33,8 @@ define(function (require) {
                require('./components/collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddComponent'))
     .component('collectionSpecimenDescriptionSummary',
                require('./components/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummaryComponent'))
+    .component('collectionSpecimenDescriptionView',
+               require('./components/collectionSpecimenDescriptionView/collectionSpecimenDescriptionViewComponent'))
     .component('studyCollection',         require('./components/studyCollection/studyCollectionComponent'))
     .component('studiesAdmin',            require('./components/studiesAdmin/studiesAdminComponent'))
     .component('studyAdd',                require('./components/studyAdd/studyAddComponent'))
