@@ -2,40 +2,38 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'lodash',
-  'angularMocks',
-  'biobankApp'
-], function(angular, _, mocks) {
+define(function (require) {
   'use strict';
 
-  function SuiteMixinFactory(TestSuiteMixin) {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    function SuiteMixin() {
+  describe('Component: centresAdmin', function() {
+
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<centres-admin></centres-admin>',
+          undefined,
+          'centresAdmin');
+      };
+
+      return SuiteMixin;
     }
-
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.createController = function () {
-      this.element = angular.element('<centres-admin></centres-admin>');
-      this.scope = this.$rootScope.$new();
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-    };
-
-    return SuiteMixin;
-  }
-
-  describe('Directive: centresAdminDirective', function() {
-
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -45,7 +43,7 @@ define([
                               'factory');
 
       this.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/centresAdmin/centresAdmin.html',
+        '/assets/javascripts/admin/centres/components/centresAdmin/centresAdmin.html',
         '/assets/javascripts/admin/centres/components/centresPagedList/centresPagedList.html',
         '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');

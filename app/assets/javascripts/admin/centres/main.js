@@ -13,18 +13,19 @@ define(function (require) {
 
   module = angular.module(name, ['biobank.users']);
 
-  module.component('centresPagedList',   require('./components/centresPagedList/centresPagedListComponent'));
-  module.component('centreAdd',          require('./components/centreAdd/centreAddComponent'));
-  module.component('centreLocationAdd',  require('./components/centreLocationAdd/centreLocationAddComponent'));
-  module.component('centreLocationView', require('./components/centreLocationView/centreLocationViewComponent'));
-  module.component('centreSummary',      require('./components/centreSummary/centreSummaryComponent'));
-  module.component('centreView',         require('./components/centreView/centreViewComponent'));
+  module
+    .component('centresPagedList',   require('./components/centresPagedList/centresPagedListComponent'))
+    .component('centreAdd',          require('./components/centreAdd/centreAddComponent'))
+    .component('centreLocationAdd',  require('./components/centreLocationAdd/centreLocationAddComponent'))
+    .component('centreLocationView', require('./components/centreLocationView/centreLocationViewComponent'))
+    .component('centreSummary',      require('./components/centreSummary/centreSummaryComponent'))
+    .component('centreView',         require('./components/centreView/centreViewComponent'))
+    .component('centresAdmin',       require('./components/centresAdmin/centresAdminComponent'))
 
-  module.directive('centresAdmin',       require('./directives/centresAdmin/centresAdminDirective'));
-  module.directive('centreStudiesPanel', require('./directives/centreStudiesPanel/centreStudiesPanelDirective'));
-  module.directive('locationsPanel',     require('./directives/locationsPanel/locationsPanelDirective'));
+    .directive('centreStudiesPanel', require('./directives/centreStudiesPanel/centreStudiesPanelDirective'))
+    .directive('locationsPanel',     require('./directives/locationsPanel/locationsPanelDirective'))
 
-  module.config(require('./states'));
+    .config(require('./states'));
 
   return {
     name: name,
