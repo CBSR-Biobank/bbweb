@@ -2,29 +2,25 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function (require) {
   'use strict';
+
+  var _ = require('lodash');
 
   /**
    * Displays the centre administrtion page, with a number of tabs. Each tab displays the configuration
    * for a different aspect of the centre.
    */
-  function centreSummaryDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        centre: '='
-      },
-      templateUrl : '/assets/javascripts/admin/centres/directives/centreSummary/centreSummary.html',
-      controller: CentreSummaryCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/centres/components/centreSummary/centreSummary.html',
+    controller: CentreSummaryController,
+    controllerAs: 'vm',
+    bindings: {
+      centre: '='
+    }
+  };
 
-    return directive;
-  }
-
-  CentreSummaryCtrl.$inject = [
+  CentreSummaryController.$inject = [
     '$scope',
     '$filter',
     'gettextCatalog',
@@ -33,26 +29,28 @@ define(['lodash'], function (_) {
     'notificationsService'
   ];
 
-  function CentreSummaryCtrl($scope,
-                             $filter,
-                             gettextCatalog,
-                             modalService,
-                             modalInput,
-                             notificationsService) {
+  /*
+   * Controller for this component.
+   */
+  function CentreSummaryController($scope,
+                                   $filter,
+                                   gettextCatalog,
+                                   modalService,
+                                   modalInput,
+                                   notificationsService) {
     var vm = this;
     vm.descriptionToggleControl = {}; // for truncateToggle directive
     vm.descriptionToggleState   = true;
     vm.descriptionToggleLength  = 100;
 
-    vm.changeState    = changeState;
+    vm.changeState     = changeState;
     vm.editName        = editName;
     vm.editDescription = editDescription;
-
-    init();
+    vm.$onInit         = onInit;
 
     //----
 
-    function init() {
+    function onInit() {
       // updates the selected tab in 'studyViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
     }
@@ -119,5 +117,5 @@ define(['lodash'], function (_) {
 
   }
 
-  return centreSummaryDirective;
+  return component;
 });
