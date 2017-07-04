@@ -15,12 +15,12 @@ define(function (require) {
 
   module
     .config(require('./states'))
+
     .component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'))
     .component('login',          require('./components/login/loginComponent'))
     .component('passwordSent',   require('./components/passwordSent/passwordSentComponent'))
     .component('registerUser',   require('./components/registerUser/registerUserComponent'))
 
-    .directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'))
     .directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'))
 
     .service('usersService',   require('./usersService'))
