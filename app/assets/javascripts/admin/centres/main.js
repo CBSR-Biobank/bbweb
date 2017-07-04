@@ -21,8 +21,8 @@ define(function (require) {
     .component('centreSummary',      require('./components/centreSummary/centreSummaryComponent'))
     .component('centreView',         require('./components/centreView/centreViewComponent'))
     .component('centresAdmin',       require('./components/centresAdmin/centresAdminComponent'))
+    .component('centreStudiesPanel', require('./components/centreStudiesPanel/centreStudiesPanelComponent'))
 
-    .directive('centreStudiesPanel', require('./directives/centreStudiesPanel/centreStudiesPanelDirective'))
     .directive('locationsPanel',     require('./directives/locationsPanel/locationsPanelDirective'))
 
     .config(require('./states'));

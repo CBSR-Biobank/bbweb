@@ -2,29 +2,25 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'lodash'], function(angular, _) {
+define(function (require) {
   'use strict';
 
+  var _ = require('lodash');
+
   /**
-   * This directive allows the user to link a center to one or more study.
+   * Allows the user to link a center to one or more study.
    */
-  function centreStudiesPanelDirective() {
-    var directive = {
-      restrict: 'EA',
-      scope: {},
-      bindToController: {
-        centre:     '=',
-        studyNames: '='
-      },
-      templateUrl: '/assets/javascripts/admin/centres/directives/centreStudiesPanel/centreStudiesPanel.html',
-      controller: CentreStudiesPanelCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/centres/components/centreStudiesPanel/centreStudiesPanel.html',
+    controller: CentreStudiesPanelController,
+    controllerAs: 'vm',
+    bindings: {
+      centre:     '=',
+      studyNames: '='
+    }
+  };
 
-    return directive;
-  }
-
-  CentreStudiesPanelCtrl.$inject = [
+  CentreStudiesPanelController.$inject = [
     '$scope',
     '$log',
     'gettextCatalog',
@@ -34,16 +30,16 @@ define(['angular', 'lodash'], function(angular, _) {
     'modalService'
   ];
 
-  /**
-   *
+  /*
+   * Controller for this component.
    */
-  function CentreStudiesPanelCtrl($scope,
-                                  $log,
-                                  gettextCatalog,
-                                  Panel,
-                                  Study,
-                                  StudyViewer,
-                                  modalService) {
+  function CentreStudiesPanelController($scope,
+                                        $log,
+                                        gettextCatalog,
+                                        Panel,
+                                        Study,
+                                        StudyViewer,
+                                        modalService) {
 
     var vm = this;
 
@@ -119,5 +115,5 @@ define(['angular', 'lodash'], function(angular, _) {
 
   }
 
-  return centreStudiesPanelDirective;
+  return component;
 });
