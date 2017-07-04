@@ -12,30 +12,31 @@ define(function () {
    *
    * http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs
    */
-  function loginDirective() {
-    var directive = {
-      restrict: 'E',
-      templateUrl : '/assets/javascripts/users/directives/login/login.html',
-      controller: LoginCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl : '/assets/javascripts/users/components/login/login.html',
+    controller: LoginController,
+    controllerAs: 'vm',
+    bindings: {
+    }
+  };
 
-    return directive;
-  }
-
-  LoginCtrl.$inject = [
+  LoginController.$inject = [
     '$state',
     'gettextCatalog',
     'usersService',
     'modalService',
   ];
 
-  function LoginCtrl($state,
-                     gettextCatalog,
-                     usersService,
-                     modalService) {
+  /*
+   * Controller for this component.
+   */
+  function LoginController($state,
+                           gettextCatalog,
+                           usersService,
+                           modalService) {
     var vm = this;
 
+    vm.$onInit = onInit;
     vm.credentials = {
       email: '',
       password: ''
@@ -43,11 +44,9 @@ define(function () {
 
     vm.login = login;
 
-    init();
-
     //--
 
-    function init() {
+    function onInit() {
       if (usersService.isAuthenticated()) {
         // user already logged in, send him to home page
         $state.go('home');
@@ -87,5 +86,5 @@ define(function () {
 
   }
 
-  return loginDirective;
+  return component;
 });

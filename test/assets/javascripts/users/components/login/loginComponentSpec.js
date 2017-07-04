@@ -4,45 +4,53 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   describe('loginDirective', function() {
 
-    var createController = function () {
-      this.element = angular.element('<login></login>');
-      this.scope = this.$rootScope.$new();
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('login');
-    };
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<login></login>',
+          undefined,
+          'login');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
                               '$state',
                               'usersService',
                               'modalService');
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/users/directives/login/login.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/users/components/login/login.html',
         '/assets/javascripts/common/services/modalService/modalOk.html');
     }));
 
     it('has valid state', function() {
-      createController.call(this);
+      this.createController();
       expect(this.controller.credentials.email).toBeEmptyString();
       expect(this.controller.credentials.password).toBeEmptyString();
       expect(this.controller.login).toBeFunction();
@@ -52,7 +60,7 @@ define([
       spyOn(this.usersService, 'isAuthenticated').and.returnValue(true);
       spyOn(this.$state, 'go').and.returnValue(true);
 
-      createController.call(this);
+      this.createController();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home');
     });
@@ -61,7 +69,7 @@ define([
       spyOn(this.usersService, 'login').and.returnValue(this.$q.when(true));
       spyOn(this.$state, 'go').and.returnValue(true);
 
-      createController.call(this);
+      this.createController();
       this.controller.login({ email: 'test@test.com', password: 'secret-password' });
       this.scope.$digest();
 
@@ -140,7 +148,7 @@ define([
           spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
           spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
 
-          createController.call(this);
+          this.createController();
           this.controller.login({ email: 'test@test.com', password: 'secret-password' });
           this.scope.$digest();
 
@@ -152,7 +160,7 @@ define([
           spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
           spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.reject('Cancel'));
 
-          createController.call(this);
+          this.createController();
           this.controller.login({ email: 'test@test.com', password: 'secret-password' });
           this.scope.$digest();
 
