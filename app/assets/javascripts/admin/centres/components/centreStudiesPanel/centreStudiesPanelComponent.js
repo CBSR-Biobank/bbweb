@@ -43,6 +43,7 @@ define(function (require) {
 
     var vm = this;
 
+    vm.$onInit        = onInit;
     vm.studyNamesById = [];
     vm.tableStudies   = [];
     vm.studyCollection = [];
@@ -53,11 +54,9 @@ define(function (require) {
     vm.selected = undefined;
     vm.onSelect = onSelect;
 
-    init();
-
     //--
 
-    function init() {
+    function onInit() {
       // updates the selected tab in 'centreViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
 

@@ -4,47 +4,57 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'biobankApp'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   describe('Directive: locationsPanelDirective', function() {
 
-    var createEntities = function () {
-      var self = this, entities = {};
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-      entities.centre = new self.Centre(self.factory.centre());
-      entities.locations = _.map(_.range(3), function () {
-        return new self.Location(self.factory.location());
-      });
-      return entities;
-    };
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
 
-    var createController = function (centre) {
-      var element = angular.element('<locations-panel centre="vm.centre"></locations-panel>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { centre: centre };
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-      this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
-      this.scope.$on('tabbed-page-update', this.eventRxFunc);
+      SuiteMixin.prototype.createScope = function (scopeVars) {
+        var scope = ComponentTestSuiteMixin.prototype.createScope.call(this, scopeVars);
+        this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
+        scope.$on('tabbed-page-update', this.eventRxFunc);
+        return scope;
+      };
 
-      this.$compile(element)(this.scope);
-      this.scope.$digest();
-      this.controller = element.controller('locationsPanel');
-    };
+      SuiteMixin.prototype.createController = function (centre) {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<locations-panel centre="vm.centre"></locations-panel>',
+          { centre: centre },
+        'locationsPanel');
+      };
+
+      SuiteMixin.prototype.createEntities = function () {
+        var self = this, entities = {};
+
+        entities.centre = new self.Centre(self.factory.centre());
+        entities.locations = _.map(_.range(3), function () {
+          return new self.Location(self.factory.location());
+        });
+        return entities;
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin, testUtils) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
                               '$state',
@@ -56,24 +66,24 @@ define([
 
       testUtils.addCustomMatchers();
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/locationsPanel/locationsPanel.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/centres/components/locationsPanel/locationsPanel.html',
         '/assets/javascripts/common/directives/panelButtons.html',
         '/assets/javascripts/common/directives/updateRemoveButtons.html');
     }));
 
     it('initialization is valid', function() {
-      var entities = createEntities.call(this);
-      createController.call(this, entities.centre);
+      var entities = this.createEntities();
+      this.createController(entities.centre);
       expect(this.controller.centre).toBe(entities.centre);
       expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
     it('can add a location', function() {
       var $state = this.$injector.get('$state'),
-          entities = createEntities.call(this);
+          entities = this.createEntities();
 
-      createController.call(this, entities.centre);
+      this.createController(entities.centre);
       spyOn($state, 'go').and.callFake(function () {});
       this.controller.add();
       this.scope.$digest();
@@ -84,11 +94,11 @@ define([
     });
 
     it('can remove a location', function() {
-      var entities            = createEntities.call(this),
+      var entities            = this.createEntities(),
           locationToRemove    = entities.locations[0];
 
       entities.centre.locations.push(locationToRemove);
-      createController.call(this, entities.centre);
+      this.createController(entities.centre);
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(this.$q.when(entities.centre));
@@ -99,7 +109,7 @@ define([
     });
 
     it('displays information modal when removal of a location fails', function() {
-      var entities         = createEntities.call(this),
+      var entities         = this.createEntities(),
           locationToRemove = entities.locations[0];
 
       entities.centre.locations.push(locationToRemove);
@@ -107,7 +117,7 @@ define([
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(this.$q.reject('simulated error'));
 
-      createController.call(this, entities.centre);
+      this.createController(entities.centre);
       this.controller.remove(locationToRemove);
       this.scope.$digest();
       expect(this.modalService.modalOkCancel.calls.count()).toBe(2);
@@ -119,7 +129,7 @@ define([
 
       spyOn(this.$state, 'go').and.returnValue(null);
 
-      createController.call(this, centre);
+      this.createController(centre);
       this.controller.view(location);
       expect(this.$state.go).toHaveBeenCalledWith(
         'home.admin.centres.centre.locations.locationView',

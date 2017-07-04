@@ -2,28 +2,19 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function () {
   'use strict';
 
-  /**
-   *
-   */
-  function locationsPanelDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        centre: '='
-      },
-      templateUrl: '/assets/javascripts/admin/centres/directives/locationsPanel/locationsPanel.html',
-      controller: LocationsPanelCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/centres/components/locationsPanel/locationsPanel.html',
+    controller: LocationsPanelController,
+    controllerAs: 'vm',
+    bindings: {
+      centre: '='
+    }
+  };
 
-    return directive;
-  }
-
-  LocationsPanelCtrl.$inject = [
+  LocationsPanelController.$inject = [
     '$scope',
     '$state',
     'gettextCatalog',
@@ -31,23 +22,22 @@ define(['lodash'], function(_) {
   ];
 
   /*
-   *
+   * Controller for this component.
    */
-  function LocationsPanelCtrl($scope,
-                              $state,
-                              gettextCatalog,
-                              domainNotificationService) {
+  function LocationsPanelController($scope,
+                                    $state,
+                                    gettextCatalog,
+                                    domainNotificationService) {
     var vm = this;
 
-    vm.add    = add;
-    vm.view   = view;
-    vm.remove = remove;
-
-    init();
+    vm.$onInit = onInit;
+    vm.add     = add;
+    vm.view    = view;
+    vm.remove  = remove;
 
     //--
 
-    function init() {
+    function onInit() {
       // updates the selected tab in 'centreViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
     }
@@ -80,5 +70,5 @@ define(['lodash'], function(_) {
 
   }
 
-  return locationsPanelDirective;
+  return component;
 });
