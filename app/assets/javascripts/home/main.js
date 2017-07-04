@@ -20,8 +20,7 @@ define(function (require) {
     .component('about',         require('./components/about/aboutComponent'))
     .component('biobankFooter', require('./components/biobankFooter/biobankFooterComponent'))
     .component('biobankHeader', require('./components/biobankHeader/biobankHeaderComponent'))
-
-    .directive('home',          require('./directives/home/homeDirective'));
+    .component('home',          require('./components/home/homeComponent'));
 
   return {
     name: name,

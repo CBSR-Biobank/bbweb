@@ -2,37 +2,34 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function () {
   'use strict';
 
-  /**
-   * Home page directive.
+  var component = {
+    templateUrl : '/assets/javascripts/home/components/home/home.html',
+    controller: HomeController,
+    controllerAs: 'vm',
+    bindings: {
+    }
+  };
+
+  HomeController.$inject = ['$rootScope', '$timeout', 'usersService', 'User', 'breadcrumbService'];
+
+  /*
+   * Controller for this component.
    */
-  function homeDirective() {
-    var directive = {
-      restrict: 'E',
-      templateUrl : '/assets/javascripts/home/directives/home/home.html',
-      controller: HomeCtrl,
-      controllerAs: 'vm'
-    };
-
-    return directive;
-  }
-
-  HomeCtrl.$inject = ['$rootScope', '$timeout', 'usersService', 'User', 'breadcrumbService'];
-
-  function HomeCtrl($rootScope, $timeout, usersService, User, breadcrumbService) {
+  function HomeController($rootScope, $timeout, usersService, User, breadcrumbService) {
     var vm = this;
 
+    vm.$onInit = onInit;
     vm.breadcrumbs = [ breadcrumbService.forState('home') ];
 
     vm.userIsAuthenticated = false;
     $rootScope.pageTitle = 'Biobank';
-    init();
 
     //--
 
-    function init() {
+    function onInit() {
       usersService.requestCurrentUser().then(function (user) {
         vm.user = User.create(user);
         vm.userIsAuthenticated = true;
@@ -45,6 +42,5 @@ define(['lodash'], function (_) {
     }
   }
 
-  return homeDirective;
-
+  return component;
 });
