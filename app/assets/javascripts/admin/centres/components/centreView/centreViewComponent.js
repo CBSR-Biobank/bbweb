@@ -2,28 +2,19 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function () {
   'use strict';
 
-  /**
-   *
-   */
-  function centreViewDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        centre: '='
-      },
-      templateUrl : '/assets/javascripts/admin/centres/directives/centreView/centreView.html',
-      controller: CentreViewCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/centres/components/centreView/centreView.html',
+    controller: CentreViewDirective,
+    controllerAs: 'vm',
+    bindings: {
+      centre: '='
+    }
+  };
 
-    return directive;
-  }
-
-  CentreViewCtrl.$inject = [
+  CentreViewDirective.$inject = [
     '$window',
     '$controller',
     '$scope',
@@ -32,13 +23,18 @@ define(['lodash'], function (_) {
     'breadcrumbService'
   ];
 
-  function CentreViewCtrl($window,
-                          $controller,
-                          $scope,
-                          $state,
-                          gettextCatalog,
-                          breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function CentreViewDirective($window,
+                               $controller,
+                               $scope,
+                               $state,
+                               gettextCatalog,
+                               breadcrumbService) {
     var vm = this;
+
+    vm.$onInit = onInit;
 
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
@@ -76,14 +72,13 @@ define(['lodash'], function (_) {
     ];
 
     $scope.$on('centre-name-changed', centreNameUpdated);
-    init();
 
     //--
 
     /*
      * initialize the panels to open state when viewing a new centre
      */
-    function init() {
+    function onInit() {
       if (vm.centre.id !== $window.localStorage.getItem('centre.panel.centreId')) {
         // this way when the user selects a new centre, the panels always default to open
         $window.localStorage.setItem('centre.panel.locations', true);
@@ -100,5 +95,5 @@ define(['lodash'], function (_) {
 
   }
 
-  return centreViewDirective;
+  return component;
 });

@@ -56,7 +56,7 @@ define(function (require) {
       this.centre = new this.Centre(this.factory.centre());
       this.putHtmlTemplates(
         '/assets/javascripts/admin/centres/components/centreSummary/centreSummary.html',
-        '/assets/javascripts/admin/centres/directives/centreView/centreView.html',
+        '/assets/javascripts/admin/centres/components/centreView/centreView.html',
         '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
         '/assets/javascripts/common/components/statusLine/statusLine.html');
 

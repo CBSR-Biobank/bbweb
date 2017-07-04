@@ -18,8 +18,8 @@ define(function (require) {
   module.component('centreLocationAdd',  require('./components/centreLocationAdd/centreLocationAddComponent'));
   module.component('centreLocationView', require('./components/centreLocationView/centreLocationViewComponent'));
   module.component('centreSummary',      require('./components/centreSummary/centreSummaryComponent'));
+  module.component('centreView',         require('./components/centreView/centreViewComponent'));
 
-  module.directive('centreView',         require('./directives/centreView/centreViewDirective'));
   module.directive('centresAdmin',       require('./directives/centresAdmin/centresAdminDirective'));
   module.directive('centreStudiesPanel', require('./directives/centreStudiesPanel/centreStudiesPanelDirective'));
   module.directive('locationsPanel',     require('./directives/locationsPanel/locationsPanelDirective'));

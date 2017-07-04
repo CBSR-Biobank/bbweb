@@ -4,61 +4,68 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  describe('Directive: centreViewDirective', function() {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    var createController = function (centre) {
-      this.element = angular.element('<centre-view centre="vm.centre"></centre-view>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { centre: centre };
+  describe('Component: centreView', function() {
 
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('centreView');
-    };
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (centre) {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<centre-view centre="vm.centre"></centre-view>',
+          { centre: centre },
+          'centreView');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($window, $timeout, TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function($window, $timeout, ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
       $window.localStorage.setItem = jasmine.createSpy().and.returnValue(null);
       $window.localStorage.getItem = jasmine.createSpy().and.returnValue(null);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$window',
                               '$state',
                               'Centre',
                               'factory');
 
-      self.centre = new self.Centre(self.factory.centre());
+      this.centre = new this.Centre(this.factory.centre());
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/centreView/centreView.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/centres/components/centreView/centreView.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('should contain a valid centre', function() {
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       expect(this.scope.vm.centre).toBe(this.centre);
     });
 
     it('should contain initialized panels', function() {
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       expect(this.controller.tabs).toBeArrayOfSize(3);
     });
 
     it('should contain initialized local storage', function() {
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       expect(this.$window.localStorage.setItem)
         .toHaveBeenCalledWith('centre.panel.locations', true);
     });
@@ -75,7 +82,7 @@ define([
 
       _(states).forEach(function (state) {
         self.$state.current.name = state;
-        createController.call(self, self.centre);
+        self.createController(self.centre);
         childScope = self.element.isolateScope().$new();
         childScope.$emit('tabbed-page-update');
         self.scope.$digest();
