@@ -5,35 +5,29 @@
 define(function () {
   'use strict';
 
-  /**
-   *
-   */
-  function centreLocationAddDirective() {
-    var directive = {
-      restrict: 'E',
-      scope: {},
-      bindToController: {
-        centre: '='
-      },
-      templateUrl : '/assets/javascripts/admin/centres/directives/centreLocationAdd/centreLocationAdd.html',
-      controller: CentreLocationAddCtrl,
-      controllerAs: 'vm'
-    };
+  var component = {
+    templateUrl : '/assets/javascripts/admin/centres/components/centreLocationAdd/centreLocationAdd.html',
+    controller: CentreLocationAddController,
+    controllerAs: 'vm',
+    bindings: {
+      centre: '='
+    }
+  };
 
-    return directive;
-  }
-
-  CentreLocationAddCtrl.$inject = [
+  CentreLocationAddController.$inject = [
     '$state',
     'gettextCatalog',
     'domainNotificationService',
     'notificationsService'
   ];
 
-  function CentreLocationAddCtrl($state,
-                                 gettextCatalog,
-                                 domainNotificationService,
-                                 notificationsService) {
+  /*
+   * Controller for this component.
+   */
+  function CentreLocationAddController($state,
+                                       gettextCatalog,
+                                       domainNotificationService,
+                                       notificationsService) {
     var vm = this;
 
     vm.submit = submit;
@@ -65,5 +59,5 @@ define(function () {
 
   }
 
-  return centreLocationAddDirective;
+  return component;
 });

@@ -15,8 +15,8 @@ define(function (require) {
 
   module.component('centresPagedList',   require('./components/centresPagedList/centresPagedListComponent'));
   module.component('centreAdd',          require('./components/centreAdd/centreAddComponent'));
+  module.component('centreLocationAdd',  require('./components/centreLocationAdd/centreLocationAddComponent'));
 
-  module.directive('centreLocationAdd',  require('./directives/centreLocationAdd/centreLocationAddDirective'));
   module.directive('centreLocationView', require('./directives/centreLocationView/centreLocationViewDirective'));
   module.directive('centreSummary',      require('./directives/centreSummary/centreSummaryDirective'));
   module.directive('centreView',         require('./directives/centreView/centreViewDirective'));

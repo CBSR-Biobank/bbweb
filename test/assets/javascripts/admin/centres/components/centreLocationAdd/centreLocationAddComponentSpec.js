@@ -4,34 +4,40 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'biobankApp'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
 
-  describe('Directive: centreLocationAddDirective', function() {
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-    var createController = function (centre) {
-      this.element = angular.element(
-        '<centre-location-add centre="vm.centre"></centre-location-add>');
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { centre: centre };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('centreLocationAdd');
-    };
+  describe('Component: centreLocationAdd', function() {
+
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (centre) {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<centre-location-add centre="vm.centre"></centre-location-add>',
+          { centre: centre },
+          'centreLocationAdd');
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function ($state, TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function (ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$rootScope',
+      this.injectDependencies('$rootScope',
                               '$compile',
                               '$state',
                               'Centre',
@@ -40,24 +46,24 @@ define([
                               'domainNotificationService',
                               'notificationsService');
 
-      self.centre = new self.Centre(self.factory.centre());
-      self.location = new self.Location(self.factory.location());
-      self.returnStateName = 'home.admin.centres.centre.locations';
+      this.centre = new this.Centre(this.factory.centre());
+      this.location = new this.Location(this.factory.location());
+      this.returnStateName = 'home.admin.centres.centre.locations';
 
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/directives/centreLocationAdd/centreLocationAdd.html',
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/centres/components/centreLocationAdd/centreLocationAdd.html',
         '/assets/javascripts/admin/components/locationAdd/locationAdd.html');
     }));
 
     it('scope should be valid', function() {
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       expect(this.controller.centre).toBe(this.centre);
       expect(this.controller.submit).toBeFunction();
       expect(this.controller.cancel).toBeFunction();
     });
 
     it('should return to valid state on cancel', function() {
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       spyOn(this.$state, 'go').and.callFake(function () {} );
       this.controller.cancel();
       expect(this.$state.go).toHaveBeenCalledWith(this.returnStateName);
@@ -67,7 +73,7 @@ define([
       var $q                  = this.$injector.get('$q'),
           domainNotificationService = this.$injector.get('domainNotificationService');
 
-      createController.call(this, this.centre);
+      this.createController(this.centre);
 
       spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
       spyOn(this.Centre.prototype, 'addLocation').and.callFake(function () {
@@ -86,7 +92,7 @@ define([
     it('should return to valid state on submit', function() {
       var $q = this.$injector.get('$q');
 
-      createController.call(this, this.centre);
+      this.createController(this.centre);
       spyOn(this.$state, 'go').and.callFake(function () {} );
       spyOn(this.Centre.prototype, 'addLocation').and.callFake(function () {
         return $q.when('test');
