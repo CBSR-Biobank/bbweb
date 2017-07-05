@@ -23,9 +23,7 @@ define(function () {
       .state('home.shipping', {
         url: 'shipping',
         views: {
-          'main@': {
-            component: 'shippingHome'
-          }
+          'main@': 'shippingHome'
         }
       })
       .state('home.shipping.centre', {
@@ -37,41 +35,31 @@ define(function () {
           }]
         },
         views: {
-          'main@': {
-            component: 'centreShipments'
-          }
+          'main@': 'centreShipments'
         }
       })
       .state('home.shipping.centre.incoming', {
         url: '/incoming',
         views: {
-          'shipments': {
-            component: 'shipmentsIncoming'
-          }
+          'shipments': 'shipmentsIncoming'
         }
       })
       .state('home.shipping.centre.outgoing', {
         url: '/outgoing',
         views: {
-          'shipments': {
-            component: 'shipmentsOutgoing'
-          }
+          'shipments': 'shipmentsOutgoing'
         }
       })
       .state('home.shipping.centre.completed', {
         url: '/completed',
         views: {
-          'shipments': {
-            component: 'shipmentsCompleted'
-          }
+          'shipments': 'shipmentsCompleted'
         }
       })
       .state('home.shipping.add', {
         url: '/add',
         views: {
-          'main@': {
-            component: 'shipmentAdd'
-          }
+          'main@': 'shipmentAdd'
         }
       })
       .state('home.shipping.addItems', {
@@ -80,9 +68,7 @@ define(function () {
           shipment: resolveShipment
         },
         views: {
-          'main@': {
-            component: 'shipmentAddItems'
-          }
+          'main@': 'shipmentAddItems'
         }
       })
       .state('home.shipping.shipment', {
@@ -91,34 +77,26 @@ define(function () {
           shipment: resolveShipment
         },
         views: {
-          'main@': {
-            component: 'shipmentView'
-          }
+          'main@': 'shipmentView'
         }
       })
       .state('home.shipping.shipment.unpack', {
         abstract: true,
         url: '/unpack',
         views: {
-          'main@': {
-            component: 'unpackedShipmentView'
-          }
+          'main@': 'unpackedShipmentView'
         }
       })
       .state('home.shipping.shipment.unpack.info', {
         url: '/information',
         views: {
-          'unpackedShipmentDetails': {
-            component: 'unpackedShipmentInfo'
-          }
+          'unpackedShipmentDetails': 'unpackedShipmentInfo'
         }
       })
       .state('home.shipping.shipment.unpack.unpack', {
         url: '/unpack',
         views: {
-          'unpackedShipmentDetails': {
-            component: 'unpackedShipmentUnpack'
-          }
+          'unpackedShipmentDetails': 'unpackedShipmentUnpack'
         }
       })
       .state('home.shipping.shipment.unpack.received', {
@@ -129,53 +107,21 @@ define(function () {
           }]
         },
         views: {
-          'unpackedShipmentDetails': {
-            component: 'unpackedShipmentItems'
-          }
+          'unpackedShipmentDetails': 'unpackedShipmentItems'
         }
       })
       .state('home.shipping.shipment.unpack.missing', {
         url: '/missing',
         views: {
-          'unpackedShipmentDetails': {
-            template: [
-              '<unpacked-shipment-items ',
-              '  shipment="vm.shipment"',
-              '  item-state="{{vm.itemState}}">',
-              '</unpacked-shipment-items>'
-            ].join(''),
-            controller: [
-              'shipment',
-              'ShipmentItemState',
-              function (shipment, ShipmentItemState) {
-                this.shipment = shipment;
-                this.itemState = ShipmentItemState.MISSING;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'unpackedShipmentDetails': 'unpackedShipmentItems'
         }
       })
       .state('home.shipping.shipment.unpack.extra', {
         url: '/extra',
         views: {
-          'unpackedShipmentDetails': {
-            component: 'unpackedShipmentExtra'
-          }
+          'unpackedShipmentDetails': 'unpackedShipmentExtra'
         }
       });
-
-    ShipmentController.$inject = ['shipment'];
-
-    function ShipmentController(shipment) {
-      this.shipment = shipment;
-    }
-
-    CentreController.$inject = [ 'centre' ];
-
-    function CentreController(centre) {
-      this.centre = centre;
-    }
 
   }
 

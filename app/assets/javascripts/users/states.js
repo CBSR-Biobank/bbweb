@@ -15,17 +15,13 @@ define(function () {
         abstract: true,
         url: '^/users',
         views: {
-          'main@': {
-            template: '<ui-view></ui-view>'
-          }
+          'main@': 'uiView'
         }
       })
       .state('home.users.login', {
         url: '^/login',
         views: {
-          'main@': {
-            template: '<login></login>'
-          }
+          'main@': 'login'
         }
       })
       .state('home.users.forgot', {
@@ -33,32 +29,19 @@ define(function () {
         resolve: {
         },
         views: {
-          'main@': {
-            component: 'forgotPassword'
-          }
+          'main@': 'forgotPassword'
         }
       })
       .state('home.users.forgot.passwordSent', {
         url: '^/passwordSent/{email}',
         views: {
-          'main@': {
-            template: '<password-sent email="vm.email"></password-sent>',
-            controller: [
-              '$transition$',
-              function ($transition$) {
-                this.email = $transition$.params().email;
-              }
-            ],
-            controllerAst: 'vm'
-          }
+          'main@': 'passwordSent'
         }
       })
       .state('home.users.register', {
         url: '^/register',
         views: {
-          'main@': {
-            component: 'registerUser'
-          }
+          'main@': 'registerUser'
         }
       });
 

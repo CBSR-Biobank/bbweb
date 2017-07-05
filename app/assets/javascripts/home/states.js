@@ -15,17 +15,13 @@ define(['angular'], function(angular) {
       .state('home', {
         url: '/',
         views: {
-          'main@': {
-            template: '<home></home>'
-          }
+          'main@': 'home'
         }
       })
       .state('home.about', {
         url: 'about',
         views: {
-          'main@': {
-            component: 'about'
-          }
+          'main@': 'about'
         }
       })
       .state('home.contact', {

@@ -12,20 +12,7 @@ define(['lodash'], function (_) {
       .state('home.admin.studies.study.participants.annotationTypeAdd', {
         url: '/annottype/add',
         views: {
-          'main@': {
-            template: [
-              '<participant-annotation-type-add',
-              '  study="vm.study"',
-              '</participant-annotation-type-add>'
-            ].join(''),
-            controller: [
-              'study',
-              function (study) {
-                this.study = study;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'main@': 'participantAnnotationTypeAdd'
         }
       })
       .state('home.admin.studies.study.participants.annotationTypeView', {
@@ -44,24 +31,7 @@ define(['lodash'], function (_) {
           ]
         },
         views: {
-          'main@': {
-            template: [
-              '<participant-annotation-type-view',
-              '  study="vm.study"',
-              '  annotation-type="vm.annotationType"',
-              '</participant-annotation-type-view>'
-            ].join(''),
-            controller: [
-              'study',
-              'annotationType',
-              function (study, annotationType) {
-                var vm = this;
-                vm.study = study;
-                vm.annotationType = annotationType;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'main@': 'participantAnnotationTypeView'
         }
       });
   }

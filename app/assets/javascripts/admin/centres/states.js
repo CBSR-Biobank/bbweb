@@ -23,9 +23,7 @@ define(['lodash'], function (_) {
       .state('home.admin.centres.add', {
         url: '/add',
         views: {
-          'main@': {
-            template: '<centre-add></centre-add>'
-          }
+          'main@': 'centreAdd'
         }
       })
       .state('home.admin.centres.centre', {
@@ -35,61 +33,25 @@ define(['lodash'], function (_) {
           centre: resolveCentre
         },
         views: {
-          'main@': {
-            template: '<centre-view centre="vm.centre"></centre-view>',
-            controller: [
-              'centre',
-              function (centre) {
-                this.centre = centre;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'main@': 'centreView'
         }
       })
       .state('home.admin.centres.centre.summary', {
         url: '/summary',
         views: {
-          'centreDetails': {
-            template: '<centre-summary centre="vm.centre"></centre-summary>',
-            controller: [
-              'centre',
-              function (centre) {
-                this.centre = centre;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'centreDetails': 'centreSummary'
         }
       })
       .state('home.admin.centres.centre.locations', {
         url: '/locations',
         views: {
-          'centreDetails': {
-            template: '<locations-panel centre="vm.centre"></locations-panel>',
-            controller: [
-              'centre',
-              function(centre) {
-                this.centre = centre;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'centreDetails': 'locationsPanel'
         }
       })
       .state('home.admin.centres.centre.locations.locationAdd', {
         url: '/location/add',
         views: {
-          'main@': {
-            template: '<centre-location-add centre="vm.centre"></centre-location-add>',
-            controller: [
-              'centre',
-              function (centre) {
-                this.centre = centre;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'main@': 'centreLocationAdd'
         }
       })
       .state('home.admin.centres.centre.locations.locationView', {
@@ -104,18 +66,7 @@ define(['lodash'], function (_) {
           ]
         },
         views: {
-          'main@': {
-            template: '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>',
-            controller: [
-              'centre',
-              'location',
-              function (centre, location) {
-                this.centre = centre;
-                this.location = location;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'main@': 'centreLocationView'
         }
       })
       .state('home.admin.centres.centre.studies', {
@@ -127,24 +78,7 @@ define(['lodash'], function (_) {
           }]
         },
         views: {
-          'centreDetails': {
-            template: [
-              '<centre-studies-panel',
-              '  centre="vm.centre" ',
-              '  centre-studies="vm.centreStudies" ',
-              '  study-names="vm.studyNames"> ',
-              '</centre-studies-panel>'
-            ].join(''),
-            controller: [
-              'centre', 'studyNames',
-              function(centre, studyNames) {
-                var vm = this;
-                vm.centre     = centre;
-                vm.studyNames = studyNames;
-              }
-            ],
-            controllerAs: 'vm'
-          }
+          'centreDetails': 'centreStudiesPanel'
         }
       });
 

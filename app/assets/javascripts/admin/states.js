@@ -14,9 +14,7 @@ define(function () {
     $stateProvider.state('home.admin', {
       url: 'admin',
       views: {
-        'main@': {
-          template: '<biobank-admin></biobank-admin>'
-        }
+        'main@': 'biobankAdmin'
       }
     });
 

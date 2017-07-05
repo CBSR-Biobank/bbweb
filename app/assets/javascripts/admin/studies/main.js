@@ -43,6 +43,8 @@ define(function (require) {
     .component('studyView',               require('./components/studyView/studyViewComponent'))
     .component('studyNotDisabledWarning',
                require('./components/studyNotDisabledWarning/studyNotDisabledWarningComponent'))
+    .component('studyProcessingTab',
+               require('./components/studyProcessingTab/studyProcessingTabComponent'))
 
     .config(require('./states'))
     .config(require('./ceventTypes/states'))
