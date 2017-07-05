@@ -5,56 +5,55 @@
 define(function (require) {
   'use strict';
 
-  /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
-
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
-      _               = require('lodash');
-
-  function SuiteMixinFactory(TestSuiteMixin) {
-
-    function SuiteMixin() {
-    }
-
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.createController = function () {
-      this.element = angular.element('<shipment-add centre="vm.centre"></shipment-add');
-      this.scope = this.$rootScope.$new();
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('shipmentAdd');
-    };
-
-    SuiteMixin.prototype.createPagedResultsSpy = function (shipments) {
-      var reply = this.factory.pagedResult(shipments);
-      spyOn(this.Shipment, 'list').and.returnValue(this.$q.when(reply));
-    };
-
-    SuiteMixin.prototype.createCentreLocationsSpy = function (locations) {
-      var locationsCopy = locations.slice();
-      spyOn(this.Centre, 'locationsSearch').and.returnValue(this.$q.when(locationsCopy));
-    };
-
-    SuiteMixin.prototype.centreLocations = function (numCentres) {
-      var self = this;
-      return _.map(_.range(numCentres), function () {
-        var centre = self.factory.centre({ locations: [ self.factory.location() ]});
-        return self.factory.centreLocationDto(centre);
-      });
-    };
-
-    return SuiteMixin;
-  }
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   describe('shipmentAddComponent', function() {
 
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<shipment-add centre="vm.centre"></shipment-add',
+          undefined,
+          'shipmentAdd');
+      };
+
+      SuiteMixin.prototype.createPagedResultsSpy = function (shipments) {
+        var reply = this.factory.pagedResult(shipments);
+        spyOn(this.Shipment, 'list').and.returnValue(this.$q.when(reply));
+      };
+
+      SuiteMixin.prototype.createCentreLocationsSpy = function (locations) {
+        var locationsCopy = locations.slice();
+        spyOn(this.Centre, 'locationsSearch').and.returnValue(this.$q.when(locationsCopy));
+      };
+
+      SuiteMixin.prototype.centreLocations = function (numCentres) {
+        var self = this;
+        return _.map(_.range(numCentres), function () {
+          var centre = self.factory.centre({ locations: [ self.factory.location() ]});
+          return self.factory.centreLocationDto(centre);
+        });
+      };
+
+      return SuiteMixin;
+    }
+
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin, testUtils) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+
       this.putHtmlTemplates(
         '/assets/javascripts/centres/components/shipmentAdd/shipmentAdd.html',
         '/assets/javascripts/common/components/progressTracker/progressTracker.html',

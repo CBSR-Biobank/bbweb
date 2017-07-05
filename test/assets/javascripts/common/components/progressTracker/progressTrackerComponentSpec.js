@@ -11,38 +11,39 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  function SuiteMixinFactory(TestSuiteMixin) {
+  describe('progressTrackerComponent', function() {
 
-    function SuiteMixin() {
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (items, current) {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          [
+            '<progress-tracker',
+            '  items="vm.progressInfo.items"',
+            '  current="vm.progressInfo.current">',
+            '</progress-tracker>'
+          ].join(''),
+          { progressInfo:  { items: items, current: current } },
+          'progressTracker');
+      };
+
+      return SuiteMixin;
     }
 
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.createController = function (items, current) {
-      this.element = angular.element([
-        '<progress-tracker',
-        '  items="vm.progressInfo.items"',
-        '  current="vm.progressInfo.current">',
-        '</progress-tracker>'
-      ].join(''));
-      this.scope = this.$rootScope.$new();
-      this.scope.vm = { progressInfo:  { items: items, current: current } };
-      this.$compile(this.element)(this.scope);
-      this.scope.$digest();
-      this.controller = this.element.controller('progressTracker');
-    };
-
-    return SuiteMixin;
-  }
-
-  describe('progressTrackerComponent', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin, testUtils) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+
       this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
       this.putHtmlTemplates(
         '/assets/javascripts/common/components/progressTracker/progressTracker.html');

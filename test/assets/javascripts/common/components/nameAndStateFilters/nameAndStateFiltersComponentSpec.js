@@ -7,21 +7,21 @@
 define(function (require) {
   'use strict';
 
-  /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-  var angular         = require('angular'),
-      mocks           = require('angularMocks'),
-      _               = require('lodash');
+  describe('nameAndStateFiltersComponent', function() {
 
-  function SuiteMixinFactory(TestSuiteMixin) {
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    function SuiteMixin() {
-    }
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
 
-    SuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createController = function (bindings) {
+      SuiteMixin.prototype.createController = function (bindings) {
       var self = this,
           defaultBindings = {},
           actualBindings = {};
@@ -37,33 +37,30 @@ define(function (require) {
         onFiltersCleared:     self.filtersCleared
       };
 
-      _.extend(actualBindings, defaultBindings, bindings);
+        _.extend(actualBindings, defaultBindings, bindings);
 
-      self.element = angular.element([
-        '<name-and-state-filters ',
-        '    state-data="vm.stateData" ',
-        '    on-name-filter-updated="vm.onNameFilterUpdated" ',
-        '    on-state-filter-updated="vm.onStateFilterUpdated" ',
-        '    on-filters-cleared="vm.onFiltersCleared"> ',
-        '</name-and-state-filters>'
-      ].join(''));
-      self.scope = self.$rootScope.$new();
-      self.scope.vm = actualBindings;
-      self.$compile(self.element)(self.scope);
-      self.scope.$digest();
-      self.controller = self.element.controller('nameAndStateFilters');
-    };
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          [
+            '<name-and-state-filters ',
+            '    state-data="vm.stateData" ',
+            '    on-name-filter-updated="vm.onNameFilterUpdated" ',
+            '    on-state-filter-updated="vm.onStateFilterUpdated" ',
+            '    on-filters-cleared="vm.onFiltersCleared"> ',
+            '</name-and-state-filters>'
+          ].join(''),
+          actualBindings,
+          'nameAndStateFilters');
+      };
 
-    return SuiteMixin;
-  }
-
-  describe('nameAndStateFiltersComponent', function() {
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var SuiteMixin = new SuiteMixinFactory(TestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+
       this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
       this.putHtmlTemplates(
         '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html');

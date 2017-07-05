@@ -5,13 +5,10 @@
 define(function (require) {
   'use strict';
 
-  /*eslint no-unused-vars: ["error", { "varsIgnorePattern": "angular" }]*/
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
-  var angular = require('angular'),
-      mocks   = require('angularMocks'),
-      _       = require('lodash');
-
-  fdescribe('createController', function() {
+  describe('createController', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -38,7 +35,6 @@ define(function (require) {
 
       return SuiteMixin;
     }
-
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
