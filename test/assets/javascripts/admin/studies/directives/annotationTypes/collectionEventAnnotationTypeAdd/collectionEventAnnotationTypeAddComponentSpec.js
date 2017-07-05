@@ -4,8 +4,7 @@
 define(function(require) {
   'use strict';
 
-  var angular                              = require('angular'),
-      mocks                                = require('angularMocks'),
+  var mocks                                = require('angularMocks'),
       _                                    = require('lodash'),
       annotationTypeAddComponentSharedSpec = require('../../../../../test/annotationTypeAddComponentSharedSpec');
 
