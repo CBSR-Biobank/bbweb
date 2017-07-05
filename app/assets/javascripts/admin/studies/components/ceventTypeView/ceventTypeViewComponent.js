@@ -75,7 +75,7 @@ define(function (require) {
         .then(function (name) {
           vm.ceventType.updateName(name)
             .then(function (ceventType) {
-              $scope.$emit('collection-event-type-name-changed', ceventType);
+              $scope.$emit('collection-event-type-updated', ceventType);
               postUpdate(gettextCatalog.getString('Name changed successfully.'),
                          gettextCatalog.getString('Change successful'))(ceventType);
             })
@@ -103,8 +103,11 @@ define(function (require) {
                         ).result
         .then(function (recurring) {
           vm.ceventType.updateRecurring(recurring === 'true')
-            .then(postUpdate(gettextCatalog.getString('Recurring changed successfully.'),
-                             gettextCatalog.getString('Change successful')))
+            .then(function (ceventType) {
+              $scope.$emit('collection-event-type-updated', ceventType);
+              postUpdate(gettextCatalog.getString('Recurring changed successfully.'),
+                         gettextCatalog.getString('Change successful'))(ceventType);
+            })
             .catch(notificationsService.updateError);
       });
     }

@@ -21,7 +21,7 @@ define(function (require) {
   /*
    * Controller for this component.
    *
-   * Listens to event "collection-event-type-name-changed" which is emmitted by a child component when
+   * Listens to event "collection-event-type-updated" which is emmitted by a child component when
    * a Collection Event Type name is changed.
    */
   function StudyCollectionController($scope, CollectionEventType) {
@@ -39,7 +39,7 @@ define(function (require) {
         vm.collectionEventTypes = CollectionEventType.sortByName(pagedResult.items);
       });
 
-      $scope.$on('collection-event-type-name-changed', updateCollectionEventTypes);
+      $scope.$on('collection-event-type-updated', updateCollectionEventTypes);
     }
 
     function updateCollectionEventTypes(event, updatedCeventType) {

@@ -88,7 +88,7 @@ define([
       this.createController(this.study, [ ceType ]);
       childScope = this.element.isolateScope().$new();
       ceType.name = newName;
-      childScope.$emit('collection-event-type-name-changed', ceType);
+      childScope.$emit('collection-event-type-updated', ceType);
       this.scope.$digest();
 
       expect(this.controller.collectionEventTypes).toBeArrayOfSize(1);
