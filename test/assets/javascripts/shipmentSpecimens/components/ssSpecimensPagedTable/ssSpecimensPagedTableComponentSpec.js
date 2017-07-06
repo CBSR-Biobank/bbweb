@@ -10,29 +10,25 @@ define(function (require) {
 
   describe('ssSpecimensPagedTableComponent', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
-      this.putHtmlTemplates(
-        '/assets/javascripts/shipmentSpecimens/components/ssSpecimensPagedTable/ssSpecimensPagedTable.html');
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
 
-      this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
-                              '$state',
-                              'ShipmentSpecimen',
-                              'factory');
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-      this.createController = function (defaultSortField,
-                                   refresh,
-                                   showItemState,
-                                   onGetSpecimens,
-                                   noSpecimensMessage,
-                                   actions,
-                                   onActionSelected) {
+      SuiteMixin.prototype.createController = function (defaultSortField,
+                                                        refresh,
+                                                        showItemState,
+                                                        onGetSpecimens,
+                                                        noSpecimensMessage,
+                                                        actions,
+                                                        onActionSelected) {
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
+
           '<ss-specimens-paged-table' +
             ' default-sort-field="' + defaultSortField + '"' +
             ' refresh="vm.refresh"' +
@@ -52,9 +48,9 @@ define(function (require) {
           'ssSpecimensPagedTable');
       };
 
-      this.createTableState = function (searchPredicatObject,
-                                        sortPredicate,
-                                        sortOrderReverse) {
+      SuiteMixin.prototype.createTableState = function (searchPredicatObject,
+                                                        sortPredicate,
+                                                        sortOrderReverse) {
         var result = {
           sort: {
             predicate: sortPredicate,
@@ -69,12 +65,31 @@ define(function (require) {
         return result;
       };
 
-      this.addTableController = function (searchPredicatObject, sortPredicate) {
+      SuiteMixin.prototype.addTableController = function (searchPredicatObject, sortPredicate) {
         this.controller.tableController = {
           tableState: jasmine.createSpy()
             .and.returnValue(this.createTableState(searchPredicatObject, sortPredicate))
         };
       };
+
+      return SuiteMixin;
+    }
+
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+
+      this.putHtmlTemplates(
+        '/assets/javascripts/shipmentSpecimens/components/ssSpecimensPagedTable/ssSpecimensPagedTable.html');
+
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'ShipmentSpecimen',
+                              'factory');
     }));
 
     it('should have valid scope', function() {
@@ -87,12 +102,12 @@ define(function (require) {
           onActionSelected   = jasmine.createSpy('onActionSelected').and.returnValue(null);
 
       this.createController(defaultSortField,
-                       refreshTable,
-                       showItemState,
-                       onGetSpecimens,
-                       noSpecimensMessage,
-                       actions,
-                       onActionSelected);
+                            refreshTable,
+                            showItemState,
+                            onGetSpecimens,
+                            noSpecimensMessage,
+                            actions,
+                            onActionSelected);
 
       expect(this.controller.defaultSortField).toBe(defaultSortField);
       expect(this.controller.refresh).toBe(refreshTable);
@@ -109,23 +124,22 @@ define(function (require) {
     });
 
     it('invoking $onChanges reloads table data', function() {
-      var onGetSpecimens,
-          refreshTable       = 0,
+      var refreshTable       = 0,
           actions            = [],
-          onActionSelected   = jasmine.createSpy('onActionSelected').and.returnValue(null);
-
-      onGetSpecimens     = jasmine.createSpy('onGetSpecimens')
-        .and.returnValue(this.$q.when(this.factory.pagedResult([])));
+          onActionSelected   = jasmine.createSpy('onActionSelected').and.returnValue(null),
+          onGetSpecimens     = jasmine.createSpy('onGetSpecimens')
+          .and.returnValue(this.$q.when(this.factory.pagedResult([])));
 
       this.createController('inventoryId',
-                       refreshTable,
-                       true,
-                       onGetSpecimens,
-                       '',
-                       actions,
-                       onActionSelected);
+                            refreshTable,
+                            true,
+                            onGetSpecimens,
+                            '',
+                            actions,
+                            onActionSelected);
 
       this.addTableController({ inventoryId: 'test' });
+      refreshTable += 1;
       this.controller.$onChanges();
       this.scope.$digest();
 
@@ -145,12 +159,12 @@ define(function (require) {
           shipmentSpecimen = new this.ShipmentSpecimen(this.factory.shipmentSpecimen());
 
       this.createController('inventoryId',
-                       refreshTable,
-                       true,
-                       onGetSpecimens,
-                       '',
-                       actions,
-                       onActionSelected);
+                            refreshTable,
+                            true,
+                            onGetSpecimens,
+                            '',
+                            actions,
+                            onActionSelected);
 
       this.controller.actionSelected(shipmentSpecimen, actions[0]);
       this.scope.$digest();

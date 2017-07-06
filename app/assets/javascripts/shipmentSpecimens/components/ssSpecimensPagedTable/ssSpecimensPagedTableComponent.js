@@ -66,7 +66,7 @@ define(function (require) {
     //--
 
     /**
-     * Parent components can trigger a table reload by calling this function.
+     * Parent components can trigger a table reload by updating the "refresh" binding.
      */
     function onChanges() {
       if (vm.tableController) {
