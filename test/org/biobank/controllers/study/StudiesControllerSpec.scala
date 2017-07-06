@@ -1,11 +1,11 @@
 package org.biobank.controllers.study
 
+import java.time.OffsetDateTime
 import org.biobank.controllers._
 import org.biobank.domain.{AnnotationType, JsonHelper}
 import org.biobank.domain.study._
 import org.biobank.dto._
 import org.biobank.fixture.ControllerFixture
-import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.test.Helpers._
 
@@ -436,7 +436,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
           )
 
           repoStudy.annotationTypes must have size 0
-          checkTimeStamps(repoStudy, DateTime.now, None)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, None)
         }
       }
 
@@ -495,7 +495,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
           )
 
           repoStudy.annotationTypes must have size study.annotationTypes.size.toLong
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 
@@ -576,7 +576,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
           )
 
           repoStudy.annotationTypes must have size study.annotationTypes.size.toLong
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 
@@ -642,7 +642,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'required      (annotType.required)
           )
 
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 
@@ -712,7 +712,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             'required      (updatedAnnotType.required)
           )
 
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 
@@ -764,7 +764,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             )
 
           repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong - 1)
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 
@@ -859,7 +859,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             )
 
           repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 
@@ -936,7 +936,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             )
 
           repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 
@@ -975,7 +975,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             )
 
           repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 
@@ -1014,7 +1014,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             )
 
           repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
-          checkTimeStamps(repoStudy, DateTime.now, DateTime.now)
+          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
 

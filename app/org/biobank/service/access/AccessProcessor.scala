@@ -3,6 +3,8 @@ package org.biobank.service.access
 import akka.actor._
 import akka.event.{Logging, LoggingAdapter}
 import akka.persistence.{RecoveryCompleted, SnapshotOffer, SaveSnapshotSuccess, SaveSnapshotFailure}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.domain.access._
 import org.biobank.domain.user.UserId
@@ -10,8 +12,6 @@ import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.event.AccessEvents._
 //import org.biobank.infrastructure.event.EventUtils
 import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -122,7 +122,7 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
   private def addUserToRoleCmdToEvent(cmd: AddUserToRoleCmd, role: Role): ServiceValidation[AccessEvent] = {
     accessItemRepository.getRole(AccessItemId(cmd.roleId)).map { role =>
       AccessEvent(cmd.sessionUserId).update(
-        _.time                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                   := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.role.roleId            := cmd.roleId,
         _.role.version           := cmd.expectedVersion,
         _.role.userAdded.userId  := cmd.userId
@@ -131,7 +131,7 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
   }
 
   private def onValidRoleEvent(event: AccessEvent)
-                              (applyEvent: (Role, DateTime) => ServiceValidation[Boolean])
+                              (applyEvent: (Role, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!event.eventType.isRole) {
       log.error(s"invalid role event type: $event")
@@ -142,7 +142,7 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
           if (role.version != event.getRole.getVersion) {
             log.error(s"event version check failed: role version: ${role.version}, event: $event")
           } else {
-            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val eventTime = OffsetDateTime.parse(event.getTime)
             val update = applyEvent(role, eventTime)
 
             if (update.isFailure) {

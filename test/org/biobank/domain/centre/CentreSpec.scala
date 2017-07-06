@@ -1,10 +1,9 @@
 package org.biobank.domain.centre
 
+import java.time.OffsetDateTime
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
-
 import org.slf4j.LoggerFactory
-import com.github.nscala_time.time.Imports._
 import scalaz.Scalaz._
 
 class CentreSpec extends DomainSpec {
@@ -37,7 +36,7 @@ class CentreSpec extends DomainSpec {
         centre.studyIds must have size 0
         centre.locations must have size 0
 
-        checkTimeStamps(s, DateTime.now, None)
+        checkTimeStamps(s, OffsetDateTime.now, None)
       }
     }
 
@@ -56,7 +55,7 @@ class CentreSpec extends DomainSpec {
         updatedCentre.studyIds must have size 0
         updatedCentre.locations must have size 0
 
-        checkTimeStamps(updatedCentre, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedCentre, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 
@@ -75,7 +74,7 @@ class CentreSpec extends DomainSpec {
         updatedCentre.studyIds must have size 0
         updatedCentre.locations must have size 0
 
-        checkTimeStamps(updatedCentre, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedCentre, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 

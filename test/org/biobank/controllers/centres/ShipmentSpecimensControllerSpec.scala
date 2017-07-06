@@ -1,5 +1,6 @@
 package org.biobank.controllers.centres
-import com.github.nscala_time.time.Imports._
+
+import java.time.OffsetDateTime
 import org.biobank.TestUtils
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.dto.{CentreLocationInfo}
@@ -353,7 +354,7 @@ class ShipmentSpecimensControllerSpec
           'state      (ShipmentItemState.Present)
         )
 
-        TestUtils.checkTimeStamps(repoSs.timeAdded, DateTime.now)
+        TestUtils.checkTimeStamps(repoSs.timeAdded, OffsetDateTime.now)
         TestUtils.checkOpionalTime(repoSs.timeModified, None)
       }
 
@@ -454,7 +455,7 @@ class ShipmentSpecimensControllerSpec
           )
 
           TestUtils.checkTimeStamps(repoSs.timeAdded, shipmentSpecimen.timeAdded)
-          TestUtils.checkOpionalTime(repoSs.timeModified, Some(DateTime.now))
+          TestUtils.checkOpionalTime(repoSs.timeModified, Some(OffsetDateTime.now))
         }
       }
 
@@ -580,7 +581,7 @@ class ShipmentSpecimensControllerSpec
           )
 
           TestUtils.checkTimeStamps(repoSs.timeAdded, shipmentSpecimen.timeAdded)
-          TestUtils.checkOpionalTime(repoSs.timeModified, Some(DateTime.now))
+          TestUtils.checkOpionalTime(repoSs.timeModified, Some(OffsetDateTime.now))
         }
       }
 
@@ -630,7 +631,7 @@ class ShipmentSpecimensControllerSpec
           'state      (ShipmentItemState.Extra)
         )
 
-        TestUtils.checkTimeStamps(repoSs.timeAdded, DateTime.now)
+        TestUtils.checkTimeStamps(repoSs.timeAdded, OffsetDateTime.now)
         TestUtils.checkOpionalTime(repoSs.timeModified, None)
       }
 

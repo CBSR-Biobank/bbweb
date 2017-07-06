@@ -4,7 +4,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.{ Inject, Singleton }
 import org.biobank.domain.user.UserId
 import play.api.Environment
-import play.api.cache.CacheApi
+import play.api.cache.SyncCacheApi
 import scala.concurrent.duration._
 import scala.util.Random
 import scalaz.Scalaz._
@@ -21,7 +21,7 @@ trait AuthToken {
 
   val env: Environment
 
-  val cacheApi: CacheApi
+  val cacheApi: SyncCacheApi
 
   def newToken(userId: UserId): String
 
@@ -32,7 +32,7 @@ trait AuthToken {
 }
 
 @Singleton
-class AuthTokenImpl @Inject() (val env: Environment, val cacheApi: CacheApi)
+class AuthTokenImpl @Inject() (val env: Environment, val cacheApi: SyncCacheApi)
     extends AuthToken {
   import org.biobank.CommonValidations._
 

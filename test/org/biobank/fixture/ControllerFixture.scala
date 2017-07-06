@@ -1,7 +1,7 @@
 package org.biobank.fixture
 
 import org.biobank.Global
-import org.biobank.controllers.FixedEhCache
+import org.biobank.controllers.CacheForTesting
 import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.centre._
@@ -12,14 +12,16 @@ import org.biobank.domain.user._
 import org.biobank.service.PasswordHasher
 import org.scalatest._
 import org.scalatestplus.play._
+import org.scalatestplus.play.guice.GuiceOneServerPerTest
 import play.api.Logger
-import play.api.cache.{ CacheApi /* , EhCacheModule */ }
+import play.api.cache.{AsyncCacheApi, DefaultSyncCacheApi, SyncCacheApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
+import scala.concurrent.Await
 
 trait BbwebFakeApplication {
 
@@ -54,7 +56,7 @@ trait BbwebFakeApplication {
  */
 abstract class ControllerFixture
     extends FunSpec
-    with OneServerPerTest
+    with GuiceOneServerPerTest
     with OneBrowserPerTest
     with HtmlUnitFactory
     with BeforeAndAfterEach
@@ -70,33 +72,31 @@ abstract class ControllerFixture
 
   val factory = new Factory
 
-  /**
-   * tests will not work with EhCache, need alternate implementation for EhCachePlugin.
-   */
   override def newAppForTest(testData: TestData) =
     new GuiceApplicationBuilder()
-      .overrides(bind[CacheApi].to[FixedEhCache])
-      .build()
+      .overrides(bind[SyncCacheApi].to[DefaultSyncCacheApi])
+      .overrides(bind[AsyncCacheApi].to[CacheForTesting])
+      .build
 
   protected def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
     val request = Json.obj("email" -> email, "password" -> password)
     route(app, FakeRequest(POST, "/users/login").withJsonBody(request)).fold {
       cancel("login failed")
-    } { result =>
-      status(result) mustBe (OK)
-      contentType(result) mustBe Some("application/json")
-      val json = Json.parse(contentAsString(result))
+    } { response =>
+      status(response) mustBe (OK)
+      contentType(response) mustBe Some("application/json")
+      val json = Json.parse(contentAsString(response))
 
       (json \ "data" \ "email").as[String] must be (email)
 
-      getTokenFromHeader(headers(result))
-    }
-  }
+      val cookies = Await.result(response, defaultAwaitTimeout.duration)
+        .newCookies.groupBy(_.name).mapValues(_.head)
 
-  private def getTokenFromHeader(headers: Map[String, String]) = {
-    val cookie = headers("Set-Cookie")
-    cookie must include ("XSRF-TOKEN")
-    cookie.split("; ")(0).split("=")(1)
+      cookies.get("XSRF-TOKEN") match {
+        case Some(c) => c.value
+        case None =>    ""
+      }
+    }
   }
 
   override def makeRequest(method:         String,
@@ -104,10 +104,11 @@ abstract class ControllerFixture
                            expectedStatus: Int,
                            json:           JsValue,
                            token:          String): JsValue = {
+    val cookie = Cookie("XSRF-TOKEN", token)
     val fakeRequest = FakeRequest(method, path)
       .withJsonBody(json)
-      .withHeaders("X-XSRF-TOKEN" -> token)
-      .withCookies(Cookie("XSRF-TOKEN", token))
+      .withHeaders("X-XSRF-TOKEN" -> token, "Set-Cookie" -> Cookies.encodeCookieHeader(Seq(cookie)))
+      .withCookies(cookie)
 
     if (json != JsNull) {
       log.debug(s"request: $method, $path,\n${Json.prettyPrint(json)}")

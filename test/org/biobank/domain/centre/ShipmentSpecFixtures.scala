@@ -1,6 +1,6 @@
 package org.biobank.domain.centre
 
-import com.github.nscala_time.time.Imports._
+import java.time.OffsetDateTime
 import org.biobank.dto._
 import org.biobank.domain.{EntityState, Factory}
 import org.biobank.domain.study._
@@ -104,23 +104,23 @@ trait ShipmentSpecFixtures {
 
   def makePackedShipment(shipment: Shipment): PackedShipment = {
     shipment match {
-      case s: CreatedShipment => s.pack(DateTime.now)
+      case s: CreatedShipment => s.pack(OffsetDateTime.now)
       case _ => fail(s"bad shipment state: ${shipment.state}")
     }
   }
 
   def makeSentShipment(shipment: Shipment): SentShipment = {
-    makePackedShipment(shipment).send(DateTime.now).fold(
+    makePackedShipment(shipment).send(OffsetDateTime.now).fold(
       err => fail("could not make a sent shipment"), s => s)
   }
 
   def makeReceivedShipment(shipment: Shipment): ReceivedShipment = {
-    makeSentShipment(shipment).receive(DateTime.now).fold(
+    makeSentShipment(shipment).receive(OffsetDateTime.now).fold(
       err => fail("could not make a received shipment"), s => s)
   }
 
   def makeUnpackedShipment(shipment: Shipment): UnpackedShipment = {
-    makeReceivedShipment(shipment).unpack(DateTime.now).fold(
+    makeReceivedShipment(shipment).unpack(OffsetDateTime.now).fold(
       err => fail("could not make a unpacked shipment"), s => s)
   }
 

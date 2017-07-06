@@ -1,21 +1,13 @@
 package org.biobank.domain.study
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
-import org.biobank.domain.{
-  ConcurrencySafeEntity,
-  DomainValidation,
-  HasUniqueName,
-  HasOptionalDescription
-}
+import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, HasUniqueName, HasOptionalDescription }
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.SpecimenType._
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
-
 import play.api.libs.json._
-
 import scalaz._
 import Scalaz._
 
@@ -43,8 +35,8 @@ import Scalaz._
 final case class SpecimenGroup(studyId:                     StudyId,
                                id:                          SpecimenGroupId,
                                version:                     Long,
-                               timeAdded:                   DateTime,
-                               timeModified:                Option[DateTime],
+                               timeAdded:                   OffsetDateTime,
+                               timeModified:                Option[OffsetDateTime],
                                name:                        String,
                                description:                 Option[String],
                                units:                       String,
@@ -91,7 +83,7 @@ final case class SpecimenGroup(studyId:                     StudyId,
                                  preservationType,
                                  preservationTemperatureType,
                                  specimenType)
-    v.map(_.copy(timeModified = Some(DateTime.now)))
+    v.map(_.copy(timeModified = Some(OffsetDateTime.now)))
   }
 }
 
@@ -137,7 +129,7 @@ object SpecimenGroup extends SpecimenGroupValidations {
       case (_, _, _, _, _, _) => SpecimenGroup(studyId,
                                                id,
                                                version,
-                                               DateTime.now,
+                                               OffsetDateTime.now,
                                                None,
                                                name,
                                                description,

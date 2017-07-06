@@ -1,10 +1,9 @@
 package org.biobank.controllers.centres
 
-import com.github.nscala_time.time.Imports._
+import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.{EntityState, LocationId}
 import org.biobank.domain.centre._
-import org.joda.time.DateTime
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -17,8 +16,8 @@ import play.api.test.Helpers._
 class ShipmentsControllerSpec
     extends ShipmentsControllerSpecFixtures
     with ShipmentsControllerSpecUtils {
+
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.JsonUtils._
 
   val states = Table("state",
                      Shipment.createdState,
@@ -54,7 +53,7 @@ class ShipmentsControllerSpec
         'fromLocationId (shipment.fromLocationId),
         'toLocationId   (shipment.toLocationId))
 
-      checkTimeStamps(repoShipment, shipment.timeAdded, DateTime.now)
+      checkTimeStamps(repoShipment, shipment.timeAdded, OffsetDateTime.now)
     }
   }
 
@@ -407,7 +406,7 @@ class ShipmentsControllerSpec
             'fromLocationId (f.shipment.fromLocationId),
             'toLocationId   (f.shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, DateTime.now, None)
+          checkTimeStamps(repoShipment, OffsetDateTime.now, None)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -474,7 +473,7 @@ class ShipmentsControllerSpec
             'fromLocationId (f.shipment.fromLocationId),
             'toLocationId   (f.shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
+          checkTimeStamps(repoShipment, f.shipment.timeAdded, OffsetDateTime.now)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -533,7 +532,7 @@ class ShipmentsControllerSpec
             'fromLocationId (f.shipment.fromLocationId),
             'toLocationId   (f.shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
+          checkTimeStamps(repoShipment, f.shipment.timeAdded, OffsetDateTime.now)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -596,7 +595,7 @@ class ShipmentsControllerSpec
             'fromLocationId (newLocation.id),
             'toLocationId   (f.shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
+          checkTimeStamps(repoShipment, f.shipment.timeAdded, OffsetDateTime.now)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -675,7 +674,7 @@ class ShipmentsControllerSpec
             'fromLocationId (f.shipment.fromLocationId),
             'toLocationId   (newLocation.id))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, DateTime.now)
+          checkTimeStamps(repoShipment, f.shipment.timeAdded, OffsetDateTime.now)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -731,7 +730,7 @@ class ShipmentsControllerSpec
 
       def changeStateCommon(shipment:  Shipment,
                             newState:  EntityState,
-                            timeMaybe: Option[DateTime]) = {
+                            timeMaybe: Option[OffsetDateTime]) = {
         shipmentRepository.put(shipment)
         val baseJson = Json.obj("expectedVersion" -> shipment.version)
         val updateJson = timeMaybe.fold { baseJson } { time =>
@@ -752,7 +751,7 @@ class ShipmentsControllerSpec
             'fromLocationId (shipment.fromLocationId),
             'toLocationId   (shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, shipment.timeAdded, DateTime.now)
+          checkTimeStamps(repoShipment, shipment.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -760,7 +759,7 @@ class ShipmentsControllerSpec
 
         it("fail requests to update the state on a shipment that does not exist") {
           val f = createdShipmentFixture
-          val time = DateTime.now.minusDays(10)
+          val time = OffsetDateTime.now.minusDays(10)
 
           forAll(states) { state =>
             info(s"for $state state")
@@ -824,7 +823,7 @@ class ShipmentsControllerSpec
           forAll(testStates) { state =>
             info(s"change to $state state")
 
-            val stateChangeTime = DateTime.now.minusDays(10)
+            val stateChangeTime = OffsetDateTime.now.minusDays(10)
             val shipment = f.shipments(state)
             addSpecimenToShipment(shipment, f.fromCentre)
 
@@ -851,7 +850,7 @@ class ShipmentsControllerSpec
             info(s"change to $state state")
             val shipment = f.shipments(state)
             val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                      "datetime"        -> DateTime.now)
+                                      "datetime"        -> OffsetDateTime.now)
             val json = makeRequest(POST, uri(shipment, "state/packed"), BAD_REQUEST, updateJson)
 
             (json \ "status").as[String] must include ("error")
@@ -877,7 +876,7 @@ class ShipmentsControllerSpec
             addSpecimenToShipment(shipment, f.fromCentre)
 
             val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                      "datetime"        -> DateTime.now)
+                                      "datetime"        -> OffsetDateTime.now)
             val json = makeRequest(POST, uri(shipment, "state/packed"), BAD_REQUEST, updateJson)
 
             (json \ "status").as[String] must include ("error")
@@ -940,7 +939,7 @@ class ShipmentsControllerSpec
             info(s"from state $state")
             val shipment = f.shipments(state)
             val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                      "datetime"        -> DateTime.now)
+                                      "datetime"        -> OffsetDateTime.now)
             val json = makeRequest(POST, uri(shipment, s"state/sent"), BAD_REQUEST, updateJson)
 
             (json \ "status").as[String] must include ("error")
@@ -991,7 +990,7 @@ class ShipmentsControllerSpec
             info(s"from state $state")
             val shipment = f.shipments(state)
             val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                      "datetime"        -> DateTime.now)
+                                      "datetime"        -> OffsetDateTime.now)
             val json = makeRequest(POST, uri(shipment, s"state/received"), BAD_REQUEST, updateJson)
 
             (json \ "status").as[String] must include ("error")
@@ -1081,7 +1080,7 @@ class ShipmentsControllerSpec
             info(s"from state $state")
             val shipment = f.shipments(state)
             val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                      "datetime"        -> DateTime.now)
+                                      "datetime"        -> OffsetDateTime.now)
             val json = makeRequest(POST, uri(shipment, s"state/unpacked"), BAD_REQUEST, updateJson)
 
             (json \ "status").as[String] must include ("error")
@@ -1142,7 +1141,7 @@ class ShipmentsControllerSpec
             info(s"from state $state")
             val shipment = f.shipments(state)
             val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                      "datetime"        -> DateTime.now)
+                                      "datetime"        -> OffsetDateTime.now)
             val json = makeRequest(POST, uri(shipment, s"state/completed"), BAD_REQUEST, updateJson)
 
             (json \ "status").as[String] must include ("error")
@@ -1179,7 +1178,7 @@ class ShipmentsControllerSpec
             info(s"from state $state")
             val shipment = f.shipments(state)
             val updateJson = Json.obj("expectedVersion" -> shipment.version,
-                                      "datetime"        -> DateTime.now)
+                                      "datetime"        -> OffsetDateTime.now)
             val json = makeRequest(POST, uri(shipment, s"state/lost"), BAD_REQUEST, updateJson)
 
             (json \ "status").as[String] must include ("error")
@@ -1195,7 +1194,7 @@ class ShipmentsControllerSpec
 
       it("switch from CREATED to SENT state") {
         val f = createdShipmentFixture
-        val timePacked = DateTime.now.minusDays(10)
+        val timePacked = OffsetDateTime.now.minusDays(10)
         val timeSent = timePacked.plusDays(1)
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
                                   "timePacked"      -> timePacked,
@@ -1224,7 +1223,7 @@ class ShipmentsControllerSpec
         forAll(fromStates) { fromState =>
           info(s"$fromState")
           val shipment =  f.shipments(fromState)
-          val time = DateTime.now.minusDays(10)
+          val time = OffsetDateTime.now.minusDays(10)
           val updateJson = Json.obj("expectedVersion" -> shipment.version,
                                     "timePacked"      -> time,
                                     "timeSent"        -> time)
@@ -1243,7 +1242,7 @@ class ShipmentsControllerSpec
 
       it("switch from SENT to UNPACKED state") {
         val f = sentShipmentFixture
-        val timeReceived = f.shipment.timeSent.fold { DateTime.now } { t => t.plusDays(1) }
+        val timeReceived = f.shipment.timeSent.fold { OffsetDateTime.now } { t => t.plusDays(1) }
         val timeUnpacked = timeReceived.plusDays(1)
         val updateJson = Json.obj("expectedVersion" -> f.shipment.version,
                                   "timeReceived"    -> timeReceived,
@@ -1270,7 +1269,7 @@ class ShipmentsControllerSpec
         forAll(fromStates) { fromState =>
           info(s"$fromState")
           val shipment =  f.shipments(fromState)
-          val time = shipment.timeSent.fold { DateTime.now } { t => t }
+          val time = shipment.timeSent.fold { OffsetDateTime.now } { t => t }
           val updateJson = Json.obj("expectedVersion" -> shipment.version,
                                     "timeReceived"    -> time,
                                     "timeUnpacked"    -> time)

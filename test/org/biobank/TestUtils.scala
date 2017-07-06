@@ -1,7 +1,7 @@
 package org.biobank
 
-import com.github.nscala_time.time.Imports._
-import org.biobank.domain.{ ConcurrencySafeEntity, DomainValidation }
+import java.time.{Duration, OffsetDateTime}
+import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
 import org.scalatest._
 import org.scalatest.matchers.MatchResult
 import org.scalatest.matchers.Matcher
@@ -11,9 +11,9 @@ object TestUtils extends MustMatchers with OptionValues {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val TimeCoparisonMillis = 2000L
+  val TimeCoparisonSeconds = 2L
 
-  def checkOpionalTime(expectedTimeMaybe: Option[DateTime], actualTimeMaybe: Option[DateTime]) = {
+  def checkOpionalTime(expectedTimeMaybe: Option[OffsetDateTime], actualTimeMaybe: Option[OffsetDateTime]) = {
     expectedTimeMaybe match {
       case Some(expectedTime) => actualTimeMaybe match {
         case Some(actualTime) => checkTimeStamps(expectedTime, actualTime)
@@ -26,23 +26,28 @@ object TestUtils extends MustMatchers with OptionValues {
     }
   }
 
-  def checkTimeStamps(expectedTime:  DateTime, actualTime: DateTime): Unit = {
-    val timediff = if (expectedTime < actualTime) (expectedTime to actualTime).millis
-                   else (actualTime to expectedTime).millis
-    timediff must be < TimeCoparisonMillis
+  def checkTimeStamps(expectedTime:  OffsetDateTime,
+                      actualTime: OffsetDateTime,
+                      maxDifference: Long): Unit = {
+    val timediff = Duration.between(actualTime, expectedTime).getSeconds.abs
+    timediff must be < maxDifference
     ()
   }
 
+  def checkTimeStamps(expectedTime:  OffsetDateTime, actualTime: OffsetDateTime): Unit = {
+    checkTimeStamps(expectedTime, actualTime, TimeCoparisonSeconds)
+  }
+
   def checkTimeStamps(entity:               ConcurrencySafeEntity[_],
-                      expectedTimeAdded:    DateTime,
-                      expectedTimeModified: Option[DateTime]): Unit = {
+                      expectedTimeAdded:    OffsetDateTime,
+                      expectedTimeModified: Option[OffsetDateTime]): Unit = {
     checkTimeStamps(entity.timeAdded, expectedTimeAdded)
     checkOpionalTime(expectedTimeModified, entity.timeModified)
   }
 
   def checkTimeStamps(entity:               ConcurrencySafeEntity[_],
-                      expectedTimeAdded:    DateTime,
-                      expectedTimeModified: DateTime): Unit = {
+                      expectedTimeAdded:    OffsetDateTime,
+                      expectedTimeModified: OffsetDateTime): Unit = {
     checkTimeStamps(entity, expectedTimeAdded, Some(expectedTimeModified))
   }
 

@@ -4,7 +4,7 @@ val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 
 version := conf.getString("app.version")
 
-val akkaVer = "2.4.18"
+val akkaVer = "2.5.3"
 val angularVer = "1.5.11"
 
 name := "bbweb"
@@ -25,27 +25,27 @@ packageSummary in Linux := "Biorepository application for tracking biospecimens.
 
 packageDescription := "Biorepository application for tracking biospecimens."
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.11.11")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.2")
 
 scalacOptions in Compile ++= Seq(
-  "-target:jvm-1.8",
-  "-encoding", "UTF-8",
-  "-deprecation",       // warning and location for usages of deprecated APIs
-  "-feature",           // warning and location for usages of features that should be imported explicitly
-  "-language:implicitConversions",
-  "-language:higherKinds",
-  "-language:existentials",
-  "-language:postfixOps",
-  "-unchecked",          // additional warnings where generated code depends on assumptions
-  "-Xlint:_",
-  "-Ywarn-adapted-args", // Warn if an argument list is modified to match the receiver
-  "-Ywarn-dead-code",
-  "-Ywarn-inaccessible",
-  "-Ywarn-numeric-widen",
-  "-Ywarn-unused",
-  "-Ywarn-unused-import",
-  "-Ywarn-value-discard" // Warn when non-Unit expression results are unused
-)
+    "-target:jvm-1.8",
+    "-encoding", "UTF-8",
+    "-deprecation",       // warning and location for usages of deprecated APIs
+    "-feature",           // warning and location for usages of features that should be imported explicitly
+    "-language:implicitConversions",
+    "-language:higherKinds",
+    "-language:existentials",
+    "-language:postfixOps",
+    "-unchecked",          // additional warnings where generated code depends on assumptions
+    "-Xlint:_",
+    "-Ywarn-adapted-args", // Warn if an argument list is modified to match the receiver
+    "-Ywarn-dead-code",
+    "-Ywarn-inaccessible",
+    "-Ywarn-numeric-widen",
+    "-Ywarn-unused:-params",
+    "-Ywarn-unused-import",
+    "-Ywarn-value-discard" // Warn when non-Unit expression results are unused
+  )
 
 scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
 
@@ -59,13 +59,13 @@ javaOptions in Test ++=  Seq(
     "-XX:+CMSClassUnloadingEnabled",
     "-Dconfig.file=conf/test.conf",
     "-Dlogger.resource=logback-test.xml"
-)
+  )
 
 javacOptions in ThisBuild  ++= Seq(
-  "-source", "1.8",
-  "-target", "1.8",
-  "-Xlint"
-)
+    "-source", "1.8",
+    "-target", "1.8",
+    "-Xlint"
+  )
 
 javaOptions in run ++= Seq(
     "-Xms256M", "-Xmx2G", "-XX:+UseConcMarkSweepGC")
@@ -79,55 +79,59 @@ testOptions in Test := Nil
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
 
 resolvers ++= Seq(
-  Classpaths.sbtPluginReleases,
-  "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
-  "Sonatype OSS"        at "https://oss.sonatype.org/content/repositories/releases",
-  "Akka Snapshots"      at "http://repo.akka.io/snapshots/",
-  "dnvriend at bintray" at "http://dl.bintray.com/dnvriend/maven"
-)
+    Classpaths.sbtPluginReleases,
+    "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
+    "Sonatype OSS"        at "https://oss.sonatype.org/content/repositories/releases",
+    "Akka Snapshots"      at "http://repo.akka.io/snapshots/",
+    "dnvriend at bintray" at "http://dl.bintray.com/dnvriend/maven"
+  )
 
 libraryDependencies ++= Seq(
-  cache,
-  filters,
-  ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.18"   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-  "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.18"   % "compile",
-  "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
-  ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.4.0"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
-  "org.scalaz"                  %% "scalaz-core"                         % "7.2.13"  % "compile",
-  "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
-  "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.0",
-  "com.github.ancane"           %% "hashids-scala"                       % "1.3",
-  "com.typesafe.play"           %% "play-mailer"                         % "5.0.0",
-  "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.5.0",
-  "com.github.nscala-time"      %% "nscala-time"                         % "2.16.0",
-  // WebJars infrastructure
-  ( "org.webjars"               %% "webjars-play"                        % "2.5.0").exclude("org.webjars", "requirejs"),
-  // WebJars dependencies
-  "org.webjars"                 %  "requirejs"                           % "2.3.3",
-  "org.webjars.npm"             %  "angular"                             % angularVer,
-  "org.webjars.npm"             %  "angular-animate"                     % "1.5.9",
-  "org.webjars.npm"             %  "angular-cookies"                     % angularVer,
-  ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" ).exclude("org.webjars.bower", "angular"),
-  "org.webjars.npm"             %  "angular-messages"                    % angularVer,
-  "org.webjars.npm"             %  "angular-sanitize"                    % angularVer,
-  "org.webjars.npm"             %  "angular-smart-table"                 % "2.1.6",
-  "org.webjars.npm"             %  "angular-toastr"                      % "1.7.0",
-  "org.webjars.npm"             %  "angular-ui-bootstrap"                % "2.5.0",
-  ( "org.webjars.npm"           % "angular-ui-router"                    % "1.0.3" ).exclude("org.webjars.npm", "angular"),
-  "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
-  ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.6.0" ).exclude("org.webjars.bower", "angular"),
-  "org.webjars.npm"             %  "jquery"                              % "3.2.1",
-  "org.webjars.npm"             %  "lodash"                              % "4.17.4",
-  "org.webjars.npm"             %  "moment"                              % "2.18.1",
-  "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
-  "org.webjars.npm"             %  "tv4"                                 % "1.2.7",
-  // Testing
-  ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.4.18.1"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
-  "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
-  "org.scalatestplus.play"      %% "scalatestplus-play"                  % "2.0.0"   % "test",
-  "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
-  "org.codehaus.janino"         %  "janino"                              % "3.0.7"   % "test",
-  "org.mockito"                 %  "mockito-core"                        % "2.8.9"  % "test"
+    guice,
+    ehcache,
+    filters,
+    "org.scala-stm"               %% "scala-stm"                           % "0.8",
+    "com.typesafe.play"           %% "play-json"                           % "2.6.0",
+    ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.18"   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+    "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.18"   % "compile",
+    "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
+    ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.4.0"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+    "org.scalaz"                  %% "scalaz-core"                         % "7.2.13"  % "compile",
+    "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
+    "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.0",
+    "com.github.ancane"           %% "hashids-scala"                       % "1.3",
+    "com.typesafe.play"           %% "play-mailer"                         % "6.0.0",
+    "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.0",
+    "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.5.0",
+    "com.github.nscala-time"      %% "nscala-time"                         % "2.16.0",
+    // WebJars infrastructure
+    ( "org.webjars"               %% "webjars-play"                        % "2.6.0").exclude("org.webjars", "requirejs"),
+    // WebJars dependencies
+    "org.webjars"                 %  "requirejs"                           % "2.3.3",
+    "org.webjars.npm"             %  "angular"                             % angularVer,
+    "org.webjars.npm"             %  "angular-animate"                     % "1.5.9",
+    "org.webjars.npm"             %  "angular-cookies"                     % angularVer,
+    ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" ).exclude("org.webjars.bower", "angular"),
+    "org.webjars.npm"             %  "angular-messages"                    % angularVer,
+    "org.webjars.npm"             %  "angular-sanitize"                    % angularVer,
+    "org.webjars.npm"             %  "angular-smart-table"                 % "2.1.6",
+    "org.webjars.npm"             %  "angular-toastr"                      % "1.7.0",
+    "org.webjars.npm"             %  "angular-ui-bootstrap"                % "2.5.0",
+    ( "org.webjars.npm"           % "angular-ui-router"                    % "1.0.3" ).exclude("org.webjars.npm", "angular"),
+    "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
+    ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.6.0" ).exclude("org.webjars.bower", "angular"),
+    "org.webjars.npm"             %  "jquery"                              % "3.2.1",
+    "org.webjars.npm"             %  "lodash"                              % "4.17.4",
+    "org.webjars.npm"             %  "moment"                              % "2.18.1",
+    "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
+    "org.webjars.npm"             %  "tv4"                                 % "1.2.7",
+    // Testing
+    ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.4.18.1"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+    "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
+    "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.0.0"   % "test",
+    "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
+    "org.codehaus.janino"         %  "janino"                              % "3.0.7"   % "test",
+    "org.mockito"                 %  "mockito-core"                        % "2.8.9"  % "test"
   )
 
 incOptions := incOptions.value.withNameHashing(true)
@@ -136,11 +140,6 @@ routesGenerator := InjectedRoutesGenerator
 
 JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
 
-//EclipseKeys.withSource := true
-
-//net.virtualvoid.sbt.graph.Plugin.graphSettings
-
-//MochaKeys.requires += "./setup.js"
 
 // Configure the steps of the asset pipeline (used in stage and dist tasks)
 // rjs = RequireJS, uglifies, shrinks to one file, replaces WebJars with CDN
@@ -152,7 +151,7 @@ pipelineStages := Seq(rjs, digest, gzip)
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
 PB.targets in Compile := Seq(
-  scalapb.gen() -> (sourceManaged in Compile).value
+    scalapb.gen() -> (sourceManaged in Compile).value
   )
 
 // setting for play-auto-refresh plugin so that it does not open a new browser window when
@@ -161,12 +160,10 @@ com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
 
 coverageExcludedPackages := "<empty>;router.*;views.html.*;Reverse.*;org.biobank.infrastructure.event.*;org.biobank.TestData"
 
-// project would not compile if Wart.ArrayEquals is not removed: wart remover version 2.1.0
-wartremoverErrors in (Compile, compile) ++= Warts.allBut(Wart.ArrayEquals, Wart.Equals, Wart.ToString)
-
+wartremoverErrors in (Compile, compile) ++= Warts.allBut(Wart.ArrayEquals, Wart.Nothing, Wart.Equals, Wart.ToString)
 
 // see following for explanation: https://github.com/puffnfresh/wartremover/issues/219
-//wartremoverExcluded ++= ((crossTarget.value / "src_managed" / "main" / "compiled_protobuf" ) ** "*.scala").get
+wartremoverExcluded ++= ((crossTarget.value / "src_managed" / "main" / "compiled_protobuf" ) ** "*.scala").get
 
 wartremoverExcluded ++= Seq(
     crossTarget.value / "routes" / "main" / "router" / "Routes.scala",

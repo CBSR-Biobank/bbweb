@@ -2,13 +2,13 @@ package org.biobank.service.users
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.domain.user._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service._
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.{Configuration, Environment}
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -157,7 +157,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailService.userRegisteredEmail(cmd.name, cmd.email)
 
       UserEvent(user.id.id).update(
-        _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.registered.name              := cmd.name,
         _.registered.email             := cmd.email,
         _.registered.password          := encryptedPwd,
@@ -172,7 +172,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailService.userActivatedEmail(u.email)
 
       UserEvent(user.id.id).update(
-        _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                     := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.whenActive.sessionUserId := cmd.sessionUserId,
         _.activated.version        := cmd.expectedVersion)
     }
@@ -182,7 +182,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                    user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withName(cmd.name).map { _ =>
       UserEvent(user.id.id).update(
-        _.time                        := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                        := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.whenActive.sessionUserId    := cmd.sessionUserId,
         _.whenActive.version          := cmd.expectedVersion,
         _.whenActive.nameUpdated.name := cmd.name)
@@ -195,7 +195,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailAvailable <- emailAvailable(cmd.email, user.id)
       updatedUser    <- user.withEmail(cmd.email)
     } yield UserEvent(user.id.id).update(
-      _.time                          := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                          := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.whenActive.sessionUserId      := cmd.sessionUserId,
       _.whenActive.version            := cmd.expectedVersion,
       _.whenActive.emailUpdated.email := cmd.email)
@@ -207,7 +207,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       val passwordInfo = encryptPassword(user, cmd.newPassword)
       user.withPassword(passwordInfo.password, passwordInfo.salt).map { user =>
         UserEvent(user.id.id).update(
-          _.time                                := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.time                                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
           _.whenActive.sessionUserId            := cmd.sessionUserId,
           _.whenActive.version                  := cmd.expectedVersion,
           _.whenActive.passwordUpdated.password := passwordInfo.password,
@@ -222,7 +222,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                         user: ActiveUser): ServiceValidation[UserEvent] = {
     user.withAvatarUrl(cmd.avatarUrl).map { _ =>
       UserEvent(user.id.id).update(
-        _.time                                          := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                          := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.whenActive.sessionUserId                      := cmd.sessionUserId,
         _.whenActive.version                            := cmd.expectedVersion,
         _.whenActive.avatarUrlUpdated.optionalAvatarUrl := cmd.avatarUrl)
@@ -248,7 +248,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       emailService.passwordResetEmail(updatedUser.email, plainPassword)
 
       UserEvent(user.id.id).update(
-        _.time                              := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                              := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.whenActive.optionalSessionUserId  := None,
         _.whenActive.version                := user.version,
         _.whenActive.passwordReset.password := passwordInfo.password,
@@ -265,7 +265,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
     v.map { _ =>
       UserEvent(user.id.id).update(
-        _.time           := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.locked.sessionUserId := cmd.sessionUserId,
         _.locked.version := cmd.expectedVersion)
     }
@@ -275,7 +275,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                    user: LockedUser): ServiceValidation[UserEvent] = {
     user.unlock.map { _ =>
       UserEvent(user.id.id).update(
-        _.time           := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.unlocked.sessionUserId := cmd.sessionUserId,
         _.unlocked.version := cmd.expectedVersion)
     }
@@ -359,7 +359,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
       v.foreach { u =>
         userRepository.put(
-          u.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
+          u.copy(timeAdded = OffsetDateTime.parse(event.getTime)))
       }
     }
   }
@@ -367,7 +367,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
   private def onValidEventUserAndVersion(event: UserEvent,
                                          eventType: Boolean,
                                          eventVersion: Long)
-                                        (applyEvent: (User, DateTime) => ServiceValidation[Boolean])
+                                        (applyEvent: (User, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -378,7 +378,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
           if (user.version != eventVersion) {
             log.error(s"event version check failed: user version: ${user.version}, event: $event")
           } else {
-            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val eventTime = OffsetDateTime.parse(event.getTime)
             val update = applyEvent(user, eventTime)
 
             if (update.isFailure) {
@@ -394,7 +394,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                                    eventType: Boolean,
                                                    eventVersion: Long)
                                                   (applyEvent: (RegisteredUser,
-                                                                DateTime) => ServiceValidation[Boolean])
+                                                                OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventUserAndVersion(event, eventType, eventVersion) { (user, eventTime) =>
       user match {
@@ -405,7 +405,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
   }
 
   private def onValidUserActiveEvent(event: UserEvent)
-                                    (applyEvent: (ActiveUser, DateTime) => ServiceValidation[Boolean])
+                                    (applyEvent: (ActiveUser, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventUserAndVersion(event,
                                event.eventType.isWhenActive,
@@ -421,7 +421,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                                eventType: Boolean,
                                                eventVersion: Long)
                                               (applyEvent: (LockedUser,
-                                                            DateTime) => ServiceValidation[Boolean])
+                                                            OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventUserAndVersion(event, eventType, eventVersion) { (user, eventTime) =>
       user match {

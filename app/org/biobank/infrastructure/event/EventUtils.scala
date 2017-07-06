@@ -1,5 +1,6 @@
 package org.biobank.infrastructure.event
 
+import java.time.format.DateTimeFormatter
 import org.biobank.infrastructure.command.SpecimenCommands.SpecimenInfo
 import org.biobank.infrastructure.event.CommonEvents.{AnnotationType => EventAnnotationType}
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
@@ -9,8 +10,6 @@ import org.biobank.domain.study.{CollectionSpecimenDescription, SpecimenDescript
 import org.biobank.domain.participants.SpecimenId
 import org.biobank.domain.centre.ShipmentSpecimen
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
-import org.joda.time._
-import org.joda.time.format.{DateTimeFormatter, ISODateTimeFormat}
 
 object EventUtils {
 
@@ -95,7 +94,7 @@ object EventUtils {
       _.id                    := id.id,
       _.inventoryId           := specimenInfo.inventoryId,
       _.specimenDescriptionId := specimenInfo.specimenDescriptionId,
-      _.timeCreated           := ISODateTimeFormatter.print(specimenInfo.timeCreated),
+      _.timeCreated           := specimenInfo.timeCreated.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.locationId            := specimenInfo.locationId,
       _.amount                := specimenInfo.amount.doubleValue
     )
@@ -108,8 +107,5 @@ object EventUtils {
       _.version            := shipmentSpecimen.version
     )
   }
-
-  lazy val ISODateTimeFormatter: DateTimeFormatter = ISODateTimeFormat.dateTime.withZone(DateTimeZone.UTC)
-  lazy val ISODateTimeParser: DateTimeFormatter = ISODateTimeFormat.dateTimeParser
 
 }

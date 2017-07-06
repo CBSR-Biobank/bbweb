@@ -14,7 +14,6 @@ import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.service._
 import org.biobank.service.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -52,6 +51,7 @@ trait CollectionEventTypeService extends BbwebService {
 
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class CollectionEventTypeServiceImpl @Inject()(
   @Named("collectionEventType") val processor: ActorRef,
   val accessService:                 AccessService,
@@ -59,6 +59,7 @@ class CollectionEventTypeServiceImpl @Inject()(
   val studyRepository:               StudyRepository,
   val specimenGroupRepository:       SpecimenGroupRepository,
   val collectionEventRepository:     CollectionEventRepository)
+                                            (implicit executionContext: BbwebExecutionContext)
     extends CollectionEventTypeService
     with AccessChecksSerivce
     with ServicePermissionChecks {

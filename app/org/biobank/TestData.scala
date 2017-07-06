@@ -1,5 +1,6 @@
 package org.biobank
 
+import java.time.OffsetDateTime
 import javax.inject.{ Inject, Singleton }
 import org.biobank.domain._
 import org.biobank.domain.access._
@@ -9,7 +10,6 @@ import org.biobank.domain.study._
 import org.biobank.domain.user._
 import org.biobank.service.PasswordHasher
 import org.hashids.Hashids
-import org.joda.time.DateTime
 import play.api.{ Configuration, Environment, Logger, Mode }
 import scalaz.Scalaz._
 
@@ -191,13 +191,13 @@ class TestData @Inject() (config:                        Configuration,
   val log: Logger = Logger(this.getClass)
 
   private val loadTestData =
-    (env.mode == Mode.Dev) && config.getBoolean("application.testData.load").getOrElse(false)
+    (env.mode == Mode.Dev) && config.get[Boolean]("application.testData.load")
 
   private val loadSpecimenTestData =
-    (env.mode == Mode.Dev) && config.getBoolean("application.testData.loadSpecimens").getOrElse(false)
+    (env.mode == Mode.Dev) && config.get[Boolean]("application.testData.loadSpecimens")
 
   private val loadShipmentTestData =
-    (env.mode == Mode.Dev) && config.getBoolean("application.testData.loadShipments").getOrElse(false)
+    (env.mode == Mode.Dev) && config.get[Boolean]("application.testData.loadShipments")
 
   def addMultipleUsers(): Unit = {
     if (loadTestData) {
@@ -334,7 +334,7 @@ class TestData @Inject() (config:                        Configuration,
         studyRepository.getValues.find { s => s.name == "BBPSP"}.foreach { bbpsp =>
           bbpsp match {
             case s: DisabledStudy => s.enable.foreach(studyRepository.put)
-            case s =>
+            case _ =>
           }
         }
       }
@@ -538,7 +538,7 @@ class TestData @Inject() (config:                        Configuration,
                                     version               = 0L,
                                     timeAdded             = Global.StartOfTime,
                                     timeModified          = None,
-                                    timeCompleted         = DateTime.now.minusDays(1),
+                                    timeCompleted         = OffsetDateTime.now.minusDays(1),
                                     visitNumber           = cetIndex + 1,
                                     annotations           = Set.empty[Annotation]))
               }
@@ -564,7 +564,7 @@ class TestData @Inject() (config:                        Configuration,
                      locationId            = location.id,
                      containerId           = None,
                      positionId            = None,
-                     timeCreated           = DateTime.now.minusDays(1),
+                     timeCreated           = OffsetDateTime.now.minusDays(1),
                      amount                = BigDecimal(0.1))
 
 
@@ -672,7 +672,7 @@ class TestData @Inject() (config:                        Configuration,
                                 fromLocationId = fromCentre.locations.head.id,
                                 toCentreId     = toCentre.id,
                                 toLocationId   = toCentre.locations.head.id,
-                                timePacked     = Some(DateTime.now),
+                                timePacked     = Some(OffsetDateTime.now),
                                 timeSent       = None,
                                 timeReceived   = None,
                                 timeUnpacked   = None,
@@ -688,10 +688,10 @@ class TestData @Inject() (config:                        Configuration,
                                   fromLocationId = fromCentre.locations.head.id,
                                   toCentreId     = toCentre.id,
                                   toLocationId   = toCentre.locations.head.id,
-                                  timePacked     = Some(DateTime.now),
-                                  timeSent       = Some(DateTime.now),
-                                  timeReceived   = Some(DateTime.now),
-                                  timeUnpacked   = Some(DateTime.now),
+                                  timePacked     = Some(OffsetDateTime.now),
+                                  timeSent       = Some(OffsetDateTime.now),
+                                  timeReceived   = Some(OffsetDateTime.now),
+                                  timeUnpacked   = Some(OffsetDateTime.now),
                                   timeCompleted  = None)))
 
           shipmentMap.values.foreach(shipmentRepository.put)

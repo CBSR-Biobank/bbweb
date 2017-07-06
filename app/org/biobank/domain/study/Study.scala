@@ -1,11 +1,10 @@
 package org.biobank.domain.study
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
-import org.biobank.infrastructure.JsonUtils._
 import org.biobank.domain._
 import org.biobank.infrastructure.EnumUtils._
 import play.api.libs.json._
-import org.joda.time.DateTime
 import scalaz.Scalaz._
 
 /**
@@ -119,8 +118,8 @@ trait StudyValidations {
  */
 final case class DisabledStudy(id:              StudyId,
                                version:         Long,
-                               timeAdded:       DateTime,
-                               timeModified:    Option[DateTime],
+                               timeAdded:       OffsetDateTime,
+                               timeModified:    Option[OffsetDateTime],
                                name:            String,
                                description:     Option[String],
                                annotationTypes: Set[AnnotationType])
@@ -136,7 +135,7 @@ final case class DisabledStudy(id:              StudyId,
     validateString(name, NameMinLength, InvalidName) map { _ =>
       copy(name         = name,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -145,7 +144,7 @@ final case class DisabledStudy(id:              StudyId,
     validateNonEmptyOption(description, InvalidDescription) map { _ =>
       copy(description  = description,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -157,7 +156,7 @@ final case class DisabledStudy(id:              StudyId,
       val newAnnotationTypes = annotationTypes - annotationType + annotationType
       copy(annotationTypes = newAnnotationTypes,
            version         = version + 1,
-           timeModified    = Some(DateTime.now))
+           timeModified    = Some(OffsetDateTime.now))
     }
   }
 
@@ -167,7 +166,7 @@ final case class DisabledStudy(id:              StudyId,
       val newAnnotationTypes = annotationTypes - annotationType
       copy(annotationTypes = newAnnotationTypes,
            version         = version + 1,
-           timeModified    = Some(DateTime.now))
+           timeModified    = Some(OffsetDateTime.now))
     }
   }
 
@@ -176,7 +175,7 @@ final case class DisabledStudy(id:              StudyId,
     EnabledStudy(id              = this.id,
                  version         = this.version + 1,
                  timeAdded       = this.timeAdded,
-                 timeModified    = Some(DateTime.now),
+                 timeModified    = Some(OffsetDateTime.now),
                  name            = this.name,
                  description     = this.description,
                  annotationTypes = this.annotationTypes).successNel[String]
@@ -187,7 +186,7 @@ final case class DisabledStudy(id:              StudyId,
     RetiredStudy(id              = this.id,
                  version         = this.version + 1,
                  timeAdded       = this.timeAdded,
-                 timeModified    = Some(DateTime.now),
+                 timeModified    = Some(OffsetDateTime.now),
                  name            = this.name,
                  description     = this.description,
                  annotationTypes = this.annotationTypes).successNel[String]
@@ -218,7 +217,7 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
        validateNonEmptyOption(description, InvalidDescription) |@|
        annotationTypes.toList.traverseU(validate)) {
       case (_, newVersion, _, _, _) =>
-        DisabledStudy(id, newVersion, DateTime.now, None, name, description, annotationTypes)
+        DisabledStudy(id, newVersion, OffsetDateTime.now, None, name, description, annotationTypes)
     }
   }
 
@@ -232,8 +231,8 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
  */
 final case class EnabledStudy(id:                         StudyId,
                               version:                    Long,
-                              timeAdded:                  DateTime,
-                              timeModified:               Option[DateTime],
+                              timeAdded:                  OffsetDateTime,
+                              timeModified:               Option[OffsetDateTime],
                               name:                       String,
                               description:                Option[String],
                               annotationTypes: Set[AnnotationType])
@@ -244,7 +243,7 @@ final case class EnabledStudy(id:                         StudyId,
     DisabledStudy(id              = this.id,
                   version         = this.version + 1,
                   timeAdded       = this.timeAdded,
-                  timeModified    = Some(DateTime.now),
+                  timeModified    = Some(OffsetDateTime.now),
                   name            = this.name,
                   description     = this.description,
                   annotationTypes = this.annotationTypes).successNel[String]
@@ -259,8 +258,8 @@ final case class EnabledStudy(id:                         StudyId,
  */
 final case class RetiredStudy(id:                         StudyId,
                               version:                    Long,
-                              timeAdded:                  DateTime,
-                              timeModified:               Option[DateTime],
+                              timeAdded:                  OffsetDateTime,
+                              timeModified:               Option[OffsetDateTime],
                               name:                       String,
                               description:                Option[String],
                               annotationTypes: Set[AnnotationType])
@@ -271,7 +270,7 @@ final case class RetiredStudy(id:                         StudyId,
     DisabledStudy(id              = this.id,
                   version         = this.version + 1,
                   timeAdded       = this.timeAdded,
-                  timeModified    = Some(DateTime.now),
+                  timeModified    = Some(OffsetDateTime.now),
                   name            = this.name,
                   description     = this.description,
                   annotationTypes = this.annotationTypes).successNel[String]

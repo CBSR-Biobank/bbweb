@@ -2,6 +2,8 @@ package org.biobank.service.centres
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject}
 import org.biobank.TestData
 import org.biobank.domain.LocationId
@@ -11,8 +13,6 @@ import org.biobank.domain.Location
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -145,7 +145,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                              locations   = Set.empty)
     } yield CentreEvent(newCentre.id.id).update(
       _.sessionUserId             := cmd.sessionUserId,
-      _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                      := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.added.name                := cmd.name,
       _.added.optionalDescription := cmd.description
     )
@@ -158,7 +158,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       centre        <- centre.withName(cmd.name)
     } yield CentreEvent(centre.id.id).update(
       _.sessionUserId       := cmd.sessionUserId,
-      _.time                := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.nameUpdated.version := cmd.expectedVersion,
       _.nameUpdated.name    := cmd.name
     )
@@ -169,7 +169,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     centre.withDescription(cmd.description).map { _ =>
       CentreEvent(centre.id.id).update(
         _.sessionUserId                          := cmd.sessionUserId,
-        _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                   := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.descriptionUpdated.version             := cmd.expectedVersion,
         _.descriptionUpdated.optionalDescription := cmd.description
       )
@@ -181,7 +181,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     centre.enable.map { _ =>
       CentreEvent(centre.id.id).update(
         _.sessionUserId   := cmd.sessionUserId,
-        _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time            := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.enabled.version := cmd.expectedVersion)
     }
   }
@@ -191,7 +191,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     centre.disable.map { _ =>
       CentreEvent(centre.id.id).update(
         _.sessionUserId    := cmd.sessionUserId,
-        _.time             := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time             := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.disabled.version := cmd.expectedVersion)
     }
   }
@@ -210,7 +210,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       updatedCentre <- centre.withLocation(location)
     } yield CentreEvent(centre.id.id).update(
       _.sessionUserId                              := cmd.sessionUserId,
-      _.time                                       := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                                       := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.locationAdded.version                      := cmd.expectedVersion,
       _.locationAdded.location.locationId          := location.id.id,
       _.locationAdded.location.name                := cmd.name,
@@ -242,7 +242,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       updatedCentre <- centre.withLocation(location)
     } yield CentreEvent(centre.id.id).update(
       _.sessionUserId                                := cmd.sessionUserId,
-      _.time                                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.locationUpdated.version                      := cmd.expectedVersion,
       _.locationUpdated.location.locationId          := cmd.locationId,
       _.locationUpdated.location.name                := cmd.name,
@@ -262,7 +262,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     centre.removeLocation(LocationId(cmd.locationId)) map { _ =>
       CentreEvent(centre.id.id).update(
         _.sessionUserId              := cmd.sessionUserId,
-        _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                       := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.locationRemoved.version    := cmd.expectedVersion,
         _.locationRemoved.locationId := cmd.locationId)
     }
@@ -276,7 +276,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     studyRepository.getByKey(StudyId(cmd.studyId)).map { _ =>
       CentreEvent(centre.id.id).update(
         _.sessionUserId      := cmd.sessionUserId,
-        _.time               := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time               := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.studyAdded.version := cmd.expectedVersion,
         _.studyAdded.studyId := cmd.studyId)
     }
@@ -292,7 +292,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       canRemove   <- centre.removeStudyId(StudyId(cmd.studyId))
     } yield CentreEvent(centre.id.id).update(
       _.sessionUserId        := cmd.sessionUserId,
-      _.time                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                 := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.studyRemoved.version := cmd.expectedVersion,
       _.studyRemoved.studyId := cmd.studyId)
   }
@@ -302,7 +302,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                            eventVersion: Long)
                                           (applyEvent: (Centre,
                                                         CentreEvent,
-                                                        DateTime) => ServiceValidation[Centre])
+                                                        OffsetDateTime) => ServiceValidation[Centre])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -313,7 +313,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
           if (centre.version != eventVersion) {
             log.error(s"event version check failed: centre version: ${centre.version}, event: $event")
           } else {
-            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val eventTime = OffsetDateTime.parse(event.getTime)
             val update = applyEvent(centre, event, eventTime)
 
             if (update.isFailure) {
@@ -330,7 +330,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                                    eventVersion: Long)
                                                   (applyEvent: (DisabledCentre,
                                                                 CentreEvent,
-                                                                DateTime) => ServiceValidation[Centre])
+                                                                OffsetDateTime) => ServiceValidation[Centre])
       : Unit = {
     onValidEventCentreAndVersion(event, eventType, eventVersion) { (centre, event, eventTime) =>
       centre match {
@@ -345,7 +345,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                                   eventVersion: Long)
                                                  (applyEvent: (EnabledCentre,
                                                                CentreEvent,
-                                                               DateTime) => ServiceValidation[Centre])
+                                                               OffsetDateTime) => ServiceValidation[Centre])
       : Unit = {
     onValidEventCentreAndVersion(event, eventType, eventVersion) { (centre, event, eventTime) =>
       centre match {
@@ -373,7 +373,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
 
       validation.foreach { c =>
         centreRepository.put(
-          c.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
+          c.copy(timeAdded = OffsetDateTime.parse(event.getTime)))
       }
     }
   }

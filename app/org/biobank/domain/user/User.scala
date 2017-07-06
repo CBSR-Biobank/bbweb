@@ -1,10 +1,9 @@
 package org.biobank.domain.user
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
-import org.biobank.infrastructure.JsonUtils._
 import org.biobank.domain._
 import org.biobank.infrastructure.EnumUtils._
-import org.joda.time.DateTime
 import play.api.libs.json._
 import scala.util.matching.Regex
 import scalaz.Scalaz._
@@ -178,8 +177,8 @@ trait UserValidations {
   */
 final case class RegisteredUser(id:           UserId,
                                 version:      Long,
-                                timeAdded:    DateTime,
-                                timeModified: Option[DateTime],
+                                timeAdded:    OffsetDateTime,
+                                timeModified: Option[OffsetDateTime],
                                 name:         String,
                                 email:        String,
                                 password:     String,
@@ -194,7 +193,7 @@ final case class RegisteredUser(id:           UserId,
     ActiveUser(id           = this.id,
                version      = this.version + 1,
                timeAdded    = this.timeAdded,
-               timeModified = Some(DateTime.now),
+               timeModified = Some(OffsetDateTime.now),
                name         = this.name,
                email        = this.email,
                password     = this.password,
@@ -207,7 +206,7 @@ final case class RegisteredUser(id:           UserId,
     LockedUser(id           = this.id,
                version      = this.version + 1,
                timeAdded    = this.timeAdded,
-               timeModified = Some(DateTime.now),
+               timeModified = Some(OffsetDateTime.now),
                name         = this.name,
                email        = this.email,
                password     = this.password,
@@ -240,7 +239,7 @@ object RegisteredUser extends UserValidations {
        validateString(salt, SaltRequired) |@|
        validateAvatarUrl(avatarUrl)) {
       case (_, _, _, _, _, _, _) =>
-        RegisteredUser(id, version, DateTime.now, None, name, email, password, salt, avatarUrl)
+        RegisteredUser(id, version, OffsetDateTime.now, None, name, email, password, salt, avatarUrl)
       }
   }
 
@@ -249,8 +248,8 @@ object RegisteredUser extends UserValidations {
 /** A user that has access to the system. */
 final case class ActiveUser(id:           UserId,
                             version:      Long,
-                            timeAdded:    DateTime,
-                            timeModified: Option[DateTime],
+                            timeAdded:    OffsetDateTime,
+                            timeModified: Option[OffsetDateTime],
                             name:         String,
                             email:        String,
                             password:     String,
@@ -265,14 +264,14 @@ final case class ActiveUser(id:           UserId,
     validateString(name, NameMinLength, InvalidName).map( _ =>
       copy(name         = name,
            version      = version + 1,
-           timeModified = Some(DateTime.now)))
+           timeModified = Some(OffsetDateTime.now)))
   }
 
   def withEmail(email: String): DomainValidation[ActiveUser] = {
     validateEmail(email).map(_ =>
       copy(email        = email,
            version      = version + 1,
-           timeModified = Some(DateTime.now)))
+           timeModified = Some(OffsetDateTime.now)))
   }
 
   def withPassword(password: String, salt: String): DomainValidation[ActiveUser] = {
@@ -280,14 +279,14 @@ final case class ActiveUser(id:           UserId,
       copy(password     = password,
            salt         = salt,
            version      = version + 1,
-           timeModified = Some(DateTime.now)))
+           timeModified = Some(OffsetDateTime.now)))
   }
 
   def withAvatarUrl(avatarUrl: Option[String]): DomainValidation[ActiveUser] = {
     validateAvatarUrl(avatarUrl).map(_ =>
       copy(avatarUrl = avatarUrl,
            version = version + 1,
-           timeModified = Some(DateTime.now)))
+           timeModified = Some(OffsetDateTime.now)))
   }
 
   /** A registered user that can no longer access the system should be locked */
@@ -295,7 +294,7 @@ final case class ActiveUser(id:           UserId,
     LockedUser(id           = this.id,
                version      = this.version + 1,
                timeAdded    = this.timeAdded,
-               timeModified = Some(DateTime.now),
+               timeModified = Some(OffsetDateTime.now),
                name         = this.name,
                email        = this.email,
                password     = this.password,
@@ -308,8 +307,8 @@ final case class ActiveUser(id:           UserId,
 /** A user who no longer has access to the system. */
 final case class LockedUser(id:           UserId,
                             version:      Long,
-                            timeAdded:    DateTime,
-                            timeModified: Option[DateTime],
+                            timeAdded:    OffsetDateTime,
+                            timeModified: Option[OffsetDateTime],
                             name:         String,
                             email:        String,
                             password:     String,
@@ -323,7 +322,7 @@ final case class LockedUser(id:           UserId,
     ActiveUser(id           = this.id,
                version      = this.version + 1,
                timeAdded    = this.timeAdded,
-               timeModified = Some(DateTime.now),
+               timeModified = Some(OffsetDateTime.now),
                name         = this.name,
                email        = this.email,
                password     = this.password,

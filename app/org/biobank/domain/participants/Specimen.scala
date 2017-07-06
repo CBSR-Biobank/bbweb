@@ -1,5 +1,6 @@
 package org.biobank.domain.participants
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
 import org.biobank.domain._
@@ -7,7 +8,6 @@ import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
 import org.biobank.domain.study.{CollectionSpecimenDescription, SpecimenDescriptionId, StudyValidations}
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
 import org.biobank.infrastructure.EnumUtils._
-import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -46,7 +46,7 @@ sealed trait Specimen
    *
    * Not necessarily when this specimen was added to the application.
    */
-  val timeCreated: DateTime
+  val timeCreated: OffsetDateTime
 
   /** The amount, in units specified in the [[SpecimenDescription]], for this specimen. */
   val amount: scala.math.BigDecimal
@@ -90,8 +90,6 @@ sealed trait Specimen
 }
 
 object Specimen {
-  import org.biobank.infrastructure.JsonUtils._
-
   val usableState: EntityState = new EntityState("usable")
   val unusableState: EntityState = new EntityState("unusable")
 
@@ -156,13 +154,13 @@ final case class UsableSpecimen(id:                    SpecimenId,
                                 inventoryId:           String,
                                 specimenDescriptionId: SpecimenDescriptionId,
                                 version:               Long,
-                                timeAdded:             DateTime,
-                                timeModified:          Option[DateTime],
+                                timeAdded:             OffsetDateTime,
+                                timeModified:          Option[OffsetDateTime],
                                 originLocationId:      LocationId,
                                 locationId:            LocationId,
                                 containerId:           Option[ContainerId],
                                 positionId:            Option[ContainerSchemaPositionId],
-                                timeCreated:           DateTime,
+                                timeCreated:           OffsetDateTime,
                                 amount:                BigDecimal)
     extends { val state: EntityState = Specimen.usableState }
     with Specimen
@@ -177,7 +175,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
     validateString(inventoryId, InventoryIdInvalid).map { s =>
       copy(inventoryId  = inventoryId,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -185,7 +183,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
     validatePositiveNumber(amount, AmountInvalid).map { s =>
       copy(amount       = amount,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -196,7 +194,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
     validateId(id, LocationIdInvalid).map { s =>
       copy(originLocationId = id,
            version          = version + 1,
-           timeModified     = Some(DateTime.now))
+           timeModified     = Some(OffsetDateTime.now))
     }
   }
 
@@ -207,7 +205,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
     validateId(id, LocationIdInvalid).map { s =>
       copy(locationId   = id,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -215,7 +213,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
     validateId(positionId, PositionInvalid).map { s =>
       copy(positionId   = Some(positionId),
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -225,7 +223,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
                      specimenDescriptionId = this.specimenDescriptionId,
                      version               = this.version + 1,
                      timeAdded             = this.timeAdded,
-                     timeModified          = Some(DateTime.now),
+                     timeModified          = Some(OffsetDateTime.now),
                      originLocationId      = this.originLocationId,
                      locationId            = this.locationId,
                      containerId           = this.containerId,
@@ -251,8 +249,8 @@ object UsableSpecimen
              locationId:            LocationId,
              containerId:           Option[ContainerId],
              positionId:            Option[ContainerSchemaPositionId],
-             timeAdded:             DateTime,
-             timeCreated:           DateTime,
+             timeAdded:             OffsetDateTime,
+             timeCreated:           OffsetDateTime,
              amount:                BigDecimal)
       : DomainValidation[UsableSpecimen] = {
     validate(id,
@@ -287,7 +285,7 @@ object UsableSpecimen
                locationId:            LocationId,
                containerId:           Option[ContainerId],
                positionId:            Option[ContainerSchemaPositionId],
-               timeCreated:           DateTime,
+               timeCreated:           OffsetDateTime,
                amount:                BigDecimal)
       : DomainValidation[Boolean] = {
     (validateId(id) |@|
@@ -314,13 +312,13 @@ final case class UnusableSpecimen(id:                    SpecimenId,
                                   inventoryId:           String,
                                   specimenDescriptionId: SpecimenDescriptionId,
                                   version:               Long,
-                                  timeAdded:             DateTime,
-                                  timeModified:          Option[DateTime],
+                                  timeAdded:             OffsetDateTime,
+                                  timeModified:          Option[OffsetDateTime],
                                   originLocationId:      LocationId,
                                   locationId:            LocationId,
                                   containerId:           Option[ContainerId],
                                   positionId:            Option[ContainerSchemaPositionId],
-                                  timeCreated:           DateTime,
+                                  timeCreated:           OffsetDateTime,
                                   amount:                BigDecimal)
     extends { val state: EntityState = Specimen.unusableState }
     with Specimen {
@@ -331,7 +329,7 @@ final case class UnusableSpecimen(id:                    SpecimenId,
                    specimenDescriptionId = this.specimenDescriptionId,
                    version               = this.version + 1,
                    timeAdded             = this.timeAdded,
-                   timeModified          = Some(DateTime.now),
+                   timeModified          = Some(OffsetDateTime.now),
                    originLocationId      = this.originLocationId,
                    locationId            = this.locationId,
                    containerId           = this.containerId,

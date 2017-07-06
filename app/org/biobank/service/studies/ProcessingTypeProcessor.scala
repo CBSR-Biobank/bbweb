@@ -2,11 +2,11 @@ package org.biobank.service.studies
 
 import akka.actor._
 import akka.persistence.SnapshotOffer
+import java.time.OffsetDateTime
 import org.biobank.domain.study.{StudyId, ProcessingType, ProcessingTypeId, ProcessingTypeRepository }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.{Processor, ServiceValidation}
-import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -162,7 +162,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
 
       v.foreach(pt => processingTypeRepository.put(
                   pt.copy(version      = updatedEvent.getVersion,
-                          timeModified  = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+                          timeModified  = Some(OffsetDateTime.parse(event.getTime)),
                           name         = updatedEvent.getName,
                           description  = updatedEvent.description,
                           enabled      = updatedEvent.getEnabled)))

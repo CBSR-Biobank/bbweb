@@ -7,16 +7,17 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service.studies.StudiesService
 import play.api.libs.json._
 import play.api.Environment
-import play.api.mvc.{Action, Result}
+import play.api.mvc.{Action, ControllerComponents, Result}
 import scala.concurrent.{ExecutionContext, Future}
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class ProcessingTypesController @Inject() (val action:         BbwebAction,
+class ProcessingTypesController @Inject() (controllerComponents: ControllerComponents,
+                                           val action:         BbwebAction,
                                            val env:            Environment,
                                            val studiesService: StudiesService)
                                (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   def get(studyId: StudyId, procTypeId: Option[ProcessingTypeId]): Action[Unit] =
     action(parse.empty) { implicit request =>

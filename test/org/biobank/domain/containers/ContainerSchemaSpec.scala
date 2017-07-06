@@ -1,11 +1,10 @@
 package org.biobank.domain.containerType
 
+import java.time.OffsetDateTime
 import org.biobank.domain.containers._
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
-
 import org.slf4j.LoggerFactory
-import com.github.nscala_time.time.Imports._
 import scalaz.Scalaz._
 
 class ContainerSchemaSpec extends DomainSpec {
@@ -35,7 +34,7 @@ class ContainerSchemaSpec extends DomainSpec {
           'description (containerType.description)
         )
 
-        checkTimeStamps(s, DateTime.now, None)
+        checkTimeStamps(s, OffsetDateTime.now, None)
       }
     }
 
@@ -52,7 +51,7 @@ class ContainerSchemaSpec extends DomainSpec {
           'description (containerType.description)
         )
 
-        checkTimeStamps(updatedContainerType, DateTime.now, None)
+        checkTimeStamps(updatedContainerType, OffsetDateTime.now, None)
       }
     }
 
@@ -68,7 +67,7 @@ class ContainerSchemaSpec extends DomainSpec {
           'description (description)
         )
 
-        checkTimeStamps(updatedContainerType, DateTime.now, None)
+        checkTimeStamps(updatedContainerType, OffsetDateTime.now, None)
       }
     }
 

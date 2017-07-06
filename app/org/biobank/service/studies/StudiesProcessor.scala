@@ -2,6 +2,8 @@ package org.biobank.service.studies
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.TestData
 import org.biobank.domain._
@@ -10,8 +12,6 @@ import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -214,7 +214,7 @@ class StudiesProcessor @Inject() (
     } yield {
       StudyEvent(study.id.id).update(
         _.optionalSessionUserId     := cmd.sessionUserId,
-        _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                      := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.added.name                := cmd.name,
         _.added.optionalDescription := cmd.description)
     }
@@ -226,7 +226,7 @@ class StudiesProcessor @Inject() (
        study.withName(cmd.name)) { case (_, _) =>
         StudyEvent(study.id.id).update(
           _.optionalSessionUserId := cmd.sessionUserId,
-          _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
           _.nameUpdated.version   := cmd.expectedVersion,
           _.nameUpdated.name      := cmd.name)
     }
@@ -237,7 +237,7 @@ class StudiesProcessor @Inject() (
     study.withDescription(cmd.description).map { _ =>
       StudyEvent(study.id.id).update(
         _.optionalSessionUserId                  := cmd.sessionUserId,
-        _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                   := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.descriptionUpdated.version             := cmd.expectedVersion,
         _.descriptionUpdated.optionalDescription := cmd.description)
     }
@@ -258,7 +258,7 @@ class StudiesProcessor @Inject() (
       updatedStudy <- study.withParticipantAnnotationType(annotationType)
     } yield StudyEvent(study.id.id).update(
       _.optionalSessionUserId              := cmd.sessionUserId,
-      _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                               := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.annotationTypeAdded.version        := cmd.expectedVersion,
       _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
   }
@@ -277,7 +277,7 @@ class StudiesProcessor @Inject() (
       updatedStudy   <- study.withParticipantAnnotationType(annotationType)
     } yield StudyEvent(study.id.id).update(
       _.optionalSessionUserId                := cmd.sessionUserId,
-      _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                                 := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.annotationTypeUpdated.version        := cmd.expectedVersion,
       _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
   }
@@ -288,7 +288,7 @@ class StudiesProcessor @Inject() (
     study.removeParticipantAnnotationType(AnnotationTypeId(cmd.annotationTypeId)) map { s =>
       StudyEvent(study.id.id).update(
         _.optionalSessionUserId          := cmd.sessionUserId,
-        _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.annotationTypeRemoved.version  := cmd.expectedVersion,
         _.annotationTypeRemoved.id       := cmd.annotationTypeId)
     }
@@ -307,7 +307,7 @@ class StudiesProcessor @Inject() (
       study.enable.map { _ =>
         StudyEvent(study.id.id).update(
           _.optionalSessionUserId := cmd.sessionUserId,
-          _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
           _.enabled.version       := cmd.expectedVersion)
       }
     }
@@ -319,7 +319,7 @@ class StudiesProcessor @Inject() (
     study.disable map { _ =>
       StudyEvent(study.id.id).update(
         _.optionalSessionUserId := cmd.sessionUserId,
-        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.disabled.version      := cmd.expectedVersion)
     }
   }
@@ -330,7 +330,7 @@ class StudiesProcessor @Inject() (
     study.retire map { _ =>
       StudyEvent(study.id.id).update(
         _.optionalSessionUserId := cmd.sessionUserId,
-        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.retired.version       := cmd.expectedVersion)
     }
   }
@@ -341,7 +341,7 @@ class StudiesProcessor @Inject() (
     study.unretire map { _ =>
       StudyEvent(study.id.id).update(
         _.optionalSessionUserId := cmd.sessionUserId,
-        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.unretired.version     := cmd.expectedVersion)
     }
   }
@@ -404,7 +404,7 @@ class StudiesProcessor @Inject() (
   private def onValidEventStudyAndVersion(event: StudyEvent,
                                           eventType: Boolean,
                                           eventVersion: Long)
-                                         (applyEvent: (Study, DateTime) => ServiceValidation[Boolean])
+                                         (applyEvent: (Study, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -415,7 +415,7 @@ class StudiesProcessor @Inject() (
           if (study.version != eventVersion) {
             log.error(s"event version check failed: study version: ${study.version}, event: $event")
           } else {
-            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val eventTime = OffsetDateTime.parse(event.getTime)
             val update = applyEvent(study, eventTime)
 
             if (update.isFailure) {
@@ -430,7 +430,7 @@ class StudiesProcessor @Inject() (
   private def onValidEventDisabledStudyAndVersion(event: StudyEvent,
                                                   eventType: Boolean,
                                                   eventVersion: Long)
-                                                 (applyEvent: (DisabledStudy, DateTime) => ServiceValidation[Boolean])
+                                                 (applyEvent: (DisabledStudy, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventStudyAndVersion(event, eventType, eventVersion) { (study, eventTime) =>
       study match {
@@ -443,7 +443,7 @@ class StudiesProcessor @Inject() (
   private def onValidEventEnabledStudyAndVersion(event: StudyEvent,
                                                  eventType: Boolean,
                                                  eventVersion: Long)
-                                                 (applyEvent: (EnabledStudy, DateTime) => ServiceValidation[Boolean])
+                                                 (applyEvent: (EnabledStudy, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventStudyAndVersion(event, eventType, eventVersion) { (study, eventTime) =>
       study match {
@@ -456,7 +456,7 @@ class StudiesProcessor @Inject() (
   private def onValidEventRetiredStudyAndVersion(event: StudyEvent,
                                                  eventType: Boolean,
                                                  eventVersion: Long)
-                                                 (applyEvent: (RetiredStudy, DateTime) => ServiceValidation[Boolean])
+                                                 (applyEvent: (RetiredStudy, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     onValidEventStudyAndVersion(event, eventType, eventVersion) { (study, eventTime) =>
       study match {
@@ -483,25 +483,25 @@ class StudiesProcessor @Inject() (
       }
       v.foreach { s =>
         studyRepository.put(
-          s.copy(timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)))
+          s.copy(timeAdded = OffsetDateTime.parse(event.getTime)))
       }
     }
   }
 
   private def putDisabledOnSuccess(validation: ServiceValidation[DisabledStudy],
-                                   eventTime: DateTime): ServiceValidation[Boolean] = {
+                                   eventTime: OffsetDateTime): ServiceValidation[Boolean] = {
     validation.foreach { s => studyRepository.put(s.copy(timeModified = Some(eventTime))) }
     validation.map { _ => true }
   }
 
   private def putEnabledOnSuccess(validation: ServiceValidation[EnabledStudy],
-                                   eventTime: DateTime): ServiceValidation[Boolean] = {
+                                   eventTime: OffsetDateTime): ServiceValidation[Boolean] = {
     validation.foreach { s => studyRepository.put(s.copy(timeModified = Some(eventTime))) }
     validation.map { _ => true }
   }
 
   private def putRetiredOnSuccess(validation: ServiceValidation[RetiredStudy],
-                                   eventTime: DateTime): ServiceValidation[Boolean] = {
+                                   eventTime: OffsetDateTime): ServiceValidation[Boolean] = {
     validation.foreach { s => studyRepository.put(s.copy(timeModified = Some(eventTime))) }
     validation.map { _ => true }
   }

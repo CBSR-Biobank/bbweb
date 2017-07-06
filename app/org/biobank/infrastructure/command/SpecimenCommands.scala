@@ -1,11 +1,8 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.infrastructure.JsonUtils._
-
 import Commands._
-
+import java.time.OffsetDateTime
 import play.api.libs.json._
-import org.joda.time.DateTime
 
 object SpecimenCommands {
 
@@ -18,7 +15,7 @@ object SpecimenCommands {
 
   final case class SpecimenInfo(inventoryId:           String,
                                 specimenDescriptionId: String,
-                                timeCreated:           DateTime,
+                                timeCreated:           OffsetDateTime,
                                 locationId:            String,
                                 amount:                BigDecimal)
 

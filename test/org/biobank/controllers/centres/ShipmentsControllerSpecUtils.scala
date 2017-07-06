@@ -1,9 +1,8 @@
 package org.biobank.controllers.centres
 
-import com.github.nscala_time.time.Imports._
+import java.time.OffsetDateTime
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.centre._
-import org.joda.time.DateTime
 import play.api.libs.json._
 
 private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
@@ -28,10 +27,10 @@ private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
   }
 
   def compareTimestamps(shipment:     Shipment,
-                        timePacked:   Option[DateTime],
-                        timeSent:     Option[DateTime],
-                        timeReceived: Option[DateTime],
-                        timeUnpacked: Option[DateTime]): Unit = {
+                        timePacked:   Option[OffsetDateTime],
+                        timeSent:     Option[OffsetDateTime],
+                        timeReceived: Option[OffsetDateTime],
+                        timeUnpacked: Option[OffsetDateTime]): Unit = {
     checkOpionalTime(timePacked,   shipment.timePacked)
     checkOpionalTime(timeSent,     shipment.timeSent)
     checkOpionalTime(timeReceived, shipment.timeReceived)
@@ -39,11 +38,11 @@ private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
   }
 
   def compareTimestamps(shipment:      Shipment,
-                        timePacked:    Option[DateTime],
-                        timeSent:      Option[DateTime],
-                        timeReceived:  Option[DateTime],
-                        timeUnpacked:  Option[DateTime],
-                        timeCompleted: Option[DateTime]): Unit = {
+                        timePacked:    Option[OffsetDateTime],
+                        timeSent:      Option[OffsetDateTime],
+                        timeReceived:  Option[OffsetDateTime],
+                        timeUnpacked:  Option[OffsetDateTime],
+                        timeCompleted: Option[OffsetDateTime]): Unit = {
     checkOpionalTime(timePacked,    shipment.timePacked)
     checkOpionalTime(timeSent,      shipment.timeSent)
     checkOpionalTime(timeReceived,  shipment.timeReceived)

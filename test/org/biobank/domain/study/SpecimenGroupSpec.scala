@@ -1,13 +1,13 @@
 package org.biobank.domain.study
 
+import java.time.OffsetDateTime
+import org.biobank.TestUtils
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnatomicalSourceType
 import org.biobank.domain.PreservationType
 import org.biobank.domain.PreservationTemperatureType
 import org.biobank.domain.SpecimenType
-
-import com.github.nscala_time.time.Imports._
 import scalaz.Scalaz._
 
 class SpecimenGroupSpec extends DomainSpec {
@@ -48,7 +48,7 @@ class SpecimenGroupSpec extends DomainSpec {
           'specimenType                  (specimenType)
         )
 
-        (specimenGroup.timeAdded to DateTime.now).millis must be < 1000L
+        TestUtils.checkTimeStamps(specimenGroup.timeAdded, OffsetDateTime.now)
         specimenGroup.timeModified mustBe (None)
         ()
       }
@@ -86,7 +86,7 @@ class SpecimenGroupSpec extends DomainSpec {
           'specimenType                (specimenType)
         )
 
-        (specimenGroup.timeAdded to updatedSg.timeAdded).millis must be < 100L
+        TestUtils.checkTimeStamps(specimenGroup.timeAdded, updatedSg.timeAdded)
         updatedSg.timeModified must not be (None)
         ()
       }

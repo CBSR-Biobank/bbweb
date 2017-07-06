@@ -9,9 +9,9 @@ import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, PagedResults}
 import play.api.Logger
-import play.api.cache.CacheApi
-import play.api.libs.json.Reads._
+import play.api.cache.SyncCacheApi
 import play.api.libs.json._
+import play.api.libs.json.Reads._
 import play.api.mvc._
 import play.api.{Environment, Logger}
 import scala.concurrent.{ExecutionContext, Future}
@@ -21,14 +21,15 @@ import scalaz._
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class UsersController @Inject() (val action:         BbwebAction,
+class UsersController @Inject() (controllerComponents: ControllerComponents,
+                                 val action:         BbwebAction,
                                  val env:            Environment,
-                                 val cacheApi:       CacheApi,
+                                 val cacheApi:       SyncCacheApi,
                                  val authToken:      AuthToken,
                                  val usersService:   UsersService,
                                  val studiesService: StudiesService)
                              (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   import org.biobank.controllers.Security._
 
@@ -61,7 +62,7 @@ class UsersController @Inject() (val action:         BbwebAction,
           userDto => {
             val token = authToken.newToken(UserId(userDto.id))
             log.debug(s"user logged in: ${userDto.email}, token: $token")
-            Ok(userDto).withCookies(Cookie(AuthTokenCookieKey, token, None, httpOnly = false))
+            Ok(userDto).withCookies(Cookie(AuthTokenCookieKey, token, None, path = "/", httpOnly = false))
           }
         )
       }

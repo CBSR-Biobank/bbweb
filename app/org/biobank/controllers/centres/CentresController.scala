@@ -18,11 +18,12 @@ import scalaz.Validation.FlatMap._
  */
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class CentresController @Inject()(val action:  BbwebAction,
+class CentresController @Inject()(controllerComponents: ControllerComponents,
+                                  val action:  BbwebAction,
                                   val env:     Environment,
                                   val service: CentresService)
                                (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   val log: Logger = Logger(this.getClass)
 

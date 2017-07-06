@@ -2,6 +2,8 @@ package org.biobank.service.participants
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.domain.AnnotationTypeId
 import org.biobank.domain.participants._
@@ -11,8 +13,6 @@ import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.infrastructure.event.CommonEvents._
 import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -151,7 +151,7 @@ class CollectionEventsProcessor @Inject() (
                                                      participantId,
                                                      collectionEventTypeId,
                                                      0L,
-                                                     DateTime.now,
+                                                     OffsetDateTime.now,
                                                      cmd.timeCompleted,
                                                      cmd.visitNumber,
                                                      annotationsSet)
@@ -159,8 +159,8 @@ class CollectionEventsProcessor @Inject() (
       _.participantId         := cmd.participantId,
       _.collectionEventTypeId := newCollectionEvent.collectionEventTypeId.id,
       _.sessionUserId         := cmd.sessionUserId,
-      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
-      _.added.timeCompleted   := ISODateTimeFormatter.print(cmd.timeCompleted),
+      _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+      _.added.timeCompleted   := cmd.timeCompleted.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.added.visitNumber     := cmd.visitNumber,
       _.added.annotations     := cmd.annotations.map { annotationToEvent(_) })
   }
@@ -177,7 +177,7 @@ class CollectionEventsProcessor @Inject() (
       _.participantId                  := participant.id.id,
       _.collectionEventTypeId          := updatedCevent.collectionEventTypeId.id,
       _.sessionUserId                  := cmd.sessionUserId,
-      _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.visitNumberUpdated.version     := cmd.expectedVersion,
       _.visitNumberUpdated.visitNumber := updatedCevent.visitNumber)
   }
@@ -192,9 +192,9 @@ class CollectionEventsProcessor @Inject() (
         _.participantId                      := participant.id.id,
         _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
         _.sessionUserId                      := cmd.sessionUserId,
-        _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                               := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.timeCompletedUpdated.version       := cmd.expectedVersion,
-        _.timeCompletedUpdated.timeCompleted := ISODateTimeFormat.dateTime.print(updatedCevent.timeCompleted))
+        _.timeCompletedUpdated.timeCompleted := updatedCevent.timeCompleted.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
     }
   }
 
@@ -219,7 +219,7 @@ class CollectionEventsProcessor @Inject() (
       _.participantId                := participant.id.id,
       _.collectionEventTypeId        := updatedCevent.collectionEventTypeId.id,
       _.sessionUserId                := cmd.sessionUserId,
-      _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.annotationUpdated.version    := cmd.expectedVersion,
       _.annotationUpdated.annotation := annotationToEvent(annotation))
   }
@@ -244,7 +244,7 @@ class CollectionEventsProcessor @Inject() (
       _.participantId                      := participant.id.id,
       _.collectionEventTypeId              := updatedCevent.collectionEventTypeId.id,
       _.sessionUserId                      := cmd.sessionUserId,
-      _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                               := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.annotationRemoved.version          := cmd.expectedVersion,
       _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)
   }
@@ -258,7 +258,7 @@ class CollectionEventsProcessor @Inject() (
       _.participantId         := participant.id.id,
       _.collectionEventTypeId := cevent.collectionEventTypeId.id,
       _.sessionUserId         := cmd.sessionUserId,
-      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.removed.version       := cevent.version).successNel[String]
   }
 
@@ -298,8 +298,8 @@ class CollectionEventsProcessor @Inject() (
           collectionEventTypeId = CollectionEventTypeId(event.getCollectionEventTypeId),
           participantId         = ParticipantId(event.getParticipantId),
           version               = 0L,
-          timeAdded             = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
-          timeCompleted         = ISODateTimeParser.parseDateTime(addedEvent.getTimeCompleted),
+          timeAdded             = OffsetDateTime.parse(event.getTime),
+          timeCompleted         = OffsetDateTime.parse(addedEvent.getTimeCompleted),
           visitNumber           = addedEvent.getVisitNumber,
           annotations           = addedEvent.annotations.map { annotationFromEvent(_) }.toSet)
 
@@ -314,7 +314,7 @@ class CollectionEventsProcessor @Inject() (
   private def onValidEventAndVersion(event:        CollectionEventEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)
-                                    (applyEvent: (CollectionEvent, DateTime) => ServiceValidation[Boolean])
+                                    (applyEvent: (CollectionEvent, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -325,7 +325,7 @@ class CollectionEventsProcessor @Inject() (
           if (cevent.version != eventVersion) {
             log.error(s"event version check failed: cevent version: ${cevent.version}, event: $event")
           } else {
-            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val eventTime = OffsetDateTime.parse(event.getTime)
             val update = applyEvent(cevent, eventTime)
             if (update.isFailure) {
               log.error(s"collection event update from event failed: $update")
@@ -355,7 +355,7 @@ class CollectionEventsProcessor @Inject() (
                            event.eventType.isTimeCompletedUpdated,
                            event.getTimeCompletedUpdated.getVersion) { (cevent, eventTime) =>
 
-      val timeCompleted = ISODateTimeFormat.dateTime.parseDateTime(
+      val timeCompleted = OffsetDateTime.parse(
           event.getTimeCompletedUpdated.getTimeCompleted)
       val v = cevent.withTimeCompleted(timeCompleted)
 

@@ -1,11 +1,10 @@
 package org.biobank.infrastructure.event
 
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import org.biobank.infrastructure.command.StudyCommands.StudyCommand
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.domain.study._
-
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 
 object StudyEventsUtil {
 
@@ -15,6 +14,6 @@ object StudyEventsUtil {
   def createStudyEvent(id: StudyId, command: StudyCommand): StudyEventOld =
     StudyEventOld(id.id).update(
       _.optionalSessionUserId := command.sessionUserId,
-      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now))
+      _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
 
 }

@@ -7,18 +7,19 @@ import org.biobank.service._
 import org.biobank.service.participants.SpecimensService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
-import play.api.mvc.Action
+import play.api.mvc.{Action, ControllerComponents}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class SpecimensController @Inject() (val action:       BbwebAction,
+class SpecimensController @Inject() (controllerComponents: ControllerComponents,
+                                     val action:       BbwebAction,
                                      val env:          Environment,
                                      val service:      SpecimensService)
                                  (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
   import org.biobank.infrastructure.command.SpecimenCommands._
 
   val log: Logger = Logger(this.getClass)

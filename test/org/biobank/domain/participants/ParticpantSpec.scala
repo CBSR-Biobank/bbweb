@@ -1,10 +1,9 @@
 package org.biobank.domain.participants
 
+import java.time.OffsetDateTime
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
-
 import org.slf4j.LoggerFactory
-import org.joda.time.DateTime
 
 class ParticipantSpec extends DomainSpec {
   import org.biobank.TestUtils._
@@ -19,7 +18,7 @@ class ParticipantSpec extends DomainSpec {
                        version      = participant.version,
                        uniqueId     = participant.uniqueId,
                        annotations  = participant.annotations,
-                       timeAdded    = DateTime.now)
+                       timeAdded    = OffsetDateTime.now)
 
   describe("A participant") {
 
@@ -68,7 +67,7 @@ class ParticipantSpec extends DomainSpec {
         participant.withUniqueId(newUniqueId) mustSucceed { p =>
           p.uniqueId must be (newUniqueId)
           p.version must be (participant.version + 1)
-          checkTimeStamps(p, participant.timeAdded, DateTime.now)
+          checkTimeStamps(p, participant.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -79,7 +78,7 @@ class ParticipantSpec extends DomainSpec {
         participant.withAnnotation(annotation) mustSucceed { p =>
           p.annotations must have size 1
           p.version must be (participant.version + 1)
-          checkTimeStamps(p, participant.timeAdded, DateTime.now)
+          checkTimeStamps(p, participant.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -90,7 +89,7 @@ class ParticipantSpec extends DomainSpec {
         participant.withoutAnnotation(annotation.annotationTypeId) mustSucceed { p =>
           p.annotations must have size 0
           p.version must be (participant.version + 1)
-          checkTimeStamps(p, participant.timeAdded, DateTime.now)
+          checkTimeStamps(p, participant.timeAdded, OffsetDateTime.now)
         }
       }
     }

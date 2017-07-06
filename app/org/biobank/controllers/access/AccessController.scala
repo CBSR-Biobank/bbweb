@@ -17,12 +17,13 @@ import scalaz._
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class AccessController @Inject() (val action:         BbwebAction,
+class AccessController @Inject() (controllerComponents: ControllerComponents,
+                                  val action:         BbwebAction,
                                   val env:            Environment,
                                   val accessService:   AccessService,
                                   val studiesService: StudiesService)
                               (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   val log: Logger = Logger(this.getClass)
 

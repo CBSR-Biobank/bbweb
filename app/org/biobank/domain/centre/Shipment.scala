@@ -1,10 +1,8 @@
 package org.biobank.domain.centre
 
-import com.github.nscala_time.time.Imports._
+import java.time.OffsetDateTime
 import org.biobank.domain._
-import org.biobank.infrastructure.JsonUtils._
 import org.biobank.ValidationKey
-import org.joda.time.DateTime
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -81,11 +79,11 @@ sealed trait Shipment
   val fromLocationId: LocationId
   val toCentreId:     CentreId
   val toLocationId:   LocationId
-  val timePacked:     Option[DateTime]
-  val timeSent:       Option[DateTime]
-  val timeReceived:   Option[DateTime]
-  val timeUnpacked:   Option[DateTime]
-  val timeCompleted:  Option[DateTime]
+  val timePacked:     Option[OffsetDateTime]
+  val timeSent:       Option[OffsetDateTime]
+  val timeReceived:   Option[OffsetDateTime]
+  val timeUnpacked:   Option[OffsetDateTime]
+  val timeCompleted:  Option[OffsetDateTime]
 
   def isCreated: DomainValidation[CreatedShipment] = {
     this match {
@@ -171,19 +169,19 @@ trait ShipmentValidations {
 
   case object TimeCompletedBeforeUnpacked extends ValidationKey
 
-  def validateTimeAfter(afterMaybe: Option[DateTime],
-                        beforeMaybe: Option[DateTime],
+  def validateTimeAfter(afterMaybe: Option[OffsetDateTime],
+                        beforeMaybe: Option[OffsetDateTime],
                         errUndefined: ValidationKey,
                         errNotAfter: ValidationKey)
-      : DomainValidation[Option[DateTime]] = {
+      : DomainValidation[Option[OffsetDateTime]] = {
     beforeMaybe.fold {
-      if (afterMaybe.isDefined) errUndefined.failureNel[Option[DateTime]]
+      if (afterMaybe.isDefined) errUndefined.failureNel[Option[OffsetDateTime]]
       else afterMaybe.successNel[String]
     } { before =>
-      if (afterMaybe.isEmpty || afterMaybe.exists(after => after > before)) {
+      if (afterMaybe.isEmpty || afterMaybe.exists(after => after.isAfter(before))) {
         afterMaybe.successNel[String]
       } else {
-        errNotAfter.failureNel[Option[DateTime]]
+        errNotAfter.failureNel[Option[OffsetDateTime]]
       }
     }
   }
@@ -253,19 +251,19 @@ object Shipment extends ShipmentValidations {
 
 final case class CreatedShipment(id:             ShipmentId,
                                  version:        Long,
-                                 timeAdded:      DateTime,
-                                 timeModified:   Option[DateTime],
+                                 timeAdded:      OffsetDateTime,
+                                 timeModified:   Option[OffsetDateTime],
                                  courierName:    String,
                                  trackingNumber: String,
                                  fromCentreId:   CentreId,
                                  fromLocationId: LocationId,
                                  toCentreId:     CentreId,
                                  toLocationId:   LocationId,
-                                 timePacked:     Option[DateTime],
-                                 timeSent:       Option[DateTime],
-                                 timeReceived:   Option[DateTime],
-                                 timeUnpacked:   Option[DateTime],
-                                 timeCompleted:  Option[DateTime])
+                                 timePacked:     Option[OffsetDateTime],
+                                 timeSent:       Option[OffsetDateTime],
+                                 timeReceived:   Option[OffsetDateTime],
+                                 timeUnpacked:   Option[OffsetDateTime],
+                                 timeCompleted:  Option[OffsetDateTime])
     extends { val state: EntityState = Shipment.createdState }
     with Shipment
     with ShipmentValidations {
@@ -277,14 +275,14 @@ final case class CreatedShipment(id:             ShipmentId,
     validateString(name, CourierNameInvalid).map { name =>
       copy(courierName  = name,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
 
   def withTrackingNumber(trackingNumber: String): DomainValidation[CreatedShipment] =
     validateString(trackingNumber, TrackingNumberInvalid).map { _ =>
       copy(trackingNumber = trackingNumber,
            version        = version + 1,
-           timeModified   = Some(DateTime.now))
+           timeModified   = Some(OffsetDateTime.now))
     }
 
   /**
@@ -296,7 +294,7 @@ final case class CreatedShipment(id:             ShipmentId,
         copy(fromCentreId   = centreId,
              fromLocationId = locationId,
              version        = version + 1,
-             timeModified   = Some(DateTime.now))
+             timeModified   = Some(OffsetDateTime.now))
     }
 
   /**
@@ -308,14 +306,14 @@ final case class CreatedShipment(id:             ShipmentId,
         copy(toCentreId   = centreId,
              toLocationId = locationId,
              version      = version + 1,
-             timeModified = Some(DateTime.now))
+             timeModified = Some(OffsetDateTime.now))
     }
 
-  def pack(timePacked: DateTime): PackedShipment =
+  def pack(timePacked: OffsetDateTime): PackedShipment =
     PackedShipment(id             = this.id,
                    version        = this.version + 1,
                    timeAdded      = this.timeAdded,
-                   timeModified   = Some(DateTime.now),
+                   timeModified   = Some(OffsetDateTime.now),
                    courierName    = this.courierName,
                    trackingNumber = this.trackingNumber,
                    fromCentreId   = this.fromCentreId,
@@ -328,14 +326,14 @@ final case class CreatedShipment(id:             ShipmentId,
                    timeUnpacked   = None,
                    timeCompleted  = None)
 
-  def skipToSent(timePacked: DateTime, timeSent: DateTime): DomainValidation[SentShipment] = {
-    if (timeSent < timePacked) {
+  def skipToSent(timePacked: OffsetDateTime, timeSent: OffsetDateTime): DomainValidation[SentShipment] = {
+    if (timeSent.isBefore(timePacked)) {
       TimeSentBeforePacked.failureNel[SentShipment]
     } else {
       SentShipment(id             = this.id,
                    version        = this.version + 1,
                    timeAdded      = this.timeAdded,
-                   timeModified   = Some(DateTime.now),
+                   timeModified   = Some(OffsetDateTime.now),
                    courierName    = this.courierName,
                    trackingNumber = this.trackingNumber,
                    fromCentreId   = this.fromCentreId,
@@ -357,7 +355,7 @@ object CreatedShipment extends ShipmentValidations {
 
   def create(id:             ShipmentId,
              version:        Long,
-             timeAdded:      DateTime,
+             timeAdded:      OffsetDateTime,
              courierName:    String,
              trackingNumber: String,
              fromCentreId:   CentreId,
@@ -413,19 +411,19 @@ object CreatedShipment extends ShipmentValidations {
 
 final case class PackedShipment(id:             ShipmentId,
                                 version:        Long,
-                                timeAdded:      DateTime,
-                                timeModified:   Option[DateTime],
+                                timeAdded:      OffsetDateTime,
+                                timeModified:   Option[OffsetDateTime],
                                 courierName:    String,
                                 trackingNumber: String,
                                 fromCentreId:   CentreId,
                                 fromLocationId: LocationId,
                                 toCentreId:     CentreId,
                                 toLocationId:   LocationId,
-                                timePacked:     Option[DateTime],
-                                timeSent:       Option[DateTime],
-                                timeReceived:   Option[DateTime],
-                                timeUnpacked:   Option[DateTime],
-                                timeCompleted:  Option[DateTime])
+                                timePacked:     Option[OffsetDateTime],
+                                timeSent:       Option[OffsetDateTime],
+                                timeReceived:   Option[OffsetDateTime],
+                                timeUnpacked:   Option[OffsetDateTime],
+                                timeCompleted:  Option[OffsetDateTime])
     extends { val state: EntityState = Shipment.packedState }
     with Shipment
     with ShipmentValidations {
@@ -438,7 +436,7 @@ final case class PackedShipment(id:             ShipmentId,
     CreatedShipment(id             = this.id,
                     version        = this.version + 1,
                     timeAdded      = this.timeAdded,
-                    timeModified   = Some(DateTime.now),
+                    timeModified   = Some(OffsetDateTime.now),
                     courierName    = this.courierName,
                     trackingNumber = this.trackingNumber,
                     fromCentreId   = this.fromCentreId,
@@ -451,17 +449,17 @@ final case class PackedShipment(id:             ShipmentId,
                     timeUnpacked   = None,
                     timeCompleted  = None)
 
-  def send(timeSent: DateTime): DomainValidation[SentShipment] = {
+  def send(timeSent: OffsetDateTime): DomainValidation[SentShipment] = {
     this.timePacked.
       toSuccessNel(TimePackedUndefined.toString).
       flatMap { timePacked =>
-        if (timeSent < timePacked) {
+        if (timeSent.isBefore(timePacked)) {
           TimeSentBeforePacked.failureNel[SentShipment]
         } else {
           SentShipment(id             = this.id,
                        version        = this.version + 1,
                        timeAdded      = this.timeAdded,
-                       timeModified   = Some(DateTime.now),
+                       timeModified   = Some(OffsetDateTime.now),
                        courierName    = this.courierName,
                        trackingNumber = this.trackingNumber,
                        fromCentreId   = this.fromCentreId,
@@ -481,19 +479,19 @@ final case class PackedShipment(id:             ShipmentId,
 
 final case class SentShipment(id:             ShipmentId,
                               version:        Long,
-                              timeAdded:      DateTime,
-                              timeModified:   Option[DateTime],
+                              timeAdded:      OffsetDateTime,
+                              timeModified:   Option[OffsetDateTime],
                               courierName:    String,
                               trackingNumber: String,
                               fromCentreId:   CentreId,
                               fromLocationId: LocationId,
                               toCentreId:     CentreId,
                               toLocationId:   LocationId,
-                              timePacked:     Option[DateTime],
-                              timeSent:       Option[DateTime],
-                              timeReceived:   Option[DateTime],
-                              timeUnpacked:   Option[DateTime],
-                              timeCompleted:  Option[DateTime])
+                              timePacked:     Option[OffsetDateTime],
+                              timeSent:       Option[OffsetDateTime],
+                              timeReceived:   Option[OffsetDateTime],
+                              timeUnpacked:   Option[OffsetDateTime],
+                              timeCompleted:  Option[OffsetDateTime])
     extends { val state: EntityState = Shipment.sentState }
     with Shipment
     with ShipmentValidations {
@@ -502,7 +500,7 @@ final case class SentShipment(id:             ShipmentId,
     PackedShipment(id             = this.id,
                    version        = this.version + 1,
                    timeAdded      = this.timeAdded,
-                   timeModified   = Some(DateTime.now),
+                   timeModified   = Some(OffsetDateTime.now),
                    courierName    = this.courierName,
                    trackingNumber = this.trackingNumber,
                    fromCentreId   = this.fromCentreId,
@@ -516,17 +514,17 @@ final case class SentShipment(id:             ShipmentId,
                    timeCompleted  = None)
   }
 
-  def receive(timeReceived: DateTime): DomainValidation[ReceivedShipment] = {
+  def receive(timeReceived: OffsetDateTime): DomainValidation[ReceivedShipment] = {
     this.timeSent.
       toSuccessNel(TimeSentUndefined.toString).
       flatMap { timeSent =>
-        if (timeReceived < timeSent) {
+        if (timeReceived.isBefore(timeSent)) {
           TimeReceivedBeforeSent.failureNel[ReceivedShipment]
         } else {
           ReceivedShipment(id             = this.id,
                            version        = this.version + 1,
                            timeAdded      = this.timeAdded,
-                           timeModified   = Some(DateTime.now),
+                           timeModified   = Some(OffsetDateTime.now),
                            courierName    = this.courierName,
                            trackingNumber = this.trackingNumber,
                            fromCentreId   = this.fromCentreId,
@@ -542,19 +540,19 @@ final case class SentShipment(id:             ShipmentId,
       }
   }
 
-  def skipToUnpacked(timeReceived: DateTime, timeUnpacked: DateTime): DomainValidation[UnpackedShipment] = {
+  def skipToUnpacked(timeReceived: OffsetDateTime, timeUnpacked: OffsetDateTime): DomainValidation[UnpackedShipment] = {
     this.timeSent.
       toSuccessNel(TimeSentUndefined.toString).
       flatMap { timeSent =>
-        if (timeReceived < timeSent) {
+        if (timeReceived.isBefore(timeSent)) {
           TimeReceivedBeforeSent.failureNel[UnpackedShipment]
-        } else if (timeUnpacked < timeReceived) {
+        } else if (timeUnpacked.isBefore(timeReceived)) {
           TimeUnpackedBeforeReceived.failureNel[UnpackedShipment]
         } else {
           UnpackedShipment(id             = this.id,
                        version        = this.version + 1,
                        timeAdded      = this.timeAdded,
-                       timeModified   = Some(DateTime.now),
+                       timeModified   = Some(OffsetDateTime.now),
                        courierName    = this.courierName,
                        trackingNumber = this.trackingNumber,
                        fromCentreId   = this.fromCentreId,
@@ -574,7 +572,7 @@ final case class SentShipment(id:             ShipmentId,
     LostShipment(id             = this.id,
                  version        = this.version + 1,
                  timeAdded      = this.timeAdded,
-                 timeModified   = Some(DateTime.now),
+                 timeModified   = Some(OffsetDateTime.now),
                  courierName    = this.courierName,
                  trackingNumber = this.trackingNumber,
                  fromCentreId   = this.fromCentreId,
@@ -591,19 +589,19 @@ final case class SentShipment(id:             ShipmentId,
 
 final case class ReceivedShipment(id:             ShipmentId,
                                   version:        Long,
-                                  timeAdded:      DateTime,
-                                  timeModified:   Option[DateTime],
+                                  timeAdded:      OffsetDateTime,
+                                  timeModified:   Option[OffsetDateTime],
                                   courierName:    String,
                                   trackingNumber: String,
                                   fromCentreId:   CentreId,
                                   fromLocationId: LocationId,
                                   toCentreId:     CentreId,
                                   toLocationId:   LocationId,
-                                  timePacked:     Option[DateTime],
-                                  timeSent:       Option[DateTime],
-                                  timeReceived:   Option[DateTime],
-                                  timeUnpacked:   Option[DateTime],
-                                  timeCompleted:  Option[DateTime])
+                                  timePacked:     Option[OffsetDateTime],
+                                  timeSent:       Option[OffsetDateTime],
+                                  timeReceived:   Option[OffsetDateTime],
+                                  timeUnpacked:   Option[OffsetDateTime],
+                                  timeCompleted:  Option[OffsetDateTime])
     extends { val state: EntityState = Shipment.receivedState }
     with Shipment
     with ShipmentValidations {
@@ -612,7 +610,7 @@ final case class ReceivedShipment(id:             ShipmentId,
     SentShipment(id             = this.id,
                  version        = this.version + 1,
                  timeAdded      = this.timeAdded,
-                 timeModified   = Some(DateTime.now),
+                 timeModified   = Some(OffsetDateTime.now),
                  courierName    = this.courierName,
                  trackingNumber = this.trackingNumber,
                  fromCentreId   = this.fromCentreId,
@@ -626,17 +624,17 @@ final case class ReceivedShipment(id:             ShipmentId,
                  timeCompleted  = None)
   }
 
-  def unpack(timeUnpacked: DateTime): DomainValidation[UnpackedShipment] = {
+  def unpack(timeUnpacked: OffsetDateTime): DomainValidation[UnpackedShipment] = {
     this.timeReceived.
       toSuccessNel(TimeReceivedUndefined.toString).
       flatMap { timeReceived =>
-        if (timeUnpacked < timeReceived) {
+        if (timeUnpacked.isBefore(timeReceived)) {
           TimeUnpackedBeforeReceived.failureNel[UnpackedShipment]
         } else {
           UnpackedShipment(id             = this.id,
                            version        = this.version + 1,
                            timeAdded      = this.timeAdded,
-                           timeModified   = Some(DateTime.now),
+                           timeModified   = Some(OffsetDateTime.now),
                            courierName    = this.courierName,
                            trackingNumber = this.trackingNumber,
                            fromCentreId   = this.fromCentreId,
@@ -656,19 +654,19 @@ final case class ReceivedShipment(id:             ShipmentId,
 
 final case class UnpackedShipment(id:             ShipmentId,
                                   version:        Long,
-                                  timeAdded:      DateTime,
-                                  timeModified:   Option[DateTime],
+                                  timeAdded:      OffsetDateTime,
+                                  timeModified:   Option[OffsetDateTime],
                                   courierName:    String,
                                   trackingNumber: String,
                                   fromCentreId:   CentreId,
                                   fromLocationId: LocationId,
                                   toCentreId:     CentreId,
                                   toLocationId:   LocationId,
-                                  timePacked:     Option[DateTime],
-                                  timeSent:       Option[DateTime],
-                                  timeReceived:   Option[DateTime],
-                                  timeUnpacked:   Option[DateTime],
-                                  timeCompleted:  Option[DateTime])
+                                  timePacked:     Option[OffsetDateTime],
+                                  timeSent:       Option[OffsetDateTime],
+                                  timeReceived:   Option[OffsetDateTime],
+                                  timeUnpacked:   Option[OffsetDateTime],
+                                  timeCompleted:  Option[OffsetDateTime])
     extends { val state: EntityState = Shipment.unpackedState }
     with Shipment
     with ShipmentValidations {
@@ -677,7 +675,7 @@ final case class UnpackedShipment(id:             ShipmentId,
     ReceivedShipment(id             = this.id,
                      version        = this.version + 1,
                      timeAdded      = this.timeAdded,
-                     timeModified   = Some(DateTime.now),
+                     timeModified   = Some(OffsetDateTime.now),
                      courierName    = this.courierName,
                      trackingNumber = this.trackingNumber,
                      fromCentreId   = this.fromCentreId,
@@ -691,17 +689,17 @@ final case class UnpackedShipment(id:             ShipmentId,
                      timeCompleted  = None)
   }
 
-  def complete(timeCompleted: DateTime): DomainValidation[CompletedShipment] = {
+  def complete(timeCompleted: OffsetDateTime): DomainValidation[CompletedShipment] = {
     this.timeUnpacked.
       toSuccessNel(TimeReceivedUndefined.toString).
       flatMap { timeUnpacked =>
-        if (timeCompleted < timeUnpacked) {
+        if (timeCompleted.isBefore(timeUnpacked)) {
           TimeCompletedBeforeUnpacked.failureNel[CompletedShipment]
         } else {
           CompletedShipment(id             = this.id,
                             version        = this.version + 1,
                             timeAdded      = this.timeAdded,
-                            timeModified   = Some(DateTime.now),
+                            timeModified   = Some(OffsetDateTime.now),
                             courierName    = this.courierName,
                             trackingNumber = this.trackingNumber,
                             fromCentreId   = this.fromCentreId,
@@ -720,19 +718,19 @@ final case class UnpackedShipment(id:             ShipmentId,
 
 final case class CompletedShipment(id:             ShipmentId,
                                    version:        Long,
-                                   timeAdded:      DateTime,
-                                   timeModified:   Option[DateTime],
+                                   timeAdded:      OffsetDateTime,
+                                   timeModified:   Option[OffsetDateTime],
                                    courierName:    String,
                                    trackingNumber: String,
                                    fromCentreId:   CentreId,
                                    fromLocationId: LocationId,
                                    toCentreId:     CentreId,
                                    toLocationId:   LocationId,
-                                   timePacked:     Option[DateTime],
-                                   timeSent:       Option[DateTime],
-                                   timeReceived:   Option[DateTime],
-                                   timeUnpacked:   Option[DateTime],
-                                   timeCompleted:  Option[DateTime])
+                                   timePacked:     Option[OffsetDateTime],
+                                   timeSent:       Option[OffsetDateTime],
+                                   timeReceived:   Option[OffsetDateTime],
+                                   timeUnpacked:   Option[OffsetDateTime],
+                                   timeCompleted:  Option[OffsetDateTime])
     extends { val state: EntityState = Shipment.completedState }
     with Shipment
     with ShipmentValidations {
@@ -741,7 +739,7 @@ final case class CompletedShipment(id:             ShipmentId,
     UnpackedShipment(id             = this.id,
                      version        = this.version + 1,
                      timeAdded      = this.timeAdded,
-                     timeModified   = Some(DateTime.now),
+                     timeModified   = Some(OffsetDateTime.now),
                      courierName    = this.courierName,
                      trackingNumber = this.trackingNumber,
                      fromCentreId   = this.fromCentreId,
@@ -760,19 +758,19 @@ final case class CompletedShipment(id:             ShipmentId,
 
 final case class LostShipment(id:             ShipmentId,
                               version:        Long,
-                              timeAdded:      DateTime,
-                              timeModified:   Option[DateTime],
+                              timeAdded:      OffsetDateTime,
+                              timeModified:   Option[OffsetDateTime],
                               courierName:    String,
                               trackingNumber: String,
                               fromCentreId:   CentreId,
                               fromLocationId: LocationId,
                               toCentreId:     CentreId,
                               toLocationId:   LocationId,
-                              timePacked:     Option[DateTime],
-                              timeSent:       Option[DateTime],
-                              timeReceived:   Option[DateTime],
-                              timeUnpacked:   Option[DateTime],
-                              timeCompleted:  Option[DateTime])
+                              timePacked:     Option[OffsetDateTime],
+                              timeSent:       Option[OffsetDateTime],
+                              timeReceived:   Option[OffsetDateTime],
+                              timeUnpacked:   Option[OffsetDateTime],
+                              timeCompleted:  Option[OffsetDateTime])
     extends { val state: EntityState = Shipment.lostState }
     with Shipment
     with ShipmentValidations {
@@ -781,7 +779,7 @@ final case class LostShipment(id:             ShipmentId,
     SentShipment(id             = this.id,
                  version        = this.version + 1,
                  timeAdded      = this.timeAdded,
-                 timeModified   = Some(DateTime.now),
+                 timeModified   = Some(OffsetDateTime.now),
                  courierName    = this.courierName,
                  trackingNumber = this.trackingNumber,
                  fromCentreId   = this.fromCentreId,

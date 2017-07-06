@@ -17,7 +17,6 @@ import org.biobank.infrastructure.event.AccessEvents._
 import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.{Environment, Mode}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -46,6 +45,7 @@ trait AccessService extends BbwebService {
 
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: ActorRef,
                                    val accessItemRepository:                AccessItemRepository,
                                    val membershipRepository:                MembershipRepository,
@@ -53,6 +53,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                                    val studyRepository:                     StudyRepository,
                                    val centreRepository:                    CentreRepository,
                                    val environment:                         Environment)
+                               (implicit executionContext: BbwebExecutionContext)
     extends AccessService
     with BbwebServiceImpl {
 

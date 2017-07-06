@@ -1,14 +1,7 @@
 package org.biobank.domain.study
 
-import org.biobank.domain.{
-  ConcurrencySafeEntity,
-  DomainValidation,
-  HasUniqueName,
-  HasOptionalDescription
-}
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
-
+import java.time.OffsetDateTime
+import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, HasUniqueName, HasOptionalDescription }
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -26,8 +19,8 @@ import scalaz.Scalaz._
 final case class ProcessingType(studyId:      StudyId,
                                 id:           ProcessingTypeId,
                                 version:      Long,
-                                timeAdded:    DateTime,
-                                timeModified: Option[DateTime],
+                                timeAdded:    OffsetDateTime,
+                                timeModified: Option[OffsetDateTime],
                                 name:         String,
                                 description:  Option[String],
                                 enabled:      Boolean)
@@ -46,7 +39,7 @@ final case class ProcessingType(studyId:      StudyId,
                                   name,
                                   description,
                                   enabled)
-    v.map(_.copy(timeModified = Some(DateTime.now)))
+    v.map(_.copy(timeModified = Some(OffsetDateTime.now)))
   }
 
   override def toString: String =
@@ -80,7 +73,7 @@ object ProcessingType {
       case (_, _, _, _, _) => ProcessingType(studyId,
                                              id,
                                              version,
-                                             DateTime.now,
+                                             OffsetDateTime.now,
                                              None,
                                              name,
                                              description,

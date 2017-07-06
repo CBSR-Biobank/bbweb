@@ -2,14 +2,14 @@ package org.biobank.service.studies
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import org.biobank.domain._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study._
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -170,7 +170,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     } yield CollectionEventTypeEvent(cetId.id).update(
       _.studyId                   := studyId.id,
       _.sessionUserId             := cmd.sessionUserId,
-      _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                      := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.added.name                := newItem.name,
       _.added.optionalDescription := newItem.description,
       _.added.recurring           := newItem.recurring)
@@ -184,7 +184,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       CollectionEventTypeEvent(ceventType.id.id).update(
         _.studyId               := ceventType.studyId.id,
         _.sessionUserId         := cmd.sessionUserId,
-        _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.removed.version       := cmd.expectedVersion).successNel[String]
     }
   }
@@ -197,7 +197,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     } yield CollectionEventTypeEvent(newItem.id.id).update(
       _.studyId               := newItem.studyId.id,
       _.sessionUserId         := cmd.sessionUserId,
-      _.time                  := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                  := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.nameUpdated.version   := cmd.expectedVersion,
       _.nameUpdated.name      := newItem.name)
   }
@@ -209,7 +209,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                                := cet.studyId.id,
         _.sessionUserId                          := cmd.sessionUserId,
-        _.time                                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                   := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.descriptionUpdated.version             := cmd.expectedVersion,
         _.descriptionUpdated.optionalDescription := cmd.description)
     }
@@ -222,7 +222,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                    := cet.studyId.id,
         _.sessionUserId              := cmd.sessionUserId,
-        _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                       := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.recurringUpdated.version   := cmd.expectedVersion,
         _.recurringUpdated.recurring := cmd.recurring)
     }
@@ -245,7 +245,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                            := cet.studyId.id,
       _.sessionUserId                      := cmd.sessionUserId,
-      _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                               := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.annotationTypeAdded.version        := cmd.expectedVersion,
       _.annotationTypeAdded.annotationType := EventUtils.annotationTypeToEvent(annotationType))
   }
@@ -266,7 +266,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                              := cet.studyId.id,
         _.sessionUserId                        := cmd.sessionUserId,
-        _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                 := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.annotationTypeUpdated.version        := cmd.expectedVersion,
         _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
     }
@@ -279,7 +279,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                        := cet.studyId.id,
         _.sessionUserId                  := cmd.sessionUserId,
-        _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.annotationTypeRemoved.version  := cmd.expectedVersion,
         _.annotationTypeRemoved.id       := cmd.annotationTypeId)
     }
@@ -302,7 +302,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                      := cet.studyId.id,
       _.sessionUserId                                := cmd.sessionUserId,
-      _.time                                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.specimenDescriptionAdded.version             := cmd.expectedVersion,
       _.specimenDescriptionAdded.specimenDescription := EventUtils.specimenDescriptionToEvent(specimenDesc))
   }
@@ -327,7 +327,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                        := cet.studyId.id,
       _.sessionUserId                                  := cmd.sessionUserId,
-      _.time                                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                                           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.specimenDescriptionUpdated.version             := cmd.expectedVersion,
       _.specimenDescriptionUpdated.specimenDescription := EventUtils.specimenDescriptionToEvent(specimenDesc))
   }
@@ -339,7 +339,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                             := cet.studyId.id,
         _.sessionUserId                       := cmd.sessionUserId,
-        _.time                                := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.specimenDescriptionRemoved.version  := cmd.expectedVersion,
         _.specimenDescriptionRemoved.id       := cmd.specimenDescriptionId)
     }
@@ -362,7 +362,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   private def onValidEventAndVersion(event:        CollectionEventTypeEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)
-                                    (applyEvent: (CollectionEventType, DateTime) => ServiceValidation[Boolean])
+                                    (applyEvent: (CollectionEventType, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -373,7 +373,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
           if (cet.version != eventVersion) {
             log.error(s"event version check failed: cet version: ${cet.version}, event: $event")
           } else {
-            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val eventTime = OffsetDateTime.parse(event.getTime)
             val update = applyEvent(cet, eventTime)
 
             if (update.isFailure) {
@@ -406,7 +406,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       }
 
       v.foreach { ct =>
-        val timeAdded = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+        val timeAdded = OffsetDateTime.parse(event.getTime)
         collectionEventTypeRepository.put(ct.copy(timeAdded = timeAdded))
       }
     }
@@ -423,7 +423,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   }
 
   private def storeIfValid(validation: ServiceValidation[CollectionEventType],
-                           eventTime: DateTime): ServiceValidation[Boolean] = {
+                           eventTime: OffsetDateTime): ServiceValidation[Boolean] = {
     validation.foreach { c =>
       collectionEventTypeRepository.put(c.copy(timeModified = Some(eventTime)))
     }

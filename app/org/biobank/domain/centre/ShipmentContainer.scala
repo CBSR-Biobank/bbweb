@@ -1,10 +1,10 @@
 package org.biobank.domain.centre
 
+import java.time.OffsetDateTime
 import org.biobank._
 import org.biobank.domain._
 import org.biobank.domain.centre.ShipmentItemState._
 import org.biobank.domain.containers.ContainerId
-import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -27,10 +27,10 @@ object ShipmentContainerId {
  * [org.biobank.domain.centre.Shipment].
  *
  */
-final case class ShipmentContainer(id:          ShipmentContainerId,
+final case class ShipmentContainer(id:           ShipmentContainerId,
                                    version:      Long,
-                                   timeAdded:    DateTime,
-                                   timeModified: Option[DateTime],
+                                   timeAdded:    OffsetDateTime,
+                                   timeModified: Option[OffsetDateTime],
                                    shipmentId:   ShipmentId,
                                    containerId:  ContainerId,
                                    state:        ShipmentItemState)
@@ -54,7 +54,7 @@ object ShipmentContainer {
              containerId,
              state).map(_ => ShipmentContainer(id,
                                                version,
-                                               DateTime.now,
+                                               OffsetDateTime.now,
                                                None,
                                                shipmentId,
                                                containerId,

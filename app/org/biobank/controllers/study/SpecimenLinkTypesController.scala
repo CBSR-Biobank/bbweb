@@ -8,16 +8,17 @@ import org.biobank.service.studies.StudiesService
 import play.api.Logger
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
-import play.api.mvc.Action
+import play.api.mvc.{Action, ControllerComponents}
 import scala.concurrent.ExecutionContext
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class SpecimenLinkTypesController @Inject() (val action:         BbwebAction,
+class SpecimenLinkTypesController @Inject() (controllerComponents: ControllerComponents,
+                                             val action:         BbwebAction,
                                              val env:            Environment,
                                              val studiesService: StudiesService)
                                (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   val log: Logger = Logger(this.getClass)
 

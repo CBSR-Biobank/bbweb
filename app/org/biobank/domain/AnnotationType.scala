@@ -92,7 +92,7 @@ trait AnnotationTypeValidations {
        validateMaxValueCount(maxValueCount) |@|
        validateOptions(options) |@|
        validateSelectParams(valueType, maxValueCount, options)) {
-      case (_, _, _, _, _) => true
+      case _ => true
     }
   }
 

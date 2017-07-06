@@ -1,9 +1,8 @@
 package org.biobank.domain.study
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.domain._
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -49,8 +48,8 @@ trait CollectionEventTypeValidations {
 final case class CollectionEventType(studyId:              StudyId,
                                      id:                   CollectionEventTypeId,
                                      version:              Long,
-                                     timeAdded:            DateTime,
-                                     timeModified:         Option[DateTime],
+                                     timeAdded:            OffsetDateTime,
+                                     timeModified:         Option[OffsetDateTime],
                                      name:                 String,
                                      description:          Option[String],
                                      recurring:            Boolean,
@@ -67,7 +66,7 @@ final case class CollectionEventType(studyId:              StudyId,
     validateString(name, NameRequired).map { _ =>
       copy(name         = name,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -75,14 +74,14 @@ final case class CollectionEventType(studyId:              StudyId,
     validateNonEmptyOption(description, InvalidDescription).map { _ =>
       copy(description  = description,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
   def withRecurring(recurring: Boolean): DomainValidation[CollectionEventType] = {
     copy(recurring   = recurring,
          version      = version + 1,
-         timeModified = Some(DateTime.now)).successNel[String]
+         timeModified = Some(OffsetDateTime.now)).successNel[String]
   }
 
   def withAnnotationType(annotationType: AnnotationType)
@@ -92,7 +91,7 @@ final case class CollectionEventType(studyId:              StudyId,
       val newAnnotationTypes = annotationTypes - annotationType + annotationType
       copy(annotationTypes = newAnnotationTypes,
            version         = version + 1,
-           timeModified    = Some(DateTime.now))
+           timeModified    = Some(OffsetDateTime.now))
     }
   }
 
@@ -101,7 +100,7 @@ final case class CollectionEventType(studyId:              StudyId,
       val newAnnotationTypes = annotationTypes - annotationType
       copy(annotationTypes = newAnnotationTypes,
            version         = version + 1,
-           timeModified    = Some(DateTime.now))
+           timeModified    = Some(OffsetDateTime.now))
     }
   }
 
@@ -121,7 +120,7 @@ final case class CollectionEventType(studyId:              StudyId,
       specValid <- CollectionSpecimenDescription.validate(specimenDesc)
     } yield copy(specimenDescriptions = specimenDescriptions - specimenDesc + specimenDesc,
                  version       = version + 1,
-                 timeModified  = Some(DateTime.now))
+                 timeModified  = Some(OffsetDateTime.now))
   }
 
   def removeSpecimenDescription(specimenDescId: SpecimenDescriptionId): DomainValidation[CollectionEventType] = {
@@ -132,7 +131,7 @@ final case class CollectionEventType(studyId:              StudyId,
       { specimenDesc =>
         copy(specimenDescriptions = specimenDescriptions - specimenDesc,
              version       = version + 1,
-             timeModified  = Some(DateTime.now)).successNel[DomainError]
+             timeModified  = Some(OffsetDateTime.now)).successNel[DomainError]
       }
   }
 
@@ -184,7 +183,7 @@ object CollectionEventType extends CollectionEventTypeValidations {
       case (_, _, _, _, _, _, _) => CollectionEventType(studyId,
                                                         id,
                                                         version,
-                                                        DateTime.now,
+                                                        OffsetDateTime.now,
                                                         None,
                                                         name,
                                                         description,

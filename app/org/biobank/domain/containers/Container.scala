@@ -1,9 +1,8 @@
 package org.biobank.domain.containers
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.domain._
-import org.joda.time.DateTime
-
 import play.api.libs.json._
 
 trait ContainerValidations {
@@ -57,8 +56,8 @@ object Container {
 
 final case class StorageContainer(id:              ContainerId,
                                   version:         Long,
-                                  timeAdded:       DateTime,
-                                  timeModified:    Option[DateTime],
+                                  timeAdded:       OffsetDateTime,
+                                  timeModified:    Option[OffsetDateTime],
                                   inventoryId:     String,
                                   containerTypeId: ContainerTypeId,
                                   parentId:        ContainerId,
@@ -67,8 +66,8 @@ final case class StorageContainer(id:              ContainerId,
 
 final case class SpecimenContainer(id:              ContainerId,
                                    version:         Long,
-                                   timeAdded:       DateTime,
-                                   timeModified:    Option[DateTime],
+                                   timeAdded:       OffsetDateTime,
+                                   timeModified:    Option[OffsetDateTime],
                                    inventoryId:     String,
                                    containerTypeId: ContainerTypeId,
                                    parentId:        ContainerId,

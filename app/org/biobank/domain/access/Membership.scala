@@ -1,11 +1,10 @@
 package org.biobank.domain.access
 
+import java.time.OffsetDateTime
 import org.biobank.domain._
 import org.biobank.domain.user.{User, UserId}
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.centre.CentreId
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -65,8 +64,8 @@ final case class MembershipCentreInfo(allCentres: Boolean, centreIds: Set[Centre
 
 final case class Membership(id:           MembershipId,
                             version:      Long,
-                            timeAdded:    DateTime,
-                            timeModified: Option[DateTime],
+                            timeAdded:    OffsetDateTime,
+                            timeModified: Option[OffsetDateTime],
                             userIds:      Set[UserId],
                             studyInfo:    MembershipStudyInfo,
                             centreInfo:   MembershipCentreInfo)
@@ -77,43 +76,43 @@ final case class Membership(id:           MembershipId,
   def addUser(user: User): Membership = {
     copy(userIds      = userIds + user.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def hasAllStudies(): Membership = {
     copy(studyInfo    = studyInfo.hasAllStudies,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def addStudy(id: StudyId): Membership = {
     copy(studyInfo    = studyInfo.addStudy(id),
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def removeStudy(id: StudyId): Membership = {
     copy(studyInfo    = studyInfo.removeStudy(id),
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def hasAllCentres(setting: Boolean): Membership = {
     copy(centreInfo   = centreInfo.hasAllCentres,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def addCentre(id: CentreId): Membership = {
     copy(centreInfo   = centreInfo.addCentre(id),
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def removeCentre(id: CentreId): Membership = {
     copy(centreInfo   = centreInfo.removeCentre(id),
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   /**
@@ -161,8 +160,8 @@ object Membership {
 
   def create(id:           MembershipId,
              version:      Long,
-             timeAdded:    DateTime,
-             timeModified: Option[DateTime],
+             timeAdded:    OffsetDateTime,
+             timeModified: Option[OffsetDateTime],
              userIds:      Set[UserId],
              allStudies:   Boolean,
              allCentres:   Boolean,

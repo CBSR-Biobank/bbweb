@@ -1,18 +1,11 @@
 package org.biobank.domain.study
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
-import org.biobank.domain.{
-  ConcurrencySafeEntity,
-  DomainValidation
-}
+import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
 import org.biobank.infrastructure._
-import org.biobank.infrastructure.JsonUtils._
 import org.biobank.domain.containers.ContainerTypeId
-import org.joda.time.DateTime
-
 import play.api.libs.json._
-//import scalaz._
-//import Scalaz._
 
 trait SpecimenLinkTypeValidations {
 
@@ -59,8 +52,8 @@ trait SpecimenLinkTypeValidations {
 final case class SpecimenLinkType(processingTypeId:      ProcessingTypeId,
                                   id:                    SpecimenLinkTypeId,
                                   version:               Long,
-                                  timeAdded:             DateTime,
-                                  timeModified:          Option[DateTime],
+                                  timeAdded:             OffsetDateTime,
+                                  timeModified:          Option[OffsetDateTime],
                                   expectedInputChange:   BigDecimal,
                                   expectedOutputChange:  BigDecimal,
                                   inputCount:            Int,
@@ -96,7 +89,7 @@ final case class SpecimenLinkType(processingTypeId:      ProcessingTypeId,
                                     inputContainerTypeId  = inputContainerTypeId,
                                     outputContainerTypeId = outputContainerTypeId,
                                     annotationTypeData    = annotationTypeData)
-    v.map(_.copy(timeModified = Some(DateTime.now)))
+    v.map(_.copy(timeModified = Some(OffsetDateTime.now)))
   }
 
   override def toString: String =

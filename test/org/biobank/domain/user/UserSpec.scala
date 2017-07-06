@@ -1,8 +1,8 @@
 package org.biobank.domain.user
 
+import java.time.OffsetDateTime
 import org.biobank.domain.{DomainSpec, DomainValidation}
 import org.biobank.fixture.NameGenerator
-import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 
 /**
@@ -41,7 +41,7 @@ class UserSpec extends DomainSpec {
           'state     (User.registeredState.id)
         )
 
-        checkTimeStamps(u, DateTime.now, None)
+        checkTimeStamps(u, OffsetDateTime.now, None)
       }
     }
 
@@ -62,7 +62,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, DateTime.now)
+        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
       }
     }
 
@@ -101,7 +101,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, DateTime.now)
+        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
       }
     }
 
@@ -123,7 +123,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, DateTime.now)
+        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
       }
     }
 
@@ -146,7 +146,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, DateTime.now)
+        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
       }
     }
 
@@ -168,7 +168,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, DateTime.now)
+        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
       }
     }
 
@@ -189,7 +189,7 @@ class UserSpec extends DomainSpec {
           'state     (User.lockedState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, DateTime.now)
+        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
       }
     }
   }
@@ -213,7 +213,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, DateTime.now)
+        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
       }
     }
   }

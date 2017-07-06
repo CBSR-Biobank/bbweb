@@ -1,6 +1,6 @@
 package org.biobank.controllers.participants
 
-import com.github.nscala_time.time.Imports._
+import java.time.OffsetDateTime
 import org.biobank.controllers._
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.participants._
@@ -15,7 +15,6 @@ import scala.language.reflectiveCalls
 class SpecimensControllerSpec extends ControllerFixture with JsonHelper with SpecimenSpecFixtures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.JsonUtils._
 
   def uri(): String = "/participants/cevents/spcs"
 
@@ -183,7 +182,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
       it("list specimens sorted by time created") {
         val e = createEntities
         val specimens = List(1, 2).map { hour =>
-            factory.createUsableSpecimen.copy(timeCreated = DateTime.now.hour(hour))
+            factory.createUsableSpecimen.copy(timeCreated = OffsetDateTime.now.withHour(hour))
           }
 
         storeSpecimens(e.cevent, specimens)
@@ -348,8 +347,8 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
             'amount                (specimen.amount)
           )
 
-          (repoSpecimen.timeCreated to specimen.timeCreated).millis must be < TimeCoparisonMillis
-          checkTimeStamps(repoSpecimen, DateTime.now, None)
+          checkTimeStamps(repoSpecimen.timeCreated, specimen.timeCreated, TimeCoparisonSeconds)
+          checkTimeStamps(repoSpecimen, OffsetDateTime.now, None)
         }
       }
 

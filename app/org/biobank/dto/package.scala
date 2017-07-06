@@ -1,10 +1,9 @@
 package org.biobank
 
+import java.time.OffsetDateTime
 import org.biobank.domain.EntityState
 import org.biobank.domain.access.RoleId._
 import org.biobank.domain.centre.Shipment
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
 import play.api.libs.json._
 
 package dto {
@@ -38,8 +37,8 @@ package dto {
 
   final case class UserDto(id:           String,
                            version:      Long,
-                           timeAdded:    DateTime,
-                           timeModified: Option[DateTime],
+                           timeAdded:    OffsetDateTime,
+                           timeModified: Option[OffsetDateTime],
                            state:        EntityState,
                            name:         String,
                            email:        String,
@@ -120,13 +119,13 @@ package dto {
                                specimenDescriptionId:   String,
                                specimenDescriptionName: String,
                                version:                 Long,
-                               timeAdded:               DateTime,
-                               timeModified:            Option[DateTime],
+                               timeAdded:               OffsetDateTime,
+                               timeModified:            Option[OffsetDateTime],
                                originLocationInfo:      CentreLocationInfo,
                                locationInfo:            CentreLocationInfo,
                                containerId:             Option[String],
                                positionId:              Option[String],
-                               timeCreated:             DateTime,
+                               timeCreated:             OffsetDateTime,
                                amount:                  BigDecimal,
                                units:                   String)
 
@@ -138,18 +137,18 @@ package dto {
 
   final case class ShipmentDto(id:               String,
                                version:          Long,
-                               timeAdded:        DateTime,
-                               timeModified:     Option[DateTime],
+                               timeAdded:        OffsetDateTime,
+                               timeModified:     Option[OffsetDateTime],
                                state:            String,
                                courierName:      String,
                                trackingNumber:   String,
                                fromLocationInfo: CentreLocationInfo,
                                toLocationInfo:   CentreLocationInfo,
-                               timePacked:       Option[DateTime],
-                               timeSent:         Option[DateTime],
-                               timeReceived:     Option[DateTime],
-                               timeUnpacked:     Option[DateTime],
-                               timeCompleted:    Option[DateTime],
+                               timePacked:       Option[OffsetDateTime],
+                               timeSent:         Option[OffsetDateTime],
+                               timeReceived:     Option[OffsetDateTime],
+                               timeUnpacked:     Option[OffsetDateTime],
+                               timeCompleted:    Option[OffsetDateTime],
                                specimenCount:    Int,
                                containerCount:   Int)
 
@@ -207,8 +206,8 @@ package dto {
 
   final case class ShipmentSpecimenDto(id:                  String,
                                        version:             Long,
-                                       timeAdded:           DateTime,
-                                       timeModified:        Option[DateTime],
+                                       timeAdded:           OffsetDateTime,
+                                       timeModified:        Option[OffsetDateTime],
                                        state:               String,
                                        shipmentId:          String,
                                        shipmentContainerId: Option[String],

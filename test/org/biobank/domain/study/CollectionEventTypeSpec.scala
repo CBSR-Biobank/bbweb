@@ -1,6 +1,6 @@
 package org.biobank.domain.study
 
-import com.github.nscala_time.time.Imports._
+import java.time.OffsetDateTime
 import org.biobank.domain._
 import org.biobank.fixture.NameGenerator
 import org.slf4j.LoggerFactory
@@ -42,7 +42,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         cet.specimenDescriptions must have size 0
         cet.annotationTypes must have size 0
-        checkTimeStamps(cet, DateTime.now, None)
+        checkTimeStamps(cet, OffsetDateTime.now, None)
       }
     }
 
@@ -64,7 +64,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDescriptions must have size 0
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 
@@ -86,7 +86,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDescriptions must have size 0
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 
@@ -108,7 +108,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
           updatedCet.specimenDescriptions must have size 0
           updatedCet.annotationTypes must have size 0
-          checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
+          checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
         }
       }
     }
@@ -175,7 +175,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDescriptions must have size 1
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 
@@ -198,7 +198,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDescriptions must have size 1
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 
@@ -220,7 +220,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDescriptions must have size 0
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 

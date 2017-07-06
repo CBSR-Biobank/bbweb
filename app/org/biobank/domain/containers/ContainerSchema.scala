@@ -1,10 +1,8 @@
 package org.biobank.domain.containers
 
+import java.time.OffsetDateTime
 import org.biobank.domain._
-import org.biobank.infrastructure.JsonUtils._
-
 import play.api.libs.json._
-import org.joda.time.DateTime
 import scalaz.Scalaz._
 
 trait ContainerSchemaValidations {
@@ -19,8 +17,8 @@ trait ContainerSchemaValidations {
  */
 final case class ContainerSchema(id:           ContainerSchemaId,
                                  version:      Long,
-                                 timeAdded:    DateTime,
-                                 timeModified: Option[DateTime],
+                                 timeAdded:    OffsetDateTime,
+                                 timeModified: Option[OffsetDateTime],
                                  name:         String,
                                  description:  Option[String],
                                  shared:       Boolean)
@@ -71,7 +69,7 @@ object ContainerSchema extends ContainerSchemaValidations {
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription)) {
-      case (_, _, _, _) => ContainerSchema(id, version, DateTime.now, None, name, description, shared)
+      case (_, _, _, _) => ContainerSchema(id, version, OffsetDateTime.now, None, name, description, shared)
     }
   }
 

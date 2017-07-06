@@ -1,12 +1,10 @@
 package org.biobank.infrastructure.command
 
+import java.time.OffsetDateTime
 import org.biobank.infrastructure.command.Commands._
-import org.joda.time.DateTime
 import play.api.libs.json._
 
 object ShipmentCommands {
-
-  import org.biobank.infrastructure.JsonUtils._
 
   trait ShipmentCommand extends Command with HasSessionUserId
 
@@ -51,31 +49,31 @@ object ShipmentCommands {
   final case class PackShipmentCmd(sessionUserId:   String,
                                    id:              String, // shipment ID
                                    expectedVersion: Long,
-                                   datetime:        DateTime)
+                                   datetime:        OffsetDateTime)
       extends ShipmentModifyCommand
 
   final case class SendShipmentCmd(sessionUserId:   String,
                                    id:              String, // shipment ID
                                    expectedVersion: Long,
-                                   datetime:        DateTime)
+                                   datetime:        OffsetDateTime)
       extends ShipmentModifyCommand
 
   final case class ReceiveShipmentCmd(sessionUserId: String,
                                    id:               String, // shipment ID
                                    expectedVersion:  Long,
-                                   datetime:         DateTime)
+                                   datetime:         OffsetDateTime)
       extends ShipmentModifyCommand
 
   final case class UnpackShipmentCmd(sessionUserId:   String,
                                      id:              String, // shipment ID
                                      expectedVersion: Long,
-                                     datetime:        DateTime)
+                                     datetime:        OffsetDateTime)
       extends ShipmentModifyCommand
 
   final case class CompleteShipmentCmd(sessionUserId:   String,
                                        id:              String, // shipment ID
                                        expectedVersion: Long,
-                                       datetime:        DateTime)
+                                       datetime:        OffsetDateTime)
       extends ShipmentModifyCommand
 
   final case class LostShipmentCmd(sessionUserId:   String,
@@ -86,15 +84,15 @@ object ShipmentCommands {
   final case class ShipmentSkipStateToSentCmd(sessionUserId:   String,
                                               id:              String, // shipment ID
                                               expectedVersion: Long,
-                                              timePacked:      DateTime,
-                                              timeSent:        DateTime)
+                                              timePacked:      OffsetDateTime,
+                                              timeSent:        OffsetDateTime)
       extends ShipmentModifyCommand
 
   final case class ShipmentSkipStateToUnpackedCmd(sessionUserId:   String,
                                                   id:              String, // shipment ID
                                                   expectedVersion: Long,
-                                                  timeReceived:    DateTime,
-                                                  timeUnpacked:    DateTime)
+                                                  timeReceived:    OffsetDateTime,
+                                                  timeUnpacked:    OffsetDateTime)
       extends ShipmentModifyCommand
 
   final case class ShipmentRemoveCmd(sessionUserId:   String,

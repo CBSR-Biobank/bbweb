@@ -2,12 +2,12 @@ package org.biobank.service.participants
 
 import akka.actor.ActorRef
 import akka.pattern._
+import java.time.OffsetDateTime
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
 import org.biobank.domain.participants._
 import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
 import org.biobank.service.ServiceValidation
-import org.joda.time.DateTime
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -54,7 +54,7 @@ class CollectionEventsProcessorSpec extends ProcessorTestFixture {
       val cmd = AddCollectionEventCmd(sessionUserId         = nameGenerator.next[String],
                                       participantId         = participant.id.id,
                                       collectionEventTypeId = ceventType.id.id,
-                                      timeCompleted         = DateTime.now,
+                                      timeCompleted         = OffsetDateTime.now,
                                       visitNumber           = 1,
                                       annotations           = List.empty)
       studyRepository.put(study)

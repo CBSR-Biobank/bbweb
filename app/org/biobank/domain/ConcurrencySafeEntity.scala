@@ -1,7 +1,8 @@
 package org.biobank.domain
 
+import java.time.OffsetDateTime
 import play.api.libs.json._
-import org.joda.time.DateTime
+import play.api.libs.json._
 import scalaz.Scalaz._
 
 /**
@@ -19,10 +20,10 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
   val versionOption: Option[Long] = if (version < 0) None else Some(version)
 
   /** The date and time when this entity was added to the system. */
-  val timeAdded: DateTime
+  val timeAdded: OffsetDateTime
 
   /** The date and time when this entity was last updated. */
-  val timeModified: Option[DateTime]
+  val timeModified: Option[OffsetDateTime]
 
   protected def invalidVersion(expected: Long) =
     InvalidVersion(s"${this.getClass.getSimpleName}: expected version doesn't match current version: id: $id, version: $version, expectedVersion: $expected")
@@ -35,7 +36,6 @@ trait ConcurrencySafeEntity[T] extends IdentifiedDomainObject[T] {
 }
 
 object ConcurrencySafeEntity {
-  import org.biobank.infrastructure.JsonUtils._
 
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   def toJson[T <: ConcurrencySafeEntity[_]](entity: T): JsObject = {

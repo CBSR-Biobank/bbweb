@@ -1,11 +1,10 @@
 package org.biobank
 
 import akka.stream.Materializer
+import java.time.{OffsetDateTime, ZoneOffset}
 import javax.inject._
 import org.biobank.domain.user._
-import org.joda.time.{DateTime, DateTimeZone}
-import play.api.{Configuration}
-import play.filters.gzip.GzipFilter
+import play.api.{Configuration, Logger}
 
 /**
  * This is a trait so that it can be used by tests also.
@@ -15,55 +14,24 @@ import play.filters.gzip.GzipFilter
 class Global @Inject()(implicit val mat: Materializer,
                        configuration: Configuration) {
 
-  @SuppressWarnings(Array("org.wartremover.warts.PublicInference"))
-  val filter = new GzipFilter(shouldGzip = (request, response) => {
-                                  response.body.contentType.exists(_.startsWith("text/html"))
-                   })
-  checkEmailConfig
-  createSqlDdlScripts
+  val log: Logger = Logger(this.getClass)
 
-  def checkEmailConfig(): Unit = {
-    if (configuration.getString("play.mailer.host").isEmpty) {
+  def checkConfig(): Unit = {
+    if (configuration.get[String]("play.mailer.host").isEmpty) {
       throw new RuntimeException("smtp server information needs to be set in email.conf")
+    }
+
+    if (configuration.get[String]("admin.email").isEmpty) {
+      throw new RuntimeException("administrator email needs to be set in application.conf")
+    }
+
+    val adminUrl = configuration.get[String]("admin.url")
+    if (adminUrl.isEmpty) {
+      throw new RuntimeException("administrator url needs to be set in application.conf")
     }
   }
 
-  /**
-   * Creates SQL DDL scripts on application start-up.
-   */
-  private def createSqlDdlScripts(): Unit = {
-    // if (app.mode != Mode.Prod) {
-    //   app.configuration.getConfig(configKey).foreach { configuration =>
-    //     configuration.keys.foreach { database =>
-    //       val databaseConfiguration = configuration.getString(database).getOrElse {
-    //         throw configuration.reportError(database, "No config: key " + database, None)
-    //       }
-    //       val packageNames = databaseConfiguration.spl"," in new WithApplication(fakeApplication()).toSet
-    //       val classloader = app.classloader
-    //       val ddls = TableScanner.reflectAllDDLMethods(packageNames, classloader)
-
-    //       val scriptDirectory = app.getFile(ScriptDirectory + database)
-    //       Files.createDirectory(scriptDirectory)
-
-    //       writeScript(ddls.map(_.createStatements), scriptDirectory, CreateScript)
-    //       writeScript(ddls.map(_.dropStatements), scriptDirectory, DropScript)
-    //     }
-    //   }
-    // }
-  }
-
-  /**
-   * Writes the given DDL statements to a file.
-   */
-  // private def writeScript(
-  //   ddlStatements: Seq[Iterator[String]],
-  //   directory: File,
-  //   fileName: String): Unit = {
-  //   // val createScript = new File(directory, fileName)
-  //   // val createSql = ddlStatements.flatten.mkString("\n\n")
-  //   // Files.writeFileIfChanged(createScript, ScriptHeader + createSql)
-  // }
-
+  checkConfig
 }
 
 object Global {
@@ -72,8 +40,8 @@ object Global {
 
   val DefaultUserId: UserId = UserId(DefaultUserEmail)
 
-  val StartOfTime: DateTime = new DateTime(1, 1, 1, 0, 0, 0, DateTimeZone.UTC)
+  val StartOfTime: OffsetDateTime = OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
 
-  val EndOfTime: DateTime = new DateTime(9999, 1, 1, 0, 0, 0, DateTimeZone.UTC)
+  val EndOfTime: OffsetDateTime = OffsetDateTime.of(9999, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
 
 }

@@ -1,10 +1,9 @@
 package org.biobank.domain.participants
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -38,9 +37,9 @@ final case class CollectionEvent(id:                    CollectionEventId,
                                  participantId:         ParticipantId,
                                  collectionEventTypeId: CollectionEventTypeId,
                                  version:               Long,
-                                 timeAdded:             DateTime,
-                                 timeModified:          Option[DateTime],
-                                 timeCompleted:         DateTime,
+                                 timeAdded:             OffsetDateTime,
+                                 timeModified:          Option[OffsetDateTime],
+                                 timeCompleted:         OffsetDateTime,
                                  visitNumber:           Int,
                                  annotations:           Set[Annotation])
     extends ConcurrencySafeEntity[CollectionEventId]
@@ -53,14 +52,14 @@ final case class CollectionEvent(id:                    CollectionEventId,
     validateMinimum(visitNumber, 1, VisitNumberInvalid).map { _ =>
       copy(visitNumber  = visitNumber,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
-  def withTimeCompleted(timeCompleted: DateTime): DomainValidation[CollectionEvent] = {
+  def withTimeCompleted(timeCompleted: OffsetDateTime): DomainValidation[CollectionEvent] = {
     copy(timeCompleted = timeCompleted,
          version         = version + 1,
-         timeModified    = Some(DateTime.now)).successNel[String]
+         timeModified    = Some(OffsetDateTime.now)).successNel[String]
   }
 
   def withAnnotation(annotation: Annotation): DomainValidation[CollectionEvent] = {
@@ -68,7 +67,7 @@ final case class CollectionEvent(id:                    CollectionEventId,
       val newAnnotations = annotations - annotation + annotation
       copy(annotations  = newAnnotations,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -77,7 +76,7 @@ final case class CollectionEvent(id:                    CollectionEventId,
       val newAnnotations = annotations - annotation
       copy(annotations  = newAnnotations,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -104,8 +103,8 @@ object CollectionEvent
              participantId:         ParticipantId,
              collectionEventTypeId: CollectionEventTypeId,
              version:               Long,
-             timeAdded:             DateTime,
-             timeCompleted:         DateTime,
+             timeAdded:             OffsetDateTime,
+             timeCompleted:         OffsetDateTime,
              visitNumber:           Int,
              annotations:           Set[Annotation])
       : DomainValidation[CollectionEvent] = {

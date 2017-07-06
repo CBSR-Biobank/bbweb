@@ -1,5 +1,6 @@
 package org.biobank.service.centres
 
+import java.time.OffsetDateTime
 import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.access._
@@ -8,7 +9,6 @@ import org.biobank.domain.study._
 import org.biobank.domain.participants._
 import org.biobank.domain.user._
 import org.biobank.service.{FilterString, SortString}
-import org.joda.time.DateTime
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -213,31 +213,31 @@ class ShipmentsServiceSpec
             PackShipmentCmd(sessionUserId     = sessionUserId.id,
                             id                = shipments(Shipment.createdState).id.id,
                             expectedVersion   = shipments(Shipment.createdState).version,
-                            datetime          = DateTime.now)
+                            datetime          = OffsetDateTime.now)
           ),(
             shipments(Shipment.packedState),
             SendShipmentCmd(sessionUserId     = sessionUserId.id,
                             id                = shipments(Shipment.packedState).id.id,
                             expectedVersion   = shipments(Shipment.packedState).version,
-                            datetime          = DateTime.now)
+                            datetime          = OffsetDateTime.now)
           ),(
             shipments(Shipment.sentState),
             ReceiveShipmentCmd(sessionUserId     = sessionUserId.id,
                                id                = shipments(Shipment.sentState).id.id,
                                expectedVersion   = shipments(Shipment.sentState).version,
-                               datetime          = DateTime.now)
+                               datetime          = OffsetDateTime.now)
           ),(
             shipments(Shipment.receivedState),
             UnpackShipmentCmd(sessionUserId     = sessionUserId.id,
                               id                = shipments(Shipment.receivedState).id.id,
                               expectedVersion   = shipments(Shipment.receivedState).version,
-                              datetime          = DateTime.now)
+                              datetime          = OffsetDateTime.now)
           ),(
             shipments(Shipment.unpackedState),
             CompleteShipmentCmd(sessionUserId     = sessionUserId.id,
                                 id                = shipments(Shipment.unpackedState).id.id,
                                 expectedVersion   = shipments(Shipment.unpackedState).version,
-                                datetime          = DateTime.now)
+                                datetime          = OffsetDateTime.now)
           ),(
             shipments(Shipment.sentState),
             LostShipmentCmd(sessionUserId     = sessionUserId.id,
@@ -248,15 +248,15 @@ class ShipmentsServiceSpec
             ShipmentSkipStateToSentCmd(sessionUserId     = sessionUserId.id,
                                        id                = shipments(Shipment.createdState).id.id,
                                        expectedVersion   = shipments(Shipment.createdState).version,
-                                       timePacked        = DateTime.now,
-                                       timeSent          = DateTime.now)
+                                       timePacked        = OffsetDateTime.now,
+                                       timeSent          = OffsetDateTime.now)
           ),(
             shipments(Shipment.sentState),
             ShipmentSkipStateToUnpackedCmd(sessionUserId     = sessionUserId.id,
                                            id                = shipments(Shipment.sentState).id.id,
                                            expectedVersion   = shipments(Shipment.sentState).version,
-                                           timeReceived      = DateTime.now,
-                                           timeUnpacked      = DateTime.now)
+                                           timeReceived      = OffsetDateTime.now,
+                                           timeUnpacked      = OffsetDateTime.now)
           ))
   }
 

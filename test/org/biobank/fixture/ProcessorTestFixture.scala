@@ -1,36 +1,35 @@
 package org.biobank.fixture
 
 import akka.actor._
-import akka.util.Timeout
 import akka.testkit.{TestKit, TestProbe}
 import akka.persistence.inmemory.extension.{ InMemoryJournalStorage, InMemorySnapshotStorage, StorageExtension }
-import org.biobank.controllers.FixedEhCache
+import org.biobank.controllers.CacheForTesting
 import org.biobank.service.SnapshotWriter
 import org.scalatest._
 import org.scalatest.time._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.mockito.MockitoSugar
-import play.api.cache.CacheApi
+import play.api.cache.{AsyncCacheApi, DefaultSyncCacheApi, SyncCacheApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
-import scala.concurrent.duration._
+import play.api.test.DefaultAwaitTimeout
 
 trait ProcessorTestFixture
     extends TestFixture
     with ScalaFutures
     with BeforeAndAfterAll
-    with MockitoSugar {
+    with MockitoSugar
+    with DefaultAwaitTimeout {
 
   val snapshotWriterMock = mock[SnapshotWriter]
 
   override val app = new GuiceApplicationBuilder()
-    .overrides(bind[CacheApi].to[FixedEhCache])
+    .overrides(bind[SyncCacheApi].to[DefaultSyncCacheApi])
+    .overrides(bind[AsyncCacheApi].to[CacheForTesting])
     .overrides(bind[SnapshotWriter].toInstance(snapshotWriterMock))
     .build
 
   implicit val system: ActorSystem = app.injector.instanceOf[ActorSystem]
-
-  implicit val timeout: Timeout = 5.seconds
 
   // need to configure scalatest to have more patience when waiting for future results
   implicit val defaultPatience =

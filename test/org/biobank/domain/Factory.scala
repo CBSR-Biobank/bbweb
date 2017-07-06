@@ -1,5 +1,7 @@
 package org.biobank.domain
 
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.user._
@@ -10,10 +12,7 @@ import org.biobank.domain.centre._
 import org.biobank.domain.containers._
 import org.biobank.domain.AnnotationValueType._
 import org.slf4j.LoggerFactory
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import scalaz.Scalaz._
-import com.github.nscala_time.time.Imports._
 
 /**
  * This factory class creates domain entities that can be used in test cases.
@@ -36,7 +35,7 @@ class Factory {
 
   def createRegisteredUser(): RegisteredUser = {
     val user = RegisteredUser(version      = 0L,
-                              timeAdded    = DateTime.now,
+                              timeAdded    = OffsetDateTime.now,
                               timeModified = None,
                               name         = nameGenerator.next[User],
                               email        = nameGenerator.nextEmail[User],
@@ -50,7 +49,7 @@ class Factory {
 
   def createActiveUser: ActiveUser = {
     val user = ActiveUser(version      = 0L,
-                          timeAdded    = DateTime.now,
+                          timeAdded    = OffsetDateTime.now,
                           timeModified = None,
                           name         = nameGenerator.next[User],
                           email        = nameGenerator.nextEmail[User],
@@ -64,7 +63,7 @@ class Factory {
 
   def createLockedUser(): LockedUser = {
     val user = LockedUser(version      = 0L,
-                          timeAdded    = DateTime.now,
+                          timeAdded    = OffsetDateTime.now,
                           timeModified = None,
                           name         = nameGenerator.next[User],
                           email        = nameGenerator.nextEmail[User],
@@ -79,7 +78,7 @@ class Factory {
   def createRole(): Role = {
     val role = Role(id           = AccessItemId(nameGenerator.next[AccessItem]),
                     version      = 0L,
-                    timeAdded    = DateTime.now,
+                    timeAdded    = OffsetDateTime.now,
                     timeModified = None,
                     name         = nameGenerator.next[Role],
                     description  = Some(nameGenerator.next[Role]),
@@ -93,7 +92,7 @@ class Factory {
   def createPermission(): Permission = {
     val permission = Permission(id           = AccessItemId(nameGenerator.next[AccessItem]),
                                 version      = 0L,
-                                timeAdded    = DateTime.now,
+                                timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
                                 name         = nameGenerator.next[Permission],
                                 description  = Some(nameGenerator.next[Permission]),
@@ -106,7 +105,7 @@ class Factory {
   def createMembership(): Membership = {
     val membership = Membership(id           = MembershipId(nameGenerator.next[MembershipId]),
                                 version      = 0L,
-                                timeAdded    = DateTime.now,
+                                timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
                                 userIds      = Set.empty[UserId],
                                 studyInfo    = MembershipStudyInfo(false, Set.empty[StudyId]),
@@ -117,7 +116,7 @@ class Factory {
 
   def createDisabledStudy(): DisabledStudy = {
     val study = DisabledStudy(version      = 0L,
-                              timeAdded    = DateTime.now,
+                              timeAdded    = OffsetDateTime.now,
                               timeModified = None,
                               id           = StudyId(nameGenerator.next[Study]),
                               name         = nameGenerator.next[Study],
@@ -130,7 +129,7 @@ class Factory {
   def createEnabledStudy(): EnabledStudy = {
     val enabledStudy = EnabledStudy(id           = StudyId(nameGenerator.next[Study]),
                                     version      = 0L,
-                                    timeAdded    = DateTime.now,
+                                    timeAdded    = OffsetDateTime.now,
                                     timeModified = None,
                                     name         = nameGenerator.next[Study],
                                     description  = Some(nameGenerator.next[Study]),
@@ -143,7 +142,7 @@ class Factory {
     val retiredStudy = RetiredStudy(
         id             = StudyId(nameGenerator.next[Study]),
         version        = 0L,
-        timeAdded      = DateTime.now,
+        timeAdded      = OffsetDateTime.now,
         timeModified = None,
         name           = nameGenerator.next[Study],
         description    = Some(nameGenerator.next[Study]),
@@ -158,7 +157,7 @@ class Factory {
         id                          = SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
         studyId                     = disabledStudy.id,
         version                     = 0L,
-        timeAdded                   = DateTime.now,
+        timeAdded                   = OffsetDateTime.now,
         timeModified                = None,
         name                        = nameGenerator.next[SpecimenGroup],
         description                 = Some(nameGenerator.next[SpecimenGroup]),
@@ -193,7 +192,7 @@ class Factory {
         id                   = CollectionEventTypeId(nameGenerator.next[CollectionEventType]),
         studyId              = disabledStudy.id,
         version              = 0L,
-        timeAdded            = DateTime.now,
+        timeAdded            = OffsetDateTime.now,
         timeModified         = None,
         name                 = nameGenerator.next[CollectionEventType],
         description          = Some(nameGenerator.next[CollectionEventType]),
@@ -234,7 +233,7 @@ class Factory {
         id             = ProcessingTypeId(nameGenerator.next[ProcessingType]),
         studyId        = disabledStudy.id,
         version        = 0L,
-        timeAdded      = DateTime.now,
+        timeAdded      = OffsetDateTime.now,
         timeModified   = None,
         name           = nameGenerator.next[ProcessingType],
         description    = Some(nameGenerator.next[ProcessingType]),
@@ -249,7 +248,7 @@ class Factory {
         id                    = SpecimenLinkTypeId(nameGenerator.next[SpecimenLinkType]),
         processingTypeId      = defaultProcessingType.id,
         version               = 0L,
-        timeAdded             = DateTime.now,
+        timeAdded             = OffsetDateTime.now,
         timeModified          = None,
         expectedInputChange   = BigDecimal(1.0),
         expectedOutputChange  = BigDecimal(1.0),
@@ -278,7 +277,7 @@ class Factory {
         studyId      = study.id,
         id           = ParticipantId(nameGenerator.next[Participant]),
         version      = 0L,
-        timeAdded    = DateTime.now,
+        timeAdded    = OffsetDateTime.now,
         timeModified = None,
         uniqueId     = nameGenerator.next[Participant],
         annotations  = Set.empty
@@ -295,7 +294,7 @@ class Factory {
       case Number   =>
         (None, Some(scala.util.Random.nextFloat.toString), Set.empty)
       case AnnotationValueType.DateTime =>
-        (Some(ISODateTimeFormat.dateTime.print(DateTime.now)), None, Set.empty)
+        (Some(OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)), None, Set.empty)
       case Select   =>
         (None, None, Set(annotationType.options(0)))
     }
@@ -328,9 +327,9 @@ class Factory {
         participantId         = participant.id,
         collectionEventTypeId = collectionEventType.id,
         version               = 0,
-        timeAdded             = DateTime.now,
+        timeAdded             = OffsetDateTime.now,
         timeModified          = None,
-        timeCompleted         = DateTime.now,
+        timeCompleted         = OffsetDateTime.now,
         visitNumber           = 1,
         annotations           = Set.empty)
     domainObjects = domainObjects + (classOf[CollectionEvent] -> cevent)
@@ -346,13 +345,13 @@ class Factory {
         inventoryId           = nameGenerator.next[Specimen],
         specimenDescriptionId = specimenDescription.id,
         version               = 0,
-        timeAdded             = DateTime.now,
+        timeAdded             = OffsetDateTime.now,
         timeModified          = None,
         originLocationId      = location.id,
         locationId            = location.id,
         containerId           = None,
         positionId            = None,
-        timeCreated           = DateTime.now,
+        timeCreated           = OffsetDateTime.now,
         amount                = BigDecimal(1.0)
       )
     domainObjects = domainObjects + (classOf[UsableSpecimen] -> specimen)
@@ -368,13 +367,13 @@ class Factory {
         inventoryId           = nameGenerator.next[Specimen],
         specimenDescriptionId = specimenDescription.id,
         version               = 0,
-        timeAdded             = DateTime.now,
+        timeAdded             = OffsetDateTime.now,
         timeModified          = None,
         originLocationId      = location.id,
         locationId            = location.id,
         containerId           = None,
         positionId            = None,
-        timeCreated           = DateTime.now,
+        timeCreated           = OffsetDateTime.now,
         amount                = BigDecimal(1.0)
       )
     domainObjects = domainObjects + (classOf[UnusableSpecimen] -> specimen)
@@ -384,7 +383,7 @@ class Factory {
   def createDisabledCentre(): DisabledCentre = {
     val centre = DisabledCentre(id           = CentreId(nameGenerator.next[Centre]),
                                 version      = 0L,
-                                timeAdded    = DateTime.now,
+                                timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
                                 name         = nameGenerator.next[Centre],
                                 description  = Some(nameGenerator.next[Centre]),
@@ -398,7 +397,7 @@ class Factory {
   def createEnabledCentre(): EnabledCentre = {
     val centre = EnabledCentre(id           = CentreId(nameGenerator.next[Centre]),
                                version      = 0L,
-                               timeAdded    = DateTime.now,
+                               timeAdded    = OffsetDateTime.now,
                                timeModified = None,
                                name         = nameGenerator.next[Centre],
                                description  = Some(nameGenerator.next[Centre]),
@@ -424,7 +423,7 @@ class Factory {
   def createContainerSchema(): ContainerSchema = {
     val containerSchema = ContainerSchema(
         version      = 0L,
-        timeAdded    = DateTime.now,
+        timeAdded    = OffsetDateTime.now,
         timeModified = None,
         id           = ContainerSchemaId(nameGenerator.next[ContainerSchema]),
         name         = nameGenerator.next[ContainerSchema],
@@ -440,7 +439,7 @@ class Factory {
                      toLocation:   Location): CreatedShipment = {
     val shipment = CreatedShipment(id             = ShipmentId(nameGenerator.next[Shipment]),
                                    version        = 0L,
-                                   timeAdded      = DateTime.now,
+                                   timeAdded      = OffsetDateTime.now,
                                    timeModified   = None,
                                    courierName    = nameGenerator.next[Shipment],
                                    trackingNumber = nameGenerator.next[Shipment],
@@ -471,7 +470,7 @@ class Factory {
   }
 
   def createPackedShipment(fromCentre: Centre, toCentre: Centre): PackedShipment = {
-    createShipment(fromCentre, toCentre).pack(DateTime.now.minusDays(10))
+    createShipment(fromCentre, toCentre).pack(OffsetDateTime.now.minusDays(10))
   }
 
   def createSentShipment(fromCentre: Centre, toCentre: Centre): SentShipment = {
@@ -517,7 +516,7 @@ class Factory {
     val shipmentSpecimen = ShipmentSpecimen(
         id                  = ShipmentSpecimenId(nameGenerator.next[ShipmentSpecimen]),
         version             = 0L,
-        timeAdded           = DateTime.now,
+        timeAdded           = OffsetDateTime.now,
         timeModified        = None,
         shipmentId          = shipment.id,
         specimenId          = specimen.id,
@@ -535,7 +534,7 @@ class Factory {
     // val shipmentContainer = ShipmentContainer(
     //     id                  = ShipmentContainerId(nameGenerator.next[ShipmentContainer]),
     //     version             = 0L,
-    //     timeAdded           = DateTime.now,
+    //     timeAdded           = OffsetDateTime.now,
     //     timeModified        = None,
     //     shipmentId          = shipment.id,
     //     containerId         = container.id,
@@ -550,7 +549,7 @@ class Factory {
   //     centreId     = Some(centre.id),
   //     schemaId     = defaultContainerSchema.id,
   //     version      = 0L,
-  //     timeAdded    = DateTime.now,
+  //     timeAdded    = OffsetDateTime.now,
   //     timeModified = None,
   //     name         = nameGenerator.next[ContainerType],
   //     description  = Some(nameGenerator.next[ContainerType]),
@@ -568,7 +567,7 @@ class Factory {
   //     version      = 0L,
   //     centreId     = Some(defaultEnabledCentre.id),
   //     schemaId     = defaultContainerSchema.id,
-  //     timeAdded    = DateTime.now,
+  //     timeAdded    = OffsetDateTime.now,
   //     timeModified = None,
   //     id           = ContainerTypeId(nameGenerator.next[ContainerType]),
   //     name         = nameGenerator.next[ContainerType],

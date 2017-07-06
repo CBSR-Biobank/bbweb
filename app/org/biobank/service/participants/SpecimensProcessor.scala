@@ -2,6 +2,8 @@ package org.biobank.service.participants
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import org.biobank.domain.LocationId
 import org.biobank.domain.participants._
@@ -10,8 +12,6 @@ import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeReposit
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.service._
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -152,7 +152,7 @@ class SpecimensProcessor @Inject() (
       specIdsValid    <- validateSpecimenInfo(cmd.specimenData, ceventType)
       invIdsValid     <- validateInventoryId(cmd.specimenData)
     } yield SpecimenEvent(cmd.sessionUserId).update(
-      _.time                    := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                    := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.added.collectionEventId := collectionEvent.id.id,
       _.added.specimenData      := cmd.specimenData.map { specimenInfo =>
           specimenInfoToEvent(specimenRepository.nextIdentity, specimenInfo)
@@ -186,7 +186,7 @@ class SpecimensProcessor @Inject() (
                                specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     specimenHasNoChildren(specimen).map( _ =>
       SpecimenEvent(cmd.sessionUserId).update(
-        _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                      := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.removed.version           := specimen.version,
         _.removed.specimenId        := specimen.id.id,
         _.removed.collectionEventId := cevent.id.id)
@@ -207,8 +207,8 @@ class SpecimensProcessor @Inject() (
               locationId            = LocationId(info.getLocationId),
               containerId           = None,
               positionId            = None,
-              timeAdded             = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
-              timeCreated           = ISODateTimeParser.parseDateTime(info.getTimeCreated),
+              timeAdded             = OffsetDateTime.parse(event.getTime),
+              timeCreated           = OffsetDateTime.parse(info.getTimeCreated),
               amount                = BigDecimal(info.getAmount))
           }
         }

@@ -18,14 +18,15 @@ import scalaz.Validation.FlatMap._
  */
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class Application @Inject() (val action:         BbwebAction,
-                             val env:            Environment,
-                             val accessService:  AccessService,
-                             val usersService:   UsersService,
-                             val studiesService: StudiesService,
-                             val centresService: CentresService)
+class Application @Inject() (controllerComponents: ControllerComponents,
+                             val action:               BbwebAction,
+                             val env:                  Environment,
+                             val accessService:        AccessService,
+                             val usersService:         UsersService,
+                             val studiesService:       StudiesService,
+                             val centresService:       CentresService)
                          (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   import org.biobank.domain.access.AccessItem._
 

@@ -1,11 +1,11 @@
 package org.biobank.domain.participants
 
+import java.time.OffsetDateTime
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.containers.{ ContainerId, ContainerSchemaPositionId }
 import org.biobank.domain.study.SpecimenDescriptionId
 import org.slf4j.LoggerFactory
-import org.joda.time.DateTime
 
 class SpecimenSpec extends DomainSpec {
   import org.biobank.TestUtils._
@@ -19,7 +19,7 @@ class SpecimenSpec extends DomainSpec {
                           inventoryId           = specimen.inventoryId,
                           specimenDescriptionId = specimen.specimenDescriptionId,
                           version               = specimen.version,
-                          timeAdded             = DateTime.now,
+                          timeAdded             = OffsetDateTime.now,
                           timeCreated           = specimen.timeCreated,
                           originLocationId      = specimen.originLocationId,
                           locationId            = specimen.locationId,
@@ -62,7 +62,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withInventoryId(newInventoryId) mustSucceed { s =>
           s.inventoryId must be (newInventoryId)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, DateTime.now)
+          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -73,7 +73,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withAmount(newAmount) mustSucceed { s =>
           s.amount must be (newAmount)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, DateTime.now)
+          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -84,7 +84,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withOriginLocation(newLocation.id) mustSucceed { s =>
           s.originLocationId must be (newLocation.id)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, DateTime.now)
+          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -95,7 +95,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withLocation(newLocation.id) mustSucceed { s =>
           s.locationId must be (newLocation.id)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, DateTime.now)
+          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -106,7 +106,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withPosition(newPosition) mustSucceed { s =>
           s.positionId mustBe Some(newPosition)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, DateTime.now)
+          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
         }
       }
     }
@@ -119,7 +119,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.makeUnusable mustSucceed { s =>
           s mustBe a[UnusableSpecimen]
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, DateTime.now)
+          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -216,7 +216,7 @@ class SpecimenSpec extends DomainSpec {
       specimen.makeUnusable mustSucceed { s =>
         s mustBe a[UnusableSpecimen]
         s.version must be (specimen.version + 1)
-        checkTimeStamps(s, specimen.timeAdded, DateTime.now)
+        checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
       }
     }
 
@@ -232,7 +232,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.makeUsable mustSucceed { s =>
           s mustBe a[UsableSpecimen]
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, DateTime.now)
+          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -258,8 +258,8 @@ class SpecimenSpec extends DomainSpec {
 
     it("by time created") {
       val (specimen1, specimen2) =
-        (factory.createUsableSpecimen.copy(timeCreated = DateTime.now.minusDays(1)),
-         factory.createUsableSpecimen.copy(timeCreated = DateTime.now))
+        (factory.createUsableSpecimen.copy(timeCreated = OffsetDateTime.now.minusDays(1)),
+         factory.createUsableSpecimen.copy(timeCreated = OffsetDateTime.now))
       Specimen.compareByTimeCreated(specimen1, specimen2) mustBe true
       Specimen.compareByTimeCreated(specimen2, specimen1) mustBe false
     }

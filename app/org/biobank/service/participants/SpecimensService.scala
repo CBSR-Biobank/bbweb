@@ -16,7 +16,6 @@ import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.service._
 import org.biobank.service.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -40,6 +39,7 @@ trait SpecimensService extends BbwebService {
 
 }
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class SpecimensServiceImpl @Inject() (
   @Named("specimensProcessor") val processor: ActorRef,
   val accessService:                          AccessService,
@@ -49,6 +49,7 @@ class SpecimensServiceImpl @Inject() (
   val ceventSpecimenRepository:               CeventSpecimenRepository,
   val specimenRepository:                     SpecimenRepository,
   val centreRepository:                       CentreRepository)
+                                  (implicit executionContext: BbwebExecutionContext)
     extends SpecimensService
     with AccessChecksSerivce
     with ServicePermissionChecks {

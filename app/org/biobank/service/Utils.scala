@@ -1,7 +1,6 @@
 package org.biobank.service
 
 import com.trueaccord.scalapb.GeneratedMessage
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
 import scala.util.Random
 
@@ -21,8 +20,9 @@ object Utils {
   /**
    * Returns 'true' wrapped in a validation if the event does not fail validation.
    */
+  @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
   def eventValidationToBoolean(future: Future[ServiceValidation[GeneratedMessage]])
-      : Future[ServiceValidation[Boolean]] =
+                              (implicit ec: ExecutionContext): Future[ServiceValidation[Boolean]] =
     future map { validation => validation map { event => true } }
 
 }

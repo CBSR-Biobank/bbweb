@@ -1,6 +1,6 @@
 package org.biobank.controllers.users
 
-import com.github.nscala_time.time.Imports._
+import java.time.OffsetDateTime
 import org.biobank.Global
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.JsonHelper
@@ -8,7 +8,7 @@ import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
-import play.api.mvc.Cookie
+import play.api.mvc.{Cookie, Cookies}
 import play.api.test.Helpers._
 import play.api.test._
 
@@ -89,7 +89,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     describe("GET /users") {
 
-      it("lists the default user") {
+      it("111 lists the default user") {
         val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
         (jsonItem \ "id").as[String] must be (Global.DefaultUserId.id)
       }
@@ -347,7 +347,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'avatarUrl   (user.avatarUrl)
           )
 
-          checkTimeStamps(repoUser, DateTime.now, None)
+          checkTimeStamps(repoUser, OffsetDateTime.now, None)
         }
       }
 
@@ -410,7 +410,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
     describe("POST /users/email/:id") {
 
       it("update a user's email") {
-        val user = factory.createActiveUser.copy(timeAdded = DateTime.lastMonth)
+        val user = factory.createActiveUser.copy(timeAdded = OffsetDateTime.now.minusMonths(1))
         userRepository.put(user)
 
         val newEmail = nameGenerator.nextEmail[User]
@@ -436,7 +436,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'avatarUrl   (user.avatarUrl)
           )
 
-          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
+          checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -476,7 +476,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val encryptedPassword = passwordHasher.encrypt(plainPassword, salt)
         val user = factory.createActiveUser.copy(password  = encryptedPassword,
                                                  salt      = salt,
-                                                 timeAdded = DateTime.lastMonth)
+                                                 timeAdded = OffsetDateTime.now.minusMonths(1))
         userRepository.put(user)
 
         val reqJson = Json.obj("expectedVersion" -> Some(user.version),
@@ -499,7 +499,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'avatarUrl   (user.avatarUrl)
           )
 
-          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
+          checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -545,7 +545,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
     describe("POST /users/avatarurl/:id") {
 
       it("update a user's avatar URL") {
-        val user = factory.createActiveUser.copy(timeAdded = DateTime.lastMonth)
+        val user = factory.createActiveUser.copy(timeAdded = OffsetDateTime.now.minusMonths(1))
         userRepository.put(user)
 
         val newAvatarUrl = nameGenerator.nextUrl[User]
@@ -569,7 +569,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'avatarUrl   (Some(newAvatarUrl))
           )
 
-          checkTimeStamps(repoUser, user.timeAdded, DateTime.now)
+          checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -798,9 +798,10 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
-        val resp = route(app, FakeRequest(GET, uri)
-          .withHeaders("X-XSRF-TOKEN" -> badToken)
-          .withCookies(Cookie("XSRF-TOKEN", badToken)))
+        val fakeRequest = FakeRequest(GET, uri)
+          .withHeaders("X-XSRF-TOKEN" -> badToken,
+                       "Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", badToken))))
+        val resp = route(app, fakeRequest)
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
@@ -814,13 +815,15 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
 
+
         val validToken = doLogin(user.email, plainPassword)
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
-        val resp = route(app, FakeRequest(GET, uri)
-          .withHeaders("X-XSRF-TOKEN" -> validToken)
-          .withCookies(Cookie("XSRF-TOKEN", badToken)))
+        val fakeRequest = FakeRequest(GET, uri)
+          .withHeaders("X-XSRF-TOKEN" -> validToken,
+                       "Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", badToken))))
+        val resp = route(app, fakeRequest)
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
@@ -842,8 +845,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         // this request is valid since user is logged in
         val fakeRequest = FakeRequest(POST, updateUri(user, "lock"))
         .withJsonBody(reqJson)
-        .withHeaders("X-XSRF-TOKEN" -> validToken)
-        .withCookies(Cookie("XSRF-TOKEN", badToken))
+        .withHeaders("X-XSRF-TOKEN" -> validToken,
+                     "Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", badToken))))
 
         //log.info(s"makeRequest: request: $fakeRequest")
 
@@ -874,7 +877,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val user = createActiveUserInRepository(plainPassword)
         val token = doLogin(user.email, plainPassword)
 
-        val resp = route(app, FakeRequest(GET, uri).withCookies(Cookie("XSRF-TOKEN", token)))
+        val fakeRequest = FakeRequest(GET, uri)
+          .withHeaders("Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", token))))
+        val resp = route(app, fakeRequest)
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)

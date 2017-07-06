@@ -9,7 +9,7 @@ import org.biobank.service._
 import org.biobank.service.studies.StudiesService
 import play.api.Logger
 import play.api.libs.json._
-import play.api.mvc.{Action, Result}
+import play.api.mvc.{Action, ControllerComponents, Result}
 import play.api.{ Environment, Logger }
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
@@ -20,11 +20,12 @@ import scalaz.Validation.FlatMap._
  */
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class StudiesController @Inject() (val action:  BbwebAction,
+class StudiesController @Inject() (controllerComponents: ControllerComponents,
+                                   val action:  BbwebAction,
                                    val env:     Environment,
                                    val service: StudiesService)
                                (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   val log: Logger = Logger(this.getClass)
 

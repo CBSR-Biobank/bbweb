@@ -19,7 +19,6 @@ import org.biobank.service._
 import org.biobank.service.access.AccessService
 import org.biobank.service.centres.CentreServicePermissionChecks
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -98,6 +97,7 @@ trait StudiesService extends BbwebService {
   * @param studiesProcessor
   *
  */
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class StudiesServiceImpl @Inject()(
   @Named("studiesProcessor") val processor: ActorRef,
   val accessService:                        AccessService,
@@ -108,6 +108,7 @@ class StudiesServiceImpl @Inject()(
   val collectionEventTypeRepository:        CollectionEventTypeRepository,
   val collectionEventRepository:            CollectionEventRepository,
   val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
+                               (implicit executionContext: BbwebExecutionContext)
     extends StudiesService
     with AccessChecksSerivce
     with StudyServicePermissionChecks

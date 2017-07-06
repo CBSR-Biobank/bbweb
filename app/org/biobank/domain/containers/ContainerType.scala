@@ -1,10 +1,9 @@
 package org.biobank.domain.containers
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.domain._
 import org.biobank.domain.centre.CentreId
-
-import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -99,8 +98,8 @@ final case class StorageContainerType(id:           ContainerTypeId,
                                       centreId:     Option[CentreId],
                                       schemaId:     ContainerSchemaId,
                                       version:      Long,
-                                      timeAdded:    DateTime,
-                                      timeModified: Option[DateTime],
+                                      timeAdded:    OffsetDateTime,
+                                      timeModified: Option[OffsetDateTime],
                                       name:         String,
                                       description:  Option[String],
                                       shared:       Boolean,
@@ -148,7 +147,7 @@ object StorageContainerType extends ContainerValidations {
                                                       centreId,
                                                       schemaId,
                                                       version,
-                                                      DateTime.now,
+                                                      OffsetDateTime.now,
                                                       None,
                                                       name,
                                                       description,
@@ -166,8 +165,8 @@ final case class SpecimenContainerType(id:           ContainerTypeId,
                                        centreId:     Option[CentreId],
                                        schemaId:     ContainerSchemaId,
                                        version:      Long,
-                                       timeAdded:    DateTime,
-                                       timeModified: Option[DateTime],
+                                       timeAdded:    OffsetDateTime,
+                                       timeModified: Option[OffsetDateTime],
                                        name:         String,
                                        description:  Option[String],
                                        shared:       Boolean,
@@ -181,8 +180,8 @@ object SpecimenContainerType extends ContainerValidations {
              centreId:     Option[CentreId],
              schemaId:     ContainerSchemaId,
              version:      Long,
-             timeAdded:    DateTime,
-             timeModified: Option[DateTime],
+             timeAdded:    OffsetDateTime,
+             timeModified: Option[OffsetDateTime],
              name:         String,
              description:  Option[String],
              shared:       Boolean,
@@ -197,7 +196,7 @@ object SpecimenContainerType extends ContainerValidations {
                                                        centreId,
                                                        schemaId,
                                                        version,
-                                                       DateTime.now,
+                                                       OffsetDateTime.now,
                                                        None,
                                                        name,
                                                        description,

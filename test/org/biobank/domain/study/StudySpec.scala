@@ -1,6 +1,6 @@
 package org.biobank.domain.study
 
-import com.github.nscala_time.time.Imports._
+import java.time.OffsetDateTime
 import org.biobank.domain._
 import org.biobank.fixture.NameGenerator
 import org.slf4j.LoggerFactory
@@ -36,7 +36,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
         )
 
         s.annotationTypes mustBe empty
-        checkTimeStamps(s, DateTime.now, None)
+        checkTimeStamps(s, OffsetDateTime.now, None)
       }
     }
 
@@ -52,7 +52,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
           'description (study.description)
         )
 
-        checkTimeStamps(updatedStudy, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedStudy, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 
@@ -68,7 +68,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
           'description (description)
         )
 
-        checkTimeStamps(updatedStudy, DateTime.now, DateTime.now)
+        checkTimeStamps(updatedStudy, OffsetDateTime.now, OffsetDateTime.now)
       }
     }
 

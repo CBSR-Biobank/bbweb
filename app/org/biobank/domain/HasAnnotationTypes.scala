@@ -25,7 +25,7 @@ trait HasAnnotationTypes extends AnnotationTypeValidations {
   protected def nameNotUsed(annotationType: AnnotationType): DomainValidation[Boolean] = {
     annotationTypes
       .find { x => (x.name == annotationType.name) && (x.id != annotationType.id)  } match {
-        case Some(at) =>
+        case Some(_) =>
           DomainError(s"annotation type name already used: ${annotationType.name}").failureNel[Boolean]
         case None =>
           true.successNel[DomainError]

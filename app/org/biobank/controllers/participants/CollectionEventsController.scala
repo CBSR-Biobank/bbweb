@@ -8,18 +8,19 @@ import org.biobank.service.PagedResults
 import org.biobank.service.participants.CollectionEventsService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
-import play.api.mvc.{Action, Result}
+import play.api.mvc.{Action, ControllerComponents, Result}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @Singleton
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
-class CollectionEventsController @Inject() (val action:       BbwebAction,
+class CollectionEventsController @Inject() (controllerComponents: ControllerComponents,
+                                            val action:       BbwebAction,
                                             val env:          Environment,
                                             val service:      CollectionEventsService)
                                         (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   val log: Logger = Logger(this.getClass)
 

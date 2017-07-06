@@ -2,6 +2,8 @@ package org.biobank.service.participants
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.domain.AnnotationTypeId
 import org.biobank.domain.participants._
@@ -10,8 +12,6 @@ import org.biobank.domain.Annotation
 import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -133,10 +133,10 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                               0L,
                                               cmd.uniqueId,
                                               cmd.annotations.toSet,
-                                              DateTime.now)
+                                              OffsetDateTime.now)
     } yield ParticipantEvent(newParticipant.id.id).update(
       _.sessionUserId     := cmd.sessionUserId,
-      _.time              := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time              := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.added.studyId     := newParticipant.studyId.id,
       _.added.uniqueId    := cmd.uniqueId,
       _.added.annotations := cmd.annotations.map { annotationToEvent(_) })
@@ -150,7 +150,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       updatedParticipant <- participant.withUniqueId(cmd.uniqueId)
     } yield ParticipantEvent(updatedParticipant.id.id).update(
       _.sessionUserId            := cmd.sessionUserId,
-      _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                     := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.uniqueIdUpdated.version  := cmd.expectedVersion,
       _.uniqueIdUpdated.uniqueId := cmd.uniqueId)
   }
@@ -172,7 +172,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       updatedParticipant <- participant.withAnnotation(annotation)
     } yield ParticipantEvent(updatedParticipant.id.id).update(
       _.sessionUserId                := cmd.sessionUserId,
-      _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.annotationUpdated.version    := cmd.expectedVersion,
       _.annotationUpdated.annotation := annotationToEvent(annotation))
   }
@@ -193,7 +193,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       updatedParticipant <- participant.withoutAnnotation(AnnotationTypeId(cmd.annotationTypeId))
     } yield ParticipantEvent(updatedParticipant.id.id).update(
       _.sessionUserId                      := cmd.sessionUserId,
-      _.time                               := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                               := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.annotationRemoved.version          := cmd.expectedVersion,
       _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)
   }
@@ -223,7 +223,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                  version      = 0L,
                                  uniqueId     = addedEvent.getUniqueId,
                                  annotations  = addedEvent.annotations.map(annotationFromEvent).toSet,
-                                 timeAdded    = ISODateTimeFormat.dateTime.parseDateTime(event.getTime))
+                                 timeAdded    = OffsetDateTime.parse(event.getTime))
 
       if (v.isFailure) {
         log.error(s"could not add collection event from event: $v, $event")
@@ -236,7 +236,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
   private def onValidEventAndVersion(event:        ParticipantEvent,
                                      eventType:    Boolean,
                                      eventVersion: Long)
-                                    (applyEvent: (Participant, DateTime) => ServiceValidation[Boolean])
+                                    (applyEvent: (Participant, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -247,7 +247,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
           if (participant.version != eventVersion) {
             log.error(s"event version check failed: participant version: ${participant.version}, event: $event")
           } else {
-            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val eventTime = OffsetDateTime.parse(event.getTime)
             val update = applyEvent(participant, eventTime)
 
             if (update.isFailure) {

@@ -1,10 +1,10 @@
 package org.biobank.controllers.participants
 
+import java.time.OffsetDateTime
 import org.biobank.controllers._
 import org.biobank.domain._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.joda.time.DateTime
 import play.api.libs.json._
 import play.api.test.Helpers._
 
@@ -376,7 +376,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
             'annotations            (participant.annotations)
           )
 
-          checkTimeStamps(pt, participant.timeAdded, DateTime.now)
+          checkTimeStamps(pt, participant.timeAdded, OffsetDateTime.now)
         }
       }
 

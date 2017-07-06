@@ -199,7 +199,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     //       processingTypeId      = ProcessingTypeId(addedEvent.getProcessingTypeId),
     //       id                    = SpecimenLinkTypeId(addedEvent.getSpecimenLinkTypeId),
     //       version               = 0L,
-    //       timeAdded             = ISODateTimeFormat.dateTime.parseDateTime(event.getTime),
+    //       timeAdded             = OffsetDateTime.parse(event.getTime),
     //       timeModified          = None,
     //       expectedInputChange   = addedEvent.getExpectedInputChange,
     //       expectedOutputChange  = addedEvent.getExpectedOutputChange,
@@ -227,7 +227,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     //       specimenLinkTypeRepository.put(
     //         slt.copy(
     //           version               = updatedEvent.getVersion,
-    //           timeModified          = Some(ISODateTimeFormat.dateTime.parseDateTime(event.getTime)),
+    //           timeModified          = Some(OffsetDateTime.parse(event.getTime)),
     //           expectedInputChange   = updatedEvent.getExpectedInputChange,
     //           expectedOutputChange  = updatedEvent.getExpectedOutputChange,
     //           inputCount            = updatedEvent.getInputCount,

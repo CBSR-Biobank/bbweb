@@ -1,9 +1,9 @@
 package org.biobank.domain.centre
 
+import java.time.OffsetDateTime
 import org.biobank.domain.{ DomainSpec, DomainValidation }
 import org.biobank.domain.participants.SpecimenId
 import org.biobank.fixture.NameGenerator
-import com.github.nscala_time.time.Imports._
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 
@@ -39,7 +39,7 @@ class ShipmentSpecimenSpec extends DomainSpec {
             'shipmentContainerId (shipmentSpecimen.shipmentContainerId)
           )
 
-          checkTimeStamps(s, DateTime.now, None)
+          checkTimeStamps(s, OffsetDateTime.now, None)
         }
       }
 

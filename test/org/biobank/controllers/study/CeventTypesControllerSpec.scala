@@ -1,5 +1,6 @@
 package org.biobank.controllers.study
 
+import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.AnnotationType
 import org.biobank.domain.JsonHelper
@@ -7,7 +8,6 @@ import org.biobank.domain.study._
 import org.biobank.domain.study.{ CollectionEventType, Study }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.fixture._
-import org.joda.time.DateTime
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -454,7 +454,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
             repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -495,7 +495,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
             repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -574,7 +574,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
             repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -635,7 +635,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
               repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
               repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
-              checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+              checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
             }
           }
         }
@@ -705,7 +705,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'required      (annotType.required)
             )
 
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -786,7 +786,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'required      (updatedAnnotationType.required)
             )
 
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -854,7 +854,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             repoCet.specimenDescriptions must have size cet.specimenDescriptions.size.toLong
             repoCet.annotationTypes must have size 0
 
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -991,7 +991,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'specimenType                (spec.specimenType)
             )
 
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -1077,7 +1077,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               'preservationTemperatureType (updatedSpecimenDescription.preservationTemperatureType),
               'specimenType                (updatedSpecimenDescription.specimenType)
             )
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -1145,7 +1145,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             repoCet.annotationTypes must have size cet.annotationTypes.size.toLong
             repoCet.specimenDescriptions must have size 0
 
-            checkTimeStamps(repoCet, cet.timeAdded, DateTime.now)
+            checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)
           }
         }
       }

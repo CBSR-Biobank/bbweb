@@ -1,12 +1,9 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.domain.Annotation
-import org.biobank.infrastructure.JsonUtils._
-
 import Commands._
-
+import java.time.OffsetDateTime
+import org.biobank.domain.Annotation
 import play.api.libs.json._
-import org.joda.time.DateTime
 
 object CollectionEventCommands {
 
@@ -20,7 +17,7 @@ object CollectionEventCommands {
   final case class AddCollectionEventCmd(sessionUserId:         String,
                                          participantId:         String,
                                          collectionEventTypeId: String,
-                                         timeCompleted:         DateTime,
+                                         timeCompleted:         OffsetDateTime,
                                          visitNumber:           Int,
                                          annotations:           List[Annotation])
       extends CollectionEventCommand
@@ -34,7 +31,7 @@ object CollectionEventCommands {
   final case class UpdateCollectionEventTimeCompletedCmd(sessionUserId:   String,
                                                          id:              String,
                                                          expectedVersion: Long,
-                                                         timeCompleted:   DateTime)
+                                                         timeCompleted:   OffsetDateTime)
       extends CollectionEventModifyCommand
 
   final case class CollectionEventUpdateAnnotationCmd(sessionUserId:    String,

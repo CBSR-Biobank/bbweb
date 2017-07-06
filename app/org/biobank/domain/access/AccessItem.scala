@@ -1,12 +1,11 @@
 package org.biobank.domain.access
 
+import java.time.OffsetDateTime
 import RoleId._
 import PermissionId._
 import org.biobank.Global
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
 import play.api.libs.json._
 
 /**
@@ -120,8 +119,8 @@ object AccessItem {
 
 final case class Role(id:           AccessItemId,
                       version:      Long,
-                      timeAdded:    DateTime,
-                      timeModified: Option[DateTime],
+                      timeAdded:    OffsetDateTime,
+                      timeModified: Option[OffsetDateTime],
                       name:         String,
                       description:  Option[String],
                       userIds:      Set[UserId],
@@ -135,14 +134,14 @@ final case class Role(id:           AccessItemId,
   def addUser(userId: UserId): Role = {
     copy(userIds      = userIds + userId,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   /** Used to change the name. */
   def removeUser(userId: UserId): Role = {
     copy(userIds      = userIds - userId,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   /** Used to change the name. */
@@ -150,7 +149,7 @@ final case class Role(id:           AccessItemId,
     validateString(name, NameMinLength, InvalidName) map { _ =>
       copy(name         = name,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -159,32 +158,32 @@ final case class Role(id:           AccessItemId,
     validateNonEmptyOption(description, InvalidDescription) map { _ =>
       copy(description  = description,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
   def addParent(role: Role): Role = {
     copy(parentIds    = parentIds + role.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def removeParent(role: Role): Role = {
     copy(parentIds    = parentIds - role.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def addChild(accessItem: AccessItem): AccessItem = {
     copy(childrenIds  = childrenIds + accessItem.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def removeChild(accessItem: AccessItem): AccessItem = {
     copy(childrenIds  = childrenIds - accessItem.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
 
@@ -205,8 +204,8 @@ final case class Role(id:           AccessItemId,
 
 final case class Permission(id:           AccessItemId,
                             version:      Long,
-                            timeAdded:    DateTime,
-                            timeModified: Option[DateTime],
+                            timeAdded:    OffsetDateTime,
+                            timeModified: Option[OffsetDateTime],
                             name:         String,
                             description:  Option[String],
                             parentIds:    Set[AccessItemId],
@@ -217,25 +216,25 @@ final case class Permission(id:           AccessItemId,
   def addParent(accessItem: AccessItem): Permission = {
     copy(parentIds    = parentIds + accessItem.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def removeParent(accessItem: AccessItem): Permission = {
     copy(parentIds    = parentIds - accessItem.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def addChild(accessItem: AccessItem): Permission = {
     copy(childrenIds  = childrenIds + accessItem.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 
   def removeChild(accessItem: AccessItem): Permission = {
     copy(childrenIds  = childrenIds - accessItem.id,
          version      = version + 1,
-         timeModified = Some(DateTime.now))
+         timeModified = Some(OffsetDateTime.now))
   }
 }
 

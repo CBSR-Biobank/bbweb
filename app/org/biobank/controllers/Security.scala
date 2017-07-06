@@ -26,6 +26,8 @@ trait Security {
 
   val authToken: AuthToken
 
+  //private val log: Logger = Logger(this.getClass)
+
   /*
    * Checks that the token is:
    *

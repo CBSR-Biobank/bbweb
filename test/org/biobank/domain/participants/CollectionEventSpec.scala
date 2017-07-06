@@ -1,10 +1,10 @@
 package org.biobank.domain.participants
 
+import java.time.OffsetDateTime
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.study._
 import org.slf4j.LoggerFactory
-import org.joda.time.DateTime
 
 class CollectionEventSpec extends DomainSpec {
   import org.biobank.TestUtils._
@@ -18,7 +18,7 @@ class CollectionEventSpec extends DomainSpec {
                            participantId          = collectionEvent.participantId,
                            collectionEventTypeId  = collectionEvent.collectionEventTypeId,
                            version                = collectionEvent.version,
-                           timeAdded              = DateTime.now,
+                           timeAdded              = OffsetDateTime.now,
                            timeCompleted          = collectionEvent.timeCompleted,
                            visitNumber            = collectionEvent.visitNumber,
                            annotations            = collectionEvent.annotations)
@@ -102,7 +102,7 @@ class CollectionEventSpec extends DomainSpec {
         cevent.withVisitNumber(newVisitNumber) mustSucceed { s =>
           s.visitNumber must be (newVisitNumber)
           s.version must be (cevent.version + 1)
-          checkTimeStamps(s, cevent.timeAdded, DateTime.now)
+          checkTimeStamps(s, cevent.timeAdded, OffsetDateTime.now)
         }
       }
 
@@ -113,7 +113,7 @@ class CollectionEventSpec extends DomainSpec {
         cevent.withTimeCompleted(newTimeCompleted) mustSucceed { s =>
           s.timeCompleted must be (newTimeCompleted)
           s.version must be (cevent.version + 1)
-          checkTimeStamps(s, cevent.timeAdded, DateTime.now)
+          checkTimeStamps(s, cevent.timeAdded, OffsetDateTime.now)
         }
       }
 

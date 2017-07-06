@@ -16,7 +16,6 @@ import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service._
 import org.biobank.service.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.libs.concurrent.Execution.Implicits.defaultContext
 import scala.concurrent.Future
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -81,12 +80,14 @@ trait UsersService extends BbwebService {
 
 }
 
-class UsersServiceImpl @javax.inject.Inject() (@Named("usersProcessor") val processor: ActorRef,
-                                               val accessService:                      AccessService,
-                                               val userRepository:                     UserRepository,
-                                               val studyRepository:                    StudyRepository,
-                                               val centreRepository:                   CentreRepository,
-                                               val passwordHasher:                     PasswordHasher)
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
+class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val processor: ActorRef,
+                                              val accessService:                      AccessService,
+                                              val userRepository:                     UserRepository,
+                                              val studyRepository:                    StudyRepository,
+                                              val centreRepository:                   CentreRepository,
+                                              val passwordHasher:                     PasswordHasher)
+                                           (implicit executionContext: BbwebExecutionContext)
     extends UsersService
     with AccessChecksSerivce
     with ServicePermissionChecks {

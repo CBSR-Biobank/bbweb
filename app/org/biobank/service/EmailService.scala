@@ -4,12 +4,15 @@ import javax.inject.{ Inject, Singleton }
 import play.api.libs.mailer._
 import play.api.{ Configuration, Environment, Logger }
 import scala.concurrent.Future
-import play.api.libs.concurrent.Execution.Implicits._
+import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
+@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
 class EmailService @Inject() (env:           Environment,
                               configuration: Configuration,
-                              mailerClient:  MailerClient) {
+                              mailerClient:  MailerClient)
+                          (implicit ec: ExecutionContext){
 
   val log: Logger = Logger(this.getClass)
 
@@ -65,11 +68,10 @@ class EmailService @Inject() (env:           Environment,
               bodyHtml = bodyHtml)
   }
 
-  private def adminEmail: String =
-    configuration.getString("admin.email").getOrElse("cbsrbiobank@gmail.com")
+  private def adminEmail: String = configuration.get[String]("admin.email")
 
   private def serverUrl: String =
-    configuration.getString("admin.url").getOrElse("biobank.com")
+    configuration.get[Option[String]]("admin.url").getOrElse("biobank.com")
 
   private def recipientEmails(recipient: String): Seq[String] =
     if (env.mode == play.api.Mode.Prod) Seq[String](recipient, adminEmail)
@@ -84,8 +86,9 @@ class EmailService @Inject() (env:           Environment,
         mailerClient.send(Email(subject, from, to, bodyHtml = Some(bodyHtml)))
       }
 
-    async.onFailure {
-      case err => Logger.error("mailer failed due to: " + err.getMessage)
+    async.onComplete {
+      case Failure(err) => Logger.error("mailer failed due to: " + err.getMessage)
+      case Success(_) =>
     }
   }
 

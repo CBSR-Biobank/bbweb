@@ -1,9 +1,8 @@
 package org.biobank.domain.participants
 
+import java.time.OffsetDateTime
 import org.biobank.domain._
 import org.biobank.domain.study._
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -18,8 +17,8 @@ import scalaz.Scalaz._
 final case class Participant(id:           ParticipantId,
                              studyId:      StudyId,
                              version:      Long,
-                             timeAdded:    DateTime,
-                             timeModified: Option[DateTime],
+                             timeAdded:    OffsetDateTime,
+                             timeModified: Option[OffsetDateTime],
                              uniqueId:     String,
                              annotations:  Set[Annotation])
     extends ConcurrencySafeEntity[ParticipantId]
@@ -32,7 +31,7 @@ final case class Participant(id:           ParticipantId,
     validateString(uniqueId, UniqueIdRequired).map { _ =>
       copy(uniqueId     = uniqueId,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -41,7 +40,7 @@ final case class Participant(id:           ParticipantId,
       val newAnnotations = annotations - annotation + annotation
       copy(annotations  = newAnnotations,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -50,7 +49,7 @@ final case class Participant(id:           ParticipantId,
       val newAnnotations = annotations - annotation
       copy(annotations  = newAnnotations,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -75,7 +74,7 @@ object Participant extends ParticipantValidations {
              version:     Long,
              uniqueId:    String,
              annotations: Set[Annotation],
-             timeAdded:   DateTime)
+             timeAdded:   OffsetDateTime)
       : DomainValidation[Participant] = {
     (validateId(id) |@|
        validateId(studyId) |@|

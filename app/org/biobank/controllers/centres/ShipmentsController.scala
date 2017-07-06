@@ -21,11 +21,12 @@ import scalaz.Validation.FlatMap._
  */
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class ShipmentsController @Inject() (val action:           BbwebAction,
+class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
+                                     val action:           BbwebAction,
                                      val env:              Environment,
                                      val shipmentsService: ShipmentsService)
                                  (implicit val ec: ExecutionContext)
-    extends CommandController {
+    extends CommandController(controllerComponents) {
 
   import org.biobank.infrastructure.command.ShipmentCommands._
   import org.biobank.infrastructure.command.ShipmentSpecimenCommands._

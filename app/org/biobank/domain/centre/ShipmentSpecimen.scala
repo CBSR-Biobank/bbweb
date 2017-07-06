@@ -1,12 +1,11 @@
 package org.biobank.domain.centre
 
+import java.time.OffsetDateTime
 import org.biobank._
-import org.biobank.infrastructure.JsonUtils._
 import org.biobank.dto.{ShipmentSpecimenDto, SpecimenDto}
 import org.biobank.domain._
 import org.biobank.domain.centre.ShipmentItemState._
 import org.biobank.domain.participants.SpecimenId
-import org.joda.time.DateTime
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -50,8 +49,8 @@ trait ShipmentSpecimenValidations {
  */
 final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
                                   version:             Long,
-                                  timeAdded:           DateTime,
-                                  timeModified:        Option[DateTime],
+                                  timeAdded:           OffsetDateTime,
+                                  timeModified:        Option[OffsetDateTime],
                                   shipmentId:          ShipmentId,
                                   specimenId:          SpecimenId,
                                   state:               ShipmentItemState,
@@ -65,7 +64,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     validateId(shipmentContainerId, ShipmentContainerIdInvalid) map { _ =>
       copy(shipmentContainerId = shipmentContainerId,
            version             = version + 1,
-           timeModified        = Some(DateTime.now))
+           timeModified        = Some(OffsetDateTime.now))
     }
   }
 
@@ -75,7 +74,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     } else {
       copy(state        = ShipmentItemState.Present,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).successNel[String]
+           timeModified = Some(OffsetDateTime.now)).successNel[String]
     }
   }
 
@@ -85,7 +84,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     } else {
       copy(state        = ShipmentItemState.Received,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).successNel[String]
+           timeModified = Some(OffsetDateTime.now)).successNel[String]
     }
   }
 
@@ -95,7 +94,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     } else {
       copy(state        = ShipmentItemState.Missing,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).successNel[String]
+           timeModified = Some(OffsetDateTime.now)).successNel[String]
     }
   }
 
@@ -105,7 +104,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     } else {
       copy(state        = ShipmentItemState.Extra,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).successNel[String]
+           timeModified = Some(OffsetDateTime.now)).successNel[String]
     }
   }
 
@@ -178,7 +177,7 @@ object ShipmentSpecimen extends ShipmentSpecimenValidations {
              shipmentContainerId).map(_ =>
       ShipmentSpecimen(id,
                        version,
-                       DateTime.now,
+                       OffsetDateTime.now,
                        None,
                        shipmentId,
                        specimenId,

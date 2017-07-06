@@ -1,14 +1,12 @@
 package org.biobank.domain.centre
 
+import java.time.OffsetDateTime
 import org.biobank.ValidationKey
-import org.biobank.infrastructure.JsonUtils._
 import org.biobank.dto.NameDto
 import org.biobank.domain._
 import org.biobank.domain.study.StudyId
 import org.biobank.infrastructure.EnumUtils._
-
 import play.api.libs.json._
-import org.joda.time.DateTime
 import scalaz.Scalaz._
 
 /**
@@ -140,8 +138,8 @@ trait CentreValidations {
   */
 final case class DisabledCentre(id:           CentreId,
                                 version:      Long,
-                                timeAdded:    DateTime,
-                                timeModified: Option[DateTime],
+                                timeAdded:    OffsetDateTime,
+                                timeModified: Option[OffsetDateTime],
                                 name:         String,
                                 description:  Option[String],
                                 studyIds:     Set[StudyId],
@@ -157,7 +155,7 @@ final case class DisabledCentre(id:           CentreId,
     validateString(name, NameMinLength, InvalidName) map { _ =>
       copy(name         = name,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -166,7 +164,7 @@ final case class DisabledCentre(id:           CentreId,
     validateNonEmptyOption(description, InvalidDescription) map { _ =>
       copy(description  = description,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -175,7 +173,7 @@ final case class DisabledCentre(id:           CentreId,
     validateId(studyId, InvalidStudyId).map { _ =>
       copy(studyIds     = studyIds + studyId,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
 
     }
   }
@@ -187,7 +185,7 @@ final case class DisabledCentre(id:           CentreId,
     } { _ =>
       copy(studyIds     = studyIds - studyId,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).successNel[String]
+           timeModified = Some(OffsetDateTime.now)).successNel[String]
     }
   }
 
@@ -197,7 +195,7 @@ final case class DisabledCentre(id:           CentreId,
       // replaces previous annotation type with same unique id
       copy(locations    = locations - location + location,
            version      = version + 1,
-           timeModified = Some(DateTime.now))
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -209,7 +207,7 @@ final case class DisabledCentre(id:           CentreId,
     } { location =>
       copy(locations    = locations - location,
            version      = version + 1,
-           timeModified = Some(DateTime.now)).successNel[String]
+           timeModified = Some(OffsetDateTime.now)).successNel[String]
     }
   }
 
@@ -257,7 +255,7 @@ object DisabledCentre extends CentreValidations {
        studyIds.toList.traverseU(validateStudyId) |@|
        locations.toList.traverseU(Location.validate)) {
       case (_, validVersion, _, _, _, _) =>
-        DisabledCentre(id, validVersion, DateTime.now, None, name, description, studyIds, locations)
+        DisabledCentre(id, validVersion, OffsetDateTime.now, None, name, description, studyIds, locations)
     }
   }
 }
@@ -270,8 +268,8 @@ object DisabledCentre extends CentreValidations {
   */
 final case class EnabledCentre(id:           CentreId,
                                version:      Long,
-                               timeAdded:    DateTime,
-                               timeModified: Option[DateTime],
+                               timeAdded:    OffsetDateTime,
+                               timeModified: Option[OffsetDateTime],
                                name:         String,
                                description:  Option[String],
                                studyIds:     Set[StudyId],

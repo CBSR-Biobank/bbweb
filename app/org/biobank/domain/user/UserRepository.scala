@@ -98,7 +98,7 @@ class UserRepositoryImpl @Inject() (val config: Configuration,
    */
   private def createDefaultUser(): Unit = {
     val adminEmail = if (env.mode == Mode.Dev) org.biobank.Global.DefaultUserEmail
-                     else config.getString("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
+                     else config.get[Option[String]]("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
 
     put(ActiveUser(id           = org.biobank.Global.DefaultUserId,
                    version      = 0L,

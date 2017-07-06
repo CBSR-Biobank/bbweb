@@ -3,6 +3,8 @@ package org.biobank.service.centres
 import akka.actor._
 import akka.event.{Logging, LoggingAdapter}
 import akka.persistence.{RecoveryCompleted, SnapshotOffer, SaveSnapshotSuccess, SaveSnapshotFailure}
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.TestData
 import org.biobank.domain.LocationId
@@ -14,8 +16,6 @@ import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.ShipmentEvents._
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
-import org.joda.time.DateTime
-import org.joda.time.format.ISODateTimeFormat
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -208,7 +208,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       toCentre   <- centreRepository.getByLocationId(LocationId(cmd.toLocationId))
       shipment   <- CreatedShipment.create(id             = id,
                                            version        = 0L,
-                                           timeAdded      = DateTime.now,
+                                           timeAdded      = OffsetDateTime.now,
                                            courierName    = cmd.courierName,
                                            trackingNumber = cmd.trackingNumber,
                                            fromCentreId   = fromCentre.id,
@@ -217,7 +217,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                            toLocationId   = LocationId(cmd.toLocationId))
     } yield ShipmentEvent(id.id).update(
       _.sessionUserId        := cmd.sessionUserId,
-      _.time                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                 := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.added.courierName    := shipment.courierName,
       _.added.trackingNumber := shipment.trackingNumber,
       _.added.fromCentreId   := shipment.fromCentreId.id,
@@ -231,7 +231,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     shipment.withCourier(cmd.courierName).map { s =>
       ShipmentEvent(shipment.id.id).update(
         _.sessionUserId                  := cmd.sessionUserId,
-        _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.courierNameUpdated.version     := cmd.expectedVersion,
         _.courierNameUpdated.courierName := cmd.courierName)
     }
@@ -242,7 +242,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     shipment.withTrackingNumber(cmd.trackingNumber).map { s =>
       ShipmentEvent(shipment.id.id).update(
         _.sessionUserId                        := cmd.sessionUserId,
-        _.time                                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                 := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.trackingNumberUpdated.version        := cmd.expectedVersion,
         _.trackingNumberUpdated.trackingNumber := cmd.trackingNumber)
     }
@@ -256,7 +256,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       newShipment <- shipment.withFromLocation(centre.id, location.id)
     } yield ShipmentEvent(shipment.id.id).update(
       _.sessionUserId                  := cmd.sessionUserId,
-      _.time                           := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.fromLocationUpdated.version    := cmd.expectedVersion,
       _.fromLocationUpdated.centreId   := centre.id.id,
       _.fromLocationUpdated.locationId := cmd.locationId)
@@ -270,7 +270,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       newShipment <- shipment.withToLocation(centre.id, location.id)
     } yield ShipmentEvent(shipment.id.id).update(
       _.sessionUserId                := cmd.sessionUserId,
-      _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.toLocationUpdated.version    := cmd.expectedVersion,
       _.toLocationUpdated.centreId   := centre.id.id,
       _.toLocationUpdated.locationId := cmd.locationId)
@@ -282,7 +282,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       err => InvalidState(s"shipment is not packed: ${shipment.id}").failureNel[ShipmentEvent],
       s => ShipmentEvent(shipment.id.id).update(
         _.sessionUserId   := cmd.sessionUserId,
-        _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time            := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.created.version := cmd.expectedVersion).successNel[String]
     )
   }
@@ -297,9 +297,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
         case _: CreatedShipment | _: SentShipment =>
           ShipmentEvent(shipment.id.id).update(
             _.sessionUserId          := cmd.sessionUserId,
-            _.time                   := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.time                   := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             _.packed.version         := cmd.expectedVersion,
-            _.packed.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.datetime)).successNel[String]
+            _.packed.stateChangeTime := cmd.datetime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)).successNel[String]
         case _ =>
           InvalidState(s"cannot change to packed state: ${shipment.id}").failureNel[ShipmentEvent]
       }
@@ -319,9 +319,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     valid.map { s =>
       ShipmentEvent(shipment.id.id).update(
         _.sessionUserId        := cmd.sessionUserId,
-        _.time                 := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                 := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.sent.version         := cmd.expectedVersion,
-        _.sent.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.datetime))
+        _.sent.stateChangeTime := cmd.datetime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
     }
   }
 
@@ -345,9 +345,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     valid.map { s =>
       ShipmentEvent(shipment.id.id).update(
         _.sessionUserId            := cmd.sessionUserId,
-        _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                     := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.received.version         := cmd.expectedVersion,
-        _.received.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.datetime))
+        _.received.stateChangeTime := cmd.datetime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
     }
   }
 
@@ -362,9 +362,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     valid.map { s =>
       ShipmentEvent(shipment.id.id).update(
         _.sessionUserId            := cmd.sessionUserId,
-        _.time                     := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                     := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.unpacked.version         := cmd.expectedVersion,
-        _.unpacked.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.datetime))
+        _.unpacked.stateChangeTime := cmd.datetime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
     }
   }
 
@@ -382,9 +382,9 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       valid.map { s =>
         ShipmentEvent(shipment.id.id).update(
           _.sessionUserId             := cmd.sessionUserId,
-          _.time                      := ISODateTimeFormat.dateTime.print(DateTime.now),
+          _.time                      := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
           _.completed.version         := cmd.expectedVersion,
-          _.completed.stateChangeTime := ISODateTimeFormat.dateTime.print(cmd.datetime))
+          _.completed.stateChangeTime := cmd.datetime.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
       }
     }
   }
@@ -395,7 +395,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       err => InvalidState(s"cannot change to lost state: ${shipment.id}").failureNel[ShipmentEvent],
       s   => ShipmentEvent(shipment.id.id).update(
         _.sessionUserId := cmd.sessionUserId,
-        _.time          := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time          := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.lost.version  := cmd.expectedVersion).successNel[String]
     )
   }
@@ -405,10 +405,10 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     shipment.skipToSent(cmd.timePacked, cmd.timeSent).map { _ =>
       ShipmentEvent(shipment.id.id).update(
         _.sessionUserId                 := cmd.sessionUserId,
-        _.time                          := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                          := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.skippedToSentState.version    := cmd.expectedVersion,
-        _.skippedToSentState.timePacked := ISODateTimeFormat.dateTime.print(cmd.timePacked),
-        _.skippedToSentState.timeSent   := ISODateTimeFormat.dateTime.print(cmd.timeSent))
+        _.skippedToSentState.timePacked := cmd.timePacked.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+        _.skippedToSentState.timeSent   := cmd.timeSent.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
     }
   }
 
@@ -419,10 +419,10 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
         s.skipToUnpacked(cmd.timeReceived, cmd.timeUnpacked).map { _ =>
           ShipmentEvent(s.id.id).update(
             _.sessionUserId                       := cmd.sessionUserId,
-            _.time                                := ISODateTimeFormat.dateTime.print(DateTime.now),
+            _.time                                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
             _.skippedToUnpackedState.version      := cmd.expectedVersion,
-            _.skippedToUnpackedState.timeReceived := ISODateTimeFormat.dateTime.print(cmd.timeReceived),
-            _.skippedToUnpackedState.timeUnpacked := ISODateTimeFormat.dateTime.print(cmd.timeUnpacked))
+            _.skippedToUnpackedState.timeReceived := cmd.timeReceived.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+            _.skippedToUnpackedState.timeUnpacked := cmd.timeUnpacked.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
         }
       case _ =>
         InvalidState(s"shipment not sent: ${shipment.state}").failureNel[ShipmentEvent]
@@ -441,7 +441,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       }
     } yield ShipmentEvent(shipment.id.id).update(
       _.sessionUserId   := cmd.sessionUserId,
-      _.time            := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time            := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.removed.version := cmd.expectedVersion)
   }
 
@@ -461,7 +461,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
         }
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.sessionUserId                     := cmd.sessionUserId,
-        _.time                              := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                              := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.added.optionalShipmentContainerId := cmd.shipmentContainerId,
         _.added.shipmentSpecimenAddData     := shipmentSpecimenAddData
       )
@@ -504,7 +504,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       validVersion     <- validShipmentSpecimen(cmd.shipmentSpecimenId, cmd.expectedVersion)
     } yield ShipmentSpecimenEvent(shipment.id.id).update(
       _.sessionUserId              := cmd.sessionUserId,
-      _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
+      _.time                       := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.removed.version            := cmd.expectedVersion,
       _.removed.shipmentSpecimenId := cmd.shipmentSpecimenId)
   }
@@ -523,7 +523,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.sessionUserId                                       := cmd.sessionUserId,
-        _.time                                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.containerUpdated.optionalShipmentContainerId := cmd.shipmentContainerId,
         _.containerUpdated.shipmentSpecimenData        := shipmentSpecimenData)
     }
@@ -539,7 +539,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.sessionUserId                       := cmd.sessionUserId,
-        _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.present.shipmentSpecimenData := shipmentSpecimenData)
     }
   }
@@ -554,7 +554,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.sessionUserId                        := cmd.sessionUserId,
-        _.time                          := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                          := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.received.shipmentSpecimenData := shipmentSpecimenData)
     }
   }
@@ -569,7 +569,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       val shipmentSpecimenData = shipmentSpecimens.map(EventUtils.shipmentSpecimenInfoToEvent).toSeq
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.sessionUserId                       := cmd.sessionUserId,
-        _.time                         := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.missing.shipmentSpecimenData := shipmentSpecimenData)
     }
   }
@@ -597,7 +597,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
         }
       ShipmentSpecimenEvent(cmd.shipmentId).update(
         _.sessionUserId                     := cmd.sessionUserId,
-        _.time                       := ISODateTimeFormat.dateTime.print(DateTime.now),
+        _.time                       := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
         _.extra.shipmentSpecimenData := shipmentSpecimenData)
     }
   }
@@ -607,7 +607,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       log.error(s"invalid event type: $event")
     } else {
       val addedEvent = event.getAdded
-      val eventTime  = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+      val eventTime  = OffsetDateTime.parse(event.getTime)
       val add = CreatedShipment.create(id             = ShipmentId(event.id),
                                        version        = 0L,
                                        timeAdded      = eventTime,
@@ -698,8 +698,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isPacked,
                            event.getPacked.getVersion) { (shipment, _, time) =>
-      val stateChangeTime =
-        ISODateTimeFormat.dateTime.parseDateTime(event.getPacked.getStateChangeTime)
+      val stateChangeTime = OffsetDateTime.parse(event.getPacked.getStateChangeTime)
 
       val updated = shipment match {
           case created: CreatedShipment =>
@@ -723,7 +722,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isSent,
                            event.getSent.getVersion) { (shipment, _, time) =>
-      val stateChangeTime = ISODateTimeFormat.dateTime.parseDateTime(event.getSent.getStateChangeTime)
+      val stateChangeTime = OffsetDateTime.parse(event.getSent.getStateChangeTime)
       val updated = shipment match {
           case packed: PackedShipment =>
             packed.send(stateChangeTime).map(_.copy(timeModified = Some(time)))
@@ -749,8 +748,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isReceived,
                            event.getReceived.getVersion) { (shipment, _, time) =>
-      val stateChangeTime =
-        ISODateTimeFormat.dateTime.parseDateTime(event.getReceived.getStateChangeTime)
+      val stateChangeTime = OffsetDateTime.parse(event.getReceived.getStateChangeTime)
       val updated = shipment match {
           case sent: SentShipment =>
             sent.receive(stateChangeTime).map(_.copy(timeModified = Some(time)))
@@ -773,8 +771,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isUnpacked,
                            event.getUnpacked.getVersion) { (shipment, _, time) =>
-      val stateChangeTime =
-        ISODateTimeFormat.dateTime.parseDateTime(event.getUnpacked.getStateChangeTime)
+      val stateChangeTime = OffsetDateTime.parse(event.getUnpacked.getStateChangeTime)
 
       val unpacked = shipment match {
           case received: ReceivedShipment =>
@@ -798,8 +795,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isCompleted,
                            event.getCompleted.getVersion) { (shipment, _, time) =>
-      val stateChangeTime =
-        ISODateTimeFormat.dateTime.parseDateTime(event.getCompleted.getStateChangeTime)
+      val stateChangeTime = OffsetDateTime.parse(event.getCompleted.getStateChangeTime)
       for {
         unpacked  <- shipment.isUnpacked
         completed <- unpacked.copy(timeModified = Some(time)).complete(stateChangeTime)
@@ -827,8 +823,8 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isSkippedToSentState,
                            event.getSkippedToSentState.getVersion) { (shipment, _, time) =>
-      val timePacked = ISODateTimeFormat.dateTime.parseDateTime(event.getSkippedToSentState.getTimePacked)
-      val timeSent   = ISODateTimeFormat.dateTime.parseDateTime(event.getSkippedToSentState.getTimeSent)
+      val timePacked = OffsetDateTime.parse(event.getSkippedToSentState.getTimePacked)
+      val timeSent   = OffsetDateTime.parse(event.getSkippedToSentState.getTimeSent)
       val v = for {
           created <- shipment.isCreated
           updated <- created.skipToSent(timePacked, timeSent)
@@ -842,10 +838,8 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     onValidEventAndVersion(event,
                            event.eventType.isSkippedToUnpackedState,
                            event.getSkippedToUnpackedState.getVersion) { (shipment, _, time) =>
-      val timeReceived =
-        ISODateTimeFormat.dateTime.parseDateTime(event.getSkippedToUnpackedState.getTimeReceived)
-      val timeUnpacked =
-        ISODateTimeFormat.dateTime.parseDateTime(event.getSkippedToUnpackedState.getTimeUnpacked)
+      val timeReceived = OffsetDateTime.parse(event.getSkippedToUnpackedState.getTimeReceived)
+      val timeUnpacked = OffsetDateTime.parse(event.getSkippedToUnpackedState.getTimeUnpacked)
 
       val v = for {
           sent     <- shipment.isSent
@@ -870,7 +864,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       log.error(s"invalid event type: $event")
     } else {
       val addedEvent          = event.getAdded
-      val eventTime           = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+      val eventTime           = OffsetDateTime.parse(event.getTime)
       val shipmentContainerId = addedEvent.shipmentContainerId.map(ShipmentContainerId.apply)
 
       addedEvent.shipmentSpecimenAddData.foreach { info =>
@@ -920,7 +914,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def specimenStateUpdate
-    (shipmentSpecimenData: Seq[ShipmentSpecimenEvent.ShipmentSpecimenInfo], eventTime: DateTime)
+    (shipmentSpecimenData: Seq[ShipmentSpecimenEvent.ShipmentSpecimenInfo], eventTime: OffsetDateTime)
     (stateUpdateFn: ShipmentSpecimen => ServiceValidation[ShipmentSpecimen])
       : ServiceValidation[Boolean] = {
     if (shipmentSpecimenData.isEmpty) {
@@ -968,7 +962,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   private def applySpecimenExtraEvent(event: ShipmentSpecimenEvent): Unit = {
     onValidSpecimenEvent(event, event.eventType.isExtra) { (shipment, _, time) =>
       val extraEvent = event.getExtra
-      val eventTime  = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+      val eventTime  = OffsetDateTime.parse(event.getTime)
       extraEvent.shipmentSpecimenData.foreach { info =>
         val add = ShipmentSpecimen.create(id                  = ShipmentSpecimenId(info.getShipmentSpecimenId),
                                           version             = 0L,
@@ -1024,7 +1018,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                      eventVersion: Long)
                                     (applyEvent:  (Shipment,
                                                    ShipmentEvent,
-                                                   DateTime) => ServiceValidation[Boolean])
+                                                   OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -1035,7 +1029,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
           if (shipment.version != eventVersion) {
             log.error(s"event version check failed: shipment version: ${shipment.version}, event: $event")
           } else {
-            val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+            val eventTime = OffsetDateTime.parse(event.getTime)
             val update = applyEvent(shipment, event, eventTime)
             if (update.isFailure) {
               log.error(s"shipment update from event failed: event: $event, reason: $update")
@@ -1050,7 +1044,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                    eventType: Boolean)
                                   (applyEvent:  (Shipment,
                                                  ShipmentSpecimenEvent,
-                                                 DateTime) => ServiceValidation[Boolean])
+                                                 OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -1058,7 +1052,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       shipmentRepository.getByKey(ShipmentId(event.shipmentId)).fold(
         err => log.error(s"shipment from event does not exist: $err"),
         shipment => {
-          val eventTime = ISODateTimeFormat.dateTime.parseDateTime(event.getTime)
+          val eventTime = OffsetDateTime.parse(event.getTime)
           val update = applyEvent(shipment, event, eventTime)
           if (update.isFailure) {
             log.error(s"shipment specimen update from event failed: $update")

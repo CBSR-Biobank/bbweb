@@ -1,12 +1,11 @@
 package org.biobank.domain.study
 
+import java.time.OffsetDateTime
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
-
-import javax.inject.{Inject}
+import org.biobank.TestUtils
+import javax.inject.Inject
 import org.slf4j.LoggerFactory
-import com.github.nscala_time.time.Imports._
-import scalaz.Scalaz._
 
 class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingTypeRepository)
     extends DomainSpec {
@@ -37,7 +36,7 @@ class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingType
           'enabled (enabled)
         )
 
-        (processingType.timeAdded to DateTime.now).millis must be < 100L
+        TestUtils.checkTimeStamps(processingType.timeAdded, OffsetDateTime.now)
         processingType.timeModified mustBe (None)
         ()
       }

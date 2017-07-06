@@ -1,12 +1,12 @@
 package org.biobank.controllers.participants
 
-import com.github.nscala_time.time.Imports._
+import java.time.format.DateTimeFormatter
+import org.biobank.TestUtils
+import java.time.OffsetDateTime
 import org.biobank.controllers._
 import org.biobank.domain._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.biobank.infrastructure.JsonUtils._
-import org.joda.time.DateTime
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -385,7 +385,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val cevents = (1 to 4).map { hour =>
               val cevent = factory.createCollectionEvent.copy(
                   participantId = participant.id,
-                  timeCompleted = DateTime.now.hour(hour))
+                  timeCompleted = OffsetDateTime.now.withHour(hour))
               collectionEventRepository.put(cevent)
               cevent
             }
@@ -422,7 +422,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val cevents = (1 to 4).map { hour =>
               val cevent = factory.createCollectionEvent.copy(
                   participantId = participant.id,
-                  timeCompleted = DateTime.now.hour(hour))
+                  timeCompleted = OffsetDateTime.now.withHour(hour))
               collectionEventRepository.put(cevent)
               cevent
             }
@@ -443,7 +443,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val cevents = (1 to 4).map { hour =>
               val cevent = factory.createCollectionEvent.copy(
                   participantId = participant.id,
-                  timeCompleted = DateTime.now.hour(hour))
+                  timeCompleted = OffsetDateTime.now.withHour(hour))
               collectionEventRepository.put(cevent)
               cevent
             }
@@ -558,9 +558,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
             repoCe.annotations must have size 0
 
-            (repoCe.timeCompleted to cevent.timeCompleted).millis must be < TimeCoparisonMillis
-
-            checkTimeStamps(repoCe, DateTime.now, None)
+            TestUtils.checkTimeStamps(repoCe.timeCompleted, cevent.timeCompleted, TimeCoparisonSeconds)
+            checkTimeStamps(repoCe, OffsetDateTime.now, None)
           }
         }
       }
@@ -818,8 +817,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               'annotations            (cevent.annotations)
             )
 
-            (repoCe.timeCompleted to cevent.timeCompleted).millis must be < TimeCoparisonMillis
-            checkTimeStamps(repoCe, cevent.timeAdded, DateTime.now)
+            TestUtils.checkTimeStamps(repoCe.timeCompleted, cevent.timeCompleted, TimeCoparisonSeconds)
+            checkTimeStamps(repoCe, cevent.timeAdded, OffsetDateTime.now)
           }
         }
       }
@@ -896,7 +895,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
       it("update the time completed on a collection event") {
         createEntities { (study, participant, ceventType) =>
           val cevent = factory.createCollectionEvent
-          val newTimeCompleted = cevent.timeCompleted - 2.months
+          val newTimeCompleted = cevent.timeCompleted.minusMonths(2)
 
           collectionEventRepository.put(cevent)
           cevent.annotations must have size 0
@@ -918,15 +917,15 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               'annotations            (cevent.annotations)
             )
 
-            (repoCe.timeCompleted to newTimeCompleted).millis must be < TimeCoparisonMillis
-            checkTimeStamps(repoCe, cevent.timeAdded, DateTime.now)
+            TestUtils.checkTimeStamps(repoCe.timeCompleted, newTimeCompleted, TimeCoparisonSeconds)
+            checkTimeStamps(repoCe, cevent.timeAdded, OffsetDateTime.now)
           }
         }
       }
 
       it("not update a collection event's time completed on a non enabled study") {
         createEntities { (study, participant, ceventType) =>
-          val newTimeCompleted = DateTime.now - 2.months
+          val newTimeCompleted = OffsetDateTime.now.minusMonths(2)
 
           study.disable mustSucceed { disabledStudy =>
             updateOnNonEnabledStudy(disabledStudy,
@@ -948,19 +947,21 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
       it("fail when updating time completed and collection event ID is invalid") {
         createEntities { (study, participant, ceventType) =>
+          val timeCompleted = OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
           updateOnInvalidCevent(participant,
                                 ceventType,
                                 "timeCompleted",
-                                Json.obj("timeCompleted" -> 1))
+                                Json.obj("timeCompleted" -> timeCompleted))
         }
       }
 
       it("fail when updating time completed with an invalid version") {
         createEntities { (study, participant, ceventType) =>
+          val timeCompleted = OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
           updateWithInvalidVersion(participant,
                                    ceventType,
                                    "timeCompleted",
-                                   Json.obj("timeCompleted" -> 1))
+                                   Json.obj("timeCompleted" -> timeCompleted))
         }
       }
 

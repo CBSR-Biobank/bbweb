@@ -11,7 +11,8 @@ import scala.concurrent.{ExecutionContext, Future}
  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
  */
 @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-trait CommandController extends Controller {
+abstract class CommandController(controllerComponents: ControllerComponents)
+    extends AbstractController(controllerComponents) {
 
   implicit val ec: ExecutionContext
 
