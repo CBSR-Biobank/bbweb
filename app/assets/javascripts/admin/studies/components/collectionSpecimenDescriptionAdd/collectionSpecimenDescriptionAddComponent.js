@@ -12,8 +12,8 @@ define(function (require) {
     controller: CollectionSpecimenDescriptionAddController,
     controllerAs: 'vm',
     bindings: {
-      study:               '=',
-      collectionEventType: '='
+      study:               '<',
+      collectionEventType: '<'
     }
   };
 

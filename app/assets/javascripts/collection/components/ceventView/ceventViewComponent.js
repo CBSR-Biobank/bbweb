@@ -12,9 +12,9 @@ define(function (require) {
     controller: CeventViewController,
     controllerAs: 'vm',
     bindings: {
-      study:                '=',
-      collectionEvent:      '=',
-      collectionEventTypes: '='
+      study:                '<',
+      collectionEvent:      '<',
+      collectionEventTypes: '<'
     }
   };
 

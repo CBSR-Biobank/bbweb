@@ -11,8 +11,8 @@ define(function (require) {
     controller: CeventTypeViewController,
     controllerAs: 'vm',
     bindings: {
-        study:      '=',
-        ceventType: '='
+        study:      '<',
+        ceventType: '<'
     }
   };
 

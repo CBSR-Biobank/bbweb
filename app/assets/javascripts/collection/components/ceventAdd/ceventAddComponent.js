@@ -13,9 +13,9 @@ define(function () {
       controller: CeventAddController,
       controllerAs: 'vm',
       bindings: {
-        study: '=',
-        participant: '=',
-        collectionEventType: '='
+        study:               '<',
+        participant:         '<',
+        collectionEventType: '<'
       }
    };
 

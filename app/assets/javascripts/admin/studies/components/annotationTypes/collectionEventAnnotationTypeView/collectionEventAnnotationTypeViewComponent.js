@@ -13,9 +13,9 @@ define(function (require) {
     controller: CollectionEventAnnotationTypeViewController,
     controllerAs: 'vm',
     bindings: {
-      study:               '=',
-      collectionEventType: '=',
-      annotationType:      '='
+      study:               '<',
+      collectionEventType: '<',
+      annotationType:      '<'
     }
   };
 

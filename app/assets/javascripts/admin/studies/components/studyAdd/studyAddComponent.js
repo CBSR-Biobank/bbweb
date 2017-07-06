@@ -10,7 +10,7 @@ define(function () {
     controller: StudyAddController,
     controllerAs: 'vm',
     bindings: {
-      study: '='
+      study: '<'
     }
   };
 

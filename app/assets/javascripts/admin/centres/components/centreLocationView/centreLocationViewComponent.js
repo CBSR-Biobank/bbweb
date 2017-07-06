@@ -13,8 +13,8 @@ define(function (require) {
     controller: CentreLocationViewController,
     controllerAs: 'vm',
     bindings: {
-      centre: '=',
-      location: '='
+      centre:   '<',
+      location: '<'
     }
   };
 

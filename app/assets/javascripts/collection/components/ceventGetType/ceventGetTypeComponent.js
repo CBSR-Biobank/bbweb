@@ -10,9 +10,9 @@ define(function () {
     controller: CeventGetTypeController,
     controllerAs: 'vm',
     bindings: {
-      study: '=',
-      participant: '=',
-      collectionEventTypes: '='
+      study:                '<',
+      participant:          '<',
+      collectionEventTypes: '<'
     }
   };
 

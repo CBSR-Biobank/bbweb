@@ -16,7 +16,7 @@ define(function (require) {
     controller: CentreSummaryController,
     controllerAs: 'vm',
     bindings: {
-      centre: '='
+      centre: '<'
     }
   };
 

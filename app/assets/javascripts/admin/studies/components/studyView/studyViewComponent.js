@@ -10,7 +10,7 @@ define(function (require) {
     controller: StudyViewController,
     controllerAs: 'vm',
     bindings: {
-      study: '='
+      study: '<'
     }
   };
 

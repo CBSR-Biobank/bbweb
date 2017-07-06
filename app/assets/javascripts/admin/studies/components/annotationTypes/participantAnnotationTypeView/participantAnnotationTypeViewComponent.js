@@ -11,8 +11,8 @@ define(function (require) {
     controller: ParticipantAnnotationTypeViewController,
     controllerAs: 'vm',
     bindings: {
-      study:          '=',
-      annotationType: '='
+      study:          '<',
+      annotationType: '<'
     }
   };
 

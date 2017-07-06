@@ -17,7 +17,7 @@ define(function (require) {
     bindings: {
       getHeader:              '&',
       getStudies:             '&',
-      limit:                  '=',
+      limit:                  '<',
       messageNoResults:       '@',
       icon:                   '@',
       navigateStateName:      '@',

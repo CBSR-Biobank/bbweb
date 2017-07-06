@@ -12,8 +12,8 @@ define(function (require) {
     controller: AnnotationTypeViewController,
     controllerAs: 'vm',
     bindings: {
-      study:          '=',
-      annotationType: '=',
+      study:          '<',
+      annotationType: '<',
       returnState:    '@',
       onUpdate:       '&'
     }

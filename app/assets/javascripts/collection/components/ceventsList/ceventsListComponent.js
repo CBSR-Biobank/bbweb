@@ -13,8 +13,8 @@ define(function () {
     controller: CeventsListController,
     controllerAs: 'vm',
     bindings: {
-      participant: '=',
-      collectionEventTypes: '='
+      participant:          '<',
+      collectionEventTypes: '<'
     }
   };
 

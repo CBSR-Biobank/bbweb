@@ -10,8 +10,8 @@ define(function () {
     controller: StatusLineController,
     controllerAs: 'vm',
     bindings: {
-      item: '=',
-      showState: '='
+      item:      '<',
+      showState: '<'
     }
   };
 

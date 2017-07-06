@@ -10,7 +10,7 @@ define(function () {
     controller: CentreViewDirective,
     controllerAs: 'vm',
     bindings: {
-      centre: '='
+      centre: '<'
     }
   };
 

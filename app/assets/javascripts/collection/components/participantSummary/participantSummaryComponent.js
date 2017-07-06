@@ -10,8 +10,8 @@ define(function () {
     controller: ParticipantSummaryController,
     controllerAs: 'vm',
     bindings: {
-      study: '=',
-      participant: '='
+      study:       '<',
+      participant: '<'
     }
   };
 

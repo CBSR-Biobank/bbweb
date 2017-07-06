@@ -10,7 +10,7 @@ define(function () {
     controller: LocationsPanelController,
     controllerAs: 'vm',
     bindings: {
-      centre: '='
+      centre: '<'
     }
   };
 

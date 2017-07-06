@@ -12,8 +12,8 @@ define(function (require) {
     controller: ParticipantViewController,
     controllerAs: 'vm',
     bindings: {
-      study: '=',
-      participant: '='
+      study:       '<',
+      participant: '<'
     }
   };
 

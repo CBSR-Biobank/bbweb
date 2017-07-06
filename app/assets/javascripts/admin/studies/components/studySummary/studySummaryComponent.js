@@ -15,7 +15,7 @@ define(function () {
     controller: StudySummaryController,
     controllerAs: 'vm',
     bindings: {
-      study: '='
+      study: '<'
     }
   };
 

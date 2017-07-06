@@ -12,7 +12,7 @@ define(function (require) {
     controller: ParticipantAnnotationTypeAddController,
     controllerAs: 'vm',
     bindings: {
-      study: '='
+      study: '<'
     }
   };
 

@@ -10,7 +10,7 @@ define(function () {
     controller: PasswordSentController,
     controllerAs: 'vm',
     bindings: {
-      email: '='
+      email: '<'
     }
   };
 

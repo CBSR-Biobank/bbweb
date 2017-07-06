@@ -12,7 +12,7 @@ define(function (require) {
     controller: StudyCollectionController,
     controllerAs: 'vm',
     bindings: {
-        study: '='
+        study: '<'
     }
   };
 

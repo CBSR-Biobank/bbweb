@@ -12,8 +12,8 @@ define(function (require) {
     controller: CollectionEventAnnotationTypeAddController,
     controllerAs: 'vm',
     bindings: {
-      study:               '=',
-      collectionEventType: '='
+      study:               '<',
+      collectionEventType: '<'
     }
   };
 

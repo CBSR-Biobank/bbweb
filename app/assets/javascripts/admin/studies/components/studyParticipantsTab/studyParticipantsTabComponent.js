@@ -14,7 +14,7 @@ define(function (require) {
     controller: StudyParticipantsTabController,
     controllerAs: 'vm',
     bindings: {
-      study: '='
+      study: '<'
     }
   };
 

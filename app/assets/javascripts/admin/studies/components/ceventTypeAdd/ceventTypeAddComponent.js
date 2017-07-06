@@ -10,7 +10,7 @@ define(function () {
     controller: CeventTypeAddController,
     controllerAs: 'vm',
     bindings: {
-      study: '='
+      study: '<'
     }
   };
 

@@ -10,7 +10,7 @@ define(function () {
     controller: StudyNotDisabledWarningController,
     controllerAs: 'vm',
     bindings: {
-      study: '='
+      study: '<'
     }
   };
 

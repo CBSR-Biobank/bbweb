@@ -15,8 +15,8 @@ define(function (require) {
     controller: CentreStudiesPanelController,
     controllerAs: 'vm',
     bindings: {
-      centre:     '=',
-      studyNames: '='
+      centre:     '<',
+      studyNames: '<'
     }
   };
 

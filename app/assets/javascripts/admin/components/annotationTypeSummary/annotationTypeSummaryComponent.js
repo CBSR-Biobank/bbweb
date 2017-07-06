@@ -10,7 +10,7 @@ define(function () {
     controller: AnnotationTypeSummaryController,
     controllerAs: 'vm',
     bindings: {
-      annotationType: '='
+      annotationType: '<'
     }
   };
 

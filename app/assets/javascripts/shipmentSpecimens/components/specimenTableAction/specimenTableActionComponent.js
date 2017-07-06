@@ -9,7 +9,7 @@ define(function () {
     controller: SpecimenTableActionDirective,
     controllerAs: 'vm',
     bindings: {
-      action:            '=',
+      action:            '<',
       onActionSelected:  '&'
     }
   };

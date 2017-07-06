@@ -13,7 +13,7 @@ define(function () {
     controller: ParticipantAddController,
     controllerAs: 'vm',
     bindings: {
-      study:    '=',
+      study:    '<',
       uniqueId: '@'
     }
   };
