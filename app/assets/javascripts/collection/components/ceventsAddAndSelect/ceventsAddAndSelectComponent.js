@@ -12,8 +12,9 @@ define(function (require) {
     controller: CeventsAddAndSelectDirective,
     controllerAs: 'vm',
     bindings: {
-      participant: '=',
-      collectionEventTypes: '='
+      participant:            '<',
+      collectionEventTypes:   '<',
+      updateCollectionEvents: '<'
     }
   };
 
@@ -44,18 +45,28 @@ define(function (require) {
       sortField: 'visitNumber'
     };
 
+    vm.$onInit              = onInit;
+    vm.$onChanges           = onChanges;
     vm.visitNumberFilter    = '';
     vm.pageChanged          = pageChanged;
     vm.add                  = add;
     vm.eventInformation     = eventInformation;
     vm.visitFilterUpdated   = visitFilterUpdated;
     vm.collectionEventError = false;
-    vm.$onInit              = onInit;
 
     // --
 
     function onInit() {
       updateCollectionEvents();
+    }
+
+    /*
+     * Parent component can trigger a collection event reload by calling updating this binding.
+     */
+    function onChanges() {
+      if (vm.updateCollectionEvents) {
+        updateCollectionEvents();
+      }
     }
 
     function setCollectionEventType(cevents) {
@@ -67,7 +78,7 @@ define(function (require) {
           cevent.setCollectionEventType(ceventType);
         }
       });
-      return cevents;
+      return CollectionEvent.sortByVisitNumber(cevents);
     }
 
     function getDisplayState() {

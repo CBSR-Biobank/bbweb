@@ -19,6 +19,7 @@ define(function (require) {
   };
 
   CeventViewController.$inject = [
+    '$scope',
     '$state',
     'gettextCatalog',
     'CollectionEvent',
@@ -34,7 +35,8 @@ define(function (require) {
   /*
    * Controller for this component.
    */
-  function CeventViewController($state,
+  function CeventViewController($scope,
+                                $state,
                                 gettextCatalog,
                                 CollectionEvent,
                                 Specimen,
@@ -72,9 +74,12 @@ define(function (require) {
                           { required: true })
         .result.then(function (timeCompleted) {
           vm.collectionEvent.updateTimeCompleted(timeService.dateAndTimeToUtcString(timeCompleted))
-            .then(postUpdate(gettextCatalog.getString('Time completed updated successfully.'),
-                             gettextCatalog.getString('Change successful'),
-                             1500))
+            .then(function (cevent) {
+              $scope.$emit('collection-event-updated', cevent);
+              postUpdate(gettextCatalog.getString('Time completed updated successfully.'),
+                         gettextCatalog.getString('Change successful'),
+                         1500)(cevent);
+            })
             .catch(notificationsService.updateError);
         });
     }

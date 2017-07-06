@@ -284,6 +284,19 @@ define(function(require) {
         });
     };
 
+    /**
+     * Sorts an array of Collection Events by visit number.
+     *
+     * @param {Array<CollectionEvent>} collectionEvents The array to sort.
+     *
+     * @return {Array<CollectionEvent>} A new array sorted by visit number.
+     */
+    CollectionEvent.sortByVisitNumber = function(collectionEvents) {
+      return _.sortBy(collectionEvents, function (collectionEvent) {
+        return collectionEvent.visitNumber;
+      });
+    };
+
     CollectionEvent.prototype.asyncCreate = function (obj) {
       return CollectionEvent.asyncCreate(obj);
     };
