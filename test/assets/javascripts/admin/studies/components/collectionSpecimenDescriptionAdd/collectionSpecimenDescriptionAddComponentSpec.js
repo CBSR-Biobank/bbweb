@@ -64,7 +64,7 @@ define(function (require) {
       this.collectionEventType = new this.CollectionEventType(this.jsonCevenType);
       this.study               = new this.Study(this.jsonStudy);
 
-      spyOn(this.$state, 'go').and.returnValue('ok');
+      spyOn(this.$state, 'go').and.returnValue(null);
     }));
 
     it('has valid scope', function() {
@@ -85,7 +85,7 @@ define(function (require) {
     describe('on submit', function() {
 
       beforeEach(function() {
-        this.jsonSpec     = this.factory.collectionSpecimenDescription();
+        this.jsonSpec            = this.factory.collectionSpecimenDescription();
         this.specimenDescription = new this.CollectionSpecimenDescription(this.jsonSpec);
       });
 
@@ -105,11 +105,10 @@ define(function (require) {
       });
 
       it('displays an error when submit fails', function() {
+        this.createController();
         spyOn(this.CollectionEventType.prototype, 'addSpecimenDescription')
           .and.returnValue(this.$q.reject('simulated error'));
         spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
-
-        this.createController();
         this.controller.submit(this.specimenDescription);
         this.scope.$digest();
 

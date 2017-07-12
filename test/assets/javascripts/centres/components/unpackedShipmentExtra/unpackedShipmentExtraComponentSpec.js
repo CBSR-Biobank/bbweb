@@ -127,20 +127,15 @@ define(function (require) {
         var self = this,
             shipment = this.createShipment(),
             errors = [
-              this.$q.reject(this.errorReply(
-                'EntityCriteriaError: specimen inventory IDs already in this shipment: xxxx')),
-              this.$q.reject(this.errorReply(
-                'EntityCriteriaError: specimens are already in an active shipment: xxxx')),
-              this.$q.reject(this.errorReply(
-                'EntityCriteriaError: invalid inventory Ids: xxx')),
-              this.$q.reject(this.errorReply(
-                'EntityCriteriaError: invalid centre for specimen inventory IDs: xxx')),
-              this.$q.reject(this.errorReply(this.factory.stringNext())),
-              this.$q.reject(this.factory.stringNext())
+              this.errorReply('EntityCriteriaError: specimen inventory IDs already in this shipment: xxxx'),
+              this.errorReply('EntityCriteriaError: specimens are already in an active shipment: xxxx'),
+              this.errorReply('EntityCriteriaError: invalid inventory Ids: xxx'),
+              this.errorReply('EntityCriteriaError: invalid centre for specimen inventory IDs: xxx'),
+              this.errorReply(this.factory.stringNext()),
+              this.factory.stringNext()
             ],
             tableRefreshCount;
 
-        spyOn(this.Shipment.prototype, 'tagSpecimensAsExtra').and.returnValues.apply(null, errors);
         spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
 
         this.createController(shipment);
@@ -150,6 +145,8 @@ define(function (require) {
         errors.forEach(function (error, index) {
           var args;
 
+          self.Shipment.prototype.tagSpecimensAsExtra =
+            jasmine.createSpy().and.returnValue(self.$q.reject(error));
           self.controller.onInventoryIdsSubmit();
           self.scope.$digest();
           expect(self.controller.refreshTable).toBe(tableRefreshCount);
@@ -179,16 +176,12 @@ define(function (require) {
 
 
       it('a specimen can be removed', function() {
-        var modalOkResults = [
-              this.$q.when('OK'),
-              this.$q.reject('Cancel'),
-            ],
-            tableRefreshCount;
+        var tableRefreshCount;
 
         spyOn(this.ShipmentSpecimen.prototype, 'remove').and.returnValue(this.$q.when(true));
-        spyOn(this.modalService, 'modalOkCancel').and.returnValues.apply(null, modalOkResults);
 
         this.createController(this.shipment);
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
         tableRefreshCount = this.controller.refreshTable;
         this.controller.tableActionSelected(this.shipmentSpecimen);
         this.scope.$digest();
@@ -202,10 +195,10 @@ define(function (require) {
         var tableRefreshCount;
 
         spyOn(this.ShipmentSpecimen.prototype, 'remove').and.returnValue(this.$q.when(true));
-        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
 
         this.createController(this.shipment);
         tableRefreshCount = this.controller.refreshTable;
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
         this.controller.tableActionSelected(this.shipmentSpecimen);
         this.scope.$digest();
 

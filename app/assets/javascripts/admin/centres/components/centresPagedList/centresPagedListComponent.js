@@ -23,6 +23,7 @@ define(function (require) {
 
   CentresPagedListController.$inject = [
     '$controller',
+    '$q',
     '$scope',
     'Centre',
     'CentreState',
@@ -35,6 +36,7 @@ define(function (require) {
    * Controller for this component.
    */
   function CentresPagedListController($controller,
+                                      $q,
                                       $scope,
                                       Centre,
                                       CentreState,
@@ -42,43 +44,40 @@ define(function (require) {
                                       $state,
                                       gettextCatalog) {
     var vm = this;
-
-    vm.$onInit     = onInit;
-    vm.counts      = {};
-    vm.limit       = 5;
-    vm.getItems    = getItems;
-    vm.getItemIcon = getItemIcon;
-
-    vm.stateData = _.map(_.values(CentreState), function (state) {
-      return { id: state, label: state.toUpperCase() };
-    });
-
-    // initialize this controller's base class
-    $controller('PagedListController', {
-      vm:             vm,
-      gettextCatalog: gettextCatalog
-    });
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.counts      = {};
+      vm.limit       = 5;
+      vm.getItems    = getItems;
+      vm.getItemIcon = getItemIcon;
+
+      vm.stateData = _.map(_.values(CentreState), function (state) {
+        return { id: state, label: state.toUpperCase() };
+      });
+
+      // initialize this controller's base class
+      $controller('PagedListController', {
+        vm:             vm,
+        gettextCatalog: gettextCatalog
+      });
+
       CentreCounts.get()
         .then(function (counts) {
           vm.counts = counts;
         })
-        .catch(function (error) {
-          if (error.status && (error.status === 401)) {
-            $state.go('home.users.login', {}, { reload: true });
-          }
-        });
+        .catch(handleUnauthorized);
     }
 
     function getItems(options) {
-      // KLUDGE: for now, fix after Entity Pagers have been implemented
-      return CentreCounts.get().then(function (counts) {
-        vm.counts = counts;
-        return Centre.list(options);
-      });
+      return CentreCounts.get()
+        .then(function (counts) {
+          vm.counts = counts;
+          return Centre.list(options);
+        })
+        .catch(handleUnauthorized);
     }
 
     function getItemIcon(centre) {
@@ -89,6 +88,13 @@ define(function (require) {
       } else {
         throw new Error('invalid centre state: ' + centre.state);
       }
+    }
+
+    function handleUnauthorized(error) {
+      if (error.status && (error.status === 401)) {
+        $state.go('home.users.login', {}, { reload: true });
+      }
+      return null;
     }
   }
 

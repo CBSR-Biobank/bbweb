@@ -28,35 +28,35 @@ define(function (require) {
    */
   function CeventsAddAndSelectDirective($state, CollectionEvent) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    if (vm.collectionEventTypes.length <= 0) {
-      throw new Error('no collection event types defined for this study');
-    }
-
-    vm.displayStates = {
-      NO_RESULTS: 0,
-      HAVE_RESULTS: 1,
-      NONE_ADDED: 2
-    };
-
-    vm.pagerOptions = {
-      page:      1,
-      limit:  5,
-      sortField: 'visitNumber'
-    };
-
-    vm.$onInit              = onInit;
-    vm.$onChanges           = onChanges;
-    vm.visitNumberFilter    = '';
-    vm.pageChanged          = pageChanged;
-    vm.add                  = add;
-    vm.eventInformation     = eventInformation;
-    vm.visitFilterUpdated   = visitFilterUpdated;
-    vm.collectionEventError = false;
-
-    // --
+    //--
 
     function onInit() {
+      if (vm.collectionEventTypes.length <= 0) {
+        throw new Error('no collection event types defined for this study');
+      }
+
+      vm.displayStates = {
+        NO_RESULTS: 0,
+        HAVE_RESULTS: 1,
+        NONE_ADDED: 2
+      };
+
+      vm.pagerOptions = {
+        page:      1,
+        limit:  5,
+        sortField: 'visitNumber'
+      };
+
+      vm.$onChanges           = onChanges;
+      vm.visitNumberFilter    = '';
+      vm.pageChanged          = pageChanged;
+      vm.add                  = add;
+      vm.eventInformation     = eventInformation;
+      vm.visitFilterUpdated   = visitFilterUpdated;
+      vm.collectionEventError = false;
+
       updateCollectionEvents();
     }
 

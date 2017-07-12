@@ -32,18 +32,22 @@ define(function (require) {
                               domainNotificationService,
                               notificationsService) {
     var vm = this;
-
-    vm.centre = new Centre();
-    vm.submit = submit;
-    vm.cancel = cancel;
-
-    vm.returnState = {
-      name: 'home.admin.centres',
-      params: { },
-      options: { reload: true }
-    };
+    vm.$onInit = onInit;
 
     //---
+
+     function onInit() {
+      vm.centre = new Centre();
+      vm.submit = submit;
+      vm.cancel = cancel;
+
+      vm.returnState = {
+        name: 'home.admin.centres',
+        params: { },
+        options: { reload: true }
+      };
+
+    }
 
     function gotoReturnState(state) {
       $state.go(state.name, state.params, state.options);

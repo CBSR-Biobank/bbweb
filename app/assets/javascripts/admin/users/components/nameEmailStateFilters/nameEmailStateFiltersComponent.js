@@ -25,16 +25,19 @@ define(function () {
    */
   function NameAndStateFiltersController($controller) {
     var vm = this;
-
-    // initialize this controller's base class
-    $controller('NameAndStateFiltersController', { vm: vm });
-
-    vm.emailFilter = '';
-    vm.emailFilterUpdated = emailFilterUpdated;
-    vm.superClearFilters = vm.clearFilters;
-    vm.clearFilters = clearFilters;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      // initialize this controller's base class
+      $controller('NameAndStateFiltersController', { vm: vm });
+
+      vm.emailFilter = '';
+      vm.emailFilterUpdated = emailFilterUpdated;
+      vm.superClearFilters = vm.clearFilters;
+      vm.clearFilters = clearFilters;
+    }
 
     function emailFilterUpdated() {
       vm.onEmailFilterUpdated()(vm.emailFilter);

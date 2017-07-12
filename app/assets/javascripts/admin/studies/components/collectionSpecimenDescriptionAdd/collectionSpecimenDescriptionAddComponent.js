@@ -42,16 +42,19 @@ define(function (require) {
                                                       PreservationTemperatureType,
                                                       SpecimenType) {
     var vm = this;
-
-    vm.anatomicalSourceTypes = _.values(AnatomicalSourceType);
-    vm.preservTypes          = _.values(PreservationType);
-    vm.preservTempTypes      = _.values(PreservationTemperatureType);
-    vm.specimenTypes         = _.values(SpecimenType);
-
-    vm.submit = submit;
-    vm.cancel = cancel;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.anatomicalSourceTypes = _.values(AnatomicalSourceType);
+      vm.preservTypes          = _.values(PreservationType);
+      vm.preservTempTypes      = _.values(PreservationTemperatureType);
+      vm.specimenTypes         = _.values(SpecimenType);
+
+      vm.submit = submit;
+      vm.cancel = cancel;
+    }
 
     function submit(specimenDescription) {
       vm.collectionEventType.addSpecimenDescription(specimenDescription)

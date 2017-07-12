@@ -47,17 +47,20 @@ define(function (require) {
                                 notificationsService,
                                 annotationUpdate) {
     var vm = this;
-
-    vm.collectionEventType = _.find(vm.collectionEventTypes, { id: vm.collectionEvent.collectionEventTypeId });
-
-    vm.panelOpen                      = true;
-    vm.editTimeCompleted              = editTimeCompleted;
-    vm.editAnnotation                 = editAnnotation;
-    vm.panelButtonClicked             = panelButtonClicked;
-    vm.remove                         = remove;
-    vm.getAnnotationUpdateButtonTitle = getAnnotationUpdateButtonTitle;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.collectionEventType = _.find(vm.collectionEventTypes, { id: vm.collectionEvent.collectionEventTypeId });
+
+      vm.panelOpen                      = true;
+      vm.editTimeCompleted              = editTimeCompleted;
+      vm.editAnnotation                 = editAnnotation;
+      vm.panelButtonClicked             = panelButtonClicked;
+      vm.remove                         = remove;
+      vm.getAnnotationUpdateButtonTitle = getAnnotationUpdateButtonTitle;
+    }
 
     function postUpdate(message, title, timeout) {
       return function (cevent) {

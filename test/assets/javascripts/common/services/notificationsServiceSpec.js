@@ -124,44 +124,6 @@ define(function (require) {
       expect(args[2].extendedTimeOut).toEqual(0);
     });
 
-    it('updateErrorAndReject with error message', function() {
-      var err = { message: this.factory.stringNext() },
-          args;
-
-      this.notificationsService.updateErrorAndReject(err).then(function (arg) {
-        expect(arg).toBe(err);
-      });
-      this.$rootScope.$digest();
-
-      expect(this.toastr.error).toHaveBeenCalled();
-      args = this.toastr.error.calls.argsFor(0);
-      expect(args[0]).toEqual(err.message);
-      expect(args[1]).toEqual('Cannot apply your change');
-      expect(args[2]).toBeObject();
-      expect(args[2].closeButton).toBeTrue();
-      expect(args[2].timeOut).toEqual(0);
-      expect(args[2].extendedTimeOut).toEqual(0);
-    });
-
-    it('updateErrorAndReject with no error message', function() {
-      var err = {},
-          args;
-
-      this.notificationsService.updateErrorAndReject(err).then(function (arg) {
-        expect(arg).toBe(err);
-      });
-      this.$rootScope.$digest();
-
-      expect(this.toastr.error).toHaveBeenCalled();
-      args = this.toastr.error.calls.argsFor(0);
-      expect(args[0]).toEqual('Your change could not be saved');
-      expect(args[1]).toEqual('Cannot apply your change');
-      expect(args[2]).toBeObject();
-      expect(args[2].closeButton).toBeTrue();
-      expect(args[2].timeOut).toEqual(0);
-      expect(args[2].extendedTimeOut).toEqual(0);
-    });
-
   });
 
 });

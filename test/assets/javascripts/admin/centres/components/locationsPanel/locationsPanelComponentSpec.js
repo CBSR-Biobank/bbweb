@@ -113,11 +113,10 @@ define(function (require) {
           locationToRemove = entities.locations[0];
 
       entities.centre.locations.push(locationToRemove);
-
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(this.$q.reject('simulated error'));
 
       this.createController(entities.centre);
+      spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(this.$q.reject('simulated error'));
       this.controller.remove(locationToRemove);
       this.scope.$digest();
       expect(this.modalService.modalOkCancel.calls.count()).toBe(2);

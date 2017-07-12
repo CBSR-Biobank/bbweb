@@ -16,21 +16,21 @@ define(function () {
   /*
    * Shows a table of users.
    */
-   function UserAdminController(UserCounts, breadcrumbService) {
+  function UserAdminController(UserCounts, breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.users')
-    ];
-
     vm.$onInit = onInit;
-    vm.haveUsers = false;
 
     //--
 
     function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin.users')
+      ];
+
+      vm.haveUsers = false;
+
       UserCounts.get().then(function (counts) {
         vm.userCounts = counts;
         vm.haveUsers  = (vm.userCounts.total > 0);

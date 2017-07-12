@@ -29,33 +29,36 @@ define(function (require) {
    */
   function SelectCentreController() {
     var vm = this;
-
-    vm.displayStates = {
-      NO_RESULTS: 0,
-      HAVE_RESULTS: 1
-    };
-
-    vm.nameFilter         = '';
-    vm.nameFilterWildcard = '';
-    vm.updateCentres      = updateCentres;
-    vm.pagedResult        = {};
-    vm.nameFilterUpdated  = nameFilterUpdated;
-    vm.pageChanged        = pageChanged;
-    vm.clearFilter        = clearFilter;
-    vm.displayState       = getDisplayState();
-    vm.centreGlyphicon    = centreGlyphicon;
-    vm.showPagination     = getShowPagination();
-
-    vm.pagerOptions = {
-      filter: '',
-      sort:   'name', // must be lower case
-      page:   1,
-      limit:  vm.limit
-    };
-
-    updateCentres();
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.displayStates = {
+        NO_RESULTS: 0,
+        HAVE_RESULTS: 1
+      };
+
+      vm.nameFilter         = '';
+      vm.nameFilterWildcard = '';
+      vm.updateCentres      = updateCentres;
+      vm.pagedResult        = {};
+      vm.nameFilterUpdated  = nameFilterUpdated;
+      vm.pageChanged        = pageChanged;
+      vm.clearFilter        = clearFilter;
+      vm.displayState       = getDisplayState();
+      vm.centreGlyphicon    = centreGlyphicon;
+      vm.showPagination     = getShowPagination();
+
+      vm.pagerOptions = {
+        filter: '',
+        sort:   'name', // must be lower case
+        page:   1,
+        limit:  vm.limit
+      };
+
+      updateCentres();
+    }
 
     function getDisplayState() {
       return (vm.pagedResult.total > 0) ? vm.displayStates.HAVE_RESULTS : vm.displayStates.NO_RESULTS;

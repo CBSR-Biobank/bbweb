@@ -107,10 +107,11 @@ define(function (require) {
     });
 
     it('submit button pressed and shipment could not be added', function() {
-      spyOn(this.Shipment.prototype, 'add').and.returnValue(this.$q.reject('simulated error'));
       spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
       this.createCentreLocationsSpy([]);
+
       this.createController();
+      spyOn(this.Shipment.prototype, 'add').and.returnValue(this.$q.reject('simulated error'));
       this.controller.submit();
       this.scope.$digest();
       expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();

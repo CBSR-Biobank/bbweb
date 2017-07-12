@@ -30,12 +30,15 @@ define(function () {
                                         notificationsService,
                                         modalInput) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.editUniqueId                   = editUniqueId;
-    vm.editAnnotation                 = editAnnotation;
-    vm.getAnnotationUpdateButtonTitle = getAnnotationUpdateButtonTitle;
+    //--
 
-    //---
+    function onInit() {
+      vm.editUniqueId                   = editUniqueId;
+      vm.editAnnotation                 = editAnnotation;
+      vm.getAnnotationUpdateButtonTitle = getAnnotationUpdateButtonTitle;
+    }
 
     function postUpdate(message, title, timeout) {
       timeout = timeout || 1500;

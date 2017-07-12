@@ -36,33 +36,36 @@ define(function (require) {
    */
   function SelectStudyController($state, gettextCatalog, modalService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.displayStates = {
-      NO_RESULTS: 0,
-      HAVE_RESULTS: 1
-    };
+    //--
 
-    vm.nameFilter        = '';
-    vm.updateStudies     = updateStudies;
-    vm.pagedResult       = {};
-    vm.nameFilterUpdated = nameFilterUpdated;
-    vm.pageChanged       = pageChanged;
-    vm.clearFilter       = clearFilter;
-    vm.displayState      = getDisplayState();
-    vm.studyGlyphicon    = studyGlyphicon;
-    vm.studySelected     = studySelected;
-    vm.showPagination    = getShowPagination();
+    function onInit() {
+      vm.displayStates = {
+        NO_RESULTS: 0,
+        HAVE_RESULTS: 1
+      };
 
-    vm.pagerOptions = {
-      filter: '',
-      sort:   'name', // must be lower case
-      page:   1,
-      limit:  vm.limit
-    };
+      vm.nameFilter        = '';
+      vm.updateStudies     = updateStudies;
+      vm.pagedResult       = {};
+      vm.nameFilterUpdated = nameFilterUpdated;
+      vm.pageChanged       = pageChanged;
+      vm.clearFilter       = clearFilter;
+      vm.displayState      = getDisplayState();
+      vm.studyGlyphicon    = studyGlyphicon;
+      vm.studySelected     = studySelected;
+      vm.showPagination    = getShowPagination();
 
-    updateStudies();
+      vm.pagerOptions = {
+        filter: '',
+        sort:   'name', // must be lower case
+        page:   1,
+        limit:  vm.limit
+      };
 
-    //---
+      updateStudies();
+    }
 
     function getDisplayState() {
       return (vm.pagedResult.total > 0) ? vm.displayStates.HAVE_RESULTS : vm.displayStates.NO_RESULTS;

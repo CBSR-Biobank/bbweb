@@ -11,7 +11,7 @@ define(function (require) {
       _     = require('lodash'),
       faker = require('faker');
 
-  describe('collectionSpecimenDescriptionViewDirective', function() {
+  describe('Component: collectionSpecimenDescriptionView', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -300,19 +300,14 @@ define(function (require) {
       });
 
       it('error message should be displayed when update fails', function() {
-        var deferred = this.$q.defer(),
-            updateDeferred = this.$q.defer();
-
-        deferred.resolve(context.newValue);
-        updateDeferred.reject('simulated error');
+        context.createController.call(this);
 
         spyOn(this.modalInput, context.modalInputFuncName)
-          .and.returnValue({ result: deferred.promise});
+          .and.returnValue({ result: this.$q.when(context.newValue) });
         spyOn(this.CollectionEventType.prototype, 'updateSpecimenDescription')
-          .and.returnValue(updateDeferred.promise);
+          .and.returnValue(this.$q.reject('simulated error'));
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        context.createController.call(this);
         this.controller[context.controllerUpdateFuncName]();
         this.scope.$digest();
         expect(this.notificationsService.updateError).toHaveBeenCalled();

@@ -40,25 +40,25 @@ define(function (require) {
                                            notificationsService,
                                            gettextCatalog) {
     var vm = this;
-
     vm.$onInit = onInit;
-    vm.refreshSpecimensTable = 0;
-
-    vm.actions =  [
-      {
-        id:    'tag-as-extra',
-        class: 'btn-warning',
-        title: gettextCatalog.getString('Tag as present'),
-        icon:  'glyphicon-arrow-left'
-      }
-    ];
-
-    vm.getSpecimens         = getSpecimens;
-    vm.tableActionSelected  = tableActionSelected;
 
     //----
 
     function onInit() {
+      vm.refreshSpecimensTable = 0;
+
+      vm.actions =  [
+        {
+          id:    'tag-as-extra',
+          class: 'btn-warning',
+          title: gettextCatalog.getString('Tag as present'),
+          icon:  'glyphicon-arrow-left'
+        }
+      ];
+
+      vm.getSpecimens         = getSpecimens;
+      vm.tableActionSelected  = tableActionSelected;
+
       $scope.$emit('tabbed-page-update', 'tab-selected');
 
       if (vm.itemState === ShipmentItemState.RECEIVED) {
@@ -95,7 +95,8 @@ define(function (require) {
         .then(function () {
           vm.refreshSpecimensTable += 1;
           notificationsService.success(gettextCatalog.getString('Specimen returnted to unpacked'));
-        });
+        })
+        .catch(function () {});
     }
 
   }

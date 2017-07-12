@@ -24,16 +24,22 @@ define(function () {
    */
    function UserRolesController(breadcrumbService, gettextCatalog) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
+    //--
+
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
       breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.users'),
-      breadcrumbService.forStateWithFunc(
-        'home.admin.users.user',
-         function () { return gettextCatalog.getString('User: {{name}}', { name: vm.user.name }); }),
-      breadcrumbService.forState('home.admin.users.user.roles'),
-    ];
+        breadcrumbService.forState('home.admin.users'),
+        breadcrumbService.forStateWithFunc(
+          'home.admin.users.user',
+          function () { return gettextCatalog.getString('User: {{name}}', { name: vm.user.name }); }),
+        breadcrumbService.forState('home.admin.users.user.roles'),
+      ];
+    }
+
   }
 
   return component;

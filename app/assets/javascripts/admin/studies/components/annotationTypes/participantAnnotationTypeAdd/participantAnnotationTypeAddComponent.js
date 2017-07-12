@@ -2,10 +2,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
-
-  var _       = require('lodash');
 
   var component = {
     templateUrl : '/assets/javascripts/admin/studies/components/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
@@ -16,32 +14,41 @@ define(function (require) {
     }
   };
 
-  var returnState = 'home.admin.studies.study.participants';
-
-  ParticipantAnnotationTypeAddController.$inject = ['annotationTypeAddMixin'];
+  ParticipantAnnotationTypeAddController.$inject = [
+    '$controller',
+    '$state',
+    'notificationsService',
+    'domainNotificationService'
+  ];
 
   /*
    * Controller for this component.
    */
-  function ParticipantAnnotationTypeAddController(annotationTypeAddMixin) {
+  function ParticipantAnnotationTypeAddController($controller,
+                                                  $state,
+                                                  notificationsService,
+                                                  domainNotificationService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    _.extend(vm, annotationTypeAddMixin);
+    //---
 
-    vm.submit = submit;
-    vm.cancel = cancel;
+    function onInit() {
+      vm.domainObjTypeName = 'Study';
+      vm.addAnnotationTypePromiseFunc = vm.study.addAnnotationType.bind(vm.study);
+      vm.returnState = 'home.admin.studies.study.participants';
 
-    //--
+      // initialize this controller's base class
+      $controller('AnnotationTypeAddController', {
+        vm:                        vm,
+        $state:                    $state,
+        notificationsService:      notificationsService,
+        domainNotificationService: domainNotificationService
+      });
 
-    function submit(annotationType) {
-      vm.study.addAnnotationType(annotationType)
-        .then(vm.onAddSuccessful(returnState))
-        .catch(vm.onAddFailed);
+      vm.init();
     }
 
-    function cancel() {
-      vm.onCancel(returnState)();
-    }
   }
 
   return component;

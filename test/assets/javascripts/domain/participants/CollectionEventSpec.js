@@ -69,7 +69,8 @@ define(function (require) {
         return {
           jsonAnnotationTypes:   jsonAnnotationTypes,
           collectionEventType:   collectionEventType,
-          collectionEvent:       collectionEvent
+          collectionEvent:       collectionEvent,
+          serverCollectionEvent: jsonCevent
         };
       }
 
@@ -499,7 +500,7 @@ define(function (require) {
       entities.collectionEvent.add().then(function(reply) {
         expect(reply.id).toEqual(entities.serverCollectionEvent.id);
         expect(reply.version).toEqual(0);
-        expect(reply.participantId).toEqual(entities.participant.id);
+        expect(reply.participantId).toEqual(entities.serverCollectionEvent.participantId);
         expect(reply.timeCompleted).toEqual(entities.serverCollectionEvent.timeCompleted);
         expect(reply.visitNumber).toEqual(entities.serverCollectionEvent.visitNumber);
         expect(reply.annotations)

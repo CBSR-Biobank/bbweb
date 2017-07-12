@@ -29,15 +29,15 @@ define(function () {
                                     gettextCatalog,
                                     domainNotificationService) {
     var vm = this;
-
     vm.$onInit = onInit;
-    vm.add     = add;
-    vm.view    = view;
-    vm.remove  = remove;
 
     //--
 
     function onInit() {
+      vm.add     = add;
+      vm.view    = view;
+      vm.remove  = remove;
+
       // updates the selected tab in 'centreViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
     }

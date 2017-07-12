@@ -11,7 +11,7 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  describe('biobankHeaderDirective', function() {
+  describe('Component: biobankHeader', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -76,13 +76,10 @@ define([
     });
 
     it('changes to correct state on logout failure', function() {
-      var deferred = this.$q.defer();
-
-      spyOn(this.usersService, 'logout').and.returnValue(deferred.promise);
       spyOn(this.$state, 'go').and.returnValue(true);
-      deferred.reject('simulated logout failure');
 
       this.createController();
+      spyOn(this.usersService, 'logout').and.returnValue(this.$q.reject('simulated logout failure'));
       this.controller.logout();
       this.scope.$digest();
 

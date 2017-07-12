@@ -43,63 +43,61 @@ define(function (require) {
                                       UserCounts,
                                       gettextCatalog) {
     var vm = this;
-
-    vm.$onInit              = onInit;
-    vm.emailFilter          = '';
-    vm.counts               = {};
-    vm.limit                = 5;
-    vm.getItems             = getItems;
-    vm.getItemIcon          = getItemIcon;
-    vm.emailFilterUpdated   = emailFilterUpdated;
-
-    // initialize this controller's base class
-    $controller('PagedListController', {
-      vm:             vm,
-      gettextCatalog: gettextCatalog
-    });
-
-    vm.superGetFilters      = vm.getFilters;
-    vm.getFilters           = getFilters;
-    vm.superFiltersCleared  = vm.filtersCleared;
-    vm.filtersCleared       = filtersCleared;
-
-    vm.stateData = _.map(_.values(UserState), function (state) {
-      return { id: state, label: userStateLabel.stateToLabel(state) };
-    });
-
-    vm.stateLabels = {};
-    _.forEach(_.values(UserState), function (state) {
-      vm.stateLabels[state] = userStateLabel.stateToLabel(state);
-    });
-
-    // override this setting
-    vm.sortFields = [
-      gettextCatalog.getString('Name'),
-      gettextCatalog.getString('Email'),
-      gettextCatalog.getString('State')
-    ];
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.emailFilter          = '';
+      vm.counts               = {};
+      vm.limit                = 5;
+      vm.getItems             = getItems;
+      vm.getItemIcon          = getItemIcon;
+      vm.emailFilterUpdated   = emailFilterUpdated;
+
+      // initialize this controller's base class
+      $controller('PagedListController', {
+        vm:             vm,
+        gettextCatalog: gettextCatalog
+      });
+
+      vm.superGetFilters      = vm.getFilters;
+      vm.getFilters           = getFilters;
+      vm.superFiltersCleared  = vm.filtersCleared;
+      vm.filtersCleared       = filtersCleared;
+
+      vm.stateData = _.map(_.values(UserState), function (state) {
+        return { id: state, label: userStateLabel.stateToLabel(state) };
+      });
+
+      vm.stateLabels = {};
+      _.forEach(_.values(UserState), function (state) {
+        vm.stateLabels[state] = userStateLabel.stateToLabel(state);
+      });
+
+      // override this setting
+      vm.sortFields = [
+        gettextCatalog.getString('Name'),
+        gettextCatalog.getString('Email'),
+        gettextCatalog.getString('State')
+      ];
+
       UserCounts.get()
         .then(function (counts) {
           vm.userCounts = counts;
           vm.haveUsers  = (vm.userCounts.total > 0);
         })
-        .catch(function (error) {
-          if (error.status && (error.status === 401)) {
-            $state.go('home.users.login', {}, { reload: true });
-          }
-        });
+        .catch(handleUnauthorized);
     }
 
     function getItems(options) {
       // KLUDGE: for now, fix after Entity Pagers have been implemented
-      return UserCounts.get().then(function (counts) {
-        vm.counts = counts;
-        return User.list(options);
-      });
+      return UserCounts.get()
+        .then(function (counts) {
+          vm.counts = counts;
+          return User.list(options);
+        })
+        .catch(handleUnauthorized);
     }
 
     function getItemIcon(user) {
@@ -133,6 +131,13 @@ define(function (require) {
     function filtersCleared() {
       vm.emailFilter = '';
       vm.superFiltersCleared();
+    }
+
+    function handleUnauthorized(error) {
+      if (error.status && (error.status === 401)) {
+        $state.go('home.users.login', {}, { reload: true });
+      }
+      return null;
     }
   }
 

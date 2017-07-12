@@ -43,8 +43,6 @@ define(['angular', 'jquery'], function (angular, $) {
             $log.error(response.status, response.data.message);
             return $q.reject(response.data);
           }
-
-          $log.error(response.status, response.config.method, response.config.url);
           return $q.reject(response);
         });
     }

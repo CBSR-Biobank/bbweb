@@ -37,16 +37,17 @@ define(function () {
     var vm = this;
 
     vm.$onInit = onInit;
-    vm.credentials = {
-      email: '',
-      password: ''
-    };
-
-    vm.login = login;
 
     //--
 
     function onInit() {
+      vm.credentials = {
+        email: '',
+        password: ''
+      };
+
+      vm.login = login;
+
       if (usersService.isAuthenticated()) {
         // user already logged in, send him to home page
         $state.go('home');

@@ -31,26 +31,31 @@ define(function (require) {
                                                    notificationsService,
                                                    breadcrumbService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.studies'),
-      breadcrumbService.forStateWithFunc(
-        'home.admin.studies.study.participants',
-        function () { return vm.study.name; }),
-      breadcrumbService.forStateWithFunc(
-        'home.admin.studies.study.participant.annotationTypeView',
-        function () {
-          if (_.isUndefined(vm.annotationType)) {
-            return gettextCatalog.getString('Error');
-          }
-          return gettextCatalog.getString(
-            'Participant annotation: {{name}}', { name: vm.annotationType.name });
-        })
-    ];
+    //---
 
-    vm.onUpdate = onUpdate;
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin.studies'),
+        breadcrumbService.forStateWithFunc(
+          'home.admin.studies.study.participants',
+          function () { return vm.study.name; }),
+        breadcrumbService.forStateWithFunc(
+          'home.admin.studies.study.participant.annotationTypeView',
+          function () {
+            if (_.isUndefined(vm.annotationType)) {
+              return gettextCatalog.getString('Error');
+            }
+            return gettextCatalog.getString(
+              'Participant annotation: {{name}}', { name: vm.annotationType.name });
+          })
+      ];
+
+      vm.onUpdate = onUpdate;
+    }
 
     function onUpdate(annotationType) {
       return vm.study.updateAnnotationType(annotationType)

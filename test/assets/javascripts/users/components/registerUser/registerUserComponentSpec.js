@@ -54,20 +54,20 @@ define([
     });
 
     it('displays a notification after registering an already registered email address', function() {
+      createController.call(this);
       spyOn(this.User.prototype, 'register').and.returnValue(
         this.$q.reject({ status: 403, data: { message: 'already registered' } }));
       spyOn(this.notificationsService, 'error').and.returnValue(null);
-      createController.call(this);
       this.controller.submit({});
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();
     });
 
     it('displays a notification after registration failure', function() {
+      createController.call(this);
       spyOn(this.User.prototype, 'register').and.returnValue(
         this.$q.reject({ status: 401, data: { message: 'xxx' } }));
       spyOn(this.notificationsService, 'error').and.returnValue(null);
-      createController.call(this);
       this.controller.submit({});
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();

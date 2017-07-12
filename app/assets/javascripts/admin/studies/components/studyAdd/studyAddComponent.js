@@ -32,11 +32,14 @@ define(function () {
                               domainNotificationService) {
 
     var vm = this;
-
-    vm.submit = submit;
-    vm.cancel = cancel;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.submit = submit;
+      vm.cancel = cancel;
+    }
 
     function submit(study) {
       study.add()

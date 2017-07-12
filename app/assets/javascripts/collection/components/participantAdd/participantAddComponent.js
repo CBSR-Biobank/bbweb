@@ -37,19 +37,24 @@ define(function () {
                                     notificationsService,
                                     breadcrumbService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-      breadcrumbService.forStateWithFunc('home.collection.study', function () {
-        return vm.study.name;
-      }),
-      breadcrumbService.forState('home.collection.study.participantAdd')
-    ];
+    //--
 
-    vm.participant = new Participant({ uniqueId: vm.uniqueId }, vm.study);
-    vm.submit      = submit;
-    vm.cancel      = cancel;
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.collection'),
+        breadcrumbService.forStateWithFunc('home.collection.study', function () {
+          return vm.study.name;
+        }),
+        breadcrumbService.forState('home.collection.study.participantAdd')
+      ];
+
+      vm.participant = new Participant({ uniqueId: vm.uniqueId }, vm.study);
+      vm.submit      = submit;
+      vm.cancel      = cancel;
+    }
 
     function submit(participant) {
       // convert the data from the form to data expected by REST API

@@ -23,18 +23,18 @@ define(function () {
    */
   function BiobankAdminController(adminService, usersService, User, breadcrumbService) {
     var vm = this;
-
-    vm.counts = {};
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin')
-    ];
-
-    init();
+    vm.$onInit = onInit;
 
     //--
 
-    function init() {
+    function onInit() {
+      vm.counts = {};
+
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin')
+      ];
+
       usersService.requestCurrentUser().then(function (user) {
         vm.user = User.create(user);
         adminService.aggregateCounts().then(function (aggregateCounts) {

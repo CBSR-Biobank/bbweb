@@ -121,14 +121,11 @@ define(function (require) {
       describe('when submit fails', function() {
 
         it('displays an error modal', function() {
-          var participantAddDeferred = this.$q.defer();
+          this.createController();
 
-          participantAddDeferred.reject('submit failure');
-
-          spyOn(this.Participant.prototype, 'add').and.returnValue(participantAddDeferred.promise);
+          spyOn(this.Participant.prototype, 'add').and.returnValue(this.$q.reject('submit failure'));
           spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
 
-          this.createController();
           this.controller.submit(this.participant);
           this.scope.$digest();
 
@@ -136,17 +133,12 @@ define(function (require) {
         });
 
         it('user presses Cancel on error modal', function() {
-          var participantAddDeferred = this.$q.defer(),
-              updateErrorModalDeferred = this.$q.defer();
-
-          participantAddDeferred.reject('submit failure');
-          updateErrorModalDeferred.reject('Cancel');
-
-          spyOn(this.Participant.prototype, 'add').and.returnValue(participantAddDeferred.promise);
-          spyOn(this.domainNotificationService, 'updateErrorModal')
-            .and.returnValue(updateErrorModalDeferred.promise);
-
           this.createController();
+
+          spyOn(this.Participant.prototype, 'add').and.returnValue(this.$q.reject('submit failure'));
+          spyOn(this.domainNotificationService, 'updateErrorModal')
+            .and.returnValue(this.$q.reject('Cancel'));
+
           this.controller.submit(this.participant);
           this.scope.$digest();
 

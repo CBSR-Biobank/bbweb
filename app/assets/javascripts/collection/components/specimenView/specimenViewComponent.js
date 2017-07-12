@@ -27,37 +27,40 @@ define(function (require) {
    */
   function SpecimenViewController($state, gettextCatalog, breadcrumbService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.specimenDescription = _.find(vm.collectionEventType.specimenDescriptions,
-                                    { id: vm.specimen.specimenDescriptionId });
+    //--
 
-    vm.editParticipant = editParticipant;
-    vm.back            = back;
+    function onInit() {
+      vm.specimenDescription = _.find(vm.collectionEventType.specimenDescriptions,
+                                      { id: vm.specimen.specimenDescriptionId });
 
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study',
-        function () { return vm.study.name; }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents',
-        function () {
-          return gettextCatalog.getString('Participant {{uniqueId}}',
-                                          { uniqueId: vm.participant.uniqueId });
-        }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents.details',
-        function () {
-          return gettextCatalog.getString('Visit # {{vnumber}}',
-                                          { vnumber: vm.collectionEvent.visitNumber });
-        }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents.details.specimen',
-        function () { return vm.specimen.inventoryId; })
-    ];
+      vm.editParticipant = editParticipant;
+      vm.back            = back;
 
-    //---
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.collection'),
+        breadcrumbService.forStateWithFunc(
+          'home.collection.study',
+          function () { return vm.study.name; }),
+        breadcrumbService.forStateWithFunc(
+          'home.collection.study.participant.cevents',
+          function () {
+            return gettextCatalog.getString('Participant {{uniqueId}}',
+                                            { uniqueId: vm.participant.uniqueId });
+          }),
+        breadcrumbService.forStateWithFunc(
+          'home.collection.study.participant.cevents.details',
+          function () {
+            return gettextCatalog.getString('Visit # {{vnumber}}',
+                                            { vnumber: vm.collectionEvent.visitNumber });
+          }),
+        breadcrumbService.forStateWithFunc(
+          'home.collection.study.participant.cevents.details.specimen',
+          function () { return vm.specimen.inventoryId; })
+      ];
+    }
 
     function editParticipant() {
       console.log(vm.participant);

@@ -181,14 +181,16 @@ define(function (require) {
     });
 
     it('can register a user', function() {
-      var password = this.factory.stringNext();
-      var user = new this.User(_.omit(this.factory.user(), 'id'));
-      var cmd = registerCommand(user, password);
+      var self       = this,
+          password   = this.factory.stringNext(),
+          serverUser = this.factory.user(),
+          user       = new this.User(_.omit(serverUser, 'id')),
+          cmd        = registerCommand(user, password);
 
-      this.$httpBackend.expectPOST(uri(), cmd).respond(this.reply());
+      this.$httpBackend.expectPOST(uri(), cmd).respond(this.reply(serverUser));
 
       user.register(password).then(function(reply) {
-        expect(reply).toEqual({});
+        expect(reply).toEqual(jasmine.any(self.User));
       });
       this.$httpBackend.flush();
     });

@@ -5,7 +5,7 @@
 define(function (require) {
   'use strict';
 
-  var _ = require('lodash'),
+  var _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
   /**
@@ -42,21 +42,21 @@ define(function (require) {
                                     SHIPMENT_TYPES,
                                     timeService) {
     var vm = this;
-
-    vm.statesToDisplay  = [];
-    vm.tableDataLoading = true;
-    vm.limit            = 5;
-    vm.shipmentDates    = {};
-    vm.tableController  = null;
-    vm.centreFilter     = null;
-
-    vm.$onInit             = onInit;
-    vm.getTableData        = getTableData;
-    vm.shipmentInformation = shipmentInformation;
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.statesToDisplay  = [];
+      vm.tableDataLoading = true;
+      vm.limit            = 5;
+      vm.shipmentDates    = {};
+      vm.tableController  = null;
+      vm.centreFilter     = null;
+
+      vm.getTableData        = getTableData;
+      vm.shipmentInformation = shipmentInformation;
+
       switch (vm.shipmentTypes) {
       case SHIPMENT_TYPES.INCOMING:
         vm.centreFilter = sprintf('toCentre:in:(%s)', vm.centre.name);

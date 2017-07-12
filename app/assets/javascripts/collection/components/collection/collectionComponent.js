@@ -20,20 +20,20 @@ define(function () {
    */
   function CollectionController($state, gettextCatalog, Study, breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-    ];
-
-    vm.$onInit              = onInit;
-    vm.isCollectionAllowed  = false;
-    vm.updateEnabledStudies  = updateEnabledStudies;
-    vm.getStudiesPanelHeader = getStudiesPanelHeader;
+    vm.$onInit = onInit;
 
     //---
 
     function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.collection'),
+      ];
+
+      vm.isCollectionAllowed  = false;
+      vm.updateEnabledStudies  = updateEnabledStudies;
+      vm.getStudiesPanelHeader = getStudiesPanelHeader;
+
       Study.collectionStudies()
         .then(function (reply) {
           vm.isCollectionAllowed = (reply.items.length > 0);

@@ -1,5 +1,6 @@
 /**
- *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 define(function () {
   'use strict';

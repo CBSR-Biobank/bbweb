@@ -41,30 +41,29 @@ define(function (require) {
                                            notificationsService,
                                            gettextCatalog) {
     var vm = this;
-
-    $controller('UnpackBaseController', { vm:             vm,
-                                          modalService:   modalService,
-                                          gettextCatalog: gettextCatalog });
-
     vm.$onInit = onInit;
-    vm.refreshTable = 0;
-
-    vm.actions =  [
-      {
-        id:    'tag-as-extra',
-        class: 'btn-warning',
-        title: gettextCatalog.getString('Remove'),
-        icon:  'glyphicon-remove'
-      }
-    ];
-
-    vm.getExtraSpecimens    = getExtraSpecimens;
-    vm.onInventoryIdsSubmit = onInventoryIdsSubmit;
-    vm.tableActionSelected  = tableActionSelected;
 
     //----
 
     function onInit() {
+      $controller('UnpackBaseController', { vm:             vm,
+                                            modalService:   modalService,
+                                            gettextCatalog: gettextCatalog });
+      vm.refreshTable = 0;
+
+      vm.actions =  [
+        {
+          id:    'tag-as-extra',
+          class: 'btn-warning',
+          title: gettextCatalog.getString('Remove'),
+          icon:  'glyphicon-remove'
+        }
+      ];
+
+      vm.getExtraSpecimens    = getExtraSpecimens;
+      vm.onInventoryIdsSubmit = onInventoryIdsSubmit;
+      vm.tableActionSelected  = tableActionSelected;
+
       $scope.$emit('tabbed-page-update', 'tab-selected');
     }
 
@@ -107,10 +106,11 @@ define(function (require) {
           { id: shipmentSpecimen.specimen.inventoryId }));
 
       function promiseFn() {
-        return shipmentSpecimen.remove().then(function () {
-          vm.refreshTable += 1;
-          notificationsService.success(gettextCatalog.getString('Specimen returnted to unpacked'));
-        });
+        return shipmentSpecimen.remove()
+          .then(function () {
+            vm.refreshTable += 1;
+            notificationsService.success(gettextCatalog.getString('Specimen returnted to unpacked'));
+          });
       }
     }
 

@@ -2,15 +2,12 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'lodash',
-  'faker',
-  'moment'
-], function(angular, _, faker, moment) {
+define(function (require) {
   'use strict';
 
-  /*jshint camelcase: false */
+  var _      = require('lodash'),
+      faker  = require('faker'),
+      moment = require('moment');
 
   factory.$inject = [
     'AnnotationValueType',

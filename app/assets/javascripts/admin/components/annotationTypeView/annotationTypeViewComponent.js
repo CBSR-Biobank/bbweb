@@ -7,6 +7,9 @@ define(function (require) {
 
   var _ = require('lodash');
 
+  /*
+   *
+   */
   var component = {
     templateUrl: '/assets/javascripts/admin/components/annotationTypeView/annotationTypeView.html',
     controller: AnnotationTypeViewController,
@@ -26,25 +29,24 @@ define(function (require) {
     'annotationTypeUpdateModal'
   ];
 
-  /*
-   * Controller for this component.
-   */
   function AnnotationTypeViewController($state,
                                         gettextCatalog,
                                         modalInput,
                                         annotationTypeUpdateModal) {
     var vm = this;
-
-    vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabel();
-    updateRequiredLabel(vm.annotationType);
-
-    vm.editName             = editName;
-    vm.editRequired         = editRequired;
-    vm.editDescription      = editDescription;
-    vm.editSelectionOptions = editSelectionOptions;
-    vm.back                 = back;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabel();
+      vm.requiredLabel                = getRequiredLabel(vm.annotationType);
+      vm.editName                     = editName;
+      vm.editRequired                 = editRequired;
+      vm.editDescription              = editDescription;
+      vm.editSelectionOptions         = editSelectionOptions;
+      vm.back                         = back;
+    }
 
     function editName() {
       modalInput.text(gettextCatalog.getString('Edit Annotation name'),
@@ -64,7 +66,7 @@ define(function (require) {
                          { required: true }).result
         .then(function (required) {
           vm.annotationType.required = (required === 'true' );
-          updateRequiredLabel(vm.annotationType);
+          vm.requiredLabel = getRequiredLabel(vm.annotationType);
           vm.onUpdate()(vm.annotationType);
         });
     }
@@ -90,9 +92,8 @@ define(function (require) {
       $state.go(vm.returnState, {}, { reload: true });
     }
 
-    function updateRequiredLabel(annotationType) {
-      vm.requiredLabel = vm.annotationType.required ?
-        gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
+    function getRequiredLabel(annotationType) {
+      return annotationType.required ? gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
     }
   }
 

@@ -213,15 +213,13 @@ define(function (require) {
     });
 
     it('displays remove failed information modal if remove fails', function() {
-      var deferred      = this.$q.defer(),
-          entities      = this.createEntities(),
+      var entities      = this.createEntities(),
           studyToRemove = entities.studies[1];
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      spyOn(entities.centre, 'removeStudy').and.returnValue(deferred.promise);
 
-      deferred.reject('err');
       this.createController(entities);
+      spyOn(entities.centre, 'removeStudy').and.returnValue(this.$q.reject('simulated error'));
       this.controller.remove(studyToRemove.id);
       this.scope.$digest();
       expect(this.modalService.modalOkCancel.calls.count()).toBe(2);

@@ -24,9 +24,12 @@ define(function () {
    */
   function Controller($controller) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    // initialize this controller's base class
-    $controller('NameAndStateFiltersController', { vm: vm });
+    function onInit() {
+      // initialize this controller's base class
+      $controller('NameAndStateFiltersController', { vm: vm });
+    }
   }
 
   return component;

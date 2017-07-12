@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
 
   var component = {
@@ -25,14 +25,17 @@ define(function (require) {
    *
    */
   function ShipmentViewLostController($state,
-                                           gettextCatalog,
-                                           notificationsService,
-                                           modalService) {
+                                      gettextCatalog,
+                                      notificationsService,
+                                      modalService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.returnToSentState = returnToSentState;
+    //--
 
-    //----
+    function onInit() {
+      vm.returnToSentState = returnToSentState;
+    }
 
     function returnToSentState() {
       modalService.modalOkCancel(

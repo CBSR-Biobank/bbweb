@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
 
   var component = {
@@ -37,32 +37,32 @@ define(function (require) {
                                  User,
                                  breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.users'),
-      breadcrumbService.forStateWithFunc(
-        'home.admin.users.user',
-        function () { return gettextCatalog.getString('User: {{name}}', { name: vm.user.name }); })
-    ];
-
-    vm.$onInit                 = onInit;
-    vm.studyMemberships        = '';
-    vm.centreMemberships       = '';
-    vm.updateName              = updateName;
-    vm.updateEmail             = updateEmail;
-    vm.updatePassword          = updatePassword;
-    vm.updateAvatarUrl         = updateAvatarUrl;
-    vm.removeAvatarUrl         = removeAvatarUrl;
-    vm.updateStudyMemberships  = updateStudyMemberships;
-    vm.updateCentreMemberships = updateCentreMemberships;
-    vm.updateRoles             = updateRoles;
-    vm.rolesValue              = getRolesValue();
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin.users'),
+        breadcrumbService.forStateWithFunc(
+          'home.admin.users.user',
+          function () { return gettextCatalog.getString('User: {{name}}', { name: vm.user.name }); })
+      ];
+
+      vm.studyMemberships        = '';
+      vm.centreMemberships       = '';
+      vm.updateName              = updateName;
+      vm.updateEmail             = updateEmail;
+      vm.updatePassword          = updatePassword;
+      vm.updateAvatarUrl         = updateAvatarUrl;
+      vm.removeAvatarUrl         = removeAvatarUrl;
+      vm.updateStudyMemberships  = updateStudyMemberships;
+      vm.updateCentreMemberships = updateCentreMemberships;
+      vm.updateRoles             = updateRoles;
+      vm.rolesValue              = getRolesValue();
+
       vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
       if (vm.user.membership) {
         if (vm.user.membership.studyInfo.all) {

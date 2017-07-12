@@ -75,12 +75,11 @@ define(function (require) {
       });
 
       it('user is informed if shipment cannot be returned to packed state', function() {
-        var error = this.$q.reject('simulated error');
-        spyOn(this.Shipment.prototype, 'pack').and.returnValue(error);
-        spyOn(this.notificationsService, 'updateErrorAndReject').and.returnValue(error);
+        spyOn(this.Shipment.prototype, 'pack').and.returnValue(this.$q.reject('simulated error'));
+        spyOn(this.notificationsService, 'updateError').and.returnValue(null);
         this.controller.returnToPackedState();
         this.scope.$digest();
-        expect(this.notificationsService.updateErrorAndReject).toHaveBeenCalled();
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
       });
 
     });
@@ -112,17 +111,14 @@ define(function (require) {
             errorMsgs = [
               'TimeReceivedBeforeSent',
               'simulated error'
-            ],
-            errorPromises = errorMsgs.map(function (errMsg) {
-              return self.$q.reject({ message: errMsg });
-            });
+            ];
 
-        spyOn(this.Shipment.prototype, 'receive').and.returnValues.apply(null, errorPromises);
         spyOn(this.toastr, 'error').and.returnValue(null);
-
         errorMsgs.forEach(function (errMsg, index) {
           var args;
 
+          self.Shipment.prototype.receive =
+            jasmine.createSpy().and.returnValue(self.$q.reject({ message: errMsg }));
           self.controller.receiveShipment();
           self.scope.$digest();
           expect(self.toastr.error.calls.count()).toBe(index + 1);
@@ -173,16 +169,14 @@ define(function (require) {
               'TimeReceivedBeforeSent',
               'TimeUnpackedBeforeReceived',
               'simulated error'
-            ],
-            errorPromises = errorMsgs.map(function (errMsg) {
-              return self.$q.reject({ message: errMsg });
-            });
+            ];
 
-        spyOn(this.Shipment.prototype, 'skipToStateUnpacked').and.returnValues.apply(null, errorPromises);
         spyOn(this.toastr, 'error').and.returnValue(null);
 
         errorMsgs.forEach(function (errMsg, index) {
           var args;
+          self.Shipment.prototype.skipToStateUnpacked =
+            jasmine.createSpy().and.returnValue(self.$q.reject({ message: errMsg }));
           self.controller.unpackShipment();
           self.scope.$digest();
           expect(self.toastr.error.calls.count()).toBe(index + 1);
@@ -217,16 +211,14 @@ define(function (require) {
       });
 
       it('user is informed if shipment cannot be tagged as lost', function() {
-        var errorPromise = this.$q.reject('simulated error');
-        spyOn(this.Shipment.prototype, 'lost').and.returnValue(errorPromise);
-        spyOn(this.notificationsService, 'updateErrorAndReject').and.returnValue(errorPromise);
-
+        spyOn(this.notificationsService, 'updateError').and.returnValue(null);
         this.shipment = this.createShipment({ state: this.ShipmentState.SENT });
         this.createController(this.shipment);
+        spyOn(this.Shipment.prototype, 'lost').and.returnValue(this.$q.reject('simulated error'));
         this.controller.tagAsLost();
         this.scope.$digest();
 
-        expect(this.notificationsService.updateErrorAndReject).toHaveBeenCalled();
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
       });
     });
 

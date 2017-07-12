@@ -39,41 +39,46 @@ define(function () {
                                      breadcrumbService) {
     var vm = this;
 
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.shipping'),
-      breadcrumbService.forStateWithFunc('home.shipping.centre', function () {
-        return vm.centre.name;
-      })
-    ];
-
-    // initialize this controller's base class
-    $controller('TabbedPageController',
-                {
-                  vm:     vm,
-                  $scope: $scope,
-                  $state: $state
-                });
-
-    vm.tabs = [
-      {
-        heading: gettextCatalog.getString('Incoming'),
-        sref: 'home.shipping.centre.incoming',
-        active: true
-      },
-      {
-        heading: gettextCatalog.getString('Outgoing'),
-        sref: 'home.shipping.centre.outgoing',
-        active: false
-      },
-      {
-        heading: gettextCatalog.getString('Completed'),
-        sref: 'home.shipping.centre.completed',
-        active: false
-      }
-    ];
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.shipping'),
+        breadcrumbService.forStateWithFunc('home.shipping.centre', function () {
+          return vm.centre.name;
+        })
+      ];
+
+      // initialize this controller's base class
+      $controller('TabbedPageController',
+                  {
+                    vm:     vm,
+                    $scope: $scope,
+                    $state: $state
+                  });
+
+      vm.tabs = [
+        {
+          heading: gettextCatalog.getString('Incoming'),
+          sref: 'home.shipping.centre.incoming',
+          active: true
+        },
+        {
+          heading: gettextCatalog.getString('Outgoing'),
+          sref: 'home.shipping.centre.outgoing',
+          active: false
+        },
+        {
+          heading: gettextCatalog.getString('Completed'),
+          sref: 'home.shipping.centre.completed',
+          active: false
+        }
+      ];
+
+    }
 
   }
 

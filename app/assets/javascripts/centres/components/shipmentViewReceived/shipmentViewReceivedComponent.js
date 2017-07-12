@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
 
   var component = {
@@ -25,9 +25,6 @@ define(function (require) {
     'SHIPMENT_RECEIVE_PROGRESS_ITEMS'
   ];
 
-  /**
-   *
-   */
   function ShipmentViewReceivedController($q,
                                           $state,
                                           gettextCatalog,
@@ -37,17 +34,20 @@ define(function (require) {
                                           modalService,
                                           SHIPMENT_RECEIVE_PROGRESS_ITEMS) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.timeUnpacked      = new Date();
-    vm.unpackShipment    = unpackShipment;
-    vm.returnToSentState = returnToSentState;
+    //--
 
-    vm.progressInfo = {
-      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
-      current: 2
-    };
+    function onInit() {
+      vm.timeUnpacked      = new Date();
+      vm.unpackShipment    = unpackShipment;
+      vm.returnToSentState = returnToSentState;
 
-    //----
+      vm.progressInfo = {
+        items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
+        current: 2
+      };
+    }
 
     function unpackShipment() {
       modalInput.dateTime(gettextCatalog.getString('Date and time shipment was unpacked'),
@@ -56,16 +56,15 @@ define(function (require) {
                           { required: true }).result
         .then(function (timeUnpacked) {
           return vm.shipment.unpack(timeService.dateAndTimeToUtcString(timeUnpacked))
+            .then(function () {
+              $state.go('home.shipping.shipment.unpack.info', { shipmentId: vm.shipment.id });
+            })
             .catch(function (err) {
               if (err.message === 'TimeUnpackedBeforeReceived') {
                 err.message = gettextCatalog.getString('The unpacked time is before the received time');
               }
               notificationsService.updateError(err);
-              return $q.reject(err);
             });
-        })
-        .then(function (shipment) {
-          $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id });
         });
     }
 
@@ -76,10 +75,10 @@ define(function (require) {
         .then(function () {
           return vm.shipment.send(vm.shipment.timeSent);
         })
-        .catch(notificationsService.updateErrorAndReject)
         .then(function () {
           $state.reload();
-        });
+        })
+        .catch(notificationsService.updateError);
     }
   }
 

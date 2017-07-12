@@ -34,15 +34,11 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function($window, $timeout, ComponentTestSuiteMixin) {
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
       _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-
-      $window.localStorage.setItem = jasmine.createSpy().and.returnValue(null);
-      $window.localStorage.getItem = jasmine.createSpy().and.returnValue(null);
 
       this.injectDependencies('$rootScope',
                               '$compile',
-                              '$window',
                               '$state',
                               'Centre',
                               'factory');
@@ -62,12 +58,6 @@ define(function (require) {
     it('should contain initialized panels', function() {
       this.createController(this.centre);
       expect(this.controller.tabs).toBeArrayOfSize(3);
-    });
-
-    it('should contain initialized local storage', function() {
-      this.createController(this.centre);
-      expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('centre.panel.locations', true);
     });
 
     it('should initialize the tab corresponding to the event that was emitted', function() {

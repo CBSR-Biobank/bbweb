@@ -22,6 +22,7 @@ define(function (require) {
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
+                              '$state',
                               'ShipmentItemState',
                               'Shipment',
                               'ShipmentSpecimen',

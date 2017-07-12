@@ -1,7 +1,7 @@
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-      {{vm.ceventType.name}}
+      {{vm.collectionEventType.name}}
       <span class="pull-right">
         <button class="btn btn-xs btn-warning"
                 title="{{'Remove collection event'|translate}}"
@@ -32,7 +32,7 @@
             <strong translate>Name:</strong>
           </div>
           <div class="col-md-8">
-            {{vm.ceventType.name}}
+            {{vm.collectionEventType.name}}
           </div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
@@ -51,7 +51,7 @@
           </div>
           <div class="col-md-10">
             <truncate-toggle
-               text="vm.ceventType.description"
+               text="vm.collectionEventType.description"
                toggle-length="60"
                text-empty-warning="{{'Description not entered yet.'|translate}}"
                allow-edit="vm.study.isDisabled()"
@@ -65,8 +65,8 @@
           <div class="col-md-2">
             <strong translate>Recurring:</strong>
           </div>
-          <div class="col-md-8" ng-if="vm.ceventType.recurring" translate>Yes</div>
-          <div class="col-md-8" ng-if="!vm.ceventType.recurring" translate>No</div>
+          <div class="col-md-8" ng-if="vm.collectionEventType.recurring" translate>Yes</div>
+          <div class="col-md-8" ng-if="!vm.collectionEventType.recurring" translate>No</div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
                     title="{{'Edit recurring'|translate}}"
@@ -77,7 +77,7 @@
           </div>
         </div>
       </li>
-      <li class="list-group-item" ng-repeat="annotationType in vm.ceventType.annotationTypes">
+      <li class="list-group-item" ng-repeat="annotationType in vm.collectionEventType.annotationTypes">
         <div class="row">
           <div class="col-md-2">
             <strong translate>Annotation:</strong>
@@ -96,7 +96,7 @@
         </div>
       </li>
     </ul>
-    <status-line item="vm.ceventType"></status-line>
+    <status-line item="vm.collectionEventType"></status-line>
   </div>
 </div>
 <div class="panel panel-default">
@@ -115,7 +115,7 @@
     </h4>
   </div>
   <ul class="list-group">
-    <li class="list-group-item" ng-if="vm.ceventType.specimenSpecs.length <= 0">
+    <li class="list-group-item" ng-if="vm.collectionEventType.specimenSpecs.length <= 0">
       <div class="alert alert-warning">
         <span class="glyphicon glyphicon-warning-sign"></span>
         <translate>
@@ -124,7 +124,7 @@
       </div>
     </li>
     <li class="list-group-item"
-        ng-repeat="specimenDescription in vm.ceventType.specimenDescriptions">
+        ng-repeat="specimenDescription in vm.collectionEventType.specimenDescriptions">
       <div class="row">
         <div class="col-md-10">
           <collection-specimen-description-summary specimen-description="specimenDescription">

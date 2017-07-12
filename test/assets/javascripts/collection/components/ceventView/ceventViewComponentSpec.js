@@ -320,15 +320,15 @@ define(function(require) {
         });
 
         it('error message should be displayed when update fails', function() {
+          this.createController(this.study,
+                                [ this.collectionEvent.collectionEventType ],
+                                this.collectionEvent);
           spyOn(this.modalInput, context.modalInputFuncName)
             .and.returnValue({ result: this.$q.when(context.newValue )});
           spyOn(this.CollectionEvent.prototype, context.ceventUpdateFuncName)
             .and.returnValue(this.$q.reject('simulated error'));
           spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-          this.createController(this.study,
-                                [ this.collectionEvent.collectionEventType ],
-                                this.collectionEvent);
           this.controller[context.controllerUpdateFuncName]();
           this.scope.$digest();
 
@@ -378,6 +378,8 @@ define(function(require) {
                                                                  this.AnnotationMaxValueCount.SELECT_MULTIPLE),
             collectionEventTypes = [ collectionEvent.collectionEventType ];
 
+        this.createController(this.study, collectionEventTypes, collectionEvent);
+
         this.Specimen.list =
           jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [] }));
 
@@ -393,7 +395,6 @@ define(function(require) {
         this.$state.go =
           jasmine.createSpy('state.go').and.returnValue(null);
 
-        this.createController(this.study, collectionEventTypes, collectionEvent);
         this.controller.remove();
         this.scope.$digest();
         expect(this.CollectionEvent.prototype.remove).toHaveBeenCalled();

@@ -87,18 +87,20 @@ define(function () {
                           bodyHtml,
                           removeFailedHeaderHtml,
                           removeFaileBodyHtml) {
-      return modalService.modalOkCancel(headerHtml, bodyHtml).then(removeConfirmed);
+      return modalService.modalOkCancel(headerHtml, bodyHtml)
+        .then(removeConfirmed)
+        .catch(function () {});
 
       function removeConfirmed() {
-        return promiseFunc().catch(function (error) {
-          var errMsg = JSON.stringify(error);
-          if (error.status && (error.status === 401)) {
-            errMsg = gettextCatalog.getString('You do not have permission to perform this action');
-          }
-
-          return modalService.modalOkCancel(removeFailedHeaderHtml,
-                                            removeFaileBodyHtml + ': ' + errMsg);
-        });
+        return promiseFunc()
+          .catch(function (error) {
+            var errMsg = JSON.stringify(error);
+            if (error.status && (error.status === 401)) {
+              errMsg = gettextCatalog.getString('You do not have permission to perform this action');
+            }
+            return modalService
+              .modalOkCancel(removeFailedHeaderHtml, removeFaileBodyHtml + ': ' + errMsg);
+          });
       }
     }
   }

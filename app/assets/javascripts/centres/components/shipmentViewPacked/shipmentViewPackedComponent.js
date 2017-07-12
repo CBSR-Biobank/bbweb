@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
 
   var component = {
@@ -25,9 +25,6 @@ define(function (require) {
     'modalService'
   ];
 
-  /**
-   *
-   */
   function ShipmentViewPackedController($q,
                                         $state,
                                         gettextCatalog,
@@ -37,17 +34,20 @@ define(function (require) {
                                         timeService,
                                         modalService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.timeSent     = new Date();
-    vm.sendShipment = sendShipment;
-    vm.addMoreItems = addMoreItems;
+    //--
 
-    vm.progressInfo = {
-      items: SHIPMENT_SEND_PROGRESS_ITEMS,
-      current: 3
-    };
+    function onInit() {
+      vm.timeSent     = new Date();
+      vm.sendShipment = sendShipment;
+      vm.addMoreItems = addMoreItems;
 
-    //---
+      vm.progressInfo = {
+        items: SHIPMENT_SEND_PROGRESS_ITEMS,
+        current: 3
+      };
+    }
 
     function sendShipment() {
       modalInput.dateTime(gettextCatalog.getString('Date and time shipment was sent'),
@@ -56,16 +56,15 @@ define(function (require) {
                           { required: true }).result
         .then(function (timeSent) {
           return vm.shipment.send(timeService.dateAndTimeToUtcString(timeSent))
+            .then(function () {
+              $state.go('home.shipping');
+            })
             .catch(function (err) {
               if (err.message === 'TimeSentBeforePacked') {
                 err.message = gettextCatalog.getString('The sent time is before the packed time');
               }
               notificationsService.updateError(err);
-              return $q.reject(err);
             });
-        })
-        .then(function () {
-          $state.go('home.shipping');
         });
     }
 
@@ -75,10 +74,10 @@ define(function (require) {
         gettextCatalog.getString('Are you sure you want to add more items to this shipment?'))
         .then(function () {
           return vm.shipment.created()
-            .catch(notificationsService.updateErrorAndReject);
-        })
-        .then(function () {
-          $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
+            .then(function () {
+              $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
+            })
+            .catch(notificationsService.updateError);
         });
     }
   }

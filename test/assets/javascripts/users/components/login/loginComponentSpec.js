@@ -10,7 +10,7 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  describe('loginDirective', function() {
+  describe('Component: login', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -145,10 +145,9 @@ define(function (require) {
         });
 
         it('for invalid email or password and OK', function () {
+          this.createController();
           spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
           spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
-
-          this.createController();
           this.controller.login({ email: 'test@test.com', password: 'secret-password' });
           this.scope.$digest();
 
@@ -157,13 +156,11 @@ define(function (require) {
         });
 
         it('for invalid email or password and cancel pressed', function () {
+          this.createController();
           spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
           spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.reject('Cancel'));
-
-          this.createController();
           this.controller.login({ email: 'test@test.com', password: 'secret-password' });
           this.scope.$digest();
-
           expect(this.modalService.modalOk).toHaveBeenCalled();
           expect(this.$state.go).toHaveBeenCalledWith('home');
         });

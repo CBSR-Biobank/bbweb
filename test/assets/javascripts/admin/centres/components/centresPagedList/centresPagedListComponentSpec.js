@@ -11,46 +11,46 @@ define(function (require) {
       _               = require('lodash'),
       sharedBehaviour = require('../../../../test/EntityPagedListSharedBehaviourSpec');
 
-  function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  describe('centresPagedListComponent', function() {
 
-    function SuiteMixin() {
-    }
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
+      function SuiteMixin() {
+      }
 
-    SuiteMixin.prototype.createController = function () {
-      ComponentTestSuiteMixin.prototype.createController.call(
-        this,
-        '<centres-paged-list></centres-paged-list',
-        undefined,
-        'centresPagedList');
-    };
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createCountsSpy = function (disabled, enabled) {
-      var counts = {
-        total:    disabled + enabled,
-        disabled: disabled,
-        enabled:  enabled
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<centres-paged-list></centres-paged-list',
+          undefined,
+          'centresPagedList');
       };
 
-      spyOn(this.CentreCounts, 'get').and.returnValue(this.$q.when(counts));
-    };
+      SuiteMixin.prototype.createCountsSpy = function (disabled, enabled) {
+        var counts = {
+          total:    disabled + enabled,
+          disabled: disabled,
+          enabled:  enabled
+        };
 
-   SuiteMixin.prototype.createEntity = function () {
-     var entity = new this.Centre(this.factory.centre());
-     return entity;
-   };
+        spyOn(this.CentreCounts, 'get').and.returnValue(this.$q.when(counts));
+      };
 
-   SuiteMixin.prototype.createPagedResultsSpy = function (centres) {
-      var reply = this.factory.pagedResult(centres);
-      spyOn(this.Centre, 'list').and.returnValue(this.$q.when(reply));
-    };
+      SuiteMixin.prototype.createEntity = function () {
+        var entity = new this.Centre(this.factory.centre());
+        return entity;
+      };
 
-    return SuiteMixin;
-  }
+      SuiteMixin.prototype.createPagedResultsSpy = function (centres) {
+        var reply = this.factory.pagedResult(centres);
+        spyOn(this.Centre, 'list').and.returnValue(this.$q.when(reply));
+      };
 
-  describe('centresPagedListComponent', function() {
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -85,9 +85,9 @@ define(function (require) {
     });
 
     it('on startup, state changed to login page if user is not authorized', function() {
+      spyOn(this.$state, 'go').and.returnValue(null);
       this.CentreCounts.get = jasmine.createSpy()
         .and.returnValue(this.$q.reject({ status: 401, message: 'unauthorized'}));
-      spyOn(this.$state, 'go').and.returnValue(null);
       this.createController();
       expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
     });

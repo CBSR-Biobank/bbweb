@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
 
   var component = {
@@ -39,19 +39,22 @@ define(function (require) {
                                       SHIPMENT_RECEIVE_PROGRESS_ITEMS,
                                       shipmentSkipToUnpackedModalService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.timeReceived        = new Date();
-    vm.returnToPackedState = returnToPackedState;
-    vm.tagAsLost           = tagAsLost;
-    vm.receiveShipment     = receiveShipment;
-    vm.unpackShipment      = unpackShipment;
+    //--
 
-    vm.progressInfo = {
-      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
-      current: 1
-    };
+    function onInit() {
+      vm.timeReceived        = new Date();
+      vm.returnToPackedState = returnToPackedState;
+      vm.tagAsLost           = tagAsLost;
+      vm.receiveShipment     = receiveShipment;
+      vm.unpackShipment      = unpackShipment;
 
-    //----
+      vm.progressInfo = {
+        items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
+        current: 1
+      };
+    }
 
     function returnToPackedState() {
       modalService.modalOkCancel(
@@ -59,10 +62,10 @@ define(function (require) {
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>Packed</b> state?'))
         .then(function () {
           return vm.shipment.pack(vm.shipment.timePacked)
-            .catch(notificationsService.updateErrorAndReject);
-        })
-        .then(function () {
-          $state.reload();
+            .then(function () {
+              $state.reload();
+            })
+            .catch(notificationsService.updateError);
         });
     }
 
@@ -72,10 +75,10 @@ define(function (require) {
         gettextCatalog.getString('Are you sure you want to tag this shipment as <b>Lost</b>?'))
         .then(function () {
           return vm.shipment.lost()
-            .catch(notificationsService.updateErrorAndReject);
-        })
-        .then(function () {
-          $state.reload();
+            .then(function () {
+              $state.reload();
+            })
+            .catch(notificationsService.updateError);
         });
     }
 
@@ -86,16 +89,15 @@ define(function (require) {
                           { required: true }).result
         .then(function (timeReceived) {
           return vm.shipment.receive(timeService.dateAndTimeToUtcString(timeReceived))
+            .then(function () {
+              $state.reload();
+            })
             .catch(function (err) {
               if (err.message === 'TimeReceivedBeforeSent') {
                 err.message = gettextCatalog.getString('The received time is before the sent time');
               }
               notificationsService.updateError(err);
-              return $q.reject(err);
             });
-        })
-        .then(function () {
-          $state.reload();
         });
     }
 
@@ -104,6 +106,9 @@ define(function (require) {
         .then(function (timeResult) {
           return vm.shipment.skipToStateUnpacked(timeService.dateAndTimeToUtcString(timeResult.timeReceived),
                                                  timeService.dateAndTimeToUtcString(timeResult.timeUnpacked))
+            .then(function (shipment) {
+              return $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id});
+            })
             .catch(function (err) {
               var newErr = {};
               if (err.message === 'TimeReceivedBeforeSent') {
@@ -114,11 +119,7 @@ define(function (require) {
                   gettextCatalog.getString('The unpacked time is before the received time');
               }
               notificationsService.updateError(newErr);
-              return $q.reject(err);
             });
-        })
-        .then(function (shipment) {
-          return $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id});
         });
     }
   }

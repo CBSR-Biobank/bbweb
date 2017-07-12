@@ -39,17 +39,17 @@ define(function () {
                                   notificationsService) {
 
     var vm = this;
-
-    vm.$onInit                 = onInit;
-    vm.descriptionToggleLength = 100;
-    vm.isEnableAllowed         = false;
-    vm.changeState             = changeState;
-    vm.editName                = editName;
-    vm.editDescription         = editDescription;
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.descriptionToggleLength = 100;
+      vm.isEnableAllowed         = false;
+      vm.changeState             = changeState;
+      vm.editName                = editName;
+      vm.editDescription         = editDescription;
+
       // updates the selected tab in 'studyViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
 

@@ -31,18 +31,21 @@ define(function () {
                                    domainNotificationService,
                                    notificationsService) {
     var vm = this;
-
-    vm.ceventType  = new CollectionEventType({}, { study: vm.study });
-    vm.returnState = 'home.admin.studies.study.collection';
-
-    vm.title       = gettextCatalog.getString('Add Collection Event');
-    vm.submit      = submit;
-    vm.cancel      = cancel;
+    vm.$onInit = onInit;
 
     //---
 
-    function submit(ceventType) {
-      ceventType.add().then(submitSuccess).catch(submitError);
+    function onInit() {
+      vm.ceventType  = new CollectionEventType({}, { study: vm.study });
+      vm.returnState = 'home.admin.studies.study.collection';
+
+      vm.title       = gettextCatalog.getString('Add Collection Event');
+      vm.submit      = submit;
+      vm.cancel      = cancel;
+    }
+
+    function submit() {
+      vm.ceventType.add().then(submitSuccess).catch(submitError);
 
       function submitSuccess() {
         notificationsService.submitSuccess();

@@ -10,7 +10,7 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  describe('participantGetDirective', function() {
+  describe('Component: participantGet', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -115,11 +115,12 @@ define(function (require) {
               message: 'EntityCriteriaNotFound: participant with unique ID does not exist: xxx'
             };
 
+        this.createController();
+
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(errorMsg));
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
-        this.createController();
         this.controller.uniqueId = uniqueId;
         this.controller.onSubmit();
         this.scope.$digest();
@@ -137,11 +138,12 @@ define(function (require) {
               message: 'EntityCriteriaNotFound: participant with unique ID does not exist: xxx'
             };
 
+        this.createController();
+
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(errorMsg));
         spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
         spyOn(this.$state, 'reload').and.returnValue(null);
 
-        this.createController();
         this.controller.uniqueId = uniqueId;
         this.controller.onSubmit();
         this.scope.$digest();
@@ -151,6 +153,7 @@ define(function (require) {
       });
 
       it('on a 404 response, when patient with unique id already exists, modal is shown to user', function() {
+        this.createController();
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(
           this.$q.reject({
             status:  'error',
@@ -158,7 +161,6 @@ define(function (require) {
           }));
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('Ok'));
 
-        this.createController();
         this.controller.uniqueId = this.factory.stringNext();
         this.controller.onSubmit();
         this.scope.$digest();
@@ -167,11 +169,11 @@ define(function (require) {
       });
 
       it('promise is rejected on a non 404 response', function() {
+        this.createController();
         spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(
           { status: 400, data: { message: 'xxx' } }));
         spyOn(this.$log, 'error').and.callThrough();
 
-        this.createController();
         this.controller.uniqueId = this.factory.stringNext();
         this.controller.onSubmit();
         this.scope.$digest();

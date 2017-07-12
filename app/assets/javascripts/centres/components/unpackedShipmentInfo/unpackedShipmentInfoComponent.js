@@ -23,7 +23,6 @@ define(function () {
    */
   function UnpackedShipmentInfoController($scope) {
     var vm = this;
-
     vm.$onInit = onInit;
 
     //----

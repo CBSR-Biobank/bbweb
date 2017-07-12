@@ -35,29 +35,29 @@ define(['lodash'], function (_) {
                                  SHIPMENT_SEND_PROGRESS_ITEMS,
                                  breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.shipping'),
-      breadcrumbService.forState('home.shipping.add')
-    ];
-
-    vm.progressInfo = {
-      items: SHIPMENT_SEND_PROGRESS_ITEMS,
-      current: 1
-    };
-
-    vm.hasValidCentres           = false;
-    vm.shipment                  = new Shipment();
-    vm.$onInit                   = onInit;
-    vm.submit                    = submit;
-    vm.cancel                    = cancel;
-    vm.getFromCentreLocationInfo = getFromCentreLocationInfo;
-    vm.getToCentreLocationInfo   = getToCentreLocationInfo;
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.shipping'),
+        breadcrumbService.forState('home.shipping.add')
+      ];
+
+      vm.progressInfo = {
+        items: SHIPMENT_SEND_PROGRESS_ITEMS,
+        current: 1
+      };
+
+      vm.hasValidCentres           = false;
+      vm.shipment                  = new Shipment();
+      vm.submit                    = submit;
+      vm.cancel                    = cancel;
+      vm.getFromCentreLocationInfo = getFromCentreLocationInfo;
+      vm.getToCentreLocationInfo   = getToCentreLocationInfo;
+
       return Centre.locationsSearch().then(function (results) {
         vm.hasValidCentres = (results.length > 1);
       });

@@ -11,47 +11,47 @@ define(function (require) {
       _               = require('lodash'),
       sharedBehaviour = require('../../../../test/EntityPagedListSharedBehaviourSpec');
 
-  function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  describe('Component: studiesPagedList', function() {
 
-    function SuiteMixin() {
-    }
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
+      function SuiteMixin() {
+      }
 
-    SuiteMixin.prototype.createController = function () {
-      ComponentTestSuiteMixin.prototype.createController.call(
-        this,
-        '<studies-paged-list></studies-paged-list',
-        undefined,
-        'studiesPagedList');
-    };
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createCountsSpy = function (disabled, enabled, retired) {
-      var counts = {
-        total:    disabled + enabled + retired,
-        disabled: disabled,
-        enabled:  enabled,
-        retired:  retired
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<studies-paged-list></studies-paged-list',
+          undefined,
+          'studiesPagedList');
       };
 
-      spyOn(this.StudyCounts, 'get').and.returnValue(this.$q.when(counts));
-    };
+      SuiteMixin.prototype.createCountsSpy = function (disabled, enabled, retired) {
+        var counts = {
+          total:    disabled + enabled + retired,
+          disabled: disabled,
+          enabled:  enabled,
+          retired:  retired
+        };
 
-    SuiteMixin.prototype.createPagedResultsSpy = function (studies) {
-      var reply = this.factory.pagedResult(studies);
-      spyOn(this.Study, 'list').and.returnValue(this.$q.when(reply));
-    };
+        spyOn(this.StudyCounts, 'get').and.returnValue(this.$q.when(counts));
+      };
 
-    SuiteMixin.prototype.createEntity = function () {
-      var entity = new this.Study(this.factory.study());
-      return entity;
-    };
+      SuiteMixin.prototype.createPagedResultsSpy = function (studies) {
+        var reply = this.factory.pagedResult(studies);
+        spyOn(this.Study, 'list').and.returnValue(this.$q.when(reply));
+      };
 
-    return SuiteMixin;
-  }
+      SuiteMixin.prototype.createEntity = function () {
+        var entity = new this.Study(this.factory.study());
+        return entity;
+      };
 
-  describe('studiesPagedListComponent', function() {
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 

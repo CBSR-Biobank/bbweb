@@ -42,14 +42,12 @@ define(function() {
       });
 
       it('error message should be displayed when update fails', function() {
-        var deferred = this.$q.defer();
+        context.createController.call(this);
 
         spyOn(context.entity.prototype, context.updateAnnotationTypeFuncName)
-          .and.returnValue(deferred.promise);
+          .and.returnValue(this.$q.reject('simulated error'));
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
-        deferred.reject('simulated error');
 
-        context.createController.call(this);
         this.controller.onUpdate(context.annotationType);
         this.scope.$digest();
         expect(this.notificationsService.updateError).toHaveBeenCalled();

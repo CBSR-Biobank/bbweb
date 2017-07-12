@@ -23,6 +23,7 @@ define(function(require) {
           this,
           [
             '<collection-event-annotation-type-add',
+            '  study="vm.study"',
             '  collection-event-type="vm.ceventType">',
             '</collection-event-annotation-type-add>'
           ].join(''),

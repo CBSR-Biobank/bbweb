@@ -80,16 +80,14 @@ define(function (require) {
             errorMsgs = [
               'TimeUnpackedBeforeReceived',
               'simulated error'
-            ],
-            errorPromises = errorMsgs.map(function (errMsg) {
-              return self.$q.reject({ message: errMsg });
-            });
+            ];
 
-        spyOn(this.Shipment.prototype, 'unpack').and.returnValues.apply(null, errorPromises);
         spyOn(this.toastr, 'error').and.returnValue(null);
-
         errorMsgs.forEach(function (errMsg, index) {
           var args;
+
+          self.Shipment.prototype.unpack =
+            jasmine.createSpy().and.returnValue(self.$q.reject(errMsg));
 
           self.controller.unpackShipment();
           self.scope.$digest();
@@ -123,12 +121,11 @@ define(function (require) {
       });
 
       it('user is informed if shipment cannot be returned to sent state', function() {
-        var error = this.$q.reject('simulated error');
-        spyOn(this.Shipment.prototype, 'send').and.returnValue(error);
-        spyOn(this.notificationsService, 'updateErrorAndReject').and.returnValue(error);
+        spyOn(this.Shipment.prototype, 'send').and.returnValue(this.$q.reject('simulated error'));
+        spyOn(this.notificationsService, 'updateError').and.returnValue(null);
         this.controller.returnToSentState();
         this.scope.$digest();
-        expect(this.notificationsService.updateErrorAndReject).toHaveBeenCalled();
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
       });
 
     });

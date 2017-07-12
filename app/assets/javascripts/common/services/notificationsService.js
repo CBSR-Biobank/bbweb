@@ -8,15 +8,14 @@ define(function() {
   notificationsService.$inject = ['$q', 'gettextCatalog', 'toastr'];
 
   /**
-   *
+   * Uses Toastr to display notifications in pop up dialog boxes.
    */
   function notificationsService($q, gettextCatalog, toastr) {
     var service = {
-      submitSuccess:        submitSuccess,
-      success:              success,
-      error:                error,
-      updateError:          updateError,
-      updateErrorAndReject: updateErrorAndReject
+      submitSuccess: submitSuccess,
+      success:       success,
+      error:         error,
+      updateError:   updateError
     };
     return service;
 
@@ -60,14 +59,6 @@ define(function() {
         message = gettextCatalog.getString('Your change could not be saved');
       }
       error(message, title);
-    }
-
-    /**
-     * Error is the error returned from a biobankApiService call that failed.
-     */
-    function updateErrorAndReject(err) {
-      updateError(err);
-      return $q.reject(err);
     }
 
   }

@@ -29,6 +29,7 @@ define(function (require) {
 
       this.openModal = function () {
         this.modal = this.shipmentSkipToSentModalService.open();
+        this.modal.result.then(function () {}, function () {});
         this.$rootScope.$digest();
         this.modalElement = this.modalElementFind();
         this.scope = this.modalElement.scope();

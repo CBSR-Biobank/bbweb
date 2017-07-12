@@ -104,6 +104,8 @@ define(function (require) {
       _.extend(vm.pagerOptions, { filter: filters.join(';') });
 
       vm.getItems(vm.pagerOptions).then(function (pagedResult) {
+        if (!pagedResult) { return; }
+
         vm.pagedResult = pagedResult;
         vm.pagedResult.items = _.map(vm.pagedResult.items, function (entity) {
           entity.icon = vm.getItemIcon(entity);

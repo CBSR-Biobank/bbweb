@@ -36,33 +36,33 @@ define(function (require) {
                                                        notificationsService,
                                                        breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.studies'),
-      breadcrumbService.forStateWithFunc(
-        sprintf('home.admin.studies.study.collection.ceventType({ studyId: "%s", ceventTypeId: "%s" })',
-                vm.collectionEventType.studyId,
-                vm.collectionEventType.id),
-        function () { return vm.study.name; }),
-      breadcrumbService.forStateWithFunc(
-        'home.admin.studies.study.collection.ceventType.annotationTypeView',
-        function () {
-          if (_.isUndefined(vm.annotationType)) {
-            return gettextCatalog.getString('Error');
-          }
-          return gettextCatalog.getString('Event annotation: {{name}}',
-                                          { name: vm.annotationType.name });
-        })
-    ];
-
-    vm.onUpdate = onUpdate;
-    onInit();
+    vm.$onInit = onInit;
 
     //---
 
     function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin.studies'),
+        breadcrumbService.forStateWithFunc(
+          sprintf('home.admin.studies.study.collection.ceventType({ studyId: "%s", ceventTypeId: "%s" })',
+                  vm.collectionEventType.studyId,
+                  vm.collectionEventType.id),
+          function () { return vm.study.name; }),
+        breadcrumbService.forStateWithFunc(
+          'home.admin.studies.study.collection.ceventType.annotationTypeView',
+          function () {
+            if (_.isUndefined(vm.annotationType)) {
+              return gettextCatalog.getString('Error');
+            }
+            return gettextCatalog.getString('Event annotation: {{name}}',
+                                            { name: vm.annotationType.name });
+          })
+      ];
+
+      vm.onUpdate = onUpdate;
+
       // reload the collection event type in case changes were made to it
       CollectionEventType.get(vm.collectionEventType.studyId, vm.collectionEventType.id)
         .then(function (ceventType) {

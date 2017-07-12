@@ -51,32 +51,35 @@ define(function (require) {
                                       shipmentSkipToSentModalService,
                                       breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.shipping'),
-      breadcrumbService.forStateWithFunc('home.shipping.addItems', function () {
-        return gettextCatalog.getString(
-          '{{courierName}} - {{trackingNumber}}: Items to ship',
-          {
-            courierName: vm.shipment.courierName,
-            trackingNumber: vm.shipment.trackingNumber
-          });
-
-      })
-    ];
-
-    vm.timePacked     = new Date();
-    vm.tagAsPacked    = tagAsPacked;
-    vm.tagAsSent      = tagAsSent;
-    vm.removeShipment = removeShipment;
-
-    vm.progressInfo = {
-      items: SHIPMENT_SEND_PROGRESS_ITEMS,
-      current: 2
-    };
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.shipping'),
+        breadcrumbService.forStateWithFunc('home.shipping.addItems', function () {
+          return gettextCatalog.getString(
+            '{{courierName}} - {{trackingNumber}}: Items to ship',
+            {
+              courierName: vm.shipment.courierName,
+              trackingNumber: vm.shipment.trackingNumber
+            });
+
+        })
+      ];
+
+      vm.timePacked     = new Date();
+      vm.tagAsPacked    = tagAsPacked;
+      vm.tagAsSent      = tagAsSent;
+      vm.removeShipment = removeShipment;
+
+      vm.progressInfo = {
+        items: SHIPMENT_SEND_PROGRESS_ITEMS,
+        current: 2
+      };
+    }
 
     function validateStateChangeAllowed() {
       return Shipment.get(vm.shipment.id).then(function (shipment) {
@@ -101,10 +104,10 @@ define(function (require) {
                                    { required: true }).result
           .then(function (timePacked) {
             return vm.shipment.pack(timeService.dateAndTimeToUtcString(timePacked))
+              .then(function (shipment) {
+                return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
+              })
               .catch(notificationsService.updateErrorAndReject);
-          })
-          .then(function (shipment) {
-            return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
           });
       });
     }
@@ -117,18 +120,17 @@ define(function (require) {
           .then(function (timeResult) {
             return vm.shipment.skipToStateSent(timeService.dateAndTimeToUtcString(timeResult.timePacked),
                                                timeService.dateAndTimeToUtcString(timeResult.timeSent))
+              .then(function () {
+                return $state.go('home.shipping.shipment',
+                                 { shipmentId: vm.shipment.id },
+                                 { reload: true });
+              })
               .catch(function (err) {
                 if (err.message === 'TimeSentBeforePacked') {
                   err.message = 'the time sent is before the time shipment was packed';
                 }
                 notificationsService.updateError(err);
-                return $q.reject(err);
               });
-          })
-          .then(function () {
-            return $state.go('home.shipping.shipment',
-                             { shipmentId: vm.shipment.id },
-                             { reload: true });
           });
       });
     }

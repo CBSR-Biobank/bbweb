@@ -23,11 +23,14 @@ define(function () {
 
   function CollapsiblePanelController() {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.panelOpen = true;
-    vm.panelButtonClicked = panelButtonClicked;
+    //--
 
-    //---
+    function onInit() {
+      vm.panelOpen = true;
+      vm.panelButtonClicked = panelButtonClicked;
+    }
 
     function panelButtonClicked() {
       vm.panelOpen = ! vm.panelOpen;

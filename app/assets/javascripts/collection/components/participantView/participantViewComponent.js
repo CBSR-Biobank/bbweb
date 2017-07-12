@@ -34,36 +34,35 @@ define(function (require) {
                                      gettextCatalog,
                                      breadcrumbService) {
     var vm = this;
-
     vm.$onInit = onInit;
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-      breadcrumbService.forStateWithFunc('home.collection.study', function () {
-        return vm.study.name;
-      }),
-      breadcrumbService.forStateWithFunc('home.collection.study.participant', function () {
-        return gettextCatalog.getString('Participant {{uniqueId}}',
-                                        { uniqueId: vm.participant.uniqueId });
-      })
-    ];
-
-    vm.tabs = [
-      {
-        heading: gettextCatalog.getString('Summary'),
-        sref: 'home.collection.study.participant.summary',
-        active: false
-      },
-      {
-        heading: gettextCatalog.getString('Collection'),
-        sref: 'home.collection.study.participant.cevents',
-        active: false
-      }
-    ];
 
     //--
 
     function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.collection'),
+        breadcrumbService.forStateWithFunc('home.collection.study', function () {
+          return vm.study.name;
+        }),
+        breadcrumbService.forStateWithFunc('home.collection.study.participant', function () {
+          return gettextCatalog.getString('Participant {{uniqueId}}',
+                                          { uniqueId: vm.participant.uniqueId });
+        })
+      ];
+
+      vm.tabs = [
+        {
+          heading: gettextCatalog.getString('Summary'),
+          sref: 'home.collection.study.participant.summary',
+          active: false
+        },
+        {
+          heading: gettextCatalog.getString('Collection'),
+          sref: 'home.collection.study.participant.cevents',
+          active: false
+        }
+      ];
       _.each(vm.tabs, function (tab, index) {
         tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
         if (tab.active) {

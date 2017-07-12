@@ -35,19 +35,22 @@ define(function () {
                                        AnnotationValueType,
                                        annotationValueTypeLabelService) {
     var vm = this;
-
-    vm.annotationType        = new AnnotationType();
-    vm.valueTypes            = annotationValueTypeLabelService.getLabels();
-
-    vm.valueTypeChange       = valueTypeChange;
-    vm.maxValueCountRequired = maxValueCountRequired;
-    vm.optionAdd             = optionAdd;
-    vm.optionRemove          = optionRemove;
-    vm.removeButtonDisabled  = removeButtonDisabled;
-    vm.submit                = submit;
-    vm.cancel                = cancel;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.annotationType        = new AnnotationType();
+      vm.valueTypes            = annotationValueTypeLabelService.getLabels();
+
+      vm.valueTypeChange       = valueTypeChange;
+      vm.maxValueCountRequired = maxValueCountRequired;
+      vm.optionAdd             = optionAdd;
+      vm.optionRemove          = optionRemove;
+      vm.removeButtonDisabled  = removeButtonDisabled;
+      vm.submit                = submit;
+      vm.cancel                = cancel;
+    }
 
     /*
      * Called when the user changes the annotation type's value type.

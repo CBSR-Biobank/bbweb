@@ -53,17 +53,20 @@ define(function (require) {
    */
   function Controller($controller, BbwebError) {
     var vm = this;
-
-    vm.$onChanges        = onChanges;
-    vm.shipmentSpecimens = [];
-    vm.limit             = 10;
-    vm.tableController   = null;
-    vm.getTableData      = getTableData;
-    vm.tableDataLoading  = true;
-    vm.hasActions        = _.isArray(vm.actions) && (vm.actions.length > 0);
-    vm.actionSelected    = actionSelected;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.$onChanges        = onChanges;
+      vm.shipmentSpecimens = [];
+      vm.limit             = 10;
+      vm.tableController   = null;
+      vm.getTableData      = getTableData;
+      vm.tableDataLoading  = true;
+      vm.hasActions        = _.isArray(vm.actions) && (vm.actions.length > 0);
+      vm.actionSelected    = actionSelected;
+    }
 
     /**
      * Parent components can trigger a table reload by updating the "refresh" binding.

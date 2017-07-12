@@ -11,8 +11,8 @@ define(function (require) {
     controller: CeventTypeViewController,
     controllerAs: 'vm',
     bindings: {
-        study:      '<',
-        ceventType: '<'
+        study:               '<',
+        collectionEventType: '<'
     }
   };
 
@@ -39,30 +39,32 @@ define(function (require) {
                                     notificationsService,
                                     CollectionEventAnnotationTypeModals) {
     var vm = this;
-
+    vm.$onInit = onInit;
     _.extend(vm, new CollectionEventAnnotationTypeModals());
 
-    vm.isPanelCollapsed     = false;
-
-    vm.editName                  = editName;
-    vm.editDescription           = editDescription;
-    vm.editRecurring             = editRecurring;
-    vm.editSpecimenDescription   = editSpecimenDescription;
-    vm.editAnnotationType        = editAnnotationType;
-    vm.removeAnnotationType      = removeAnnotationType;
-    vm.addAnnotationType         = addAnnotationType;
-    vm.removeSpecimenDescription = removeSpecimenDescription;
-    vm.addSpecimenDescription    = addSpecimenDescription;
-    vm.addSpecimenDescription    = addSpecimenDescription;
-    vm.panelButtonClicked        = panelButtonClicked;
-    vm.removeCeventType          = removeCeventType;
-
     //--
+
+    function onInit() {
+      vm.isPanelCollapsed     = false;
+
+      vm.editName                  = editName;
+      vm.editDescription           = editDescription;
+      vm.editRecurring             = editRecurring;
+      vm.editSpecimenDescription   = editSpecimenDescription;
+      vm.editAnnotationType        = editAnnotationType;
+      vm.removeAnnotationType      = removeAnnotationType;
+      vm.addAnnotationType         = addAnnotationType;
+      vm.removeSpecimenDescription = removeSpecimenDescription;
+      vm.addSpecimenDescription    = addSpecimenDescription;
+      vm.addSpecimenDescription    = addSpecimenDescription;
+      vm.panelButtonClicked        = panelButtonClicked;
+      vm.removeCeventType          = removeCeventType;
+    }
 
     function postUpdate(message, title, timeout) {
       timeout = timeout || 1500;
       return function (ceventType) {
-        vm.ceventType = ceventType;
+        vm.collectionEventType = ceventType;
         notificationsService.success(message, title, timeout);
       };
     }
@@ -70,10 +72,10 @@ define(function (require) {
     function editName() {
       modalInput.text(gettextCatalog.getString('Edit Event Type name'),
                       gettextCatalog.getString('Name'),
-                      vm.ceventType.name,
+                      vm.collectionEventType.name,
                       { required: true, minLength: 2 }).result
         .then(function (name) {
-          vm.ceventType.updateName(name)
+          vm.collectionEventType.updateName(name)
             .then(function (ceventType) {
               $scope.$emit('collection-event-type-updated', ceventType);
               postUpdate(gettextCatalog.getString('Name changed successfully.'),
@@ -86,10 +88,10 @@ define(function (require) {
     function editDescription() {
       modalInput.textArea(gettextCatalog.getString('Edit Event Type description'),
                           gettextCatalog.getString('Description'),
-                          vm.ceventType.description
+                          vm.collectionEventType.description
                          ).result
         .then(function (description) {
-          vm.ceventType.updateDescription(description)
+          vm.collectionEventType.updateDescription(description)
             .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
                              gettextCatalog.getString('Change successful')))
             .catch(notificationsService.updateError);
@@ -99,10 +101,10 @@ define(function (require) {
     function editRecurring() {
       modalInput.boolean(gettextCatalog.getString('Edit Event Type recurring'),
                          gettextCatalog.getString('Recurring'),
-                         vm.ceventType.recurring.toString()
+                         vm.collectionEventType.recurring.toString()
                         ).result
         .then(function (recurring) {
-          vm.ceventType.updateRecurring(recurring === 'true')
+          vm.collectionEventType.updateRecurring(recurring === 'true')
             .then(function (ceventType) {
               $scope.$emit('collection-event-type-updated', ceventType);
               postUpdate(gettextCatalog.getString('Recurring changed successfully.'),
@@ -140,7 +142,7 @@ define(function (require) {
                                  { name: specimenDescription.name }));
 
       function removePromiseFunc() {
-        return vm.ceventType.removeSpecimenDescription(specimenDescription)
+        return vm.collectionEventType.removeSpecimenDescription(specimenDescription)
           .then(function () {
             notificationsService.success(gettextCatalog.getString('Specimen removed'));
           });
@@ -161,7 +163,7 @@ define(function (require) {
         }
 
         vm.remove(annotationType, function () {
-          return vm.ceventType.removeAnnotationType(annotationType)
+          return vm.collectionEventType.removeAnnotationType(annotationType)
             .then(function () {
               notificationsService.success(gettextCatalog.getString('Annotation removed'));
             });
@@ -174,7 +176,7 @@ define(function (require) {
     }
 
     function removeCeventType() {
-      vm.ceventType.inUse().then(function (inUse) {
+      vm.collectionEventType.inUse().then(function (inUse) {
         if (inUse) {
           modalService.modalOk(
             gettextCatalog.getString('Collection event in use'),
@@ -188,15 +190,15 @@ define(function (require) {
             gettextCatalog.getString('Remove collection event'),
              gettextCatalog.getString(
                 'Are you sure you want to remove collection event with name <strong>{{name}}</strong>?',
-                { name: vm.ceventType.name }),
+                { name: vm.collectionEventType.name }),
             gettextCatalog.getString('Remove failed'),
             gettextCatalog.getString('Collection event with name {{name}} cannot be removed',
-                    { name: vm.ceventType.name }));
+                    { name: vm.collectionEventType.name }));
         }
       });
 
       function promiseFn() {
-        return vm.ceventType.remove().then(function () {
+        return vm.collectionEventType.remove().then(function () {
           notificationsService.success(gettextCatalog.getString('Collection event removed'));
           $state.go('home.admin.studies.study.collection', {}, { reload: true });
         });

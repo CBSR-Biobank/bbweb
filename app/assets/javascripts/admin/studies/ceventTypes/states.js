@@ -13,7 +13,7 @@ define(['lodash'], function (_) {
       .state('home.admin.studies.study.collection.ceventType', {
         url: '/event/{ceventTypeId}',
         resolve: {
-          ceventType: [
+          collectionEventType: [
             '$transition$',
             'study',
             'CollectionEventType',
@@ -42,10 +42,10 @@ define(['lodash'], function (_) {
         url: '/annottype/view/{annotationTypeId}',
         resolve: {
           annotationType: [
-            'ceventType',
+            'collectionEventType',
             '$transition$',
-            function (ceventType, $transition$) {
-              var annotationType = _.find(ceventType.annotationTypes,
+            function (collectionEventType, $transition$) {
+              var annotationType = _.find(collectionEventType.annotationTypes,
                                           { id: $transition$.params().annotationTypeId });
               if (_.isUndefined(annotationType)) {
                 throw new Error('could not find annotation type: ' + $transition$.params().annotationTypeId);
@@ -68,10 +68,10 @@ define(['lodash'], function (_) {
         url: '/spcspec/view/{specimenDescriptionId}',
         resolve: {
           specimenDescription: [
-            'ceventType',
+            'collectionEventType',
             '$transition$',
-            function (ceventType, $transition$) {
-              var specimenDescription = _.find(ceventType.specimenDescriptions,
+            function (collectionEventType, $transition$) {
+              var specimenDescription = _.find(collectionEventType.specimenDescriptions,
                                                { id: $transition$.params().specimenDescriptionId });
               if (_.isUndefined(specimenDescription)) {
                 throw new Error('could not find specimen spec: ' + $transition$.params().specimenDescriptionId);

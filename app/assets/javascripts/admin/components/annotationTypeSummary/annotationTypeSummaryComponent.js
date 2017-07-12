@@ -5,6 +5,9 @@
 define(function () {
   'use strict';
 
+  /*
+   * Displays a summary for the annotation type.
+   */
   var component = {
     templateUrl : '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
     controller: AnnotationTypeSummaryController,
@@ -18,14 +21,16 @@ define(function () {
     'gettextCatalog'
   ];
 
-  /**
-   *
-   */
   function AnnotationTypeSummaryController(gettextCatalog) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.requiredLabel = vm.annotationType.required ?
-      gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
+    //--
+
+    function onInit() {
+      vm.requiredLabel = vm.annotationType.required ?
+        gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
+    }
   }
 
   return component;

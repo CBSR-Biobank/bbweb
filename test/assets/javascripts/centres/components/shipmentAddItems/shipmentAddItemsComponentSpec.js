@@ -128,18 +128,15 @@ define(function (require) {
             errorMsgs = [
               'TimeSentBeforePacked',
               'simulated error'
-            ],
-            errorPromises = errorMsgs.map(function (errMsg) {
-              return self.$q.reject({ message: errMsg });
-            });
+            ];
 
-        spyOn(this.Shipment.prototype, 'skipToStateSent').and.returnValues.apply(null, errorPromises);
         spyOn(this.toastr, 'error').and.returnValue(null);
-
         this.createController(this.shipment);
-
         errorMsgs.forEach(function (errMsg, index) {
           var args;
+
+          self.Shipment.prototype.skipToStateSent =
+            jasmine.createSpy().and.returnValue(self.$q.reject({ message: errMsg }));
 
           self.controller.tagAsSent();
           self.scope.$digest();
@@ -209,10 +206,10 @@ define(function (require) {
     it('removal of a shipment can be cancelled', function() {
       var shipment = this.createShipment();
 
-      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
       spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
       this.createController(shipment);
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
       this.controller.removeShipment();
       this.scope.$digest();
 
@@ -222,10 +219,10 @@ define(function (require) {
     it('removeShipment does nothing if shipment is not defined', function() {
       var shipment = this.createShipment();
 
-      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
       spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
       this.createController(shipment);
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
       this.controller.removeShipment();
       this.scope.$digest();
 

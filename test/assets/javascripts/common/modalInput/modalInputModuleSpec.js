@@ -27,6 +27,7 @@ define(function (require) {
       title = title || this.factory.stringNext();
       label = label || this.factory.stringNext();
       this.modal = modalInputFunc(title, label, defaultValue, options);
+      this.modal.result.then(function () {}, function () {});
       this.$rootScope.$digest();
       this.modalElement = this.modalElementFind();
       this.scope = this.modalElement.scope();
@@ -36,7 +37,7 @@ define(function (require) {
       this.addModalMatchers();
 
       jasmine.addMatchers({
-        toHaveLabelStartWith: function(util, customEqualityTesters) {
+        toHaveLabelStartWith: function() {
           return {
             compare: function(actual, expected) {
               var element = actual.find('label'),
@@ -54,7 +55,7 @@ define(function (require) {
             }
           };
         },
-        toHaveInputElementBeFocused: function(util, customEqualityTesters) {
+        toHaveInputElementBeFocused: function() {
           return {
             compare: function(actual, expected) {
               var element = actual.find('form').find('input'),
@@ -68,7 +69,7 @@ define(function (require) {
             }
           };
         },
-        toHaveInputs: function(util, customEqualityTesters) {
+        toHaveInputs: function() {
           return {
             compare: function(actual, expected) {
               var pass, message, element = actual.find('form').find('input');
@@ -82,7 +83,7 @@ define(function (require) {
             }
           };
         },
-        toHaveInputElementTypeAttrBe: function(util, customEqualityTesters) {
+        toHaveInputElementTypeAttrBe: function() {
           return {
             compare: function(actual, expected) {
               var element = actual.find('form').find('input'),
@@ -100,7 +101,7 @@ define(function (require) {
             }
           };
         },
-        toHaveValidTextAreaElement: function(util, customEqualityTesters) {
+        toHaveValidTextAreaElement: function() {
           return {
             compare: function(actual, expected) {
               var element = actual.find('form').find('textarea'),
@@ -120,7 +121,7 @@ define(function (require) {
             }
           };
         },
-        toHaveValuesInControllerScope: function(util, customEqualityTesters) {
+        toHaveValuesInControllerScope: function() {
           return {
             compare: function(actual, expected) {
               var scope = actual.scope().vm,
@@ -142,17 +143,15 @@ define(function (require) {
             }
           };
         },
-        toHaveHelpBlocks: function(util, customEqualityTesters) {
+        toHaveHelpBlocks: function() {
           return {
-            compare: function(actual, expected) {
+            compare: function(actual) {
               var element = actual.find('form').find('.help-block'),
                   pass,
                   message;
 
-              expected = expected || '';
               pass = (element.length > 0);
               message = sprintf('Expected modal %s have help blocks', pass ? 'not to' : 'to');
-
               return { pass: pass, message: message };
             }
           };
@@ -734,17 +733,17 @@ define(function (require) {
       });
 
       it('throws an exception if select options are not provided ', function() {
-        var err = new Error('select options not provided');
+        var err = 'select options not provided';
         this.modalInput.selectMultiple('', '', '', { });
         this.$rootScope.$digest();
-        expect(this.$exceptionHandler.errors[0]).toEqual(err);
+        expect(this.$exceptionHandler.errors[0][0].message).toEqual(err);
       });
 
       it('throws an exception if default value is not an array', function() {
-        var err = new Error('defaultValue is not an array');
+        var err = 'defaultValue is not an array';
         this.modalInput.selectMultiple('', '', '', { selectOptions: this.options });
         this.$rootScope.$digest();
-        expect(this.$exceptionHandler.errors[1]).toEqual(err);
+        expect(this.$exceptionHandler.errors[1][0].message).toEqual(err);
       });
 
     });
@@ -756,6 +755,8 @@ define(function (require) {
       });
 
       it('has valid elements and scope', function() {
+        expect(this.$document).toHaveModalsOpen(0);
+
         this.openModal(this.modalInput.text,
                        this.defaultValue,
                        this.title,

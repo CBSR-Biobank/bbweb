@@ -26,9 +26,6 @@ define(function () {
     'notificationsService'
   ];
 
-  /**
-   *
-   */
   function CeventSpecimensViewController($q,
                                          $state,
                                          gettextCatalog,
@@ -38,17 +35,20 @@ define(function () {
                                          domainNotificationService,
                                          notificationsService) {
     var vm = this;
-
-    vm.specimens       = [];
-    vm.centreLocations = [];
-    vm.tableController = undefined;
-
-    vm.addSpecimens    = addSpecimens;
-    vm.getTableData    = getTableData;
-    vm.removeSpecimen  = removeSpecimen;
-    vm.viewSpecimen    = viewSpecimen;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.specimens       = [];
+      vm.centreLocations = [];
+      vm.tableController = undefined;
+
+      vm.addSpecimens    = addSpecimens;
+      vm.getTableData    = getTableData;
+      vm.removeSpecimen  = removeSpecimen;
+      vm.viewSpecimen    = viewSpecimen;
+    }
 
     function addSpecimens() {
       var defer = $q.defer();

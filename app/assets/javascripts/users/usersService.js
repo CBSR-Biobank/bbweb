@@ -48,7 +48,6 @@ define(function() {
           $log.info('Token no longer valid, please log in.');
           currentUser = undefined;
           $cookies.remove('XSRF-TOKEN');
-          return $q.reject('Token invalid');
         });
     }
 

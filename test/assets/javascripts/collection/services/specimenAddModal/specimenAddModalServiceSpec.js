@@ -4,60 +4,60 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'faker'
-], function(angular, mocks, _, faker) {
+define(function(require) {
   'use strict';
 
-  function SuiteMixinFactory(ModalTestSuiteMixin) {
-
-    function SuiteMixin() {
-      ModalTestSuiteMixin.call(this);
-    }
-
-    SuiteMixin.prototype = Object.create(ModalTestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.openModal = function (centreLocations, specimenDescriptions, defaultDatetime) {
-      centreLocations = centreLocations || [];
-      specimenDescriptions = specimenDescriptions || [];
-      defaultDatetime = defaultDatetime || new Date();
-      this.modal = this.specimenAddModal.open(centreLocations, specimenDescriptions, defaultDatetime);
-      this.$rootScope.$digest();
-      this.modalElement = this.modalElementFind();
-      this.scope = this.modalElement.scope();
-
-      this.scope.form = {
-        $setPristine: jasmine.createSpy('modalInstance.form'),
-        inventoryId: { $setValidity: jasmine.createSpy('modalInstance.form.inventoryId') }
-      };
-    };
-
-    SuiteMixin.prototype.createCentreLocations = function () {
-      var self = this,
-          centres = _.map(_.range(2), function () {
-            var locations = _.map(_.range(2), function () {
-              return self.factory.location();
-            });
-            return self.factory.centre({ locations: locations });
-          });
-      return self.factory.centreLocations(centres);
-    };
-
-    SuiteMixin.prototype.createSpecimenDescriptions = function () {
-      var self = this;
-      return _.map(_.range(2), function () {
-        return self.factory.collectionSpecimenDescription();
-      });
-    };
-
-    return SuiteMixin;
-  }
+  var mocks = require('angularMocks'),
+      _     = require('lodash'),
+      faker = require('faker');
 
   describe('Service: specimenAddService', function() {
+
+    function SuiteMixinFactory(ModalTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ModalTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ModalTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.openModal = function (centreLocations, specimenDescriptions, defaultDatetime) {
+        centreLocations = centreLocations || [];
+        specimenDescriptions = specimenDescriptions || [];
+        defaultDatetime = defaultDatetime || new Date();
+        this.modal = this.specimenAddModal.open(centreLocations, specimenDescriptions, defaultDatetime);
+        this.modal.result.then(function () {}, function () {});
+        this.$rootScope.$digest();
+        this.modalElement = this.modalElementFind();
+        this.scope = this.modalElement.scope();
+
+        this.scope.form = {
+          $setPristine: jasmine.createSpy('modalInstance.form'),
+          inventoryId: { $setValidity: jasmine.createSpy('modalInstance.form.inventoryId') }
+        };
+      };
+
+      SuiteMixin.prototype.createCentreLocations = function () {
+        var self = this,
+            centres = _.map(_.range(2), function () {
+              var locations = _.map(_.range(2), function () {
+                return self.factory.location();
+              });
+              return self.factory.centre({ locations: locations });
+            });
+        return self.factory.centreLocations(centres);
+      };
+
+      SuiteMixin.prototype.createSpecimenDescriptions = function () {
+        var self = this;
+        return _.map(_.range(2), function () {
+          return self.factory.collectionSpecimenDescription();
+        });
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
 
@@ -117,7 +117,7 @@ define([
 
     it('modal is closed when okPressed is called', function () {
       var centreLocations = this.createCentreLocations(),
-      specimenDescriptions = this.createSpecimenDescriptions();
+          specimenDescriptions = this.createSpecimenDescriptions();
 
       this.openModal(centreLocations, specimenDescriptions);
       this.scope.vm.selectedSpecimenDescription = specimenDescriptions[0];
@@ -128,7 +128,7 @@ define([
 
     it('when okPressed is called and a specimenDescription is not selected, an error is thrown', function() {
       var self = this,
-      centreLocations = self.createCentreLocations();
+          centreLocations = self.createCentreLocations();
 
       self.openModal(centreLocations);
       self.scope.vm.selectedSpecimenDescription = undefined;
@@ -204,7 +204,7 @@ define([
 
     it('when specimenDescriptionChanged amount, defaultAmount and units are assigned', function() {
       var centreLocations = this.createCentreLocations(),
-      specimenDescriptions = this.createSpecimenDescriptions();
+          specimenDescriptions = this.createSpecimenDescriptions();
 
       specimenDescriptions[0].amount = 10;
       specimenDescriptions[1].amount = 20;
@@ -251,7 +251,7 @@ define([
 
       it('validity is assigned correctly for a new inventory id', function() {
         this.Specimen.getByInventoryId =
-          jasmine.createSpy('getByInventoryId').and.returnValue(this.$q.reject('simulated error'));
+          jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'));
 
         this.scope.vm.specimens = [];
         this.scope.vm.inventoryId = this.factory.stringNext();

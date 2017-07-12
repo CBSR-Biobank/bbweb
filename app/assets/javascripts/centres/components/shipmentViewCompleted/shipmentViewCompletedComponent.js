@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
 
   var component = {
@@ -22,24 +22,24 @@ define(function (require) {
     'SHIPMENT_RECEIVE_PROGRESS_ITEMS'
   ];
 
-  /**
-   *
-   */
   function ShipmentViewCompletedController($state,
                                            gettextCatalog,
                                            notificationsService,
                                            modalService,
                                            SHIPMENT_RECEIVE_PROGRESS_ITEMS) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.returnToUnpackedState = returnToUnpackedState;
+    //--
 
-    vm.progressInfo = {
-      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
-      current: 4
-    };
+    function onInit() {
+      vm.returnToUnpackedState = returnToUnpackedState;
 
-    //----
+      vm.progressInfo = {
+        items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
+        current: 4
+      };
+    }
 
     function returnToUnpackedState() {
       modalService.modalOkCancel(
@@ -47,10 +47,10 @@ define(function (require) {
         gettextCatalog.getString('Are you sure you want to place this shipment in <b>unpacked</b> state?'))
         .then(function () {
           return vm.shipment.unpack(vm.shipment.timeUnpacked)
-            .catch(notificationsService.updateErrorAndReject);
-        })
-        .then(function () {
-          $state.go('home.shipping.shipment.unpack.info', { shipmentId: vm.shipment.id});
+            .then(function () {
+              $state.go('home.shipping.shipment.unpack.info', { shipmentId: vm.shipment.id});
+            })
+            .catch(notificationsService.updateError);
         });
     }
   }

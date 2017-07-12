@@ -29,11 +29,11 @@ define(function (require) {
         return scope;
       };
 
-      SuiteMixin.prototype.createController = function () {
+      SuiteMixin.prototype.createController = function (centre) {
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
           '<centre-summary centre="vm.centre"></centre-summary>',
-          { centre: this.centre },
+          { centre: centre },
           'centreSummary');
       };
 
@@ -76,17 +76,13 @@ define(function (require) {
 
       beforeEach(inject(function () {
           var self = this,
-              centre = new self.Centre(self.factory.centre());
+              centre = new this.Centre(this.factory.centre());
 
         context.entity             = self.Centre;
-        context.createController   = createController;
+        context.createController   = this.createController.bind(this, centre);
         context.updateFuncName     = 'updateName';
         context.controllerFuncName = 'editName';
         context.modalInputFuncName = 'text';
-
-        function createController() {
-          self.createController(centre);
-        }
       }));
 
       entityUpdateSharedSpec(context);
@@ -102,14 +98,10 @@ define(function (require) {
               centre = new self.Centre(self.factory.centre());
 
         context.entity             = this.Centre;
-        context.createController   = createController;
+        context.createController   = this.createController.bind(this, centre);
         context.updateFuncName     = 'updateDescription';
         context.controllerFuncName = 'editDescription';
         context.modalInputFuncName = 'textArea';
-
-        function createController() {
-          self.createController(centre);
-        }
       }));
 
       entityUpdateSharedSpec(context);
@@ -125,14 +117,10 @@ define(function (require) {
           var self = this,
               centre = new self.Centre(self.factory.centre());
 
-          context.createController = createController;
+          context.createController = this.createController.bind(this, centre);
           context.centre           = centre;
-          context.state           = 'enable';
+          context.state            = 'enable';
           context.entity           = self.Centre;
-
-          function createController() {
-            self.createController(centre);
-          }
         }));
 
         sharedCentreStateBehaviour(context);
@@ -145,14 +133,10 @@ define(function (require) {
           var self = this,
               centre = new self.Centre(self.factory.centre({ state: self.CentreState.ENABLED }));
 
-          context.createController = createController;
+          context.createController = this.createController.bind(this, centre);
           context.centre           = centre;
-          context.state           = 'disable';
+          context.state            = 'disable';
           context.entity           = this.Centre;
-
-          function createController() {
-            self.createController(centre);
-          }
         }));
 
         sharedCentreStateBehaviour(context);

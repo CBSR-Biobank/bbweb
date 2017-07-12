@@ -42,21 +42,21 @@ define(function (require) {
                                         modalService) {
 
     var vm = this;
-
-    vm.$onInit        = onInit;
-    vm.studyNamesById = [];
-    vm.tableStudies   = [];
-    vm.studyCollection = [];
-
-    vm.remove         = remove;
-    vm.information    = information;
-
-    vm.selected = undefined;
-    vm.onSelect = onSelect;
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.studyNamesById = [];
+      vm.tableStudies   = [];
+      vm.studyCollection = [];
+
+      vm.remove         = remove;
+      vm.information    = information;
+
+      vm.selected = undefined;
+      vm.onSelect = onSelect;
+
       // updates the selected tab in 'centreViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
 

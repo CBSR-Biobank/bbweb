@@ -4,12 +4,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   describe('ceventSpecimensViewComponent', function() {
 
@@ -150,9 +149,8 @@ define([
       });
 
       it('specimen is not removed if user cancels when asked for confirmation', function() {
-        this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.reject('Cancel'));
-
         this.createController();
+        this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.reject('Cancel'));
         this.controller.removeSpecimen(this.specimen);
         this.scope.$digest();
         expect(this.Specimen.prototype.remove).not.toHaveBeenCalled();

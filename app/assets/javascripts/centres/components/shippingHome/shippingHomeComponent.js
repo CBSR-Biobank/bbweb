@@ -8,6 +8,7 @@ define(function (require) {
   var _ = require('lodash');
 
   /**
+   * Allows the user to select a centre associated to her account or the user group she is associated with.
    *
    * @param {domain.centres.CentreLocationDto} - the locations returned from the server.
    */
@@ -26,27 +27,23 @@ define(function (require) {
     'breadcrumbService'
   ];
 
-  /**
-   * Allows the user to select a centre associated to her account or the user group she is associated with.
-   */
   function ShippingHomeController($state, gettextCatalog, Centre, breadcrumbService) {
     var vm = this;
-
-    vm.hasValidCentres = false;
-    vm.centreIcon      = 'glyphicon-ok-circle';
-    vm.updateCentres   = updateCentres;
-    vm.centreSelected  = centreSelected;
-
     vm.$onInit = onInit;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.shipping')
-    ];
 
     //---
 
     function onInit() {
+      vm.hasValidCentres = false;
+      vm.centreIcon      = 'glyphicon-ok-circle';
+      vm.updateCentres   = updateCentres;
+      vm.centreSelected  = centreSelected;
+
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.shipping')
+      ];
+
       return Centre.locationsSearch()
         .then(Centre.centreLocationToNames)
         .then(function (centreLocations) {

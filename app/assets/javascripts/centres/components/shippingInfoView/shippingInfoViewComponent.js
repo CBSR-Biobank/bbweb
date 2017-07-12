@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
 
   var component = {
@@ -17,7 +17,6 @@ define(function (require) {
   };
 
   ShippingInfoViewController.$inject = [
-    '$filter',
     'gettextCatalog',
     'Centre',
     'modalInput',
@@ -25,23 +24,22 @@ define(function (require) {
     'centreLocationsModalService'
   ];
 
-  /**
-   *
-   */
-  function ShippingInfoViewController($filter,
-                                      gettextCatalog,
+  function ShippingInfoViewController(gettextCatalog,
                                       Centre,
                                       modalInput,
                                       notificationsService,
                                       centreLocationsModalService) {
     var vm = this;
-
-    vm.editCourierName    = editCourierName;
-    vm.editTrackingNumber = editTrackingNumber;
-    vm.editFromLocation   = editFromLocation;
-    vm.editToLocation     = editToLocation;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.editCourierName    = editCourierName;
+      vm.editTrackingNumber = editTrackingNumber;
+      vm.editFromLocation   = editFromLocation;
+      vm.editToLocation     = editToLocation;
+    }
 
     function postUpdate(property, message, title) {
       return function (shipment) {

@@ -24,6 +24,8 @@ define(function (require) {
   module
     .config(require('./states'))
 
+    .controller('AnnotationTypeAddController', require('./controllers/AnnotationTypeAddController'))
+
     .component('annotationTypeSummary',
                require('./components/annotationTypeSummary/annotationTypeSummaryComponent'))
     .component('biobankAdmin',          require('./components/biobankAdmin/biobankAdminComponent'))
@@ -41,8 +43,7 @@ define(function (require) {
     .factory('CollectionEventAnnotationTypeModals',
              require('./services/studies/CollectionEventAnnotationTypeModals'))
     .factory('SpecimenLinkAnnotationTypeModals',
-             require('./services/studies/SpecimenLinkAnnotationTypeModals'))
-    .factory('annotationTypeAddMixin', require('./services/annotationTypeAddMixin'));
+             require('./services/studies/SpecimenLinkAnnotationTypeModals'));
 
   return {
     name: name,

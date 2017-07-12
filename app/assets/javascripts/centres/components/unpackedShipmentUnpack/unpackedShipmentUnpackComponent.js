@@ -43,30 +43,30 @@ define(function (require) {
                                             modalService,
                                             notificationsService) {
     var vm = this;
-
-    $controller('UnpackBaseController', { vm:             vm,
-                                          modalService:   modalService,
-                                          gettextCatalog: gettextCatalog });
-
     vm.$onInit = onInit;
-    vm.refreshTable = 0;
-
-    vm.actions =  [
-      {
-        id:    'tag-as-missing',
-        class: 'btn-warning',
-        title: gettextCatalog.getString('Tag as missing'),
-        icon:  'glyphicon-cloud'
-      }
-    ];
-
-    vm.getPresentSpecimens  = getPresentSpecimens;
-    vm.onInventoryIdsSubmit = onInventoryIdsSubmit;
-    vm.tableActionSelected  = tableActionSelected;
 
     //----
 
     function onInit() {
+      $controller('UnpackBaseController', { vm:             vm,
+                                            modalService:   modalService,
+                                            gettextCatalog: gettextCatalog });
+
+      vm.refreshTable = 0;
+
+      vm.actions =  [
+        {
+          id:    'tag-as-missing',
+          class: 'btn-warning',
+          title: gettextCatalog.getString('Tag as missing'),
+          icon:  'glyphicon-cloud'
+        }
+      ];
+
+      vm.getPresentSpecimens  = getPresentSpecimens;
+      vm.onInventoryIdsSubmit = onInventoryIdsSubmit;
+      vm.tableActionSelected  = tableActionSelected;
+
       $scope.$emit('tabbed-page-update', 'tab-selected');
     }
 

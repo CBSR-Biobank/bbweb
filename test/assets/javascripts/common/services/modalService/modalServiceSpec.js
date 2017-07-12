@@ -4,12 +4,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  var mocks = require('angularMocks'),
+      _     = require('lodash');
 
   function SuiteMixinFactory(ModalTestSuiteMixin) {
 
@@ -28,17 +27,17 @@ define([
     }
 
     SuiteMixin.prototype.openModal = function (modalOpenFunc, modalDefaults, modalOptions) {
-      modalOpenFunc(modalDefaults, modalOptions);
+      modalOpenFunc(modalDefaults, modalOptions).then(function () {}, function () {});
       openCommon.call(this);
     };
 
     SuiteMixin.prototype.openModalOk = function (headerHtml, bodyHtml) {
-      this.modalService.modalOk(headerHtml, bodyHtml);
+      this.modalService.modalOk(headerHtml, bodyHtml).then(function () {}, function () {});
       openCommon.call(this);
     };
 
     SuiteMixin.prototype.openModalOkCancel = function (headerHtml, bodyHtml) {
-      this.modalService.modalOkCancel(headerHtml, bodyHtml);
+      this.modalService.modalOkCancel(headerHtml, bodyHtml).then(function () {}, function () {});
       openCommon.call(this);
     };
 
@@ -59,7 +58,7 @@ define([
 
     beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(ModalTestSuiteMixin, factory, testUtils) {
+    beforeEach(inject(function(ModalTestSuiteMixin) {
       var SuiteMixin = new SuiteMixinFactory(ModalTestSuiteMixin);
 
       _.extend(this, SuiteMixin.prototype);

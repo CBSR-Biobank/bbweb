@@ -79,20 +79,21 @@ define(function (require) {
       it('informs the user when a specimen cannot be added', function() {
         var self = this,
             errors = [
-              this.$q.reject(this.errorReply('invalid specimen inventory IDs')),
-              this.$q.reject(this.errorReply('specimens are already in an active shipment')),
-              this.$q.reject(this.errorReply('invalid centre for specimen inventory IDs')),
-              this.$q.reject(this.errorReply('simulated error')),
-              this.$q.reject('simulated error')
+              this.errorReply('invalid specimen inventory IDs'),
+              this.errorReply('specimens are already in an active shipment'),
+              this.errorReply('invalid centre for specimen inventory IDs'),
+              this.errorReply('simulated error'),
+              'simulated error'
             ];
 
-        spyOn(this.Shipment.prototype, 'addSpecimens').and.returnValues.apply(null, errors);
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when(null));
 
         this.createController(this.createShipment());
         this.controller.inventoryIds = this.factory.stringNext();
 
         errors.forEach(function (error, index) {
+          self.Shipment.prototype.addSpecimens =
+            jasmine.createSpy().and.returnValue(self.$q.reject(error));
           self.controller.addSpecimens();
           self.scope.$digest();
           expect(self.modalService.modalOk.calls.count()).toBe(index + 1);
@@ -142,11 +143,11 @@ define(function (require) {
               this.factory.shipmentSpecimen({ shipmentId: shipment.id })),
             refreshCount;
 
-        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
         spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
         this.createController(shipment);
         refreshCount = this.controller.refreshSpecimensTable;
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
         this.controller.removeShipmentSpecimen(shipmentSpecimen);
         this.scope.$digest();
 

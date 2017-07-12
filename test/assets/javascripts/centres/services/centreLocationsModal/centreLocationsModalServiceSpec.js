@@ -11,54 +11,55 @@ define([
 ], function(angular, mocks, _) {
   'use strict';
 
-  function SuiteMixinFactory(ModalTestSuiteMixin) {
-
-    function SuiteMixin() {
-      ModalTestSuiteMixin.call(this);
-    }
-
-    SuiteMixin.prototype = Object.create(ModalTestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.openModal = function (heading, label, placeholder, value, locationInfosToOmit) {
-      heading             = heading     || this.factory.stringNext();
-      label               = label       || this.factory.stringNext();
-      placeholder         = placeholder || this.factory.stringNext();
-      value               = value       || this.factory.stringNext();
-      locationInfosToOmit = locationInfosToOmit || [];
-
-      this.modal = this.centreLocationsModalService.open(heading,
-                                                         label,
-                                                         placeholder,
-                                                         value,
-                                                         locationInfosToOmit);
-      this.$rootScope.$digest();
-      this.modalElement = this.modalElementFind();
-      this.scope = this.modalElement.scope();
-    };
-
-    SuiteMixin.prototype.centreAndLocations = function () {
-      var self = this;
-      return _.map(_.range(3), function () {
-        var location = self.factory.location(),
-            centre = self.factory.centre({ locations: [ location ] });
-        return {
-          centre: centre,
-          locationInfo: self.factory.centreLocationInfo(centre)
-        };
-      });
-    };
-
-    return SuiteMixin;
-  }
-
   describe('centreLocationsModalService', function() {
+
+    function SuiteMixinFactory(ModalTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ModalTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ModalTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.openModal = function (heading, label, placeholder, value, locationInfosToOmit) {
+        heading             = heading     || this.factory.stringNext();
+        label               = label       || this.factory.stringNext();
+        placeholder         = placeholder || this.factory.stringNext();
+        value               = value       || this.factory.stringNext();
+        locationInfosToOmit = locationInfosToOmit || [];
+
+        this.modal = this.centreLocationsModalService.open(heading,
+                                                           label,
+                                                           placeholder,
+                                                           value,
+                                                           locationInfosToOmit);
+
+        this.modal.result.then(function () {}, function () {});
+        this.$rootScope.$digest();
+        this.modalElement = this.modalElementFind();
+        this.scope = this.modalElement.scope();
+      };
+
+      SuiteMixin.prototype.centreAndLocations = function () {
+        var self = this;
+        return _.map(_.range(3), function () {
+          var location = self.factory.location(),
+              centre = self.factory.centre({ locations: [ location ] });
+          return {
+            centre: centre,
+            locationInfo: self.factory.centreLocationInfo(centre)
+          };
+        });
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(ModalTestSuiteMixin, testUtils) {
-      var SuiteMixin = new SuiteMixinFactory(ModalTestSuiteMixin);
-      _.extend(this, SuiteMixin.prototype);
+      _.extend(this, new SuiteMixinFactory(ModalTestSuiteMixin).prototype);
       this.injectDependencies('$q',
                               '$rootScope',
                               '$animate',
@@ -114,8 +115,8 @@ define([
 
     it('can omit a location info', function() {
       var locationInfos = _.map(this.centreAndLocations(), function (o) {
-            return o.locationInfo;
-          }),
+        return o.locationInfo;
+      }),
           locationInfoToOmit = locationInfos[0],
           locationInfosToDisplay = locationInfos.slice(1);
 

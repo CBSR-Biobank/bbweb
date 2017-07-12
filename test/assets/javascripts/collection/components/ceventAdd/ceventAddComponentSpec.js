@@ -111,11 +111,11 @@ define(function (require) {
     describe('on submit failure', function() {
 
       it('displays an error modal', function() {
+        this.createController();
         spyOn(this.CollectionEvent.prototype, 'add')
           .and.returnValue(this.$q.reject('simulated update failure'));
         spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('ok'));
 
-        this.createController();
         this.controller.submit();
         this.scope.$digest();
 
@@ -123,13 +123,13 @@ define(function (require) {
       });
 
       it('changes state when Cancel button pressed on error modal', function() {
+        this.createController();
         spyOn(this.CollectionEvent.prototype, 'add')
           .and.returnValue(this.$q.reject('simulated update failure'));
         spyOn(this.domainNotificationService, 'updateErrorModal')
           .and.returnValue(this.$q.reject('cancel button pressed'));
         spyOn(this.$state, 'go').and.returnValue('ok');
 
-        this.createController();
         this.controller.submit();
         this.scope.$digest();
 

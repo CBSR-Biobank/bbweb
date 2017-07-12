@@ -29,12 +29,14 @@ define(function () {
                                        domainNotificationService,
                                        notificationsService) {
     var vm = this;
-
-    vm.submit = submit;
-    vm.cancel = cancel;
-    vm.returnStateName = 'home.admin.centres.centre.locations';
+    vm.$onInit = onInit;
 
     //---
+    function onInit() {
+      vm.submit = submit;
+      vm.cancel = cancel;
+      vm.returnStateName = 'home.admin.centres.centre.locations';
+    }
 
     function submit(location) {
       vm.centre.addLocation(location)

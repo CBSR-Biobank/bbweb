@@ -8,18 +8,18 @@ define(function () {
   /**
    * Used to add a collection event.
    */
-   var component = {
-      templateUrl: '/assets/javascripts/collection/components/ceventAdd/ceventAdd.html',
-      controller: CeventAddController,
-      controllerAs: 'vm',
-      bindings: {
-        study:               '<',
-        participant:         '<',
-        collectionEventType: '<'
-      }
-   };
+  var component = {
+    templateUrl: '/assets/javascripts/collection/components/ceventAdd/ceventAdd.html',
+    controller: CeventAddController,
+    controllerAs: 'vm',
+    bindings: {
+      study:               '<',
+      participant:         '<',
+      collectionEventType: '<'
+    }
+  };
 
-   CeventAddController.$inject = [
+  CeventAddController.$inject = [
     '$state',
     'gettextCatalog',
     'AppConfig',
@@ -30,51 +30,55 @@ define(function () {
     'breadcrumbService'
   ];
 
-   /*
-    * Controller for this component.
-    */
-   function CeventAddController($state,
-                                gettextCatalog,
-                                AppConfig,
-                                notificationsService,
-                                domainNotificationService,
-                                timeService,
-                                CollectionEvent,
-                                breadcrumbService) {
+  /*
+   * Controller for this component.
+   */
+  function CeventAddController($state,
+                               gettextCatalog,
+                               AppConfig,
+                               notificationsService,
+                               domainNotificationService,
+                               timeService,
+                               CollectionEvent,
+                               breadcrumbService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.collectionEvent = new CollectionEvent({ participantId: vm.participant.id },
-                                             vm.collectionEventType);
+    //--
 
-    vm.title = gettextCatalog.getString(
-      'Participant {{id}}: Add collection event', { id: vm.participant.uniqueId });
-    vm.timeCompleted = new Date();
+    function onInit() {
+      vm.collectionEvent = new CollectionEvent({ participantId: vm.participant.id },
+                                               vm.collectionEventType);
 
-    vm.submit = submit;
-    vm.cancel = cancel;
-    vm.dateTimeOnEdit = dateTimeOnEdit;
+      vm.title = gettextCatalog.getString(
+        'Participant {{id}}: Add collection event', { id: vm.participant.uniqueId });
+      vm.timeCompleted = new Date();
 
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-      breadcrumbService.forStateWithFunc('home.collection.study', function () {
-        return vm.study.name;
-      }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents',
-        function () {
-          return gettextCatalog.getString('Participant {{uniqueId}}',
-                                          { uniqueId: vm.participant.uniqueId });
+      vm.submit = submit;
+      vm.cancel = cancel;
+      vm.dateTimeOnEdit = dateTimeOnEdit;
+
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.collection'),
+        breadcrumbService.forStateWithFunc('home.collection.study', function () {
+          return vm.study.name;
         }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents.add',
-        function () {
-          return gettextCatalog.getString('Event type: {{type}}',
-                                          { type: vm.collectionEventType.name });
-        })
-    ];
+        breadcrumbService.forStateWithFunc(
+          'home.collection.study.participant.cevents',
+          function () {
+            return gettextCatalog.getString('Participant {{uniqueId}}',
+                                            { uniqueId: vm.participant.uniqueId });
+          }),
+        breadcrumbService.forStateWithFunc(
+          'home.collection.study.participant.cevents.add',
+          function () {
+            return gettextCatalog.getString('Event type: {{type}}',
+                                            { type: vm.collectionEventType.name });
+          })
+      ];
 
-    // --
+    }
 
     function submit() {
       vm.collectionEvent.timeCompleted = timeService.dateAndTimeToUtcString(vm.timeCompleted);
@@ -106,5 +110,5 @@ define(function () {
     }
   }
 
-   return component;
+  return component;
 });

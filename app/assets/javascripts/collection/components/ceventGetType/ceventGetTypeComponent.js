@@ -27,14 +27,16 @@ define(function () {
    */
   function CeventGetTypeController($state, CollectionEvent, gettextCatalog) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.title = gettextCatalog.getString(
-      'Participant {{id}}: Add collection event',
-      { id: vm.participant.uniqueId });
-    vm.collectionEvent = new CollectionEvent();
-    vm.updateCollectionEventType = updateCollectionEventType;
+    //--
 
-    // --
+    function onInit() {
+      vm.title = gettextCatalog.getString('Participant {{id}}: Add collection event',
+                                          { id: vm.participant.uniqueId });
+      vm.collectionEvent = new CollectionEvent();
+      vm.updateCollectionEventType = updateCollectionEventType;
+    }
 
     function updateCollectionEventType() {
       if (vm.collectionEvent.collectionEventTypeId) {

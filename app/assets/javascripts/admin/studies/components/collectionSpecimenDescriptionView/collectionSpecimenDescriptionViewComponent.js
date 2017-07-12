@@ -49,42 +49,41 @@ define(function (require) {
                                                        SpecimenType,
                                                        breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.studies'),
-      breadcrumbService.forStateWithFunc(
-        sprintf('home.admin.studies.study.collection.ceventType({ studyId: "%s", ceventTypeId: "%s" })',
-                vm.collectionEventType.studyId,
-                vm.collectionEventType.id),
-        function () { return vm.study.name; }),
-      breadcrumbService.forStateWithFunc(
-        'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
-        function () { return vm.specimenDescription.name; })
-    ];
-
-    vm.returnState = {
-      name: 'home.admin.studies.study.collection.ceventType',
-      param: { ceventTypeId: vm.collectionEventType.id }
-    };
-
-    vm.editName                    = editName;
-    vm.editDescription             = editDescription;
-    vm.editAnatomicalSource        = editAnatomicalSource;
-    vm.editPreservationType        = editPreservationType;
-    vm.editPreservationTemperature = editPreservationTemperature;
-    vm.editSpecimenType            = editSpecimenType;
-    vm.editUnits                   = editUnits;
-    vm.editAmount                  = editAmount;
-    vm.editMaxCount                = editMaxCount;
-    vm.back                        = back;
-
-    onInit();
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin.studies'),
+        breadcrumbService.forStateWithFunc(
+          sprintf('home.admin.studies.study.collection.ceventType({ studyId: "%s", ceventTypeId: "%s" })',
+                  vm.collectionEventType.studyId,
+                  vm.collectionEventType.id),
+          function () { return vm.study.name; }),
+        breadcrumbService.forStateWithFunc(
+          'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
+          function () { return vm.specimenDescription.name; })
+      ];
+
+      vm.returnState = {
+        name: 'home.admin.studies.study.collection.ceventType',
+        param: { ceventTypeId: vm.collectionEventType.id }
+      };
+
+      vm.editName                    = editName;
+      vm.editDescription             = editDescription;
+      vm.editAnatomicalSource        = editAnatomicalSource;
+      vm.editPreservationType        = editPreservationType;
+      vm.editPreservationTemperature = editPreservationTemperature;
+      vm.editSpecimenType            = editSpecimenType;
+      vm.editUnits                   = editUnits;
+      vm.editAmount                  = editAmount;
+      vm.editMaxCount                = editMaxCount;
+      vm.back                        = back;
+
       // reload the collection event type in case changes were made to it
       CollectionEventType.get(vm.collectionEventType.studyId, vm.collectionEventType.id)
         .then(function (ceventType) {

@@ -20,16 +20,16 @@ define(function () {
    */
   function HomeController($rootScope, $timeout, usersService, User, breadcrumbService) {
     var vm = this;
-
     vm.$onInit = onInit;
-    vm.breadcrumbs = [ breadcrumbService.forState('home') ];
-
-    vm.userIsAuthenticated = false;
-    $rootScope.pageTitle = 'Biobank';
 
     //--
 
     function onInit() {
+      vm.breadcrumbs = [ breadcrumbService.forState('home') ];
+
+      vm.userIsAuthenticated = false;
+      $rootScope.pageTitle = 'Biobank';
+
       usersService.requestCurrentUser().then(function (user) {
         vm.user = User.create(user);
         vm.userIsAuthenticated = true;

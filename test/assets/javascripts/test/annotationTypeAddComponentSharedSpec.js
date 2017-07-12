@@ -47,11 +47,11 @@ define(function() {
           context.returnState, {}, { reload: true });
       });
 
-      it('on cancel the correct method should be called', function() {
+      it('on cancel, the correct method should be called', function() {
         context.createController.call(this);
         this.controller.cancel();
         this.scope.$digest();
-        expect(this.$state.go).toHaveBeenCalledWith(context.returnState);
+        expect(this.$state.go).toHaveBeenCalledWith(context.returnState, {}, { reload: true });
       });
 
     });

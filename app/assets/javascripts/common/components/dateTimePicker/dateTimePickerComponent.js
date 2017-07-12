@@ -21,22 +21,22 @@ define(function () {
 
   DateTimePickerController.$inject = ['AppConfig'];
 
-  /**
-   *
-   */
   function DateTimePickerController(AppConfig) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.value                = vm.defaultValue;
-    vm.labelCols            = vm.labelCols || 'col-sm-2';
-    vm.inputCols            = vm.inputCols || 'col-sm-10';
-    vm.open                 = false;
-    vm.openCalendar         = openCalendar;
-    vm.datetimePickerFormat = AppConfig.datepickerFormat;
-    vm.timepickerOptions    = { readonlyInput: false, showMeridian: false };
-    vm.onChange             = onChange;
+    //--
 
-    //---
+    function onInit() {
+      vm.value                = vm.defaultValue;
+      vm.labelCols            = vm.labelCols || 'col-sm-2';
+      vm.inputCols            = vm.inputCols || 'col-sm-10';
+      vm.open                 = false;
+      vm.openCalendar         = openCalendar;
+      vm.datetimePickerFormat = AppConfig.datepickerFormat;
+      vm.timepickerOptions    = { readonlyInput: false, showMeridian: false };
+      vm.onChange             = onChange;
+    }
 
     function openCalendar(e) {
       vm.open = true;

@@ -30,31 +30,31 @@ define(function () {
                                              gettextCatalog,
                                              CollectionEventType) {
     var vm = this;
-
-    vm.displayStates = {
-      NO_RESULTS: 0,
-      HAVE_RESULTS: 1,
-      NOT_CONFIGURED: 2
-    };
-
-    vm.pagerOptions = {
-      page:   1,
-      limit:  5,
-      sortField: 'name'
-    };
-
-    vm.$onInit           = onInit;
-    vm.nameFilter        = '';
-    vm.displayState      = vm.displayStates.NOT_CONFIGURED;
-    vm.add               = add;
-    vm.select            = select;
-    vm.getRecurringLabel = getRecurringLabel;
-    vm.pageChanged       = pageChanged;
-    vm.nameFilterUpdated = nameFilterUpdated;
+    vm.$onInit = onInit;
 
     //--
 
     function onInit() {
+      vm.displayStates = {
+        NO_RESULTS: 0,
+        HAVE_RESULTS: 1,
+        NOT_CONFIGURED: 2
+      };
+
+      vm.pagerOptions = {
+        page:   1,
+        limit:  5,
+        sortField: 'name'
+      };
+
+      vm.nameFilter        = '';
+      vm.displayState      = vm.displayStates.NOT_CONFIGURED;
+      vm.add               = add;
+      vm.select            = select;
+      vm.getRecurringLabel = getRecurringLabel;
+      vm.pageChanged       = pageChanged;
+      vm.nameFilterUpdated = nameFilterUpdated;
+
       updateCollectionEvents();
     }
 

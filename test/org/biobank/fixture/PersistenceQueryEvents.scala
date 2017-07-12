@@ -18,7 +18,7 @@ trait PresistenceQueryEvents {
 
   private implicit val mat: Materializer = ActorMaterializer()(system)
 
-  private lazy val readJournal =
+  val readJournal: InMemoryReadJournal =
     PersistenceQuery(system).readJournalFor[InMemoryReadJournal](InMemoryReadJournal.Identifier)
 
   def logEvents(persistenceId: String): Unit = {

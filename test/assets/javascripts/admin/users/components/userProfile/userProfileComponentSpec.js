@@ -10,7 +10,7 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  describe('Directive: userProfileDirective', function() {
+  describe('Component: userProfile', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -167,16 +167,15 @@ define(function (require) {
     });
 
     it('should display a notification error when removing avatar URL fails', function() {
-      var deferred = this.$q.defer(),
-          user = new this.User(this.factory.user());
-
-      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(deferred.promise);
-      spyOn(this.notificationsService, 'updateError').and.returnValue(null);
-
-      deferred.reject({ data: { message: 'xxx' } });
+      var user = new this.User(this.factory.user());
 
       this.createController(user);
+
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
+      spyOn(this.User.prototype, 'updateAvatarUrl')
+        .and.returnValue(this.$q.reject({ data: { message: 'xxx' } }));
+      spyOn(this.notificationsService, 'updateError').and.returnValue(null);
+
       this.controller.removeAvatarUrl();
       this.scope.$digest();
       expect(this.notificationsService.updateError).toHaveBeenCalled();
@@ -185,12 +184,13 @@ define(function (require) {
     it('can update users password', function() {
       var user = new this.User(this.factory.user());
 
+      this.createController(user);
+
       spyOn(this.modalInput, 'password').and.returnValue(
         {result : this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
       spyOn(this.User.prototype, 'updatePassword').and.returnValue(this.$q.when(new this.User()));
       spyOn(this.notificationsService, 'success').and.callFake(function () {});
 
-      this.createController(user);
       this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.success).toHaveBeenCalled();
@@ -198,6 +198,7 @@ define(function (require) {
 
     it('should display a notification error when current password is invalid', function() {
       var user = new this.User(this.factory.user());
+      this.createController(user);
 
       spyOn(this.modalInput, 'password').and.returnValue(
         { result : this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
@@ -205,7 +206,6 @@ define(function (require) {
         this.$q.reject({ data: { message: 'invalid password' } }));
       spyOn(this.notificationsService, 'error').and.callFake(function () {});
 
-      this.createController(user);
       this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.error).toHaveBeenCalled();
@@ -216,11 +216,13 @@ define(function (require) {
 
       spyOn(this.modalInput, 'password').and.returnValue(
         { result: this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
-      spyOn(this.User.prototype, 'updatePassword').and.returnValue(
-        this.$q.reject({ data: { message: 'xxx' } }));
       spyOn(this.notificationsService, 'updateError').and.returnValue(null);
 
       this.createController(user);
+
+      spyOn(this.User.prototype, 'updatePassword').and.returnValue(
+        this.$q.reject({ data: { message: 'xxx' } }));
+
       this.controller.updatePassword();
       this.scope.$digest();
       expect(this.notificationsService.updateError).toHaveBeenCalled();
@@ -251,13 +253,14 @@ define(function (require) {
         });
 
         it('error message should be displayed when update fails', function() {
+          this.createController(this.user);
+
           spyOn(this.modalInput, context.modalInputFuncName)
             .and.returnValue({ result: this.$q.when(context.modalReturnValue)});
           spyOn(this.User.prototype, context.userUpdateFuncName)
             .and.returnValue(this.$q.reject({ data: { message: 'simulated error'}}));
           spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-          this.createController(this.user);
           this.controller[context.controllerFuncName]();
           this.scope.$digest();
 

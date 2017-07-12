@@ -20,12 +20,18 @@ define(function () {
    */
   function StudiesAdminController(breadcrumbService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.studies')
-    ];
+    //--
+
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin.studies')
+      ];
+    }
+
   }
 
   return component;

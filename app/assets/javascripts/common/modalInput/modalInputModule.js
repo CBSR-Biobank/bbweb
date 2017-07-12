@@ -140,6 +140,8 @@ define(function (require) {
           vm.value = new Date(vm.defaultValue);
         }
 
+        //--
+
         function okPressed() {
           modal.close(vm.value);
         }

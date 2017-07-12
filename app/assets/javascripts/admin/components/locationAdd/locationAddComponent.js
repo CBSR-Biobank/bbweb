@@ -31,12 +31,15 @@ define(function () {
    */
   function LocationAddController($state, Location) {
     var vm = this;
-
-    vm.location = new Location();
-    vm.submit = submit;
-    vm.cancel = cancel;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.location = new Location();
+      vm.submit = submit;
+      vm.cancel = cancel;
+    }
 
     function submit(location) {
       vm.onSubmit()(location);

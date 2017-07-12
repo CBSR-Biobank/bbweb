@@ -39,19 +39,22 @@ define(function () {
                                     Participant,
                                     breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-      breadcrumbService.forStateWithFunc('home.collection.study', function () {
-        return vm.study.name;
-      })
-    ];
-
-    vm.uniqueId = '';
-    vm.onSubmit = onSubmit;
+    vm.$onInit = onInit;
 
     //--
+
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.collection'),
+        breadcrumbService.forStateWithFunc('home.collection.study', function () {
+          return vm.study.name;
+        })
+      ];
+
+      vm.uniqueId = '';
+      vm.onSubmit = onSubmit;
+    }
 
     function onSubmit() {
       if (vm.uniqueId.length > 0) {

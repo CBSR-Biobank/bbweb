@@ -14,12 +14,21 @@ define(function () {
     }
   };
 
-  //StudyProcessingTabController.$inject = [];
+  StudyProcessingTabController.$inject = ['$scope'];
 
   /*
    * Controller for this component.
    */
-  function StudyProcessingTabController() {
+  function StudyProcessingTabController($scope) {
+    var vm = this;
+    vm.$onInit = onInit;
+
+    //--
+
+    function onInit() {
+      // updates the selected tab in 'studyViewDirective' which is the parent directive
+      $scope.$emit('tabbed-page-update', 'tab-selected');
+    }
 
   }
 

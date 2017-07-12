@@ -63,19 +63,14 @@ define(function () {
       });
 
       it('error message should be displayed when update fails', function() {
-        var modalDeferred = this.$q.defer(),
-            updateDeferred = this.$q.defer();
-
-        modalDeferred.resolve(context.newValue);
-        updateDeferred.reject('simulated error');
+        context.createController.call(this);
 
         spyOn(this.modalInput, context.modalInputFuncName)
-          .and.returnValue({ result: modalDeferred.promise});
+          .and.returnValue({ result: this.$q.resolve(context.newValue)} );
         spyOn(context.entity.prototype, context.entityUpdateFuncName)
-          .and.returnValue(updateDeferred.promise);
+          .and.returnValue(this.$q.reject('simulated error'));
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        context.createController.call(this);
         this.controller[context.controllerUpdateFuncName](context.annotation);
         this.scope.$digest();
 

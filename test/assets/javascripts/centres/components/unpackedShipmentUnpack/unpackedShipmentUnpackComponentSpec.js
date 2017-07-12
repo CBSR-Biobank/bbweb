@@ -124,18 +124,14 @@ define(function (require) {
         var self = this,
             shipment = this.createShipment(),
             errors = [
-              this.$q.reject(this.errorReply(
-                'EntityCriteriaError: invalid inventory Ids: xxxx')),
-              this.$q.reject(this.errorReply(
-                'EntityCriteriaError: specimens not in this shipment: xxxx')),
-              this.$q.reject(this.errorReply(
-                'EntityCriteriaError: shipment specimens not present: xxx')),
-              this.$q.reject(this.errorReply(this.factory.stringNext())),
-              this.$q.reject(this.factory.stringNext())
+              this.errorReply('EntityCriteriaError: invalid inventory Ids: xxxx'),
+              this.errorReply('EntityCriteriaError: specimens not in this shipment: xxxx'),
+              this.errorReply('EntityCriteriaError: shipment specimens not present: xxx'),
+              this.errorReply(this.factory.stringNext()),
+              this.factory.stringNext()
             ],
             tableRefreshCount;
 
-        spyOn(this.Shipment.prototype, 'tagSpecimensAsReceived').and.returnValues.apply(null, errors);
         spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
 
         this.createController(shipment);
@@ -144,6 +140,9 @@ define(function (require) {
 
         errors.forEach(function (error, index) {
           var args;
+
+          self.Shipment.prototype.tagSpecimensAsReceived =
+            jasmine.createSpy().and.returnValue(self.$q.reject(error));
 
           self.controller.onInventoryIdsSubmit();
           self.scope.$digest();

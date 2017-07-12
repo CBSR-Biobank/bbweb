@@ -14,37 +14,19 @@ define([
 
   describe('ceventTypesAddAndSelectComponent', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    beforeEach(inject(function(TestSuiteMixin) {
-      var self = this, jsonStudy, jsonCet;
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
 
-      _.extend(self, TestSuiteMixin.prototype);
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-      self.injectDependencies('$rootScope',
-                              '$compile',
-                              '$q',
-                              '$state',
-                              'Study',
-                              'CollectionEventType',
-                              'factory');
-
-      jsonStudy = self.factory.study();
-      jsonCet   = self.factory.collectionEventType(jsonStudy);
-
-      self.study = new self.Study(jsonStudy);
-      self.collectionEventType = new self.CollectionEventType(jsonCet);
-
-      spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ self.collectionEventType ]));
-      spyOn(this.$state, 'go').and.callFake(function () {});
-
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
-
-      this.createController = function (study, collectionEventType) {
+      SuiteMixin.prototype.createController = function (study, collectionEventType) {
         var collectionEventTypes;
-        study = study || self.study;
-        collectionEventType = collectionEventType || self.collectionEventType;
+        study = study || this.study;
+        collectionEventType = collectionEventType || this.collectionEventType;
 
         if (_.isUndefined(collectionEventType)) {
           collectionEventTypes = [];
@@ -52,22 +34,50 @@ define([
           collectionEventTypes = [ collectionEventType ];
         }
 
-        self.CollectionEventType.list =
-          jasmine.createSpy().and.returnValue(self.$q.when(self.factory.pagedResult(collectionEventTypes)));
+        this.CollectionEventType.list =
+          jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult(collectionEventTypes)));
 
-        self.element = angular.element(
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
           '<cevent-types-add-and-select study="vm.study" collection-event-types="vm.collectionEventTypes">' +
-            '</cevent-types-add-and-select>');
-        self.scope = self.$rootScope.$new();
-        self.scope.vm = {
-          study:                study,
-          collectionEventTypes: collectionEventType
-        };
-
-        self.$compile(self.element)(self.scope);
-        self.scope.$digest();
-        self.controller = self.element.controller('ceventTypesAddAndSelect');
+            '</cevent-types-add-and-select>',
+          {
+            study:                study,
+            collectionEventTypes: collectionEventType
+          },
+          'ceventTypesAddAndSelect');
       };
+
+      return SuiteMixin;
+    }
+
+
+    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      var jsonStudy, jsonCet;
+
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+
+      this.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              '$state',
+                              'Study',
+                              'CollectionEventType',
+                              'factory');
+
+      jsonStudy = this.factory.study();
+      jsonCet   = this.factory.collectionEventType(jsonStudy);
+
+      this.study = new this.Study(jsonStudy);
+      this.collectionEventType = new this.CollectionEventType(jsonCet);
+
+      spyOn(this.CollectionEventType, 'list').and.returnValue(this.$q.when([ this.collectionEventType ]));
+      spyOn(this.$state, 'go').and.callFake(function () {});
+
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/ceventTypesAddAndSelect/ceventTypesAddAndSelect.html');
     }));
 
     it('has valid scope', function() {

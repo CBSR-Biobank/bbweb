@@ -47,74 +47,73 @@ define(function () {
                                           gettextCatalog,
                                           breadcrumbService) {
     var vm = this;
-
     vm.$onInit = onInit;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.shipping'),
-      breadcrumbService.forStateWithFunc(
-        'home.shipping.shipment.unpack.info',
-        function () {
-          return gettextCatalog.getString(
-            'Unpack Shipment: {{courierName}} - {{trackingNumber}}',
-            {
-              courierName: vm.shipment.courierName,
-              trackingNumber: vm.shipment.trackingNumber
-            });
-        })
-    ];
-
-    // initialize this controller's base class
-    $controller('TabbedPageController',
-                {
-                  vm:     vm,
-                  $scope: $scope,
-                  $state: $state
-                });
-
-    vm.active = 0;
-    vm.tabs = [
-      {
-        heading: gettextCatalog.getString('Information'),
-        sref: 'home.shipping.shipment.unpack.info',
-        active: true
-      },
-      {
-        heading: gettextCatalog.getString('Unpack specimens'),
-        sref: 'home.shipping.shipment.unpack.unpack',
-        active: false
-      },
-      {
-        heading: gettextCatalog.getString('Received specimens'),
-        sref: 'home.shipping.shipment.unpack.received',
-        active: false
-      },
-      {
-        heading: gettextCatalog.getString('Missing specimens'),
-        sref: 'home.shipping.shipment.unpack.missing',
-        active: false
-      },
-      {
-        heading: gettextCatalog.getString('Extra specimens'),
-        sref: 'home.shipping.shipment.unpack.extra',
-        active: false
-      }
-    ];
-
-    vm.timeCompleted = new Date();
-
-    vm.progressInfo = {
-      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
-      current: 3
-    };
-
-    vm.returnToReceivedState = returnToReceivedState;
-    vm.completeShipment = completeShipment;
 
     //----
 
     function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.shipping'),
+        breadcrumbService.forStateWithFunc(
+          'home.shipping.shipment.unpack.info',
+          function () {
+            return gettextCatalog.getString(
+              'Unpack Shipment: {{courierName}} - {{trackingNumber}}',
+              {
+                courierName: vm.shipment.courierName,
+                trackingNumber: vm.shipment.trackingNumber
+              });
+          })
+      ];
+
+      // initialize this controller's base class
+      $controller('TabbedPageController',
+                  {
+                    vm:     vm,
+                    $scope: $scope,
+                    $state: $state
+                  });
+
+      vm.active = 0;
+      vm.tabs = [
+        {
+          heading: gettextCatalog.getString('Information'),
+          sref: 'home.shipping.shipment.unpack.info',
+          active: true
+        },
+        {
+          heading: gettextCatalog.getString('Unpack specimens'),
+          sref: 'home.shipping.shipment.unpack.unpack',
+          active: false
+        },
+        {
+          heading: gettextCatalog.getString('Received specimens'),
+          sref: 'home.shipping.shipment.unpack.received',
+          active: false
+        },
+        {
+          heading: gettextCatalog.getString('Missing specimens'),
+          sref: 'home.shipping.shipment.unpack.missing',
+          active: false
+        },
+        {
+          heading: gettextCatalog.getString('Extra specimens'),
+          sref: 'home.shipping.shipment.unpack.extra',
+          active: false
+        }
+      ];
+
+      vm.timeCompleted = new Date();
+
+      vm.progressInfo = {
+        items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
+        current: 3
+      };
+
+      vm.returnToReceivedState = returnToReceivedState;
+      vm.completeShipment = completeShipment;
+
       // get shipment again to get latest version
       return Shipment.get(vm.shipment.id).then(function (shipment) {
         vm.shipment = shipment;

@@ -27,8 +27,8 @@ define(function (require) {
      * @param {domain.Location[]} centreLocations - The locations belonging to the centres the specimens
      *        can be collected at.
      *
-     * @param {domain.studies.CollectionSpecimenDescription[]} specimenDescriptions - the specimen specifications belonging
-     *        to the collection event these specimen belong to.
+     * @param {domain.studies.CollectionSpecimenDescription[]} specimenDescriptions - the specimen
+     *        specifications belonging to the collection event these specimen belong to.
      *
      * @param {Date} defaultDatetime - The default date to use for the specimens <code>time collected<code>.
      *
@@ -192,7 +192,8 @@ define(function (require) {
             Specimen.getByInventoryId(vm.inventoryId)
               .then(function () {
                 $scope.form.inventoryId.$setValidity('inventoryIdTaken', false);
-              });
+              })
+              .catch(function () { /* do nothing */ });
           }
         }
 

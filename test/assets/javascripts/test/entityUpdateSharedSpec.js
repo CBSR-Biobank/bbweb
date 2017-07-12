@@ -45,7 +45,7 @@ define(['lodash'], function(_) {
         this.deferred.resolve(context.newValue);
         spyOn(context.entity.prototype, context.updateFuncName).and.returnValue(this.$q.when(context.entity));
 
-        context.createController.call(this);
+        context.createController();
         expect(this.controller[context.controllerFuncName]).toBeFunction();
         this.controller[context.controllerFuncName]();
         this.scope.$digest();
@@ -55,18 +55,16 @@ define(['lodash'], function(_) {
       });
 
       it('should display an error in a modal when update fails', function() {
-        var newValue = this.factory.stringNext(),
-            deferred = this.$q.defer();
+        var newValue = this.factory.stringNext();
 
         this.deferred.resolve(newValue);
         expect(context.entity.prototype[context.updateFuncName]).toBeFunction();
 
-        spyOn(context.entity.prototype, context.updateFuncName).and.returnValue(deferred.promise);
         spyOn(this.notificationsService, 'updateError');
 
-        deferred.reject('simulated error');
-
-        context.createController.call(this);
+        context.createController();
+        context.entity.prototype[context.updateFuncName] = jasmine.createSpy()
+          .and.returnValue(this.$q.reject('simulated error  ---->'));
         expect(this.controller[context.controllerFuncName]).toBeFunction();
         this.controller[context.controllerFuncName]();
         this.scope.$digest();

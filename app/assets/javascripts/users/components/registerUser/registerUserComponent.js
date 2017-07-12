@@ -27,15 +27,18 @@ define(function () {
                                   User,
                                   notificationsService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.user = new User();
-    vm.password = '';
-    vm.confirmPassword = '';
+    //--
 
-    vm.submit = submit;
-    vm.cancel = cancel;
+    function onInit() {
+      vm.user = new User();
+      vm.password = '';
+      vm.confirmPassword = '';
 
-    //----
+      vm.submit = submit;
+      vm.cancel = cancel;
+    }
 
     function submit() {
       vm.user.register(vm.password)

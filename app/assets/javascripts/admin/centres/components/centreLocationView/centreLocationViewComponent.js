@@ -35,31 +35,34 @@ define(function (require) {
                                         notificationsService,
                                         breadcrumbService) {
     var vm = this;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.centres'),
-      breadcrumbService.forStateWithFunc(
-        sprintf('home.admin.centres.centre.locations({ centreId: "%s", locationId: "%s" })',
-                vm.centre.id,
-                vm.location.id),
-        function () { return vm.centre.name; }),
-      breadcrumbService.forStateWithFunc(
-        'home.admin.centres.centre.locations.locationsView',
-        function () { return vm.location.name; })
-    ];
-
-    vm.back               = back;
-    vm.editName           = editName;
-    vm.editStreet         = editStreet;
-    vm.editCity           = editCity;
-    vm.editProvince       = editProvince;
-    vm.editPostalCode     = editPostalCode;
-    vm.editPoBoxNumber    = editPoBoxNumber;
-    vm.editCountryIsoCode = editCountryIsoCode;
+    vm.$onInit = onInit;
 
     //----
+
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin.centres'),
+        breadcrumbService.forStateWithFunc(
+          sprintf('home.admin.centres.centre.locations({ centreId: "%s", locationId: "%s" })',
+                  vm.centre.id,
+                  vm.location.id),
+          function () { return vm.centre.name; }),
+        breadcrumbService.forStateWithFunc(
+          'home.admin.centres.centre.locations.locationsView',
+          function () { return vm.location.name; })
+      ];
+
+      vm.back               = back;
+      vm.editName           = editName;
+      vm.editStreet         = editStreet;
+      vm.editCity           = editCity;
+      vm.editProvince       = editProvince;
+      vm.editPostalCode     = editPostalCode;
+      vm.editPoBoxNumber    = editPoBoxNumber;
+      vm.editCountryIsoCode = editCountryIsoCode;
+    }
 
     function back() {
       $state.go('home.admin.centres.centre.locations', {}, { reload: true });

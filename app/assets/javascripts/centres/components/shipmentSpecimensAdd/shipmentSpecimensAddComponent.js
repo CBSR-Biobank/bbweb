@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
 
   var component = {
@@ -42,28 +42,31 @@ define(function (require) {
                                           Specimen,
                                           ShipmentSpecimen) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    // initialize this controller's base class
-    $controller('ShipmentSpecimenController',
-                {
-                  vm:               vm,
-                  $q:               $q,
-                  ShipmentSpecimen: ShipmentSpecimen
-                });
+    //--
 
-    vm.inventoryIds           = '';
-    vm.refreshSpecimensTable  = 0;
-    vm.addSpecimens           = addSpecimens;
-    vm.removeShipmentSpecimen = removeShipmentSpecimen;
+    function onInit() {
+      // initialize this controller's base class
+      $controller('ShipmentSpecimenController',
+                  {
+                    vm:               vm,
+                    $q:               $q,
+                    ShipmentSpecimen: ShipmentSpecimen
+                  });
 
-    vm.actions =  [{
-      id:    'remove',
-      class: 'btn-warning',
-      title: gettextCatalog.getString('Remove specimen'),
-      icon:  'glyphicon-remove'
-    }];
+      vm.inventoryIds           = '';
+      vm.refreshSpecimensTable  = 0;
+      vm.addSpecimens           = addSpecimens;
+      vm.removeShipmentSpecimen = removeShipmentSpecimen;
 
-    //---
+      vm.actions =  [{
+        id:    'remove',
+        class: 'btn-warning',
+        title: gettextCatalog.getString('Remove specimen'),
+        icon:  'glyphicon-remove'
+      }];
+    }
 
     function addSpecimens() {
       var inventoryIdsArr;

@@ -41,43 +41,41 @@ define(function (require) {
                                       StudyCounts,
                                       gettextCatalog) {
     var vm = this;
-
     vm.$onInit     = onInit;
-    vm.counts      = {};
-    vm.limit       = 5;
-    vm.getItems    = getItems;
-    vm.getItemIcon = getItemIcon;
-
-    vm.stateData = _.map(_.values(StudyState), function (state) {
-      return { id: state, label: state.toUpperCase() };
-    });
-
-    // initialize this controller's base class
-    $controller('PagedListController', {
-      vm:             vm,
-      gettextCatalog: gettextCatalog
-    });
 
     //--
 
     function onInit() {
+      vm.counts      = {};
+      vm.limit       = 5;
+      vm.getItems    = getItems;
+      vm.getItemIcon = getItemIcon;
+
+      vm.stateData = _.map(_.values(StudyState), function (state) {
+        return { id: state, label: state.toUpperCase() };
+      });
+
+      // initialize this controller's base class
+      $controller('PagedListController', {
+        vm:             vm,
+        gettextCatalog: gettextCatalog
+      });
+
       return StudyCounts.get()
         .then(function (counts) {
           vm.counts = counts;
         })
-        .catch(function (error) {
-          if (error.status && (error.status === 401)) {
-            $state.go('home.users.login', {}, { reload: true });
-          }
-        });
+        .catch(handleUnauthorized);
     }
 
     function getItems(options) {
       // KLUDGE: for now, fix after Entity Pagers have been implemented
-      return StudyCounts.get().then(function (counts) {
-        vm.counts = counts;
-        return Study.list(options);
-      });
+      return StudyCounts.get()
+        .then(function (counts) {
+          vm.counts = counts;
+          return Study.list(options);
+        })
+        .catch(handleUnauthorized);
     }
 
     function getItemIcon(study) {
@@ -90,6 +88,13 @@ define(function (require) {
       } else {
         throw new Error('invalid study state: ' + study.state);
       }
+    }
+
+    function handleUnauthorized(error) {
+      if (error.status && (error.status === 401)) {
+        $state.go('home.users.login', {}, { reload: true });
+      }
+      return null;
     }
   }
 

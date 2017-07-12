@@ -10,12 +10,38 @@ define(function (require) {
 
   describe('annotationTypeUpdateModalService', function() {
 
+    function SuiteMixinFactory(ModalTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ModalTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ModalTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.openModal = function (annotationType) {
+        this.modal = this.annotationTypeUpdateModal.openModal(annotationType);
+        this.modal.result.then(function () {}, function () {});
+        this.$rootScope.$digest();
+        this.modalElement = this.modalElementFind();
+        this.scope = this.modalElement.scope();
+      };
+
+      SuiteMixin.prototype.createAnnotationType = function (valueType) {
+        return new this.AnnotationType(this.factory.annotationType({ valueType: valueType }));
+      };
+
+      SuiteMixin.prototype.createSelectAnnotationType = function () {
+        return this.createAnnotationType(this.AnnotationValueType.SELECT);
+      };
+
+      return SuiteMixin;
+    }
+
     beforeEach(mocks.module('ngAnimateMock', 'biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(ModalTestSuiteMixin, testUtils) {
-      var self = this;
-
-      _.extend(this, ModalTestSuiteMixin.prototype);
+      _.extend(this, new SuiteMixinFactory(ModalTestSuiteMixin).prototype);
       this.injectDependencies('$q',
                               '$rootScope',
                               '$animate',
@@ -29,22 +55,6 @@ define(function (require) {
 
       this.addModalMatchers();
       testUtils.addCustomMatchers();
-
-      this.openModal = function (annotationType) {
-        self.modal = self.annotationTypeUpdateModal.openModal(annotationType);
-        self.$rootScope.$digest();
-        self.modalElement = self.modalElementFind();
-        self.scope = self.modalElement.scope();
-      };
-
-      this.createAnnotationType = function (valueType) {
-        return new self.AnnotationType(
-          self.factory.annotationType({ valueType: valueType }));
-      };
-
-      this.createSelectAnnotationType = function () {
-        return new self.createAnnotationType(self.AnnotationValueType.SELECT);
-      };
     }));
 
     it('can open modal', function() {
@@ -65,7 +75,7 @@ define(function (require) {
           ];
 
       invalidValueTypes.forEach(function (valueType) {
-        var annotationType = new self.createAnnotationType(valueType);
+        var annotationType = self.createAnnotationType(valueType);
 
         expect(function () {
           self.openModal(annotationType);

@@ -2,13 +2,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-// Jasmine test suite
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
+define(function (require) {
   'use strict';
+
+  var mocks = require('angularMocks'),
+      _ =     require('lodash');
 
   describe('Service: userService', function() {
 

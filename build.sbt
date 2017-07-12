@@ -5,7 +5,7 @@ val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 version := conf.getString("app.version")
 
 val akkaVer = "2.5.3"
-val angularVer = "1.5.11"
+val angularVer = "1.6.5"
 
 name := "bbweb"
 
@@ -83,7 +83,7 @@ resolvers ++= Seq(
     "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
     "Sonatype OSS"        at "https://oss.sonatype.org/content/repositories/releases",
     "Akka Snapshots"      at "http://repo.akka.io/snapshots/",
-    "dnvriend at bintray" at "http://dl.bintray.com/dnvriend/maven"
+    Resolver.jcenterRepo
   )
 
 libraryDependencies ++= Seq(
@@ -91,26 +91,26 @@ libraryDependencies ++= Seq(
     ehcache,
     filters,
     "org.scala-stm"               %% "scala-stm"                           % "0.8",
-    "com.typesafe.play"           %% "play-json"                           % "2.6.0",
-    ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.4.18"   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
-    "com.typesafe.akka"           %% "akka-persistence-query-experimental" % "2.4.18"   % "compile",
+    "com.typesafe.play"           %% "play-json"                           % "2.6.2",
+    ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.5.3"   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+    "com.typesafe.akka"           %% "akka-persistence-query"              % "2.5.3"   % "compile",
     "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
     ( "com.okumin"                %% "akka-persistence-sql-async"          % "0.4.0"   % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
-    "org.scalaz"                  %% "scalaz-core"                         % "7.2.13"  % "compile",
+    "org.scalaz"                  %% "scalaz-core"                         % "7.2.14"  % "compile",
     "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
-    "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.0",
+    "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.1",
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
     "com.typesafe.play"           %% "play-mailer"                         % "6.0.0",
     "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.0",
-    "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.5.0",
+    "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.7.1",
     "com.github.nscala-time"      %% "nscala-time"                         % "2.16.0",
     // WebJars infrastructure
-    ( "org.webjars"               %% "webjars-play"                        % "2.6.0").exclude("org.webjars", "requirejs"),
+    ( "org.webjars"               %% "webjars-play"                        % "2.6.1").exclude("org.webjars", "requirejs"),
     // WebJars dependencies
     "org.webjars"                 %  "requirejs"                           % "2.3.3",
     "org.webjars.npm"             %  "angular"                             % angularVer,
-    "org.webjars.npm"             %  "angular-animate"                     % "1.5.9",
-    "org.webjars.npm"             %  "angular-cookies"                     % angularVer,
+    "org.webjars.npm"             %  "angular-animate"                     % "1.6.4",
+    "org.webjars.npm"             %  "angular-cookies"                     % "1.6.4",
     ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" ).exclude("org.webjars.bower", "angular"),
     "org.webjars.npm"             %  "angular-messages"                    % angularVer,
     "org.webjars.npm"             %  "angular-sanitize"                    % angularVer,
@@ -124,14 +124,14 @@ libraryDependencies ++= Seq(
     "org.webjars.npm"             %  "lodash"                              % "4.17.4",
     "org.webjars.npm"             %  "moment"                              % "2.18.1",
     "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
-    "org.webjars.npm"             %  "tv4"                                 % "1.2.7",
+    "org.webjars.npm"             %  "tv4"                                 % "1.3.0",
     // Testing
-    ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.4.18.1"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+    ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.5.1.1"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
-    "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.0.0"   % "test",
+    "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.0"   % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
     "org.codehaus.janino"         %  "janino"                              % "3.0.7"   % "test",
-    "org.mockito"                 %  "mockito-core"                        % "2.8.9"  % "test"
+    "org.mockito"                 %  "mockito-core"                        % "2.8.47"  % "test"
   )
 
 incOptions := incOptions.value.withNameHashing(true)

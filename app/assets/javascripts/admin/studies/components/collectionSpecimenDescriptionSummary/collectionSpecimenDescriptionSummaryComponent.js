@@ -10,10 +10,11 @@ define(function () {
     controller: CollectionSpecimenDescriptionSummaryController,
     controllerAs: 'vm',
     bindings: {
+      specimenDescription: '<'
     }
   };
 
-  CollectionSpecimenDescriptionSummaryController.$inject = [];
+  //CollectionSpecimenDescriptionSummaryController.$inject = [];
 
   /*
    * Controller for this component.

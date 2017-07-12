@@ -27,11 +27,14 @@ define(function () {
                                     usersService,
                                     modalService) {
     var vm = this;
+    vm.$onInit = onInit;
 
-    vm.email = '';
-    vm.submit = submit;
+    //--
 
-    //---
+    function onInit() {
+      vm.email = '';
+      vm.submit = submit;
+    }
 
     function gotoReturnState() {
       $state.go('home');

@@ -35,21 +35,21 @@ define(function (require) {
                                           notificationsService,
                                           gettextCatalog) {
     var vm = this;
-
+    vm.$onInit = onInit;
     _.extend(vm, new ParticipantAnnotationTypeModals());
-
-    // FIXME this is set to empty array for now, but will have to call the correct method in the future
-    vm.annotationTypeIdsInUse = [];
-    vm.modificationsAllowed = vm.study.isDisabled();
-
-    vm.$onInit              = onInit;
-    vm.add                  = add;
-    vm.editAnnotationType   = editAnnotationType;
-    vm.removeAnnotationType = removeAnnotationType;
 
     //--
 
     function onInit() {
+      // FIXME this is set to empty array for now, but will have to call the correct method in the future
+      vm.annotationTypeIdsInUse = [];
+      vm.modificationsAllowed = vm.study.isDisabled();
+
+      vm.$onInit              = onInit;
+      vm.add                  = add;
+      vm.editAnnotationType   = editAnnotationType;
+      vm.removeAnnotationType = removeAnnotationType;
+
       // updates the selected tab in 'studyViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
     }

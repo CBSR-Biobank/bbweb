@@ -64,17 +64,6 @@ define([
       expect(this.controller.tabs).toBeArrayOfSize(4);
     });
 
-    it('should contain initialized local storage', function() {
-      this.createController();
-
-      expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.processingTypes', true);
-      expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.specimenLinkAnnotationTypes', true);
-      expect(this.$window.localStorage.setItem)
-        .toHaveBeenCalledWith('study.panel.specimenLinkTypes', true);
-    });
-
     it('should initialize the tab corresponding to the event that was emitted', function() {
       var self = this,
           tab,

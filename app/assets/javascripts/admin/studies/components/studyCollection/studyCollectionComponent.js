@@ -12,7 +12,7 @@ define(function (require) {
     controller: StudyCollectionController,
     controllerAs: 'vm',
     bindings: {
-        study: '<'
+      study: '<'
     }
   };
 
@@ -26,8 +26,7 @@ define(function (require) {
    */
   function StudyCollectionController($scope, CollectionEventType) {
     var vm = this;
-
-    vm.$onInit = onInit();
+    vm.$onInit = onInit;
 
     //--
 

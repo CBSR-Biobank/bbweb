@@ -7,21 +7,47 @@
 define(function (require) {
   'use strict';
 
-  var angular                = require('angular'),
-      mocks                  = require('angularMocks'),
+  var mocks                  = require('angularMocks'),
       _                      = require('lodash'),
       entityUpdateSharedSpec = require('../../../../test/entityUpdateSharedSpec');
 
   describe('ceventTypeViewComponent', function() {
 
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+
+      function SuiteMixin() {
+        ComponentTestSuiteMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      SuiteMixin.prototype.createController = function (study, collectionEventType) {
+        study = study || this.study;
+        collectionEventType = collectionEventType || this.collectionEventType;
+
+        this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
+
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<cevent-type-view study="vm.study" collection-event-type="vm.ceventType"></cevent-type-view>',
+          {
+            study:      study,
+            ceventType: collectionEventType
+          },
+          'ceventTypeView');
+      };
+
+      return SuiteMixin;
+    }
+
+
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(testUtils, TestSuiteMixin) {
-      var self = this;
+    beforeEach(inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
 
-      _.extend(self, TestSuiteMixin.prototype);
-
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               '$state',
@@ -35,12 +61,12 @@ define(function (require) {
                               'modalService',
                               'factory');
 
-      self.jsonStudy              = this.factory.study();
-      self.jsonCet                = self.factory.collectionEventType(self.jsonStudy);
-      self.study                  = new self.Study(self.jsonStudy);
-      self.collectionEventType    = new self.CollectionEventType(self.jsonCet);
+      this.jsonStudy              = this.factory.study();
+      this.jsonCet                = this.factory.collectionEventType(this.jsonStudy);
+      this.study                  = new this.Study(this.jsonStudy);
+      this.collectionEventType    = new this.CollectionEventType(this.jsonCet);
 
-      spyOn(this.$state, 'go').and.returnValue(true);
+      spyOn(this.$state, 'go').and.returnValue(null);
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/components/ceventTypeView/ceventTypeView.html',
@@ -50,31 +76,11 @@ define(function (require) {
         '/assets/javascripts/common/directives/updateRemoveButtons.html',
         '/assets/javascripts/common/components/statusLine/statusLine.html',
         '/assets/javascripts/common/modalInput/modalInput.html');
-
-      this.createController = function (study, collectionEventType) {
-        this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
-
-        study = study || this.study;
-        collectionEventType = collectionEventType || this.collectionEventType;
-
-        this.element = angular.element(
-          '<cevent-type-view study="vm.study" cevent-type="vm.ceventType"></cevent-type-view>');
-
-        this.scope = this.$rootScope.$new();
-        this.scope.vm = {
-          study:      study,
-          ceventType: collectionEventType
-        };
-        this.$compile(this.element)(this.scope);
-        this.scope.$digest();
-        this.controller = this.element.controller('ceventTypeView');
-      };
-
     }));
 
     it('scope should be valid', function() {
       this.createController();
-      expect(this.controller.ceventType).toBe(this.collectionEventType);
+      expect(this.controller.collectionEventType).toBe(this.collectionEventType);
     });
 
     it('calling addAnnotationType should change to the correct state', function() {
