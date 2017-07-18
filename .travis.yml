@@ -23,7 +23,7 @@ before_cache:
   - find $HOME/.sbt        -name "*.lock"               -print -delete
 
 scala:
-  - 2.11.11
+  - 2.12.2
 
 node_js:
   - "6.9.4"
