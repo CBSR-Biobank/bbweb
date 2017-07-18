@@ -27,6 +27,7 @@
   <logger name="org.biobank.service" level="INFO" />
   <logger name="org.biobank.query" level="INFO" />
   <logger name="org.biobank.fixture" level="DEBUG" />
+  <logger name="com.zaxxer.hikari.pool.HikariPool" level="debug"/>
 
   <!--
   <logger name="org.biobank.service.access" level="DEBUG" />

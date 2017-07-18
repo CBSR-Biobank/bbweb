@@ -1,24 +1,21 @@
-CREATE TABLE IF NOT EXISTS persistence_metadata (
-  persistence_key BIGINT NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS journal;
+
+CREATE TABLE IF NOT EXISTS journal (
+  ordering SERIAL,
   persistence_id VARCHAR(255) NOT NULL,
-  sequence_nr BIGINT NOT NULL,
-  PRIMARY KEY (persistence_key),
-  UNIQUE (persistence_id)
-) ENGINE = InnoDB;
-
-CREATE TABLE IF NOT EXISTS persistence_journal (
-  persistence_key BIGINT NOT NULL,
-  sequence_nr BIGINT NOT NULL,
+  sequence_number BIGINT NOT NULL,
+  deleted BOOLEAN DEFAULT FALSE,
+  tags VARCHAR(255) DEFAULT NULL,
   message BLOB NOT NULL,
-  PRIMARY KEY (persistence_key, sequence_nr),
-  FOREIGN KEY (persistence_key) REFERENCES persistence_metadata (persistence_key)
-) ENGINE = InnoDB;
+  PRIMARY KEY(persistence_id, sequence_number)
+);
 
-CREATE TABLE IF NOT EXISTS persistence_snapshot (
-  persistence_key BIGINT NOT NULL,
-  sequence_nr BIGINT NOT NULL,
-  created_at BIGINT NOT NULL,
+DROP TABLE IF EXISTS snapshot;
+
+CREATE TABLE IF NOT EXISTS snapshot (
+  persistence_id VARCHAR(255) NOT NULL,
+  sequence_number BIGINT NOT NULL,
+  created BIGINT NOT NULL,
   snapshot BLOB NOT NULL,
-  PRIMARY KEY (persistence_key, sequence_nr),
-  FOREIGN KEY (persistence_key) REFERENCES persistence_metadata (persistence_key)
-) ENGINE = InnoDB;
+  PRIMARY KEY (persistence_id, sequence_number)
+);
