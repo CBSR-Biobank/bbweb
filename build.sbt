@@ -92,10 +92,12 @@ libraryDependencies ++= Seq(
     filters,
     "org.scala-stm"               %% "scala-stm"                           % "0.8",
     "com.typesafe.play"           %% "play-json"                           % "2.6.2",
-    ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.5.3"   % "compile"  ).excludeAll(ExclusionRule(organization="com.google.protobuf")),
+    ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.5.3"   % "compile"  )
+      .excludeAll(ExclusionRule(organization="com.google.protobuf")),
     "com.typesafe.akka"           %% "akka-persistence-query"              % "2.5.3"   % "compile",
     "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
-    ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "2.5.2.0" % "compile"  ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+    ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "2.5.2.0" % "compile"  )
+      .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "mysql"                       % "mysql-connector-java"                 % "6.0.6",
     "org.scalaz"                  %% "scalaz-core"                         % "7.2.14"  % "compile",
     "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
@@ -106,28 +108,33 @@ libraryDependencies ++= Seq(
     "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.7.1",
     "com.github.nscala-time"      %% "nscala-time"                         % "2.16.0",
     // WebJars infrastructure
-    ( "org.webjars"               %% "webjars-play"                        % "2.6.1").exclude("org.webjars", "requirejs"),
+    ( "org.webjars"               %% "webjars-play"                        % "2.6.1")
+      .exclude("org.webjars", "requirejs"),
     // WebJars dependencies
     "org.webjars"                 %  "requirejs"                           % "2.3.3",
     "org.webjars.npm"             %  "angular"                             % angularVer,
     "org.webjars.npm"             %  "angular-animate"                     % "1.6.4",
     "org.webjars.npm"             %  "angular-cookies"                     % "1.6.4",
-    ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" ).exclude("org.webjars.bower", "angular"),
+    ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" )
+      .exclude("org.webjars.bower", "angular"),
     "org.webjars.npm"             %  "angular-messages"                    % angularVer,
     "org.webjars.npm"             %  "angular-sanitize"                    % angularVer,
     "org.webjars.npm"             %  "angular-smart-table"                 % "2.1.6",
     "org.webjars.npm"             %  "angular-toastr"                      % "1.7.0",
     "org.webjars.npm"             %  "angular-ui-bootstrap"                % "2.5.0",
-    ( "org.webjars.npm"           % "angular-ui-router"                    % "1.0.3" ).exclude("org.webjars.npm", "angular"),
+    ( "org.webjars.npm"           % "angular-ui-router"                    % "1.0.3" )
+      .exclude("org.webjars.npm", "angular"),
     "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
-    ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.6.0" ).exclude("org.webjars.bower", "angular"),
+    ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.6.0" )
+      .exclude("org.webjars.bower", "angular"),
     "org.webjars.npm"             %  "jquery"                              % "3.2.1",
     "org.webjars.npm"             %  "lodash"                              % "4.17.4",
     "org.webjars.npm"             %  "moment"                              % "2.18.1",
     "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
     "org.webjars.npm"             %  "tv4"                                 % "1.3.0",
     // Testing
-    ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.5.1.1"  % "test" ).excludeAll(ExclusionRule(organization="com.typesafe.akka")),
+    ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.5.1.1"  % "test" )
+      .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
     "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.0"   % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
