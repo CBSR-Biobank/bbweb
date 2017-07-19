@@ -36,7 +36,7 @@ class UsersProcessorSpec extends ProcessorTestFixture with PresistenceQueryEvent
 
   describe("A user processor must") {
 
-    it("allow recovery from journal") {
+    it("allow recovery from journal", PersistenceTest) {
       val user = factory.createActiveUser
       val cmd = RegisterUserCmd(name      = user.name,
                                 email     = user.email,
@@ -54,7 +54,7 @@ class UsersProcessorSpec extends ProcessorTestFixture with PresistenceQueryEvent
       userRepository.getValues.map { c => c.name } must contain (user.name)
     }
 
-    it("allow a snapshot request") {
+    it("allow a snapshot request", PersistenceTest) {
       val users = (1 to 2).map { _ => factory.createActiveUser }
       users.foreach(userRepository.put)
 
@@ -64,7 +64,7 @@ class UsersProcessorSpec extends ProcessorTestFixture with PresistenceQueryEvent
       ()
     }
 
-    it("accept a snapshot offer") {
+    it("accept a snapshot offer", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val users = (1 to 2).map { _ => factory.createActiveUser }
       val snapshotUser = users(1)

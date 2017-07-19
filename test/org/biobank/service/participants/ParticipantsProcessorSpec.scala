@@ -6,7 +6,7 @@ import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
 import org.biobank.domain.study.StudyRepository
 import org.biobank.domain.participants.ParticipantRepository
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -39,7 +39,7 @@ class ParticipantsProcessorSpec extends ProcessorTestFixture {
 
   describe("A participants processor must") {
 
-    it("allow recovery from journal") {
+    it("allow recovery from journal", PersistenceTest) {
       val participant = factory.createParticipant
       val study = factory.defaultEnabledStudy
       val cmd = AddParticipantCmd(sessionUserId = nameGenerator.next[String],
@@ -59,7 +59,7 @@ class ParticipantsProcessorSpec extends ProcessorTestFixture {
       participantRepository.getValues.map { s => s.uniqueId } must contain (participant.uniqueId)
     }
 
-    it("allow a snapshot request") {
+    it("allow a snapshot request", PersistenceTest) {
       val participants = (1 to 2).map { _ => factory.createParticipant }
       participants.foreach(participantRepository.put)
 
@@ -69,7 +69,7 @@ class ParticipantsProcessorSpec extends ProcessorTestFixture {
       ()
     }
 
-    it("accept a snapshot offer") {
+    it("accept a snapshot offer", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val participants = (1 to 2).map { _ => factory.createParticipant }
       val snapshotParticipant = participants(1)

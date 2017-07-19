@@ -5,7 +5,7 @@ import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
 import org.biobank.domain.centre.CentreRepository
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -36,7 +36,7 @@ class CentresProcessorSpec extends ProcessorTestFixture {
 
   describe("A centres processor must") {
 
-    it("allow for recovery from journal") {
+    it("allow for recovery from journal", PersistenceTest) {
       val centre = factory.createDisabledCentre
       val cmd = AddCentreCmd(sessionUserId = nameGenerator.next[String],
                              name          = centre.name,
@@ -53,7 +53,7 @@ class CentresProcessorSpec extends ProcessorTestFixture {
       centreRepository.getValues.map { c => c.name } must contain (centre.name)
     }
 
-    it("allow a snapshot request") {
+    it("allow a snapshot request", PersistenceTest) {
       val centres = (1 to 2).map { _ => factory.createDisabledCentre }
       centres.foreach(centreRepository.put)
 
@@ -63,7 +63,7 @@ class CentresProcessorSpec extends ProcessorTestFixture {
       ()
     }
 
-    it("accept a snapshot offer") {
+    it("accept a snapshot offer", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val centres = (1 to 2).map { _ => factory.createDisabledCentre }
       val snapshotCentre = centres(1)

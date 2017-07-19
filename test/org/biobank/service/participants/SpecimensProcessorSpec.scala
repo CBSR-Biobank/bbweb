@@ -7,7 +7,7 @@ import org.biobank.fixture._
 import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants._
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -52,7 +52,7 @@ class SpecimensProcessorSpec
 
   describe("A specimens processor must") {
 
-    ignore("allow recovery from journal") {
+    ignore("allow recovery from journal", PersistenceTest) {
       val f = createEntitiesAndSpecimens
 
       centreRepository.put(f.centre)
@@ -89,7 +89,7 @@ class SpecimensProcessorSpec
       }
     }
 
-    it("allow a snapshot request") {
+    it("allow a snapshot request", PersistenceTest) {
       val specimens = (1 to 2).map { _ => factory.createUsableSpecimen }
       specimens.foreach(specimenRepository.put)
 
@@ -99,7 +99,7 @@ class SpecimensProcessorSpec
       ()
     }
 
-    it("accept a snapshot offer") {
+    it("accept a snapshot offer", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val specimens = (1 to 2).map { _ => factory.createUsableSpecimen }
       val snapshotSpecimen = specimens(1)

@@ -5,7 +5,7 @@ import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
 import org.biobank.domain.study.StudyRepository
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -38,7 +38,7 @@ class StudiesProcessorSpec extends ProcessorTestFixture {
 
   describe("A studies processor must") {
 
-    it("allow recovery from journal") {
+    it("allow recovery from journal", PersistenceTest) {
       val study = factory.createDisabledStudy
       val cmd = AddStudyCmd(sessionUserId = None,
                             name          = study.name,
@@ -55,7 +55,7 @@ class StudiesProcessorSpec extends ProcessorTestFixture {
       studyRepository.getValues.map { s => s.name } must contain (study.name)
     }
 
-    it("allow a snapshot request") {
+    it("allow a snapshot request", PersistenceTest) {
       val studies = (1 to 2).map { _ => factory.createDisabledStudy }
       studies.foreach(studyRepository.put)
 
@@ -65,7 +65,7 @@ class StudiesProcessorSpec extends ProcessorTestFixture {
       ()
     }
 
-    it("accept a snapshot offer") {
+    it("accept a snapshot offer", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val studies = (1 to 2).map { _ => factory.createDisabledStudy }
       val snapshotStudy = studies(1)

@@ -8,7 +8,7 @@ import org.biobank.domain.centre.ShipmentSpecFixtures
 import org.biobank.fixture._
 import org.biobank.domain.study.StudyRepository
 import org.biobank.domain.centre.{CentreRepository, ShipmentRepository}
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -56,7 +56,7 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
 
   describe("A shipments processor must") {
 
-    it("allow recovery from journal") {
+    it("allow recovery from journal", PersistenceTest) {
       val f = createdShipmentFixture
       val cmd = AddShipmentCmd(sessionUserId  = Global.DefaultUserId.id,
                                courierName    = f.shipment.courierName,
@@ -76,7 +76,7 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
       shipmentRepository.getValues.map { s => s.courierName } must contain (f.shipment.courierName)
     }
 
-    it("allow a snapshot request") {
+    it("allow a snapshot request", PersistenceTest) {
       val f = createdShipmentFixture
       shipmentRepository.put(f.shipment)
 
@@ -86,7 +86,7 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
       ()
     }
 
-    it("accept a snapshot offer") {
+    it("accept a snapshot offer", PersistenceTest) {
       val f = createdShipmentsFixture(2)
       val snapshotFilename = "testfilename"
       val snapshotShipment = f.shipmentMap.values.toList(1)

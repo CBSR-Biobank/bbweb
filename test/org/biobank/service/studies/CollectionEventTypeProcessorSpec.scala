@@ -6,7 +6,7 @@ import javax.inject.{ Inject, Named }
 import org.biobank.Global
 import org.biobank.fixture._
 import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -42,7 +42,7 @@ class CollectionEventTypesProcessorSpec extends ProcessorTestFixture {
 
   describe("A collectionEventTypes processor must") {
 
-    it("allow recovery from journal") {
+    it("allow recovery from journal", PersistenceTest) {
       val collectionEventType = factory.createCollectionEventType
       val study = factory.defaultDisabledStudy
       val cmd = AddCollectionEventTypeCmd(sessionUserId = Global.DefaultUserId.id,
@@ -64,7 +64,7 @@ class CollectionEventTypesProcessorSpec extends ProcessorTestFixture {
       collectionEventTypeRepository.getValues.map { cet => cet.name } must contain (collectionEventType.name)
     }
 
-    it("allow a snapshot request") {
+    it("allow a snapshot request", PersistenceTest) {
       val collectionEventTypes = (1 to 2).map { _ => factory.createCollectionEventType }
       val study = factory.defaultDisabledStudy
       collectionEventTypes.foreach(collectionEventTypeRepository.put)
@@ -76,7 +76,7 @@ class CollectionEventTypesProcessorSpec extends ProcessorTestFixture {
       ()
     }
 
-    it("accept a snapshot offer") {
+    it("accept a snapshot offer", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val collectionEventTypes = (1 to 2).map { _ => factory.createCollectionEventType }
       val snapshotCollectionEventType = collectionEventTypes(1)

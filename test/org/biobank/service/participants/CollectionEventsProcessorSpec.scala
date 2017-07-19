@@ -7,7 +7,7 @@ import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
 import org.biobank.domain.participants._
 import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
-import org.biobank.service.ServiceValidation
+import org.biobank.service._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
@@ -46,7 +46,7 @@ class CollectionEventsProcessorSpec extends ProcessorTestFixture {
 
   describe("A collectionEvents processor must") {
 
-    it("allow recovery from journal") {
+    it("allow recovery from journal", PersistenceTest) {
       val collectionEvent = factory.createCollectionEvent
       val participant = factory.defaultParticipant
       val study = factory.defaultEnabledStudy
@@ -72,7 +72,7 @@ class CollectionEventsProcessorSpec extends ProcessorTestFixture {
       collectionEventRepository.getValues.map { s => s.visitNumber } must contain (collectionEvent.visitNumber)
     }
 
-    it("allow a snapshot request") {
+    it("allow a snapshot request", PersistenceTest) {
       val collectionEvents = (1 to 2).map { _ => factory.createCollectionEvent }
       collectionEvents.foreach(collectionEventRepository.put)
 
@@ -82,7 +82,7 @@ class CollectionEventsProcessorSpec extends ProcessorTestFixture {
       ()
     }
 
-    it("accept a snapshot offer") {
+    it("accept a snapshot offer", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val collectionEvents = (1 to 2).map { _ => factory.createCollectionEvent }
       val snapshotCollectionEvent = collectionEvents(1)
