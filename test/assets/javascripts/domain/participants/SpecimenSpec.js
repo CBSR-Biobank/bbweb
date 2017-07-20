@@ -324,51 +324,6 @@ define(function (require) {
       });
     });
 
-    describe('for isDefaultAmount', function() {
-
-      it('true when amount is the same as the default amount', function() {
-        var specimenDescription  = this.factory.collectionSpecimenDescription(),
-            specimen = new this.Specimen(this.factory.specimen());
-        specimen.setSpecimenDescription(specimenDescription);
-        specimen.amount = specimenDescription.amount;
-        expect(specimen.isDefaultAmount()).toBeTrue();
-      });
-
-      it('false when amount is the same as the default amount', function() {
-        var specimenDescription  = this.factory.collectionSpecimenDescription(),
-            specimen = new this.Specimen(this.factory.specimen());
-        specimen.setSpecimenDescription(specimenDescription);
-        specimen.amount = specimenDescription.amount + 1;
-        expect(specimen.isDefaultAmount()).toBeFalse();
-      });
-
-      it('throws a domain error if specimen spec not assigned', function() {
-        var specimen = new this.Specimen(this.factory.specimen());
-        expect(function () {
-          specimen.isDefaultAmount();
-        }).toThrowError(/specimen spec not assigned/);
-      });
-
-    });
-
-    describe('for units', function() {
-
-      it('can get the units', function() {
-        var specimenDescription  = this.factory.collectionSpecimenDescription(),
-            specimen = new this.Specimen(this.factory.specimen());
-        specimen.setSpecimenDescription(specimenDescription);
-        expect(specimen.units()).toBe(specimenDescription.units);
-      });
-
-      it('throws a domain error if specimen spec not assigned', function() {
-        var specimen = new this.Specimen(this.factory.specimen());
-        expect(function () {
-          specimen.units();
-        }).toThrowError(/specimen spec not assigned/);
-      });
-
-    });
-
     it('should be able to remove a specimen', function() {
       var cevent   = new this.CollectionEvent(this.factory.collectionEvent()),
           specimen = new this.Specimen(this.factory.specimen()),

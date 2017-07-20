@@ -28,8 +28,6 @@ define(function () {
     //--
 
     function onInit() {
-      vm.requiredLabel = vm.annotationType.required ?
-        gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
     }
   }
 

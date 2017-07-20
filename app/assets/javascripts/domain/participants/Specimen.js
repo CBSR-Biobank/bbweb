@@ -140,26 +140,28 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       'id': 'Specimen',
       'type': 'object',
       'properties': {
-        'id':                      { 'type': 'string' },
-        'inventoryId':             { 'type': 'string' },
-        'specimenDescriptionId':   { 'type': 'string' },
-        'specimenDescriptionName': { 'type': [ 'string', 'null' ] },
-        'version':                 { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':               { 'type': 'string' },
-        'timeModified':            { 'type': [ 'string', 'null' ] },
-        'originLocationInfo':      {
-          'type':                  'object',
-          'items':                 { '$ref': 'CentreLocationInfo' }
+        'id':                       { 'type': 'string' },
+        'inventoryId':              { 'type': 'string' },
+        'specimenDescriptionId':    { 'type': 'string' },
+        'specimenDescriptionName':  { 'type': [ 'string', 'null' ] },
+        'specimenDescriptionUnits': { 'type': [ 'string', 'null' ] },
+        'version':                  { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':                { 'type': 'string' },
+        'timeModified':             { 'type': [ 'string', 'null' ] },
+        'originLocationInfo':       {
+          'type':  'object',
+          'items': { '$ref': 'CentreLocationInfo' }
         },
-        'locationInfo':            {
-          'type':                  'object',
-          'items':                 { '$ref': 'CentreLocationInfo' }
+        'locationInfo':             {
+          'type':  'object',
+          'items': { '$ref': 'CentreLocationInfo' }
         },
-        'containerId':             { 'type': [ 'string', 'null' ] },
-        'postitionId':             { 'type': [ 'string', 'null' ] },
-        'timeCreated':             { 'type': 'string' },
-        'amount':                  { 'type': 'number' },
-        'state':                   { 'type': 'string' }
+        'containerId':              { 'type': [ 'string', 'null' ] },
+        'postitionId':              { 'type': [ 'string', 'null' ] },
+        'timeCreated':              { 'type': 'string' },
+        'amount':                   { 'type': 'number' },
+        'isDefaultAmount':          { 'type': [ 'boolean', 'null' ] },
+        'state':                    { 'type': 'string' }
       },
       'required': [
         'id',
@@ -188,8 +190,8 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {CollectionSpecimenDescription} [specimenDescription] - The specimen spec from the collection event type this
-     * specimen represents.
+     * @param {CollectionSpecimenDescription} [specimenDescription] - The specimen spec from the collection
+     * event type this specimen represents.
      *
      * @returns {Specimen} A new specimen.
      *
@@ -368,30 +370,6 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         throw new DomainError('specimen spec not assigned');
       }
       return this.specimenDescription.amount;
-    };
-
-    /**
-     * Whether or not the amount for this specimen is the default amount.
-     *
-     * @returns {boolean} True if the amount is the default.
-     */
-    Specimen.prototype.isDefaultAmount = function () {
-      if (_.isUndefined(this.specimenDescription)) {
-        throw new DomainError('specimen spec not assigned');
-      }
-      return (this.amount === this.specimenDescription.amount);
-    };
-
-    /**
-     * Returns the units a specimen of this type.
-     *
-     * @returns {string} The units used for this specimen.
-     */
-    Specimen.prototype.units = function () {
-      if (_.isUndefined(this.specimenDescription)) {
-        throw new DomainError('specimen spec not assigned');
-      }
-      return this.specimenDescription.units;
     };
 
     /**

@@ -40,7 +40,6 @@ define(function (require) {
 
     function onInit() {
       vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabel();
-      vm.requiredLabel                = getRequiredLabel(vm.annotationType);
       vm.editName                     = editName;
       vm.editRequired                 = editRequired;
       vm.editDescription              = editDescription;
@@ -66,7 +65,6 @@ define(function (require) {
                          { required: true }).result
         .then(function (required) {
           vm.annotationType.required = (required === 'true' );
-          vm.requiredLabel = getRequiredLabel(vm.annotationType);
           vm.onUpdate()(vm.annotationType);
         });
     }
@@ -92,9 +90,6 @@ define(function (require) {
       $state.go(vm.returnState, {}, { reload: true });
     }
 
-    function getRequiredLabel(annotationType) {
-      return annotationType.required ? gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
-    }
   }
 
   return component;

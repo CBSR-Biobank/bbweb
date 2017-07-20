@@ -43,6 +43,7 @@ define(function (require) {
     .filter('nl2br',                      require('./filters/nl2brFilter'))
     .filter('timeago',                    require('./filters/timeagoFilter'))
     .filter('truncate',                   require('./filters/truncateFilter'))
+    .filter('yesNo',                      require('./filters/yesNoFilter'))
 
     .service('breadcrumbService',         require('./services/breadcrumbService'))
     .service('Panel',                     require('./services/Panel'))

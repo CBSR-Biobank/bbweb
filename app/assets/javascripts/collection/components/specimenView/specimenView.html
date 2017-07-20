@@ -82,7 +82,8 @@
           <strong translate>Amount</strong>
         </div>
         <div class="col-md-7">
-          {{vm.specimen.amount}} {{vm.specimenDescription.units}}
+          {{vm.specimen.amount}} {{vm.specimen.specimenDescriptionUnits}}
+          <small>(default amount: {{vm.specimenisDefaultAmount | yesNo}})</small>
         </div>
       </div>
     </li>

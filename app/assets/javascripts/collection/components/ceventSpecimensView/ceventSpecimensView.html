@@ -28,7 +28,7 @@
     <tbody ng-if="!vm.tableDataLoading && (vm.specimens.length > 0)">
       <tr ng-repeat="specimen in vm.specimens">
         <td><small>{{specimen.inventoryId}}</small></td>
-        <td><small>{{specimen.amount}} {{specimen.units}}</small></td>
+        <td><small>{{specimen.amount}} {{specimen.specimenDescriptionUnits}}</small></td>
         <td><small>{{specimen.specimenDescriptionName}}</small></td>
         <td><small>{{specimen.timeCreated| localTime}}</small></td>
         <td><small>{{specimen.locationInfo.name}}</small></td>

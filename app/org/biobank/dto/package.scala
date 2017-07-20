@@ -112,22 +112,24 @@ package dto {
     implicit val userCountsByStatusWriter: Writes[UserCountsByStatus] = Json.writes[UserCountsByStatus]
   }
 
-  final case class SpecimenDto(id:                      String,
-                               state:                   EntityState,
-                               inventoryId:             String,
-                               collectionEventId:       String,
-                               specimenDescriptionId:   String,
-                               specimenDescriptionName: String,
-                               version:                 Long,
-                               timeAdded:               OffsetDateTime,
-                               timeModified:            Option[OffsetDateTime],
-                               originLocationInfo:      CentreLocationInfo,
-                               locationInfo:            CentreLocationInfo,
-                               containerId:             Option[String],
-                               positionId:              Option[String],
-                               timeCreated:             OffsetDateTime,
-                               amount:                  BigDecimal,
-                               units:                   String)
+  final case class SpecimenDto(id:                       String,
+                               state:                    EntityState,
+                               inventoryId:              String,
+                               collectionEventId:        String,
+                               specimenDescriptionId:    String,
+                               specimenDescriptionName:  String,
+                               specimenDescriptionUnits: String,
+                               version:                  Long,
+                               timeAdded:                OffsetDateTime,
+                               timeModified:             Option[OffsetDateTime],
+                               originLocationInfo:       CentreLocationInfo,
+                               locationInfo:             CentreLocationInfo,
+                               containerId:              Option[String],
+                               positionId:               Option[String],
+                               timeCreated:              OffsetDateTime,
+                               amount:                   BigDecimal,
+                               units:                    String,
+                               isDefaultAmount:          Boolean)
 
   object SpecimenDto {
 

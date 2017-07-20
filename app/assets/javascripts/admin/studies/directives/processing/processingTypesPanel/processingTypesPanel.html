@@ -40,7 +40,7 @@
           </span>
         </td>
         <td>
-          {{processingType.enabled ? 'Yes' : 'No'}}
+          {{processingType.enabled | yesNo}}
         </td>
         <td>
           {{processingType.description === null ? '' : processingType.description | truncate:40}}
