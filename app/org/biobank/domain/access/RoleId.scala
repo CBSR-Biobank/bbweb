@@ -7,7 +7,7 @@ import org.biobank.infrastructure.EnumUtils._
 object RoleId extends Enumeration {
   type RoleId = Value
 
-  val WebsiteAdministrator: Value  = Value("WebsiteAdministrator")
+  val SystemAdministrator: Value  = Value("SystemAdministrator")
   val UserAdministrator: Value     = Value("UserAdministrator")
 
   val SpecimenCollector: Value     = Value("SpecimenCollector")

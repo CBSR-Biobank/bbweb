@@ -18,13 +18,18 @@ define(function (require) {
 
       _.extend(self, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
-      self.injectDependencies('$httpBackend',
+      this.injectDependencies('$httpBackend',
                               'User',
                               'UserState',
                               'factory');
 
-      self.statusChangeShared = statusChangeShared;
+      this.statusChangeShared = statusChangeShared;
       testDomainEntities.extend();
+
+      // used by promise tests
+      this.expectUser = function(entity) {
+        expect(entity).toEqual(jasmine.any(self.User));
+      };
 
       //--
 

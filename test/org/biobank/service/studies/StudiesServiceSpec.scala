@@ -32,8 +32,8 @@ class StudiesServiceSpec
     Set(disabledStudy, enabledStudy, retiredStudy).foreach(addToRepository)
     collectionEventTypeRepository.put(cet)
     addToRepository(studyOnlyMembership.copy(
-                      studyInfo = studyOnlyMembership.studyInfo.copy(
-                          studyIds = Set(disabledStudy.id, enabledStudy.id, retiredStudy.id))))
+                      studyData = studyOnlyMembership.studyData.copy(
+                          ids = Set(disabledStudy.id, enabledStudy.id, retiredStudy.id))))
 
   }
 
@@ -463,7 +463,7 @@ class StudiesServiceSpec
 
         // remove all studies from membership
         val noStudiesMembership = f.studyOnlyMembership.copy(
-            studyInfo = f.studyOnlyMembership.studyInfo.copy(studyIds = Set.empty[StudyId]))
+            studyData = f.studyOnlyMembership.studyData.copy(ids = Set.empty[StudyId]))
         addToRepository(noStudiesMembership)
 
         // should not show up in results

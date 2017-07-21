@@ -24,6 +24,9 @@ define(function (require) {
    *
    * @param {int} vm.active - the index of the tab selected by the user.
    *
+   * @param {function|undefined} vm.activeTabUpdate - If defined, this function is invoked when a user selects
+   * a tab.
+   *
    * @param {object} $scope - the scope object this controller inherits from.
    *
    * @param {object} $state - the UI Router state object.
@@ -40,7 +43,7 @@ define(function (require) {
      *
      * This function is called when event 'tabbed-page-update' is emitted by child scopes.
      */
-    function activeTabUpdate(event) {
+    function activeTabUpdate(event, tabName) {
       event.stopPropagation();
       _.each(vm.tabs, function (tab, index) {
         tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
@@ -48,6 +51,9 @@ define(function (require) {
           vm.active = index;
         }
       });
+      if (!_.isNil(vm.activeTabUpdate)) {
+        vm.activeTabUpdate(event, tabName);
+      }
     }
 
   }

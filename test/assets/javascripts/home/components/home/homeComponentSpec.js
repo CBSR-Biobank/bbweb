@@ -50,7 +50,7 @@ define(function (require) {
     }));
 
     it('has valid scope', function() {
-      var user = this.factory.user();
+      var user = this.User.create(this.factory.user());
       this.usersService.requestCurrentUser =
         jasmine.createSpy().and.returnValue(this.$q.when(user));
       this.createController();

@@ -299,7 +299,6 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
       return Study.asyncCreate(obj);
     };
 
-
     /**
      * Updates the Study's name.
      *

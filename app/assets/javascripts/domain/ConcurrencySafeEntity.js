@@ -5,12 +5,12 @@
 define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
-  ConcurrencySafeEntityFactory.$inject = [ '$q', 'DomainEntity', 'biobankApi' ];
+  ConcurrencySafeEntityFactory.$inject = [ '$q', 'DomainEntity', 'DomainError', 'biobankApi' ];
 
   /**
    * A domain entity in the system that allows for optimistic concurrency versioning.
    */
-  function ConcurrencySafeEntityFactory($q, DomainEntity, biobankApi) {
+  function ConcurrencySafeEntityFactory($q, DomainEntity, DomainError, biobankApi) {
 
     /**
      * @classdesc Used to manage surrogate identity and optimistic concurrency versioning.
@@ -79,7 +79,12 @@ define(['angular', 'lodash'], function(angular, _) {
 
     /** @protected */
     ConcurrencySafeEntity.prototype.update = function (url, additionalJson) {
-      var self = this, json = _.extend({ expectedVersion: self.version }, additionalJson || {});
+      var self = this,
+          json;
+      if (_.isNil(this.id)) {
+        throw new DomainError('entity has not been persisted');
+      }
+      json = _.extend({ expectedVersion: self.version }, additionalJson || {});
       return biobankApi.post(url, json).then(function(reply) {
         return self.asyncCreate(reply);
       });

@@ -49,7 +49,7 @@ define(function (require) {
     }));
 
     it('has valid scope', function() {
-      var user = this.factory.user(),
+      var user = this.User.create(this.factory.user()),
           counts = {
             studies: 1,
             centres: 2,

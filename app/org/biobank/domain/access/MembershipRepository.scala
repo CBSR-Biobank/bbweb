@@ -13,7 +13,7 @@ import scalaz.Scalaz._
 @ImplementedBy(classOf[MembershipRepositoryImpl])
 trait MembershipRepository extends ReadWriteRepository[MembershipId, Membership] {
 
-  def getUserMembership(userId: UserId): DomainValidation[Membership]
+  def getUserMembership(userId: UserId): DomainValidation[UserMembership]
 
 }
 
@@ -32,17 +32,22 @@ class MembershipRepositoryImpl
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
+                   name         = "All studies and all centres",
+                   description  = None,
                    userIds      = Set(Global.DefaultUserId),
-                   studyInfo    = MembershipStudyInfo(true, Set.empty[StudyId]),
-                   centreInfo   = MembershipCentreInfo(true, Set.empty[CentreId])))
+                   studyData    = MembershipEntityData(true, Set.empty[StudyId]),
+                   centreData   = MembershipEntityData(true, Set.empty[CentreId])))
   }
 
   def nextIdentity: MembershipId = new MembershipId(nextIdentityAsString)
 
-  def domainNotFound(id: MembershipId): IdNotFound = IdNotFound(s"user id: $id")
+  def domainNotFound(id: MembershipId): IdNotFound = IdNotFound(s"membership id: $id")
 
-  def getUserMembership(userId: UserId): DomainValidation[Membership] = {
-    getValues.find { m => m.userIds.exists(_ == userId) }.toSuccessNel(s"membership for user not found: $userId")
+  def getUserMembership(userId: UserId): DomainValidation[UserMembership] = {
+    getValues
+      .find { m => m.userIds.exists(_ == userId) }
+      .map { m => UserMembership.create(m, userId) }
+      .toSuccessNel(s"membership for user not found: $userId")
   }
 
   override def getByKey(id: MembershipId): DomainValidation[Membership] = {

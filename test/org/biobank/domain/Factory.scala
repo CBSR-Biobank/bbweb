@@ -107,9 +107,11 @@ class Factory {
                                 version      = 0L,
                                 timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
+                                name         = nameGenerator.next[Membership],
+                                description  = Some(nameGenerator.next[Membership]),
                                 userIds      = Set.empty[UserId],
-                                studyInfo    = MembershipStudyInfo(false, Set.empty[StudyId]),
-                                centreInfo   = MembershipCentreInfo(false, Set.empty[CentreId]))
+                                studyData    = MembershipEntityData(false, Set.empty[StudyId]),
+                                centreData   = MembershipEntityData(false, Set.empty[CentreId]))
     domainObjects = domainObjects + (classOf[Membership] -> membership)
     membership
   }
@@ -140,12 +142,12 @@ class Factory {
 
   def createRetiredStudy(): RetiredStudy = {
     val retiredStudy = RetiredStudy(
-        id             = StudyId(nameGenerator.next[Study]),
-        version        = 0L,
-        timeAdded      = OffsetDateTime.now,
-        timeModified = None,
-        name           = nameGenerator.next[Study],
-        description    = Some(nameGenerator.next[Study]),
+        id              = StudyId(nameGenerator.next[Study]),
+        version         = 0L,
+        timeAdded       = OffsetDateTime.now,
+        timeModified    = None,
+        name            = nameGenerator.next[Study],
+        description     = Some(nameGenerator.next[Study]),
         annotationTypes = Set.empty)
     domainObjects = domainObjects + (classOf[RetiredStudy] -> retiredStudy)
     retiredStudy

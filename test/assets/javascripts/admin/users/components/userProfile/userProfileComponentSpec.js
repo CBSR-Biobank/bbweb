@@ -69,7 +69,7 @@ define(function (require) {
     }));
 
     it('should have valid scope', function() {
-      var user = new this.User(this.factory.user());
+      var user = this.User.create(this.factory.user());
       this.createController(user);
       expect(this.controller.user.id).toEqual(user.id);
       expect(this.controller.user).toEqual(jasmine.any(this.User));
@@ -85,8 +85,8 @@ define(function (require) {
     it('correct display when user has membership to all studies and centres', function() {
       var user = new this.User(this.factory.user({
         membership: {
-          studyInfo:  { all: true, names: [] },
-          centreInfo: { all: true, names: [] }
+          studyData:  { allEntities: true, entityData: [] },
+          centreData: { allEntities: true, entityData: [] }
         }
       }));
       this.createController(user);
@@ -99,8 +99,20 @@ define(function (require) {
           centreName = this.factory.stringNext(),
           user = new this.User(this.factory.user({
             membership: {
-              studyInfo:  { all: false, names: [ studyName ] },
-              centreInfo: { all: false, names: [ centreName ] }
+              studyData: {
+                allEntities: false,
+                entityData: [{
+                  id: this.factory.stringNext(),
+                  name: studyName
+                }]
+              },
+              centreData: {
+                allEntities: false,
+                entityData: [{
+                  id: this.factory.stringNext(),
+                  name: centreName
+                }]
+              }
             }
           }));
       this.createController(user);

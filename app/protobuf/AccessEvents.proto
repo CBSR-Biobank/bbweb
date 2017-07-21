@@ -6,27 +6,73 @@ message AccessEvent {
 
   message Role {
 
-    message UserAdded {
-      optional string userId = 1;
-    }
-
-    optional string roleId  = 1;
+    optional string id      = 1;
     optional int64  version = 2;
 
     oneof event_type {
-      UserAdded userAdded = 3;
+      string userIdAdded = 3;
     }
   }
 
   message Permission {
-    optional string permissionId  = 1;
+    optional string id  = 1;
+  }
+
+  message Membership {
+
+    message Added {
+      optional string name        = 1;
+      optional string description = 2;
+      repeated string userIds     = 3;
+      optional bool   allStudies  = 4;
+      repeated string studyIds    = 5;
+      optional bool   allCentres  = 6;
+      repeated string centreIds   = 7;
+    }
+
+    message WithVersion {
+      optional int64 version = 1;
+    }
+
+    message NameUpdated {
+      optional int64  version = 1;
+      optional string name    = 2;
+    }
+
+    message DescriptionUpdated {
+      optional int64  version     = 1;
+      optional string description = 2;
+    }
+
+    message WithId {
+      optional int64  version = 1;
+      optional string id      = 2;
+    }
+
+    optional string id = 1;
+
+    oneof event_type {
+      Added              added              = 3;
+      NameUpdated        nameUpdated        = 4;
+      DescriptionUpdated descriptionUpdated = 5;
+      WithId             userAdded          = 6;
+      WithVersion        allStudies         = 7;
+      WithVersion        allCentres         = 8;
+      WithId             studyAdded         = 9;
+      WithId             centreAdded        = 10;
+      WithId             userRemoved        = 11;
+      WithId             studyRemoved       = 12;
+      WithId             centreRemoved      = 13;
+      WithVersion        removed            = 14;
+    }
   }
 
   required string sessionUserId = 1;
   optional string time          = 2;
 
   oneof event_type {
-    Role       role = 3;
+    Role       role       = 3;
     Permission permission = 4;
+    Membership membership = 5;
   }
 }

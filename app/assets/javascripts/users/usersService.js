@@ -5,7 +5,13 @@
 define(function() {
   'use strict';
 
-  usersServiceFactory.$inject = ['$q', '$cookies', '$log', 'biobankApi'];
+  usersServiceFactory.$inject = [
+    '$q',
+    '$cookies',
+    '$log',
+    'biobankApi',
+    'User'
+  ];
 
   /**
    * Communicates with the server to get user related information and perform user related commands.
@@ -13,7 +19,8 @@ define(function() {
   function usersServiceFactory($q,
                                $cookies,
                                $log,
-                               biobankApi) {
+                               biobankApi,
+                               User) {
     var currentUser;
 
     var service = {
@@ -40,7 +47,7 @@ define(function() {
 
       biobankApi.get('/users/authenticate')
         .then(function(user) {
-          currentUser = user;
+          currentUser = User.create(user);
           $log.info('Welcome back, ' + currentUser.name);
         })
         .catch(function() {
@@ -53,7 +60,7 @@ define(function() {
 
     function retrieveCurrentUser() {
       return biobankApi.get('/users/authenticate').then(function(user) {
-        currentUser = user;
+        currentUser = User.create(user);
         return currentUser;
       });
     }

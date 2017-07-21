@@ -32,6 +32,12 @@ define(function (require) {
     .constant('AnnotationMaxValueCount',            require('./annotations/AnnotationMaxValueCount'))
     .constant('SpecimenType',                       require('./study/SpecimenType'))
 
+    .factory('EntityInfo',                          require('./access/EntityInfo'))
+    .factory('EntitySet',                           require('./access/EntitySet'))
+    .factory('MembershipBase',                      require('./access/MembershipBase'))
+    .factory('Membership',                          require('./access/Membership'))
+    .factory('UserMembership',                      require('./access/UserMembership'))
+
     .factory('Annotation',                          require('./annotations/Annotation'))
     .factory('AnnotationType',                      require('./annotations/AnnotationType'))
     .factory('DateTimeAnnotation',                  require('./annotations/DateTimeAnnotation'))

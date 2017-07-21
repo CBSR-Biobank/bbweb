@@ -16,14 +16,16 @@ define(function (require) {
    */
   function breadcrumbService(gettextCatalog) {
     var breadcrumbStateToDisplayFunc = {
-      'home':                        function () { return gettextCatalog.getString('Home'); },
-      'home.about':                  function () { return gettextCatalog.getString('About'); },
-      'home.admin':                  function () { return gettextCatalog.getString('Administration'); },
-      'home.admin.studies':          function () { return gettextCatalog.getString('Studies'); },
-      'home.admin.centres':          function () { return gettextCatalog.getString('Centres'); },
-      'home.admin.users':            function () { return gettextCatalog.getString('Users'); },
-      'home.admin.users.user.roles': function () { return gettextCatalog.getString('Roles'); },
-      'home.collection':             function () { return gettextCatalog.getString('Collection'); },
+      'home':                              function () { return gettextCatalog.getString('Home'); },
+      'home.about':                        function () { return gettextCatalog.getString('About'); },
+      'home.admin':                        function () { return gettextCatalog.getString('Administration'); },
+      'home.admin.studies':                function () { return gettextCatalog.getString('Studies'); },
+      'home.admin.centres':                function () { return gettextCatalog.getString('Centres'); },
+      'home.admin.users':                  function () { return gettextCatalog.getString('Users'); },
+      'home.admin.users.manage':           function () { return gettextCatalog.getString('Manage users'); },
+      'home.admin.users.roles':            function () { return gettextCatalog.getString('Roles'); },
+      'home.admin.users.memberships':      function () { return gettextCatalog.getString('Memberships'); },
+      'home.collection':                   function () { return gettextCatalog.getString('Collection'); },
       'home.collection.study.participantAdd': function () {
         return gettextCatalog.getString('Add participant');
       },

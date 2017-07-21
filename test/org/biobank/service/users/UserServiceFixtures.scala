@@ -63,9 +63,9 @@ trait UserServiceFixtures {
   protected def restoreRoles(): Unit = {
     accessItemRepository.getValues
       .collect { case r: Role => r }
-      .filter { r => r.id != RoleId.WebsiteAdministrator }
+      .filter { r => r.id != RoleId.SystemAdministrator }
       .foreach(r => accessItemRepository.put(r.copy(userIds = Set.empty[UserId])))
-    accessItemRepository.getRole(RoleId.WebsiteAdministrator).foreach { r =>
+    accessItemRepository.getRole(RoleId.SystemAdministrator).foreach { r =>
       accessItemRepository.put(r.copy(userIds = Set(Global.DefaultUserId)))
     }
   }

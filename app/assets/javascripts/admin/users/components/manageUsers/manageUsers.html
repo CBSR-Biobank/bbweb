@@ -1,0 +1,13 @@
+<breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
+<div class="page-header">
+  <h1 translate>Current users</h1>
+</div>
+
+<div class="alert alert-warning" ng-if="! vm.haveUsers">
+  <span class="glyphicon glyphicon-warning-sign"></span>
+  <translate>
+    No users have been added yet.
+  </translate>
+</div>
+
+<users-paged-list ng-if="vm.haveUsers"></users-paged-list>

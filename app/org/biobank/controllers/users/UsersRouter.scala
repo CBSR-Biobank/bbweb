@@ -8,14 +8,7 @@ import play.api.routing.SimpleRouter
 import play.api.routing.sird._
 
 class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
-
-  implicit object bindableUserId extends Parsing[UserId](
-    UserId.apply,
-    _.id,
-    (key: String, e: Exception) => s"$key is not a valid user Id"
-  )
-
-  val userId: PathBindableExtractor[UserId] = new PathBindableExtractor[UserId]
+  import UsersRouting._
 
   override def routes: Routes = {
 
@@ -73,4 +66,17 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
       controller.registerUser
 
   }
+}
+
+
+object UsersRouting {
+
+  implicit object bindableUserId extends Parsing[UserId](
+    UserId.apply,
+    _.id,
+    (key: String, e: Exception) => s"$key is not a valid user Id"
+  )
+
+  val userId: PathBindableExtractor[UserId] = new PathBindableExtractor[UserId]
+
 }

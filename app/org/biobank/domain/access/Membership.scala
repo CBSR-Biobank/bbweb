@@ -2,12 +2,22 @@ package org.biobank.domain.access
 
 import java.time.OffsetDateTime
 import org.biobank.domain._
-import org.biobank.domain.user.{User, UserId}
+import org.biobank.domain.user.UserId
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.centre.CentreId
-import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._
+import play.api.libs.functional.syntax._
 import scalaz.Scalaz._
+
+/**
+ * Predicates that can be used to filter collections of memberships.
+ *
+ */
+trait MembershipPredicates extends HasNamePredicates[Membership] {
+
+  type MembershipFilter = Membership => Boolean
+
+}
 
 /** Identifies a unique [[Membership]] in the system.
   *
@@ -24,109 +34,63 @@ object MembershipId {
 
   implicit val membershipIdWriter: Writes[MembershipId] =
     Writes{ (id: MembershipId) => JsString(id.id) }
+}
+
+/**
+ * Used to track the IDs of the entities a Membership is for.
+ *
+ */
+final case class MembershipEntityData[T <: IdentifiedValueObject[_]](allEntities: Boolean, ids: Set[T]) {
+
+  def hasAllEntities(): MembershipEntityData[T] =
+    copy(allEntities = true, ids = Set.empty[T])
+
+ def addEntity(id: T): MembershipEntityData[T] =
+    copy(allEntities = false, ids = ids + id)
+
+ def removeEntity(id: T): MembershipEntityData[T] =
+   copy(allEntities = false, ids = ids - id)
+
+  def isMemberOf(id: T): Boolean = {
+    if (allEntities) true
+    else ids.exists(_ == id)
+  }
 
 }
 
-final case class MembershipStudyInfo(allStudies: Boolean, studyIds: Set[StudyId]) {
+object MembershipEntityData {
 
-  def hasAllStudies(): MembershipStudyInfo =
-    copy(allStudies = true, studyIds = Set.empty[StudyId])
-
- def addStudy(id: StudyId): MembershipStudyInfo =
-    copy(allStudies = false, studyIds = studyIds + id)
-
- def removeStudy(id: StudyId): MembershipStudyInfo =
-   copy(allStudies = false, studyIds = studyIds - id)
-
-  def isMemberOfStudy(id: StudyId): Boolean = {
-    if (allStudies) true
-    else studyIds.exists(_ == id)
-  }
+  implicit def format[T <: IdentifiedValueObject[_]](implicit fmt: Format[T])
+      : Format[MembershipEntityData[T]] =
+    ((__ \ "allEntities").format[Boolean] ~
+       (__ \ "ids").format[Set[T]]
+    )(MembershipEntityData.apply, unlift(MembershipEntityData.unapply))
 
 }
 
-final case class MembershipCentreInfo(allCentres: Boolean, centreIds: Set[CentreId]) {
-
-  def hasAllCentres(): MembershipCentreInfo =
-    copy(allCentres = true, centreIds = Set.empty[CentreId])
-
- def addCentre(id: CentreId): MembershipCentreInfo =
-   copy(allCentres = false, centreIds = centreIds + id)
-
- def removeCentre(id: CentreId): MembershipCentreInfo =
-    copy(allCentres = false, centreIds = centreIds - id)
-
-  def isMemberOfCentre(id: CentreId): Boolean = {
-    if (allCentres) true
-    else centreIds.exists(_ == id)
-  }
-}
-
-final case class Membership(id:           MembershipId,
-                            version:      Long,
-                            timeAdded:    OffsetDateTime,
-                            timeModified: Option[OffsetDateTime],
-                            userIds:      Set[UserId],
-                            studyInfo:    MembershipStudyInfo,
-                            centreInfo:   MembershipCentreInfo)
-    extends ConcurrencySafeEntity[MembershipId] {
-
-  val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  def addUser(user: User): Membership = {
-    copy(userIds      = userIds + user.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
-  }
-
-  def hasAllStudies(): Membership = {
-    copy(studyInfo    = studyInfo.hasAllStudies,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
-  }
-
-  def addStudy(id: StudyId): Membership = {
-    copy(studyInfo    = studyInfo.addStudy(id),
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
-  }
-
-  def removeStudy(id: StudyId): Membership = {
-    copy(studyInfo    = studyInfo.removeStudy(id),
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
-  }
-
-  def hasAllCentres(setting: Boolean): Membership = {
-    copy(centreInfo   = centreInfo.hasAllCentres,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
-  }
-
-  def addCentre(id: CentreId): Membership = {
-    copy(centreInfo   = centreInfo.addCentre(id),
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
-  }
-
-  def removeCentre(id: CentreId): Membership = {
-    copy(centreInfo   = centreInfo.removeCentre(id),
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
-  }
+sealed trait MembershipBase
+    extends ConcurrencySafeEntity[MembershipId]
+    with HasUniqueName
+    with HasOptionalDescription {
+  val id:           MembershipId
+  val version:      Long
+  val timeAdded:    OffsetDateTime
+  val timeModified: Option[OffsetDateTime]
+  val studyData:    MembershipEntityData[StudyId]
+  val centreData:   MembershipEntityData[CentreId]
 
   /**
    * If studyId is None, then don't bother checking for study membership.
    */
   def isMemberOfStudy(id: StudyId): Boolean = {
-    studyInfo.isMemberOfStudy(id)
+    studyData.isMemberOf(id)
   }
 
   /**
    * If centreId is None, then don't bother checking for study membership.
    */
   def isMemberOfCentre(id: CentreId): Boolean = {
-    centreInfo.isMemberOfCentre(id)
+    centreData.isMemberOf(id)
   }
 
   /**
@@ -140,6 +104,93 @@ final case class Membership(id:           MembershipId,
       case (Some(sId), Some(cId)) => isMemberOfStudy(sId) && isMemberOfCentre(cId)
     }
   }
+}
+
+trait MembershipValidations {
+
+  val NameMinLength: Long = 2L
+
+}
+
+final case class Membership(id:           MembershipId,
+                            version:      Long,
+                            timeAdded:    OffsetDateTime,
+                            timeModified: Option[OffsetDateTime],
+                            name:         String,
+                            description:  Option[String],
+                            userIds:      Set[UserId],
+                            studyData:    MembershipEntityData[StudyId],
+                            centreData:   MembershipEntityData[CentreId])
+    extends MembershipBase
+    with MembershipValidations {
+
+  import org.biobank.domain.CommonValidations._
+
+  /** Used to change the name. */
+  def withName(name: String): DomainValidation[Membership] = {
+    validateString(name, NameMinLength, InvalidName) map { _ =>
+      copy(name         = name,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
+  }
+
+  /** Used to change the description. */
+  def withDescription(description: Option[String]): DomainValidation[Membership] = {
+    validateNonEmptyOption(description, InvalidDescription) map { _ =>
+      copy(description  = description,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
+  }
+
+  def addUser(userId: UserId): Membership = {
+    copy(userIds      = userIds + userId,
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
+  def removeUser(id: UserId): Membership = {
+    copy(userIds      = userIds - id,
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
+  def hasAllStudies(): Membership = {
+    copy(studyData    = studyData.hasAllEntities,
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
+  def addStudy(id: StudyId): Membership = {
+    copy(studyData    = studyData.addEntity(id),
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
+  def removeStudy(id: StudyId): Membership = {
+    copy(studyData    = studyData.removeEntity(id),
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
+  def hasAllCentres(): Membership = {
+    copy(centreData   = centreData.hasAllEntities,
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
+  def addCentre(id: CentreId): Membership = {
+    copy(centreData   = centreData.addEntity(id),
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
+  def removeCentre(id: CentreId): Membership = {
+    copy(centreData   = centreData.removeEntity(id),
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
 
   override def toString: String =
     s"""|Membership:{
@@ -147,13 +198,15 @@ final case class Membership(id:           MembershipId,
         |  version:      $version
         |  timeAdded:    $timeAdded
         |  timeModified: $timeModified
+        |  name:         $name
+        |  description:  $description
         |  userIds:      $userIds
-        |  studyInfo:    $studyInfo
-        |  centreInfo:   $centreInfo
+        |  studyData:    $studyData
+        |  centreData:   $centreData
         |}""".stripMargin
 }
 
-object Membership {
+object Membership extends MembershipValidations {
   import org.biobank.domain.CommonValidations._
 
   case object InvalidMembershipId extends org.biobank.ValidationKey
@@ -162,6 +215,8 @@ object Membership {
              version:      Long,
              timeAdded:    OffsetDateTime,
              timeModified: Option[OffsetDateTime],
+             name:         String,
+             description:  Option[String],
              userIds:      Set[UserId],
              allStudies:   Boolean,
              allCentres:   Boolean,
@@ -177,6 +232,8 @@ object Membership {
       else true.successNel[String]
 
     (validateId(id, InvalidMembershipId) |@|
+       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyOption(description, InvalidDescription) |@|
        userIds.map(validateId(_, InvalidStudyId)).toList.sequenceU |@|
        studyIds.map(validateId(_, InvalidStudyId)).toList.sequenceU |@|
        centreIds.map(validateId(_, InvalidCentreId)).toList.sequenceU |@|
@@ -186,16 +243,69 @@ object Membership {
                    version      = version,
                    timeAdded    = timeAdded,
                    timeModified = timeModified,
+                   name         = name,
+                   description  = description,
                    userIds      = userIds,
-                   studyInfo     = MembershipStudyInfo(allStudies, studyIds),
-                   centreInfo    = MembershipCentreInfo(allCentres, centreIds))
+                   studyData    = MembershipEntityData[StudyId](allStudies, studyIds),
+                   centreData   = MembershipEntityData[CentreId](allCentres, centreIds))
     }
   }
 
-  implicit val membershipStudyIds: Format[MembershipStudyInfo] = Json.format[MembershipStudyInfo]
+  implicit val usersMembershipformat: Format[Membership] = Json.format[Membership]
 
-  implicit val membershipCentreIds: Format[MembershipCentreInfo] = Json.format[MembershipCentreInfo]
+  val sort2Compare: Map[String, (Membership, Membership) => Boolean] =
+    Map[String, (Membership, Membership) => Boolean]("name"  -> compareByName)
 
-  implicit val membershipFormat: Format[Membership] = Json.format[Membership]
+  def compareByName(a: Membership, b: Membership): Boolean = {
+    (a.name compareToIgnoreCase b.name) < 0
+  }}
+
+/**
+ * The membership belonging to a single user.
+ *
+ * This class has no information as to what other users share this membership.
+ */
+final case class UserMembership(id:           MembershipId,
+                                version:      Long,
+                                timeAdded:    OffsetDateTime,
+                                timeModified: Option[OffsetDateTime],
+                                name:         String,
+                                description:  Option[String],
+                                userId:       UserId,
+                                studyData:    MembershipEntityData[StudyId],
+                                centreData:   MembershipEntityData[CentreId])
+    extends MembershipBase
+    with MembershipValidations {
+
+  override def toString: String =
+    s"""|UserMembership:{
+        |  id:           $id
+        |  version:      $version
+        |  timeAdded:    $timeAdded
+        |  timeModified: $timeModified
+        |  name:         $name
+        |  description:  $description
+        |  userId:       $userId
+        |  studyData:    $studyData
+        |  centreData:   $centreData
+        |}""".stripMargin
+
+}
+
+object UserMembership {
+
+  def create(usersMembership: Membership, userId: UserId): UserMembership = {
+    UserMembership(id           = usersMembership.id,
+                   version      = usersMembership.version,
+                   timeAdded    = usersMembership.timeAdded,
+                   timeModified = usersMembership.timeModified,
+                   name         = usersMembership.name,
+                   description  = usersMembership.description,
+                   userId       = userId,
+                   studyData    = usersMembership.studyData,
+                   centreData   = usersMembership.centreData)
+  }
+
+  implicit val userMembershipformat: Format[UserMembership] = Json.format[UserMembership]
 
 }

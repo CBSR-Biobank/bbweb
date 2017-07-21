@@ -39,7 +39,8 @@ define([
        * Have to create controller as a directive so that $onInit() is fired on the controller.
        */
       SuiteMixin.prototype.createController = function (userCounts) {
-        this.UserCounts.get = jasmine.createSpy('get').and.returnValue(this.$q.when(userCounts));
+        this.usersService.requestCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(new this.User()));
+        this.UserCounts.get = jasmine.createSpy().and.returnValue(this.$q.when(userCounts));
 
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
@@ -64,6 +65,7 @@ define([
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
+                              'usersService',
                               'User',
                               'UserCounts',
                               'factory');

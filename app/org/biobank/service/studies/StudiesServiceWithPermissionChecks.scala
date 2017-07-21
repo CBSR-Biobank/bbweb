@@ -23,11 +23,11 @@ trait StudyServicePermissionChecks extends ServicePermissionChecks {
   }
 
   protected def getMembershipStudies(userId: UserId): ServiceValidation[Set[Study]] = {
-    accessService.getMembership(userId).flatMap { membership =>
-      if (membership.studyInfo.allStudies) {
+    accessService.getUserMembership(userId).flatMap { membership =>
+      if (membership.studyData.allEntities) {
         studyRepository.getValues.toSet.successNel[String]
       } else {
-        membership.studyInfo.studyIds
+        membership.studyData.ids
           .map(studyRepository.getByKey)
           .toList.sequenceU
           .map(studies => studies.toSet)

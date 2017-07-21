@@ -33,5 +33,7 @@ define(function (require) {
     .factory('DirectiveTestSuiteMixin',
              require('../../../assets/javascripts/test/DirectiveTestSuiteMixin'))
     .factory('ShippingComponentTestSuiteMixin',
-             require('../../../assets/javascripts/test/ShippingComponentTestSuiteMixin'));
+             require('../../../assets/javascripts/test/ShippingComponentTestSuiteMixin'))
+    .factory('MebershipSpecCommon',
+             require('../../../assets/javascripts/test/MembershipSpecCommon'));
 });

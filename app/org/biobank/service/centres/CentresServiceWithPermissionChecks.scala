@@ -37,11 +37,11 @@ trait CentreServicePermissionChecks extends ServicePermissionChecks {
   }
 
   protected def getMembershipCentres(userId: UserId): ServiceValidation[Set[Centre]] = {
-    accessService.getMembership(userId).flatMap { membership =>
-      if (membership.centreInfo.allCentres) {
+    accessService.getUserMembership(userId).flatMap { membership =>
+      if (membership.centreData.allEntities) {
         centreRepository.getValues.toSet.successNel[String]
       } else {
-        membership.centreInfo.centreIds
+        membership.centreData.ids
           .map(centreRepository.getByKey)
           .toList.sequenceU
           .map(centres => centres.toSet)

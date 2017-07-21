@@ -11,8 +11,8 @@ trait AccessServiceFixtures extends Assertions {
 
   case class MembershipFixtureParam(user: User, study: Study, centre: Centre) extends {
     val membership = factory.createMembership.copy(userIds    = Set(user.id),
-                                                   studyInfo  = MembershipStudyInfo(false, Set(study.id)),
-                                                   centreInfo = MembershipCentreInfo(false, Set(centre.id)))
+                                                   studyData  = MembershipEntityData(false, Set(study.id)),
+                                                   centreData = MembershipEntityData(false, Set(centre.id)))
   }
 
   val factory: Factory

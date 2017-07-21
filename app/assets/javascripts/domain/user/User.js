@@ -11,7 +11,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
     'biobankApi',
     'ConcurrencySafeEntity',
     'DomainError',
-    'UserState'
+    'UserState',
+    'UserMembership'
   ];
 
   /*
@@ -22,27 +23,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
                        biobankApi,
                        ConcurrencySafeEntity,
                        DomainError,
-                       UserState) {
-
-    var MEMBERSHIP_INFO_SCHEMA = {
-      'id': 'MembershipInfo',
-      'type': 'object',
-      'properties': {
-        'all':   { 'type': 'boolean' },
-        'names': { 'type': 'array', items: 'string' }
-      }
-    };
-
-    var MEMBERSHIP_SCHEMA = {
-      'id': 'Membership',
-      'type': 'object',
-      properties: {
-        'id':         { 'type': 'string' },
-        'version':    { 'type': 'integer', 'minimum': 0 },
-        'studyInfo':  { 'type': 'object', 'items': { '$ref': 'MembershipInfo' } },
-        'centreInfo': { 'type': 'object', 'items': { '$ref': 'MembershipInfo' } }
-      }
-    };
+                       UserState,
+                       UserMembership) {
 
     var SCHEMA = {
       'id': 'User',
@@ -57,7 +39,12 @@ define(['lodash', 'tv4'], function(_, tv4) {
         'avatarUrl':    { 'type': [ 'string', 'null' ] },
         'state':        { 'type': 'string' },
         'roles':        { 'type': 'array', items: 'string' },
-        'membership':   { 'type': [ 'object', 'null' ], 'items': { '$ref': 'Membership' } }
+        'membership':   {
+          'oneOf': [
+            { 'type': 'null' },
+            { '$ref': UserMembership.SCHEMA.id }
+          ]
+        }
       },
       'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state' ]
     };
@@ -116,6 +103,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
       this.state = UserState.REGISTERED;
 
       ConcurrencySafeEntity.call(this, SCHEMA, obj);
+      this.membership = new UserMembership(_.get(obj, 'membership', {}));
     }
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -130,7 +118,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     User.isValid = function (obj) {
-       return ConcurrencySafeEntity.isValid(SCHEMA, [MEMBERSHIP_INFO_SCHEMA, MEMBERSHIP_SCHEMA], obj);
+       return ConcurrencySafeEntity.isValid(SCHEMA, [UserMembership.SCHEMA], obj);
     };
 
     /**
@@ -189,7 +177,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
     /**
      * Used to list users.
      *
-     * @param {object} options - The options to use to list studies.
+     * @param {object} options - The options to use.
      *
      * @param {string} options.filter The filter expression to use on user to refine the list.
      *

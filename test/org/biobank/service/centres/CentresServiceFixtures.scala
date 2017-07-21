@@ -23,15 +23,15 @@ trait CentresServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
 
     val allCentresMembership = factory.createMembership.copy(
         userIds = Set(allCentresAdminUser.id),
-        centreInfo = MembershipCentreInfo(true, Set.empty[CentreId]))
+        centreData = MembershipEntityData(true, Set.empty[CentreId]))
 
     val centreOnlyMembership = factory.createMembership.copy(
         userIds = Set(centreOnlyAdminUser.id, centreUser.id),
-        centreInfo = MembershipCentreInfo(false, Set(centre.id)))
+        centreData = MembershipEntityData(false, Set(centre.id)))
 
     val noCentresMembership = factory.createMembership.copy(
         userIds = Set(noMembershipUser.id, noCentrePermissionUser.id),
-        centreInfo = MembershipCentreInfo(false, Set.empty[CentreId]))
+        centreData = MembershipEntityData(false, Set.empty[CentreId]))
 
     def usersCanReadTable() = Table(("users with read access", "label"),
                                     (allCentresAdminUser, "all centres admin user"),

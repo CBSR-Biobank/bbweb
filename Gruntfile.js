@@ -28,6 +28,11 @@ module.exports = function(grunt) {
         singleRun: true,
         colors: true
       },
+      dots: {
+        singleRun: true,
+        colors: true,
+        reporters: ['dots']
+      },
       coverage: {
         options: {
           reporters: ['dots', 'coverage']

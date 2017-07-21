@@ -64,19 +64,28 @@ define(function () {
       vm.rolesValue              = getRolesValue();
 
       vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
+
       if (vm.user.membership) {
-        if (vm.user.membership.studyInfo.all) {
+        if (vm.user.membership.isForAllStudies()) {
           vm.studyMemberships = gettextCatalog.getString('All Studies');
-        } else if (vm.user.membership.studyInfo.names.length > 0){
-          vm.studyMemberships = vm.user.membership.studyInfo.names.join(', ');
+        } else if (vm.user.membership.studyData.entityData.length > 0){
+          vm.studyMemberships = vm.user.membership.studyData.entityData
+            .map(function (entityInfo) {
+              return entityInfo.name;
+            })
+            .join(', ');
         } else {
           vm.studyMemberships = gettextCatalog.getString('None');
         }
 
-        if (vm.user.membership.centreInfo.all) {
+        if (vm.user.membership.isForAllCentres()) {
           vm.centreMemberships = gettextCatalog.getString('All Centres');
-        } else if (vm.user.membership.centreInfo.names.length > 0){
-          vm.centreMemberships = vm.user.membership.centreInfo.names.join(', ');
+        } else if (vm.user.membership.centreData.entityData.length > 0){
+          vm.centreMemberships = vm.user.membership.centreData.entityData
+            .map(function (entityInfo) {
+              return entityInfo.name;
+            })
+            .join(', ');
         } else {
           vm.centreMemberships = gettextCatalog.getString('None');
         }

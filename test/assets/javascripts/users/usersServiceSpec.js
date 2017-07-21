@@ -19,9 +19,10 @@ define(function (require) {
                               '$httpBackend',
                               '$cookies',
                               'biobankApi',
+                              'User',
                               'factory');
 
-      this.user = this.factory.user();
+      this.user = this.User.create(this.factory.user());
     }));
 
     afterEach(function() {
@@ -76,7 +77,7 @@ define(function (require) {
         this.$httpBackend.expectGET('/users/authenticate').respond(this.reply(this.user));
         self.usersService.sessionTimeout();
         self.usersService.requestCurrentUser().then(function (reply) {
-          expect(reply).toEqual(self.user);
+          expect(reply).toEqual(self.User.create(self.user));
         });
         this.$httpBackend.flush();
       });
@@ -107,7 +108,7 @@ define(function (require) {
 
           doLogin.call(self, token, self.user);
           self.usersService.requestCurrentUser().then(function (reply) {
-            expect(reply).toEqual(self.user);
+            expect(reply).toEqual(self.User.create(self.user));
           });
         });
 

@@ -696,7 +696,7 @@ define(function (require) {
                             uri('state/' + context.state, shipment.id ),
                             json,
                             context.jsonShipment,
-                            context.expectShipment,
+                            this.expectShipment,
                             failTest);
         });
 

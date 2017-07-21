@@ -16,22 +16,35 @@ package dto {
 
   }
 
-  final case class MembershipInfoDto(all: Boolean, names: Set[String])
+  final case class MembershipEntityInfoDto(id: String, name: String)
 
-  object MembershipInfoDto {
+  object MembershipEntityInfoDto {
 
-    implicit val membershipInfoDtoWriter: Writes[MembershipInfoDto] = Json.writes[MembershipInfoDto]
+    implicit val membershipEntityInfoDtoWriter: Writes[MembershipEntityInfoDto] =
+      Json.writes[MembershipEntityInfoDto]
+  }
+
+  final case class MembershipEntitySetDto(all: Boolean, entityInfo: Set[MembershipEntityInfoDto])
+
+  object MembershipEntitySetDto {
+
+    implicit val membershipEntitySetInfoDtoWriter: Writes[MembershipEntitySetDto] =
+      Json.writes[MembershipEntitySetDto]
 
   }
 
-  final case class MembershipDto(id:           String,
-                                 version:      Long,
-                                 studyInfo:    MembershipInfoDto,
-                                 centreInfo:   MembershipInfoDto)
+  final case class UserMembershipDto(id:           String,
+                                     version:      Long,
+                                     timeAdded:    String,
+                                     timeModified: Option[String],
+                                     name:         String,
+                                     description:  Option[String],
+                                     studyData:    MembershipEntitySetDto,
+                                     centreData:   MembershipEntitySetDto)
 
-  object MembershipDto {
+  object UserMembershipDto {
 
-    implicit val membershipDtoWriter: Writes[MembershipDto] = Json.writes[MembershipDto]
+    implicit val userMembershipDtoWriter: Writes[UserMembershipDto] = Json.writes[UserMembershipDto]
 
   }
 
@@ -44,7 +57,7 @@ package dto {
                            email:        String,
                            avatarUrl:    Option[String],
                            roles:        Set[RoleId],
-                           membership:   Option[MembershipDto])
+                           membership:   Option[UserMembershipDto])
 
   object UserDto {
 

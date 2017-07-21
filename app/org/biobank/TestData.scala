@@ -350,13 +350,15 @@ class TestData @Inject() (config:         Configuration,
         }.toSet
 
       List(
-        Membership(id = MembershipId("test-data-all-studies-and-centres-membership"),
+        Membership(id           = MembershipId("test-data-all-studies-and-centres-membership"),
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
+                   name         = "Test data - all studies and all centres",
+                   description  = None,
                    userIds      = userIds,
-                   studyInfo    = MembershipStudyInfo(true, Set.empty[StudyId]),
-                   centreInfo   = MembershipCentreInfo(true, Set.empty[CentreId]))
+                   studyData    = MembershipEntityData(true, Set.empty[StudyId]),
+                   centreData   = MembershipEntityData(true, Set.empty[CentreId]))
       )
     }
   }

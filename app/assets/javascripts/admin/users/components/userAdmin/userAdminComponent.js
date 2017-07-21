@@ -11,12 +11,16 @@ define(function () {
     controllerAs: 'vm'
   };
 
-  UserAdminController.$inject = ['UserCounts', 'breadcrumbService'];
+  UserAdminController.$inject = [
+    'usersService',
+    'UserCounts',
+    'breadcrumbService'
+  ];
 
   /*
    * Shows a table of users.
    */
-  function UserAdminController(UserCounts, breadcrumbService) {
+  function UserAdminController(usersService, UserCounts, breadcrumbService) {
     var vm = this;
     vm.$onInit = onInit;
 
@@ -31,10 +35,15 @@ define(function () {
 
       vm.haveUsers = false;
 
-      UserCounts.get().then(function (counts) {
-        vm.userCounts = counts;
-        vm.haveUsers  = (vm.userCounts.total > 0);
-      });
+      usersService.requestCurrentUser()
+        .then(function (user) {
+          vm.user = user;
+          return UserCounts.get();
+        })
+        .then(function (counts) {
+          vm.userCounts = counts;
+          vm.haveUsers  = (vm.userCounts.total > 0);
+        });
     }
   }
 

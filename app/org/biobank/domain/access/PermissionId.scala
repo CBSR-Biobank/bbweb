@@ -28,7 +28,7 @@ object PermissionId extends Enumeration {
   val ParticipantRead: Value       = Value("ParticipantRead")
   val ParticipantCreate: Value     = Value("ParticipantCreate")
   val ParticipantUpdate: Value     = Value("ParticipantUpdate")
-  val ParticipantDelete: Value      = Value("ParticipantDelete")
+  val ParticipantDelete: Value     = Value("ParticipantDelete")
 
   val CollectionEventRead: Value   = Value("CollectionEventRead")
   val CollectionEventCreate: Value = Value("CollectionEventCreate")
@@ -61,6 +61,11 @@ object PermissionId extends Enumeration {
   val ContainerRead: Value         = Value("ContainerRead")
   val ContainerUpdate: Value       = Value("ContainerUpdate")
   val ContainerDelete: Value       = Value("ContainerDelete")
+
+  val MembershipCreate: Value      = Value("MembershipCreate")
+  val MembershipRead: Value        = Value("MembershipRead")
+  val MembershipUpdate: Value      = Value("MembershipUpdate")
+  val MembershipDelete: Value      = Value("MembershipDelete")
 
   implicit val permissionFormat: Format[PermissionId] =
     enumFormat(org.biobank.domain.access.PermissionId)

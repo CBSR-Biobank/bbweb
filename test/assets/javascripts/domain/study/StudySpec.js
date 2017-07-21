@@ -131,81 +131,106 @@ define(function (require) {
       });
     });
 
-    it('can retrieve a single study', function() {
-      var self = this;
-      self.$httpBackend.whenGET(self.uri(self.jsonStudy.id)).respond(self.reply(self.jsonStudy));
-      self.Study.get(self.jsonStudy.id).then(self.expectStudy).catch(self.failTest);
-      self.$httpBackend.flush();
+    describe('when getting a single study', function() {
+
+      it('can retrieve a single study', function() {
+        this.$httpBackend.whenGET(this.uri(this.jsonStudy.id)).respond(this.reply(this.jsonStudy));
+        this.Study.get(this.jsonStudy.id).then(this.expectStudy).catch(this.failTest);
+        this.$httpBackend.flush();
+      });
+
+      it('fails when getting a study and it has a bad format', function() {
+        var self = this,
+            study = _.omit(self.jsonStudy, 'name');
+        self.$httpBackend.whenGET(this.uri(study.id)).respond(this.reply(study));
+
+        self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
+        self.$httpBackend.flush();
+
+        function shouldNotFail() {
+          fail('function should not be called');
+        }
+
+        function shouldFail(error) {
+          expect(error.message).toContain('Missing required property');
+        }
+      });
+
+      it('fails when getting a study and it has a bad annotation type', function() {
+        var self = this,
+            annotationType = _.omit(self.factory.annotationType(), 'name'),
+            study = self.factory.study({ annotationTypes: [ annotationType ]});
+
+        self.$httpBackend.whenGET(this.uri(study.id)).respond(this.reply(study));
+
+        self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
+        self.$httpBackend.flush();
+
+        function shouldNotFail(error) {
+          fail('function should not be called: ' + error);
+        }
+
+        function shouldFail(error) {
+          expect(error.message).toContain('Missing required property');
+        }
+      });
+
     });
 
-    it('fails when getting a study and it has a bad format', function() {
-      var self = this,
-          study = _.omit(self.jsonStudy, 'name');
-      self.$httpBackend.whenGET(this.uri(study.id)).respond(this.reply(study));
+    describe('when listing studies', function() {
 
-      self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
-      self.$httpBackend.flush();
+      it('can retrieve studies', function() {
+        var self = this,
+            studies = [ self.factory.study({ annotationTypes: [] }) ],
+            reply = self.factory.pagedResult(studies);
 
-      function shouldNotFail() {
-        fail('function should not be called');
-      }
+        self.$httpBackend.whenGET(this.uri()).respond(this.reply(reply));
 
-      function shouldFail(error) {
-        expect(error.message).toContain('Missing required property');
-      }
-    });
+        self.Study.list().then(testStudy).catch(this.failTest);
+        self.$httpBackend.flush();
 
-    it('fails when getting a study and it has a bad annotation type', function() {
-      var self = this,
-          annotationType = _.omit(self.factory.annotationType(), 'name'),
-          study = self.factory.study({ annotationTypes: [ annotationType ]});
+        function testStudy(pagedResult) {
+          expect(pagedResult.items).toBeArrayOfSize(1);
+          expect(pagedResult.items[0]).toEqual(jasmine.any(self.Study));
+          pagedResult.items[0].compareToJsonEntity(studies[0]);
+        }
+      });
 
-      self.$httpBackend.whenGET(this.uri(study.id)).respond(this.reply(study));
+      it('can use options', function() {
+        var self = this,
+            optionList = [
+              { filter: 'name::test' },
+              { sort: 'state' },
+              { page: 2 },
+              { limit: 10 }
+            ],
+            studies = [ self.jsonStudy ],
+            reply   = self.factory.pagedResult(studies);
 
-      self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
-      self.$httpBackend.flush();
+        _.each(optionList, function (options) {
+          var url = sprintf('%s?%s', self.uri(), self.$httpParamSerializer(options, true));
 
-      function shouldNotFail(error) {
-        fail('function should not be called: ' + error);
-      }
+          self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
-      function shouldFail(error) {
-        expect(error.message).toContain('Missing required property');
-      }
-    });
+          self.Study.list(options).then(testStudy).catch(self.failTest);
+          self.$httpBackend.flush();
 
-    it('can retrieve studies', function() {
-      var self = this,
-          studies = [ self.factory.study({ annotationTypes: [] }) ],
-          reply = self.factory.pagedResult(studies);
+          function testStudy(pagedResult) {
+            expect(pagedResult.items).toBeArrayOfSize(studies.length);
+            _.each(pagedResult.items, function (study) {
+              expect(study).toEqual(jasmine.any(self.Study));
+            });
+          }
+        });
+      });
 
-      self.$httpBackend.whenGET(this.uri()).respond(this.reply(reply));
+      it('listing omits empty options', function() {
+        var self = this,
+            options = { filter: ''},
+            studies = [ self.jsonStudy ],
+            reply   = self.factory.pagedResult(studies);
 
-      self.Study.list().then(testStudy).catch(this.failTest);
-      self.$httpBackend.flush();
-
-      function testStudy(pagedResult) {
-        expect(pagedResult.items).toBeArrayOfSize(1);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(self.Study));
-        pagedResult.items[0].compareToJsonEntity(studies[0]);
-      }
-    });
-
-    it('can list studies using options', function() {
-      var self = this,
-          optionList = [
-            { filter: 'name::test' },
-            { sort: 'state' },
-            { page: 2 },
-            { limit: 10 }
-          ],
-          studies = [ self.jsonStudy ],
-          reply   = self.factory.pagedResult(studies);
-
-      _.each(optionList, function (options) {
-        var url = sprintf('%s?%s', self.uri(), self.$httpParamSerializer(options, true));
-
-        self.$httpBackend.whenGET(url).respond(self.reply(reply));
+        self.$httpBackend.whenGET(self.uri()).respond(self.reply(reply));
 
         self.Study.list(options).then(testStudy).catch(self.failTest);
         self.$httpBackend.flush();
@@ -217,43 +242,25 @@ define(function (require) {
           });
         }
       });
-    });
 
-    it('when listing studies, omits empty options', function() {
-      var self = this,
-          options = { filter: ''},
-          studies = [ self.jsonStudy ],
-          reply   = self.factory.pagedResult(studies);
+      it('fails when an invalid study is returned', function() {
+        var self = this,
+            studies = [ _.omit(self.jsonStudy, 'name') ],
+            reply = self.factory.pagedResult(studies);
 
-      self.$httpBackend.whenGET(self.uri()).respond(self.reply(reply));
+        self.$httpBackend.whenGET(this.uri()).respond(this.reply(reply));
+        self.Study.list().then(listFail).catch(shouldFail);
+        self.$httpBackend.flush();
 
-      self.Study.list(options).then(testStudy).catch(self.failTest);
-      self.$httpBackend.flush();
+        function listFail(reply) {
+          fail('function should not be called');
+        }
 
-      function testStudy(pagedResult) {
-        expect(pagedResult.items).toBeArrayOfSize(studies.length);
-        _.each(pagedResult.items, function (study) {
-          expect(study).toEqual(jasmine.any(self.Study));
-        });
-      }
-    });
+        function shouldFail(error) {
+          expect(error).toStartWith('invalid studies from server');
+        }
+      });
 
-    it('fails when list returns an invalid study', function() {
-      var self = this,
-          studies = [ _.omit(self.jsonStudy, 'name') ],
-          reply = self.factory.pagedResult(studies);
-
-      self.$httpBackend.whenGET(this.uri()).respond(this.reply(reply));
-      self.Study.list().then(listFail).catch(shouldFail);
-      self.$httpBackend.flush();
-
-      function listFail(reply) {
-        fail('function should not be called');
-      }
-
-      function shouldFail(error) {
-        expect(error).toStartWith('invalid studies from server');
-      }
     });
 
     it('can add a study', function() {

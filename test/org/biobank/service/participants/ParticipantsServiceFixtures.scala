@@ -32,7 +32,7 @@ trait ParticipantsServiceFixtures extends StudiesServiceFixtures {
     Set(enabledStudy, participant).foreach(addToRepository)
     addToRepository(studyOnlyMembership.copy(
                       userIds   = studyOnlyMembership.userIds + collectorUser.id,
-                      studyInfo = studyOnlyMembership.studyInfo.copy(studyIds = Set(enabledStudy.id))))
+                      studyData = studyOnlyMembership.studyData.copy(ids = Set(enabledStudy.id))))
     addUserToRole(collectorUser, RoleId.SpecimenCollector)
   }
 

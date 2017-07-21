@@ -41,9 +41,9 @@ sealed trait Study
         |  version:         $version,
         |  timeAdded:       $timeAdded,
         |  timeModified:    $timeModified,
-        |  state:           $state
+        |  state:           $state,
         |  name:            $name,
-        |  description:     $description
+        |  description:     $description,
         |  annotationTypes: $annotationTypes
         |}""".stripMargin
 

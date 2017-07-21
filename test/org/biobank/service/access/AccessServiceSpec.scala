@@ -5,10 +5,12 @@ import org.biobank.domain.access._
 import org.biobank.domain.user.{ActiveUser, UserRepository}
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.centre.{CentreId, CentreRepository}
+import org.biobank.service.{FilterString, SortString}
 
 class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
 
   import org.biobank.TestUtils._
+  import org.biobank.domain.access.AccessItem._
 
   val accessItemRepository = app.injector.instanceOf[AccessItemRepository]
 
@@ -131,8 +133,8 @@ class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
       it("allows user that is member of all studies and all centres") {
         val f = membershipFixture
         val membership = f.membership.copy(userIds    = Set(f.user.id),
-                                           studyInfo  = MembershipStudyInfo(true, Set.empty[StudyId]),
-                                           centreInfo = MembershipCentreInfo(true, Set.empty[CentreId]))
+                                           studyData  = MembershipEntityData(true, Set.empty[StudyId]),
+                                           centreData = MembershipEntityData(true, Set.empty[CentreId]))
 
         addToRepository(membership)
         accessService.isMember(f.user.id, Some(f.study.id), Some(f.centre.id)) mustSucceed { _ must be (true) }
@@ -144,8 +146,8 @@ class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
       it("forbids a user that is not a member of a study and centre") {
         val f = membershipFixture
         val membership = f.membership.copy(userIds    = Set(f.user.id),
-                                           studyInfo  = MembershipStudyInfo(false, Set.empty[StudyId]),
-                                           centreInfo = MembershipCentreInfo(false, Set.empty[CentreId]))
+                                           studyData  = MembershipEntityData(false, Set.empty[StudyId]),
+                                           centreData = MembershipEntityData(false, Set.empty[CentreId]))
         addToRepository(membership)
 
         accessService.isMember(f.user.id, Some(f.study.id), Some(f.centre.id)) mustSucceed { _ must be (false) }
@@ -191,6 +193,56 @@ class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
 
         accessService.isMember(f.user.id, None, Some(centre2.id))
           .mustFail(s"IdNotFound: centre id: ${centre2.id}")
+      }
+
+    }
+
+    describe("for Memberships") {
+
+      class Fixture {
+        val membership = factory.createMembership
+        val permittedUser = factory.createActiveUser
+        val nonPermittedUser = factory.createActiveUser
+        val role = factory.createRole.copy(userIds = Set(permittedUser.id))
+        val permission = factory.createPermission.copy(id        = PermissionId.MembershipRead,
+                                                       name      = PermissionId.MembershipRead.toString,
+                                                       parentIds = Set(role.id))
+        Set(membership, permittedUser, nonPermittedUser, role, permission).foreach(addToRepository)
+      }
+
+      describe("for getMembership") {
+
+        it("user with 'membership read' permission can retrieve a membership") {
+          val f = new Fixture
+          accessService.getMembership(f.permittedUser.id, f.membership.id) .mustSucceed { m =>
+            m must be (f.membership)
+          }
+        }
+
+        it("fails for user without 'membership read' permission") {
+          val f = new Fixture
+          accessService.getMembership(f.nonPermittedUser.id, f.membership.id).mustFail("Unauthorized")
+        }
+
+      }
+
+      describe("for getMemberships") {
+
+        it("user with 'membership read' permission can retrieve memberships") {
+          val f = new Fixture
+          accessService.getMemberships(f.permittedUser.id,
+                                       new FilterString(""),
+                                       new SortString("")) mustSucceed { memberships =>
+            memberships must have size (1)
+          }
+        }
+
+        it("fails for user without 'membership read' permission") {
+          val f = new Fixture
+          accessService.getMemberships(f.nonPermittedUser.id,
+                                       new FilterString(""),
+                                       new SortString("")).mustFail("Unauthorized")
+        }
       }
 
     }

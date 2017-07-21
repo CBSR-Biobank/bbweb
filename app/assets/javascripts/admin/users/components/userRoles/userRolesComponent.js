@@ -9,7 +9,7 @@ define(function () {
    * Allows the logged in user to modify another user's roles.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/users/components/userRoles/userRole.html',
+    templateUrl: '/assets/javascripts/admin/users/components/userRoles/userRoles.html',
     controller: UserRolesController,
     controllerAs: 'vm',
     bindings: {
@@ -31,12 +31,9 @@ define(function () {
     function onInit() {
       vm.breadcrumbs = [
         breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin'),
         breadcrumbService.forState('home.admin.users'),
-        breadcrumbService.forStateWithFunc(
-          'home.admin.users.user',
-          function () { return gettextCatalog.getString('User: {{name}}', { name: vm.user.name }); }),
-        breadcrumbService.forState('home.admin.users.user.roles'),
+        breadcrumbService.forState('home.admin.users.roles'),
       ];
     }
 

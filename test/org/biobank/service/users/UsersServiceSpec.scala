@@ -205,7 +205,7 @@ class UsersServiceSpec
 
       it("user has access to all studies corresponding his membership") {
         val f = membershipFixture
-        val membership = f.membership.copy(studyInfo  = MembershipStudyInfo(true, Set.empty[StudyId]))
+        val membership = f.membership.copy(studyData  = MembershipEntityData(true, Set.empty[StudyId]))
         Set(f.user, f.study, membership).foreach(addToRepository)
         usersService.getUserStudyIds(f.user.id) mustSucceed { reply =>
           reply must have size (1)

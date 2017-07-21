@@ -3,6 +3,7 @@ package org.biobank.service.users
 import akka.actor.ActorRef
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
+import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.ValidationKey
 import org.biobank.domain.access.PermissionId
@@ -104,7 +105,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
       hasPermission <- accessService.hasPermission(requestUserId, PermissionId.UserRead)
       user          <- userRepository.getByKey(id)
       dto           <- {
-        if (hasPermission || (requestUserId == id)) userToDto(user, getMembershipDto(id)).successNel[String]
+        if (hasPermission || (requestUserId == id)) userToDto(user, getMembershipDto(user)).successNel[String]
         else Unauthorized.failureNel[UserDto]
       }
     } yield dto
@@ -138,7 +139,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
 
       v.map { users =>
         users
-          .map { user => userToDto(user, getMembershipDto(user.id)) }
+          .map { user => userToDto(user, getMembershipDto(user)) }
         //.leftMap(err => InternalServerError.nel)
       }
     }
@@ -158,9 +159,9 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
   }
 
   def getUserStudyIds(requestUserId: UserId): ServiceValidation[Set[StudyId]] = {
-    accessService.getMembership(requestUserId).map { membershipStudyIds =>
-      if (membershipStudyIds.studyInfo.allStudies) studyRepository.getKeys.toSet
-      else membershipStudyIds.studyInfo.studyIds
+    accessService.getUserMembership(requestUserId).map { membershipStudyIds =>
+      if (membershipStudyIds.studyData.allEntities) studyRepository.getKeys.toSet
+      else membershipStudyIds.studyData.ids
     }
   }
 
@@ -175,7 +176,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
         if (passwordHasher.valid(user.password, user.salt, enteredPwd)) user.successNel[String]
         else InvalidPassword.failureNel[User]
       }
-    } yield userToDto(user, getMembershipDto(user.id))
+    } yield userToDto(user, getMembershipDto(user))
   }
 
   def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]] = {
@@ -217,35 +218,41 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     )
   }
 
-  private def getMembershipDto(id: UserId): ServiceValidation[MembershipDto] = {
+  private def getMembershipDto(user: User): ServiceValidation[UserMembershipDto] = {
     for {
-      membership <- accessService.getMembership(id)
-      studyNames <- {
-        membership.studyInfo.studyIds
+      membership <- accessService.getUserMembership(user.id)
+      studies <- {
+        membership.studyData.ids
           .map(studyRepository.getByKey)
           .toList.sequenceU
-          .map(studies => studies.map(s => s.name).toSet)
           .leftMap(err => InternalServerError.nel)
       }
-      centreNames <- {
-        membership.centreInfo.centreIds
+      centres <- {
+        membership.centreData.ids
           .map(centreRepository.getByKey)
           .toList.sequenceU
-          .map(centres => centres.map(c => c.name).toSet)
           .leftMap(err => InternalServerError.nel)
       }
     } yield {
-      val studyInfo = MembershipInfoDto(all = membership.studyInfo.allStudies, names = studyNames)
-      val centreInfo = MembershipInfoDto(all = membership.centreInfo.allCentres, names = centreNames)
+      val studyEntityInfo = studies.map { study => MembershipEntityInfoDto(study.id.id, study.name) }.toSet
+      val studyData       = MembershipEntitySetDto(all = membership.studyData.allEntities,
+                                                   entityInfo = studyEntityInfo)
+      val centreEntityInfo = centres.map { centre => MembershipEntityInfoDto(centre.id.id, centre.name) }.toSet
+      val centreData       = MembershipEntitySetDto(all = membership.centreData.allEntities,
+                                                    entityInfo = centreEntityInfo)
 
-      MembershipDto(id           = membership.id.id,
-                    version      = membership.version,
-                    studyInfo    = studyInfo,
-                    centreInfo   = centreInfo)
+      UserMembershipDto(id           = membership.id.id,
+                        version      = membership.version,
+                        timeAdded    = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                        timeModified = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+                        name         = membership.name,
+                        description  = membership.description,
+                        studyData    = studyData,
+                        centreData   = centreData)
     }
   }
 
-  private def userToDto(user: User, membership: ServiceValidation[MembershipDto]): UserDto = {
+  private def userToDto(user: User, membership: ServiceValidation[UserMembershipDto]): UserDto = {
     UserDto(id           = user.id.id,
             version      = user.version,
             timeAdded    = user.timeAdded,

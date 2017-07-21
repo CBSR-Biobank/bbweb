@@ -35,16 +35,18 @@ define(function () {
         breadcrumbService.forState('home.admin')
       ];
 
-      usersService.requestCurrentUser().then(function (user) {
-        vm.user = User.create(user);
-        adminService.aggregateCounts().then(function (aggregateCounts) {
+      usersService.requestCurrentUser()
+        .then(function (user) {
+          vm.user = user;
+          return adminService.aggregateCounts();
+        })
+        .then(function (aggregateCounts) {
           vm.counts = {
             studies: aggregateCounts.studies,
             centres: aggregateCounts.centres,
             users:   aggregateCounts.users
           };
         });
-      });
     }
   }
 

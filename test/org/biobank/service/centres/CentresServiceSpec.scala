@@ -26,8 +26,8 @@ class CentresServiceSpec
 
     Set(disabledCentre, enabledCentre).foreach(addToRepository)
     addToRepository(centreOnlyMembership.copy(
-                      centreInfo = centreOnlyMembership.centreInfo.copy(
-                          centreIds = Set(disabledCentre.id, enabledCentre.id))))
+                      centreData = centreOnlyMembership.centreData.copy(
+                          ids = Set(disabledCentre.id, enabledCentre.id))))
 
   }
 
@@ -419,7 +419,7 @@ class CentresServiceSpec
 
         // remove all studies from membership
         val noCentresMembership = f.centreOnlyMembership.copy(
-            centreInfo = f.centreOnlyMembership.centreInfo.copy(centreIds = Set.empty[CentreId]))
+            centreData = f.centreOnlyMembership.centreData.copy(ids = Set.empty[CentreId]))
         addToRepository(noCentresMembership)
 
         // should not show up in results

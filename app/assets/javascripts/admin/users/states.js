@@ -11,14 +11,17 @@ define(function () {
     $stateProvider
       .state('home.admin.users', {
         url: '/users',
-        resolve: {
-          userCounts: resolveUserCounts
-        },
         views: {
           'main@': 'userAdmin'
         }
       })
-      .state('home.admin.users.user', {
+      .state('home.admin.users.manage', {
+        url: '/manage',
+        views: {
+          'main@': 'manageUsers'
+        }
+      })
+      .state('home.admin.users.manage.user', {
         url: '/:userId',
         resolve: {
           user: resolveUser
@@ -27,16 +30,27 @@ define(function () {
           'main@': 'userProfile'
         }
       })
-      .state('home.admin.users.user.roles', {
+      .state('home.admin.users.roles', {
         url: '/roles',
         views: {
           'main@': 'userRoles'
         }
+      })
+      .state('home.admin.users.memberships', {
+        url: '/memberships',
+        views: {
+          'main@': 'userMemberships'
+        }
       });
 
-    resolveUserCounts.$inject = ['UserCounts'];
-    function resolveUserCounts(UserCounts) {
-      return UserCounts.get();
+    resolveUserCounts.$inject = ['$state', 'UserCounts'];
+    function resolveUserCounts($state, UserCounts) {
+      return UserCounts.get()
+        .catch(function (error) {
+          if (error.status && (error.status === 401)) {
+            $state.go('home.users.login', {}, { reload: true });
+          }
+        });
     }
 
     resolveUser.$inject = ['$transition$', 'User'];

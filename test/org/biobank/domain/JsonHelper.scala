@@ -3,6 +3,7 @@ package org.biobank.domain
 import com.typesafe.scalalogging._
 import java.time.OffsetDateTime
 import org.biobank.TestUtils
+import org.biobank.domain.access._
 import org.biobank.domain.centre._
 import org.biobank.domain.participants.{CollectionEvent, Participant}
 import org.biobank.domain.study._
@@ -340,6 +341,32 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "locationId").as[String] mustBe (dto.locationId)
 
     (json \ "name").as[String] mustBe (dto.name)
+  }
+
+  def compareObj(json: JsValue, membership: Membership) = {
+    compareEntity(json, membership)
+
+    val jsonUserIds = (json \ "userIds").as[List[String]]
+    jsonUserIds must have length (membership.userIds.size.toLong)
+    (json \ "userIds").as[List[String]].foreach { jsId =>
+      membership.userIds must contain (UserId(jsId))
+    }
+
+    (json \ "studyData" \ "allEntities").as[Boolean] must be (membership.studyData.allEntities)
+
+    val jsonStudyIds = (json \ "studyData" \ "ids").as[List[String]]
+    jsonStudyIds must have length (membership.studyData.ids.size.toLong)
+    jsonStudyIds.foreach { jsId =>
+      membership.studyData.ids must contain (StudyId(jsId))
+    }
+
+    (json \ "centreData" \ "allEntities").as[Boolean] must be (membership.centreData.allEntities)
+
+    val jsonCentreIds = (json \ "centreData" \ "ids").as[List[String]]
+    jsonCentreIds must have length (membership.centreData.ids.size.toLong)
+    jsonCentreIds.foreach { jsId =>
+      membership.centreData.ids must contain (CentreId(jsId))
+    }
   }
 
 }

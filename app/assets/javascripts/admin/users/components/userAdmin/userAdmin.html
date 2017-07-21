@@ -2,11 +2,79 @@
 <div class="page-header">
   <h1 translate>User administration</h1>
 </div>
-<div class="alert alert-warning" ng-if="! vm.haveUsers">
-  <span class="glyphicon glyphicon-warning-sign"></span>
-  <translate>
-    No users have been added yet.
-  </translate>
+
+<div class="row" ng-if="vm.user.hasUserAdminRole()">
+
+  <!-- MANAGE USERS -->
+  <div class="col-md-4">
+    <div class="panel panel-default voffset2">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <translate>Manage users</translate>
+          <span class="btn-group pull-right">
+            <a ui-sref="home.admin.users.manage"
+               class="btn btn-xs btn-primary"
+               type="button" translate>
+              Select
+            </a>
+          </span>
+        </h3>
+      </div>
+      <div class="panel-body">
+        <p translate>Activate or lock current users, or change user profiles.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROLES -->
+  <div class="col-md-4">
+    <div class="panel panel-default voffset2">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <translate>Roles</translate>
+          <span class="btn-group pull-right">
+            <a ui-sref="home.admin.users.roles"
+               class="btn btn-xs btn-primary"
+               type="button" translate>
+              Select
+            </a>
+          </span>
+        </h3>
+      </div>
+      <div class="panel-body">
+        <p translate>Add, modify or remove user roles.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- MEMBERSHIPS -->
+  <div class="col-md-4">
+    <div class="panel panel-default voffset2">
+      <div class="panel-heading">
+        <h3 class="panel-title">
+          <translate>Memberships</translate>
+          <span class="btn-group pull-right">
+            <a ui-sref="home.admin.users.memberships"
+               class="btn btn-xs btn-primary"
+               type="button" translate>
+              Select
+            </a>
+          </span>
+        </h3>
+      </div>
+      <div class="panel-body">
+        <p translate>Add, modify or remove memberhsips. Assign users to memberships.</p>
+      </div>
+    </div>
+  </div>
+
 </div>
 
-<users-paged-list ng-if="vm.haveUsers"></users-paged-list>
+<div class="row" ng-if="!vm.user.hasUserAdminRole()">
+  <div class="col-md-12">
+    <div class="alert alert-warning">
+      <span class="glyphicon glyphicon-warning-sign"></span>
+      <transltate>You do not have the correct permissions for this page.</transltate>
+    </div>
+  </div>
+</div>

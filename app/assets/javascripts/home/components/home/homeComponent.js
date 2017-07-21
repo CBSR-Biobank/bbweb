@@ -31,7 +31,7 @@ define(function () {
       $rootScope.pageTitle = 'Biobank';
 
       usersService.requestCurrentUser().then(function (user) {
-        vm.user = User.create(user);
+        vm.user = user;
         vm.userIsAuthenticated = true;
         vm.allowCollection = vm.user.hasRole('SpecimenCollector');
         vm.shippingAllowed = vm.user.hasRole('ShippingUser');

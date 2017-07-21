@@ -89,7 +89,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     describe("GET /users") {
 
-      it("111 lists the default user") {
+      it("lists the default user") {
         val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
         (jsonItem \ "id").as[String] must be (Global.DefaultUserId.id)
       }

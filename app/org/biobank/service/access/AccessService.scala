@@ -24,7 +24,11 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[AccessServiceImpl])
 trait AccessService extends BbwebService {
 
+  def getRole(requestUserId: UserId, roleId: RoleId): ServiceValidation[Role]
+
   def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]]
+
+  def getRolePermissions(requestUserId: UserId, roleId: RoleId): ServiceValidation[Set[AccessItemId]]
 
   def getUserRoles(userId: UserId): Set[RoleId]
 
@@ -41,8 +45,17 @@ trait AccessService extends BbwebService {
                                studyId:      Option[StudyId],
                                centreId:     Option[CentreId]): ServiceValidation[Boolean]
 
-  def getMembership(userId: UserId): ServiceValidation[Membership]
+  def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership]
 
+  def getMemberships(requestUserId: UserId,
+                     filter:        FilterString,
+                     sort:          SortString): ServiceValidation[Seq[Membership]]
+
+  def getUserMembership(userId: UserId): ServiceValidation[UserMembership]
+
+  def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Membership]]
+
+  def processRemoveMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Boolean]]
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
@@ -61,27 +74,6 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
   import org.biobank.domain.access.AccessItem._
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]] = {
-    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
-      val allRoles = accessItemRepository.getRoles
-      val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                    else sort
-      for {
-        roles           <- AccessItemFilter.filterRoles(allRoles, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-      } yield {
-        val result = roles.toSeq.sortWith(sortFunc)
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
-      }
-    }
-  }
 
   def getUserRoles(userId: UserId): Set[RoleId] = {
     accessItemRepository.rolesForUser(userId).map(r => RoleId.withName(r.id.id))
@@ -128,8 +120,93 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     } yield (permission && member)
   }
 
-  def getMembership(userId: UserId): ServiceValidation[Membership] = {
+  def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership] = {
+    whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
+      membershipRepository.getByKey(membershipId)
+    }
+  }
+
+  def getMemberships(requestUserId: UserId,
+                     filter:        FilterString,
+                     sort:          SortString): ServiceValidation[Seq[Membership]] = {
+    whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
+      val allMemberships = membershipRepository.getValues.toSet
+      val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                    else sort
+      for {
+        memberships     <- MembershipFilter.filterMemberships(allMemberships, filter)
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { Membership.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = memberships.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
+      }
+    }
+  }
+
+  def getUserMembership(userId: UserId): ServiceValidation[UserMembership] = {
     membershipRepository.getUserMembership(userId)
+  }
+
+  def getRole(requestUserId: UserId, roleId: RoleId): ServiceValidation[Role] = {
+    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
+      accessItemRepository.getRole(roleId)
+    }
+  }
+
+  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]] = {
+    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
+      val allRoles = accessItemRepository.getRoles
+      val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                    else sort
+      for {
+        roles           <- AccessItemFilter.filterRoles(allRoles, filter)
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = roles.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
+      }
+    }
+  }
+
+  def getRolePermissions(requestUserId: UserId, roleId: RoleId): ServiceValidation[Set[AccessItemId]] = {
+
+    def getPermissionsFromIds(accessItemIds: Set[AccessItemId]): Set[Permission] = {
+      accessItemIds
+        .map(accessItemRepository.getByKey)
+        .toList.sequenceU
+        .map { items =>
+          items.flatMap(getPermissions).toSet
+        }
+        .fold(
+          err => Set.empty[Permission],
+          s => s
+        )
+    }
+
+    def getPermissions(accessItem: AccessItem): Set[Permission] = {
+      accessItem match {
+        case permission: Permission => getPermissionsFromIds(permission.childrenIds) + permission
+        case role: Role             => getPermissionsFromIds(role.childrenIds)
+      }
+    }
+
+    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
+      accessItemRepository.getRole(roleId).map { role =>
+        getPermissions(role).map(_.id)
+      }
+    }
   }
 
   def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[Role]] = {
@@ -137,7 +214,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
       for {
         event <- validation
-        role  <- accessItemRepository.getRole(AccessItemId(event.getRole.getRoleId))
+        role  <- accessItemRepository.getRole(AccessItemId(event.getRole.getId))
       } yield role
     }
   }
@@ -176,6 +253,97 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
 
     log.debug(s"hasPermission: userId: $userId, permissionId: $permissionId")
     accessItemRepository.getByKey(permissionId).map(checkItemAccess)
+  }
+
+  def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Membership]] = {
+    val v = for {
+        validCommand <- {
+          cmd match {
+            case c: RemoveMembershipCmd =>
+              ServiceError(s"invalid service call: $cmd, use processRemoveMembershipCommand")
+                .failureNel[Boolean]
+            case c => true.successNel[String]
+          }
+        }
+        validEntities <- {
+          cmd match {
+            case c: AddMembershipCmd => {
+              for {
+                usersNonEmpty <- {
+                  if (c.userIds.isEmpty) ServiceError("userIds cannot be empty").failureNel[Boolean]
+                  else true.successNel[String]
+                }
+                validUsers   <- c.userIds.map(id => userRepository.getByKey(UserId(id))).toList.sequenceU
+                validStudies <- c.studyIds.map(id => studyRepository.getByKey(StudyId(id))).toList.sequenceU
+                validCentres <- c.centreIds.map(id => centreRepository.getByKey(CentreId(id))).toList.sequenceU
+              } yield true
+            }
+
+            case c: MembershipAddUserCmd =>
+              userRepository.getByKey(UserId(c.userId)).map(_ => true)
+
+            case c: MembershipAddStudyCmd =>
+              studyRepository.getByKey(StudyId(c.studyId)).map(_ => true)
+
+            case c: MembershipAddCentreCmd =>
+              centreRepository.getByKey(CentreId(c.centreId)).map(_ => true)
+
+            case c: MembershipRemoveUserCmd =>
+              userRepository.getByKey(UserId(c.userId)).map(_ => true)
+
+            case c: MembershipRemoveStudyCmd =>
+              studyRepository.getByKey(StudyId(c.studyId)).map(_ => true)
+
+            case c: MembershipRemoveCentreCmd =>
+              centreRepository.getByKey(CentreId(c.centreId)).map(_ => true)
+
+            case _ =>
+              true.successNel[String]
+          }
+        }
+        permitted <- {
+          val permissionId = cmd match {
+              case c: AddMembershipCmd        => PermissionId.MembershipCreate
+              case c: MembershipModifyCommand => PermissionId.MembershipUpdate
+            }
+          hasPermissionInternal(UserId(cmd.sessionUserId), permissionId)
+        }
+      } yield permitted
+
+    v.fold(
+      err => Future.successful(err.failure[Membership]),
+      permitted => {
+        if (!permitted) {
+          Future.successful(Unauthorized.failureNel[Membership])
+        } else {
+          ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
+            validation.flatMap { event =>
+              event.eventType match {
+                case et: AccessEvent.EventType.Membership =>
+                  membershipRepository.getByKey(MembershipId(event.getMembership.getId))
+                case _ =>
+                  ServiceError(s"invalid reply from processor: $event").failureNel[Membership]
+              }
+            }
+          }
+        }
+      }
+    )
+  }
+
+  def processRemoveMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Boolean]] = {
+    hasPermissionInternal(UserId(cmd.sessionUserId), PermissionId.MembershipDelete).fold(
+      err => Future.successful(err.failure[Boolean]),
+      permitted => {
+        if (!permitted) {
+          Future.successful(Unauthorized.failureNel[Boolean])
+        } else {
+          ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
+            validation.map(_ => true)
+          }
+        }
+      }
+    )
   }
 
   // should only called if userId is valid, studyId is None or valid, and centreId is None or valid
@@ -281,13 +449,15 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                      version      = 0L,
                      timeAdded    = Global.StartOfTime,
                      timeModified = None,
+                     name         = "All studies",
+                     description  = None,
                      userIds      = Set(studyAdmin.id,
                                         studyUser.id,
                                         specimenCollector.id,
                                         shippingAdmin.id,
                                         shippingUser.id),
-                     studyInfo    = MembershipStudyInfo(true, Set.empty[StudyId]),
-                     centreInfo   = MembershipCentreInfo(true, Set.empty[CentreId]))
+                     studyData    = MembershipEntityData(true, Set.empty[StudyId]),
+                     centreData   = MembershipEntityData(true, Set.empty[CentreId]))
         )
 
       memberships.foreach(membershipRepository.put)

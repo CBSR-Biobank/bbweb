@@ -18,7 +18,7 @@ message StudyEvent {
 
    message DescriptionUpdated {
       optional int64  version     = 1;
-      optional string description = 3;
+      optional string description = 2;
    }
 
    message Enabled {

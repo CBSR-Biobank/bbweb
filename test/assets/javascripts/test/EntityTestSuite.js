@@ -50,20 +50,23 @@ define(['lodash'], function (_) {
      *        JSON. Default value is TRUE.
      */
     EntityTestSuite.prototype.updateEntity = function (entity,
-                                                            updateFuncName,
-                                                            updateParams,
-                                                            url,
-                                                            reqJson,
-                                                            reply,
-                                                            thenFunc,
-                                                            catchFunc,
-                                                            appendExpectedVersion) {
+                                                       updateFuncName,
+                                                       updateParams,
+                                                       url,
+                                                       reqJson,
+                                                       reply,
+                                                       thenFunc,
+                                                       catchFunc,
+                                                       appendExpectedVersion) {
+      expect(entity[updateFuncName]).toBeFunction();
+      expect(thenFunc).toBeFunction();
+      expect(catchFunc).toBeFunction();
+
       appendExpectedVersion = _.isBoolean(appendExpectedVersion) ? appendExpectedVersion : true;
       if (appendExpectedVersion) {
         _.extend(reqJson, { expectedVersion: 0 });
       }
       $httpBackend.expectPOST(url, reqJson).respond(201, { status: 'success', data: reply });
-      expect(entity[updateFuncName]).toBeFunction();
 
       if (!Array.isArray(updateParams)) {
         updateParams = [ updateParams ];

@@ -89,6 +89,12 @@ define(function (require) {
       user:                              user,
       defaultUser:                       defaultUser,
 
+      membershipBase:                    membershipBase,
+      defaultMembershipBase:             defaultMembershipBase,
+
+      membership:                        membership,
+      defaultMembership:                 defaultMembership,
+
       // value types
       annotationType:                    annotationType,
       allAnnotationTypes:                allAnnotationTypes,
@@ -99,6 +105,7 @@ define(function (require) {
       centreLocations:                   centreLocations,
       centreLocationInfo:                centreLocationInfo,
       centreLocationDto:                 centreLocationDto,
+      membershipEntityData:              membershipEntityData,
 
       // utilities
       domainEntityNameNext:              domainEntityNameNext,
@@ -119,7 +126,10 @@ define(function (require) {
       ENTITY_NAME_COLLECTION_EVENT:      ENTITY_NAME_COLLECTION_EVENT,
 
       ENTITY_NAME_CENTRE:                ENTITY_NAME_CENTRE,
-      ENTITY_NAME_LOCATION:              ENTITY_NAME_LOCATION
+      ENTITY_NAME_LOCATION:              ENTITY_NAME_LOCATION,
+
+      ENTITY_NAME_MEMBERSHIP:            ENTITY_NAME_MEMBERSHIP,
+      ENTITY_NAME_MEMBERSHIP_BASE:       ENTITY_NAME_MEMBERSHIP_BASE
     };
     return service;
 
@@ -141,6 +151,9 @@ define(function (require) {
     function ENTITY_NAME_SHIPMENT_SPECIMEN()     { return 'shipmentSpecimen'; }
 
     function ENTITY_NAME_USER()                  { return 'user'; }
+
+    function ENTITY_NAME_MEMBERSHIP_BASE()       { return 'membershipBase'; }
+    function ENTITY_NAME_MEMBERSHIP()            { return 'membership'; }
 
     function commonFields() {
       return {
@@ -507,19 +520,23 @@ define(function (require) {
     }
 
     function user(options) {
-      var defaults = { id:        domainEntityNameNext(ENTITY_NAME_USER()),
-                       name:      stringNext(),
-                       email:     stringNext(),
-                       avatarUrl: null,
-                       state:     UserState.REGISTERED,
-                       roles:     [],
-                       membership: {
-                         studyInfo:  { all: false, names: [] },
-                         centreInfo: { all: false, names: [] }
-                       }
+      var defaults = { id:         domainEntityNameNext(ENTITY_NAME_USER()),
+                       name:       stringNext(),
+                       email:      stringNext(),
+                       avatarUrl:  null,
+                       state:      UserState.REGISTERED,
+                       roles:      []
                      },
           validKeys = commonFieldNames.concat(_.keys(defaults)),
-          u = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys));
+          membership,
+          u;
+
+          options = options || {};
+      if (_.isNil(options.membership)) {
+        options.membership = {};
+      }
+      membership = userMembership(options.membership);
+      u = _.extend(defaults, commonFields(), _.pick(options || {}, validKeys), { membership: membership });
       updateDefaultEntity(ENTITY_NAME_USER(), u);
       return u;
     }
@@ -734,6 +751,51 @@ define(function (require) {
         maxPages: options.maxPages || 4
       };
     }
+
+    function membershipEntityData() {
+      return {
+        id:   stringNext(),
+        name: stringNext()
+      };
+    }
+
+    function membershipEntitySet() {
+      return { allEntities: false, entityData: [] };
+    }
+
+    function membershipBase(options) {
+      var defaults =  { id:           domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE()),
+                        name:         stringNext(),
+                        description:  faker.lorem.sentences(4),
+                        studyData:    membershipEntitySet(),
+                        centreData:   membershipEntitySet()
+                      },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          m = _.extend({}, defaults, commonFields(), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_MEMBERSHIP_BASE(), m);
+      return m;
+    }
+
+    function defaultMembershipBase() {
+      return defaultEntity(ENTITY_NAME_MEMBERSHIP_BASE(), membershipBase);
+    }
+
+    function membership(options) {
+      var defaults =  { userData: [] },
+          validKeys = commonFieldNames.concat(_.keys(defaults)),
+          m = _.extend(defaults, membershipBase(options), _.pick(options || {}, validKeys));
+      updateDefaultEntity(ENTITY_NAME_MEMBERSHIP(), m);
+      return m;
+    }
+
+    function defaultMembership() {
+      return defaultEntity(ENTITY_NAME_MEMBERSHIP(), membership);
+    }
+
+    function userMembership(options) {
+      return membershipBase(options);
+    }
+
   }
 
   /*jshint camelcase: true */
