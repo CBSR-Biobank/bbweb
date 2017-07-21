@@ -7,17 +7,19 @@
     </small>
   </h1>
 </div>
-<form class="form-inline" name="UniqueId">
+<form class="form-inline" name="uniqueId">
   <div class="form-group">
     <label for="nameFilter" translate>Enter the participant's unique ID:</label>
     <input type="text"
            class="form-control"
            name="uniqueId"
            ng-model="vm.uniqueId"
-           placeholder="{{'unique id'|translate}}">
+           placeholder="{{'unique id'|translate}}"
+           required>
   </div>
   <button type="submit"
           class="btn btn-primary"
+          ng-disabled="uniqueId.$invalid"
           ng-click="vm.onSubmit()">
     <translate>Submit</translate>
     <i class="glyphicon glyphicon-ok"></i>
