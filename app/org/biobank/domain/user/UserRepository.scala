@@ -3,7 +3,7 @@ package org.biobank.domain.user
 import com.google.inject.ImplementedBy
 import javax.inject.Inject
 import javax.inject.Singleton
-import org.biobank.Global
+import org.biobank.{Global, TestData}
 import org.biobank.domain.{ DomainValidation, ReadWriteRepository, ReadWriteRepositoryRefImpl }
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.{Configuration, Environment, Mode}
@@ -31,8 +31,9 @@ trait UserRepository extends ReadWriteRepository[UserId, User] {
  * This repository uses the [[ReadWriteRepository]] implementation.
  */
 @Singleton
-class UserRepositoryImpl @Inject() (val config: Configuration,
-                                    val env:    Environment)
+class UserRepositoryImpl @Inject() (val config:   Configuration,
+                                    val env:      Environment,
+                                    val testData: TestData)
     extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
     with UserRepository {
   import org.biobank.CommonValidations._
@@ -97,8 +98,9 @@ class UserRepositoryImpl @Inject() (val config: Configuration,
    * - for production servers, the password should be changed as soon as possible
    */
   private def createDefaultUser(): Unit = {
-    val adminEmail = if (env.mode == Mode.Dev) org.biobank.Global.DefaultUserEmail
-                     else config.get[Option[String]]("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
+    val adminEmail =
+      if (env.mode == Mode.Dev) org.biobank.Global.DefaultUserEmail
+      else config.get[Option[String]]("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
 
     put(ActiveUser(id           = org.biobank.Global.DefaultUserId,
                    version      = 0L,
@@ -112,4 +114,5 @@ class UserRepositoryImpl @Inject() (val config: Configuration,
   }
 
   createDefaultUser
+  testData.testUsers.foreach(put)
 }

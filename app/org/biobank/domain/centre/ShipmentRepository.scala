@@ -1,7 +1,8 @@
 package org.biobank.domain.centre
 
 import com.google.inject.ImplementedBy
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
+import org.biobank.TestData
 import org.biobank.domain._
 import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
@@ -22,7 +23,7 @@ trait ShipmentRepository extends ReadWriteRepository[ShipmentId, Shipment] {
 }
 
 @Singleton
-class ShipmentRepositoryImpl
+class ShipmentRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[ShipmentId, Shipment](v => v.id)
     with ShipmentRepository {
   import org.biobank.CommonValidations._
@@ -54,4 +55,6 @@ class ShipmentRepositoryImpl
       unpacked <- shipment.isUnpacked
     } yield unpacked
   }
+
+  testData.testShipments.foreach(put)
 }

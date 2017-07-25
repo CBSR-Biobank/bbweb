@@ -1,9 +1,10 @@
 package org.biobank.domain.participants
 
+import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Singleton}
+import org.biobank.TestData
 import org.biobank.domain._
 import org.biobank.domain.study.CollectionEventTypeId
-import javax.inject.Singleton
-import com.google.inject.ImplementedBy
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -23,7 +24,7 @@ trait CollectionEventRepository
 }
 
 @Singleton
-class CollectionEventRepositoryImpl
+class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[CollectionEventId, CollectionEvent](v => v.id)
     with CollectionEventRepository {
   import org.biobank.CommonValidations._
@@ -83,4 +84,5 @@ class CollectionEventRepositoryImpl
     getValues.filter { _.participantId == participantId }.toSet
   }
 
+  testData.testEvents.foreach(put)
 }

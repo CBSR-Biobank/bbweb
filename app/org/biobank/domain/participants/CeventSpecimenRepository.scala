@@ -1,14 +1,9 @@
 package org.biobank.domain.participants
 
-import org.biobank.domain.{
-  DomainValidation,
-  DomainError,
-  ReadWriteRepository,
-  ReadWriteRepositoryRefImpl
-}
-
-import javax.inject.Singleton
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Singleton}
+import org.biobank.TestData
+import org.biobank.domain._
 import scalaz.Scalaz._
 
 /**
@@ -24,7 +19,7 @@ trait CeventSpecimenRepository extends ReadWriteRepository[SpecimenId, CeventSpe
 }
 
 @Singleton
-class CeventSpecimenRepositoryImpl
+class CeventSpecimenRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[SpecimenId, CeventSpecimen](v => v.specimenId)
     with CeventSpecimenRepository {
 
@@ -48,5 +43,7 @@ class CeventSpecimenRepositoryImpl
       ceventSpecimens.headOption.toSuccessNel("list not expected to be empty")
     }
   }
+
+  testData.testCeventSpecimens.foreach(put)
 
 }

@@ -1,11 +1,11 @@
 package org.biobank.domain.study
 
-import org.biobank.domain._
-
-import javax.inject.Singleton
 import com.google.inject.ImplementedBy
-import scalaz.Scalaz._
+import javax.inject.{Inject , Singleton}
+import org.biobank.TestData
+import org.biobank.domain._
 import scalaz.Validation.FlatMap._
+import scalaz.Scalaz._
 
 @ImplementedBy(classOf[StudyRepositoryImpl])
 trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
@@ -21,7 +21,7 @@ trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
 }
 
 @Singleton
-class StudyRepositoryImpl
+class StudyRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id)
     with StudyRepository {
   import org.biobank.CommonValidations._
@@ -72,4 +72,5 @@ class StudyRepositoryImpl
     } yield retired
   }
 
+  testData.testStudies.foreach(put)
 }

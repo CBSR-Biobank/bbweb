@@ -1,10 +1,9 @@
 package org.biobank.domain.study
 
-import org.biobank.domain._
-
 import com.google.inject.ImplementedBy
-
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
+import org.biobank.TestData
+import org.biobank.domain._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -24,7 +23,7 @@ trait CollectionEventTypeRepository
 }
 
 @Singleton
-class CollectionEventTypeRepositoryImpl
+class CollectionEventTypeRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[CollectionEventTypeId, CollectionEventType](v => v.id)
     with CollectionEventTypeRepository {
   import org.biobank.CommonValidations._
@@ -60,4 +59,6 @@ class CollectionEventTypeRepositoryImpl
   def specimenSpecCanBeUpdated(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean = ???
 
   def annotationTypeInUse(annotationType: AnnotationType): Boolean = ???
+
+  testData.testEventTypes.foreach(put)
 }

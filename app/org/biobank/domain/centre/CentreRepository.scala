@@ -1,7 +1,8 @@
 package org.biobank.domain.centre
 
 import com.google.inject.ImplementedBy
-import javax.inject.Singleton
+import javax.inject.{Inject , Singleton}
+import org.biobank.TestData
 import org.biobank.domain._
 import org.biobank.domain.study.StudyId
 import scalaz.Scalaz._
@@ -23,7 +24,7 @@ trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
 }
 
 @Singleton
-class CentreRepositoryImpl
+class CentreRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[CentreId, Centre](v => v.id)
     with CentreRepository {
   import org.biobank.CommonValidations._
@@ -82,4 +83,6 @@ class CentreRepositoryImpl
       }.
       toSet
   }
+
+  testData.testCentres.foreach(put)
 }

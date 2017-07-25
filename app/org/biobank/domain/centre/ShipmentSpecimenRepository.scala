@@ -1,7 +1,8 @@
 package org.biobank.domain.centre
 
 import com.google.inject.ImplementedBy
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
+import org.biobank.TestData
 import org.biobank.domain._
 import org.biobank.domain.participants.{Specimen, SpecimenId}
 import scalaz.Scalaz._
@@ -20,7 +21,7 @@ trait ShipmentSpecimenRepository extends ReadWriteRepository[ShipmentSpecimenId,
 }
 
 @Singleton
-class ShipmentSpecimenRepositoryImpl
+class ShipmentSpecimenRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[ShipmentSpecimenId, ShipmentSpecimen](v => v.id)
     with ShipmentSpecimenRepository {
   import org.biobank.CommonValidations._
@@ -57,4 +58,6 @@ class ShipmentSpecimenRepositoryImpl
   def getBySpecimens(shipmentId: ShipmentId, specimens: Specimen*): DomainValidation[List[ShipmentSpecimen]] = {
     specimens.map(getBySpecimen(shipmentId, _)).toList.sequenceU
   }
+
+  testData.testShipmentSpecimens.foreach(put)
 }

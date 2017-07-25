@@ -1,9 +1,9 @@
 package org.biobank.domain.participants
 
-import org.biobank.domain._
-
-import javax.inject.Singleton
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Singleton}
+import org.biobank.TestData
+import org.biobank.domain._
 import scalaz.Scalaz._
 
 @ImplementedBy(classOf[SpecimenRepositoryImpl])
@@ -15,7 +15,7 @@ trait SpecimenRepository
 }
 
 @Singleton
-class SpecimenRepositoryImpl
+class SpecimenRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[SpecimenId, Specimen](v => v.id)
     with SpecimenRepository {
   import org.biobank.CommonValidations._
@@ -36,4 +36,5 @@ class SpecimenRepositoryImpl
       .toSuccessNel(inventoryIdCriteriaError(inventoryId))
   }
 
+  testData.testSpecimens.foreach(put)
 }
