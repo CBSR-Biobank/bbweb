@@ -112,12 +112,22 @@ define(function () {
       })
       .state('home.shipping.shipment.unpack.missing', {
         url: '/missing',
+        resolve: {
+          itemState: ['ShipmentItemState', function (ShipmentItemState) {
+            return ShipmentItemState.MISSING;
+          }]
+        },
         views: {
           'unpackedShipmentDetails': 'unpackedShipmentItems'
         }
       })
       .state('home.shipping.shipment.unpack.extra', {
         url: '/extra',
+        resolve: {
+          itemState: ['ShipmentItemState', function (ShipmentItemState) {
+            return ShipmentItemState.EXTRA;
+          }]
+        },
         views: {
           'unpackedShipmentDetails': 'unpackedShipmentExtra'
         }

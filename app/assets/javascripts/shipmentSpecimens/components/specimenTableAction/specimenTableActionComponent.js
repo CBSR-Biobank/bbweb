@@ -21,6 +21,13 @@ define(function () {
    * Controller for this component.
    */
   function SpecimenTableActionDirective() {
+    var vm = this;
+    vm.$onInit = onInit;
+
+    //---
+    function onInit() {
+
+    }
 
   }
 
