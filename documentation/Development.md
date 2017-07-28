@@ -52,7 +52,7 @@ to download the modules.
 
 OR: `web-assets:web-node-modules`
 
-##### npm packages
+##### NPM packages
 
 Install the following packages globally (npm install -g <pacakge_name>):
 
@@ -66,10 +66,6 @@ Install the following packages globally (npm install -g <pacakge_name>):
 ##### Client Tests
 
 Using Karma and Jasmine for client unit tests. Also using Grunt to run the tests.
-
-```sh
-sudo npm install -g karma-cli
-```
 
 To run JavaScript code coverage use command:
 

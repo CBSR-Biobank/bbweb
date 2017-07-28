@@ -29,26 +29,24 @@ sudo apt-get install mysql-server
 A database with 3 tables needs to be created on the MySQL server. See or change `akka-persistence-sql-async`
 settings in `conf/application.conf`. These settings are:
 
-| Setting                                         | Description                                                                                                                                |
-|-------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `akka-persistence-sql-async.user`               | the database user name.                                                                                                                    |
-| `akka-persistence-sql-async.password`           | the database user's password.                                                                                                              |
-| `akka-persistence-sql-async.url`                | the database name. This is usually a string that starts with `jdbc:mysql://localhost/`. The database name is then appended to this prefix. |
-| `akka-persistence-sql-async.metadata-table-name`| the database table used to store persistence metadata.                                                                                     |
-| `akka-persistence-sql-async.journal-table-name` | the database table used to store persistence journal.                                                                                      |
-| `akka-persistence-sql-async.snapshot-table-name`| the database table used to store persistence snapshots.                                                                                    |
+| Setting                       | Description                                                             | Default value  |
+|-------------------------------|-------------------------------------------------------------------------|----------------|
+| `slick.db.host`               | the host name or IP address for the machine hosting the MySQL database. | `localhost`    |
+| `slick.db.port`               | the port name on the host used by the MySQL database.                   | `3306`         |
+| `slick.db.dbname`             | the database name.                                                      | `bbweb`        |
+| `slick.db.user`               | the database user name.                                                 | `bbweb_user`   |
+| `slick.db.password`           | the database user's password.                                           | `bbweb_pwd`    |
 
 Here is an example of the MySQL commands to create a database and user using the default values.
 
 ```mysql
 create database bbweb;
-create user 'bbweb_user'@'localhost' identified by 'bbweb_PWDD';
+create user 'bbweb_user'@'localhost' identified by 'bbweb_pwd';
 grant all privileges on bbweb.* to 'bbweb_user'@'localhost' with grant option;
 ```
 
 See file `akka_persistence_schema.sql` in the root directory of this project for a sample script on how to
-create the required database tables. Modify the table names used in this script to match the settings you
-chose for the settings listed above.
+create the required database tables.
 
 ### Server URL
 
