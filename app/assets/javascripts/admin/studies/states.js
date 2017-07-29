@@ -14,9 +14,7 @@ define(function () {
       .state('home.admin.studies', {
         url: '/studies',
         views: {
-          'main@': {
-            component: 'studiesAdmin'
-          }
+          'main@': 'studiesAdmin'
         }
       })
       .state('home.admin.studies.add', {

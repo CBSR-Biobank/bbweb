@@ -15,9 +15,7 @@ define(function () {
           userCounts: resolveUserCounts
         },
         views: {
-          'main@': {
-            component: 'userAdmin'
-          }
+          'main@': 'userAdmin'
         }
       })
       .state('home.admin.users.user', {
@@ -26,17 +24,13 @@ define(function () {
           user: resolveUser
         },
         views: {
-          'main@': {
-            component: 'userProfile'
-          }
+          'main@': 'userProfile'
         }
       })
       .state('home.admin.users.user.roles', {
         url: '/roles',
         views: {
-          'main@': {
-            component: 'userRoles'
-          }
+          'main@': 'userRoles'
         }
       });
 
