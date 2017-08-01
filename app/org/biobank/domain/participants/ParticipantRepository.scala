@@ -26,6 +26,11 @@ class ParticipantRepositoryImpl @Inject() (val testData: TestData)
     with ParticipantRepository {
   import org.biobank.CommonValidations._
 
+  override def init(): Unit = {
+    super.init()
+    testData.testParticipants.foreach(put)
+  }
+
   def nextIdentity: ParticipantId = new ParticipantId(nextIdentityAsString)
 
   def notFound(id: ParticipantId): IdNotFound = IdNotFound(s"participant id: $id")
@@ -70,7 +75,5 @@ class ParticipantRepositoryImpl @Inject() (val testData: TestData)
   def allForStudy(studyId: StudyId): Set[Participant] = {
     getValues.filter(x => x.studyId == studyId).toSet
   }
-
-  testData.testParticipants.foreach(put)
 
 }

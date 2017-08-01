@@ -26,6 +26,11 @@ class ShipmentSpecimenRepositoryImpl @Inject() (val testData: TestData)
     with ShipmentSpecimenRepository {
   import org.biobank.CommonValidations._
 
+  override def init(): Unit = {
+    super.init()
+    testData.testShipmentSpecimens.foreach(put)
+  }
+
   def nextIdentity: ShipmentSpecimenId = new ShipmentSpecimenId(nextIdentityAsString)
 
   def notFound(id: ShipmentSpecimenId): IdNotFound = IdNotFound(s"shipment specimen id: $id")
@@ -59,5 +64,4 @@ class ShipmentSpecimenRepositoryImpl @Inject() (val testData: TestData)
     specimens.map(getBySpecimen(shipmentId, _)).toList.sequenceU
   }
 
-  testData.testShipmentSpecimens.foreach(put)
 }

@@ -438,4 +438,10 @@ class CollectionEventsProcessor @Inject() (
       (item.participantId == participantId) && (item.visitNumber == visitNumber) && (item.id != excludeCollectionEventId)
     }
   }
+
+  private def init(): Unit = {
+    collectionEventRepository.init
+  }
+
+  init
 }

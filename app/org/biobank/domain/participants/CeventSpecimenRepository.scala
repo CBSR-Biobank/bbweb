@@ -23,6 +23,11 @@ class CeventSpecimenRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[SpecimenId, CeventSpecimen](v => v.specimenId)
     with CeventSpecimenRepository {
 
+  override def init(): Unit = {
+    super.init()
+    testData.testCeventSpecimens.foreach(put)
+  }
+
   // only existing collection event and specimen IDs should be stored, never new IDs
   @SuppressWarnings(Array("org.wartremover.warts.Throw"))
   def nextIdentity: SpecimenId = throw new IllegalStateException("should not be used")
@@ -43,7 +48,5 @@ class CeventSpecimenRepositoryImpl @Inject() (val testData: TestData)
       ceventSpecimens.headOption.toSuccessNel("list not expected to be empty")
     }
   }
-
-  testData.testCeventSpecimens.foreach(put)
 
 }

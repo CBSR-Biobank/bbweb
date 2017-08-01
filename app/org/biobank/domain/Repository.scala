@@ -24,7 +24,9 @@ trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
   protected def nextIdentityAsString: String
 
-  def nextIdentity: K
+  def init(): Unit
+
+  def nextIdentity(): K
 
   def put(value: A): Unit
 
@@ -63,6 +65,10 @@ abstract class ReadRepositoryRefImpl[K, A](keyGetter: (A) => K) extends ReadRepo
 private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) => K)
     extends ReadRepositoryRefImpl[K, A](keyGetter)
     with ReadWriteRepository[K, A] {
+
+  def init(): Unit = {
+    removeAll
+  }
 
   protected def nextIdentityAsString: String =
     play.api.libs.Codecs.sha1(ReadWriteRepositoryRefImpl.md.digest(java.util.UUID.randomUUID.toString.getBytes))

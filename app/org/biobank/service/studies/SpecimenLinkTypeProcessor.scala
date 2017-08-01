@@ -319,4 +319,10 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     specimenLinkType.successNel[String]
   }
 
+  private def init(): Unit = {
+    specimenLinkTypeRepository.init
+  }
+
+  init
+
 }

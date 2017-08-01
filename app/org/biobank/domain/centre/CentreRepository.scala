@@ -29,6 +29,11 @@ class CentreRepositoryImpl @Inject() (val testData: TestData)
     with CentreRepository {
   import org.biobank.CommonValidations._
 
+  override def init(): Unit = {
+    super.init()
+    testData.testCentres.foreach(put)
+  }
+
   def nextIdentity: CentreId = new CentreId(nextIdentityAsString)
 
   def notFound(id: CentreId): IdNotFound = IdNotFound(s"centre id: $id")
@@ -84,5 +89,4 @@ class CentreRepositoryImpl @Inject() (val testData: TestData)
       toSet
   }
 
-  testData.testCentres.foreach(put)
 }

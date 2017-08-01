@@ -212,4 +212,10 @@ class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeReposito
     // it needs to be replaced with the real check
     processingType.successNel[String]
   }
+
+  private def init(): Unit = {
+    processingTypeRepository.init
+  }
+
+  init
 }

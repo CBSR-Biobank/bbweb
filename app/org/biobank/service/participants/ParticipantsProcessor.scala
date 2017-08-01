@@ -314,4 +314,10 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       (item.uniqueId == uniqueId) && (item.id != excludeParticipantId)
     }
   }
+
+  private def init(): Unit = {
+    participantRepository.init
+  }
+
+  init
 }

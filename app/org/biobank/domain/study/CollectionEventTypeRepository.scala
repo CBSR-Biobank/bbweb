@@ -28,6 +28,11 @@ class CollectionEventTypeRepositoryImpl @Inject() (val testData: TestData)
     with CollectionEventTypeRepository {
   import org.biobank.CommonValidations._
 
+  override def init(): Unit = {
+    super.init()
+    testData.testEventTypes.foreach(put)
+  }
+
   def nextIdentity: CollectionEventTypeId = new CollectionEventTypeId(nextIdentityAsString)
 
   def notFound(id: CollectionEventTypeId): IdNotFound = IdNotFound(s"collection event type: $id")
@@ -60,5 +65,4 @@ class CollectionEventTypeRepositoryImpl @Inject() (val testData: TestData)
 
   def annotationTypeInUse(annotationType: AnnotationType): Boolean = ???
 
-  testData.testEventTypes.foreach(put)
 }

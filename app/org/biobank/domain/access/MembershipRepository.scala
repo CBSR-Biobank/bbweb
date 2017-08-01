@@ -26,6 +26,17 @@ class MembershipRepositoryImpl
 
   //private val log: Logger = LoggerFactory.getLogger(this.getClass)
 
+  override def init(): Unit = {
+    super.init()
+    put(Membership(id           = nextIdentity,
+                   version      = 0L,
+                   timeAdded    = Global.StartOfTime,
+                   timeModified = None,
+                   userIds      = Set(Global.DefaultUserId),
+                   studyInfo    = MembershipStudyInfo(true, Set.empty[StudyId]),
+                   centreInfo   = MembershipCentreInfo(true, Set.empty[CentreId])))
+  }
+
   def nextIdentity: MembershipId = new MembershipId(nextIdentityAsString)
 
   def domainNotFound(id: MembershipId): IdNotFound = IdNotFound(s"user id: $id")
@@ -37,16 +48,4 @@ class MembershipRepositoryImpl
   override def getByKey(id: MembershipId): DomainValidation[Membership] = {
     getMap.get(id).toSuccessNel(domainNotFound(id).toString)
   }
-
-  private def init(): Unit = {
-    put(Membership(id           = nextIdentity,
-                   version      = 0L,
-                   timeAdded    = Global.StartOfTime,
-                   timeModified = None,
-                   userIds      = Set(Global.DefaultUserId),
-                   studyInfo    = MembershipStudyInfo(true, Set.empty[StudyId]),
-                   centreInfo   = MembershipCentreInfo(true, Set.empty[CentreId])))
-  }
-
-  init
 }

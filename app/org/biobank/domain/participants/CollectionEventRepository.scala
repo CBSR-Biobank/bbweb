@@ -29,6 +29,11 @@ class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
     with CollectionEventRepository {
   import org.biobank.CommonValidations._
 
+  override def init(): Unit = {
+    super.init()
+    testData.testEvents.foreach(put)
+  }
+
   def nextIdentity: CollectionEventId = new CollectionEventId(nextIdentityAsString)
 
   def notFound(id: CollectionEventId): IdNotFound = IdNotFound(s"collection event id: $id")
@@ -84,5 +89,4 @@ class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
     getValues.filter { _.participantId == participantId }.toSet
   }
 
-  testData.testEvents.foreach(put)
 }

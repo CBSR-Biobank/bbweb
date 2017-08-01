@@ -30,6 +30,11 @@ class ShipmentRepositoryImpl @Inject() (val testData: TestData)
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
+  override def init(): Unit = {
+    super.init()
+    testData.testShipments.foreach(put)
+  }
+
   def nextIdentity: ShipmentId = new ShipmentId(nextIdentityAsString)
 
   def notFound(id: ShipmentId): IdNotFound = IdNotFound(s"shipment id: $id")
@@ -56,5 +61,4 @@ class ShipmentRepositoryImpl @Inject() (val testData: TestData)
     } yield unpacked
   }
 
-  testData.testShipments.foreach(put)
 }

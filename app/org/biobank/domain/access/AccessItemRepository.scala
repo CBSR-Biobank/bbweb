@@ -37,6 +37,12 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
 
   def accessItemNotFound(id: AccessItemId): IdNotFound = IdNotFound(s"accessItem id: $id")
 
+  override def init(): Unit = {
+    super.init()
+    initPermissions
+    initRoles
+  }
+
   override def getByKey(id: AccessItemId): DomainValidation[AccessItem] = {
     getMap.get(id).toSuccessNel(accessItemNotFound(id).toString)
   }
@@ -110,6 +116,20 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                Set(RoleId.UserAdministrator)),
         createPermissionSimple(PermissionId.UserRead,
                                "User can view information for other users",
+                               Set(RoleId.UserAdministrator)),
+
+        // MEMBERSHIP PERMISSIONS
+        createPermissionSimple(PermissionId.MembershipRead,
+                               "User can view memberships",
+                               Set(RoleId.UserAdministrator)),
+        createPermissionSimple(PermissionId.MembershipCreate,
+                               "User can create memberships",
+                               Set(RoleId.UserAdministrator)),
+        createPermissionSimple(PermissionId.MembershipUpdate,
+                               "User can update memberships",
+                               Set(RoleId.UserAdministrator)),
+        createPermissionSimple(PermissionId.MembershipDelete,
+                               "User can remove a membership",
                                Set(RoleId.UserAdministrator)),
 
         // CENTRE PERMISSIONS
@@ -234,10 +254,13 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
 
         createRole(roleId      = RoleId.UserAdministrator,
                    description = "UserAdministrator",
-                   parentIds   = Set(RoleId.WebsiteAdministrator),
+                   parentIds   = Set(RoleId.SystemAdministrator),
                    childrenIds = Set(PermissionId.UserUpdate,
                                      PermissionId.UserChangeState,
-                                     PermissionId.UserRead)),
+                                     PermissionId.UserRead,
+                                     PermissionId.MembershipCreate,
+                                     PermissionId.MembershipUpdate,
+                                     PermissionId.MembershipDelete)),
 
         createRole(roleId      = RoleId.CentreUser,
                    description = "Centre User",
@@ -246,7 +269,7 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
 
         createRole(roleId      = RoleId.CentreAdministrator,
                    description = "Centre Administrator",
-                   parentIds   = Set(RoleId.WebsiteAdministrator),
+                   parentIds   = Set(RoleId.SystemAdministrator),
                    childrenIds = Set(PermissionId.CentreUpdate,
                                      PermissionId.CentreChangeState,
                                      RoleId.CentreUser,
@@ -262,7 +285,7 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
 
         createRole(roleId      = RoleId.StudyAdministrator,
                    description = "Study Administrator",
-                   parentIds   = Set(RoleId.WebsiteAdministrator),
+                   parentIds   = Set(RoleId.SystemAdministrator),
                    childrenIds = Set(PermissionId.StudyUpdate,
                                      PermissionId.StudyChangeState,
                                      RoleId.StudyUser)),
@@ -291,8 +314,8 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                                      PermissionId.SpecimenRead,
                                      PermissionId.CollectionEventRead)),
 
-        createRole(roleId      = RoleId.WebsiteAdministrator,
-                   description = "WebsiteAdministrator",
+        createRole(roleId      = RoleId.SystemAdministrator,
+                   description = "SystemAdministrator",
                    userIds     = Set(Global.DefaultUserId),
                    parentIds   = Set.empty[AccessItemId],
                    childrenIds = Set(PermissionId.StudyCreate,
@@ -330,11 +353,4 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
                description = description,
                parentIds   = Set.empty[AccessItemId],
                childrenIds = Set.empty[AccessItemId])
-
-  private def init(): Unit = {
-    initPermissions
-    initRoles
-  }
-
-  init
 }

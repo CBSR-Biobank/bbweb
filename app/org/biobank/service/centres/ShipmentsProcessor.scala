@@ -1085,4 +1085,11 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     } yield shipmentSpecimens
   }
 
+  private def init(): Unit = {
+    shipmentRepository.init
+    shipmentSpecimenRepository.init
+  }
+
+  init
+
 }

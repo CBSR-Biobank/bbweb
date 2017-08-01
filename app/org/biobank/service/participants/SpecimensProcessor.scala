@@ -311,4 +311,11 @@ class SpecimensProcessor @Inject() (
     if (children.isEmpty) true.successNel[String]
     else ServiceError(s"specimen has child specimens: ${specimen.id}").failureNel[Boolean]
   }
+
+  private def init(): Unit = {
+    ceventSpecimenRepository.init
+    specimenRepository.init
+  }
+
+  init
 }

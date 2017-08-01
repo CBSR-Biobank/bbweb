@@ -612,4 +612,9 @@ class StudiesProcessor @Inject() (
     }
   }
 
+  private def init(): Unit = {
+    studyRepository.init
+  }
+
+  init
 }

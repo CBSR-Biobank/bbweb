@@ -26,6 +26,11 @@ class StudyRepositoryImpl @Inject() (val testData: TestData)
     with StudyRepository {
   import org.biobank.CommonValidations._
 
+  override def init(): Unit = {
+    super.init()
+    testData.testStudies.foreach(put)
+  }
+
   def nextIdentity: StudyId = new StudyId(nextIdentityAsString)
 
   def studyNotFound(id: StudyId): IdNotFound = IdNotFound(s"study id: $id")
@@ -72,5 +77,4 @@ class StudyRepositoryImpl @Inject() (val testData: TestData)
     } yield retired
   }
 
-  testData.testStudies.foreach(put)
 }

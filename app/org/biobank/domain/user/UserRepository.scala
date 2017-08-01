@@ -40,6 +40,12 @@ class UserRepositoryImpl @Inject() (val config:   Configuration,
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
+  override def init(): Unit = {
+    super.init()
+    createDefaultUser
+    testData.testUsers.foreach(put)
+  }
+
   def nextIdentity: UserId = new UserId(nextIdentityAsString)
 
   def notFound(id: UserId): IdNotFound = IdNotFound(s"user id: $id")
@@ -112,7 +118,4 @@ class UserRepositoryImpl @Inject() (val config:   Configuration,
                    salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
                    avatarUrl    = None))
   }
-
-  createDefaultUser
-  testData.testUsers.foreach(put)
 }

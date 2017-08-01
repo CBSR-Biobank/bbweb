@@ -544,4 +544,10 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
 
     processUpdateCmd(cmd, internal, applyEvent)
   }
+
+  private def init(): Unit = {
+    centreRepository.init
+  }
+
+  init
 }

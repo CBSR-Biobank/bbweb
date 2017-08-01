@@ -541,4 +541,10 @@ class UsersProcessor @Inject() (val config:         Configuration,
     PasswordInfo(newPwd, newSalt)
   }
 
+  private def init(): Unit = {
+    userRepository.init
+  }
+
+  init
+
 }

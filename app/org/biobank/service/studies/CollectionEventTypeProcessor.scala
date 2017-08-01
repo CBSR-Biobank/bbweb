@@ -537,4 +537,9 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     }
   }
 
+  private def init(): Unit = {
+    collectionEventTypeRepository.init
+  }
+
+  init
 }

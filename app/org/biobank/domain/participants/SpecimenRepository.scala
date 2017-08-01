@@ -20,6 +20,11 @@ class SpecimenRepositoryImpl @Inject() (val testData: TestData)
     with SpecimenRepository {
   import org.biobank.CommonValidations._
 
+  override def init(): Unit = {
+    super.init()
+    testData.testSpecimens.foreach(put)
+  }
+
   def nextIdentity: SpecimenId = new SpecimenId(nextIdentityAsString)
 
   def notFound(id: SpecimenId): IdNotFound = IdNotFound(s"specimen id: $id")
@@ -36,5 +41,4 @@ class SpecimenRepositoryImpl @Inject() (val testData: TestData)
       .toSuccessNel(inventoryIdCriteriaError(inventoryId))
   }
 
-  testData.testSpecimens.foreach(put)
 }
