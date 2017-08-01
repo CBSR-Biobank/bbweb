@@ -4,7 +4,7 @@ val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 
 version := conf.getString("app.version")
 
-val akkaVer = "2.5.3"
+val akkaVer = "2.5.4"
 val angularVer = "1.6.5"
 
 name := "bbweb"
@@ -25,7 +25,7 @@ packageSummary in Linux := "Biorepository application for tracking biospecimens.
 
 packageDescription := "Biorepository application for tracking biospecimens."
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.2")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.3")
 
 scalacOptions in Compile ++= Seq(
     "-target:jvm-1.8",
@@ -91,21 +91,21 @@ libraryDependencies ++= Seq(
     ehcache,
     filters,
     "org.scala-stm"               %% "scala-stm"                           % "0.8",
-    "com.typesafe.play"           %% "play-json"                           % "2.6.2",
-    ( "com.typesafe.akka"         %% "akka-persistence"                    % "2.5.3"   % "compile"  )
+    "com.typesafe.play"           %% "play-json"                           % "2.6.3",
+    ( "com.typesafe.akka"         %% "akka-persistence"                    % akkaVer   % "compile"  )
       .excludeAll(ExclusionRule(organization="com.google.protobuf")),
-    "com.typesafe.akka"           %% "akka-persistence-query"              % "2.5.3"   % "compile",
+    "com.typesafe.akka"           %% "akka-persistence-query"              % akkaVer   % "compile",
     "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
     ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "2.5.2.0" % "compile"  )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "mysql"                       % "mysql-connector-java"                 % "6.0.6",
-    "org.scalaz"                  %% "scalaz-core"                         % "7.2.14"  % "compile",
+    "org.scalaz"                  %% "scalaz-core"                         % "7.2.15"  % "compile",
     "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
     "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.1",
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
-    "com.typesafe.play"           %% "play-mailer"                         % "6.0.0",
-    "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.0",
-    "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.7.1",
+    "com.typesafe.play"           %% "play-mailer"                         % "6.0.1",
+    "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.1",
+    "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.7.2",
     "com.github.nscala-time"      %% "nscala-time"                         % "2.16.0",
     // WebJars infrastructure
     ( "org.webjars"               %% "webjars-play"                        % "2.6.1")
@@ -113,8 +113,8 @@ libraryDependencies ++= Seq(
     // WebJars dependencies
     "org.webjars"                 %  "requirejs"                           % "2.3.3",
     "org.webjars.npm"             %  "angular"                             % angularVer,
-    "org.webjars.npm"             %  "angular-animate"                     % "1.6.4",
-    "org.webjars.npm"             %  "angular-cookies"                     % "1.6.4",
+    "org.webjars.npm"             %  "angular-animate"                     % angularVer,
+    "org.webjars.npm"             %  "angular-cookies"                     % angularVer,
     ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" )
       .exclude("org.webjars.bower", "angular"),
     "org.webjars.npm"             %  "angular-messages"                    % angularVer,
@@ -136,7 +136,7 @@ libraryDependencies ++= Seq(
     ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.5.1.1"  % "test" )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
-    "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.0"   % "test",
+    "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.1"   % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
     "org.codehaus.janino"         %  "janino"                              % "3.0.7"   % "test",
     "org.mockito"                 %  "mockito-core"                        % "2.8.47"  % "test"
