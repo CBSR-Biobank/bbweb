@@ -18,8 +18,8 @@ define(function (require) {
              require('../../../assets/javascripts/test/factory'))
     .service('testUtils',
              require('../../../assets/javascripts/test/testUtils'))
-    .factory('EntityTestSuiteMixin',
-             require('../../../assets/javascripts/test/EntityTestSuiteMixin'))
+    .factory('EntityTestSuite',
+             require('../../../assets/javascripts/test/EntityTestSuite'))
     .factory('ModalTestSuiteMixin',
              require('../../../assets/javascripts/test/ModalTestSuiteMixin'))
     .factory('TestSuiteMixin',

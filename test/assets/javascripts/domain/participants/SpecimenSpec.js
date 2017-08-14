@@ -15,7 +15,7 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(EntityTestSuiteMixin,
+    beforeEach(inject(function(EntityTestSuite,
                                ServerReplyMixin,
                                AnnotationsEntityTestSuiteMixin,
                                testUtils,
@@ -23,7 +23,7 @@ define(function (require) {
       var self = this;
 
       _.extend(self,
-               EntityTestSuiteMixin.prototype,
+               EntityTestSuite.prototype,
                ServerReplyMixin.prototype,
                AnnotationsEntityTestSuiteMixin.prototype);
 

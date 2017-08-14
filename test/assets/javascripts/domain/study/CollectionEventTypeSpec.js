@@ -13,14 +13,14 @@ define(function (require) {
 
   var CollectionEventType;
 
-  function SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin) {
+  function SuiteMixinFactory(EntityTestSuite, ServerReplyMixin) {
 
     function SuiteMixin() {
-      EntityTestSuiteMixin.call(this);
+      EntityTestSuite.call(this);
       ServerReplyMixin.call(this);
     }
 
-    SuiteMixin.prototype = Object.create(EntityTestSuiteMixin.prototype);
+    SuiteMixin.prototype = Object.create(EntityTestSuite.prototype);
     _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
@@ -84,8 +84,8 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(EntityTestSuiteMixin, ServerReplyMixin, testDomainEntities) {
-      var SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin);
+    beforeEach(inject(function(EntityTestSuite, ServerReplyMixin, testDomainEntities) {
+      var SuiteMixin = new SuiteMixinFactory(EntityTestSuite, ServerReplyMixin);
       _.extend(this, SuiteMixin.prototype);
 
       this.injectDependencies('$rootScope',

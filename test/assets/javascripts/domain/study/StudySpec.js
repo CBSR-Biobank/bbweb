@@ -9,14 +9,14 @@ define(function (require) {
       _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
-  function SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin) {
+  function SuiteMixinFactory(EntityTestSuite, ServerReplyMixin) {
 
     function SuiteMixin() {
-      EntityTestSuiteMixin.call(this);
+      EntityTestSuite.call(this);
       ServerReplyMixin.call(this);
     }
 
-    SuiteMixin.prototype = Object.create(EntityTestSuiteMixin.prototype);
+    SuiteMixin.prototype = Object.create(EntityTestSuite.prototype);
     _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
@@ -52,11 +52,11 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(EntityTestSuiteMixin,
+    beforeEach(inject(function(EntityTestSuite,
                                ServerReplyMixin,
                                testDomainEntities) {
       var self = this,
-          SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin, ServerReplyMixin);
+          SuiteMixin = new SuiteMixinFactory(EntityTestSuite, ServerReplyMixin);
 
       _.extend(self, SuiteMixin.prototype);
 

@@ -77,8 +77,8 @@ define(function(require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(EntityTestSuiteMixin, testUtils, testDomainEntities) {
-      var SuiteMixin = new SuiteMixinFactory(EntityTestSuiteMixin);
+    beforeEach(inject(function(EntityTestSuite, testUtils, testDomainEntities) {
+      var SuiteMixin = new SuiteMixinFactory(EntityTestSuite);
       _.extend(this, SuiteMixin.prototype);
       this.injectDependencies('AppConfig',
                               'Study',

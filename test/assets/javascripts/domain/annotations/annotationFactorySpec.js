@@ -20,8 +20,8 @@ define([
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function(EntityTestSuiteMixin) {
-      _.extend(this, EntityTestSuiteMixin.prototype);
+    beforeEach(inject(function(EntityTestSuite) {
+      _.extend(this, EntityTestSuite.prototype);
       this.injectDependencies('annotationFactory',
                               'AnnotationType',
                               'AnnotationValueType',

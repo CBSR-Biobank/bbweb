@@ -5,21 +5,21 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  EntityTestSuiteMixinFactory.$inject = ['$httpBackend', 'TestSuiteMixin'];
+  EntityTestSuiteFactory.$inject = ['$httpBackend', 'TestSuiteMixin'];
 
-  function EntityTestSuiteMixinFactory($httpBackend, TestSuiteMixin) {
+  function EntityTestSuiteFactory($httpBackend, TestSuiteMixin) {
 
     /**
      * A mixin for domain entity test suites.
      *
      * @mixin entityTestSuite
      */
-    function EntityTestSuiteMixin() {
+    function EntityTestSuite() {
       TestSuiteMixin.call(this);
     }
 
-    EntityTestSuiteMixin.prototype = Object.create(TestSuiteMixin.prototype);
-    EntityTestSuiteMixin.prototype.constructor = EntityTestSuiteMixin;
+    EntityTestSuite.prototype = Object.create(TestSuiteMixin.prototype);
+    EntityTestSuite.prototype.constructor = EntityTestSuite;
 
     /**
      * @method
@@ -49,7 +49,7 @@ define(['lodash'], function (_) {
      * @param {boolean} [appendExpectedVersion] - If TRUE, the 'expectedVersion' field is added to the request
      *        JSON. Default value is TRUE.
      */
-    EntityTestSuiteMixin.prototype.updateEntity = function (entity,
+    EntityTestSuite.prototype.updateEntity = function (entity,
                                                             updateFuncName,
                                                             updateParams,
                                                             url,
@@ -73,9 +73,9 @@ define(['lodash'], function (_) {
       $httpBackend.flush();
     };
 
-    return EntityTestSuiteMixin;
+    return EntityTestSuite;
   }
 
-  return EntityTestSuiteMixinFactory;
+  return EntityTestSuiteFactory;
 
 });

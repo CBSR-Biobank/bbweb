@@ -20,10 +20,10 @@ define(function (require) {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-    beforeEach(inject(function (ServerReplyMixin, EntityTestSuiteMixin, testDomainEntities) {
+    beforeEach(inject(function (ServerReplyMixin, EntityTestSuite, testDomainEntities) {
       var self = this;
 
-      _.extend(this, EntityTestSuiteMixin.prototype, ServerReplyMixin.prototype);
+      _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
