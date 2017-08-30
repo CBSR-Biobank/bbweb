@@ -3,14 +3,17 @@ package org.biobank.service.access
 import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
+import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.Global
+import org.biobank.domain.{ConcurrencySafeEntity, HasUniqueName}
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.access.RoleId._
 import org.biobank.domain.user.{ActiveUser, User, UserId, UserRepository}
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.centre.{CentreId, CentreRepository}
+import org.biobank.dto._
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.event.AccessEvents._
@@ -45,17 +48,23 @@ trait AccessService extends BbwebService {
                                studyId:      Option[StudyId],
                                centreId:     Option[CentreId]): ServiceValidation[Boolean]
 
-  def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership]
+  def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[MembershipDto]
 
   def getMemberships(requestUserId: UserId,
                      filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[Membership]]
+                     sort:          SortString): ServiceValidation[Seq[MembershipDto]]
 
   def getUserMembership(userId: UserId): ServiceValidation[UserMembership]
 
   def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Membership]]
 
   def processRemoveMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Boolean]]
+
+  def entityInfoDto[T <: ConcurrencySafeEntity[_] with HasUniqueName](entities: Set[T]): Set[MembershipEntityInfoDto]
+
+  def entitySetDto[T <: ConcurrencySafeEntity[_] with HasUniqueName](hasAllEntities: Boolean,
+                                                                     entities:       Set[T])
+      : MembershipEntitySetDto
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
@@ -120,31 +129,42 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     } yield (permission && member)
   }
 
-  def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership] = {
+  def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[MembershipDto] = {
     whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
-      membershipRepository.getByKey(membershipId)
+      for {
+        membership <- membershipRepository.getByKey(membershipId)
+        dto        <- membershipToDto(membership)
+      } yield dto
     }
   }
 
   def getMemberships(requestUserId: UserId,
                      filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[Membership]] = {
+                     sort:          SortString): ServiceValidation[Seq[MembershipDto]] = {
     whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
       val allMemberships = membershipRepository.getValues.toSet
       val sortStr = if (sort.expression.isEmpty) new SortString("name")
                     else sort
-      for {
-        memberships     <- MembershipFilter.filterMemberships(allMemberships, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { Membership.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-      } yield {
-        val result = memberships.toSeq.sortWith(sortFunc)
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
+      val v = for {
+          memberships     <- MembershipFilter.filterMemberships(allMemberships, filter)
+          sortExpressions <- { QuerySortParser(sortStr).
+                                toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+          firstSort       <- { sortExpressions.headOption.
+                                toSuccessNel(ServiceError("at least one sort expression is required")) }
+          sortFunc        <- { Membership.sort2Compare.get(firstSort.name).
+                                toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+        } yield {
+          val result = memberships.toSeq.sortWith(sortFunc)
+
+          if (firstSort.order == AscendingOrder) result
+          else result.reverse
+        }
+      v.flatMap { seq =>
+        seq
+          .map(membershipToDto)
+          .toList.sequenceU
+          .leftMap(err => InternalServerError.nel)
+          .map(_.toSeq)
       }
     }
   }
@@ -346,6 +366,19 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     )
   }
 
+  def entityInfoDto[T <: ConcurrencySafeEntity[_] with HasUniqueName](entities: Set[T])
+      : Set[MembershipEntityInfoDto] = {
+    entities.map { entity =>
+      MembershipEntityInfoDto(entity.id.toString, entity.name)
+    }
+  }
+
+  def entitySetDto[T <: ConcurrencySafeEntity[_] with HasUniqueName](hasAllEntities: Boolean,
+                                                                     entities:       Set[T])
+      : MembershipEntitySetDto = {
+    MembershipEntitySetDto(hasAllEntities, entityInfoDto(entities))
+  }
+
   // should only called if userId is valid, studyId is None or valid, and centreId is None or valid
   private def isMemberInternal(userId:   UserId,
                                studyId:  Option[StudyId],
@@ -456,12 +489,52 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                                         specimenCollector.id,
                                         shippingAdmin.id,
                                         shippingUser.id),
-                     studyData    = MembershipEntityData(true, Set.empty[StudyId]),
-                     centreData   = MembershipEntityData(true, Set.empty[CentreId]))
+                     studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
+                     centreData   = MembershipEntitySet(true, Set.empty[CentreId]))
         )
 
       memberships.foreach(membershipRepository.put)
     }
+  }
+
+  private def membershipToDto(membership: Membership): ServiceValidation[MembershipDto] ={
+    for {
+      users <- {
+        membership.studyData.ids
+          .map(studyRepository.getByKey)
+          .toList.sequenceU
+          .leftMap(err => InternalServerError.nel)
+          .map(_.toSet)
+      }
+      studies <- {
+        membership.userIds
+          .map(userRepository.getByKey)
+          .toList.sequenceU
+          .leftMap(err => InternalServerError.nel)
+          .map(_.toSet)
+      }
+      centres <- {
+        membership.centreData.ids
+          .map(centreRepository.getByKey)
+          .toList.sequenceU
+          .leftMap(err => InternalServerError.nel)
+          .map(_.toSet)
+      }
+    } yield {
+      val userData        = entityInfoDto(users)
+      val studyEntitySet  = entitySetDto(membership.studyData.allEntities, studies)
+      val centreEntitySet = entitySetDto(membership.centreData.allEntities, centres)
+
+      MembershipDto(id           = membership.id.id,
+                    version      = membership.version,
+                    timeAdded    = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                    timeModified = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+                    name         = membership.name,
+                    description  = membership.description,
+                    userData     = userData,
+                    studyData    = studyEntitySet,
+                    centreData   = centreEntitySet)
+      }
   }
 
   createAccessUsers

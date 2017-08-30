@@ -60,7 +60,9 @@ define(function (require) {
       this.putHtmlTemplates(
         '/assets/javascripts/admin/centres/components/centresPagedList/centresPagedList.html',
         '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
-        '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');
+        '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html',
+        '/assets/javascripts/common/components/stateAndTimestamps/stateAndTimestamps.html',
+        '/assets/javascripts/common/components/entityTimestamps/entityTimestamps.html');
 
       this.injectDependencies('$q',
                               '$rootScope',

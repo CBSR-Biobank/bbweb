@@ -357,8 +357,8 @@ class TestData @Inject() (config:         Configuration,
                    name         = "Test data - all studies and all centres",
                    description  = None,
                    userIds      = userIds,
-                   studyData    = MembershipEntityData(true, Set.empty[StudyId]),
-                   centreData   = MembershipEntityData(true, Set.empty[CentreId]))
+                   studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
+                   centreData   = MembershipEntitySet(true, Set.empty[CentreId]))
       )
     }
   }

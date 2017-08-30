@@ -35,8 +35,8 @@ class MembershipRepositoryImpl
                    name         = "All studies and all centres",
                    description  = None,
                    userIds      = Set(Global.DefaultUserId),
-                   studyData    = MembershipEntityData(true, Set.empty[StudyId]),
-                   centreData   = MembershipEntityData(true, Set.empty[CentreId])))
+                   studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
+                   centreData   = MembershipEntitySet(true, Set.empty[CentreId])))
   }
 
   def nextIdentity: MembershipId = new MembershipId(nextIdentityAsString)

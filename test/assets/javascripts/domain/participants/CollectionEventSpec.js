@@ -7,9 +7,10 @@
 define(function (require) {
   'use strict';
 
-  var mocks   = require('angularMocks'),
-      _       = require('lodash'),
-      sprintf = require('sprintf-js').sprintf;
+  var mocks                           = require('angularMocks'),
+      _                               = require('lodash'),
+      sprintf                         = require('sprintf-js').sprintf,
+      entityWithAnnotationsSharedSpec = require('../../test/entityWithAnnotationsSharedSpec');
 
   describe('CollectionEvent', function() {
 
@@ -163,10 +164,9 @@ define(function (require) {
       var self = this,
           jsonAnnotation = {},
           jsonCet,
-          jsonCevent,
-          ceventType;
+          jsonCevent;
 
-      var annotationType = new this.AnnotationType(this.factory.annotationType());
+      var annotationType = this.AnnotationType.create(this.factory.annotationType());
 
       // put an invalid value in jsonAnnotation.annotationTypeId
       _.extend(
@@ -178,12 +178,11 @@ define(function (require) {
                                                  { annotationTypes: [annotationType] });
 
       jsonCevent = this.factory.collectionEvent();
-      ceventType = this.CollectionEventType.create(jsonCet);
 
       expect(function () {
         return self.CollectionEvent.create(
           _.extend(jsonCevent, {
-            collectionEventType: ceventType,
+            collectionEventType: jsonCet,
             annotations: [ jsonAnnotation ]
           }));
       }).toThrowError(/annotation type not found/);
@@ -574,69 +573,35 @@ define(function (require) {
       this.$httpBackend.flush();
     });
 
-    it('can add an annotation type', function() {
-      var self = this,
-          jsonCevent = this.factory.collectionEvent(),
-          cevent = new this.CollectionEvent(jsonCevent),
-          annotationType = new this.AnnotationType(this.factory.annotationType()),
-          annotation = this.annotationFactory.create(undefined, annotationType),
-          jsonAnnotation = _.extend(annotation.getServerAnnotation(), { expectedVersion: cevent.version }),
-          thenTriggered = false;
+    describe('updates to annotations', function () {
 
-      this.$httpBackend.expectPOST(uriWithPath('annot', cevent.id), jsonAnnotation)
-        .respond(this.reply(jsonCevent));
+      var context = {};
 
-      cevent.addAnnotation(annotation).then(function (reply) {
-        expect(reply).toEqual(jasmine.any(self.CollectionEvent));
-        thenTriggered = true;
-      });
-      this.$httpBackend.flush();
-      expect(thenTriggered).toBeTrue();
-    });
-
-    describe('when removing annotations', function() {
-
-      it('can remove an annotation type', function() {
-        var self = this,
-            annotationType = this.factory.annotationType(),
+      beforeEach(inject(function () {
+        var annotationType = this.factory.annotationType(),
             annotation = this.factory.annotation(undefined, annotationType),
             jsonCet    = this.factory.collectionEventType({ annotationTypes: [ annotationType ]}),
             jsonCevent = this.factory.collectionEvent({
               collectionEvenType: jsonCet,
               annotations: [ annotation ]
             }),
-            cevent = this.CollectionEvent.create(jsonCevent),
-            url = sprintf('%s/%s/%d',
-                          uriWithPath('annot', cevent.id),
-                          annotation.annotationTypeId,
-                          cevent.version),
-            thenTriggered = false;
+            cevent = this.CollectionEvent.create(jsonCevent);
 
-        this.$httpBackend.expectDELETE(url).respond(this.reply(true));
+        context.entityType     = this.CollectionEvent;
+        context.entity         = cevent;
+        context.updateFuncName = 'addAnnotation';
+        context.removeFuncName = 'removeAnnotation';
+        context.annotation     = cevent.annotations[0];
+        context.$httpBackend   = this.$httpBackend;
+        context.addUrl         = uriWithPath('annot', cevent.id);
+        context.removeUrl      = sprintf('%s/%d/%s',
+                                         uriWithPath('annot', cevent.id),
+                                         cevent.version,
+                                         annotation.annotationTypeId);
+        context.response       = jsonCevent;
+      }));
 
-        cevent.removeAnnotation(annotation).then(function (reply) {
-          expect(reply).toEqual(jasmine.any(self.CollectionEvent));
-          thenTriggered = true;
-        });
-        this.$httpBackend.flush();
-        expect(thenTriggered).toBeTrue();
-      });
-
-      it('fails when removing an annotation it does not contain', function() {
-        var annotationType = this.factory.annotationType(),
-            annotation = this.factory.annotation(undefined, annotationType),
-            jsonCevent = this.factory.collectionEvent(),
-            cevent = new this.CollectionEvent(jsonCevent),
-            catchTriggered = false;
-
-        cevent.removeAnnotation(annotation)
-          .catch(function (err) {
-            expect(err.indexOf('annotation with annotation type ID not present')).not.toBeNull();
-            catchTriggered = true;
-          });
-        this.$rootScope.$digest();
-        expect(catchTriggered).toBeTrue();
-      });
+      entityWithAnnotationsSharedSpec(context);
 
     });
 

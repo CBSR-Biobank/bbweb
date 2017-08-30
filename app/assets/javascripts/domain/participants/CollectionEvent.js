@@ -338,10 +338,7 @@ define(function(require) {
     };
 
     CollectionEvent.prototype.update = function (path, reqJson) {
-      return ConcurrencySafeEntity.prototype.update.call(this, uriWithPath(path, this.id), reqJson)
-        .then(function (updatedCevent) {
-          return $q.when(CollectionEvent.create(updatedCevent));
-        });
+      return ConcurrencySafeEntity.prototype.update.call(this, uriWithPath(path, this.id), reqJson);
     };
 
     CollectionEvent.prototype.updateVisitNumber = function (visitNumber) {
@@ -357,10 +354,10 @@ define(function(require) {
     };
 
     CollectionEvent.prototype.removeAnnotation = function (annotation) {
-      var url = sprintf('%s/%s/%d',
+      var url = sprintf('%s/%d/%s',
                         uri('annot', this.id),
-                        annotation.annotationTypeId,
-                        this.version);
+                        this.version,
+                        annotation.annotationTypeId);
       return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url);
     };
 

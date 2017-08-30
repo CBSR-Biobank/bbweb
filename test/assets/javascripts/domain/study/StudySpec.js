@@ -354,7 +354,7 @@ define(function (require) {
                           this.study.version,
                           this.annotationType.id);
 
-        this.$httpBackend.whenDELETE(url).respond(this.reply(true));
+        this.$httpBackend.whenDELETE(url).respond(this.reply(this.jsonStudy));
         this.study.removeAnnotationType(this.annotationType)
           .then(this.expectStudy)
           .catch(this.failTest);

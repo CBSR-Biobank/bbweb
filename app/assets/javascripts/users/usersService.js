@@ -59,10 +59,11 @@ define(function() {
     }
 
     function retrieveCurrentUser() {
-      return biobankApi.get('/users/authenticate').then(function(user) {
-        currentUser = User.create(user);
-        return currentUser;
-      });
+      return biobankApi.get('/users/authenticate')
+        .then(function(user) {
+          currentUser = User.create(user);
+          return currentUser;
+        });
     }
 
     function requestCurrentUser() {
@@ -83,7 +84,7 @@ define(function() {
     function login(credentials) {
       return biobankApi.post('/users/login', credentials)
         .then(function(user) {
-          currentUser = user;
+          currentUser = User.create(user);
           $log.info('Welcome ' + currentUser.name);
           return currentUser;
         });

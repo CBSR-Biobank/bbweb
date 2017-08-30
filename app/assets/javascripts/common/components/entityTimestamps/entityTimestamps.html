@@ -1,0 +1,18 @@
+<div class="col-md-3">
+  <small class="text-muted" ng-if="vm.timeAdded" >
+    <strong translate>Added:</strong> {{vm.timeAdded | timeago}}
+  </small>
+  <small class="text-muted" ng-if="!vm.timeAdded" >
+    <strong translate>Added:</strong><translate>On system initialization</translate>
+  </small>
+</div>
+<div class="col-md-3" ng-if="vm.timeModified">
+  <small class="text-muted">
+    <strong translate>Updated:</strong> {{vm.timeModified | timeago}}
+  </small>
+</div>
+<div class="col-md-3" ng-if="!vm.timeModified">
+  <small class="text-muted">
+    <strong translate>Modified:</strong> <translate>Never</translate>
+  </small>
+</div>

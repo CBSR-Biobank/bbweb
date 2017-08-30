@@ -22,7 +22,8 @@ define(function (require) {
                               'User',
                               'factory');
 
-      this.user = this.User.create(this.factory.user());
+      this.jsonUser = this.factory.user();
+      this.user = this.User.create(this.jsonUser);
     }));
 
     afterEach(function() {
@@ -40,11 +41,11 @@ define(function (require) {
         var usersService;
 
         this.$cookies.put('XSRF-TOKEN', this.factory.stringNext());
-        this.$httpBackend.expectGET('/users/authenticate').respond(this.reply(this.user));
+        this.$httpBackend.expectGET('/users/authenticate').respond(this.reply(this.jsonUser));
 
         usersService = this.$injector.get('usersService');
         this.$httpBackend.flush();
-        expect(usersService.getCurrentUser()).toEqual(this.user);
+        expect(usersService.getCurrentUser()).toEqual(jasmine.any(this.User));
       });
 
       it('should not allow a user to re-connect when authentication fails', function() {
@@ -57,7 +58,8 @@ define(function (require) {
         this.$injector.get('modalService').modalOk = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
 
         this.$cookies.put('XSRF-TOKEN', this.factory.stringNext());
-        this.$httpBackend.expectGET('/users/authenticate').respond(401, this.errorReply('simulated auth failure'));
+        this.$httpBackend.expectGET('/users/authenticate')
+          .respond(401, this.errorReply('simulated auth failure'));
 
         usersService = this.$injector.get('usersService');
         this.$httpBackend.flush();
@@ -74,10 +76,10 @@ define(function (require) {
       it('should return the user that is logged in after a session timeout', function() {
         var self = this;
 
-        this.$httpBackend.expectGET('/users/authenticate').respond(this.reply(this.user));
+        this.$httpBackend.expectGET('/users/authenticate').respond(this.reply(this.jsonUser));
         self.usersService.sessionTimeout();
         self.usersService.requestCurrentUser().then(function (reply) {
-          expect(reply).toEqual(self.User.create(self.user));
+          expect(reply).toEqual(jasmine.any(self.User));
         });
         this.$httpBackend.flush();
       });
@@ -89,7 +91,7 @@ define(function (require) {
             email: 'test@test.com',
             password: 'test'
           };
-          this.$httpBackend.expectPOST('/users/login', credentials).respond(this.reply(this.user));
+          this.$httpBackend.expectPOST('/users/login', credentials).respond(this.reply(this.jsonUser));
 
           this.usersService.login(credentials).then(function(reply) {
             expect(_.isEqual(reply, user));
@@ -108,7 +110,7 @@ define(function (require) {
 
           doLogin.call(self, token, self.user);
           self.usersService.requestCurrentUser().then(function (reply) {
-            expect(reply).toEqual(self.User.create(self.user));
+            expect(reply).toEqual(jasmine.any(self.User));
           });
         });
 

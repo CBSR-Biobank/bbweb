@@ -52,6 +52,14 @@ define(['angular', 'lodash'], function(angular, _) {
       this.timeModified = null;
 
       DomainEntity.call(this, schema, obj);
+
+      obj = obj || {};
+      if (obj.timeAdded) {
+        this.timeAdded = new Date(obj.timeAdded);
+      }
+      if (obj.timeModified) {
+        this.timeModified = new Date(obj.timeModified);
+      }
     }
 
     ConcurrencySafeEntity.prototype = Object.create(DomainEntity.prototype);

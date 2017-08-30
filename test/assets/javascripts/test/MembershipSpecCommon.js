@@ -51,7 +51,7 @@ define(function (require) {
     MebershipSpecCommon.prototype.jsonMembershipWithStudy = function (id, name) {
       var json = factory.membershipBase();
       json.studyData.entityData = [{ id: id, name: name }];
-      return this.MembershipBase.create(json);
+      return json;
     };
 
     MebershipSpecCommon.prototype.jsonMembershipWithAllStudies = function () {
@@ -63,7 +63,7 @@ define(function (require) {
     MebershipSpecCommon.prototype.jsonMembershipWithCentre = function (id, name) {
       var json = factory.membershipBase();
       json.centreData.entityData = [{ id: id, name: name}];
-      return this.MembershipBase.create(json);
+      return json;
     };
 
     MebershipSpecCommon.prototype.jsonMembershipWithAllCentres = function () {
@@ -73,9 +73,8 @@ define(function (require) {
     };
 
     MebershipSpecCommon.prototype.jsonMembershipWithEntities = function () {
-      var entityData = [ factory.membershipEntityData() ],
-          json = this.jsonObjWithEntities(entityData, entityData);
-      return this.MembershipBase.create(json);
+      var entityData = [ factory.membershipEntityData() ];
+      return this.jsonObjWithEntities(entityData, entityData);
     };
 
     return MebershipSpecCommon;

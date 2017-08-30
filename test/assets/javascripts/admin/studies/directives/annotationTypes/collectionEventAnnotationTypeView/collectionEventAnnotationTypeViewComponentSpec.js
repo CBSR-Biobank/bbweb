@@ -43,13 +43,13 @@ define(function(require) {
       };
 
       SuiteMixin.prototype.createEntities = function() {
-        var jsonAnnotType = this.factory.annotationType(),
-            jsonStudy     = this.factory.study(),
-            jsonCet       = this.factory.collectionEventType(jsonStudy),
-            study         = this.Study.create(jsonStudy),
+        var jsonAnnotType       = this.factory.annotationType(),
+            jsonStudy           = this.factory.study(),
+            jsonCet             = this.factory.collectionEventType(jsonStudy),
+            study               = this.Study.create(jsonStudy),
             collectionEventType = this.CollectionEventType.create(
               _.extend({}, jsonCet, { annotationTypes: [ jsonAnnotType] })),
-            annotationType = new this.AnnotationType(jsonAnnotType);
+            annotationType      = new this.AnnotationType(jsonAnnotType);
 
         return {
           study:               study,

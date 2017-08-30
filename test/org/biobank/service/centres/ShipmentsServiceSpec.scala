@@ -39,15 +39,15 @@ class ShipmentsServiceSpec
 
     val allCentresMembership = factory.createMembership.copy(
         userIds = Set(allCentresAdminUser.id),
-        centreData = MembershipEntityData(true, Set.empty[CentreId]))
+        centreData = MembershipEntitySet(true, Set.empty[CentreId]))
 
     val centreOnlyMembership = factory.createMembership.copy(
         userIds = Set(centreOnlyShippingAdminUser.id, shippingUser.id),
-        centreData = MembershipEntityData(false, Set(fromCentre.id, toCentre.id)))
+        centreData = MembershipEntitySet(false, Set(fromCentre.id, toCentre.id)))
 
     val noCentresMembership = factory.createMembership.copy(
         userIds = Set(noMembershipUser.id, noShippingPermissionUser.id),
-        centreData = MembershipEntityData(false, Set.empty[CentreId]))
+        centreData = MembershipEntitySet(false, Set.empty[CentreId]))
 
     val usersCanReadTable = Table(("users with read access", "label"),
                                   (allCentresAdminUser,         "all centres admin user"),
@@ -151,7 +151,7 @@ class ShipmentsServiceSpec
 
     Set(f.allCentresMembership, f.centreOnlyMembership).foreach { membership =>
       addToRepository(membership.copy(
-                        studyData = MembershipEntityData(false, Set(ceventFixture.study.id))))
+                        studyData = MembershipEntitySet(false, Set(ceventFixture.study.id))))
     }
 
     ceventSpecimenRepository.put(CeventSpecimen(ceventFixture.cevent.id, specimen.id))

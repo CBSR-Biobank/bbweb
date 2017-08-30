@@ -20,15 +20,15 @@ trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
 
     val allStudiesMembership = factory.createMembership.copy(
         userIds = Set(allStudiesAdminUser.id),
-        studyData = MembershipEntityData(true, Set.empty[StudyId]))
+        studyData = MembershipEntitySet(true, Set.empty[StudyId]))
 
     val studyOnlyMembership = factory.createMembership.copy(
         userIds = Set(studyOnlyAdminUser.id, studyUser.id),
-        studyData = MembershipEntityData(false, Set(study.id)))
+        studyData = MembershipEntitySet(false, Set(study.id)))
 
     val noStudiesMembership = factory.createMembership.copy(
         userIds = Set(noMembershipUser.id, nonStudyPermissionUser.id),
-        studyData = MembershipEntityData(false, Set.empty[StudyId]))
+        studyData = MembershipEntitySet(false, Set.empty[StudyId]))
 
     def usersCanReadTable() = Table(("users with read access", "label"),
                                     (allStudiesAdminUser, "all studies admin user"),

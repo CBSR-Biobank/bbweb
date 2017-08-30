@@ -52,7 +52,7 @@ define(function (require) {
       SuiteMixin.prototype.jsonMembershipWithStudy = function (id, name) {
         var json = this.factory.membership();
         json.studyData.entityData = [{ id: id, name: name}];
-        return this.Membership.create(json);
+        return json;
       };
 
       SuiteMixin.prototype.jsonMembershipWithAllCentres = function () {
@@ -64,13 +64,12 @@ define(function (require) {
       SuiteMixin.prototype.jsonMembershipWithCentre = function (id, name) {
         var json = this.factory.membership();
         json.centreData.entityData = [{ id: id, name: name}];
-        return this.Membership.create(json);
+        return json;
       };
 
       SuiteMixin.prototype.jsonMembershipWithEntities = function () {
-        var entityData = [ this.jsonEntityData() ],
-            json = this.jsonObjWithEntities(entityData, entityData);
-        return this.Membership.create(json);
+        var entityData = [ this.jsonEntityData() ];
+        return this.jsonObjWithEntities(entityData, entityData);
       };
 
       SuiteMixin.prototype.fixtures = function (options) {

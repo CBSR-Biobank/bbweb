@@ -110,8 +110,8 @@ class Factory {
                                 name         = nameGenerator.next[Membership],
                                 description  = Some(nameGenerator.next[Membership]),
                                 userIds      = Set.empty[UserId],
-                                studyData    = MembershipEntityData(false, Set.empty[StudyId]),
-                                centreData   = MembershipEntityData(false, Set.empty[CentreId]))
+                                studyData    = MembershipEntitySet(false, Set.empty[StudyId]),
+                                centreData   = MembershipEntitySet(false, Set.empty[CentreId]))
     domainObjects = domainObjects + (classOf[Membership] -> membership)
     membership
   }

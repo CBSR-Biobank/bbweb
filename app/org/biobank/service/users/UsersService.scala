@@ -234,12 +234,8 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
           .leftMap(err => InternalServerError.nel)
       }
     } yield {
-      val studyEntityInfo = studies.map { study => MembershipEntityInfoDto(study.id.id, study.name) }.toSet
-      val studyData       = MembershipEntitySetDto(all = membership.studyData.allEntities,
-                                                   entityInfo = studyEntityInfo)
-      val centreEntityInfo = centres.map { centre => MembershipEntityInfoDto(centre.id.id, centre.name) }.toSet
-      val centreData       = MembershipEntitySetDto(all = membership.centreData.allEntities,
-                                                    entityInfo = centreEntityInfo)
+      val studyEntitySet  = accessService.entitySetDto(membership.studyData.allEntities, studies.toSet)
+      val centreEntitySet  = accessService.entitySetDto(membership.centreData.allEntities, centres.toSet)
 
       UserMembershipDto(id           = membership.id.id,
                         version      = membership.version,
@@ -247,8 +243,8 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
                         timeModified = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
                         name         = membership.name,
                         description  = membership.description,
-                        studyData    = studyData,
-                        centreData   = centreData)
+                        studyData    = studyEntitySet,
+                        centreData   = centreEntitySet)
     }
   }
 

@@ -40,22 +40,12 @@ define(['lodash'], function (_) {
      * The entity that includes this mixin needs to implement 'asyncCreate'.
      */
     HasAnnotations.prototype.removeAnnotation = function (annotation, url) {
-      var self = this,
-          found = _.find(self.annotations,  { annotationTypeId: annotation.annotationTypeId });
+      var found = _.find(this.annotations,  { annotationTypeId: annotation.annotationTypeId });
 
       if (!found) {
         return $q.reject('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
       }
-
-      return biobankApi.del(url).then(function () {
-        return self.asyncCreate(
-          _.extend({}, self, {
-            version: self.version + 1,
-            annotations: _.filter(self.annotations, function(at) {
-              return at.id !== annotation.id;
-            })
-          }));
-      });
+      return biobankApi.del(url).then(this.asyncCreate);
     };
 
     HasAnnotations.prototype.setAnnotationTypes = function (annotationTypes) {

@@ -10,7 +10,7 @@ define(function (require) {
   var mocks = require('angularMocks'),
       _     = require('lodash');
 
-  describe('Directive: studyAddDirective', function() {
+  describe('Component: studyAdd', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -45,8 +45,7 @@ define(function (require) {
       this.titleContains = 'Add';
       this.returnState = 'home.admin.studies';
 
-      this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/studyAdd/studyAdd.html');
+      this.putHtmlTemplates('/assets/javascripts/admin/studies/components/studyAdd/studyAdd.html');
     }));
 
     it('should contain valid settings to update a study', function() {

@@ -343,9 +343,8 @@ define(function(require) {
     };
 
     CollectionEventType.prototype.removeSpecimenDescription = function (specimenDescription) {
-      var self = this,
-          url,
-          found = _.find(self.specimenDescriptions,  { id: specimenDescription.id });
+      var url,
+          found = _.find(this.specimenDescriptions,  { id: specimenDescription.id });
 
       if (!found) {
         throw new DomainError('specimen description with ID not present: ' + specimenDescription.id);
@@ -356,16 +355,7 @@ define(function(require) {
                             this.id,
                             this.version,
                             specimenDescription.id);
-
-      return biobankApi.del(url).then(function () {
-        return self.asyncCreate(
-          _.extend(self, {
-            version: self.version + 1,
-            specimenDescriptions: _.filter(self.specimenDescriptions, function(ss) {
-              return ss.id !== specimenDescription.id;
-            })
-          }));
-      });
+      return biobankApi.del(url).then(CollectionEventType.asyncCreate);
     };
 
     CollectionEventType.prototype.addAnnotationType = function (annotationType) {

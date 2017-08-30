@@ -365,13 +365,12 @@ define(function (require) {
                                    centre.version,
                                    jsonLocation.id);
 
-        self.$httpBackend.expectDELETE(url).respond(this.reply(true));
+        self.$httpBackend.expectDELETE(url).respond(this.reply(jsonCentre));
         centre.removeLocation(jsonLocation).then(checkCentre).catch(failTest);
         self.$httpBackend.flush();
 
         function checkCentre(reply) {
           expect(reply).toEqual(jasmine.any(self.Centre));
-          expect(reply.locations).toBeEmptyArray();
         }
       });
 
@@ -406,13 +405,12 @@ define(function (require) {
                                          centre.version,
                                          jsonStudy.id);
 
-        self.$httpBackend.expectDELETE(url).respond(this.reply(true));
+        self.$httpBackend.expectDELETE(url).respond(this.reply(jsonCentre));
         centre.removeStudy(jsonStudy).then(checkCentre).catch(failTest);
         this.$httpBackend.flush();
 
         function checkCentre(replyCentre) {
           expect(replyCentre).toEqual(jasmine.any(self.Centre));
-          expect(replyCentre.studyIds).toBeEmptyArray();
         }
       });
 

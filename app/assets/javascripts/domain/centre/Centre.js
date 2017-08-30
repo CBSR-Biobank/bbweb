@@ -380,14 +380,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
       }
 
       url = sprintf.sprintf('%s/%d/%s', uri('studies', self.id), self.version, study.id);
-
-      return biobankApi.del(url).then(function(reply) {
-        return Centre.asyncCreate(
-          _.extend(self, {
-            version: self.version + 1,
-            studyIds: _.without(self.studyIds, study.id)
-          }));
-      });
+      return biobankApi.del(url).then(Centre.asyncCreate);
     };
 
     /**
@@ -430,16 +423,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
       }
 
       url = sprintf.sprintf('%s/%d/%s', uri('locations', self.id), self.version, location.id);
-
-      return biobankApi.del(url).then(function(reply) {
-        return Centre.asyncCreate(
-          _.extend(self, {
-            version: self.version + 1,
-            locations: _.filter(self.locations, function(loc) {
-              return loc.id !== location.id;
-            })
-          }));
-      });
+      return biobankApi.del(url).then(Centre.asyncCreate);
     };
 
     /**

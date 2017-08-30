@@ -133,8 +133,8 @@ class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
       it("allows user that is member of all studies and all centres") {
         val f = membershipFixture
         val membership = f.membership.copy(userIds    = Set(f.user.id),
-                                           studyData  = MembershipEntityData(true, Set.empty[StudyId]),
-                                           centreData = MembershipEntityData(true, Set.empty[CentreId]))
+                                           studyData  = MembershipEntitySet(true, Set.empty[StudyId]),
+                                           centreData = MembershipEntitySet(true, Set.empty[CentreId]))
 
         addToRepository(membership)
         accessService.isMember(f.user.id, Some(f.study.id), Some(f.centre.id)) mustSucceed { _ must be (true) }
@@ -146,8 +146,8 @@ class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
       it("forbids a user that is not a member of a study and centre") {
         val f = membershipFixture
         val membership = f.membership.copy(userIds    = Set(f.user.id),
-                                           studyData  = MembershipEntityData(false, Set.empty[StudyId]),
-                                           centreData = MembershipEntityData(false, Set.empty[CentreId]))
+                                           studyData  = MembershipEntitySet(false, Set.empty[StudyId]),
+                                           centreData = MembershipEntitySet(false, Set.empty[CentreId]))
         addToRepository(membership)
 
         accessService.isMember(f.user.id, Some(f.study.id), Some(f.centre.id)) mustSucceed { _ must be (false) }

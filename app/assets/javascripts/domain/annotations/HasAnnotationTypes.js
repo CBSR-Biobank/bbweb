@@ -48,16 +48,7 @@ define(['lodash'], function(_) {
       if (!found) {
         return $q.reject(new DomainError('annotation type with ID not present: ' + annotationType.id));
       }
-
-      return biobankApi.del(url).then(function () {
-        return self.asyncCreate(
-          _.extend(self, {
-            version: self.version + 1,
-            annotationTypes: _.filter(self.annotationTypes, function(at) {
-              return at.id !== annotationType.id;
-            })
-          }));
-      });
+      return biobankApi.del(url).then( self.asyncCreate);
     };
 
     return HasAnnotationTypes;

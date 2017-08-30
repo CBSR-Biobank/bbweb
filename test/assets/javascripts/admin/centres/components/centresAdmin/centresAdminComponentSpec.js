@@ -45,6 +45,7 @@ define(function (require) {
       this.putHtmlTemplates(
         '/assets/javascripts/admin/centres/components/centresAdmin/centresAdmin.html',
         '/assets/javascripts/admin/centres/components/centresPagedList/centresPagedList.html',
+        '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html',
         '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html',
         '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');

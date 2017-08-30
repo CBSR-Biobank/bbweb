@@ -40,15 +40,15 @@ object MembershipId {
  * Used to track the IDs of the entities a Membership is for.
  *
  */
-final case class MembershipEntityData[T <: IdentifiedValueObject[_]](allEntities: Boolean, ids: Set[T]) {
+final case class MembershipEntitySet[T <: IdentifiedValueObject[_]](allEntities: Boolean, ids: Set[T]) {
 
-  def hasAllEntities(): MembershipEntityData[T] =
+  def hasAllEntities(): MembershipEntitySet[T] =
     copy(allEntities = true, ids = Set.empty[T])
 
- def addEntity(id: T): MembershipEntityData[T] =
+ def addEntity(id: T): MembershipEntitySet[T] =
     copy(allEntities = false, ids = ids + id)
 
- def removeEntity(id: T): MembershipEntityData[T] =
+ def removeEntity(id: T): MembershipEntitySet[T] =
    copy(allEntities = false, ids = ids - id)
 
   def isMemberOf(id: T): Boolean = {
@@ -58,13 +58,13 @@ final case class MembershipEntityData[T <: IdentifiedValueObject[_]](allEntities
 
 }
 
-object MembershipEntityData {
+object MembershipEntitySet {
 
   implicit def format[T <: IdentifiedValueObject[_]](implicit fmt: Format[T])
-      : Format[MembershipEntityData[T]] =
+      : Format[MembershipEntitySet[T]] =
     ((__ \ "allEntities").format[Boolean] ~
        (__ \ "ids").format[Set[T]]
-    )(MembershipEntityData.apply, unlift(MembershipEntityData.unapply))
+    )(MembershipEntitySet.apply, unlift(MembershipEntitySet.unapply))
 
 }
 
@@ -76,8 +76,8 @@ sealed trait MembershipBase
   val version:      Long
   val timeAdded:    OffsetDateTime
   val timeModified: Option[OffsetDateTime]
-  val studyData:    MembershipEntityData[StudyId]
-  val centreData:   MembershipEntityData[CentreId]
+  val studyData:    MembershipEntitySet[StudyId]
+  val centreData:   MembershipEntitySet[CentreId]
 
   /**
    * If studyId is None, then don't bother checking for study membership.
@@ -119,8 +119,8 @@ final case class Membership(id:           MembershipId,
                             name:         String,
                             description:  Option[String],
                             userIds:      Set[UserId],
-                            studyData:    MembershipEntityData[StudyId],
-                            centreData:   MembershipEntityData[CentreId])
+                            studyData:    MembershipEntitySet[StudyId],
+                            centreData:   MembershipEntitySet[CentreId])
     extends MembershipBase
     with MembershipValidations {
 
@@ -246,8 +246,8 @@ object Membership extends MembershipValidations {
                    name         = name,
                    description  = description,
                    userIds      = userIds,
-                   studyData    = MembershipEntityData[StudyId](allStudies, studyIds),
-                   centreData   = MembershipEntityData[CentreId](allCentres, centreIds))
+                   studyData    = MembershipEntitySet[StudyId](allStudies, studyIds),
+                   centreData   = MembershipEntitySet[CentreId](allCentres, centreIds))
     }
   }
 
@@ -272,8 +272,8 @@ final case class UserMembership(id:           MembershipId,
                                 name:         String,
                                 description:  Option[String],
                                 userId:       UserId,
-                                studyData:    MembershipEntityData[StudyId],
-                                centreData:   MembershipEntityData[CentreId])
+                                studyData:    MembershipEntitySet[StudyId],
+                                centreData:   MembershipEntitySet[CentreId])
     extends MembershipBase
     with MembershipValidations {
 

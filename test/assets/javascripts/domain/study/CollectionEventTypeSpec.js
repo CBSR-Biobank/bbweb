@@ -11,76 +11,77 @@ define(function (require) {
       _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
-  var CollectionEventType;
-
-  function SuiteMixinFactory(EntityTestSuite, ServerReplyMixin) {
-
-    function SuiteMixin() {
-      EntityTestSuite.call(this);
-      ServerReplyMixin.call(this);
-    }
-
-    SuiteMixin.prototype = Object.create(EntityTestSuite.prototype);
-    _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    // used by promise tests
-    SuiteMixin.prototype.expectCet = function (entity) {
-      expect(entity).toEqual(jasmine.any(CollectionEventType));
-    };
-
-    // used by promise tests
-    SuiteMixin.prototype.failTest = function (error) {
-      expect(error).toBeUndefined();
-    };
-
-    /*
-     * Returns 3 collection event types, each one with a different missing field.
-     */
-    SuiteMixin.prototype.getBadCollectionEventTypes = function () {
-      var badSpecimenDescription   = _.omit(this.factory.collectionSpecimenDescription(), 'name'),
-          badAnnotationType = _.omit(this.factory.annotationType(), 'name'),
-          data = [
-            {
-              cet: _.omit(this.factory.collectionEventType(), 'name'),
-              errMsg : 'Missing required property'
-            },
-            {
-              cet: this.factory.collectionEventType({ specimenDescriptions: [ badSpecimenDescription ]}),
-              errMsg : 'specimenDescriptions.*Missing required property'
-            },
-            {
-              cet: this.factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
-              errMsg : 'annotationTypes.*Missing required property'
-            }
-          ];
-      return data;
-    };
-
-    SuiteMixin.prototype.uri = function (/* path, cetypeId */) {
-      var args = _.toArray(arguments),
-          cetypeId,
-          path;
-
-      var result = '/studies/cetypes';
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += '/' + path;
-      }
-
-      if (args.length > 0) {
-        cetypeId = args.shift();
-        result += '/' + cetypeId;
-      }
-
-      return result;
-    };
-
-    return SuiteMixin;
-  }
 
   describe('CollectionEventType', function() {
+
+    var CollectionEventType;
+
+    function SuiteMixinFactory(EntityTestSuite, ServerReplyMixin) {
+
+      function SuiteMixin() {
+        EntityTestSuite.call(this);
+        ServerReplyMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(EntityTestSuite.prototype);
+      _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      // used by promise tests
+      SuiteMixin.prototype.expectCet = function (entity) {
+        expect(entity).toEqual(jasmine.any(CollectionEventType));
+      };
+
+      // used by promise tests
+      SuiteMixin.prototype.failTest = function (error) {
+        expect(error).toBeUndefined();
+      };
+
+      /*
+       * Returns 3 collection event types, each one with a different missing field.
+       */
+      SuiteMixin.prototype.getBadCollectionEventTypes = function () {
+        var badSpecimenDescription   = _.omit(this.factory.collectionSpecimenDescription(), 'name'),
+            badAnnotationType = _.omit(this.factory.annotationType(), 'name'),
+            data = [
+              {
+                cet: _.omit(this.factory.collectionEventType(), 'name'),
+                errMsg : 'Missing required property'
+              },
+              {
+                cet: this.factory.collectionEventType({ specimenDescriptions: [ badSpecimenDescription ]}),
+                errMsg : 'specimenDescriptions.*Missing required property'
+              },
+              {
+                cet: this.factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
+                errMsg : 'annotationTypes.*Missing required property'
+              }
+            ];
+        return data;
+      };
+
+      SuiteMixin.prototype.uri = function (/* path, cetypeId */) {
+        var args = _.toArray(arguments),
+            cetypeId,
+            path;
+
+        var result = '/studies/cetypes';
+
+        if (args.length > 0) {
+          path = args.shift();
+          result += '/' + path;
+        }
+
+        if (args.length > 0) {
+          cetypeId = args.shift();
+          result += '/' + cetypeId;
+        }
+
+        return result;
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -151,7 +152,7 @@ define(function (require) {
       ceventType.compareToJsonEntity(jsonCet);
     });
 
-   it('can retrieve a collection event type', function() {
+    it('can retrieve a collection event type', function() {
       var url = sprintf('%s/%s/%s', this.uri(), this.jsonStudy.id, this.jsonCet.id);
 
       this.$httpBackend.whenGET(url).respond(this.reply(this.jsonCet));
@@ -246,10 +247,10 @@ define(function (require) {
       var study = this.Study.create(this.jsonStudy),
           ceventType = new CollectionEventType(this.jsonCet, { study: study }),
           url = sprintf('%s/%s/%s/%d',
-                                this.uri(),
-                                this.jsonStudy.id,
-                                ceventType.id,
-                                ceventType.version);
+                        this.uri(),
+                        this.jsonStudy.id,
+                        ceventType.id,
+                        ceventType.version);
 
       this.$httpBackend.expectDELETE(url).respond(this.reply(true));
       ceventType.remove();
@@ -333,7 +334,7 @@ define(function (require) {
                           this.cet.version,
                           this.jsonSpec.id);
 
-        this.$httpBackend.whenDELETE(url).respond(this.reply(true));
+        this.$httpBackend.whenDELETE(url).respond(this.reply(this.jsonCet));
         this.cet.removeSpecimenDescription(this.jsonSpec).then(this.expectCet).catch(this.failTest);
         this.$httpBackend.flush();
       });
@@ -382,14 +383,14 @@ define(function (require) {
                             this.cet.version,
                             this.jsonAnnotType.id);
 
-          this.$httpBackend.whenDELETE(url).respond(this.reply(true));
+          this.$httpBackend.whenDELETE(url).respond(this.reply(this.jsonCet));
           this.cet.removeAnnotationType(this.jsonAnnotType)
-            .then(annotationTypeCheck)
+            .then(cetCheck)
             .catch(this.failTest);
           this.$httpBackend.flush();
 
-          function annotationTypeCheck(ceventType) {
-            expect(_.find(ceventType.annotationTypes, { id: self.jsonAnnotType.id })).toBeUndefined();
+          function cetCheck(ceventType) {
+            expect(ceventType).toEqual(jasmine.any(self.CollectionEventType));
           }
         });
 

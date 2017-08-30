@@ -50,12 +50,13 @@ define(['lodash'], function (_) {
       });
 
       it('can remove an annotation', function () {
-        var self = this;
-
-        context.$httpBackend.whenDELETE(context.removeUrl).respond(201, { status: 'success', data: true });
+        context.$httpBackend.whenDELETE(context.removeUrl).respond(201, {
+          status: 'success',
+          data:   context.response
+        });
         context.entity[context.removeFuncName](context.annotation)
-          .then(self.expectParticipant)
-          .catch(self.failTest);
+          .then(expectEntity)
+          .catch(failTest);
         context.$httpBackend.flush();
       });
 
