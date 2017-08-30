@@ -11,15 +11,13 @@ define(function (require) {
       name = 'biobank.studies',
       module;
 
-  module = angular.module(name, []);
+  module = angular.module(name, [])
+    .factory('StudyAnnotationTypesService',       require('./StudyAnnotationTypesService'))
 
-  module.factory('StudyAnnotationTypesService',       require('./StudyAnnotationTypesService'));
-
-  module.service('specimenGroupsService',             require('./specimenGroupsService'));
-  module.service('spcLinkAnnotationTypesService',     require('./spcLinkAnnotationTypesService'));
-
-  module.service('annotationValueTypeLabelService',
-                 require('./services/annotationValueTypeLabelService'));
+    .service('annotationValueTypeLabelService',   require('./services/annotationValueTypeLabelService'))
+    .service('specimenGroupsService',             require('./services/specimenGroupsService'))
+    .service('spcLinkAnnotationTypesService',     require('./services/spcLinkAnnotationTypesService'))
+    .service('studyStateLabelService',            require('./services/studyStateLabelService'));
 
   return module;
 });

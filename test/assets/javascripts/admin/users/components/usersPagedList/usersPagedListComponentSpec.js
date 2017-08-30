@@ -11,47 +11,47 @@ define(function (require) {
       _               = require('lodash'),
       sharedBehaviour = require('../../../../test/EntityPagedListSharedBehaviourSpec');
 
-  function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  describe('usersPagedListComponent', function() {
 
-    function SuiteMixin() {
-    }
+    function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
-    SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
+      function SuiteMixin() {
+      }
 
-    SuiteMixin.prototype.createController = function () {
-      ComponentTestSuiteMixin.prototype.createController.call(
-        this,
-        '<users-paged-list></users-paged-list',
-        undefined,
-        'usersPagedList');
-    };
+      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
 
-    SuiteMixin.prototype.createCountsSpy = function (disabled, enabled, retired) {
-      var counts = {
-        total:    disabled + enabled + retired,
-        disabled: disabled,
-        enabled:  enabled,
-        retired:  retired
+      SuiteMixin.prototype.createController = function () {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<users-paged-list></users-paged-list',
+          undefined,
+          'usersPagedList');
       };
 
-      spyOn(this.UserCounts, 'get').and.returnValue(this.$q.when(counts));
-    };
+      SuiteMixin.prototype.createCountsSpy = function (disabled, enabled, retired) {
+        var counts = {
+          total:    disabled + enabled + retired,
+          disabled: disabled,
+          enabled:  enabled,
+          retired:  retired
+        };
 
-    SuiteMixin.prototype.createUserListSpy = function (users) {
-      var reply = this.factory.pagedResult(users);
-      spyOn(this.User, 'list').and.returnValue(this.$q.when(reply));
-    };
+        spyOn(this.UserCounts, 'get').and.returnValue(this.$q.when(counts));
+      };
 
-    SuiteMixin.prototype.createEntity = function () {
-      var entity = new this.User(this.factory.user());
-      return entity;
-    };
+      SuiteMixin.prototype.createUserListSpy = function (users) {
+        var reply = this.factory.pagedResult(users);
+        spyOn(this.User, 'list').and.returnValue(this.$q.when(reply));
+      };
 
-    return SuiteMixin;
-  }
+      SuiteMixin.prototype.createEntity = function () {
+        var entity = new this.User(this.factory.user());
+        return entity;
+      };
 
-  describe('usersPagedListComponent', function() {
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
@@ -60,7 +60,8 @@ define(function (require) {
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/users/components/usersPagedList/usersPagedList.html',
-        '/assets/javascripts/admin/users/components/nameEmailStateFilters/nameEmailStateFilters.html');
+        '/assets/javascripts/common/components/nameEmailStateFilters/nameEmailStateFilters.html',
+        '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -68,6 +69,9 @@ define(function (require) {
                               'User',
                               'UserCounts',
                               'UserState',
+                              'NameFilter',
+                              'EmailFilter',
+                              'StateFilter',
                               '$state',
                               'factory');
 
@@ -79,8 +83,8 @@ define(function (require) {
       this.createController();
 
       expect(this.controller.limit).toBeDefined();
-      expect(this.controller.stateData).toBeArrayOfObjects();
-      expect(this.controller.stateData).toBeNonEmptyArray();
+      expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeArrayOfObjects();
+      expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeNonEmptyArray();
       expect(this.controller.getItems).toBeFunction();
       expect(this.controller.getItemIcon).toBeFunction();
     });
@@ -120,6 +124,9 @@ define(function (require) {
           return self.User.list.calls.mostRecent().args;
         };
 
+        context.stateFilterValue = this.UserState.ACTIVE;
+        context.sortFields = ['Name', 'Email', 'State'];
+        context.defaultSortFiled = 'name';
       }));
 
       sharedBehaviour(context);
@@ -166,7 +173,7 @@ define(function (require) {
       this.createCountsSpy(2, 5);
       this.createUserListSpy([]);
       this.createController();
-      this.controller.emailFilterUpdated(emailFilterValue);
+      this.controller.updateSearchFilter('EmailFilter')(emailFilterValue);
       this.scope.$digest();
 
       spyArgs = this.User.list.calls.mostRecent().args[0];
@@ -178,7 +185,7 @@ define(function (require) {
       this.createCountsSpy(2, 5);
       this.createUserListSpy([]);
       this.createController();
-      this.controller.emailFilter = 'test@test.com';
+      this.controller.updateSearchFilter('EmailFilter')('test@test.com');
       this.controller.filtersCleared();
       this.scope.$digest();
       expect(this.controller.emailFilter).toBeEmptyString();

@@ -59,7 +59,8 @@ define(function (require) {
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/centres/components/centresPagedList/centresPagedList.html',
-        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html');
+        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
+        '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -67,6 +68,8 @@ define(function (require) {
                               'Centre',
                               'CentreCounts',
                               'CentreState',
+                              'NameFilter',
+                              'StateFilter',
                               '$state',
                               'factory');
 
@@ -78,16 +81,16 @@ define(function (require) {
       this.createController();
 
       expect(this.controller.limit).toBeDefined();
-      expect(this.controller.stateData).toBeArrayOfObjects();
-      expect(this.controller.stateData).toBeNonEmptyArray();
+      expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeArrayOfObjects();
+      expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeNonEmptyArray();
       expect(this.controller.getItems).toBeFunction();
       expect(this.controller.getItemIcon).toBeFunction();
     });
 
     it('on startup, state changed to login page if user is not authorized', function() {
       spyOn(this.$state, 'go').and.returnValue(null);
-      this.CentreCounts.get = jasmine.createSpy()
-        .and.returnValue(this.$q.reject({ status: 401, message: 'unauthorized'}));
+      this.CentreCounts.get =
+        jasmine.createSpy().and.returnValue(this.$q.reject({ status: 401, message: 'unauthorized'}));
       this.createController();
       expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
     });
@@ -119,6 +122,9 @@ define(function (require) {
           return self.Centre.list.calls.mostRecent().args;
         };
 
+        context.stateFilterValue = this.CentreState.DISABLED;
+        context.sortFields = ['Name', 'State'];
+        context.defaultSortFiled = 'name';
       }));
 
       sharedBehaviour(context);

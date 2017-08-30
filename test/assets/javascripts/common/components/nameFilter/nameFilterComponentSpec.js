@@ -11,7 +11,7 @@ define(function (require) {
       _     = require('lodash'),
       filtersSharedBehaviour = require('../../../test/filtersSharedBehaviour');
 
-  describe('nameAndStateFiltersComponent', function() {
+  describe('Component: nameFilter', function() {
 
     function SuiteMixinFactory(ComponentTestSuiteMixin) {
 
@@ -28,7 +28,6 @@ define(function (require) {
           actualBindings = {};
 
       self.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
-      self.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
       self.filtersCleared = jasmine.createSpy().and.returnValue(null);
 
       defaultBindings = {
@@ -43,15 +42,13 @@ define(function (require) {
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
-            '<name-and-state-filters ',
-            '    state-data="vm.stateData" ',
+            '<name-filter ',
             '    on-name-filter-updated="vm.onNameFilterUpdated" ',
-            '    on-state-filter-updated="vm.onStateFilterUpdated" ',
             '    on-filters-cleared="vm.onFiltersCleared"> ',
-            '</name-and-state-filters>'
+            '</name-filter>'
           ].join(''),
           actualBindings,
-          'nameAndStateFilters');
+          'nameFilter');
       };
 
       return SuiteMixin;
@@ -64,7 +61,7 @@ define(function (require) {
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
       this.putHtmlTemplates(
-        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
+        '/assets/javascripts/common/components/nameFilter/nameFilter.html',
         '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');
     }));
 
@@ -76,17 +73,6 @@ define(function (require) {
       });
 
       filtersSharedBehaviour.nameFiltersharedBehaviour(context);
-
-    });
-
-    describe('for state filter', function() {
-      var context = {};
-
-      beforeEach(function() {
-        context.createController = this.createController.bind(this);
-      });
-
-      filtersSharedBehaviour.stateFiltersharedBehaviour(context);
 
     });
 

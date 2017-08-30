@@ -23,7 +23,10 @@ define(function (require) {
     .component('breadcrumbs',             require('./components/breadcrumbs/breadcrumbsComponent'))
     .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
     .component('collapsiblePanel',        require('./components/collapsiblePanel/collapsiblePanelComponent'))
+    .component('debouncedTextInput',      require('./components/debouncedTextInput/debouncedTextInputComponent'))
+    .component('nameFilter',              require('./components/nameFilter/nameFilterComponent'))
     .component('nameAndStateFilters',     require('./components/nameAndStateFilters/nameAndStateFiltersComponent'))
+    .component('nameEmailStateFilters',   require('./components/nameEmailStateFilters/nameEmailStateFiltersComponent'))
     .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))
     .component('statusLine',              require('./components/statusLine/statusLineComponent'))
 
@@ -57,6 +60,7 @@ define(function (require) {
     .service('validationService',         require('./services/validationService'))
     .service('domainNotificationService', require('./services/domainNotification/domainNotificationService') )
     .service('languageService',           require('./services/languageService'))
+    .service('labelService',              require('./services/labelService'))
 
     .factory('BbwebError',                require('./BbwebError'));
 

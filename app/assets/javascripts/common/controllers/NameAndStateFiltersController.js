@@ -13,7 +13,6 @@ define(function () {
   function NameAndStateFiltersController(vm) {
     vm.nameFilter = '';
     vm.selectedState = 'all';
-    vm.stateData.unshift({ id: 'all', label: 'All' });
 
     vm.nameFilterUpdated = nameFilterUpdated;
     vm.stateFilterUpdated = stateFilterUpdated;
@@ -21,7 +20,8 @@ define(function () {
 
     //--
 
-    function nameFilterUpdated() {
+    function nameFilterUpdated(value) {
+      vm.nameFilter = value;
       vm.onNameFilterUpdated()(vm.nameFilter);
     }
 

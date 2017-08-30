@@ -14,34 +14,51 @@ define(function (require) {
    */
   var component = {
     templateUrl: '/assets/javascripts/admin/studies/components/studiesPagedList/studiesPagedList.html',
-    controller: StudiesPagedListController,
+    controller: Controller,
     controllerAs: 'vm',
     bindings: {
     }
   };
 
-  StudiesPagedListController.$inject = [
+  Controller.$inject = [
     '$controller',
     '$scope',
     '$state',
     'Study',
     'StudyState',
     'StudyCounts',
-    'gettextCatalog'
+    'gettextCatalog',
+    'NameFilter',
+    'StateFilter',
+    'studyStateLabelService'
   ];
 
   /*
    * Controller for this component.
    */
-  function StudiesPagedListController($controller,
-                                      $scope,
-                                      $state,
-                                      Study,
-                                      StudyState,
-                                      StudyCounts,
-                                      gettextCatalog) {
-    var vm = this;
-    vm.$onInit     = onInit;
+  function Controller($controller,
+                      $scope,
+                      $state,
+                      Study,
+                      StudyState,
+                      StudyCounts,
+                      gettextCatalog,
+                      NameFilter,
+                      StateFilter,
+                      studyStateLabelService) {
+    var vm = this,
+        stateData = _.values(StudyState).map(function (state) {
+          return { id: state, label: studyStateLabelService.stateToLabelFunc(state) };
+        });
+    vm.$onInit = onInit;
+    vm.filters = {};
+    vm.filters[NameFilter.name]  = new NameFilter();
+    vm.filters[StateFilter.name] = new StateFilter(true, stateData, 'all');
+
+    vm.stateLabelFuncs = {};
+    _.values(StudyState).forEach(function (state) {
+      vm.stateLabelFuncs[state] = studyStateLabelService.stateToLabelFunc(state);
+    });
 
     //--
 
@@ -51,13 +68,10 @@ define(function (require) {
       vm.getItems    = getItems;
       vm.getItemIcon = getItemIcon;
 
-      vm.stateData = _.map(_.values(StudyState), function (state) {
-        return { id: state, label: state.toUpperCase() };
-      });
-
       // initialize this controller's base class
       $controller('PagedListController', {
         vm:             vm,
+        $state:         $state,
         gettextCatalog: gettextCatalog
       });
 
@@ -65,7 +79,7 @@ define(function (require) {
         .then(function (counts) {
           vm.counts = counts;
         })
-        .catch(handleUnauthorized);
+        .catch(vm.handleUnauthorized);
     }
 
     function getItems(options) {
@@ -75,7 +89,7 @@ define(function (require) {
           vm.counts = counts;
           return Study.list(options);
         })
-        .catch(handleUnauthorized);
+        .catch(vm.handleUnauthorized);
     }
 
     function getItemIcon(study) {
@@ -88,13 +102,6 @@ define(function (require) {
       } else {
         throw new Error('invalid study state: ' + study.state);
       }
-    }
-
-    function handleUnauthorized(error) {
-      if (error.status && (error.status === 401)) {
-        $state.go('home.users.login', {}, { reload: true });
-      }
-      return null;
     }
   }
 

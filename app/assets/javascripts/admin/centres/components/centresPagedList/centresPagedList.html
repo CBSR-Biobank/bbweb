@@ -1,9 +1,10 @@
 <div class="voffset-bottom-2">
   <name-and-state-filters
-      state-data="vm.stateData"
-      on-name-filter-updated="vm.nameFilterUpdated"
-      on-state-filter-updated="vm.stateFilterUpdated"
-      on-filters-cleared="vm.filtersCleared">
+     state-data="vm.filters['StateFilter'].allChoices()"
+     selected-state="all"
+     on-name-filter-updated="vm.updateSearchFilter('NameFilter')"
+     on-state-filter-updated="vm.updateSearchFilter('StateFilter')"
+     on-filters-cleared="vm.filtersCleared">
   </name-and-state-filters>
 </div>
 
@@ -17,8 +18,8 @@
       </a>
       <ul class="dropdown-menu" role="menu">
         <li role="presentation" class="dropdown-header" translate>Sort by</li>
-        <li ng-repeat="sortField in vm.sortFields">
-          <a ng-click="vm.sortFieldSelected(sortField)">{{sortField}}</a>
+        <li ng-repeat="sortFieldInfo in vm.sortFieldData">
+          <a ng-click="vm.sortFieldSelected(sortFieldInfo.id)">{{ sortFieldInfo.labelFunc() }}</a>
         </li>
       </ul>
     </div>
@@ -56,21 +57,10 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-5">
-          <small class="text-info">
-            <strong translate>State:</strong> {{ entity.state.toUpperCase() }}
-          </small>
-        </div>
-        <div class="col-md-3">
-          <small class="text-muted">
-            <strong translate>Added:</strong> {{entity.timeAdded | timeago}}
-          </small>
-        </div>
-        <div class="col-md-3" data-ng-if="entity.timeModified">
-          <small class="text-muted">
-            <strong translate>Updated:</strong> {{entity.timeModified | timeago}}
-          </small>
-        </div>
+        <state-and-timestamps state-label-func="vm.stateLabelFuncs[entity.state]()"
+                              time-added="entity.timeAdded"
+                              time-modified="entity.timeModified">
+        </state-and-timestamps>
       </div>
     </li>
   </ul>

@@ -80,6 +80,11 @@ define(function (require) {
     .factory('UserViewer',                          require('./user/UserViewer'))
     .service('UserCounts',                          require('./user/UserCounts'))
 
+    .factory('SearchFilter',                        require('./filters/SearchFilter'))
+    .factory('EmailFilter',                         require('./filters/EmailFilter'))
+    .factory('NameFilter',                          require('./filters/NameFilter'))
+    .factory('StateFilter',                         require('./filters/StateFilter'))
+
     .constant('UserState',                         require('./user/UserState'))
     .constant('StudyState',                        require('./study/StudyState'))
     .constant('CentreState',                       require('./centre/CentreState'));

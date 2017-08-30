@@ -23,35 +23,40 @@ define(function (require) {
       SuiteMixin.prototype.constructor = SuiteMixin;
 
       SuiteMixin.prototype.createController = function (bindings) {
-      var self = this,
-          defaultBindings = {},
-          actualBindings = {};
+        var self = this,
+            defaultBindings = {},
+            actualBindings = {};
 
-      self.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
-      self.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
-      self.filtersCleared = jasmine.createSpy().and.returnValue(null);
+        self.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        self.emailFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        self.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        self.filtersCleared = jasmine.createSpy().and.returnValue(null);
 
-      defaultBindings = {
-        stateData:            [ 'enabled', 'disbled' ],
-        onNameFilterUpdated:  self.nameFilterUpdated,
-        onStateFilterUpdated: self.stateFilterUpdated,
-        onFiltersCleared:     self.filtersCleared
-      };
+        defaultBindings = {
+          stateData:            [ 'enabled', 'disbled' ],
+          selectedState:        'all',
+          onNameFilterUpdated:  self.nameFilterUpdated,
+          onEmailFilterUpdated: self.emailFilterUpdated,
+          onStateFilterUpdated: self.stateFilterUpdated,
+          onFiltersCleared:     self.filtersCleared
+        };
 
         _.extend(actualBindings, defaultBindings, bindings);
 
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
-            '<name-and-state-filters ',
+            '<name-email-state-filters ',
             '    state-data="vm.stateData" ',
+            '    selected-state="' + actualBindings.selectedState + '" ',
             '    on-name-filter-updated="vm.onNameFilterUpdated" ',
+            '    on-email-filter-updated="vm.onEmailFilterUpdated" ',
             '    on-state-filter-updated="vm.onStateFilterUpdated" ',
             '    on-filters-cleared="vm.onFiltersCleared"> ',
-            '</name-and-state-filters>'
+            '</name-email-state-filters>'
           ].join(''),
           actualBindings,
-          'nameAndStateFilters');
+          'nameEmailStateFilters');
       };
 
       return SuiteMixin;
@@ -64,7 +69,7 @@ define(function (require) {
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
       this.putHtmlTemplates(
-        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
+        '/assets/javascripts/common/components/nameEmailStateFilters/nameEmailStateFilters.html',
         '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');
     }));
 
@@ -88,6 +93,30 @@ define(function (require) {
 
       filtersSharedBehaviour.stateFiltersharedBehaviour(context);
 
+    });
+
+    it('has valid scope', function() {
+      this.createController();
+      expect(this.controller.emailFilter).toBeEmptyString();
+      expect(this.controller.emailFilterUpdated).toBeFunction();
+    });
+
+    it('invokes the callback when the email filter is updated', function() {
+      this.createController();
+
+      this.controller.emailFilter = 'test';
+      this.controller.emailFilterUpdated();
+      this.scope.$digest();
+
+      expect(this.emailFilterUpdated).toHaveBeenCalled();
+    });
+
+    it('invokes the callback when the filters are cleared', function() {
+      this.createController();
+      this.controller.clearFilters();
+      this.scope.$digest();
+      expect(this.controller.emailFilter).toBeEmptyString();
+      expect(this.filtersCleared).toHaveBeenCalled();
     });
 
   });

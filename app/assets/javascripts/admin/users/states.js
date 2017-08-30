@@ -39,7 +39,13 @@ define(function () {
       .state('home.admin.users.memberships', {
         url: '/memberships',
         views: {
-          'main@': 'userMemberships'
+          'main@': 'membershipAdmin'
+        }
+      })
+      .state('home.admin.users.memberships.membership', {
+        url: '/{membershipId}',
+        views: {
+          'main@': 'membershipView'
         }
       });
 

@@ -7,7 +7,7 @@ define(function (require) {
 
   var _ = require('lodash');
 
-  PagedListController.$inject = ['vm', 'gettextCatalog'];
+  PagedListController.$inject = ['vm', '$state', 'gettextCatalog'];
 
   /**
    * Base class for controllers that display items in a paged fashion.
@@ -20,31 +20,43 @@ define(function (require) {
    * @param {function} vm.getItems - A function that returns a promise of PagedResult to display on a single
    * page.
    *
-   * @param {int[]} vm.counts - The entity counts.
+   * @param {object} vm.counts - The entity counts. The 'total' field in this object holds the count
+   *        of the total number of objects on the server.
    *
    * @param {string[]} vm.stateData - an array of objects, used to filter entities by state. Each object has 2
    *        keys: <code>id</code> and <code>name</code>. The value for the <code>id</code> key is a state for
    *        the entities being displayed, and used with the $scope.getItems function. The value for the
    *        <code>name</code> key is what is displayed in the 'State' drop down box.
    *
-   * @param {object} $scope - the scope object this controller inherits from.
+   * @param {domain.ui.filter[]} vm.filters - an array of filters the derived class supports.
+   *
+   * @param {function|undefined} vm.onFiltersCleared - a function to be called when all filters are cleared.
+   *
+   * @param {function|undefined} vm.handleUnauthorized - the function to gall if vm.getItems returns
+   *        a rejected promise. If this function is not defined, then the state will be changed to
+   *        the login page on a rejected promise.
+   *
+   * @param {object} $state - the Angular UI Router state object.
    *
    * @param {AngularJs_Service} gettextCatalog - the service that provides string translations functions.
    *
    * @return {object} The base class object.
    */
-  function PagedListController(vm, gettextCatalog) {
-    vm.nameFilter         = '';
+  function PagedListController(vm, $state, gettextCatalog) {
     vm.pagedResult        = { total: 0 };
-    vm.sortFields         = [ gettextCatalog.getString('Name'), gettextCatalog.getString('State') ];
-    vm.nameFilterUpdated  = nameFilterUpdated;
-    vm.stateFilterUpdated = stateFilterUpdated;
     vm.selectedState      = 'all';
     vm.pageChanged        = pageChanged;
     vm.sortFieldSelected  = sortFieldSelected;
+    vm.updateSearchFilter = updateSearchFilter;
     vm.filtersCleared     = filtersCleared;
     vm.getFilters         = getFilters;
     vm.updateItems        = updateItems;
+    vm.handleUnauthorized = handleUnauthorized;
+
+    vm.sortFieldData         = [
+      { id: 'name',  labelFunc: function () {  return gettextCatalog.getString('Name'); } },
+      { id: 'state', labelFunc: function () {  return gettextCatalog.getString('State'); } }
+    ];
 
     vm.pagerOptions = {
       filter: '',
@@ -60,8 +72,6 @@ define(function (require) {
     };
 
     vm.displayState = displayState();
-    vm.displayState = displayState;
-
     updateItems();
 
     //---
@@ -77,65 +87,52 @@ define(function (require) {
       return vm.displayStates.NO_ENTITIES;
     }
 
-    function getFilters() {
-      var filters = [],
-          additionalFilters = [];
-
-      if (vm.getAdditionalFilters) {
-        additionalFilters = vm.getAdditionalFilters();
-        if (additionalFilters.length > 0) {
-          filters.push(additionalFilters);
-        }
-      }
-
-      if (vm.nameFilter !== '') {
-        filters.push('name:like:' + vm.nameFilter);
-      }
-
-      if (vm.selectedState && (vm.selectedState !== 'all')) {
-        filters.push('state::' + vm.selectedState);
-      }
-
-      return filters;
-    }
-
     function updateItems() {
       var filters = vm.getFilters();
       _.extend(vm.pagerOptions, { filter: filters.join(';') });
 
-      vm.getItems(vm.pagerOptions).then(function (pagedResult) {
-        if (!pagedResult) { return; }
+      vm.getItems(vm.pagerOptions)
+        .then(function (pagedResult) {
+          if (!pagedResult) { return; }
 
-        vm.pagedResult = pagedResult;
-        vm.pagedResult.items = _.map(vm.pagedResult.items, function (entity) {
-          entity.icon = vm.getItemIcon(entity);
-          return entity;
+          vm.pagedResult = pagedResult;
+          vm.pagedResult.items = _.map(vm.pagedResult.items, function (entity) {
+            entity.icon = vm.getItemIcon(entity);
+            return entity;
+          });
+          vm.displayState = displayState();
+        })
+        .catch(handleUnauthorized);
+    }
+
+    /*
+     * Returns a function that updates the filter.
+     */
+    function updateSearchFilter(name) {
+      var filter = vm.filters[name];
+      if (_.isUndefined(filter)) {
+        throw new Error('filter never assigned: ' + name);
+      }
+      return function (value) {
+        filter.setValue(value);
+        vm.pagerOptions.page = 1;
+        updateItems();
+      };
+    }
+
+    function getFilters() {
+      return _.values(vm.filters)
+        .map(function (filter) {
+          return filter.getValue();
+        })
+        .filter(function (value) {
+          return value !== '';
         });
-        vm.displayState = displayState.call(vm);
-      });
-    }
-
-    /*
-     * Called when user enters text into the 'name filter'.
-     */
-    function nameFilterUpdated(nameFilter) {
-      vm.nameFilter = nameFilter;
-      vm.pagerOptions.page = 1;
-      updateItems();
-    }
-
-    /*
-     * Called when user selects a state from the 'state filter' select.
-     */
-    function stateFilterUpdated(selectedState) {
-      vm.selectedState = selectedState;
-      vm.pagerOptions.page = 1;
-      updateItems();
     }
 
     function sortFieldSelected(sortField) {
       vm.pagerOptions.page = 1;
-      vm.pagerOptions.sort = sortField.toLowerCase(); // must be lower case
+      vm.pagerOptions.sort = sortField;
       updateItems();
     }
 
@@ -144,12 +141,20 @@ define(function (require) {
     }
 
     function filtersCleared() {
-      if (vm.clearAdditionalFilters) {
-        vm.clearAdditionalFilters();
-      }
-      vm.nameFilter = '';
-      vm.selectedState = 'all';
+      _.values(vm.filters).forEach(function (filter) {
+        filter.clearValue();
+      });
       updateItems();
+      if (!_.isNil(vm.onFiltersCleared)) {
+        vm.onFiltersCleared();
+      }
+    }
+
+    function handleUnauthorized(error) {
+      if (error.status && (error.status === 401)) {
+        $state.go('home.users.login', {}, { reload: true });
+      }
+      return null;
     }
 
   }

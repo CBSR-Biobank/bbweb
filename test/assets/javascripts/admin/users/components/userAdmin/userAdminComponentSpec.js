@@ -73,7 +73,7 @@ define([
       this.putHtmlTemplates(
         '/assets/javascripts/admin/users/components/userAdmin/userAdmin.html',
         '/assets/javascripts/admin/users/components/usersPagedList/usersPagedList.html',
-        '/assets/javascripts/admin/users/components/nameEmailStateFilters/nameEmailStateFilters.html',
+        '/assets/javascripts/common/components/nameEmailStateFilters/nameEmailStateFilters.html',
         '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 

@@ -6,13 +6,14 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/users/components/nameEmailStateFilters/nameEmailStateFilters.html',
+    templateUrl: '/assets/javascripts/common/components/nameEmailStateFilters/nameEmailStateFilters.html',
     controller: NameAndStateFiltersController,
     controllerAs: 'vm',
     bindings: {
       stateData:            '<',
+      selectedState:        '@',
       onNameFilterUpdated:  '&',
-      onEmailFilterUpdated:  '&',
+      onEmailFilterUpdated: '&',
       onStateFilterUpdated: '&',
       onFiltersCleared:     '&'
     }

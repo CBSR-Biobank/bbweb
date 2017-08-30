@@ -60,7 +60,8 @@ define(function (require) {
 
       this.putHtmlTemplates(
         '/assets/javascripts/admin/studies/components/studiesPagedList/studiesPagedList.html',
-        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html');
+        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
+        '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -68,6 +69,8 @@ define(function (require) {
                               'Study',
                               'StudyCounts',
                               'StudyState',
+                              'NameFilter',
+                              'StateFilter',
                               '$state',
                               'factory');
 
@@ -79,8 +82,8 @@ define(function (require) {
       this.createController();
 
       expect(this.controller.limit).toBeDefined();
-      expect(this.controller.stateData).toBeArrayOfObjects();
-      expect(this.controller.stateData).toBeNonEmptyArray();
+      expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeArrayOfObjects();
+      expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeNonEmptyArray();
       expect(this.controller.getItems).toBeFunction();
       expect(this.controller.getItemIcon).toBeFunction();
     });
@@ -120,6 +123,9 @@ define(function (require) {
           return self.Study.list.calls.mostRecent().args;
         };
 
+        context.stateFilterValue = this.StudyState.DISABLED;
+        context.sortFields = ['Name', 'State'];
+        context.defaultSortFiled = 'name';
       }));
 
       sharedBehaviour(context);

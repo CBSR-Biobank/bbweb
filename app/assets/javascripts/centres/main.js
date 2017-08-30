@@ -57,5 +57,7 @@ define(function (require) {
     .service('shipmentStateLabelService',
              require('./services/shipmentStateLabelService'))
     .service('shipmentSkipToUnpackedModalService',
-             require('./services/shipmentSkipToUnpackedModal/shipmentSkipToUnpackedModalService'));
+             require('./services/shipmentSkipToUnpackedModal/shipmentSkipToUnpackedModalService'))
+
+    .service('centreStateLabelService',  require('./services/centreStateLabelService'));
 });

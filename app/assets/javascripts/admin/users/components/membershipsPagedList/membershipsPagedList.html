@@ -1,0 +1,58 @@
+<div class="voffset-bottom-3">
+  <name-filter on-name-filter-updated="vm.updateSearchFilter('NameFilter')"
+               on-filters-cleared="vm.filtersCleared">
+  </name-filter>
+</div>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <i class="glyphicon glyphicon-cog"></i> {{vm.pagedResult.total}} {{'Total memberships'|translate}}
+  </div>
+
+  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.NO_RESULTS">
+    <li class="list-group-item">
+      <p class="alert alert-warning" role="alert">
+        <span class="glyphicon glyphicon-warning-sign"></span>
+        {{'No users match the criteria.'|translate}}
+      </p>
+    </li>
+  </ul>
+
+  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
+    <li class="list-group-item" ng-repeat="entity in vm.pagedResult.items">
+      <div class="row">
+        <div class="col-md-12">
+          <strong>
+            <a ui-sref="home.admin.users.user({ userId: entity.id })">
+              <i class="glyphicon" ng-class="vm.getItemIcon(entity)"></i>
+              {{entity.name}}
+            </a>
+          </strong>
+          <p>{{entity.description === null ? "" : entity.description | truncate:100}}</p>
+        </div>
+      </div>
+      <div class="row">
+        <entity-timestamps time-added="entity.timeAdded"
+                           time-modified="entity.timeModified">
+        </entity-timestamps>
+      </div>
+    </li>
+  </ul>
+
+</div>
+
+<ul uib-pagination
+    class="pagination-sm"
+    total-items="vm.pagedResult.total"
+    ng-model="vm.pagerOptions.page"
+    ng-change="vm.pageChanged()"
+    items-per-page="vm.pagerOptions.limit"
+    max-size="5"
+    rotate="false"
+    boundary-links="true"
+    previous-text="&lsaquo;"
+    next-text="&rsaquo;"
+    first-text="&laquo;"
+    last-text="&raquo;"
+    ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
+</ul>

@@ -14,13 +14,13 @@ define(function (require) {
    */
   var component = {
     templateUrl: '/assets/javascripts/admin/users/components/usersPagedList/usersPagedList.html',
-    controller: StudiesPagedListController,
+    controller: Controller,
     controllerAs: 'vm',
     bindings: {
     }
   };
 
-  StudiesPagedListController.$inject = [
+  Controller.$inject = [
     '$controller',
     '$scope',
     '$state',
@@ -28,22 +28,36 @@ define(function (require) {
     'UserState',
     'userStateLabel',
     'UserCounts',
-    'gettextCatalog'
+    'gettextCatalog',
+    'EmailFilter',
+    'NameFilter',
+    'StateFilter',
   ];
 
   /*
    * Controller for this component.
    */
-  function StudiesPagedListController($controller,
-                                      $scope,
-                                      $state,
-                                      User,
-                                      UserState,
-                                      userStateLabel,
-                                      UserCounts,
-                                      gettextCatalog) {
-    var vm = this;
+  function Controller($controller,
+                      $scope,
+                      $state,
+                      User,
+                      UserState,
+                      userStateLabel,
+                      UserCounts,
+                      gettextCatalog,
+                      EmailFilter,
+                      NameFilter,
+                      StateFilter) {
+    var vm = this,
+        stateData = _.values(UserState).map(function (state) {
+          return { id: state, label: userStateLabel.stateToLabelFunc(state) };
+        });
+
     vm.$onInit = onInit;
+    vm.filters = {};
+    vm.filters[NameFilter.name]  = new NameFilter();
+    vm.filters[EmailFilter.name] = new EmailFilter();
+    vm.filters[StateFilter.name] = new StateFilter(true, stateData, 'all');
 
     //--
 
@@ -53,33 +67,23 @@ define(function (require) {
       vm.limit                = 5;
       vm.getItems             = getItems;
       vm.getItemIcon          = getItemIcon;
-      vm.emailFilterUpdated   = emailFilterUpdated;
 
       // initialize this controller's base class
       $controller('PagedListController', {
         vm:             vm,
+        $state:         $state,
         gettextCatalog: gettextCatalog
       });
 
-      vm.superGetFilters      = vm.getFilters;
-      vm.getFilters           = getFilters;
-      vm.superFiltersCleared  = vm.filtersCleared;
-      vm.filtersCleared       = filtersCleared;
-
-      vm.stateData = _.map(_.values(UserState), function (state) {
-        return { id: state, label: userStateLabel.stateToLabel(state) };
+      vm.stateLabelFuncs = {};
+       _.values(UserState).forEach(function (state) {
+        vm.stateLabelFuncs[state] = userStateLabel.stateToLabelFunc(state);
       });
 
-      vm.stateLabels = {};
-      _.forEach(_.values(UserState), function (state) {
-        vm.stateLabels[state] = userStateLabel.stateToLabel(state);
-      });
-
-      // override this setting
-      vm.sortFields = [
-        gettextCatalog.getString('Name'),
-        gettextCatalog.getString('Email'),
-        gettextCatalog.getString('State')
+      vm.sortFieldData = [
+        { id: 'name',  labelFunc: function () {  return gettextCatalog.getString('Name'); } },
+        { id: 'email', labelFunc: function () {  return gettextCatalog.getString('Email'); } },
+        { id: 'state', labelFunc: function () {  return gettextCatalog.getString('State'); } }
       ];
 
       UserCounts.get()
@@ -87,17 +91,16 @@ define(function (require) {
           vm.userCounts = counts;
           vm.haveUsers  = (vm.userCounts.total > 0);
         })
-        .catch(handleUnauthorized);
+        .catch(vm.handleUnauthorized);
     }
 
     function getItems(options) {
-      // KLUDGE: for now, fix after Entity Pagers have been implemented
       return UserCounts.get()
         .then(function (counts) {
           vm.counts = counts;
           return User.list(options);
         })
-        .catch(handleUnauthorized);
+        .catch(vm.handleUnauthorized);
     }
 
     function getItemIcon(user) {
@@ -109,35 +112,6 @@ define(function (require) {
         return 'glyphicon-lock';
       }
       throw new Error('invalid user state: ' + user.state);
-    }
-
-    /*
-     * Called when user enters text into the 'email filter'.
-     */
-    function emailFilterUpdated(emailFilter) {
-      vm.emailFilter = emailFilter;
-      vm.pagerOptions.page = 1;
-      vm.updateItems.call(vm);
-    }
-
-    function getFilters() {
-      var filters = vm.superGetFilters();
-      if (vm.emailFilter !== '') {
-        filters.push('email:like:' + vm.emailFilter);
-      }
-      return filters;
-    }
-
-    function filtersCleared() {
-      vm.emailFilter = '';
-      vm.superFiltersCleared();
-    }
-
-    function handleUnauthorized(error) {
-      if (error.status && (error.status === 401)) {
-        $state.go('home.users.login', {}, { reload: true });
-      }
-      return null;
     }
   }
 

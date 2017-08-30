@@ -20,10 +20,9 @@ define(function (require) {
     .component('usersPagedList',  require('./components/usersPagedList/usersPagedListComponent'))
     .component('userProfile',     require('./components/userProfile/userProfileComponent'))
     .component('userRoles',       require('./components/userRoles/userRolesComponent'))
-    .component('userMemberships', require('./components/userMemberships/userMembershipsComponent'))
-    .component('nameEmailStateFilters',
-               require('./components/nameEmailStateFilters/nameEmailStateFiltersComponent'));
-
+    .component('membershipAdmin', require('./components/membershipAdmin/membershipAdminComponent'))
+    .component('membershipsPagedList',
+               require('./components/membershipsPagedList/membershipsPagedListComponent'));
   return {
     name: name,
     module: module

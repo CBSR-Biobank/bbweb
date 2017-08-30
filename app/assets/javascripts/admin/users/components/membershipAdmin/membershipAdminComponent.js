@@ -9,15 +9,15 @@ define(function () {
    * Allows the logged in user to modify another user's memberships.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/users/components/userMemberships/userMemberships.html',
-    controller: UserMembershipsController,
+    templateUrl: '/assets/javascripts/admin/users/components/membershipAdmin/membershipAdmin.html',
+    controller: MembershipAdminsController,
     controllerAs: 'vm',
     bindings: {
       user: '<'
     }
   };
 
-  UserMembershipsController.$inject = [
+  MembershipAdminsController.$inject = [
     'breadcrumbService',
     'gettextCatalog'
   ];
@@ -25,7 +25,7 @@ define(function () {
   /*
    * Controller for this component.
    */
-  function UserMembershipsController(breadcrumbService,
+  function MembershipAdminsController(breadcrumbService,
                                      gettextCatalog) {
     var vm = this;
     vm.$onInit = onInit;

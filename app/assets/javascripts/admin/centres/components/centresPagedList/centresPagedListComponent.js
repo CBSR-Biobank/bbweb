@@ -15,13 +15,13 @@ define(function (require) {
    */
   var component = {
     templateUrl: '/assets/javascripts/admin/centres/components/centresPagedList/centresPagedList.html',
-    controller: CentresPagedListController,
+    controller: Controller,
     controllerAs: 'vm',
     bindings: {
     }
   };
 
-  CentresPagedListController.$inject = [
+  Controller.$inject = [
     '$controller',
     '$q',
     '$scope',
@@ -29,22 +29,34 @@ define(function (require) {
     'CentreState',
     'CentreCounts',
     '$state',
-    'gettextCatalog'
+    'gettextCatalog',
+    'NameFilter',
+    'StateFilter',
+    'centreStateLabelService'
   ];
 
   /*
    * Controller for this component.
    */
-  function CentresPagedListController($controller,
-                                      $q,
-                                      $scope,
-                                      Centre,
-                                      CentreState,
-                                      CentreCounts,
-                                      $state,
-                                      gettextCatalog) {
-    var vm = this;
+  function Controller($controller,
+                      $q,
+                      $scope,
+                      Centre,
+                      CentreState,
+                      CentreCounts,
+                      $state,
+                      gettextCatalog,
+                      NameFilter,
+                      StateFilter,
+                      centreStateLabelService) {
+    var vm = this,
+        stateData = _.values(CentreState).map(function (state) {
+          return { id: state, label: centreStateLabelService.stateToLabelFunc(state) };
+        });
     vm.$onInit = onInit;
+    vm.filters = {};
+    vm.filters[NameFilter.name]  = new NameFilter();
+    vm.filters[StateFilter.name] = new StateFilter(true, stateData, 'all');
 
     //--
 
@@ -54,21 +66,23 @@ define(function (require) {
       vm.getItems    = getItems;
       vm.getItemIcon = getItemIcon;
 
-      vm.stateData = _.map(_.values(CentreState), function (state) {
-        return { id: state, label: state.toUpperCase() };
-      });
-
       // initialize this controller's base class
       $controller('PagedListController', {
         vm:             vm,
+        $state:         $state,
         gettextCatalog: gettextCatalog
       });
+
+       vm.stateLabelFuncs = {};
+       _.values(CentreState).forEach(function (state) {
+          vm.stateLabelFuncs[state] = centreStateLabelService.stateToLabelFunc(state);
+       });
 
       CentreCounts.get()
         .then(function (counts) {
           vm.counts = counts;
         })
-        .catch(handleUnauthorized);
+        .catch(vm.handleUnauthorized);
     }
 
     function getItems(options) {
@@ -77,7 +91,7 @@ define(function (require) {
           vm.counts = counts;
           return Centre.list(options);
         })
-        .catch(handleUnauthorized);
+        .catch(vm.handleUnauthorized);
     }
 
     function getItemIcon(centre) {
@@ -88,13 +102,6 @@ define(function (require) {
       } else {
         throw new Error('invalid centre state: ' + centre.state);
       }
-    }
-
-    function handleUnauthorized(error) {
-      if (error.status && (error.status === 401)) {
-        $state.go('home.users.login', {}, { reload: true });
-      }
-      return null;
     }
   }
 
