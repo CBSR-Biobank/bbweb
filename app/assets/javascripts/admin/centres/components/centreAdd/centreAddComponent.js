@@ -20,7 +20,8 @@ define(function (require) {
     'gettextCatalog',
     'Centre',
     'domainNotificationService',
-    'notificationsService'
+    'notificationsService',
+    'breadcrumbService'
   ];
 
   /*
@@ -30,13 +31,21 @@ define(function (require) {
                               gettextCatalog,
                               Centre,
                               domainNotificationService,
-                              notificationsService) {
+                              notificationsService,
+                              breadcrumbService) {
     var vm = this;
     vm.$onInit = onInit;
 
     //---
 
-     function onInit() {
+    function onInit() {
+      vm.breadcrumbs = [
+        breadcrumbService.forState('home'),
+        breadcrumbService.forState('home.admin'),
+        breadcrumbService.forState('home.admin.centres'),
+        breadcrumbService.forState('home.admin.centres.add')
+      ];
+
       vm.centre = new Centre();
       vm.submit = submit;
       vm.cancel = cancel;

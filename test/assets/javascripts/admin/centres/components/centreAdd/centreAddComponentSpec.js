@@ -45,7 +45,8 @@ define(function (require) {
                               'domainNotificationService');
 
       this.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/components/centreAdd/centreAdd.html');
+        '/assets/javascripts/admin/centres/components/centreAdd/centreAdd.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
       this.centre = new this.Centre();
       this.returnState = {

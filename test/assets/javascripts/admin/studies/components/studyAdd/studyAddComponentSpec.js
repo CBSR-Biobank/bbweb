@@ -45,7 +45,9 @@ define(function (require) {
       this.titleContains = 'Add';
       this.returnState = 'home.admin.studies';
 
-      this.putHtmlTemplates('/assets/javascripts/admin/studies/components/studyAdd/studyAdd.html');
+      this.putHtmlTemplates(
+        '/assets/javascripts/admin/studies/components/studyAdd/studyAdd.html',
+        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
     }));
 
     it('should contain valid settings to update a study', function() {

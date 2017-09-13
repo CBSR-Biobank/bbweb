@@ -15,16 +15,20 @@ define(function (require) {
    * displayed in the client are updated correctly when the user changes the language.
    */
   function breadcrumbService(gettextCatalog) {
-    var breadcrumbStateToDisplayFunc = {
+    var addLabelFunc = function () { return gettextCatalog.getString('Add'); },
+    breadcrumbStateToDisplayFunc = {
       'home':                              function () { return gettextCatalog.getString('Home'); },
       'home.about':                        function () { return gettextCatalog.getString('About'); },
       'home.admin':                        function () { return gettextCatalog.getString('Administration'); },
       'home.admin.studies':                function () { return gettextCatalog.getString('Studies'); },
+      'home.admin.studies.add':            addLabelFunc,
       'home.admin.centres':                function () { return gettextCatalog.getString('Centres'); },
+      'home.admin.centres.add':            addLabelFunc,
       'home.admin.users':                  function () { return gettextCatalog.getString('Users'); },
       'home.admin.users.manage':           function () { return gettextCatalog.getString('Manage users'); },
       'home.admin.users.roles':            function () { return gettextCatalog.getString('Roles'); },
       'home.admin.users.memberships':      function () { return gettextCatalog.getString('Memberships'); },
+      'home.admin.users.memberships.add':  addLabelFunc,
       'home.collection':                   function () { return gettextCatalog.getString('Collection'); },
       'home.collection.study.participantAdd': function () {
         return gettextCatalog.getString('Add participant');
