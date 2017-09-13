@@ -63,17 +63,18 @@ define(function (require) {
     Membership.prototype = Object.create(MembershipBase.prototype);
     Membership.prototype.constructor = Membership;
 
-    Membership.SCHEMA = _.extend({},
-                                 MembershipBase.SCHEMA,
-                                 {
-                                   'id': 'Membership',
-                                   'type': 'object'
-                                 });
+    Membership.REST_API_URL = '/access/memberships';
 
-    _.extend(Membership.SCHEMA.properties,
-             { 'userData':  { 'type': 'array', 'items': { '$ref': 'EntityInfo' } } });
-
-    Membership.SCHEMA.required.push('userData');
+    Membership.SCHEMA = _.extend(
+      _.clone(MembershipBase.SCHEMA),
+      {
+        'id': 'Membership',
+        'type': 'object',
+        'properties': _.extend(
+          _.clone(MembershipBase.SCHEMA.properties),
+          { 'userData':  { 'type': 'array', 'items': { '$ref': 'EntityInfo' } } }),
+        'required': _.clone(MembershipBase.SCHEMA.required).concat('userData')
+      });
 
     /**
      * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.access.Membership|Membership}.
@@ -84,7 +85,7 @@ define(function (require) {
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     Membership.isValid = function (obj) {
-      return ConcurrencySafeEntity.isValid(MembershipBase.SCHEMA,
+      return ConcurrencySafeEntity.isValid(Membership.SCHEMA,
                                            [
                                              EntityInfo.SCHEMA,
                                              EntitySet.SCHEMA
@@ -174,7 +175,7 @@ define(function (require) {
         return value === '';
       });
 
-      return biobankApi.get(uri(), params).then(function(reply) {
+      return biobankApi.get(Membership.REST_API_URL, params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
@@ -302,7 +303,7 @@ define(function (require) {
     };
 
     function uri(id) {
-      var result = '/access/memberships/';
+      var result = Membership.REST_API_URL + '/';
       if (arguments.length > 0) {
         result += id;
       }

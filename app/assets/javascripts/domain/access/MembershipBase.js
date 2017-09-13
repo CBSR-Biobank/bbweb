@@ -92,8 +92,8 @@ define(function(require) {
         'timeModified': { 'type': [ 'string', 'null' ] },
         'name':         { 'type': 'string' },
         'description':  { 'type': [ 'string', 'null' ] },
-        'studyData':    { 'type': 'object', 'items': { '$ref': 'MembershipEntitySet' } },
-        'centreData':   { 'type': 'object', 'items': { '$ref': 'MembershipEntitySet' } }
+        'studyData':    { 'type': 'object', 'items': { '$ref': 'EntitySet' } },
+        'centreData':   { 'type': 'object', 'items': { '$ref': 'EntitySet' } }
       },
       'required': [ 'id', 'version', 'timeAdded', 'studyData', 'centreData' ]
     };

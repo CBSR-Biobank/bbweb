@@ -12,6 +12,8 @@ define(function (require) {
 
   describe('Membership', function() {
 
+    var REST_API_URL = '/access/memberships';
+
     function SuiteMixinFactory(MebershipSpecCommon) {
 
       function SuiteMixin() {
@@ -153,6 +155,9 @@ define(function (require) {
         this.Membership.SCHEMA.required.forEach(function (property) {
           var json = self.factory.membership(),
               badJson = _.omit(json, property);
+          if (property === 'userData') {
+            console.log(property);
+          }
           self.$httpBackend.whenGET(uri(json.id)).respond(self.reply(badJson));
           self.Membership.get(json.id).then(shouldNotFail).catch(shouldFail);
           self.$httpBackend.flush();
@@ -176,7 +181,7 @@ define(function (require) {
             memberships = [ this.factory.membership() ],
             reply = this.factory.pagedResult(memberships);
 
-        self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
+        self.$httpBackend.whenGET(REST_API_URL).respond(this.reply(reply));
         self.Membership.list().then(testMembership).catch(failTest);
         self.$httpBackend.flush();
 
@@ -197,7 +202,7 @@ define(function (require) {
             reply = this.factory.pagedResult(memberships);
 
         optionList.forEach(function (options) {
-          var url = sprintf('%s?%s', uri(), self.$httpParamSerializer(options, true));
+          var url = sprintf('%s?%s', REST_API_URL, self.$httpParamSerializer(options, true));
 
           self.$httpBackend.whenGET(url).respond(self.reply(reply));
           self.Membership.list(options).then(testMembership).catch(failTest);
@@ -218,7 +223,7 @@ define(function (require) {
             memberships = [ this.factory.membership() ],
             reply = this.factory.pagedResult(memberships);
 
-        this.$httpBackend.whenGET(uri()).respond(this.reply(reply));
+        this.$httpBackend.whenGET(REST_API_URL).respond(this.reply(reply));
         this.Membership.list(options).then(testMembership).catch(failTest);
         this.$httpBackend.flush();
 
@@ -234,7 +239,7 @@ define(function (require) {
         var json = [ _.omit(this.factory.membership(), 'id') ],
             reply = this.factory.pagedResult(json);
 
-        this.$httpBackend.whenGET(uri()).respond(this.reply(reply));
+        this.$httpBackend.whenGET(REST_API_URL).respond(this.reply(reply));
         this.Membership.list().then(listFail).catch(shouldFail);
         this.$httpBackend.flush();
 
@@ -508,7 +513,7 @@ define(function (require) {
     }
 
     function uri(membershipId) {
-      var result = '/access/memberships/';
+      var result = REST_API_URL + '/';
       if (arguments.length > 0) {
         result += membershipId;
       }
