@@ -64,7 +64,7 @@ define(function(require) {
        * @name domain.access.MembershipBase#studyData
        * @type {Array<string>}
        */
-      this.studyData = null;
+      this.studyData = [];
 
       /**
        * The centres this membership is for.
@@ -72,7 +72,7 @@ define(function(require) {
        * @name domain.users.MembershipBase#centreData
        * @type {Array<string>}
        */
-      this.centreData = null;
+      this.centreData = [];
 
       ConcurrencySafeEntity.call(this, MembershipBase.SCHEMA, obj);
       this.studyData = new EntitySet(_.get(obj, 'studyData', {}));

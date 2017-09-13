@@ -1,0 +1,84 @@
+<breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
+<div class="page-header">
+  <h1 translate>Add membership</h1>
+</div>
+<form class="form-horizontal"
+      name="membershipForm"
+      ng-submit="membershipForm.$valid && vm.submit()"
+      novalidate>
+
+  <!-- NAME -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : membershipForm.name.$invalid && !membershipForm.name.$pristine }">
+    <label for="name" class="col-md-2 form-control-label" translate>Name</label>
+    <div class="col-md-10">
+      <input name="name"
+             type="text"
+             class="form-control"
+             ng-model="vm.membership.name"
+             ng-minlength="2"
+             placeholder="{{'A short name for the membership'|translate}}"
+             focus-me="true"
+             required />
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="membershipForm.name.$error"
+         ng-if="membershipForm.name.$dirty">
+      <div ng-message="minlength" class="help-block" translate>Name is too short</div>
+      <div ng-message="required" class="help-block" translate>A name is required</div>
+    </div>
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div class="form-group">
+    <label for="description" class="col-md-2 form-control-label" translate>Description</label>
+    <div class="col-md-10">
+      <textarea name="description"
+                class="form-control"
+                rows="5"
+                ng-model="vm.membership.description"
+                placeholder="{{'A description for the membership (optional)'|translate}}" />
+    </div>
+  </div>
+
+  <!-- USERS -->
+  <labels-input add-label="{{'Add a user'|translate}}"
+                tags-label="{{'Users'|translate}}"
+                placeholder="{{'enter a user\'s name or partial name'|translate}}"
+                tags-placeholder="{{'No users added yet'|translate}}"
+                no-results-found="{{'No matching users found'|translate}}"
+                get-values="vm.getUserNames"
+                on-value-selected="vm.userSelected"
+                on-remove-tag="vm.removeUser">
+  </labels-input>
+
+  <!-- STUDIES -->
+  <labels-input add-label="{{'Add a study'|translate}}"
+                tags-label="{{'Studies'|translate}}"
+                placeholder="{{'enter a study\'s name or partial name'|translate}}"
+                tags-placeholder="{{'No studies added yet'|translate}}"
+                no-results-found="{{'No matching studies found'|translate}}"
+                get-values="vm.getStudyNames"
+                on-value-selected="vm.studySelected"
+                on-remove-tag="vm.removeStudy">
+  </labels-input>
+
+  <!-- CENTRES -->
+  <labels-input add-label="{{'Add a centre'|translate}}"
+                tags-label="{{'Centres'|translate}}"
+                placeholder="{{'enter a centre\'s name or partial name'|translate}}"
+                tags-placeholder="{{'No centres added yet'|translate}}"
+                no-results-found="{{'No matching centres found'|translate}}"
+                get-values="vm.getCentreNames"
+                on-value-selected="vm.centreSelected"
+                on-remove-tag="vm.removeCentre">
+  </labels-input>
+
+  <!-- BUTTONS  -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <button class="btn btn-primary" ng-disabled="membershipForm.$invalid" translate>Submit</button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>Cancel</button>
+    </div>
+  </div>
+</form>

@@ -2,8 +2,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf, tv4) {
+define(function(require) {
   'use strict';
+
+  var _       = require('lodash'),
+      sprintf = require('sprintf-js').sprintf;
 
   StudyFactory.$inject = [
     '$q',
@@ -27,25 +30,6 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
                         StudyState,
                         AnnotationType,
                         HasAnnotationTypes) {
-
-    /**
-     * Used for validating plain objects.
-     */
-    var schema = {
-      'id': 'Study',
-      'type': 'object',
-      'properties': {
-        'id':              { 'type': 'string' },
-        'version':         { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':       { 'type': 'string' },
-        'timeModified':    { 'type': [ 'string', 'null' ] },
-        'name':            { 'type': 'string' },
-        'description':     { 'type': [ 'string', 'null' ] },
-        'annotationTypes': { 'type': 'array', 'items':{ '$ref': 'AnnotationType' }  },
-        'state':           { 'type': 'string' }
-      },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'state' ]
-    };
 
     /**
      * Use this contructor to create a new Study to be persited on the server. Use {@link
@@ -96,14 +80,34 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
        */
       this.state = StudyState.DISABLED;
 
-      ConcurrencySafeEntity.call(this, schema, obj);
+      ConcurrencySafeEntity.call(this, Study.SCHEMA, obj);
       _.extend(this, { annotationTypes: annotationTypes });
     }
 
     Study.prototype = Object.create(ConcurrencySafeEntity.prototype);
     _.extend(Study.prototype, HasAnnotationTypes.prototype);
-
     Study.prototype.constructor = Study;
+
+    Study.REST_API_URL = '/studies';
+
+    /**
+     * Used for validating plain objects.
+     */
+    Study.SCHEMA = {
+      'id': 'Study',
+      'type': 'object',
+      'properties': {
+        'id':              { 'type': 'string' },
+        'version':         { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':       { 'type': 'string' },
+        'timeModified':    { 'type': [ 'string', 'null' ] },
+        'name':            { 'type': 'string' },
+        'description':     { 'type': [ 'string', 'null' ] },
+        'annotationTypes': { 'type': 'array', 'items':{ '$ref': 'AnnotationType' }  },
+        'state':           { 'type': 'string' }
+      },
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'state' ]
+    };
 
     /**
      * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.studies.Study|Study}.
@@ -114,7 +118,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     Study.isValid = function (obj) {
-      return ConcurrencySafeEntity.isValid(schema, [ AnnotationType.SCHEMA ], obj);
+      return ConcurrencySafeEntity.isValid(Study.SCHEMA, [ AnnotationType.SCHEMA ], obj);
     };
 
     /**
@@ -256,23 +260,6 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
     };
 
     /**
-     * @typedef domain.studies.StudyNameDto
-     * @type object
-     * @property {String} id - the study's identity
-     * @property {String} name - the study's name
-     * @property {String} state - the study's state
-     */
-
-    /**
-     * Returns the names of all the studies in the system.
-     *
-     * @returns {Promise<Array<domain.studies.StudyNameDto>>} The names of the studies in the system.
-     */
-    Study.names = function () {
-      return biobankApi.get('/studies/names');
-    };
-
-    /**
      * Adds a study.
      *
      * @return {Promise<domain.studies.Study>} A promise containing the study that was created.
@@ -360,8 +347,10 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
      * type.
      */
     Study.prototype.removeAnnotationType = function (annotationType) {
-      var url = sprintf.sprintf('%s/%d/%s',
-                                uri('pannottype', this.id), this.version, annotationType.id);
+      var url = sprintf('%s/%d/%s',
+                        uri('pannottype', this.id),
+                        this.version,
+                        annotationType.id);
       return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
     };
 
@@ -496,7 +485,7 @@ define(['angular', 'lodash', 'sprintf-js', 'tv4'], function(angular, _, sprintf,
       var args = _.toArray(arguments),
           studyId,
           path,
-          result = '/studies/';
+          result = Study.REST_API_URL + '/';
 
       if (args.length > 0) {
         path = args.shift();

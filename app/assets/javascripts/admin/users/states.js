@@ -42,6 +42,12 @@ define(function () {
           'main@': 'membershipAdmin'
         }
       })
+      .state('home.admin.users.memberships.add', {
+        url: '/add',
+        views: {
+          'main@': 'membershipAdd'
+        }
+      })
       .state('home.admin.users.memberships.membership', {
         url: '/{membershipId}',
         views: {

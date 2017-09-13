@@ -67,6 +67,7 @@ define(function (require) {
     .factory('SpecimenLinkAnnotationType',          require('./study/SpecimenLinkAnnotationType'))
     .factory('SpecimenLinkType',                    require('./study/SpecimenLinkType'))
     .factory('Study',                               require('./study/Study'))
+    .factory('StudyName',                           require('./study/StudyName'))
     .factory('StudyCounts',                         require('./study/StudyCounts'))
     .factory('StudyAnnotationType',                 require('./study/StudyAnnotationType'))
     .factory('StudyViewer',                         require('./study/StudyViewer'))

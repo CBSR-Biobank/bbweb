@@ -56,7 +56,7 @@ trait AccessService extends BbwebService {
 
   def getUserMembership(userId: UserId): ServiceValidation[UserMembership]
 
-  def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Membership]]
+  def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[MembershipDto]]
 
   def processRemoveMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Boolean]]
 
@@ -275,7 +275,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     accessItemRepository.getByKey(permissionId).map(checkItemAccess)
   }
 
-  def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Membership]] = {
+  def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[MembershipDto]] = {
     val v = for {
         validCommand <- {
           cmd match {
@@ -331,18 +331,21 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
       } yield permitted
 
     v.fold(
-      err => Future.successful(err.failure[Membership]),
+      err => Future.successful(err.failure[MembershipDto]),
       permitted => {
         if (!permitted) {
-          Future.successful(Unauthorized.failureNel[Membership])
+          Future.successful(Unauthorized.failureNel[MembershipDto])
         } else {
           ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
             validation.flatMap { event =>
               event.eventType match {
                 case et: AccessEvent.EventType.Membership =>
-                  membershipRepository.getByKey(MembershipId(event.getMembership.getId))
+                  for {
+                    membership <- membershipRepository.getByKey(MembershipId(event.getMembership.getId))
+                    dto        <- membershipToDto(membership)
+                  } yield dto
                 case _ =>
-                  ServiceError(s"invalid reply from processor: $event").failureNel[Membership]
+                  ServiceError(s"invalid reply from processor: $event").failureNel[MembershipDto]
               }
             }
           }
@@ -500,15 +503,15 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
   private def membershipToDto(membership: Membership): ServiceValidation[MembershipDto] ={
     for {
       users <- {
-        membership.studyData.ids
-          .map(studyRepository.getByKey)
+        membership.userIds
+          .map(userRepository.getByKey)
           .toList.sequenceU
           .leftMap(err => InternalServerError.nel)
           .map(_.toSet)
       }
       studies <- {
-        membership.userIds
-          .map(userRepository.getByKey)
+        membership.studyData.ids
+          .map(studyRepository.getByKey)
           .toList.sequenceU
           .leftMap(err => InternalServerError.nel)
           .map(_.toSet)

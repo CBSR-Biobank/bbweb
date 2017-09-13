@@ -21,6 +21,8 @@ define(function (require) {
     .component('userProfile',     require('./components/userProfile/userProfileComponent'))
     .component('userRoles',       require('./components/userRoles/userRolesComponent'))
     .component('membershipAdmin', require('./components/membershipAdmin/membershipAdminComponent'))
+    .component('membershipAdd',   require('./components/membershipAdd/membershipAddComponent'))
+    .component('membershipView',  require('./components/membershipView/membershipViewComponent'))
     .component('membershipsPagedList',
                require('./components/membershipsPagedList/membershipsPagedListComponent'));
   return {

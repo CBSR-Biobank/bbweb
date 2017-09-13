@@ -2,7 +2,7 @@ package org.biobank.domain.centre
 
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey
-import org.biobank.dto.NameDto
+import org.biobank.dto.NameAndStateDto
 import org.biobank.domain._
 import org.biobank.domain.study.StudyId
 import org.biobank.infrastructure.EnumUtils._
@@ -54,7 +54,7 @@ sealed trait Centre
     locationWithId(locationId).map(loc => s"${this.name}: ${loc.name}")
   }
 
-  def nameDto(): NameDto = NameDto(id.id, name, state.id)
+  def nameDto(): NameAndStateDto = NameAndStateDto(id.id, name, state.id)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {

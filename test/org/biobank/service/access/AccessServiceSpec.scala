@@ -214,8 +214,8 @@ class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
 
         it("user with 'membership read' permission can retrieve a membership") {
           val f = new Fixture
-          accessService.getMembership(f.permittedUser.id, f.membership.id) .mustSucceed { m =>
-            m must be (f.membership)
+          accessService.getMembership(f.permittedUser.id, f.membership.id) .mustSucceed { dto =>
+            dto.id must be (f.membership.id.id)
           }
         }
 

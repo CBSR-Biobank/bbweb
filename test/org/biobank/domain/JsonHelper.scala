@@ -59,8 +59,14 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "id").as[String] mustBe (nameDto.id)
 
     (json \ "name").as[String] mustBe (nameDto.name)
+  }
 
-    (json \ "state").as[String] mustBe (nameDto.state)
+  def compareObj(json: JsValue, nameAndStateDto: NameAndStateDto) = {
+    (json \ "id").as[String] mustBe (nameAndStateDto.id)
+
+    (json \ "name").as[String] mustBe (nameAndStateDto.name)
+
+    (json \ "state").as[String] mustBe (nameAndStateDto.state)
   }
 
   def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {
@@ -347,25 +353,28 @@ trait JsonHelper extends MustMatchers with OptionValues {
   def compareObj(json: JsValue, membership: Membership) = {
     compareEntity(json, membership)
 
-    val jsonUserIds = (json \ "userIds").as[List[String]]
-    jsonUserIds must have length (membership.userIds.size.toLong)
-    (json \ "userIds").as[List[String]].foreach { jsId =>
-      membership.userIds must contain (UserId(jsId))
+    val jsonUserData = (json \ "userData").as[List[JsObject]]
+    jsonUserData must have length (membership.userIds.size.toLong)
+    jsonUserData.foreach { jsUserInfo =>
+      val jsUserId = (jsUserInfo \ "id").as[String]
+      membership.userIds must contain (UserId(jsUserId))
     }
 
-    (json \ "studyData" \ "allEntities").as[Boolean] must be (membership.studyData.allEntities)
+    (json \ "studyData" \ "all").as[Boolean] must be (membership.studyData.allEntities)
 
-    val jsonStudyIds = (json \ "studyData" \ "ids").as[List[String]]
-    jsonStudyIds must have length (membership.studyData.ids.size.toLong)
-    jsonStudyIds.foreach { jsId =>
+    val jsonStudyData = (json \ "studyData" \ "entityInfo").as[List[JsObject]]
+    jsonStudyData must have length (membership.studyData.ids.size.toLong)
+    jsonStudyData.foreach { jsStudyInfo =>
+      val jsId = (jsStudyInfo \ "id").as[String]
       membership.studyData.ids must contain (StudyId(jsId))
     }
 
-    (json \ "centreData" \ "allEntities").as[Boolean] must be (membership.centreData.allEntities)
+    (json \ "centreData" \ "all").as[Boolean] must be (membership.centreData.allEntities)
 
-    val jsonCentreIds = (json \ "centreData" \ "ids").as[List[String]]
-    jsonCentreIds must have length (membership.centreData.ids.size.toLong)
-    jsonCentreIds.foreach { jsId =>
+    val jsonCentreData = (json \ "centreData" \ "entityInfo").as[List[JsObject]]
+    jsonCentreData must have length (membership.centreData.ids.size.toLong)
+    jsonCentreData.foreach { jsCentreInfo =>
+      val jsId = (jsCentreInfo \ "id").as[String]
       membership.centreData.ids must contain (CentreId(jsId))
     }
   }

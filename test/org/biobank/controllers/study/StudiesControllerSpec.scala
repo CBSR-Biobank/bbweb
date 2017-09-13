@@ -54,8 +54,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   private def urlUpdateAnnotationType(annotType: AnnotationType) =
       (study: Study) => urlAddAnnotationType(study) + s"/${annotType.id}"
 
-  private def compareNameDto(json: JsValue, study: Study): Unit = {
-    compareObj(json, NameDto(study.id.id, study.name, study.state.id))
+  private def compareNameAndStateDto(json: JsValue, study: Study): Unit = {
+    compareObj(json, NameAndStateDto(study.id.id, study.name, study.state.id))
     ()
   }
 
@@ -1094,8 +1094,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size studies.size.toLong
 
-        compareNameDto(jsonList(0), study1)
-        compareNameDto(jsonList(1), study2)
+        compareNameAndStateDto(jsonList(0), study1)
+        compareNameAndStateDto(jsonList(1), study2)
       }
 
       it("list single study when using a filter") {
@@ -1111,7 +1111,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
 
-        compareNameDto(jsonList(0), study1)
+        compareNameAndStateDto(jsonList(0), study1)
       }
 
       it("list nothing when using a name filter for name not in system") {
