@@ -1,12 +1,44 @@
 package org.biobank
 
 import java.time.OffsetDateTime
-import org.biobank.domain.EntityState
+import org.biobank.domain.{EntityState, Location}
 import org.biobank.domain.access.RoleId._
 import org.biobank.domain.centre.Shipment
 import play.api.libs.json._
 
 package dto {
+
+  final case class NameDto(id: String, name: String)
+
+  object NameDto {
+    def compareByName(a: NameDto, b: NameDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
+
+    implicit val nameDtoWriter: Writes[NameDto] = Json.writes[NameDto]
+  }
+
+  final case class NameAndStateDto(id: String, name: String, state: String)
+
+  object NameAndStateDto {
+    def compareByName(a: NameAndStateDto, b: NameAndStateDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
+
+    implicit val nameAndStateDtoWriter: Writes[NameAndStateDto] = Json.writes[NameAndStateDto]
+  }
+
+  final case class CentreDto(id:           String,
+                             version:      Long,
+                             timeAdded:    String,
+                             timeModified: Option[String],
+                             state:        String,
+                             name:         String,
+                             description:  Option[String],
+                             studyNames:   Set[NameAndStateDto],
+                             locations:    Set[Location])
+
+  object CentreDto {
+
+    implicit val centreDtoWriter: Writes[CentreDto] = Json.writes[CentreDto]
+
+  }
 
   final case class AggregateCountsDto(studies: Long, centres: Long, users: Long)
 
@@ -79,14 +111,6 @@ package dto {
 
     implicit val userDtoWriter: Writes[UserDto] = Json.writes[UserDto]
 
-  }
-
-  final case class NameDto(id: String, name: String, state: String)
-
-  object NameDto {
-    def compareByName(a: NameDto, b: NameDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
-
-    implicit val nameDtoWriter: Writes[NameDto] = Json.writes[NameDto]
   }
 
   final case class CentreLocation(centreId:     String,

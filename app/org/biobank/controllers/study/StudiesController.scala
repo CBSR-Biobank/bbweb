@@ -71,8 +71,8 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
             studyNames    <- service.getStudyNames(request.authInfo.userId,
-                                                          filterAndSort.filter,
-                                                          filterAndSort.sort)
+                                                   filterAndSort.filter,
+                                                   filterAndSort.sort)
           } yield studyNames
         }
       )

@@ -72,10 +72,7 @@ define(['lodash'], function (_) {
       .state('home.admin.centres.centre.studies', {
         url: '/studies',
         resolve: {
-          centre: resolveCentre,
-          studyNames: ['Study', function(Study) {
-            return Study.names();
-          }]
+          centre: resolveCentre
         },
         views: {
           'centreDetails': 'centreStudiesPanel'

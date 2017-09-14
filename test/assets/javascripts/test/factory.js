@@ -66,8 +66,6 @@ define(function (require) {
       study:                             study,
       defaultStudy:                      defaultStudy,
 
-      studyNameDto:                      studyNameDto,
-
       participant:                       participant,
       defaultParticipant:                defaultParticipant,
 
@@ -94,6 +92,10 @@ define(function (require) {
 
       membership:                        membership,
       defaultMembership:                 defaultMembership,
+
+      studyNameDto:                      studyNameDto,
+      centreNameDto:                     centreNameDto,
+      userNameDto:                       userNameDto,
 
       // value types
       annotationType:                    annotationType,
@@ -321,9 +323,23 @@ define(function (require) {
       return defaultEntity(ENTITY_NAME_STUDY(), study);
     }
 
-    function studyNameDto() {
-      var study = defaultStudy();
-      return _.pick(study, ['id', 'name', 'state']);
+    function entityNameDto(createFunc, options) {
+      var c;
+      options = options || {};
+      c = createFunc(_.pick(options, ['id', 'name', 'state']));
+      return _.pick(c, ['id', 'name', 'state']);
+    }
+
+    function studyNameDto(options) {
+      return entityNameDto(study, options);
+    }
+
+    function centreNameDto(options) {
+      return entityNameDto(centre, options);
+    }
+
+    function userNameDto(options) {
+      return entityNameDto(user, options);
     }
 
     /**
@@ -460,8 +476,8 @@ define(function (require) {
       var defaults = { id:          domainEntityNameNext(ENTITY_NAME_CENTRE()),
                        name:        stringNext(),
                        description: stringNext(),
-                       state:      CentreState.DISABLED,
-                       studyIds:    [],
+                       state:       CentreState.DISABLED,
+                       studyNames:  [],
                        locations:   []
                      },
           validKeys = commonFieldNames.concat(_.keys(defaults)),

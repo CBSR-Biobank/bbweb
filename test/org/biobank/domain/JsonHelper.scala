@@ -209,8 +209,9 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "description").asOpt[String] mustBe (centre.description)
 
-    (json \ "studyIds").as[List[String]].foreach { jsStudyId =>
-      centre.studyIds must contain (StudyId(jsStudyId))
+    (json \ "studyNames").as[List[JsObject]].foreach { jsName =>
+      val jsId = (jsName \ "id").as[String]
+      centre.studyIds must contain (StudyId(jsId))
     }
 
     (json \ "locations").as[List[JsObject]].foreach { jsLocation =>

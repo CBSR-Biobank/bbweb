@@ -110,6 +110,20 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
       )
     }
 
+  def listNames: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      validationReply(
+        Future {
+          for {
+            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
+            names         <- usersService.getUserNames(request.authInfo.userId,
+                                                        filterAndSort.filter,
+                                                        filterAndSort.sort)
+          } yield names
+        }
+      )
+    }
+
   /** Retrieves the user for the given id as JSON */
   def user(id: UserId): Action[Unit] = action(parse.empty) { implicit request =>
       validationReply(usersService.getUserIfAuthorized(request.authInfo.userId, id))

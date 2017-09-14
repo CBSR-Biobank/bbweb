@@ -9,57 +9,37 @@ define(function (require) {
       _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
-  function SuiteMixinFactory(EntityTestSuite, ServerReplyMixin) {
-
-    function SuiteMixin() {
-      EntityTestSuite.call(this);
-      ServerReplyMixin.call(this);
-    }
-
-    SuiteMixin.prototype = Object.create(EntityTestSuite.prototype);
-    _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    // used by promise tests
-    SuiteMixin.prototype.failTest = function (error) {
-      expect(error).toBeUndefined();
-    };
-
-    SuiteMixin.prototype.uri = function(/* path, studyId */) {
-      var args = _.toArray(arguments),
-          studyId,
-          path;
-
-      var result = '/studies/';
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += path;
-      }
-
-      if (args.length > 0) {
-        studyId = args.shift();
-        result += '/' + studyId;
-      }
-
-      return result;
-    };
-
-    return SuiteMixin;
-  }
-
   describe('Study', function() {
+
+    var REST_API_URL = '/studies';
+
+    function SuiteMixinFactory(EntityTestSuite, ServerReplyMixin) {
+
+      function SuiteMixin() {
+        EntityTestSuite.call(this);
+        ServerReplyMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(EntityTestSuite.prototype);
+      _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+      // used by promise tests
+      SuiteMixin.prototype.expectStudy = function (entity) {
+        expect(entity).toEqual(jasmine.any(this.Study));
+      };
+
+      return SuiteMixin;
+    }
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(EntityTestSuite,
                                ServerReplyMixin,
                                testDomainEntities) {
-      var self = this,
-          SuiteMixin = new SuiteMixinFactory(EntityTestSuite, ServerReplyMixin);
+      var self = this;
 
-      _.extend(self, SuiteMixin.prototype);
-
+      _.extend(self, new SuiteMixinFactory(EntityTestSuite, ServerReplyMixin).prototype);
       self.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
                               'Study',
@@ -70,13 +50,7 @@ define(function (require) {
 
       self.testUtils.addCustomMatchers();
       self.jsonStudy = self.factory.study();
-      self.expectStudy = expectStudy;
       testDomainEntities.extend();
-
-      // used by promise tests
-      function expectStudy(entity) {
-        expect(entity).toEqual(jasmine.any(self.Study));
-      }
     }));
 
     afterEach(function() {
@@ -134,15 +108,15 @@ define(function (require) {
     describe('when getting a single study', function() {
 
       it('can retrieve a single study', function() {
-        this.$httpBackend.whenGET(this.uri(this.jsonStudy.id)).respond(this.reply(this.jsonStudy));
-        this.Study.get(this.jsonStudy.id).then(this.expectStudy).catch(this.failTest);
+        this.$httpBackend.whenGET(uri(this.jsonStudy.id)).respond(this.reply(this.jsonStudy));
+        this.Study.get(this.jsonStudy.id).then(this.expectStudy.bind(this)).catch(failTest);
         this.$httpBackend.flush();
       });
 
       it('fails when getting a study and it has a bad format', function() {
         var self = this,
             study = _.omit(self.jsonStudy, 'name');
-        self.$httpBackend.whenGET(this.uri(study.id)).respond(this.reply(study));
+        self.$httpBackend.whenGET(uri(study.id)).respond(this.reply(study));
 
         self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
         self.$httpBackend.flush();
@@ -161,7 +135,7 @@ define(function (require) {
             annotationType = _.omit(self.factory.annotationType(), 'name'),
             study = self.factory.study({ annotationTypes: [ annotationType ]});
 
-        self.$httpBackend.whenGET(this.uri(study.id)).respond(this.reply(study));
+        self.$httpBackend.whenGET(uri(study.id)).respond(this.reply(study));
 
         self.Study.get(study.id).then(shouldNotFail).catch(shouldFail);
         self.$httpBackend.flush();
@@ -184,9 +158,9 @@ define(function (require) {
             studies = [ self.factory.study({ annotationTypes: [] }) ],
             reply = self.factory.pagedResult(studies);
 
-        self.$httpBackend.whenGET(this.uri()).respond(this.reply(reply));
+        self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
 
-        self.Study.list().then(testStudy).catch(this.failTest);
+        self.Study.list().then(testStudy).catch(failTest);
         self.$httpBackend.flush();
 
         function testStudy(pagedResult) {
@@ -208,11 +182,11 @@ define(function (require) {
             reply   = self.factory.pagedResult(studies);
 
         _.each(optionList, function (options) {
-          var url = sprintf('%s?%s', self.uri(), self.$httpParamSerializer(options, true));
+          var url = sprintf('%s?%s', uri(), self.$httpParamSerializer(options, true));
 
           self.$httpBackend.whenGET(url).respond(self.reply(reply));
 
-          self.Study.list(options).then(testStudy).catch(self.failTest);
+          self.Study.list(options).then(testStudy).catch(failTest);
           self.$httpBackend.flush();
 
           function testStudy(pagedResult) {
@@ -230,9 +204,9 @@ define(function (require) {
             studies = [ self.jsonStudy ],
             reply   = self.factory.pagedResult(studies);
 
-        self.$httpBackend.whenGET(self.uri()).respond(self.reply(reply));
+        self.$httpBackend.whenGET(uri()).respond(self.reply(reply));
 
-        self.Study.list(options).then(testStudy).catch(self.failTest);
+        self.Study.list(options).then(testStudy).catch(failTest);
         self.$httpBackend.flush();
 
         function testStudy(pagedResult) {
@@ -248,7 +222,7 @@ define(function (require) {
             studies = [ _.omit(self.jsonStudy, 'name') ],
             reply = self.factory.pagedResult(studies);
 
-        self.$httpBackend.whenGET(this.uri()).respond(this.reply(reply));
+        self.$httpBackend.whenGET(uri()).respond(this.reply(reply));
         self.Study.list().then(listFail).catch(shouldFail);
         self.$httpBackend.flush();
 
@@ -268,25 +242,24 @@ define(function (require) {
           study = new self.Study(_.omit(this.jsonStudy, 'id')),
           json = _.pick(study, 'name', 'description');
 
-      self.$httpBackend.expectPOST(this.uri(), json).respond(this.reply(this.jsonStudy));
+      self.$httpBackend.expectPOST(uri(), json).respond(this.reply(this.jsonStudy));
 
-      study.add().then(self.expectStudy).catch(this.failTest);
+      study.add().then(self.expectStudy.bind(this)).catch(failTest);
       self.$httpBackend.flush();
     });
 
     it('can update the name on a study', function() {
-      var self  = this,
-          study = new self.Study(this.jsonStudy);
+      var study = new this.Study(this.jsonStudy);
 
       this.updateEntity.call(this,
                              study,
                              'updateName',
                              study.name,
-                             this.uri('name', study.id),
+                             uri('name', study.id),
                              { name: study.name },
                              this.jsonStudy,
-                             self.expectStudy,
-                             this.failTest);
+                             this.expectStudy.bind(this),
+                             failTest);
     });
 
     it('can update the description on a study', function() {
@@ -297,21 +270,21 @@ define(function (require) {
                              study,
                              'updateDescription',
                              undefined,
-                             this.uri('description', study.id),
+                             uri('description', study.id),
                              { },
                              this.jsonStudy,
-                             self.expectStudy,
-                             this.failTest);
+                             this.expectStudy.bind(this),
+                             failTest);
 
       this.updateEntity.call(this,
                              study,
                              'updateDescription',
                              study.description,
-                             this.uri('description', study.id),
+                             uri('description', study.id),
                              { description: study.description },
                              this.jsonStudy,
-                             self.expectStudy,
-                             this.failTest);
+                             this.expectStudy.bind(this),
+                             failTest);
     });
 
     describe('for annotation types', function() {
@@ -327,11 +300,11 @@ define(function (require) {
                                this.study,
                                'addAnnotationType',
                                _.omit(this.annotationType, 'id'),
-                               this.uri('pannottype', this.study.id),
+                               uri('pannottype', this.study.id),
                                _.omit(this.annotationType, 'id'),
                                this.jsonStudy,
-                               this.expectStudy,
-                               this.failTest);
+                               this.expectStudy.bind(this),
+                               failTest);
       });
 
       it('can update an annotation type on a study', function() {
@@ -340,24 +313,24 @@ define(function (require) {
                                'updateAnnotationType',
                                this.annotationType,
                                sprintf('%s/%s',
-                                       this.uri('pannottype', this.study.id),
+                                       uri('pannottype', this.study.id),
                                        this.annotationType.id),
                                this.annotationType,
                                this.jsonStudy,
-                               this.expectStudy,
-                               this.failTest);
+                               this.expectStudy.bind(this),
+                               failTest);
       });
 
       it('can remove an annotation on a study', function() {
         var url = sprintf('%s/%d/%s',
-                          this.uri('pannottype', this.study.id),
+                          uri('pannottype', this.study.id),
                           this.study.version,
                           this.annotationType.id);
 
         this.$httpBackend.whenDELETE(url).respond(this.reply(this.jsonStudy));
         this.study.removeAnnotationType(this.annotationType)
-          .then(this.expectStudy)
-          .catch(this.failTest);
+          .then(this.expectStudy.bind(this))
+          .catch(failTest);
         this.$httpBackend.flush();
       });
 
@@ -439,19 +412,6 @@ define(function (require) {
         .toThrowError('not retired');
     });
 
-    it('can get a list of study names', function() {
-      var self = this,
-          dto = self.factory.studyNameDto();
-
-      self.$httpBackend.whenGET('/studies/names').respond([ dto ]);
-      self.Study.names()
-        .then(function (reply) {
-          expect(reply).toContainAll([ dto ]);
-        })
-        .catch(self.failTest);
-      self.$httpBackend.flush();
-    });
-
     it('can get a list of centre locations', function() {
       var self = this,
           location = self.factory.location(),
@@ -464,7 +424,7 @@ define(function (require) {
         .then(function (reply) {
           expect(reply).toContainAll([ dto ]);
         })
-        .catch(self.failTest);
+        .catch(failTest);
       self.$httpBackend.flush();
     });
 
@@ -475,7 +435,7 @@ define(function (require) {
         .then(function (reply) {
           expect(reply).toBeFalse();
         })
-        .catch(this.failTest);
+        .catch(failTest);
       this.$httpBackend.flush();
     });
 
@@ -490,9 +450,9 @@ define(function (require) {
               json =  { expectedVersion: study.version },
               reply = replyStudy(context.jsonStudy, { state: context.state });
 
-          self.$httpBackend.expectPOST(self.uri(context.action, study.id), json).respond(self.reply(reply));
+          self.$httpBackend.expectPOST(uri(context.action, study.id), json).respond(self.reply(reply));
           expect(study[context.action]).toBeFunction();
-          study[context.action]().then(checkStudy).catch(self.failTest);
+          study[context.action]().then(checkStudy).catch(failTest);
           self.$httpBackend.flush();
 
           function checkStudy(replyStudy) {
@@ -508,6 +468,32 @@ define(function (require) {
       });
 
     }
+
+    // used by promise tests
+    function failTest(error) {
+      expect(error).toBeUndefined();
+    }
+
+    function uri(/* path, studyId */) {
+      var args = _.toArray(arguments),
+          studyId,
+          path;
+
+      var result = REST_API_URL + '/';
+
+      if (args.length > 0) {
+        path = args.shift();
+        result += path;
+      }
+
+      if (args.length > 0) {
+        studyId = args.shift();
+        result += '/' + studyId;
+      }
+
+      return result;
+    }
+
   });
 
 });

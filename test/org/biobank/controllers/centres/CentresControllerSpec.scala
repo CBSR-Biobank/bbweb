@@ -10,7 +10,6 @@ import org.biobank.dto._
 import org.biobank.fixture.ControllerFixture
 import play.api.libs.json._
 import play.api.test.Helpers._
-import scala.language.reflectiveCalls
 
 /**
   * Tests the REST API for [[Centre]]s.
@@ -977,19 +976,14 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
       describe("must return centre names") {
 
-        def createFixture() = {
-          val _centres = (1 to 2).map {_ => factory.createDisabledCentre }
-          val _nameDtos = _centres.map(_.nameDto).toSeq
-          _centres.foreach(centreRepository.put)
-
-          new {
-            val centres = _centres
-            val nameDtos = _nameDtos
-          }
+        class Fixture {
+          val centres = (1 to 2).map {_ => factory.createDisabledCentre }
+          val nameDtos = centres.map(_.nameDto).toSeq
+          centres.foreach(centreRepository.put)
         }
 
         it("in ascending order") {
-          val f = createFixture
+          val f = new Fixture
           val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }
 
           val json = makeRequest(GET, uri("names"))
@@ -1005,7 +999,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         }
 
         it("in reverse order") {
-          val f = createFixture
+          val f = new Fixture
           val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) > 0 }
 
           val json = makeRequest(GET, uri("names") + "?sort=-name")

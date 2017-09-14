@@ -51,6 +51,10 @@ trait UsersService extends BbwebService {
    */
   def getUsers(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[UserDto]]
 
+  def getUserNames(requestUserId: UserId,
+                   filter:        FilterString,
+                   sort:          SortString): ServiceValidation[Seq[NameAndStateDto]]
+
   /**
    * Returns the counts of all users and also counts of users categorized by state.
    *
@@ -105,7 +109,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
       hasPermission <- accessService.hasPermission(requestUserId, PermissionId.UserRead)
       user          <- userRepository.getByKey(id)
       dto           <- {
-        if (hasPermission || (requestUserId == id)) userToDto(user, getMembershipDto(user)).successNel[String]
+        if (hasPermission || (requestUserId == id)) userToDto(user, membershipToDto(user)).successNel[String]
         else Unauthorized.failureNel[UserDto]
       }
     } yield dto
@@ -139,10 +143,16 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
 
       v.map { users =>
         users
-          .map { user => userToDto(user, getMembershipDto(user)) }
+          .map { user => userToDto(user, membershipToDto(user)) }
         //.leftMap(err => InternalServerError.nel)
       }
     }
+  }
+
+  def getUserNames(requestUserId: UserId,
+                   filter:        FilterString,
+                   sort:          SortString): ServiceValidation[Seq[NameAndStateDto]] = {
+    getUsers(requestUserId, filter, sort).map(_.map(c => NameAndStateDto(c.id, c.name, c.state.id)))
   }
 
   def getCountsByStatus(requestUserId: UserId): ServiceValidation[UserCountsByStatus] = {
@@ -176,7 +186,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
         if (passwordHasher.valid(user.password, user.salt, enteredPwd)) user.successNel[String]
         else InvalidPassword.failureNel[User]
       }
-    } yield userToDto(user, getMembershipDto(user))
+    } yield userToDto(user, membershipToDto(user))
   }
 
   def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]] = {
@@ -218,7 +228,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     )
   }
 
-  private def getMembershipDto(user: User): ServiceValidation[UserMembershipDto] = {
+  private def membershipToDto(user: User): ServiceValidation[UserMembershipDto] = {
     for {
       membership <- accessService.getUserMembership(user.id)
       studies <- {

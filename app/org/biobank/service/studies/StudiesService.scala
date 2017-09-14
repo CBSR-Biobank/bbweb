@@ -52,7 +52,7 @@ trait StudiesService extends BbwebService {
   def getStudies(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]]
 
   def getStudyNames(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[NameDto]]
+      : ServiceValidation[Seq[NameAndStateDto]]
 
   def getStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Study]
 
@@ -169,10 +169,8 @@ class StudiesServiceImpl @Inject()(
   }
 
   def getStudyNames(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[NameDto]] = {
-    whenPermitted(requestUserId, PermissionId.StudyRead) { () =>
-      getStudies(requestUserId, filter, sort).map(_.map(s => NameDto(s.id.id, s.name, s.state.id)))
-    }
+      : ServiceValidation[Seq[NameAndStateDto]] = {
+    getStudies(requestUserId, filter, sort).map(_.map(s => NameAndStateDto(s.id.id, s.name, s.state.id)))
   }
 
   def getStudy(requestUserId: UserId, studyId: StudyId) : ServiceValidation[Study] = {

@@ -9,17 +9,32 @@ define(function (require) {
       _       = require('lodash'),
       sprintf = require('sprintf-js').sprintf;
 
-  /**
-   *
-   */
   describe('Centre', function() {
 
-    var Centre;
+    function SuiteMixinFactory(EntityTestSuite, ServerReplyMixin) {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+      function SuiteMixin() {
+        EntityTestSuite.call(this);
+        ServerReplyMixin.call(this);
+      }
+
+      SuiteMixin.prototype = Object.create(EntityTestSuite.prototype);
+      _.extend(SuiteMixin.prototype, ServerReplyMixin.prototype);
+      SuiteMixin.prototype.constructor = SuiteMixin;
+
+       // used by promise tests
+       SuiteMixin.prototype.expectCentre = function (entity) {
+          expect(entity).toEqual(jasmine.any(this.Centre));
+       };
+
+      return SuiteMixin;
+    }
+
+
+     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function (ServerReplyMixin, EntityTestSuite, testDomainEntities) {
-      _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
+      _.extend(this, new SuiteMixinFactory(EntityTestSuite, ServerReplyMixin).prototype);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
@@ -30,8 +45,6 @@ define(function (require) {
                               'testUtils',
                               'factory');
       testDomainEntities.extend();
-
-      Centre = this.Centre;
     }));
 
     afterEach(function() {
@@ -49,7 +62,7 @@ define(function (require) {
       expect(centre.name).toBeEmptyString();
       expect(centre.description).toBeNull();
       expect(centre.locations).toBeEmptyArray();
-      expect(centre.studyIds).toBeEmptyArray();
+      expect(centre.studyNames).toBeEmptyArray();
       expect(centre.state).toBe(this.CentreState.DISABLED);
     });
 
@@ -71,11 +84,11 @@ define(function (require) {
 
     it('fails when creating from a bad study ID', function() {
       var self = this,
-          badCentreJson = self.factory.centre({ studyIds: [ null, '' ] });
+          badCentreJson = self.factory.centre({ studyNames: [ null, '' ] });
 
       expect(function () {
         self.Centre.create(badCentreJson);
-      }).toThrowError(/invalid object from server/);
+      }).toThrowError(/Invalid type.*expected object/);
     });
 
     it('fails when creating from a bad location', function() {
@@ -118,7 +131,7 @@ define(function (require) {
       self.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
       self.$httpBackend.flush();
 
-      function shouldNotFail(reply) {
+      function shouldNotFail() {
         fail('function should not be called');
       }
 
@@ -129,7 +142,7 @@ define(function (require) {
 
     it('fails when getting a centre and it has a bad study ID', function() {
       var self = this,
-          centre = self.factory.centre({ studyIds: [ '' ]});
+          centre = self.factory.centre({ studyNames: [ '' ]});
 
       self.$httpBackend.whenGET(uri(centre.id)).respond(this.reply(centre));
 
@@ -141,7 +154,7 @@ define(function (require) {
       }
 
       function shouldFail(error) {
-        expect(error.message).toContain('bad study ids');
+        expect(error.message).toMatch(/Invalid type/);
       }
     });
 
@@ -222,7 +235,7 @@ define(function (require) {
       self.Centre.list().then(listFail).catch(shouldFail);
       self.$httpBackend.flush();
 
-      function listFail(reply) {
+      function listFail() {
         fail('function should not be called');
       }
 
@@ -259,7 +272,7 @@ define(function (require) {
                              uri('name', centre.id),
                              { name: centre.name },
                              jsonCentre,
-                             expectCentre,
+                             this.expectCentre.bind(this),
                              failTest);
     });
 
@@ -275,7 +288,7 @@ define(function (require) {
                              uri('description', centre.id),
                              { },
                              jsonCentre,
-                             expectCentre,
+                             this.expectCentre.bind(this),
                              failTest);
 
       this.updateEntity.call(this,
@@ -285,7 +298,7 @@ define(function (require) {
                              uri('description', centre.id),
                              { description: centre.description },
                              jsonCentre,
-                             expectCentre,
+                             this.expectCentre.bind(this),
                              failTest);
     });
 
@@ -326,7 +339,7 @@ define(function (require) {
                                uri('locations', centre.id),
                                _.omit(jsonLocation, 'id'),
                                jsonCentre,
-                               expectCentre,
+                               this.expectCentre.bind(this),
                                failTest);
       });
 
@@ -343,7 +356,7 @@ define(function (require) {
                                uri('locations', centre.id) + '/' + jsonLocation.id,
                                jsonLocation,
                                jsonCentre,
-                               expectCentre,
+                               this.expectCentre.bind(this),
                                failTest);
       });
 
@@ -391,14 +404,14 @@ define(function (require) {
                                uri('studies', centre.id),
                                { studyId : jsonStudy.id },
                                jsonCentre,
-                               expectCentre,
+                               this.expectCentre.bind(this),
                                failTest);
       });
 
       it('can remove a study', function() {
         var self       = this,
             jsonStudy  = self.factory.study(),
-            jsonCentre = self.factory.centre({ studyIds: [ jsonStudy.id ]}),
+            jsonCentre = self.factory.centre({ studyNames: [ this.factory.studyNameDto(jsonStudy) ]}),
             centre     = new self.Centre(jsonCentre),
             url        = sprintf('%s/%d/%s',
                                          uri('studies', centre.id),
@@ -425,11 +438,6 @@ define(function (require) {
       });
 
     });
-
-    // used by promise tests
-    function expectCentre(entity) {
-      expect(entity).toEqual(jasmine.any(Centre));
-    }
 
     // used by promise tests
     function failTest(error) {

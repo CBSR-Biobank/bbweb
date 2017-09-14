@@ -4,7 +4,7 @@
       This centre participates in these studies
     </h3>
   </div>
-  <ul class="list-group" ng-if="vm.studyCollection.length <= 0">
+  <ul class="list-group" ng-if="vm.centre.studyNames.length <= 0">
     <li class="list-group-item">
       <div class="alert alert-warning">
         <span class="glyphicon glyphicon-warning-sign"></span>
@@ -16,9 +16,9 @@
   </ul>
 
   <table st-table="vm.tableStudies"
-         st-safe-src="vm.studyCollection"
+         st-safe-src="vm.centre.studyNames"
          class="table table-hover table-condensed"
-         ng-if="vm.studyCollection.length > 0">
+         ng-if="vm.centre.studyNames.length > 0">
     <thead>
       <th st-sort="name" translate>Name</th>
       <th st-sort="state" translate>State</th>
@@ -33,13 +33,13 @@
           </span>
         </td>
         <td>
-          <span class="badge">{{study.state.toUpperCase()}}</span>
+          <span class="badge">{{vm.studyStateLabel(study.state)}}</span>
         </td>
         <td>
-          <!-- FIXME studies should only be removed if no centre is storing specimens for it  -->
           <div class="btn-group pull-right">
             <button class="btn btn-xs btn-warning"
-                    ng-click="vm.remove(study.id)"
+                    ng-if="vm.centre.isDisabled()"
+                    ng-click="vm.remove(study)"
                     title="{{'Remove'|translate}}">
               <i class="glyphicon glyphicon-remove"></i>
             </button>
@@ -57,11 +57,20 @@
           <i class="glyphicon glyphicon-plus"></i>
         </span>
         <input type="text"
+               class="form-control"
                ng-model="vm.selected"
-               uib-typeahead="study as study.name for study in vm.studyNames | filter:$viewValue | limitTo:8"
-               typeahead-on-select="vm.onSelect($item)"
+               ng-model-options="{ debounce: 250 }"
                placeholder="{{'enter a study\'s name or partial name'|translate}}"
-               class="form-control">
+               uib-typeahead="study as study.name for study in vm.getStudyNames($viewValue)"
+               typeahead-on-select="vm.onSelect($item)"
+               typeahead-loading="loadingStudies"
+               typeahead-no-results="noResults">
+      </div>
+      <div class="input-group voffset2">
+        <i ng-show="loadingStudies" class="glyphicon glyphicon-refresh"></i>
+        <div ng-show="noResults">
+          <i class="glyphicon glyphicon-remove"></i><translate>No Results Found</translate>
+        </div>
       </div>
     </li>
   </ul>

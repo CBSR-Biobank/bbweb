@@ -3,6 +3,7 @@ package org.biobank.controllers.users
 import java.time.OffsetDateTime
 import org.biobank.Global
 import org.biobank.controllers.PagedResultsSpec
+import org.biobank.dto.NameAndStateDto
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
@@ -276,6 +277,68 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
       it("fail when using an invalid query parameters") {
         PagedResultsSpec(this).failWithInvalidParams(uri)
+      }
+
+    }
+
+    describe("GET /users/names") {
+
+      def userToDto(user: User): NameAndStateDto = NameAndStateDto(user.id.id, user.name, user.state.id)
+
+      describe("must return user names") {
+
+        class Fixture {
+          val users = (1 to 2).map {_ => factory.createActiveUser }
+          val nameDtos = users.map(userToDto).toSeq
+          users.foreach(userRepository.put)
+        }
+
+        it("in ascending order") {
+          val f = new Fixture
+          val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }
+
+          val json = makeRequest(GET, uri("names"))
+
+          (json \ "status").as[String] must include ("success")
+
+          val jsonObjs = jsonUsersFilterOutDefaultUser((json \ "data").as[List[JsObject]])
+
+          jsonObjs.size must be (nameDtos.size)
+          jsonObjs.zip(nameDtos).foreach { case (jsonObj, nameDtos) =>
+            compareObj(jsonObj, nameDtos)
+          }
+        }
+
+        it("in reverse order") {
+          val f = new Fixture
+          val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) > 0 }
+
+          val json = makeRequest(GET, uri("names") + "?sort=-name")
+
+          (json \ "status").as[String] must include ("success")
+
+          val jsonObjs = jsonUsersFilterOutDefaultUser((json \ "data").as[List[JsObject]])
+
+          jsonObjs.size must be (nameDtos.size)
+          jsonObjs.zip(nameDtos).foreach { case (jsonObj, nameDtos) =>
+            compareObj(jsonObj, nameDtos)
+          }
+        }
+      }
+
+      it("must return user names filtered by name") {
+        val users = (1 to 2).map {_ => factory.createActiveUser }
+        users.foreach(userRepository.put)
+        val user = users.head
+
+        val json = makeRequest(GET, uri("names") + s"?filter=name::${user.name}")
+
+        (json \ "status").as[String] must include ("success")
+
+        val jsonObjs = (json \ "data").as[List[JsObject]]
+
+        jsonObjs.size must be (1)
+        compareObj(jsonObjs(0), userToDto(user))
       }
 
     }

@@ -17,6 +17,7 @@ define(function (require) {
     .factory('ConcurrencySafeEntity',               require('./ConcurrencySafeEntity'))
     .factory('DomainEntity',                        require('./DomainEntity'))
     .factory('DomainError',                         require('./DomainError'))
+    .factory('EntityName',                          require('./EntityName'))
     .factory('EntityViewer',                        require('./EntityViewer'))
     .factory('Location',                            require('./Location'))
 
@@ -51,6 +52,7 @@ define(function (require) {
     .service('annotationTypeValidation',            require('./annotations/annotationTypeValidation'))
 
     .factory('Centre',                              require('./centre/Centre'))
+    .factory('CentreName',                          require('./centre/CentreName'))
     .factory('CentreCounts',                        require('./centre/CentreCounts'))
     .factory('Shipment',                            require('./centre/Shipment'))
     .factory('ShipmentSpecimen',                    require('./centre/ShipmentSpecimen'))
@@ -77,6 +79,7 @@ define(function (require) {
     .factory('Specimen',                            require('./participants/Specimen'))
 
     .factory('User',                                require('./user/User'))
+    .factory('UserName',                            require('./user/UserName'))
     .factory('UserViewer',                          require('./user/UserViewer'))
     .service('UserCounts',                          require('./user/UserCounts'))
 

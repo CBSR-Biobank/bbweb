@@ -12,6 +12,10 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
 
   override def routes: Routes = {
 
+    case GET(p"/names") =>
+      // this action extracts parameters from the raw query string
+      controller.listNames
+
     case GET(p"/authenticate") =>
       controller.authenticateUser
 

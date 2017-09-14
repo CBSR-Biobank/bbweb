@@ -12,6 +12,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
     'ConcurrencySafeEntity',
     'DomainError',
     'CentreState',
+    'StudyName',
     'Location'
   ];
 
@@ -36,27 +37,8 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
                          ConcurrencySafeEntity,
                          DomainError,
                          CentreState,
+                         StudyName,
                          Location) {
-
-    /**
-     * Used for validation.
-     */
-    var SCHEMA = {
-      'id': 'Centre',
-      'type': 'object',
-      'properties': {
-        'id':           { 'type': 'string'},
-        'version':      { 'type': 'integer', 'minimum': 0},
-        'timeAdded':    { 'type': 'string'},
-        'timeModified': { 'type': [ 'string', 'null' ] },
-        'name':         { 'type': 'string'},
-        'description':  { 'type': [ 'string', 'null' ] },
-        'studyIds':     { 'type': 'array'},
-        'locations':    { 'type': 'array', 'items':{ '$ref': 'Location' } },
-        'state':        { 'type': 'string'}
-      },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'state' ]
-    };
 
     /**
      * Use this constructor to create new Centre to be persisted on the server. Use
@@ -93,7 +75,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * this class. Objects of this type are usually returned by the server's REST API.
      *
      */
-    function Centre(obj, locations) {
+    function Centre(obj) {
       /** A short identifying name. */
       this.name = '';
 
@@ -107,25 +89,42 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
       this.state = CentreState.DISABLED;
 
       /** The studies associated with this centre. */
-      this.studyIds = [];
+      this.studyNames = [];
 
       /** The locations for this centre. Some centres may have more than one location. */
       this.locations = [];
 
-      ConcurrencySafeEntity.call(this, SCHEMA, obj);
-      if (locations) {
-        _.extend(this, { locations: locations });
-      }
+      ConcurrencySafeEntity.call(this, Centre.SCHEMA, obj);
     }
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
     Centre.prototype.constructor = Centre;
 
+    /**
+     * Used for validation.
+     */
+    Centre.SCHEMA = {
+      'id': 'Centre',
+      'type': 'object',
+      'properties': {
+        'id':           { 'type': 'string'},
+        'version':      { 'type': 'integer', 'minimum': 0},
+        'timeAdded':    { 'type': 'string'},
+        'timeModified': { 'type': [ 'string', 'null' ] },
+        'name':         { 'type': 'string'},
+        'description':  { 'type': [ 'string', 'null' ] },
+        'studyNames':   { 'type': 'array', 'items': { '$ref': 'StudyName' } },
+        'locations':    { 'type': 'array', 'items': { '$ref': 'Location' } },
+        'state':        { 'type': 'string'}
+      },
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'state', 'studyNames' ]
+    };
+
     /*
      * @private
      */
     Centre.isValid = function(obj) {
-      return ConcurrencySafeEntity.isValid(SCHEMA, [ Location.SCHEMA ], obj);
+      return ConcurrencySafeEntity.isValid(Centre.SCHEMA, [ StudyName.SCHEMA, Location.SCHEMA ], obj);
     };
 
     /**
@@ -142,35 +141,26 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * a centre within asynchronous code.
      */
     Centre.create = function (obj) {
-      var locations, validation = Centre.isValid(obj);
+      var validation = Centre.isValid(obj);
 
       if (!validation.valid) {
         $log.error('invalid object from server: ' + validation.message);
         throw new DomainError('invalid object from server: ' + validation.message);
       }
 
-      if (!validStudyIds(obj.studyIds)) {
-        $log.error('invalid object from server: bad study ids');
-        throw new DomainError('invalid object from server: bad study ids');
+      if (obj.studyNames) {
+        obj.studyNames = obj.studyNames.map(function (name) {
+          return StudyName.create(name);
+        });
       }
 
-      try {
-        if (obj.locations) {
-
-          if (!validLocations(obj.locations)) {
-            $log.error('invalid object from server: bad locations');
-            throw new DomainError('invalid object from server: bad locations');
-          }
-
-          locations = obj.locations.map(function (location) {
-            return Location.create(location);
-          });
-        }
-      } catch (e) {
-        throw new DomainError('invalid locations from server');
+      if (obj.locations) {
+        obj.locations = obj.locations.map(function (location) {
+          return Location.create(location);
+        });
       }
 
-      return new Centre(obj, locations);
+      return new Centre(obj);
     };
 
     /**
@@ -373,9 +363,13 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * @returns {Promise} A copy of this centre, but with the study removed from it.
      */
     Centre.prototype.removeStudy = function (study) {
-      var self = this, url;
+      var self = this,
+          url,
+          found = _.find(self.studyNames, function (studyName) {
+            return studyName.id === study.id;
+          });
 
-      if (!_.includes(self.studyIds, study.id)) {
+      if (!found) {
         throw new DomainError('study ID not present: ' + study.id);
       }
 
@@ -480,40 +474,6 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
       return biobankApi.post(uri(state, centre.id), json).then(function (reply) {
         return Centre.asyncCreate(reply);
       });
-    }
-
-    /**
-     * Ensures that all studyIds are valid.
-     */
-    function validStudyIds(studyIds) {
-      var result;
-
-      if (_.isUndefined(studyIds) || (studyIds.length <= 0)) {
-        // there are no study IDs, nothing to validate
-        return true;
-      }
-      result = _.find(studyIds, function (studyId) {
-        return (studyId === null) || (studyId === '');
-      });
-
-      return _.isUndefined(result);
-    }
-
-    /**
-     * Ensures that all locations are valid.
-     */
-    function validLocations(locations) {
-      var result;
-
-      if (_.isUndefined(locations) || (locations.length <= 0)) {
-        // there are no locations, nothing to validate
-        return true;
-      }
-      result = _.find(locations, function (location) {
-        return !Location.isValid(location);
-      });
-
-      return _.isUndefined(result);
     }
 
     function uri(/* path, centreId */) {

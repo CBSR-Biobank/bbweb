@@ -63,7 +63,7 @@ define(function (require) {
 
       SuiteMixin.prototype.createEntities = function () {
         var self = this,
-            studies = _.map(_.range(3), function () {
+            studies = _.range(3).map(function () {
               return new self.Study(self.factory.study());
             }),
             centre = new this.Centre(self.factory.centre());
@@ -100,83 +100,53 @@ define(function (require) {
       expect(this.eventRxFunc).toHaveBeenCalled();
     });
 
-    it('has valid state for centre with no studies', function() {
-      var self = this,
-          entities = this.createEntities();
-
-      this.createController(entities);
-
-      expect(self.controller.centre).toBe(entities.centre);
-      expect(self.controller.studyNames.length).toBe(entities.studies.length);
-      expect(self.controller.studyNames).toContainAll(this.studyNames(entities.studies));
-      expect(self.controller.studyCollection).toBeDefined();
-
-      _.each(entities.studies, function (study) {
-        expect(self.controller.studyNamesById[study.id].id).toBe(study.id);
-        expect(self.controller.studyNamesById[study.id].name).toBe(study.name);
-        expect(self.controller.studyNamesById[study.id].status).toBe(study.status);
-      });
-    });
-
     it('has valid state for centre with studies', function() {
       var self = this,
           entities = this.createEntities(),
-          linkedStudy = entities.studies[0];
+          linkedStudy = entities.studies[0],
+          linkedStudyName = this.studyNameDto(linkedStudy);
 
-      entities.centre.studyIds.push(linkedStudy.id);
+      entities.centre.studyNames.push(linkedStudyName);
       this.createController(entities);
 
       expect(self.controller.centre).toBe(entities.centre);
-      expect(self.controller.studyNames.length).toBe(entities.studies.length);
-      expect(self.controller.studyNames).toContainAll(this.studyNames(entities.studies));
-
-      _.each(entities.studies, function (study) {
-        expect(self.controller.studyCollection).toContain(self.studyNameDto(linkedStudy));
-
-        expect(self.controller.studyNamesById[study.id].id).toBe(study.id);
-        expect(self.controller.studyNamesById[study.id].name).toBe(study.name);
-        expect(self.controller.studyNamesById[study.id].status).toBe(study.status);
-      });
+      expect(self.controller.centre.studyNames.length).toBe(1);
+      expect(self.controller.centre.studyNames).toContain(linkedStudyName);
     });
 
     describe('when a study is selected', function() {
 
       beforeEach(function() {
         this.entities = this.createEntities();
-        spyOn(this.Centre.prototype, 'addStudy').and.returnValue(this.$q.when(this.entities.centre));
-        this.entities.centre.studyIds = [ this.entities.studies[1].id ];
+        this.Centre.prototype.addStudy = jasmine.createSpy().and.returnValue(this.$q.when(this.entities.centre));
+        this.entities.centre.studyNames = [ this.studyNameDto(this.entities.studies[1]) ];
         this.createController(this.entities);
       });
 
       it('adds a new study when selected', function() {
-        var numStudiesBeforeAdd = this.controller.studyCollection.length,
-            studyToAdd = this.entities.studies[2];
+        var studyToAdd = this.studyNameDto(this.entities.studies[2]);
 
         // studiesToAdd[2] is NOT one of the studies already associated with the centre
 
         this.controller.onSelect(studyToAdd);
         this.scope.$digest();
-        expect(this.controller.studyCollection).toContain(this.studyNameDto(studyToAdd));
-        expect(this.controller.studyCollection.length).toBe(numStudiesBeforeAdd + 1);
+        expect(this.Centre.prototype.addStudy).toHaveBeenCalled();
       });
 
       it('does not add an exiting study when selected', function() {
-        var numStudiesBeforeAdd = this.controller.studyCollection.length,
-            studyToAdd = this.entities.studies[1];
+        var studyToAdd = this.studyNameDto(this.entities.studies[1]);
 
         // studiesToAdd[1] is already associated with the centre
-        expect(this.controller.studyCollection).toContain(this.studyNameDto(studyToAdd));
+        expect(this.controller.centre.studyNames).toContain(studyToAdd);
 
         this.controller.onSelect(studyToAdd);
         this.scope.$digest();
-
-        expect(this.controller.studyCollection).toContain(this.studyNameDto(studyToAdd));
-        expect(this.controller.studyCollection.length).toBe(numStudiesBeforeAdd);
+        expect(this.Centre.prototype.addStudy).not.toHaveBeenCalled();
       });
 
       it('if centre is not disabled, an exception is thrown', function() {
         var self = this,
-            studyToAdd = this.entities.studies[0];
+            studyToAdd = this.studyNameDto(this.entities.studies[1]);
 
         this.entities.centre.state = this.CentreState.ENABLED;
         expect(function () {
@@ -199,22 +169,22 @@ define(function (require) {
 
     it('study is removed', function() {
       var entities      = this.createEntities(),
-          studyToRemove = entities.studies[1];
+          studyToRemove = this.studyNameDto(entities.studies[1]);
 
-      entities.centre.studyIds.push(studyToRemove.id);
+      entities.centre.studyNames.push(studyToRemove);
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(entities.centre, 'removeStudy').and.returnValue(this.$q.when(entities.centre));
 
       this.createController(entities);
-      this.controller.remove(studyToRemove.id);
+      this.controller.remove(studyToRemove);
       this.scope.$digest();
-      expect(this.controller.studyCollection).not.toContain(this.studyNameDto(studyToRemove));
+      expect(entities.centre.removeStudy).toHaveBeenCalled();
     });
 
     it('displays remove failed information modal if remove fails', function() {
       var entities      = this.createEntities(),
-          studyToRemove = entities.studies[1];
+          studyToRemove = this.studyNameDto(entities.studies[1]);
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
 

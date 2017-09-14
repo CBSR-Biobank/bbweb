@@ -15,8 +15,7 @@ define(function (require) {
     controller: CentreStudiesPanelController,
     controllerAs: 'vm',
     bindings: {
-      centre:     '<',
-      studyNames: '<'
+      centre: '<'
     }
   };
 
@@ -26,7 +25,9 @@ define(function (require) {
     'gettextCatalog',
     'Panel',
     'Study',
+    'StudyName',
     'StudyViewer',
+    'studyStateLabelService',
     'modalService'
   ];
 
@@ -38,7 +39,9 @@ define(function (require) {
                                         gettextCatalog,
                                         Panel,
                                         Study,
+                                        StudyName,
                                         StudyViewer,
+                                        studyStateLabelService,
                                         modalService) {
 
     var vm = this;
@@ -47,63 +50,57 @@ define(function (require) {
     //--
 
     function onInit() {
-      vm.studyNamesById = [];
-      vm.tableStudies   = [];
-      vm.studyCollection = [];
-
-      vm.remove         = remove;
-      vm.information    = information;
-
-      vm.selected = undefined;
-      vm.onSelect = onSelect;
+      vm.tableStudies    = [];
+      vm.selected        = undefined;
+      vm.remove          = remove;
+      vm.information     = information;
+      vm.onSelect        = onSelect;
+      vm.studyStateLabel = studyStateLabel;
+      vm.getStudyNames   = getStudyNames;
 
       // updates the selected tab in 'centreViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');
-
-      vm.studyNamesById = _.keyBy(vm.studyNames, 'id');
-
-      _.each(vm.centre.studyIds, function (studyId) {
-        var study = vm.studyNamesById[studyId];
-        vm.studyCollection.push(study);
-      });
     }
 
     function onSelect(study) {
+      var foundIndex;
+
       if (!vm.centre.isDisabled()) {
         $log.error('Should not be allowed to add studies to centre if centre is not disabled');
         throw new Error('An application error occurred, please contact your administrator.');
       }
 
+      foundIndex = _.findIndex(vm.centre.studyNames, function (studyName) {
+        return studyName.name === study.name;
+      });
+
       // add the study only if it's not there
-      if(_.indexOf(vm.centre.studyIds, study.id) < 0) {
+      if(foundIndex < 0) {
         vm.centre.addStudy(study).then(addSuccessful);
       }
       vm.selected = undefined;
 
       function addSuccessful(centre) {
         vm.centre = centre;
-        vm.studyCollection.push(vm.studyNamesById[study.id]);
       }
     }
 
     function information(studyId) {
       return Study.get(studyId).then(function (study) {
-        vm.studyNamesById[study.id] = study;
         return new StudyViewer(study);
       });
     }
 
-    function remove(studyId) {
+    function remove(study) {
       // FIXME should not allow study to be removed if centre holds specimens for study
       modalService.modalOkCancel(
         gettextCatalog.getString('Remove study'),
-        gettextCatalog.getString(
-          'Are you sure you want to remove study {{name}}?',
-          { name: vm.studyNamesById[studyId].name }))
+        gettextCatalog.getString('Are you sure you want to remove study {{name}}?',
+                                 { name: study.name }))
         .then(function () {
-          return vm.centre.removeStudy({id: studyId})
-            .then(function () {
-              vm.studyCollection = _.without(vm.studyCollection, vm.studyNamesById[studyId]);
+          return vm.centre.removeStudy({id: study.id})
+            .then(function (centre) {
+              vm.centre = centre;
             })
             .catch(function (error) {
               modalService.modalOkCancel(gettextCatalog.getString('Remove failed'),
@@ -111,6 +108,15 @@ define(function (require) {
             });
         });
     }
+
+    function studyStateLabel(state) {
+      return studyStateLabelService.stateToLabelFunc(state)();
+    }
+
+    function getStudyNames(viewValue) {
+      return StudyName.list({ filter: 'name:like:' + viewValue });
+    }
+
 
   }
 
