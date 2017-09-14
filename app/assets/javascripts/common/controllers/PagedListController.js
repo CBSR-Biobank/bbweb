@@ -7,7 +7,7 @@ define(function (require) {
 
   var _ = require('lodash');
 
-  PagedListController.$inject = ['vm', '$state', 'gettextCatalog'];
+  PagedListController.$inject = ['vm', '$log', '$state', 'gettextCatalog'];
 
   /**
    * Base class for controllers that display items in a paged fashion.
@@ -42,7 +42,7 @@ define(function (require) {
    *
    * @return {object} The base class object.
    */
-  function PagedListController(vm, $state, gettextCatalog) {
+  function PagedListController(vm, $log, $state, gettextCatalog) {
     vm.pagedResult        = { total: 0 };
     vm.selectedState      = 'all';
     vm.pageChanged        = pageChanged;
@@ -51,7 +51,6 @@ define(function (require) {
     vm.filtersCleared     = filtersCleared;
     vm.getFilters         = getFilters;
     vm.updateItems        = updateItems;
-    vm.handleUnauthorized = handleUnauthorized;
 
     vm.sortFieldData         = [
       { id: 'name',  labelFunc: function () {  return gettextCatalog.getString('Name'); } },
@@ -102,7 +101,9 @@ define(function (require) {
           });
           vm.displayState = displayState();
         })
-        .catch(handleUnauthorized);
+        .catch(function (error) {
+          $log.error(error);
+        });
     }
 
     /*
@@ -148,13 +149,6 @@ define(function (require) {
       if (!_.isNil(vm.onFiltersCleared)) {
         vm.onFiltersCleared();
       }
-    }
-
-    function handleUnauthorized(error) {
-      if (error.status && (error.status === 401)) {
-        $state.go('home.users.login', {}, { reload: true });
-      }
-      return null;
     }
 
   }

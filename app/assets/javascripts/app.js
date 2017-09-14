@@ -107,15 +107,17 @@ define(function(require) {
     $transitions.onStart({ to: 'home.shipping.**' },   checkIsAuthenticated);
 
     function checkIsAuthenticated(transition) {
-      var usersService = transition.injector().get('usersService');
-      if (!usersService.isAuthenticated()) {
-        usersService.retrieveCurrentUser()
-          .catch(function () {
-            // User isn't authenticated. Redirect to a new Target State
+      var usersService = transition.injector().get('usersService'),
+          $log = transition.injector().get('$log');
+      return usersService.requestCurrentUser()
+        .catch(function (error) {
+          // User isn't authenticated. Redirect to a new Target State
+          if (error.status && (error.status === 401)) {
             return transition.router.stateService.target('home.users.login');
-          });
-      }
-      return null;
+          }
+          $log.error(error);
+          return null;
+        });
     }
   }
 

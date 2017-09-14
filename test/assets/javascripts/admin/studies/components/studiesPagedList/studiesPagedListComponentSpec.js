@@ -90,14 +90,6 @@ define(function (require) {
       expect(this.controller.getItemIcon).toBeFunction();
     });
 
-    it('on startup, state changed to login page if user is not authorized', function() {
-      this.StudyCounts.get = jasmine.createSpy()
-        .and.returnValue(this.$q.reject({ status: 401, message: 'unauthorized'}));
-      spyOn(this.$state, 'go').and.returnValue(null);
-      this.createController();
-      expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
-    });
-
     it('when study counts fails', function() {
       this.StudyCounts.get = jasmine.createSpy()
         .and.returnValue(this.$q.reject({ status: 400, message: 'testing'}));

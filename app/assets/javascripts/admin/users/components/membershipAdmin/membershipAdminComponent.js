@@ -13,20 +13,17 @@ define(function () {
     controller: MembershipAdminsController,
     controllerAs: 'vm',
     bindings: {
-      user: '<'
     }
   };
 
   MembershipAdminsController.$inject = [
-    'breadcrumbService',
-    'gettextCatalog'
+    'breadcrumbService'
   ];
 
   /*
    * Controller for this component.
    */
-  function MembershipAdminsController(breadcrumbService,
-                                     gettextCatalog) {
+  function MembershipAdminsController(breadcrumbService) {
     var vm = this;
     vm.$onInit = onInit;
 

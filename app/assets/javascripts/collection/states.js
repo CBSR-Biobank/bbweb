@@ -7,12 +7,13 @@
 define(['lodash'], function(_) {
   'use strict';
 
-  config.$inject = [ '$stateProvider' ];
+  config.$inject = ['$stateProvider'];
 
   function config($stateProvider) {
 
     $stateProvider
       .state('home.collection', {
+        // this state is checked for an authorized user, see uiRouterIsAuthorized() in app.js
         url: '^/collection',
         views: {
           'main@': 'collection'

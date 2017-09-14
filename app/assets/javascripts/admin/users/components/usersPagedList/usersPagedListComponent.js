@@ -22,6 +22,7 @@ define(function (require) {
 
   Controller.$inject = [
     '$controller',
+    '$log',
     '$scope',
     '$state',
     'User',
@@ -38,6 +39,7 @@ define(function (require) {
    * Controller for this component.
    */
   function Controller($controller,
+                      $log,
                       $scope,
                       $state,
                       User,
@@ -71,6 +73,7 @@ define(function (require) {
       // initialize this controller's base class
       $controller('PagedListController', {
         vm:             vm,
+        $log:           $log,
         $state:         $state,
         gettextCatalog: gettextCatalog
       });
@@ -91,7 +94,9 @@ define(function (require) {
           vm.userCounts = counts;
           vm.haveUsers  = (vm.userCounts.total > 0);
         })
-        .catch(vm.handleUnauthorized);
+        .catch(function (error) {
+          $log.error(error);
+        });
     }
 
     function getItems(options) {
@@ -99,8 +104,7 @@ define(function (require) {
         .then(function (counts) {
           vm.counts = counts;
           return User.list(options);
-        })
-        .catch(vm.handleUnauthorized);
+        });
     }
 
     function getItemIcon(user) {

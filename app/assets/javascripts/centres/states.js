@@ -7,20 +7,13 @@
 define(function () {
   'use strict';
 
-  config.$inject = [ '$stateProvider' ];
+  config.$inject = ['$stateProvider'];
 
   function config($stateProvider) {
 
-    resolveShipment.$inject = ['Shipment', '$transition$', '$state'];
-    function resolveShipment(Shipment, $transition$, $state) {
-      return Shipment.get($transition$.params().shipmentId)
-        .catch(function () {
-          $state.go('404', null, { location: false });
-        });
-    }
-
     $stateProvider
       .state('home.shipping', {
+        // this state is checked for an authorized user, see uiRouterIsAuthorized() in app.js
         url: 'shipping',
         views: {
           'main@': 'shippingHome'
@@ -132,6 +125,14 @@ define(function () {
           'unpackedShipmentDetails': 'unpackedShipmentExtra'
         }
       });
+
+    resolveShipment.$inject = ['Shipment', '$transition$', '$state'];
+    function resolveShipment(Shipment, $transition$, $state) {
+      return Shipment.get($transition$.params().shipmentId)
+        .catch(function () {
+          $state.go('404', null, { location: false });
+        });
+    }
 
   }
 

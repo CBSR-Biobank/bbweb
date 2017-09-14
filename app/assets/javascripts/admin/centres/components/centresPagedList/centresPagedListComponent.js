@@ -24,6 +24,7 @@ define(function (require) {
   Controller.$inject = [
     '$controller',
     '$q',
+    '$log',
     '$scope',
     'Centre',
     'CentreState',
@@ -40,6 +41,7 @@ define(function (require) {
    */
   function Controller($controller,
                       $q,
+                      $log,
                       $scope,
                       Centre,
                       CentreState,
@@ -69,6 +71,7 @@ define(function (require) {
       // initialize this controller's base class
       $controller('PagedListController', {
         vm:             vm,
+        $log:           $log,
         $state:         $state,
         gettextCatalog: gettextCatalog
       });
@@ -82,16 +85,17 @@ define(function (require) {
         .then(function (counts) {
           vm.counts = counts;
         })
-        .catch(vm.handleUnauthorized);
-    }
+         .catch(function (error) {
+          $log.error(error);
+        });
+   }
 
     function getItems(options) {
       return CentreCounts.get()
         .then(function (counts) {
           vm.counts = counts;
           return Centre.list(options);
-        })
-        .catch(vm.handleUnauthorized);
+        });
     }
 
     function getItemIcon(centre) {

@@ -7,11 +7,12 @@
 define(function () {
   'use strict';
 
-  config.$inject = [ '$stateProvider' ];
+  config.$inject = ['$stateProvider'];
 
   function config($stateProvider) {
 
     $stateProvider.state('home.admin', {
+        // this state is checked for an authorized user, see uiRouterIsAuthorized() in app.js
       url: 'admin',
       views: {
         'main@': 'biobankAdmin'

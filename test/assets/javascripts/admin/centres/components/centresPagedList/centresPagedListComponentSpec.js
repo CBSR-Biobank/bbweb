@@ -89,14 +89,6 @@ define(function (require) {
       expect(this.controller.getItemIcon).toBeFunction();
     });
 
-    it('on startup, state changed to login page if user is not authorized', function() {
-      spyOn(this.$state, 'go').and.returnValue(null);
-      this.CentreCounts.get =
-        jasmine.createSpy().and.returnValue(this.$q.reject({ status: 401, message: 'unauthorized'}));
-      this.createController();
-      expect(this.$state.go).toHaveBeenCalledWith('home.users.login', {}, { reload: true });
-    });
-
     it('when centre counts fails', function() {
       this.CentreCounts.get = jasmine.createSpy()
         .and.returnValue(this.$q.reject({ status: 400, message: 'testing'}));
