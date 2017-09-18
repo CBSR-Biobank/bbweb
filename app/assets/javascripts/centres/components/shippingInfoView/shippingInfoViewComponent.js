@@ -42,7 +42,7 @@ define(function () {
       vm.editFromLocation   = editFromLocation;
       vm.editToLocation     = editToLocation;
 
-      vm.stateLabelFunc = shipmentStateLabelService.stateToLabel(vm.shipment.state);
+      vm.stateLabelFunc = shipmentStateLabelService.stateToLabelFunc(vm.shipment.state);
     }
 
     function postUpdate(property, message, title) {

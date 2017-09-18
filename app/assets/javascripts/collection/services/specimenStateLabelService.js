@@ -24,8 +24,8 @@ define(function () {
   function centreStateLabelService(labelService, SpecimenState, gettextCatalog) {
     var labels = {};
 
-    labels[SpecimenState.USABLE]   = function () { return gettextCatalog.getString('Unusable'); };
-    labels[SpecimenState.UNUSABLE] = function () { return gettextCatalog.getString('Usable'); };
+    labels[SpecimenState.USABLE]   = function () { return gettextCatalog.getString('Usable'); };
+    labels[SpecimenState.UNUSABLE] = function () { return gettextCatalog.getString('Unusable'); };
 
     var service = {
       stateToLabelFunc: stateToLabelFunc

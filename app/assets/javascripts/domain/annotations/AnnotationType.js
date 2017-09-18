@@ -68,9 +68,11 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
       return new AnnotationType(obj);
     };
 
-    // returns a string that can be displayed to the user
-    AnnotationType.prototype.getValueTypeLabel = function () {
-      return annotationValueTypeLabelService.valueTypeToLabel(this.valueType, this.isSingleSelect());
+    /**
+     * @returns {function} a function that returns a string that can be displayed to the user
+     */
+    AnnotationType.prototype.getValueTypeLabelFunc = function () {
+      return annotationValueTypeLabelService.valueTypeToLabelFunc(this.valueType, this.isSingleSelect());
     };
 
     AnnotationType.prototype.isValueTypeText = function () {

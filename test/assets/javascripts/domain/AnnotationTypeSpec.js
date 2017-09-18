@@ -200,24 +200,24 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
       expect(annotationType.options[0]).toContain(options[1]);
     });
 
-    describe('getValueTypeLabel', function() {
+    describe('getValueTypeLabelFunc', function() {
 
       it('returns valid type for value type TEXT', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType(
           { valueType: this.AnnotationValueType.TEXT }));
-        expect(annotationType.getValueTypeLabel().toLowerCase()).toBe(this.AnnotationValueType.TEXT);
+        expect(annotationType.getValueTypeLabelFunc()().toLowerCase()).toBe(this.AnnotationValueType.TEXT);
       });
 
       it('returns valid type for value type NUMBER', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType(
           { valueType: this.AnnotationValueType.NUMBER }));
-        expect(annotationType.getValueTypeLabel().toLowerCase()).toBe(this.AnnotationValueType.NUMBER);
+        expect(annotationType.getValueTypeLabelFunc()().toLowerCase()).toBe(this.AnnotationValueType.NUMBER);
       });
 
       it('returns valid type for value type DATE_TIME', function() {
         var annotationType = new this.AnnotationType(this.factory.annotationType(
           { valueType: this.AnnotationValueType.DATE_TIME }));
-        expect(annotationType.getValueTypeLabel()).toBe('Date and time');
+        expect(annotationType.getValueTypeLabelFunc()()).toBe('Date and time');
       });
 
       it('returns valid type for value type SINGLE SELECT', function() {
@@ -226,7 +226,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             valueType: this.AnnotationValueType.SELECT,
             maxValueCount: this.AnnotationMaxValueCount.SELECT_SINGLE
           }));
-        expect(annotationType.getValueTypeLabel()).toBe('Single Select');
+        expect(annotationType.getValueTypeLabelFunc()()).toBe('Single Select');
       });
 
       it('returns valid type for value type MULTIPLE SELECT', function() {
@@ -235,7 +235,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             valueType: this.AnnotationValueType.SELECT,
             maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE
           }));
-        expect(annotationType.getValueTypeLabel()).toBe('Multiple Select');
+        expect(annotationType.getValueTypeLabelFunc()()).toBe('Multiple Select');
       });
 
       it('throws exception for invalid value type', function() {
@@ -243,8 +243,8 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
             annotationType = new self.AnnotationType(self.factory.annotationType(
               { valueType: self.factory.stringNext() }));
         expect(function () {
-          annotationType.getValueTypeLabel();
-        }).toThrowError(/invalid annotation value type:/);
+          annotationType.getValueTypeLabelFunc()();
+        }).toThrowError(/no such label/);
       });
 
     });

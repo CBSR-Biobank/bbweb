@@ -39,7 +39,7 @@ define(function (require) {
     //--
 
     function onInit() {
-      vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabel();
+      vm.annotationTypeValueTypeLabel = vm.annotationType.getValueTypeLabelFunc();
       vm.editName                     = editName;
       vm.editRequired                 = editRequired;
       vm.editDescription              = editDescription;

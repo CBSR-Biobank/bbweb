@@ -94,7 +94,8 @@ define([
             break;
 
           case 'Type':
-            expect(attr.value).toBe(annotationType.getValueTypeLabel());
+            // in this case attr.value is a function that comes from annotationValueTypeLabelService
+            expect(attr.value()).toBe(annotationType.getValueTypeLabelFunc()());
             break;
 
           case 'Required':

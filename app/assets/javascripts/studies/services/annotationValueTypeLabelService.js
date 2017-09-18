@@ -7,7 +7,8 @@ define(['lodash'], function (_) {
 
   annotationValueTypeLabelService.$inject = [
     'gettextCatalog',
-    'AnnotationValueType'
+    'AnnotationValueType',
+    'labelService'
   ];
 
   /**
@@ -20,46 +21,39 @@ define(['lodash'], function (_) {
    *
    * @return {Service} The AngularJS service.
    */
-  function annotationValueTypeLabelService(gettextCatalog, AnnotationValueType) {
+  function annotationValueTypeLabelService(gettextCatalog, AnnotationValueType, labelService) {
     var labels = {};
 
-    labels[AnnotationValueType.TEXT]      = gettextCatalog.getString('Text');
-    labels[AnnotationValueType.NUMBER]    = gettextCatalog.getString('Number');
-    labels[AnnotationValueType.DATE_TIME] = gettextCatalog.getString('Date and time');
-    labels[AnnotationValueType.SELECT]    = gettextCatalog.getString('Select');
+    labels[AnnotationValueType.TEXT]      = function () { return gettextCatalog.getString('Text'); };
+    labels[AnnotationValueType.NUMBER]    = function () { return gettextCatalog.getString('Number'); };
+    labels[AnnotationValueType.DATE_TIME] = function () { return gettextCatalog.getString('Date and time'); };
+    labels[AnnotationValueType.SELECT]    = function () { return gettextCatalog.getString('Select'); };
 
     var service = {
-      valueTypeToLabel: valueTypeToLabel,
-      getLabels:        getLabels
+      valueTypeToLabelFunc: valueTypeToLabelFunc,
+      getLabels:            getLabels
     };
     return service;
 
     //-------
 
-    function valueTypeToLabel(valueType, isSingleSelect) {
-      var result;
-
-      if (valueType === AnnotationValueType.SELECT) {
-        if (_.isUndefined(isSingleSelect)) {
-          return labels[AnnotationValueType.SELECT];
-        } else  if (isSingleSelect) {
-          return gettextCatalog.getString('Single Select');
+    function valueTypeToLabelFunc(valueType, isSingleSelect) {
+      if (valueType === AnnotationValueType.SELECT && !_.isUndefined(isSingleSelect)) {
+        if (isSingleSelect) {
+          return function () { return gettextCatalog.getString('Single Select'); };
+        } else {
+          return function () { return gettextCatalog.getString('Multiple Select'); };
         }
-        return gettextCatalog.getString('Multiple Select');
       }
 
-      result = labels[valueType];
-      if (_.isUndefined(result)) {
-        throw new Error('invalid annotation value type: ' + valueType);
-      }
-      return result;
+      return labelService.getLabel(labels, valueType);
     }
 
     function getLabels() {
       return _.map(AnnotationValueType, function (valueType) {
         return {
-          id:    valueType,
-          label: valueTypeToLabel(valueType)
+          id:        valueType,
+          labelFunc: valueTypeToLabelFunc(valueType)
         };
       });
     }

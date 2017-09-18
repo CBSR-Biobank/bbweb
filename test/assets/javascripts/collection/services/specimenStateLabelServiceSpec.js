@@ -9,14 +9,14 @@ define(function (require) {
       _     = require('lodash'),
       sharedBehaviour = require('../../test/labelServiceSharedBehaviour');
 
-  describe('shipmentStateLabelService', function() {
+  describe('specimenStateLabelService', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(TestSuiteMixin) {
       _.extend(this, TestSuiteMixin.prototype);
-      this.injectDependencies('shipmentStateLabelService',
-                              'ShipmentState');
+      this.injectDependencies('specimenStateLabelService',
+                              'SpecimenState');
     }));
 
     describe('shared behaviour', function() {
@@ -24,10 +24,10 @@ define(function (require) {
       beforeEach(function() {
         var self = this;
 
-        context.labels = _.values(this.ShipmentState);
-        context.toLabelFunc = this.shipmentStateLabelService.stateToLabelFunc;
+        context.labels = _.values(this.SpecimenState);
+        context.toLabelFunc = this.specimenStateLabelService.stateToLabelFunc;
         context.expectedLabels = [];
-        _.values(this.ShipmentState).forEach(function (state) {
+        _.values(this.SpecimenState).forEach(function (state) {
           context.expectedLabels[state] = self.capitalizeFirstLetter(state);
         });
       });

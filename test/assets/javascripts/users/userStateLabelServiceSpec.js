@@ -7,16 +7,16 @@ define(function (require) {
 
   var mocks = require('angularMocks'),
       _     = require('lodash'),
-      sharedBehaviour = require('../../test/labelServiceSharedBehaviour');
+      sharedBehaviour = require('../test/labelServiceSharedBehaviour');
 
-  describe('shipmentStateLabelService', function() {
+  describe('userStateLabelService', function() {
 
     beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
     beforeEach(inject(function(TestSuiteMixin) {
       _.extend(this, TestSuiteMixin.prototype);
-      this.injectDependencies('shipmentStateLabelService',
-                              'ShipmentState');
+      this.injectDependencies('userStateLabelService',
+                              'UserState');
     }));
 
     describe('shared behaviour', function() {
@@ -24,10 +24,10 @@ define(function (require) {
       beforeEach(function() {
         var self = this;
 
-        context.labels = _.values(this.ShipmentState);
-        context.toLabelFunc = this.shipmentStateLabelService.stateToLabelFunc;
+        context.labels = _.values(this.UserState);
+        context.toLabelFunc = this.userStateLabelService.stateToLabelFunc;
         context.expectedLabels = [];
-        _.values(this.ShipmentState).forEach(function (state) {
+        _.values(this.UserState).forEach(function (state) {
           context.expectedLabels[state] = self.capitalizeFirstLetter(state);
         });
       });

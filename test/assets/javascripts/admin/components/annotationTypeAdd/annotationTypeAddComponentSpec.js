@@ -60,13 +60,13 @@ define(function (require) {
     }));
 
     it('scope should be valid when adding', function() {
-      var self = this,
+      var valueTypes = _.values(this.AnnotationValueType),
           labels = this.annotationValueTypeLabelService.getLabels();
       this.createController();
       expect(this.controller.annotationType).toEqual(jasmine.any(this.AnnotationType));
       expect(this.controller.valueTypes.length).toEqual(labels.length);
-      _.forEach(self.controller.valueTypes, function (value) {
-        expect(labels).toContain({ id: value.id, label: value.label });
+      labels.forEach(function (label) {
+        expect(valueTypes).toContain(label.id);
       });
     });
 

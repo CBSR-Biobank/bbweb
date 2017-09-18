@@ -2,14 +2,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
-
-  var _ = require('lodash');
 
   shipmentStateLabelService.$inject = [
     'ShipmentState',
-    'gettextCatalog'
+    'gettextCatalog',
+    'labelService'
   ];
 
   /**
@@ -20,9 +19,11 @@ define(function (require) {
    *
    * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
    *
+   * @param {service} labelService - The service that validates the state and returns the label.
+   *
    * @return {Service} The AngularJS service.
    */
-  function shipmentStateLabelService(ShipmentState, gettextCatalog) {
+  function shipmentStateLabelService(ShipmentState, gettextCatalog, labelService) {
     var labels = {};
 
     labels[ShipmentState.CREATED]   = function () { return gettextCatalog.getString('Created'); };
@@ -34,18 +35,14 @@ define(function (require) {
     labels[ShipmentState.LOST]      = function () { return gettextCatalog.getString('Lost'); };
 
     var service = {
-      stateToLabel: stateToLabel
+      stateToLabelFunc: stateToLabelFunc
     };
     return service;
 
     //-------
 
-    function stateToLabel(state) {
-      var result = labels[state];
-      if (_.isUndefined(result)) {
-        throw new Error('invalid shipment state: ' + state);
-      }
-      return result;
+    function stateToLabelFunc(state) {
+      return labelService.getLabel(labels, state);
     }
 
   }
