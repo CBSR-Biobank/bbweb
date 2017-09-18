@@ -62,8 +62,7 @@ define(function (require) {
         '/assets/javascripts/admin/users/components/usersPagedList/usersPagedList.html',
         '/assets/javascripts/common/components/nameEmailStateFilters/nameEmailStateFilters.html',
         '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html',
-        '/assets/javascripts/common/components/stateAndTimestamps/stateAndTimestamps.html',
-        '/assets/javascripts/common/components/entityTimestamps/entityTimestamps.html');
+        '/assets/javascripts/common/components/statusLine/statusLine.html');
 
       this.injectDependencies('$q',
                               '$rootScope',

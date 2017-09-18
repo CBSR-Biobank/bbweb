@@ -27,7 +27,7 @@ define(function (require) {
     '$state',
     'User',
     'UserState',
-    'userStateLabel',
+    'userStateLabelService',
     'UserCounts',
     'gettextCatalog',
     'EmailFilter',
@@ -44,7 +44,7 @@ define(function (require) {
                       $state,
                       User,
                       UserState,
-                      userStateLabel,
+                      userStateLabelService,
                       UserCounts,
                       gettextCatalog,
                       EmailFilter,
@@ -52,7 +52,7 @@ define(function (require) {
                       StateFilter) {
     var vm = this,
         stateData = _.values(UserState).map(function (state) {
-          return { id: state, label: userStateLabel.stateToLabelFunc(state) };
+          return { id: state, label: userStateLabelService.stateToLabelFunc(state) };
         });
 
     vm.$onInit = onInit;
@@ -80,7 +80,7 @@ define(function (require) {
 
       vm.stateLabelFuncs = {};
        _.values(UserState).forEach(function (state) {
-        vm.stateLabelFuncs[state] = userStateLabel.stateToLabelFunc(state);
+        vm.stateLabelFuncs[state] = userStateLabelService.stateToLabelFunc(state);
       });
 
       vm.sortFieldData = [

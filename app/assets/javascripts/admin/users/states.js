@@ -50,6 +50,9 @@ define(function () {
       })
       .state('home.admin.users.memberships.membership', {
         url: '/{membershipId}',
+        resolve: {
+          membership: resolveMembership
+        },
         views: {
           'main@': 'membershipView'
         }
@@ -68,6 +71,11 @@ define(function () {
     resolveUser.$inject = ['$transition$', 'User'];
     function resolveUser($transition$, User) {
       return User.get($transition$.params().userId);
+    }
+
+    resolveMembership.$inject = ['$transition$', 'Membership'];
+    function resolveMembership($transition$, Membership) {
+      return Membership.get($transition$.params().membershipId);
     }
 
   }

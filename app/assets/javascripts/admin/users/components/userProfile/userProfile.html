@@ -114,5 +114,7 @@
       </div>
     </li>
   </ul>
-  <status-line item="vm.user" show-status="false"></status-line>
+  <status-line state-label-func="vm.stateLabelFunc(vm.user.state)"
+               time-added="vm.user.timeAdded"
+               time-modified="vm.user.timeModified"></status-line>
 </div>

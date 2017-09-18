@@ -25,13 +25,13 @@ define(function (require) {
   function shipmentStateLabelService(ShipmentState, gettextCatalog) {
     var labels = {};
 
-    labels[ShipmentState.CREATED]   = gettextCatalog.getString('Created');
-    labels[ShipmentState.PACKED]    = gettextCatalog.getString('Packed');
-    labels[ShipmentState.SENT]      = gettextCatalog.getString('Sent');
-    labels[ShipmentState.RECEIVED]  = gettextCatalog.getString('Received');
-    labels[ShipmentState.UNPACKED]  = gettextCatalog.getString('Unpacked');
-    labels[ShipmentState.COMPLETED] = gettextCatalog.getString('Completed');
-    labels[ShipmentState.LOST]      = gettextCatalog.getString('Lost');
+    labels[ShipmentState.CREATED]   = function () { return gettextCatalog.getString('Created'); };
+    labels[ShipmentState.PACKED]    = function () { return gettextCatalog.getString('Packed'); };
+    labels[ShipmentState.SENT]      = function () { return gettextCatalog.getString('Sent'); };
+    labels[ShipmentState.RECEIVED]  = function () { return gettextCatalog.getString('Received'); };
+    labels[ShipmentState.UNPACKED]  = function () { return gettextCatalog.getString('Unpacked'); };
+    labels[ShipmentState.COMPLETED] = function () { return gettextCatalog.getString('Completed'); };
+    labels[ShipmentState.LOST]      = function () { return gettextCatalog.getString('Lost'); };
 
     var service = {
       stateToLabel: stateToLabel

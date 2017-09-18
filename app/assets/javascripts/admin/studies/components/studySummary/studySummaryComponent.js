@@ -25,7 +25,8 @@ define(function () {
     'gettextCatalog',
     'modalService',
     'modalInput',
-    'notificationsService'
+    'notificationsService',
+    'studyStateLabelService'
   ];
 
   /*
@@ -36,7 +37,8 @@ define(function () {
                                   gettextCatalog,
                                   modalService,
                                   modalInput,
-                                  notificationsService) {
+                                  notificationsService,
+                                  studyStateLabelService) {
 
     var vm = this;
     vm.$onInit = onInit;
@@ -57,6 +59,8 @@ define(function () {
       vm.study.isEnableAllowed().then(function (enableAllowed) {
         vm.isEnableAllowed = enableAllowed;
       });
+
+      vm.stateLabelFunc  = studyStateLabelService.stateToLabelFunc(vm.study.state);
     }
 
     function changeState(stateAction) {

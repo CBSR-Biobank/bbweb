@@ -83,5 +83,7 @@
       </div>
     </li>
   </ul>
-  <status-line item="vm.study"></status-line>
+  <status-line state-label-func="vm.stateLabelFunc(vm.study.state)"
+               time-added="vm.study.timeAdded"
+               time-modified="vm.study.timeModified"></status-line>
 </div>

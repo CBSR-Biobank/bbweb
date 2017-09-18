@@ -2,30 +2,32 @@
  *
  */
 define(function () {
-   'use strict';
+  'use strict';
 
-   var component = {
-      templateUrl: '/assets/javascripts/admin/users/components/membershipView/membershipView.html',
-      controller: MembershipViewController,
-      controllerAs: 'vm',
-      bindings: {
-      }
-   };
+  var component = {
+    templateUrl: '/assets/javascripts/admin/users/components/membershipView/membershipView.html',
+    controller: MembershipViewController,
+    controllerAs: 'vm',
+    bindings: {
+      membership: '<'
+    }
+  };
 
-   MembershipViewController.$inject = [];
+  MembershipViewController.$inject = [];
 
-   /*
-    *
-    */
-   function MembershipViewController() {
-      var vm = this;
-      vm.$onInit = onInit;
+  /*
+   *
+   */
+  function MembershipViewController() {
+    var vm = this;
+    vm.$onInit = onInit;
 
-      //--
+    //--
 
-      function onInit() {
-      }
-   }
+    function onInit() {
+      console.log(vm.membership);
+    }
+  }
 
-   return component;
+  return component;
 });

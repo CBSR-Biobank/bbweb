@@ -23,7 +23,8 @@ define(function () {
     'gettextCatalog',
     'modalService',
     'modalInput',
-    'notificationsService'
+    'notificationsService',
+    'centreStateLabelService'
   ];
 
   /*
@@ -33,7 +34,8 @@ define(function () {
                                    gettextCatalog,
                                    modalService,
                                    modalInput,
-                                   notificationsService) {
+                                   notificationsService,
+                                   centreStateLabelService) {
     var vm = this;
     vm.$onInit = onInit;
 
@@ -47,6 +49,8 @@ define(function () {
       vm.changeState     = changeState;
       vm.editName        = editName;
       vm.editDescription = editDescription;
+
+      vm.stateLabelFunc  = centreStateLabelService.stateToLabelFunc(vm.centre.state);
 
       // updates the selected tab in 'studyViewDirective' which is the parent directive
       $scope.$emit('tabbed-page-update', 'tab-selected');

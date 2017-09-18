@@ -22,7 +22,8 @@ define(function () {
     'notificationsService',
     'usersService',
     'User',
-    'breadcrumbService'
+    'breadcrumbService',
+    'userStateLabelService'
   ];
 
   /*
@@ -35,7 +36,8 @@ define(function () {
                                  notificationsService,
                                  usersService,
                                  User,
-                                 breadcrumbService) {
+                                 breadcrumbService,
+                                 userStateLabelService) {
     var vm = this;
     vm.$onInit = onInit;
 
@@ -64,6 +66,9 @@ define(function () {
       vm.rolesValue              = getRolesValue();
 
       vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
+
+      vm.stateLabelFunc  = userStateLabelService.stateToLabelFunc(vm.user.state);
+
 
       if (vm.user.membership) {
         if (vm.user.membership.isForAllStudies()) {

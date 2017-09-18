@@ -72,10 +72,13 @@
         </div>
       </div>
       <div class="row">
-        <state-and-timestamps state-label-func="vm.stateLabelFuncs[entity.state]()"
-                              time-added="entity.timeAdded"
-                              time-modified="entity.timeModified">
-        </state-and-timestamps>
+        <div class="col-md-12">
+          <status-line state-label-func="vm.stateLabelFuncs[entity.state]()"
+                       time-added="entity.timeAdded"
+                       time-modified="entity.timeModified"
+                       use-labels="false">
+          </status-line>
+        </div>
       </div>
     </li>
   </ul>

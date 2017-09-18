@@ -155,5 +155,7 @@
     </li>
 
   </ul>
-  <status-line item="vm.shipment"></status-line>
+  <status-line state-label-func="vm.stateLabelFunc(vm.shipment.state)"
+               time-added="vm.shipment.timeAdded"
+               time-modified="vm.shipment.timeModified"></status-line>
 </collapsible-panel>

@@ -20,12 +20,17 @@ define(function (require) {
     }
   };
 
-  SpecimenViewController.$inject = ['$state', 'gettextCatalog', 'breadcrumbService'];
+  SpecimenViewController.$inject = [
+    '$state',
+    'gettextCatalog',
+    'breadcrumbService',
+    'specimenStateLabelService'
+  ];
 
   /*
    * Displays the details for a single specimen and also allows the user to update certain fields.
    */
-  function SpecimenViewController($state, gettextCatalog, breadcrumbService) {
+  function SpecimenViewController($state, gettextCatalog, breadcrumbService, specimenStateLabelService) {
     var vm = this;
     vm.$onInit = onInit;
 
@@ -60,6 +65,8 @@ define(function (require) {
           'home.collection.study.participant.cevents.details.specimen',
           function () { return vm.specimen.inventoryId; })
       ];
+
+      vm.stateLabelFunc  = specimenStateLabelService.stateToLabelFunc(vm.specimen.state);
     }
 
     function editParticipant() {

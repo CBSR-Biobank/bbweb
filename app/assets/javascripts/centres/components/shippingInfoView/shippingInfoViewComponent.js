@@ -21,14 +21,16 @@ define(function () {
     'Centre',
     'modalInput',
     'notificationsService',
-    'centreLocationsModalService'
+    'centreLocationsModalService',
+    'shipmentStateLabelService'
   ];
 
   function ShippingInfoViewController(gettextCatalog,
                                       Centre,
                                       modalInput,
                                       notificationsService,
-                                      centreLocationsModalService) {
+                                      centreLocationsModalService,
+                                      shipmentStateLabelService) {
     var vm = this;
     vm.$onInit = onInit;
 
@@ -39,6 +41,8 @@ define(function () {
       vm.editTrackingNumber = editTrackingNumber;
       vm.editFromLocation   = editFromLocation;
       vm.editToLocation     = editToLocation;
+
+      vm.stateLabelFunc = shipmentStateLabelService.stateToLabel(vm.shipment.state);
     }
 
     function postUpdate(property, message, title) {

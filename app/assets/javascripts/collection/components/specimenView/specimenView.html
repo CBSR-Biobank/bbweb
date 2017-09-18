@@ -118,7 +118,11 @@
       </div>
     </li>
   </ul>
-  <status-line item="vm.specimen"></status-line>
+  <status-line state-label-func="vm.stateLabelFunc()"
+               time-added="vm.specimen.timeAdded"
+               time-modified="vm.specimen.timeModified">
+  </status-line>
+
 </div>
 <div class="row">
   <div class="col-md-1">

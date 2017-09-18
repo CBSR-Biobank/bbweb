@@ -34,7 +34,8 @@ define(function (require) {
     .component('ceventsAddAndSelect',
                require('./components/ceventsAddAndSelect/ceventsAddAndSelectComponent'))
 
-    .service('specimenAddModal',      require('./services/specimenAddModal/specimenAddModalService'));
+    .service('specimenAddModal',          require('./services/specimenAddModal/specimenAddModalService'))
+    .service('specimenStateLabelService', require('./services/specimenStateLabelService'));
 
   return {
     name: name,

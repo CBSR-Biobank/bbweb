@@ -32,9 +32,12 @@
         </div>
       </div>
       <div class="row">
-        <entity-timestamps time-added="entity.timeAdded"
-                           time-modified="entity.timeModified">
-        </entity-timestamps>
+        <div class="col-md-12">
+          <status-line time-added="entity.timeAdded"
+                       time-modified="entity.timeModified"
+                       use-labels="false">
+          </status-line>
+        </div>
       </div>
     </li>
   </ul>

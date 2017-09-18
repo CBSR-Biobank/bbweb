@@ -21,10 +21,10 @@ define(function (require) {
     .component('passwordSent',   require('./components/passwordSent/passwordSentComponent'))
     .component('registerUser',   require('./components/registerUser/registerUserComponent'))
 
-    .directive('passwordCheck', require('./directives/passwordCheck/passwordCheckDirective'))
+    .directive('passwordCheck',  require('./directives/passwordCheck/passwordCheckDirective'))
 
-    .service('usersService',   require('./usersService'))
-    .service('userStateLabel', require('./userStateLabelService'));
+    .service('usersService',          require('./usersService'))
+    .service('userStateLabelService', require('./userStateLabelService'));
 
   return {
     name: name,
