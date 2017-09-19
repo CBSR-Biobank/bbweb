@@ -13,7 +13,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit name'|translate}}"
+                  uib-tooltip="{{'Edit name'|translate}}"
                   ng-click="vm.editName()"
                   ng-if="vm.study.isDisabled()">
             <i class="glyphicon glyphicon-edit"></i>
@@ -31,7 +31,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit required'|translate}}"
+                  uib-tooltip="{{'Edit required'|translate}}"
                   ng-click="vm.editRequired()"
                   ng-if="vm.study.isDisabled()">
             <i class="glyphicon glyphicon-edit"></i>
@@ -75,7 +75,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Add selection option'|translate}}"
+                  uib-tooltip="{{'Add selection option'|translate}}"
                   ng-click="vm.editSelectionOptions()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>

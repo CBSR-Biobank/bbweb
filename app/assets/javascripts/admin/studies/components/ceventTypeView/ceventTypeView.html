@@ -4,13 +4,13 @@
       {{vm.collectionEventType.name}}
       <span class="pull-right">
         <button class="btn btn-xs btn-warning"
-                title="{{'Remove collection event'|translate}}"
+                uib-tooltip="{{'Remove collection event'|translate}}"
                 ng-click="vm.removeCeventType()"
                 ng-if="vm.study.isDisabled()">
           Remove <i class="glyphicon glyphicon-remove"></i>
         </button>
         <button class="btn btn-xs btn-primary"
-                title="{{'Add an annotation to this collection event'|translate}}"
+                uib-tooltip="{{'Add an annotation to this collection event'|translate}}"
                 ng-click="vm.addAnnotationType()"
                 ng-if="vm.study.isDisabled()">
           Add annotation <i class="glyphicon glyphicon-plus"></i>
@@ -36,7 +36,7 @@
           </div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
-                    title="{{'Edit name'|translate}}"
+                    uib-tooltip="{{'Edit name'|translate}}"
                     ng-click="vm.editName()"
                     ng-if="vm.study.isDisabled()">
               <i class="glyphicon glyphicon-edit"></i>
@@ -69,7 +69,7 @@
           <div class="col-md-8" ng-if="!vm.collectionEventType.recurring" translate>No</div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
-                    title="{{'Edit recurring'|translate}}"
+                    uib-tooltip="{{'Edit recurring'|translate}}"
                     ng-click="vm.editRecurring()"
                     ng-if="vm.study.isDisabled()">
               <i class="glyphicon glyphicon-edit"></i>

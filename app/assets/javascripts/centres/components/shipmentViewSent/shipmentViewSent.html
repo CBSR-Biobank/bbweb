@@ -8,25 +8,25 @@
     <br/> {{'Sent shipment'|translate}}</small>
     <div class="pull-right">
       <button class="btn btn-xs btn-warning"
-              title="{{'Return shipment to packed state (un-send this shipment)'|translate}}"
+              uib-tooltip="{{'Return shipment to packed state (un-send this shipment)'|translate}}"
               ng-click="vm.returnToPackedState()">
         <i class="glyphicon glyphicon-chevron-left"></i>
         <translate>Back to packed</translate>
       </button>
       <button class="btn btn-xs btn-danger"
-              title="{{'Mark shipment as lost'|translate}}"
+              uib-tooltip="{{'Mark shipment as lost'|translate}}"
               ng-click="vm.tagAsLost()">
         <i class="glyphicon glyphicon-question-sign"></i>
         <translate>Tag as lost</translate>
       </button>
       <button class="btn btn-xs btn-primary"
-              title="{{'Mark shipment as received'|translate}}"
+              uib-tooltip="{{'Mark shipment as received'|translate}}"
               ng-click="vm.receiveShipment()">
         <translate>Tag as received</translate>
         <i class="glyphicon glyphicon-chevron-right"></i>
       </button>
       <button class="btn btn-xs btn-primary"
-              title="{{'Mark shipment as received and start unpacking it'|translate}}"
+              uib-tooltip="{{'Mark shipment as received and start unpacking it'|translate}}"
               ng-click="vm.unpackShipment()">
         <translate>Tag as unpacked</translate>
         <i class="glyphicon glyphicon-forward"></i>

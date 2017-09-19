@@ -4,7 +4,7 @@
       <translate>Specimens</translate>
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-default"
-                title="{{'add specimens'|translate}}"
+                uib-tooltip="{{'add specimens'|translate}}"
                 ng-click="vm.addSpecimens()">
           <i class="glyphicon glyphicon-plus"></i>
         </button>
@@ -35,12 +35,12 @@
         <td>
           <button class="btn btn-xs btn-primary"
                   ng-click="vm.viewSpecimen(specimen)"
-                  title="{{'View specimen'|translate}}">
+                  uib-tooltip="{{'View specimen'|translate}}">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
           <button class="btn btn-xs btn-warning"
                   ng-click="vm.removeSpecimen(specimen)"
-                  title="{{'Remove specimen'|translate}}">
+                  uib-tooltip="{{'Remove specimen'|translate}}">
             <i class="glyphicon glyphicon-remove"></i>
           </button>
         </td>

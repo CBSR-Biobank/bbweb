@@ -22,7 +22,7 @@
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit name'|translate}}"
+                  uib-tooltip="{{'Edit name'|translate}}"
                   ng-click="vm.editName()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -41,7 +41,7 @@
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit street'|translate}}"
+                  uib-tooltip="{{'Edit street'|translate}}"
                   ng-click="vm.editStreet()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -60,7 +60,7 @@
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit city'|translate}}"
+                  uib-tooltip="{{'Edit city'|translate}}"
                   ng-click="vm.editCity()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -79,7 +79,7 @@
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit province'|translate}}"
+                  uib-tooltip="{{'Edit province'|translate}}"
                   ng-click="vm.editProvince()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -98,7 +98,7 @@
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit postal code'|translate}}"
+                  uib-tooltip="{{'Edit postal code'|translate}}"
                   ng-click="vm.editPostalCode()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -117,7 +117,7 @@
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit postal box number'|translate}}"
+                  uib-tooltip="{{'Edit postal box number'|translate}}"
                   ng-click="vm.editPoBoxNumber()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -136,7 +136,7 @@
         </div>
         <div class="col-md-2" ng-if="vm.centre.isDisabled()">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit country ISO code'|translate}}"
+                  uib-tooltip="{{'Edit country ISO code'|translate}}"
                   ng-click="vm.editCountryIsoCode()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -148,7 +148,7 @@
 </div>
 
 <button class="btn btn-primary"
-        title="{{'Back to locations'|translate}}"
+        uib-tooltip="{{'Back to locations'|translate}}"
         ng-click="vm.back()">
   Back
 </button>

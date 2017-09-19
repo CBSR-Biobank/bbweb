@@ -10,19 +10,19 @@
       <br/> {{'Add items to ship'|translate}}</small>
       <div class="pull-right">
         <button class="btn btn-xs btn-warning"
-                title="{{'Remove this shipment'|translate}}"
+                uib-tooltip="{{'Remove this shipment'|translate}}"
                 ng-click="vm.removeShipment()">
           <i class="glyphicon glyphicon-remove"></i>
           <translate>Remove</translate>
         </button>
         <button class="btn btn-xs btn-primary"
-                title="{{'All items added, ready to tag as packed'|translate}}"
+                uib-tooltip="{{'All items added, ready to tag as packed'|translate}}"
                 ng-click="vm.tagAsPacked()">
           <translate>Tag as packed</translate>
           <i class="glyphicon glyphicon-chevron-right"></i>
         </button>
         <button class="btn btn-xs btn-primary"
-                title="{{'All items added, ready to tag as sent'|translate}}"
+                uib-tooltip="{{'All items added, ready to tag as sent'|translate}}"
                 ng-click="vm.tagAsSent()">
           <translate>Tag as sent</translate>
           <i class="glyphicon glyphicon-forward"></i>

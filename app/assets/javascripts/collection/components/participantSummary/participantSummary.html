@@ -14,7 +14,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Update unique ID'|translate}}"
+                  uib-tooltip="{{'Update unique ID'|translate}}"
                   ng-click="vm.editUniqueId()">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
@@ -41,7 +41,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{vm.getAnnotationUpdateButtonTitle(annotation)}}"
+                  uib-tooltip="{{vm.getAnnotationUpdateButtonTitle(annotation)}}"
                   ng-click="vm.editAnnotation(annotation)">
             <i class="glyphicon glyphicon-edit"></i>
           </button>

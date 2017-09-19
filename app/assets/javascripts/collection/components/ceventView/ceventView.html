@@ -5,7 +5,7 @@
       {{vm.collectionEvent.visitNumber}}
       <span class="pull-right">
         <button class="btn btn-xs btn-warning"
-                title="{{'remove event'|translate}}"
+                uib-tooltip="{{'Remove this event'|translate}}"
                 ng-click="vm.remove()">
           <translate>Remove</translate>
           <i class="glyphicon glyphicon-remove"></i>
@@ -42,7 +42,7 @@
           </div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
-                    title="{{'Update time completed'|translate}}"
+                    uib-tooltip="{{'Update time completed'|translate}}"
                     ng-click="vm.editTimeCompleted()">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
@@ -59,7 +59,7 @@
           </div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
-                    title="{{vm.getAnnotationUpdateButtonTitle(annotation)}}"
+                    uib-tooltip="{{vm.getAnnotationUpdateButtonTitle(annotation)}}"
                     ng-click="vm.editAnnotation(annotation)">
               <i class="glyphicon glyphicon-edit"></i>
             </button>

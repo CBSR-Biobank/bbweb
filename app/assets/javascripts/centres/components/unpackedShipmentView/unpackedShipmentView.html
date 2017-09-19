@@ -10,13 +10,13 @@
       <br/> {{'Unpack shipment'|translate}}</small>
       <div class="pull-right">
         <button class="btn btn-xs btn-warning"
-                title="{{'Return shipment to received'|translate}}"
+                uib-tooltip="{{'Return shipment to received'|translate}}"
                 ng-click="vm.returnToReceivedState()">
           <i class="glyphicon glyphicon-chevron-left"></i>
           <translate>Back to received</translate>
         </button>
         <button class="btn btn-xs btn-primary"
-                title="{{'Mark shipment as completed'|translate}}"
+                uib-tooltip="{{'Mark shipment as completed'|translate}}"
                 ng-click="vm.completeShipment()">
           <translate>Tag as complete</translate>
           <i class="glyphicon glyphicon-chevron-right"></i>

@@ -3,7 +3,7 @@
     <h3 class="panel-title">
       <translate>Locations</translate>
       <button class="btn btn-xs btn-primary pull-right"
-              title="{{'Add location'|translate}}"
+              uib-tooltip="{{'Add location'|translate}}"
               ng-if="vm.centre.isDisabled()"
               ng-click="vm.add()">
         <i class="glyphicon glyphicon-plus"></i>
@@ -33,13 +33,13 @@
         <div class="col-md-2">
           <span class="btn-group pull-right">
             <button class="btn btn-xs btn-primary"
-                    title="{{'Edit location'|translate}}"
+                    uib-tooltip="{{'Edit location'|translate}}"
                     ng-if="vm.centre.isDisabled()"
                     ng-click="vm.view(location)">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
             <button class="btn btn-xs btn-warning"
-                    title="{{'Remove location'|translate}}"
+                    uib-tooltip="{{'Remove location'|translate}}"
                     ng-if="vm.centre.isDisabled()"
                     ng-click="vm.remove(location)">
               <i class="glyphicon glyphicon-remove"></i>

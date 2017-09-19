@@ -5,7 +5,7 @@
       <span class="pull-right">
         <button class="btn btn-xs btn-success"
                 ng-click="vm.changeState('enable')"
-                title="{{'Enable'|translate}}"
+                uib-tooltip="{{'Enable'|translate}}"
                 ng-if="vm.study.isDisabled()"
                 ng-disabled="!vm.isEnableAllowed">
           <i class="glyphicon glyphicon-ok-circle"></i>
@@ -14,7 +14,7 @@
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeState('disable')"
-                title="{{'Disable'|translate}}"
+                uib-tooltip="{{'Disable'|translate}}"
                 ng-if="vm.study.isEnabled()">
           <i class="glyphicon glyphicon-cog"></i>
           <translate>Disable</translate>
@@ -22,7 +22,7 @@
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeState('retire')"
-                title="{{'Retire'|translate}}"
+                uib-tooltip="{{'Retire'|translate}}"
                 ng-if="vm.study.isDisabled()">
           <i class="glyphicon glyphicon-arrow-down"></i>
           <translate>Retire</translate>
@@ -30,7 +30,7 @@
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeState('unretire')"
-                title="{{'Unretire'|translate}}"
+                uib-tooltip="{{'Unretire'|translate}}"
                 ng-if="vm.study.isRetired()">
           <i class="glyphicon glyphicon-arrow-up"></i>
           <translate>Unretire</translate>
@@ -50,7 +50,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit name'|translate}}"
+                  uib-tooltip="{{'Edit name'|translate}}"
                   ng-click="vm.editName()"
                   ng-if="vm.study.isDisabled()">
             <i class="glyphicon glyphicon-edit"></i>

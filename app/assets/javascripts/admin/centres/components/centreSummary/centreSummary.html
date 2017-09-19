@@ -4,7 +4,7 @@
       {{vm.centre.name}}
       <span class="btn-group pull-right">
         <button class="btn btn-xs btn-success"
-                title="{{'Enable'|translate}}"
+                uib-tooltip="{{'Enable'|translate}}"
                 ng-disabled="!vm.centre.hasLocations()"
                 ng-if="vm.centre.isDisabled()"
                 ng-click="vm.changeState('enable')">
@@ -13,7 +13,7 @@
 
         <button class="btn btn-xs btn-danger"
                 ng-click="vm.changeState('disable')"
-                title="{{'Disable'|translate}}"
+                uib-tooltip="{{'Disable'|translate}}"
                 ng-if="vm.centre.isEnabled()">
           <i class="glyphicon glyphicon-cog"></i>
         </button>
@@ -32,7 +32,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit name'|translate}}"
+                  uib-tooltip="{{'Edit name'|translate}}"
                   ng-if="vm.centre.isDisabled()"
                   ng-click="vm.editName()">
             <i class="glyphicon glyphicon-edit"></i>

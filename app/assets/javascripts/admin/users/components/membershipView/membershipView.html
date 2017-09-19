@@ -8,7 +8,7 @@
       {{vm.membership.name}}
       <span class="pull-right">
         <button class="btn btn-xs btn-warning"
-                title="{{'Remove membership'|translate}}"
+                uib-tooltip="{{'Remove membership'|translate}}"
                 ng-click="vm.removeCeventType()"
                 ng-if="vm.study.isDisabled()">
           Remove <i class="glyphicon glyphicon-remove"></i>
@@ -17,6 +17,8 @@
     </h3>
   </div>
   <ul class="list-group">
+
+    <!-- NAME -->
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
@@ -27,7 +29,7 @@
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  title="{{'Edit name'|translate}}"
+                  uib-tooltip="{{'Edit name'|translate}}"
                   ng-click="vm.editName()"
                   ng-if="vm.study.isDisabled()">
             <i class="glyphicon glyphicon-edit"></i>
@@ -35,6 +37,8 @@
         </div>
       </div>
     </li>
+
+    <!-- DESCRIPTION -->
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
@@ -51,6 +55,25 @@
         </div>
       </div>
     </li>
+
+    <!-- USERs -->
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2">
+          <strong translate>Users:</strong>
+        </div>
+        <div class="col-md-10">
+          <truncate-toggle
+             text="vm.membership.description"
+             toggle-length="60"
+             text-empty-warning="{{'Description not entered yet.'|translate}}"
+             allow-edit="vm.study.isDisabled()"
+             on-edit="vm.editDescription()">
+          </truncate-toggle>
+        </div>
+      </div>
+    </li>
+
   </ul>
   <status-line time-added="vm.membership.timeAdded"
                time-modified="vm.membership.timeModified"></status-line>
