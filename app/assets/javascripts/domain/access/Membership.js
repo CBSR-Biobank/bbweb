@@ -221,7 +221,7 @@ define(function (require) {
      *
      * @return {Promise<boolean>} A promise with boolean TRUE if successful.
      */
-    Membership.prototype.remove = function (id) {
+    Membership.prototype.remove = function () {
       var url;
       if (_.isNil(this.id)) {
         throw new DomainError('membership has not been persisted');

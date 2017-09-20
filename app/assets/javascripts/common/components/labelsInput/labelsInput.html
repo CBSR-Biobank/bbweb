@@ -1,48 +1,55 @@
-<!-- INPUT -->
-<div class="form-group">
-  <label for="users" class="col-md-2 form-control-label" translate>{{vm.addLabel}}</label>
-  <div class="col-md-10">
-    <input type="text"
-           class="form-control"
-           ng-model="vm.value"
-           ng-model-options="{ debounce: 250 }"
-           placeholder="{{vm.placeholder}}"
-           uib-typeahead="value.obj as value.label for value in vm.getValues()($viewValue)"
-           typeahead-loading="loadingValue"
-           typeahead-on-select="vm.valueSelected($item)"
-           typeahead-no-results="noValueResults"/>
-    <i ng-show="loadingValue" class="glyphicon glyphicon-refresh"></i>
-    <div ng-show="noValueResults">
-      <i class="glyphicon glyphicon-remove"></i>{{vm.noResultsFound}}
+<ng-form name="labelsForm">
+  <div class="form-group"
+       ng-class="{ 'has-error' : labelsForm.labelsInput.$invalid && !labelsForm.labelsInput.$pristine }">
+
+    <!-- INPUT -->
+    <label for="users" class="col-md-2 form-control-label" translate>{{vm.label}}</label>
+    <div class="col-md-10">
+      <input type="text"
+             name="labelsInput"
+             class="form-control"
+             ng-model="vm.value"
+             ng-model-options="{ debounce: 250 }"
+             placeholder="{{vm.placeholder}}"
+             uib-typeahead="value.obj as value.label for value in vm.getValues()($viewValue)"
+             typeahead-loading="loadingValue"
+             typeahead-on-select="vm.valueSelected($item)"
+             typeahead-no-results="noValueResults"/>
+      <i ng-show="loadingValue" class="glyphicon glyphicon-refresh"></i>
+      <div ng-show="noValueResults">
+        <i class="glyphicon glyphicon-remove"></i>{{vm.noResultsFound}}
+      </div>
+    </div>
+
+    <!-- WHEN TAGS PRESENT -->
+    <div class="col-md-offset-2 col-md-10" ng-if="vm.tags.length > 0">
+      <div class="labels-list">
+        <h4 style="margin: 0px 0px 0px 0px;">
+          <a class="label"
+             ng-class="vm.labelClass"
+             ng-repeat="tag in vm.tags"
+             ng-click="vm.removeTag(tag)"
+             style="margin-right: 2px; margin-bottom: 2px; display: inline-block;"
+             uib-tooltip="{{'Remove'|translate}}">
+            {{tag.label}} <i class="glyphicon glyphicon-remove-sign"></i>
+          </a>
+        </h4>
+      </div>
+    </div>
+
+    <!-- WHEN NO TAGS PRESENT -->
+    <div class="col-md-offset-2 col-md-10" ng-if="vm.tags.length <= 0">
+      <input type="text"
+             class="form-control"
+             ng-disabled="true"
+             placeholder="{{vm.labelsPlaceholder}}">
+    </div>
+
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="labelsForm.labelsInput.$error"
+         ng-if="labelsForm.labelsInput.$dirty"
+         role="alert">
+      <div ng-message="labelsEntered" class="help-block">{{vm.noLabelsErrorMessage}}</div>
     </div>
   </div>
-</div>
-
-<!-- WHEN TAGS PRESENT -->
-<div class="form-group" ng-if="vm.tags.length > 0">
-  <label for="users" class="col-md-2 form-control-label" translate>{{vm.tagsLabel}}</label>
-  <div class="col-md-10">
-    <div class="labels-list">
-      <h4 style="margin: 0px 0px 0px 0px;">
-        <a class="label label-primary"
-           ng-repeat="tag in vm.tags"
-           ng-click="vm.removeTag(tag)"
-           style="margin-right: 2px; margin-bottom: 2px; display: inline-block;"
-           uib-tooltip="{{'Remove'|translate}}">
-          {{tag.label}} <i class="glyphicon glyphicon-remove-sign"></i>
-        </a>
-      </h4>
-    </div>
-  </div>
-</div>
-
-<!-- WHEN NO TAGS PRESENT -->
-<div class="form-group" ng-if="vm.tags.length <= 0">
-  <label for="users" class="col-md-2 form-control-label" translate>{{vm.tagsLabel}}</label>
-  <div class="col-md-10">
-    <input type="text"
-           class="form-control"
-           ng-disabled="true"
-           placeholder="{{vm.tagsPlaceholder}}">
-  </div>
-</p>
+</ng-form>

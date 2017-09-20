@@ -191,14 +191,15 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
                                          studyIds     = cmd.studyIds.map(id => StudyId(id)).toSet,
                                          centreIds    = cmd.centreIds.map(id => CentreId(id)).toSet)
     } yield AccessEvent(cmd.sessionUserId).update(
-      _.time                        := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-      _.membership.id               := membershipId.id,
-      _.membership.added.name       := cmd.name,
-      _.membership.added.userIds    := cmd.userIds,
-      _.membership.added.allStudies := cmd.allStudies,
-      _.membership.added.studyIds   := cmd.studyIds,
-      _.membership.added.allCentres := cmd.allCentres,
-      _.membership.added.centreIds  := cmd.centreIds);
+      _.time                                 := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+      _.membership.id                        := membershipId.id,
+      _.membership.added.name                := cmd.name,
+      _.membership.added.optionalDescription := cmd.description,
+      _.membership.added.userIds             := cmd.userIds,
+      _.membership.added.allStudies          := cmd.allStudies,
+      _.membership.added.studyIds            := cmd.studyIds,
+      _.membership.added.allCentres          := cmd.allCentres,
+      _.membership.added.centreIds           := cmd.centreIds);
 
   }
 

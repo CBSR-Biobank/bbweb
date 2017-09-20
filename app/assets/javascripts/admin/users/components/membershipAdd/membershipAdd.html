@@ -42,21 +42,21 @@
   </div>
 
   <!-- USERS -->
-  <labels-input add-label="{{'Add a user'|translate}}"
-                tags-label="{{'Users'|translate}}"
+  <labels-input label="{{'Add a user'|translate}}"
                 placeholder="{{'enter a user\'s name or partial name'|translate}}"
-                tags-placeholder="{{'No users added yet'|translate}}"
+                labels-placeholder="{{'No users added yet'|translate}}"
                 no-results-found="{{'No matching users found'|translate}}"
                 get-values="vm.getUserNames"
                 on-value-selected="vm.userSelected"
-                on-remove-tag="vm.removeUser">
+                on-remove-tag="vm.removeUser"
+                no-labels-error-message="{{'At least one user is required'|translate}}"
+                required="true">
   </labels-input>
 
   <!-- STUDIES -->
-  <labels-input add-label="{{'Add a study'|translate}}"
-                tags-label="{{'Studies'|translate}}"
+  <labels-input label="{{'Add a study'|translate}}"
                 placeholder="{{'enter a study\'s name or partial name'|translate}}"
-                tags-placeholder="{{'No studies added yet'|translate}}"
+                labels-placeholder="{{'No studies added yet (optional)'|translate}}"
                 no-results-found="{{'No matching studies found'|translate}}"
                 get-values="vm.getStudyNames"
                 on-value-selected="vm.studySelected"
@@ -64,15 +64,23 @@
   </labels-input>
 
   <!-- CENTRES -->
-  <labels-input add-label="{{'Add a centre'|translate}}"
-                tags-label="{{'Centres'|translate}}"
+  <labels-input label="{{'Add a centre'|translate}}"
                 placeholder="{{'enter a centre\'s name or partial name'|translate}}"
-                tags-placeholder="{{'No centres added yet'|translate}}"
+                labels-placeholder="{{'No centres added yet (optional)'|translate}}"
                 no-results-found="{{'No matching centres found'|translate}}"
                 get-values="vm.getCentreNames"
                 on-value-selected="vm.centreSelected"
                 on-remove-tag="vm.removeCentre">
   </labels-input>
+
+  <div class="col-md-offset-2 col-md-10 has-error"
+       ng-messages="membershipForm.$error"
+       ng-if="membershipForm.$dirty"
+       role="alert">
+    <div ng-message="studyOrCentreRequired" class="help-block" translate>
+      At least one study or centre is required.
+    </div>
+  </div>
 
   <!-- BUTTONS  -->
   <div class="form-group">

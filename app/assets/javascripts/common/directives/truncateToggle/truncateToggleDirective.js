@@ -17,7 +17,8 @@ define(function () {
         toggleLength:     '=',
         textEmptyWarning: '@',
         allowEdit:        '=',
-        onEdit:           '&'
+        onEdit:           '&',
+        tooltip:          '@'
       },
       templateUrl : '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
       controller: TruncateToggleCtrl,

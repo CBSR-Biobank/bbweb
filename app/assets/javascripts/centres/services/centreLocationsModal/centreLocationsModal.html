@@ -1,9 +1,11 @@
 <div class="modal-header">
   <button type="button"
           class="close"
-          data-dismiss="modal"
-          aria-hidden="true"
-          ng-click="vm.closePressed()">&times;</button>
+          data-dismiss="alert"
+          aria-label="Close"
+          ng-click="vm.closePressed()">
+    <span aria-hidden="true">&times;</span>
+  </button>
   <h3 class="modal-title">{{vm.heading}}</h3>
 </div>
 <div class="modal-body">

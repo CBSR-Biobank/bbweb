@@ -54,10 +54,12 @@
       <select class="form-control"
               name="valueType"
               ng-model="vm.annotationType.valueType"
-              ng-options="valueType.id as valueType.label for valueType in vm.valueTypes"
               ng-change="vm.valueTypeChange()"
               required>
         <option value="" translate>-- make a selection --</option>
+        <option ng-repeat="valueType in vm.valueTypes" value="{{valueType.id}}">
+          {{valueType.labelFunc()}}
+        </option>
       </select>
     </div>
     <div class="col-md-offset-2 col-md-10"
@@ -78,14 +80,18 @@
              ng-model="vm.annotationType.maxValueCount"
              value="1"
              ng-required="vm.maxValueCountRequired()"
-             str2integer  translate> Single selection only
+             str2integer
+             translate/>
+      Single selection only
     </div>
     <div class="col-md-5">
       <input type="radio"
              ng-model="vm.annotationType.maxValueCount"
              value="2"
              ng-required="vm.maxValueCountRequired()"
-             str2integer  translate> Multiple selections allowed
+             str2integer
+             translate/>
+      Multiple selections allowed
     </div>
     <div class="col-md-offset-2 col-md-10"
          ng-messages="annotationTypeForm.maxValueCount.$error"

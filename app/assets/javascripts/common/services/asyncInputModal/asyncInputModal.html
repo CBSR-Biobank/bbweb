@@ -1,0 +1,45 @@
+<div class="modal-header">
+  <button type="button"
+          class="close"
+          data-dismiss="alert"
+          aria-label="Close"
+          ng-click="vm.closePressed()">
+    <span aria-hidden="true">&times;</span>
+  </button>
+  <h3 class="modal-title">{{vm.heading}}</h3>
+</div>
+<div class="modal-body">
+  <form class="form-horiontal" name="form" novalidate>
+    <div class="form-group row"
+         ng-class="{ 'has-error' : labelsForm.labelsInput.$invalid && !labelsForm.labelsInput.$pristine }">
+
+      <label for="users" class="col-md-2 form-control-label" translate>{{vm.label}}</label>
+      <div class="col-md-10">
+        <input type="text"
+               name="value"
+               class="form-control"
+               ng-model="vm.value"
+               ng-model-options="{ debounce: 250 }"
+               placeholder="{{vm.placeholder}}"
+               uib-typeahead="value.obj as value.label for value in vm.getValues($viewValue)"
+               typeahead-loading="loadingValue"
+               typeahead-on-select="vm.valueSelected($item)"
+               typeahead-no-results="noValueResults"/>
+        <i ng-show="loadingValue" class="glyphicon glyphicon-refresh"></i>
+        <div ng-show="noValueResults">
+          <i class="glyphicon glyphicon-remove"></i>{{vm.noResultsMessage}}
+        </div>
+      </div>
+
+    </div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button class="btn" ng-click="vm.closePressed()" translate>Cancel</button>
+  <button class="btn btn-primary"
+          ng-click="vm.okPressed()"
+          ng-disabled="form.$invalid"
+          translate>
+    OK
+  </button>
+</div>

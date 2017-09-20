@@ -14,19 +14,19 @@ define(function (require) {
    * The functions this service provides.
    */
   var modalTypes = [
-        'boolean',
-        'dateTime',
-        'email',
-        'number',
-        'naturalNumber',
-        'password',
-        'positiveFloat',
-        'select',
-        'selectMultiple',
-        'text',
-        'textArea',
-        'url'
-      ];
+    'boolean',
+    'dateTime',
+    'email',
+    'number',
+    'naturalNumber',
+    'password',
+    'positiveFloat',
+    'select',
+    'selectMultiple',
+    'text',
+    'textArea',
+    'url'
+  ];
 
   /**
    * Creates a module with one service and multiple directives to allow the user to modify an entity value
@@ -81,7 +81,7 @@ define(function (require) {
    * @param {object} [options.selectOptions] Used for "select" and "selectMultiple", these are the options to
    * be displayed.
    *
-   * @return $uibModal returns the modal object used by ui-bootstrap.
+   * @return {uibModalInstance} The instance of the modal that was opened. This is a ui-bootstrap class.
    */
   function modalInputService($uibModal) {
     var service = {};
@@ -97,7 +97,7 @@ define(function (require) {
 
     //-------
 
-    /**
+    /*
      * Displays a modal asking user to enter a value. The type of value depends on the "type" parameter.
      */
     function modalInput(type, title, label, defaultValue, options) {

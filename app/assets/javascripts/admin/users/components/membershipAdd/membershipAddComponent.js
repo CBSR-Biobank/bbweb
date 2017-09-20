@@ -15,6 +15,7 @@ define(function (require) {
   };
 
   MembershipAddController.$inject = [
+    '$scope',
     '$state',
     'notificationsService',
     'domainNotificationService',
@@ -30,7 +31,8 @@ define(function (require) {
   /*
    *
    */
-  function MembershipAddController($state,
+  function MembershipAddController($scope,
+                                   $state,
                                    notificationsService,
                                    domainNotificationService,
                                    Membership,
@@ -71,17 +73,25 @@ define(function (require) {
       vm.getCentreNames = getCentreNames;
       vm.centreSelected = centreSelected;
       vm.removeCentre   = removeCentre;
+
+      // taken from here:
+      // https://stackoverflow.com/questions/22436501/simple-angularjs-form-is-undefined-in-scope
+      $scope.$watch('membershipForm', function () {
+        $scope.membershipForm.$setValidity('studyOrCentreRequired', false);
+      });
     }
 
     function getUserNames(viewValue) {
-      return UserName.list({ filter: 'name:like:' + viewValue}).then(function (names) {
-        // remove names already added from the reply
-        return _.differenceWith(names, vm.membership.userData,function (userName, entityInfo) {
-          return userName.name === entityInfo.name;
-        }).map(function (name) {
-          return { label: name.name, obj: new EntityInfo({ id: name.id, name: name.name }) };
-        });
+      var omitUserNames = vm.membership.userData.map(function (entityInfo) {
+        return UserName.create(_.pick(entityInfo, ['id', 'name']));
       });
+      return UserName.list({ filter: 'name:like:' + viewValue}, omitUserNames)
+        .then(function (nameObjs) {
+          var labelData = nameObjs.map(function (nameObj) {
+            return { label: nameObj.name, obj: nameObj};
+          });
+          return labelData;
+        });
     }
 
     function userSelected(selection) {
@@ -95,45 +105,60 @@ define(function (require) {
     }
 
     function getStudyNames(viewValue) {
-      return StudyName.list({ filter: 'name:like:' + viewValue}).then(function (names) {
-        // remove names already added from the reply
-        return _.differenceWith(names, vm.membership.studyData.entityData,function (studyName, entityInfo) {
-          return studyName.name === entityInfo.name;
-        }).map(function (name) {
-          return { label: name.name, obj: new EntityInfo({ id: name.id, name: name.name }) };
-        });
+      var omitStudyNames = vm.membership.studyData.entityData.map(function (entityInfo) {
+        return StudyName.create(_.pick(entityInfo, ['id', 'name']));
       });
+      return StudyName.list({ filter: 'name:like:' + viewValue}, omitStudyNames)
+        .then(function (names) {
+          return names.map(function (name) {
+            return { label: name.name, obj: new EntityInfo({ id: name.id, name: name.name }) };
+          });
+        });
     }
 
     function studySelected(selection) {
       vm.membership.studyData.entityData.push(selection);
+      $scope.membershipForm.$setValidity('studyOrCentreRequired', true);
     }
 
     function removeStudy(studyTag) {
       _.remove(vm.membership.studyData.entityData, function (studyData) {
         return studyData.name === studyTag.name;
       });
+      setValidity();
     }
 
     function getCentreNames(viewValue) {
-      return CentreName.list({ filter: 'name:like:' + viewValue}).then(function (names) {
-        // remove names already added from the reply
-        return _.differenceWith(names, vm.membership.centreData.entityData,function (centreName, entityInfo) {
-          return centreName.name === entityInfo.name;
-        }).map(function (name) {
-          return { label: name.name, obj: new EntityInfo({ id: name.id, name: name.name }) };
-        });
+      var omitCentreNames = vm.membership.centreData.entityData.map(function (entityInfo) {
+        return StudyName.create(_.pick(entityInfo, ['id', 'name']));
       });
+      return CentreName.list({ filter: 'name:like:' + viewValue}, omitCentreNames)
+        .then(function (names) {
+          return names.map(function (name) {
+            return { label: name.name, obj: new EntityInfo({ id: name.id, name: name.name }) };
+          });
+        });
     }
 
     function centreSelected(selection) {
       vm.membership.centreData.entityData.push(selection);
+      $scope.membershipForm.$setValidity('studyOrCentreRequired', true);
     }
 
     function removeCentre(centreTag) {
       _.remove(vm.membership.centreData.entityData, function (centreData) {
         return centreData.name === centreTag.name;
       });
+      setValidity();
+    }
+
+    function setValidity() {
+      if (vm.membership.studyData.allEntities || vm.membership.centreData.allEntities) { return; }
+
+      if ((vm.membership.studyData.entityData.length <= 0) &&
+          (vm.membership.centreData.entityData.length <= 0)) {
+        $scope.membershipForm.$setValidity('studyOrCentreRequired', false);
+      }
     }
 
     function submit() {

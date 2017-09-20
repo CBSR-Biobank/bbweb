@@ -31,7 +31,7 @@ define(function(require) {
      * Please do not use this constructor. It is meant for internal use.
      *
      * @class
-     * @memberOf domain.studies
+     * @memberOf domain
      * @extends domain.DomainEntity
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
@@ -120,10 +120,13 @@ define(function(require) {
      *        <code>state</code>. Values other than these two yield an error. Use a minus sign prefix to sort
      *        in descending order.
      *
+     * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+     *        from the server.
+     *
      * @returns {Promise<Array<objects>} A promise containing an array of objcts. The objects are created by
      * calling {@link createFunc}.
      */
-    EntityName.list = function (url, options, createFunc) {
+    EntityName.list = function (url, options, createFunc, omit) {
       var params,
           validKeys = [
             'filter',
@@ -143,9 +146,11 @@ define(function(require) {
         var deferred = $q.defer();
 
         try {
-          deferred.resolve(items.map(function(obj){
-            return createFunc(obj);
-          }));
+          var names = items.map(function (obj) { return createFunc(obj); }),
+              difference = _.differenceWith(names, omit, function (name, omitName) {
+                return name.id === omitName.id;
+              });
+          deferred.resolve(difference);
         } catch (e) {
           deferred.reject('invalid study names from server');
         }

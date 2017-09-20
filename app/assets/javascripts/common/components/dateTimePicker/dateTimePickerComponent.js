@@ -38,7 +38,7 @@ define(function () {
       vm.onChange             = onChange;
     }
 
-    function openCalendar(e) {
+    function openCalendar() {
       vm.open = true;
     }
 

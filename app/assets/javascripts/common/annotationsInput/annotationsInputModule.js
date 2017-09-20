@@ -84,8 +84,7 @@ define(function (require) {
     return directive;
   }
 
-  function AnnotationsInputCtrl(AppConfig) {
-
+  function AnnotationsInputCtrl() {
   }
 
   return {

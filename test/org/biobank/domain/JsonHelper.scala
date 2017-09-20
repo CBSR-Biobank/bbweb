@@ -360,18 +360,18 @@ trait JsonHelper extends MustMatchers with OptionValues {
       membership.userIds must contain (UserId(jsUserId))
     }
 
-    (json \ "studyData" \ "all").as[Boolean] must be (membership.studyData.allEntities)
+    (json \ "studyData" \ "allEntities").as[Boolean] must be (membership.studyData.allEntities)
 
-    val jsonStudyData = (json \ "studyData" \ "entityInfo").as[List[JsObject]]
+    val jsonStudyData = (json \ "studyData" \ "entityData").as[List[JsObject]]
     jsonStudyData must have length (membership.studyData.ids.size.toLong)
     jsonStudyData.foreach { jsStudyInfo =>
       val jsId = (jsStudyInfo \ "id").as[String]
       membership.studyData.ids must contain (StudyId(jsId))
     }
 
-    (json \ "centreData" \ "all").as[Boolean] must be (membership.centreData.allEntities)
+    (json \ "centreData" \ "allEntities").as[Boolean] must be (membership.centreData.allEntities)
 
-    val jsonCentreData = (json \ "centreData" \ "entityInfo").as[List[JsObject]]
+    val jsonCentreData = (json \ "centreData" \ "entityData").as[List[JsObject]]
     jsonCentreData must have length (membership.centreData.ids.size.toLong)
     jsonCentreData.foreach { jsCentreInfo =>
       val jsId = (jsCentreInfo \ "id").as[String]

@@ -25,6 +25,7 @@ define(function (require) {
     .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
     .component('debouncedTextInput',      require('./components/debouncedTextInput/debouncedTextInputComponent'))
     .component('labelsInput',             require('./components/labelsInput/labelsInputComponent'))
+    .component('labelsList',              require('./components/labelsList/labelsListComponent'))
     .component('nameFilter',              require('./components/nameFilter/nameFilterComponent'))
     .component('nameAndStateFilters',     require('./components/nameAndStateFilters/nameAndStateFiltersComponent'))
     .component('nameEmailStateFilters',   require('./components/nameEmailStateFilters/nameEmailStateFiltersComponent'))
@@ -49,6 +50,7 @@ define(function (require) {
     .filter('truncate',                   require('./filters/truncateFilter'))
     .filter('yesNo',                      require('./filters/yesNoFilter'))
 
+    .service('asyncInputModal',           require('./services/asyncInputModal/asyncInputModalService'))
     .service('breadcrumbService',         require('./services/breadcrumbService'))
     .service('Panel',                     require('./services/Panel'))
     .service('annotationUpdate',          require('./services/annotationUpdateService'))

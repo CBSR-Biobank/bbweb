@@ -493,7 +493,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                                         shippingAdmin.id,
                                         shippingUser.id),
                      studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
-                     centreData   = MembershipEntitySet(true, Set.empty[CentreId]))
+                     centreData   = MembershipEntitySet(false, Set.empty[CentreId]))
         )
 
       memberships.foreach(membershipRepository.put)

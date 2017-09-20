@@ -56,7 +56,7 @@ package dto {
       Json.writes[MembershipEntityInfoDto]
   }
 
-  final case class MembershipEntitySetDto(all: Boolean, entityInfo: Set[MembershipEntityInfoDto])
+  final case class MembershipEntitySetDto(allEntities: Boolean, entityData: Set[MembershipEntityInfoDto])
 
   object MembershipEntitySetDto {
 

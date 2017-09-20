@@ -31,7 +31,7 @@ define(function() {
      *
      * @class
      * @memberOf domain.users
-     * @extends domain.DomainEntity
+     * @extends domain.EntityName
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
@@ -88,11 +88,14 @@ define(function() {
      * @param {int} [options.limit=10] The total number of users to return per page. The maximum page size
      *        is 10. If a value larger than 10 is used then the response is an error.
      *
+     * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+     *        from the server.
+     *
      * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
      *          domain.users.User}.
      */
-    UserName.list = function (options) {
-      return EntityName.list(UserName.REST_API_URL, options, UserName.create);
+    UserName.list = function (options, omit) {
+      return EntityName.list(UserName.REST_API_URL, options, UserName.create, omit);
     };
 
     /**
