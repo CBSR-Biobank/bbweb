@@ -1,17 +1,9 @@
 @()
 <!DOCTYPE html>
-<html>
+<html ng-app="biobankApp">
   <head>
     <title data-ng-bind="pageTitle"></title>
-    <link rel="shortcut icon" type="image/png" href="@routes.Assets.versioned("images/favicon.png")" />
-    @*-- CSS files go in this section -- *@
-    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/bootstrap/dist/css/bootstrap.css")" />
-    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("lib/angular-toastr/dist/angular-toastr.css")" />
-    <link rel="stylesheet" media="screen" href="@routes.Assets.versioned("stylesheets/main.css")" />
-    @*-- Javascript files go in this section -- *@
-    <script data-main="@routes.Assets.versioned("javascripts/main.js")"
-            type="text/javascript"
-            src="@routes.Assets.versioned("lib/requirejs/require.js")"></script>
+    <link rel="stylesheet" media="screen" href="assets/css/styles.css" />
   </head>
   <body>
     <biobank-header></biobank-header>
@@ -19,5 +11,7 @@
         <div ui-view="main"></div>
     </div>
     <biobank-footer></biobank-footer>
+    <script type="text/javascript" src="assets/js/common.bundle.js"></script>
+    <script type="text/javascript" src="assets/js/index.bundle.js"></script>
   </body>
 </html>

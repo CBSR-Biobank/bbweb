@@ -2,49 +2,46 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  var component = {
-    templateUrl : '/assets/javascripts/home/components/home/home.html',
-    controller: HomeController,
-    controllerAs: 'vm',
-    bindings: {
-    }
-  };
+class HomeController {
 
-  HomeController.$inject = ['$rootScope', '$timeout', 'usersService', 'User', 'breadcrumbService'];
-
-  /*
-   * Controller for this component.
-   */
-  function HomeController($rootScope, $timeout, usersService, User, breadcrumbService) {
-    var vm = this;
-    vm.$onInit = onInit;
-
-    //--
-
-    function onInit() {
-      vm.breadcrumbs = [ breadcrumbService.forState('home') ];
-
-      vm.userIsAuthenticated = false;
-      $rootScope.pageTitle = 'Biobank';
-
-      usersService.requestCurrentUser()
-        .then(function (user) {
-          vm.user = user;
-          vm.userIsAuthenticated = true;
-          vm.allowCollection = vm.user.hasRole('SpecimenCollector');
-          vm.shippingAllowed = vm.user.hasRole('ShippingUser');
-          vm.adminAllowed = vm.user.hasAnyRoleOf('StudyAdministrator',
-                                                 'CentreAdministrator',
-                                                 'UserAdministrator');
-        })
-        .catch(function () {
-          vm.user = null;
-        });
-    }
+  constructor($rootScope, usersService, breadcrumbService) {
+    this.$rootScope = $rootScope;
+    this.usersService = usersService;
+    this.breadcrumbService = breadcrumbService;
   }
 
-  return component;
-});
+  $onInit() {
+    this.breadcrumbs = [ this.breadcrumbService.forState('home') ];
+
+    this.userIsAuthenticated = false;
+    this.$rootScope.pageTitle = 'Biobank';
+
+    this.usersService.requestCurrentUser()
+      .then((user) => {
+        this.user = user;
+        this.userIsAuthenticated = true;
+        this.allowCollection = this.user.hasRole('SpecimenCollector');
+        this.shippingAllowed = this.user.hasRole('ShippingUser');
+        this.adminAllowed = this.user.hasAnyRoleOf('StudyAdministrator',
+                                                   'CentreAdministrator',
+                                                   'UserAdministrator');
+      })
+      .catch(() => {
+        this.user = null;
+      });
+  }
+
+}
+
+HomeController.$inject = [ '$rootScope', 'usersService', 'breadcrumbService' ];
+
+const component = {
+  template: require('./home.html'),
+  controller: HomeController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default component;

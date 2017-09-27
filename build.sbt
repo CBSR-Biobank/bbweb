@@ -106,32 +106,6 @@ libraryDependencies ++= Seq(
     "com.typesafe.play"           %% "play-mailer"                         % "6.0.1",
     "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.1",
     "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.7.2",
-    "com.github.nscala-time"      %% "nscala-time"                         % "2.16.0",
-    // WebJars infrastructure
-    ( "org.webjars"               %% "webjars-play"                        % "2.6.1")
-      .exclude("org.webjars", "requirejs"),
-    // WebJars dependencies
-    "org.webjars"                 %  "requirejs"                           % "2.3.3",
-    "org.webjars.npm"             %  "angular"                             % angularVer,
-    "org.webjars.npm"             %  "angular-animate"                     % angularVer,
-    "org.webjars.npm"             %  "angular-cookies"                     % angularVer,
-    ( "org.webjars.bower"         %  "angular-gettext"                     % "2.2.1" )
-      .exclude("org.webjars.bower", "angular"),
-    "org.webjars.npm"             %  "angular-messages"                    % angularVer,
-    "org.webjars.npm"             %  "angular-sanitize"                    % angularVer,
-    "org.webjars.npm"             %  "angular-smart-table"                 % "2.1.6",
-    "org.webjars.npm"             %  "angular-toastr"                      % "1.7.0",
-    "org.webjars.npm"             %  "angular-ui-bootstrap"                % "2.5.0",
-    ( "org.webjars.npm"           % "angular-ui-router"                    % "1.0.3" )
-      .exclude("org.webjars.npm", "angular"),
-    "org.webjars.npm"             %  "bootstrap"                           % "3.3.7",
-    ( "org.webjars.bower"         %  "bootstrap-ui-datetime-picker"        % "2.6.0" )
-      .exclude("org.webjars.bower", "angular"),
-    "org.webjars.npm"             %  "jquery"                              % "3.2.1",
-    "org.webjars.npm"             %  "lodash"                              % "4.17.4",
-    "org.webjars.npm"             %  "moment"                              % "2.18.1",
-    "org.webjars.npm"             %  "sprintf-js"                          % "1.0.3",
-    "org.webjars.npm"             %  "tv4"                                 % "1.3.0",
     // Testing
     ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.5.1.1"  % "test" )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
@@ -146,25 +120,12 @@ incOptions := incOptions.value.withNameHashing(true)
 
 routesGenerator := InjectedRoutesGenerator
 
-JsEngineKeys.engineType := JsEngineKeys.EngineType.Node
-
-
-// Configure the steps of the asset pipeline (used in stage and dist tasks)
-// rjs = RequireJS, uglifies, shrinks to one file, replaces WebJars with CDN
-// digest = Adds hash to filename
-// gzip = Zips all assets, Asset controller serves them automatically when client accepts them
-pipelineStages := Seq(rjs, digest, gzip)
-
 // To completely override the optimization process, use this config option:
 //requireNativePath := Some("node r.js -o name=main out=javascript-min/main.min.js")
 
 PB.targets in Compile := Seq(
     scalapb.gen() -> (sourceManaged in Compile).value
   )
-
-// setting for play-auto-refresh plugin so that it does not open a new browser window when
-// the application is run
-com.jamesward.play.BrowserNotifierKeys.shouldOpenBrowser := false
 
 coverageExcludedPackages := "<empty>;router.*;views.html.*;Reverse.*;org.biobank.infrastructure.event.*;org.biobank.TestData"
 

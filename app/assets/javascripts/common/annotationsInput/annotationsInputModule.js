@@ -1,94 +1,88 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+import angular from 'angular';
+import _       from 'lodash';
 
-  var angular = require('angular'),
-      _       = require('lodash'),
-      name    = 'biobank.annotationsInput',
-      module;
+const MODULE_NAME = 'biobank.annotationsInput';
 
-  var annotations = [
-    'text',
-    'number',
-    'dateTime',
-    'singleSelect',
-    'multipleSelect'
-  ];
+const annotations = [
+  'text',
+  'number',
+  'dateTime',
+  'singleSelect',
+  'multipleSelect'
+];
 
-  /**
-   * Creates a module with one main directives and child directives.
-   */
-  module = angular.module(name, []);
-  module.directive('annotationsInput', annotationsInputDirective);
-  init();
+/**
+ * Creates a module with one main directives and child directives.
+ */
+const module = angular.module(MODULE_NAME, []);
 
-  /**
-   * Creates the child directives.
-   */
-  function init() {
-    _.each(annotations, function (annotation) {
-      var name = annotation + 'Annotation',
-          directive = directiveGenerator(name);
-      module.directive(name, directive);
-    });
-  }
+module.directive('annotationsInput', annotationsInputDirective);
+init();
 
-  function directiveGenerator(name) {
-    return function () {
-      var directive = {
-        restrict: 'E',
-        templateUrl : '/assets/javascripts/common/annotationsInput/' + name + '.html'
-      };
+/**
+ * Creates the child directives.
+ */
+function init() {
+  _.each(annotations, function (annotation) {
+    var name = annotation + 'Annotation',
+        directive = directiveGenerator(name);
+    module.directive(name, directive);
+  });
+}
 
-      if (name === 'dateTimeAnnotation') {
-        _.extend(directive,
-                 {
-                   bindToController: { annotation: '=' },
-                   controller: DateTimeController,
-                   controllerAs: 'vm'
-                 });
-      }
-
-      return directive;
-    };
-
-    function DateTimeController() {
-      var vm = this;
-
-      vm.dateTimeOnEdit = dateTimeOnEdit;
-
-      function dateTimeOnEdit(datetime) {
-        vm.annotation.value = datetime;
-      }
-    }
-  }
-
-  /**
-   * Annotations must contain an attribute named 'annotationType' with the annotation type's information.
-   */
-  function annotationsInputDirective() {
+function directiveGenerator(name) {
+  return function () {
     var directive = {
       restrict: 'E',
-      scope: {},
-      bindToController: {
-        annotations: '='
-      },
-      templateUrl : '/assets/javascripts/common/annotationsInput/annotationsInput.html',
-      controller: AnnotationsInputCtrl,
-      controllerAs: 'vm'
+      templateUrl : '/assets/javascripts/common/annotationsInput/' + name + '.html'
     };
 
+    if (name === 'dateTimeAnnotation') {
+      _.extend(directive,
+               {
+                 bindToController: { annotation: '=' },
+                 controller: DateTimeController,
+                 controllerAs: 'vm'
+               });
+    }
+
     return directive;
-  }
-
-  function AnnotationsInputCtrl() {
-  }
-
-  return {
-    name: name,
-    module: module
   };
-});
+
+  function DateTimeController() {
+    var vm = this;
+
+    vm.dateTimeOnEdit = dateTimeOnEdit;
+
+    function dateTimeOnEdit(datetime) {
+      vm.annotation.value = datetime;
+    }
+  }
+}
+
+/**
+ * Annotations must contain an attribute named 'annotationType' with the annotation type's information.
+ */
+function annotationsInputDirective() {
+  var directive = {
+    restrict: 'E',
+    scope: {},
+    bindToController: {
+      annotations: '='
+    },
+    templateUrl : '/assets/javascripts/common/annotationsInput/annotationsInput.html',
+    controller: AnnotationsInputCtrl,
+    controllerAs: 'vm'
+  };
+
+  return directive;
+}
+
+function AnnotationsInputCtrl() {
+}
+
+export default MODULE_NAME;

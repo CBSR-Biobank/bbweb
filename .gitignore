@@ -45,3 +45,12 @@ documentation/js/
 /po
 logback-test.xml
 /.metadata/
+*.woff2
+*.woff
+*.svg
+*.ttf
+*.eot
+/public/css
+/public/js/*bundle.js
+/public/*hot-update.js
+/public/*hot-update.json

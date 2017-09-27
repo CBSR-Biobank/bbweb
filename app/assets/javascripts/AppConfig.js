@@ -1,30 +1,25 @@
 /**
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  // AppConfigProvider.$inject = [];
-
-  function AppConfigProvider() {
+export default class AppConfigProvider {
 
     // initial / default config
-    var config = {
+  constructor() {
+    this.config = {
       dateFormat:       'YYYY-MM-DD',
       dateTimeFormat:   'YYYY-MM-DD HH:mm',
       datepickerFormat: 'yyyy-MM-dd HH:mm'
     };
-
-    return {
-      set: function (settings) {
-        config = settings;
-      },
-      $get: function () {
-        return config;
-      }
-    };
   }
 
-  return AppConfigProvider;
-});
+  set(settings) {
+    this.config = settings;
+  }
+
+  $get() {
+    return this.config;
+  }
+
+}

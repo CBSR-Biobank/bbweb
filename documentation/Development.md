@@ -27,14 +27,6 @@ the `proto` files.
 
 * [Bootstrap 3.0.0 themes](http://bootswatch.com/)
 
-### MongoDB
-                                      | shell command
---------------------------------------|----------------------------------------------
-Drop the Evensourced Journal databse: | `mongo bbweb --eval "db.dropDatabase()"`
-Dump the Biobank database:            | `mongodump --db bbweb --out ~/tmp`
-Restore the Biobank database:         | `mongorestore ~/tmp/bbweb/bbweb.bson`
-Shutdown the mongo server             | `mongo admin --eval "db.shutdownServer({timeoutSecs: 10});"`
-
 ### AngularJS
 
 The code uses the style guide proposed by John Papa: [AngularJS Style Guide](https://github.com/johnpapa/angularjs-styleguide).
@@ -45,46 +37,156 @@ Install NodeJS using NVM following these instructions:
 
 * https://www.digitalocean.com/community/tutorials/how-to-install-node-js-on-an-ubuntu-14-04-server
 
-#### NPM
+## Development Environment
 
-Add dependencies to `package.json` in the root directory. Use command `web-assets:jseNpmNodeModules`
-to download the modules.
+### SBT
 
-OR: `web-assets:web-node-modules`
+Project [sbt-updated](https://github.com/rtimush/sbt-updates) is used to determine if any
+dependencies can be updated. Use command `dependencyUpdates` to display what can be updated.
 
-##### NPM packages
+#### Squash Commits
 
-Install the following packages globally (npm install -g <pacakge_name>):
+Using your own forked GitHub repository for the BBweb project. In this example the forked remote is
+named `nelson`, and the topic branch is named `nelson-dev`.
 
-* eslint
-* eslint-plugin-requirejs
-* eslint-plugin-jasmine
-* grunt-cli
-* karma-cli
-* npm-check-updates
-
-##### Client Tests
-
-Using Karma and Jasmine for client unit tests. Also using Grunt to run the tests.
-
-To run JavaScript code coverage use command:
-
-```sh
-grunt karma:coverage
+```bash
+git rebase -i HEAD~6
+git push nelson +nelson-dev
 ```
 
-###### Run tests in Chrome
+### NPM
+
+Add dependencies to `package.json` in the root directory. Use command `npm install` to download the modules.
+
+#### Global NPM packages
+
+Install the following packages globally (`npm install -g <pacakge_name>`):
+
+* `eslint`
+* `eslint-plugin-jasmine`
+* `npm-check-updates`
+
+### GitHub Markdown
+
+*  [Grip]  (https://github.com/joeyespo/grip) - Preview GitHub Markdown files like Readme.md locally
+   before committing them
+
+## Application
+
+### Running
+
+* To start the server in development mode, use the following command:
+
+    ```sh
+    npm run dev-start-server
+    ```
+
+* To build the client application, use the following command:
+
+     ```sh
+     npm run dev-build
+     ```
+
+    This must be done before the server is started.
+
+* To modifying code in the client application, use the following command for hot module replacement:
+
+     ```sh
+     npm run dev-build
+     ```
+
+### Testing
+
+#### Server Tests
+
+Use the command `sbt test` to run the server tests.
+
+#### Client Tests
+
+Using [Karma](https://karma-runner.github.io/1.0/index.html) and [Jasmine](https://jasmine.github.io/) for
+client unit tests.
+
+* Use the following command to start tests on the command line:
+
+    ```sh
+    npm run test
+    ```
+
+* Use the following command to start tests in Chrome:
+
+    ```sh
+    npm run test-in-chrome
+    ```
+
+##### Code Coverage
+
+
+*THIS SECTION NEEDS UPDATING AFTER MOVING TO WEBPACK*
+
+##### Run tests in Chrome
 
 Use the following command to start tests in Chrome:
 
 ```sh
-node_modules/karma/bin/karma start --browsers ChromeExtra --reporters progress --auto-watch --no-single-run --log-level debug
+npm run test
 ```
 
 Press the `Debug` button, open a JavaScript file in DevTools to place a breakpoint, and reload the page.
 Execution stops at the breakpoint.
 
-## Docker ##
+### Debug
+
+To prevent users being logged out when the application is restarted, EHCACHE is configured to cache
+to disk. This must be disabled for the production server (see [conf/ehcache.xml]
+(../conf/ehcache.xml), tags: `defaultCache -> diskPersistent`).
+
+### Server Logging
+
+* To enable logging at the Domain or Service layers, edit the file [conf/logger.xml]
+  (../conf/logger.xml).
+
+* To enable TEST logging at the Domain or Service layers, edit the file [conf/logback-test.xml]
+  (../conf/logback-test.xml).
+
+* The Akka logging configuration for the web application is in [conf/application.conf]
+  (../conf/application.conf). It is in [conf/reference.conf] (../conf/reference.conf) for the testing
+  environment.
+
+## Scalatest
+
+### Run one or more tests within a Suite
+
+Use the `-z` flag to run a test with the specified substring:
+
+```sbt
+test-only *__CLASS_NAME__ -- -z "sub string"
+```
+
+## Scala code coverage
+
+**sbt-scoverage** is used to determine code coverage. See the
+[GitHub page](https://github.com/scoverage/sbt-scoverage)
+for instructions on how to use it.
+
+To generate the HTML report use the command:
+
+```sh
+sbt clean coverage test
+sbt coverageReport
+```
+
+Or, within the SBT cli:
+
+```sh
+; clean; coverage; test; coverageReport
+```
+
+# Translations
+
+Internationalization is done with [angular-gettext](https://angular-gettext.rocketeer.be/). To include the
+latest translations, the command `grunt nggettext_compile` must be run from the command line.
+
+## Docker
 
 In the `tools\docker` folder of the project is a **Docker** file. This file can be used to create a docker
 image to run the web application in. You also need:
@@ -125,125 +227,6 @@ command:
 ```bash
 sudo docker run -d -p 9000:9000 -v /opt/bbweb_docker/mongodb_data:/data/db bbweb /bin/bash -c "(/usr/bin/mongod &) && su bbweb -c '/home/bbweb/bbweb_start.sh'"
 ```
-
-## Development Environment
-
-### SBT
-
-Project [sbt-updated](https://github.com/rtimush/sbt-updates) is used to determine if any
-dependencies can be updated. Use command `dependencyUpdates` to display what can be updated.
-
-### Eclipse
-
-IDE:
-
-* [Scala IDE](http://scala-ide.org/)
-
-Useful plugins:
-
-* [Workspace Mechanic](https://code.google.com/a/eclipselabs.org/p/workspacemechanic/)
-* [Play2 plug-in](https://github.com/scala-ide/scala-ide-play2/wiki#installing-the-play2-plug-in-recommended)
-
-SBT command to create Eclipse IDE project files:
-
-    sbt 'eclipse with-source=true'
-
-#### Squash Commits
-
-Using your own forked GitHub repository for the BBweb project. In this example the forked remote is
-named `nelson`, and the topic branch is named `nelson-dev`.
-
-```bash
-git rebase -i HEAD~6
-git push nelson +nelson-dev
-```
-
-### GitHub Markdown
-
-*  [Grip]  (https://github.com/joeyespo/grip) - Preview GitHub Markdown files like Readme.md locally
-   before committing them
-
-##Application
-
-### Debug
-
-To prevent users being logged out when the application is restarted, EHCACHE is configured to cache
-to disk. This must be disabled for the production server (see [conf/ehcache.xml]
-(../conf/ehcache.xml), tags: `defaultCache -> diskPersistent`).
-
-### Logging
-
-* To enable logging at the Domain or Service layers, edit the file [conf/logger.xml]
-  (../conf/logger.xml).
-
-* To enable TEST logging at the Domain or Service layers, edit the file [conf/logback-test.xml]
-  (../conf/logback-test.xml).
-
-* The Akka logging configuration for the web application is in [conf/application.conf]
-  (../conf/application.conf). It is in [conf/reference.conf] (../conf/reference.conf) for the testing
-  environment.
-
-## Scalatest
-
-### Run one or more tests within a Suite
-
-Use the `-z` flag to run a test with the specified substring:
-
-```sbt
-test-only *__CLASS_NAME__ -- -z "sub string"
-```
-
-### Tags
-
-Tag a test by adding the following import:
-
-```scala
-import org.scalatest.Tag
-```
-
-and the tag declaration to the test(s):
-
-```scala
- "add a user" taggedAs(Tag("MyTag")) in {
-```
-
-Use the following sbt command to run tagged tests:
-
-```sbt
-test-only *__CLASS_NAME__ -- -n MyTag
-```
-To tag multiple tests, create a tag object and tag the tests using the object:
-
-```scala
-object MyTag extends Tag("MyTag")
-...
- "add a user" taggedAs(MyTag) in {
-...
-```
-
-## Scala code coverage
-
-**sbt-scoverage** is used to determine code coverage. See the
-[GitHub page](https://github.com/scoverage/sbt-scoverage)
-for instructions on how to use it.
-
-To generate the HTML report use the command:
-
-```sh
-sbt clean coverage test
-sbt coverageReport
-```
-
-Or, within the SBT cli:
-
-```sh
-; clean; coverage; test; coverageReport
-```
-
-# Translations
-
-Internationalization is done with [angular-gettext](https://angular-gettext.rocketeer.be/). To include the
-latest translations, the command `grunt nggettext_compile` must be run from the command line.
 
 ---
 

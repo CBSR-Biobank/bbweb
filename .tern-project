@@ -1,22 +1,15 @@
 {
-  "ecmaVersion": 5,
+  "ecmaVersion": 6,
   "libs": [
-    "browser",
-    "jquery",
-    "underscore"
+    "browser"
   ],
   "loadEagerly": [
     "app/assets/javascripts/**/*.js",
     "test/assets/javascripts/**/*.js"
   ],
   "plugins": {
-    "jasmine": {},
-    "jasminematchers": {},
     "node": {},
     "angular": {},
-    "requirejs": {
-      "baseURL": "app",
-      "paths":   {}
-    }
+    "webpack": {}
   }
 }

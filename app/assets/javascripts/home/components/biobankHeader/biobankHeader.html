@@ -17,37 +17,33 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav navbar-right">
-        <li class="dropdown" ng-if="vm.user">
-          <a href="#!"
+        <li class="dropdown" dropdown="" uib-dropdown ng-if="vm.user">
+          <a href="#"
+             id="language-dropdown"
              class="dropdown-toggle"
-             data-toggle="dropdown"
-             role="button"
              aria-haspopup="true"
-             aria-expanded="false">
+             aria-expanded="false"
+             uib-dropdown-toggle>
             <span class="glyphicon glyphicon-globe"></span>
             <translate>Language</translate>
             <span class="caret"></span>
           </a>
-          <ul class="dropdown-menu" role="menu">
+          <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="language-dropdown">
             <li>
-              <a href ng-click="vm.changeLanguage('en')">
-                <translate>English</translate>
-              </a>
+              <a ng-click="vm.changeLanguage('en')" translate>English</a>
             </li>
             <li>
-              <a href ng-click="vm.changeLanguage('es_419')">
-                <translate>Spanish</translate>
-              </a>
+              <a ng-click="vm.changeLanguage('es_419')" translate>Spanish</a>
             </li>
           </ul>
         </li>
         <li class="dropdown" dropdown="" uib-dropdown ng-if="vm.user">
           <a href="#!"
+             id="user-dropdown"
              class="dropdown-toggle"
-             data-toggle="dropdown"
-             role="button"
              aria-haspopup="true"s
-             aria-expanded="false">
+             aria-expanded="false"
+             uib-dropdown-toggle>
             <span class="glyphicon glyphicon-user"></span> {{vm.user.name}}<b class="caret"></b>
           </a>
           <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="user-dropdown">
