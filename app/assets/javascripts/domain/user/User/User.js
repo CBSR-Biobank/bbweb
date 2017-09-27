@@ -2,13 +2,16 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash', 'tv4'], function(_, tv4) {
+define(function(require) {
   'use strict';
+
+  const _ = require('lodash');
 
   UserFactory.$inject = [
     '$q',
     '$log',
     'biobankApi',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'DomainError',
     'UserState',
@@ -21,33 +24,11 @@ define(['lodash', 'tv4'], function(_, tv4) {
   function UserFactory($q,
                        $log,
                        biobankApi,
+                        DomainEntity,
                        ConcurrencySafeEntity,
                        DomainError,
                        UserState,
                        UserMembership) {
-
-    var SCHEMA = {
-      'id': 'User',
-      'type': 'object',
-      'properties': {
-        'id':           { 'type': 'string' },
-        'version':      { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':    { 'type': 'string' },
-        'timeModified': { 'type': [ 'string', 'null' ] },
-        'name':         { 'type': 'string' },
-        'email':        { 'type': 'string' },
-        'avatarUrl':    { 'type': [ 'string', 'null' ] },
-        'state':        { 'type': 'string' },
-        'roles':        { 'type': 'array', items: 'string' },
-        'membership':   {
-          'oneOf': [
-            { 'type': 'null' },
-            { '$ref': UserMembership.SCHEMA.id }
-          ]
-        }
-      },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state' ]
-    };
 
     /**
      * Use this contructor to create a new User to be persited on the server. Use {@link
@@ -102,12 +83,40 @@ define(['lodash', 'tv4'], function(_, tv4) {
        */
       this.state = UserState.REGISTERED;
 
-      ConcurrencySafeEntity.call(this, SCHEMA, obj);
+      ConcurrencySafeEntity.call(this, User.SCHEMA, obj);
       this.membership = new UserMembership(_.get(obj, 'membership', {}));
     }
 
     User.prototype = Object.create(ConcurrencySafeEntity.prototype);
     User.prototype.constructor = User;
+
+    User.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'users' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
+
+    User.SCHEMA = {
+      'id': 'User',
+      'type': 'object',
+      'properties': {
+        'id':           { 'type': 'string' },
+        'version':      { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':    { 'type': 'string' },
+        'timeModified': { 'type': [ 'string', 'null' ] },
+        'name':         { 'type': 'string' },
+        'email':        { 'type': 'string' },
+        'avatarUrl':    { 'type': [ 'string', 'null' ] },
+        'state':        { 'type': 'string' },
+        'roles':        { 'type': 'array', items: 'string' },
+        'membership':   {
+          'oneOf': [
+            { 'type': 'null' },
+            { '$ref': UserMembership.SCHEMA.id }
+          ]
+        }
+      },
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state' ]
+    };
 
     /**
      * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.users.User|User}.
@@ -118,7 +127,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     User.isValid = function (obj) {
-       return ConcurrencySafeEntity.isValid(SCHEMA, [UserMembership.SCHEMA], obj);
+       return ConcurrencySafeEntity.isValid(User.SCHEMA, [UserMembership.SCHEMA], obj);
     };
 
     /**
@@ -171,7 +180,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
      * @returns {Promise<domain.users.User>} The user within a promise.
      */
     User.get = function(id) {
-      return biobankApi.get(uri(id)).then(User.prototype.asyncCreate);
+      return biobankApi.get(User.url(id)).then(User.prototype.asyncCreate);
     };
 
     /**
@@ -206,7 +215,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
         return value === '';
       });
 
-      return biobankApi.get(uri(), params).then(function(reply) {
+      return biobankApi.get(User.url(), params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
@@ -239,23 +248,23 @@ define(['lodash', 'tv4'], function(_, tv4) {
         password:  password,
         avatarUrl: this.avatarUrl
       };
-      return biobankApi.post(uri(), json)
+      return biobankApi.post(User.url(), json)
         .then(User.prototype.asyncCreate);
     };
 
     User.prototype.updateName = function (name) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, updateUri('name', this.id), { name: name });
+        this, User.url('name', this.id), { name: name });
     };
 
     User.prototype.updateEmail = function (email) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, updateUri('email', this.id), { email: email });
+        this, User.url('email', this.id), { email: email });
     };
 
     User.prototype.updatePassword = function (currentPassword, newPassword) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, updateUri('password', this.id),
+        this, User.url('password', this.id),
         {
           currentPassword: currentPassword,
           newPassword:     newPassword
@@ -264,14 +273,12 @@ define(['lodash', 'tv4'], function(_, tv4) {
 
     User.prototype.updateAvatarUrl = function (avatarUrl) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, updateUri('avatarurl', this.id), { avatarUrl: avatarUrl });
+        this, User.url('avatarurl', this.id), { avatarUrl: avatarUrl });
     };
 
     User.prototype.activate = function () {
-      var self = this;
-
-      if (self.state !== UserState.REGISTERED) {
-        throw new DomainError('user state is not registered: ' + self.state);
+      if (this.state !== UserState.REGISTERED) {
+        throw new DomainError('user state is not registered: ' + this.state);
       }
 
       return changeStatus(this, 'activate');
@@ -286,10 +293,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
     };
 
     User.prototype.unlock = function () {
-      var self = this;
-
-      if (self.state !== UserState.LOCKED) {
-        throw new DomainError('user state is not locked: ' + self.state);
+      if (this.state !== UserState.LOCKED) {
+        throw new DomainError('user state is not locked: ' + this.state);
       }
 
       return changeStatus(this, 'unlock');
@@ -332,34 +337,8 @@ define(['lodash', 'tv4'], function(_, tv4) {
         id:              user.id,
         expectedVersion: user.version
       };
-      return biobankApi.post(updateUri(state, user.id), json)
+      return biobankApi.post(User.url(state, user.id), json)
         .then(User.prototype.asyncCreate);
-    }
-
-    function uri(userId) {
-      var result = '/users/';
-      if (arguments.length > 0) {
-        result += userId;
-      }
-      return result;
-    }
-
-    function updateUri(/* path, userId */) {
-      var result = '/users/',
-          args = _.toArray(arguments),
-          path,
-          userId;
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += path;
-      }
-
-      if (args.length > 0) {
-        userId = args.shift();
-        result += '/' + userId;
-      }
-      return result;
     }
 
     return User;

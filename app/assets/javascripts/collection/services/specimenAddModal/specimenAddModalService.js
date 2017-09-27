@@ -52,7 +52,6 @@ define(function (require) {
         '$window',
         '$timeout',
         '$uibModalInstance',
-        'AppConfig',
         'Specimen',
         'timeService'
       ];
@@ -68,7 +67,6 @@ define(function (require) {
                                        $window,
                                        $timeout,
                                        $uibModalInstance,
-                                       AppConfig,
                                        Specimen,
                                        timeService) {
         var vm = this;

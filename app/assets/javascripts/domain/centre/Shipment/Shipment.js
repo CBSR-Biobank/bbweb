@@ -12,6 +12,7 @@ define(function (require) {
     '$q',
     '$log',
     'ConcurrencySafeEntity',
+    'DomainEntity',
     'DomainError',
     'ShipmentState',
     'ShipmentItemState',
@@ -23,43 +24,13 @@ define(function (require) {
   function ShipmentFactory($q,
                            $log,
                            ConcurrencySafeEntity,
+                           DomainEntity,
                            DomainError,
                            ShipmentState,
                            ShipmentItemState,
                            biobankApi,
                            centreLocationInfoSchema,
                            Specimen) {
-
-    var SCHEMA = {
-      'id': 'Shipment',
-      'type': 'object',
-      'properties': {
-        'id':               { 'type': 'string' },
-        'version':          { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':        { 'type': 'string' },
-        'timeModified':     { 'type': [ 'string', 'null' ] },
-        'state':            { 'type': 'string' },
-        'courierName':      { 'type': 'string' },
-        'trackingNumber':   { 'type': 'string' },
-        'fromLocationInfo': { 'type': 'object', 'items': { '$ref': 'CentreLocationInfo' } },
-        'toLocationInfo':   { 'type': 'object', 'items': { '$ref': 'CentreLocationInfo' } },
-        'timePacked':       { 'type': [ 'string', 'null' ] },
-        'timeSent':         { 'type': [ 'string', 'null' ] },
-        'timeReceived':     { 'type': [ 'string', 'null' ] },
-        'timeUnpacked':     { 'type': [ 'string', 'null' ] },
-        'timeCompleted':    { 'type': [ 'string', 'null' ] },
-        'specimenCount':    { 'type': 'integer', 'minimum': 0 }
-      },
-      'required': [
-        'id',
-        'version',
-        'state',
-        'courierName',
-        'trackingNumber',
-        'fromLocationInfo',
-        'toLocationInfo'
-      ]
-    };
 
     /**
      * Use this contructor to create new Shipments to be persited on the server. Use
@@ -153,17 +124,54 @@ define(function (require) {
        * @type {Date}
        */
 
-      ConcurrencySafeEntity.call(this, SCHEMA, obj);
+      ConcurrencySafeEntity.call(this, Shipment.SCHEMA, obj);
     }
 
     Shipment.prototype = Object.create(ConcurrencySafeEntity.prototype);
     Shipment.prototype.constructor = Shipment;
 
+    Shipment.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'shipments' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
+
+
+    Shipment.SCHEMA = {
+      'id': 'Shipment',
+      'type': 'object',
+      'properties': {
+        'id':               { 'type': 'string' },
+        'version':          { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':        { 'type': 'string' },
+        'timeModified':     { 'type': [ 'string', 'null' ] },
+        'state':            { 'type': 'string' },
+        'courierName':      { 'type': 'string' },
+        'trackingNumber':   { 'type': 'string' },
+        'fromLocationInfo': { 'type': 'object', 'items': { '$ref': 'CentreLocationInfo' } },
+        'toLocationInfo':   { 'type': 'object', 'items': { '$ref': 'CentreLocationInfo' } },
+        'timePacked':       { 'type': [ 'string', 'null' ] },
+        'timeSent':         { 'type': [ 'string', 'null' ] },
+        'timeReceived':     { 'type': [ 'string', 'null' ] },
+        'timeUnpacked':     { 'type': [ 'string', 'null' ] },
+        'timeCompleted':    { 'type': [ 'string', 'null' ] },
+        'specimenCount':    { 'type': 'integer', 'minimum': 0 }
+      },
+      'required': [
+        'id',
+        'version',
+        'state',
+        'courierName',
+        'trackingNumber',
+        'fromLocationInfo',
+        'toLocationInfo'
+      ]
+    };
+
     /*
      * @private
      */
     Shipment.isValid = function(obj) {
-      return ConcurrencySafeEntity.isValid(SCHEMA, [ centreLocationInfoSchema ], obj);
+      return ConcurrencySafeEntity.isValid(Shipment.SCHEMA, [ centreLocationInfoSchema ], obj);
     };
 
     /**
@@ -224,7 +232,7 @@ define(function (require) {
         throw new DomainError('shipment id not specified');
       }
 
-      return biobankApi.get(uri(id)).then(function (reply) {
+      return biobankApi.get(Shipment.url(id)).then(function (reply) {
         return Shipment.asyncCreate(reply);
       });
     };
@@ -254,7 +262,7 @@ define(function (require) {
      * @return {Promise} A promise. If the promise succeeds then a paged result is returned.
      */
     Shipment.list = function (options) {
-      var url = uri() + 'list',
+      var url = Shipment.url('list'),
           params,
           validKeys = [
             'filter',
@@ -310,7 +318,7 @@ define(function (require) {
                    fromLocationId: this.fromLocationInfo.locationId,
                    toLocationId:   this.toLocationInfo.locationId
                  };
-      return biobankApi.post(uri(), json).then(function(reply) {
+      return biobankApi.post(Shipment.url(), json).then(function(reply) {
         return Shipment.asyncCreate(reply);
       });
     };
@@ -321,7 +329,7 @@ define(function (require) {
      * @returns {Promise} The promise is successful if the shipment is deleted successfully.
      */
     Shipment.prototype.remove = function () {
-      var url = sprintf('%s/%d', uri(this.id), this.version);
+      var url = Shipment.url(this.id, this.version);
       return biobankApi.del(url);
     };
 
@@ -333,7 +341,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the new courier name.
      */
     Shipment.prototype.updateCourierName = function (courierName) {
-      return this.update.call(this, uri('courier', this.id), { courierName: courierName });
+      return this.update.call(this, Shipment.url('courier', this.id), { courierName: courierName });
     };
 
     /**
@@ -344,7 +352,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the new tracking number.
      */
     Shipment.prototype.updateTrackingNumber = function (trackingNumber) {
-      return this.update.call(this, uri('trackingnumber', this.id), { trackingNumber: trackingNumber });
+      return this.update.call(this, Shipment.url('trackingnumber', this.id), { trackingNumber: trackingNumber });
     };
 
     /**
@@ -355,7 +363,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the new from location.
      */
     Shipment.prototype.updateFromLocation = function (fromLocation) {
-      return this.update.call(this, uri('fromlocation', this.id), { locationId: fromLocation });
+      return this.update.call(this, Shipment.url('fromlocation', this.id), { locationId: fromLocation });
     };
 
     /**
@@ -366,7 +374,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the new to location.
      */
     Shipment.prototype.updateToLocation = function (toLocation) {
-      return this.update.call(this, uri('tolocation', this.id), { locationId: toLocation });
+      return this.update.call(this, Shipment.url('tolocation', this.id), { locationId: toLocation });
     };
 
     /**
@@ -379,7 +387,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the state set to PACKED.
      */
     Shipment.prototype.created = function () {
-      return this.update.call(this, uri('state/created', this.id));
+      return this.update.call(this, Shipment.url('state/created', this.id));
     };
 
     /**
@@ -395,7 +403,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the state set to PACKED.
      */
     Shipment.prototype.pack = function (datetime) {
-      return this.update.call(this, uri('state/packed', this.id), { datetime: datetime });
+      return this.update.call(this, Shipment.url('state/packed', this.id), { datetime: datetime });
     };
 
     /**
@@ -411,7 +419,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the state set to SENT.
      */
     Shipment.prototype.send = function (datetime) {
-      return this.update.call(this, uri('state/sent', this.id), { datetime: datetime });
+      return this.update.call(this, Shipment.url('state/sent', this.id), { datetime: datetime });
     };
 
     /**
@@ -427,7 +435,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the state set to RECEIVED.
      */
     Shipment.prototype.receive = function (datetime) {
-      return this.update.call(this, uri('state/received', this.id), { datetime: datetime });
+      return this.update.call(this, Shipment.url('state/received', this.id), { datetime: datetime });
     };
 
     /**
@@ -440,7 +448,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the state set to UNPACKED.
      */
     Shipment.prototype.unpack = function (datetime) {
-      return this.update.call(this, uri('state/unpacked', this.id), { datetime: datetime });
+      return this.update.call(this, Shipment.url('state/unpacked', this.id), { datetime: datetime });
     };
 
     /**
@@ -453,7 +461,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the state set to COMPLETED.
      */
     Shipment.prototype.complete = function (datetime) {
-      return this.update.call(this, uri('state/completed', this.id), { datetime: datetime });
+      return this.update.call(this, Shipment.url('state/completed', this.id), { datetime: datetime });
     };
 
     /**
@@ -464,7 +472,7 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the state set to LOST.
      */
     Shipment.prototype.lost = function () {
-      return this.update.call(this, uri('state/lost', this.id));
+      return this.update.call(this, Shipment.url('state/lost', this.id));
     };
 
     /**
@@ -478,7 +486,7 @@ define(function (require) {
      */
     Shipment.prototype.skipToStateSent = function (timePacked, timeSent) {
       var json = { timePacked: timePacked, timeSent: timeSent };
-      return this.update.call(this, uri('state/skip-to-sent', this.id), json);
+      return this.update.call(this, Shipment.url('state/skip-to-sent', this.id), json);
     };
 
     /**
@@ -492,7 +500,7 @@ define(function (require) {
      */
     Shipment.prototype.skipToStateUnpacked = function (timeReceived, timeUnpacked) {
       var json = { timeReceived: timeReceived, timeUnpacked: timeUnpacked };
-      return this.update.call(this, uri('state/skip-to-unpacked', this.id), json);
+      return this.update.call(this, Shipment.url('state/skip-to-unpacked', this.id), json);
     };
 
     /**
@@ -556,7 +564,7 @@ define(function (require) {
         throw new DomainError('specimen inventory id not specified');
       }
 
-      return biobankApi.get(uri('specimens/canadd', this.id) + '/' + specimenInventoryId)
+      return biobankApi.get(Shipment.url('specimens/canadd', this.id) + '/' + specimenInventoryId)
         .then(function (reply) {
           return Specimen.asyncCreate(reply);
         });
@@ -581,7 +589,7 @@ define(function (require) {
       if (shipmentContainerId) {
         _.extend(reqJson, { shipmentContainerId: shipmentContainerId });
       }
-      return biobankApi.post(uri('specimens', this.id), reqJson).then(function(reply) {
+      return biobankApi.post(Shipment.url('specimens', this.id), reqJson).then(function(reply) {
         return Shipment.asyncCreate(reply);
       });
     };
@@ -614,7 +622,7 @@ define(function (require) {
       if (shipmentContainerId) {
         _.extend(reqJson, { shipmentContainerId: shipmentContainerId });
       }
-      return biobankApi.post(uri('specimens/container', this.id), reqJson).then(function(reply) {
+      return biobankApi.post(Shipment.url('specimens/container', this.id), reqJson).then(function(reply) {
         return Shipment.asyncCreate(reply);
       });
     };
@@ -627,7 +635,7 @@ define(function (require) {
         throw new DomainError('inventoryIds should be an array');
       }
       reqJson =  { specimenInventoryIds: inventoryIds };
-      return biobankApi.post(uri('specimens/' + urlPath, this.id), reqJson).then(function(reply) {
+      return biobankApi.post(Shipment.url('specimens/' + urlPath, this.id), reqJson).then(function(reply) {
         return Shipment.asyncCreate(reply);
       });
     }
@@ -683,25 +691,6 @@ define(function (require) {
     Shipment.prototype.tagSpecimensAsExtra = function (inventoryIds) {
       return tagSpecimens.call(this, inventoryIds, ShipmentItemState.EXTRA);
     };
-
-    function uri(/* path, shipmentId */) {
-      var shipmentId,
-          result = '/shipments/',
-          args = _.toArray(arguments),
-          path;
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += path;
-      }
-
-      if (args.length > 0) {
-        shipmentId = args.shift();
-        result += '/' + shipmentId;
-      }
-
-      return result;
-    }
 
     return Shipment;
   }

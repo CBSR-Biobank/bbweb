@@ -12,6 +12,7 @@ define(function(require) {
     '$q',
     '$log',
     'biobankApi',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'DomainError',
     'StudyState',
@@ -25,6 +26,7 @@ define(function(require) {
   function StudyFactory($q,
                         $log,
                         biobankApi,
+                        DomainEntity,
                         ConcurrencySafeEntity,
                         DomainError,
                         StudyState,
@@ -88,7 +90,10 @@ define(function(require) {
     _.extend(Study.prototype, HasAnnotationTypes.prototype);
     Study.prototype.constructor = Study;
 
-    Study.REST_API_URL = '/studies';
+    Study.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'studies' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
 
     /**
      * Used for validating plain objects.
@@ -139,9 +144,7 @@ define(function(require) {
         throw new DomainError(validation.message);
       }
       if (obj.annotationTypes) {
-        annotationTypes = obj.annotationTypes.map(function (annotationType) {
-          return AnnotationType.create(annotationType);
-        });
+        annotationTypes = obj.annotationTypes.map((annotationType) => AnnotationType.create(annotationType));
       }
       return new Study(obj, annotationTypes);
     };
@@ -176,7 +179,7 @@ define(function(require) {
      * @returns {Promise<domain.studies.Study>} The study within a promise.
      */
     Study.get = function (id) {
-      return biobankApi.get(uri(id)).then(function(reply) {
+      return biobankApi.get(Study.url(id)).then(function(reply) {
         return Study.asyncCreate(reply);
       });
     };
@@ -217,7 +220,7 @@ define(function(require) {
         return value === '';
       });
 
-      return biobankApi.get(uri(), params).then(createStudiesFromPagedResult);
+      return biobankApi.get(Study.url(), params).then(createStudiesFromPagedResult);
     };
 
     /**
@@ -256,7 +259,7 @@ define(function(require) {
         return value === '';
       });
 
-      return biobankApi.get(uri('collectionStudies'), params).then(createStudiesFromPagedResult);
+      return biobankApi.get(Study.url('collectionStudies'), params).then(createStudiesFromPagedResult);
     };
 
     /**
@@ -266,7 +269,7 @@ define(function(require) {
      */
     Study.prototype.add = function () {
       var json = _.pick(this, 'name', 'description');
-      return biobankApi.post(uri(), json).then(function(reply) {
+      return biobankApi.post(Study.url(), json).then(function(reply) {
         return Study.asyncCreate(reply);
       });
     };
@@ -294,7 +297,7 @@ define(function(require) {
      * @returns {Promise<domain.studies.Study>} A promise containing the study with the new name.
      */
     Study.prototype.updateName = function (name) {
-      return this.update.call(this, uri('name', this.id), { name: name });
+      return this.update.call(this, Study.url('name', this.id), { name: name });
     };
 
     /**
@@ -307,7 +310,7 @@ define(function(require) {
      */
     Study.prototype.updateDescription = function (description) {
       return this.update.call(this,
-                              uri('description', this.id),
+                              Study.url('description', this.id),
                               description ? { description: description } : {});
     };
 
@@ -320,7 +323,7 @@ define(function(require) {
      */
     Study.prototype.addAnnotationType = function (annotationType) {
       return this.update.call(this,
-                              uri('pannottype', this.id),
+                              Study.url('pannottype', this.id),
                               _.omit(annotationType, 'id'));
     };
 
@@ -334,7 +337,7 @@ define(function(require) {
      */
     Study.prototype.updateAnnotationType = function (annotationType) {
       return this.update.call(this,
-                              uri('pannottype', this.id) + '/' + annotationType.id,
+                              Study.url('pannottype', this.id) + '/' + annotationType.id,
                               annotationType);
     };
 
@@ -348,7 +351,7 @@ define(function(require) {
      */
     Study.prototype.removeAnnotationType = function (annotationType) {
       var url = sprintf('%s/%d/%s',
-                        uri('pannottype', this.id),
+                        Study.url('pannottype', this.id),
                         this.version,
                         annotationType.id);
       return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
@@ -445,7 +448,7 @@ define(function(require) {
      * @see [Centre.centreLocationToNames()]{@link domain.centres.Centre.centreLocationToNames}
      */
     Study.prototype.allLocations = function () {
-      return biobankApi.get('/studies/centres/' + this.id);
+      return biobankApi.get(Study.url('centres', this.id));
     };
 
     /**
@@ -455,15 +458,13 @@ define(function(require) {
      * enabled.
      */
     Study.prototype.isEnableAllowed = function () {
-      return biobankApi.get('/studies/enableAllowed/' + this.id);
+      return biobankApi.get(Study.url('enableAllowed', this.id));
     };
 
     function createStudiesFromPagedResult(reply) {
       var deferred = $q.defer();
       try {
-        reply.items = _.map(reply.items, function(obj){
-          return Study.create(obj);
-        });
+        reply.items = reply.items.map((obj) => Study.create(obj));
         deferred.resolve(reply);
       } catch (e) {
         deferred.reject('invalid studies from server');
@@ -476,28 +477,8 @@ define(function(require) {
       var self = this,
           json = { expectedVersion: self.version };
 
-      return biobankApi.post(uri(state, self.id), json).then(function (reply) {
-        return Study.asyncCreate(reply);
-      });
-    }
-
-    function uri(/* path, studyId */) {
-      var args = _.toArray(arguments),
-          studyId,
-          path,
-          result = Study.REST_API_URL + '/';
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += path;
-      }
-
-      if (args.length > 0) {
-        studyId = args.shift();
-        result += '/' + studyId;
-      }
-
-      return result;
+      return biobankApi.post(Study.url(state, self.id), json)
+        .then((reply) => Study.asyncCreate(reply));
     }
 
     return Study;

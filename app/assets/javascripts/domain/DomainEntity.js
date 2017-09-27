@@ -8,13 +8,13 @@ define(function(require) {
   var _   = require('lodash'),
       tv4 = require('tv4');
 
-  //DomainEntityFactory.$inject = [];
+  DomainEntityFactory.$inject = ['UrlService'];
 
   /*
    * AngularJS factory.
    *
    */
-  function DomainEntityFactory() {
+  function DomainEntityFactory(UrlService) {
 
     /**
      * @classdesc An abstract class for an entity in the domain.
@@ -43,6 +43,10 @@ define(function(require) {
         return { valid: false, message: tv4.error.dataPath + ':' + tv4.error.message };
       }
       return { valid: true, message: null };
+    };
+
+    DomainEntity.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      return UrlService.url.apply(UrlService, _.toArray(arguments));
     };
 
     return DomainEntity;

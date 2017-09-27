@@ -4,25 +4,42 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'faker'
-], function(angular, mocks, _, faker) {
-  'use strict';
+/* global angular */
 
-  describe('Component: userAdminComponent', function() {
+import _ from 'lodash';
+import faker from 'faker';
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+describe('Component: userAdminComponent', function() {
 
-      function SuiteMixin() {
-      }
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              'usersService',
+                              'User',
+                              'UserCounts',
+                              'factory');
 
-      SuiteMixin.prototype.createUserCounts = function (registered, active, locked) {
+      /*
+       * Have to create controller as a directive so that $onInit() is fired on the controller.
+       */
+      this.createController = (userCounts) => {
+        this.usersService.requestCurrentUser =
+          jasmine.createSpy().and.returnValue(this.$q.when(new this.User()));
+        this.UserCounts.get = jasmine.createSpy().and.returnValue(this.$q.when(userCounts));
+
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<user-admin></user-admin>',
+          undefined,
+          'userAdmin');
+      };
+
+      this.createUserCounts = (registered, active, locked) => {
         registered = registered || faker.random.number();
         active = active || faker.random.number();
         locked = locked || faker.random.number();
@@ -35,55 +52,18 @@ define([
         });
       };
 
-      /*
-       * Have to create controller as a directive so that $onInit() is fired on the controller.
-       */
-      SuiteMixin.prototype.createController = function (userCounts) {
-        this.usersService.requestCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(new this.User()));
-        this.UserCounts.get = jasmine.createSpy().and.returnValue(this.$q.when(userCounts));
-
-        ComponentTestSuiteMixin.prototype.createController.call(
-          this,
-          '<user-admin></user-admin>',
-          undefined,
-          'userAdmin');
-      };
-
-      SuiteMixin.prototype.createUserListSpy = function (users) {
+      this.createUserListSpy = (users) => {
         var reply = this.factory.pagedResult(users);
-        spyOn(this.User, 'list').and.returnValue(this.$q.when(reply));
+        this.User.list = jasmine.createSpy().and.returnValue(this.$q.when(reply));
       };
-
-      return SuiteMixin;
-    }
-
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-
-      this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
-                              'usersService',
-                              'User',
-                              'UserCounts',
-                              'factory');
-
-      this.putHtmlTemplates(
-        '/assets/javascripts/admin/users/components/userAdmin/userAdmin.html',
-        '/assets/javascripts/admin/users/components/usersPagedList/usersPagedList.html',
-        '/assets/javascripts/common/components/nameEmailStateFilters/nameEmailStateFilters.html',
-        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
-    }));
-
-    it('scope is valid on startup', function() {
-      var counts = this.createUserCounts(1, 2, 3);
-      this.createUserListSpy([]);
-      this.createController(counts);
-      expect(this.controller.haveUsers).toBe(counts.total > 0);
     });
+  });
 
+  it('scope is valid on startup', function() {
+    var counts = this.createUserCounts(1, 2, 3);
+    this.createUserListSpy([]);
+    this.createController(counts);
+    expect(this.controller.haveUsers).toBe(counts.total > 0);
   });
 
 });

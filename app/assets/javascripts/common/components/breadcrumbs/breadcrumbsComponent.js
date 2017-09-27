@@ -1,25 +1,20 @@
+
+class BreadcrumbsController {
+
+}
+
+//BreadcrumbsController.$inject = [];
+
 /**
  *
  */
-define(function () {
-  'use strict';
-
-  var component = {
-    templateUrl: '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html',
-    controller: BreadcrumbsController,
-    controllerAs: 'vm',
-    bindings: {
+var component = {
+  template: require('./breadcrumbs.html'),
+  controller: BreadcrumbsController,
+  controllerAs: 'vm',
+  bindings: {
       crumbs: '<'
-    }
-  };
-
-  BreadcrumbsController.$inject = [];
-
-  /*
-   * Controller for this component.
-   */
-  function BreadcrumbsController() {
   }
+};
 
-  return component;
-});
+export default component;

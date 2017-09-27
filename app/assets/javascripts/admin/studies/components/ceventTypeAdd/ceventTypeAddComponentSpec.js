@@ -4,37 +4,16 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash');
+import _ from 'lodash';
 
-  describe('Component: ceventTypeAdd', function() {
+describe('Component: ceventTypeAdd', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
-
-      function SuiteMixin() {
-      }
-
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
-
-      SuiteMixin.prototype.createController = function (study) {
-        ComponentTestSuiteMixin.prototype.createController.call(
-          this,
-          '<cevent-type-add study="vm.study"><cevent-type-add>',
-          { study: study },
-          'ceventTypeAdd');
-      };
-
-      return SuiteMixin;
-    }
-
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -44,72 +23,75 @@ define(function (require) {
 
       this.study = new this.Study(this.factory.study());
 
-      this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/ceventTypeAdd/ceventTypeAdd.html');
-
-    }));
-
-    it('has valid scope when created', function () {
-      this.createController(this.study);
-      expect(this.controller.ceventType.isNew()).toBe(true);
+      this.createController = (study) => {
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+          '<cevent-type-add study="vm.study"><cevent-type-add>',
+          { study: study },
+          'ceventTypeAdd');
+      };
     });
+  });
 
-    it('can submit a collection event type', function() {
-      var $q                   = this.$injector.get('$q'),
-          notificationsService = this.$injector.get('notificationsService'),
-          $state               = this.$injector.get('$state'),
-          ceventType;
+  it('has valid scope when created', function () {
+    this.createController(this.study);
+    expect(this.controller.ceventType.isNew()).toBe(true);
+  });
 
-      ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
-      this.createController(this.study);
+  it('can submit a collection event type', function() {
+    var $q                   = this.$injector.get('$q'),
+        notificationsService = this.$injector.get('notificationsService'),
+        $state               = this.$injector.get('$state'),
+        ceventType;
 
-      spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
-        return $q.when();
-      });
-      spyOn(notificationsService, 'submitSuccess').and.callFake(function () {});
-      spyOn($state, 'go').and.callFake(function () {});
+    ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
+    this.createController(this.study);
 
-      this.controller.submit(ceventType);
-      this.scope.$digest();
-
-      expect(notificationsService.submitSuccess).toHaveBeenCalled();
-      expect($state.go).toHaveBeenCalledWith(
-        'home.admin.studies.study.collection', {}, { reload: true });
+    spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
+      return $q.when();
     });
+    spyOn(notificationsService, 'submitSuccess').and.callFake(function () {});
+    spyOn($state, 'go').and.callFake(function () {});
 
-    it('on submit error, displays an error modal', function() {
-      var q                   = this.$injector.get('$q'),
-          domainNotificationService = this.$injector.get('domainNotificationService'),
-          ceventType;
+    this.controller.submit(ceventType);
+    this.scope.$digest();
 
-      ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
-      this.createController(this.study);
+    expect(notificationsService.submitSuccess).toHaveBeenCalled();
+    expect($state.go).toHaveBeenCalledWith(
+      'home.admin.studies.study.collection', {}, { reload: true });
+  });
 
-      spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
-        var deferred = q.defer();
-        deferred.reject('simulated error for test');
-        return deferred.promise;
-      });
-      spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
+  it('on submit error, displays an error modal', function() {
+    var q                   = this.$injector.get('$q'),
+        domainNotificationService = this.$injector.get('domainNotificationService'),
+        ceventType;
 
-      this.controller.submit(ceventType);
-      this.scope.$digest();
+    ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
+    this.createController(this.study);
 
-      expect(domainNotificationService.updateErrorModal)
-        .toHaveBeenCalledWith('simulated error for test', 'collection event type');
+    spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
+      var deferred = q.defer();
+      deferred.reject('simulated error for test');
+      return deferred.promise;
     });
+    spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
 
-    it('when user presses the cancel button, goes to correct state', function() {
-      var state = this.$injector.get('$state');
+    this.controller.submit(ceventType);
+    this.scope.$digest();
 
-      spyOn(state, 'go').and.callFake(function () {});
-      this.createController(this.study);
+    expect(domainNotificationService.updateErrorModal)
+      .toHaveBeenCalledWith('simulated error for test', 'collection event type');
+  });
 
-      this.controller.cancel();
-      this.scope.$digest();
-      expect(state.go).toHaveBeenCalledWith('home.admin.studies.study.collection');
-    });
+  it('when user presses the cancel button, goes to correct state', function() {
+    var state = this.$injector.get('$state');
 
+    spyOn(state, 'go').and.callFake(function () {});
+    this.createController(this.study);
+
+    this.controller.cancel();
+    this.scope.$digest();
+    expect(state.go).toHaveBeenCalledWith('home.admin.studies.study.collection');
   });
 
 });

@@ -5,12 +5,11 @@
  */
 import angular from 'angular';
 
-const MODULE_NAME = 'biobank.shipmentSpecimens';
-
-angular.module(MODULE_NAME, [])
+const ShipmentSpecimensModule = angular.module('biobank.shipmentSpecimens', [])
   .component('ssSpecimensPagedTable',
              require('./components/ssSpecimensPagedTable/ssSpecimensPagedTableComponent'))
   .component('specimenTableAction',
-             require('./components/specimenTableAction/specimenTableActionComponent'));
+             require('./components/specimenTableAction/specimenTableActionComponent'))
+  .name;
 
-export default MODULE_NAME;
+export default ShipmentSpecimensModule;

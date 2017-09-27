@@ -4,25 +4,20 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
-  'use strict';
+/* global angular */
 
-  describe('progressTrackerComponent', function() {
+import _ from 'lodash';
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+describe('progressTrackerComponent', function() {
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
 
-      SuiteMixin.prototype.createController = function (items, current) {
+      this.createController = (items, current) => {
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
@@ -34,50 +29,36 @@ define([
           { progressInfo:  { items: items, current: current } },
           'progressTracker');
       };
-
-      return SuiteMixin;
-    }
-
-
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-
-      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
-      this.putHtmlTemplates(
-        '/assets/javascripts/common/components/progressTracker/progressTracker.html');
-    }));
-
-    it('has valid scope', function() {
-      var self = this,
-          items = _.map(_.range(3), function () { return self.factory.stringNext(); }),
-          current = items[0];
-      self.createController(items, current);
-      expect(self.controller.numSteps).toBe(items.length);
-      expect(self.controller.steps).toBeArrayOfSize(items.length);
     });
+  });
 
-    it('all steps can be marked as todo', function() {
-      var self = this,
-          items = _.map(_.range(3), function () { return self.factory.stringNext(); });
-      self.createController(items, 0);
-      expect(self.controller.numSteps).toBe(items.length);
-      _.each(self.controller.steps, function (step) {
-        expect(step.class).toBe('progtrckr-todo');
-      });
+  it('has valid scope', function() {
+    var self = this,
+        items = _.map(_.range(3), function () { return self.factory.stringNext(); }),
+        current = items[0];
+    self.createController(items, current);
+    expect(self.controller.numSteps).toBe(items.length);
+    expect(self.controller.steps).toBeArrayOfSize(items.length);
+  });
+
+  it('all steps can be marked as todo', function() {
+    var self = this,
+        items = _.map(_.range(3), function () { return self.factory.stringNext(); });
+    self.createController(items, 0);
+    expect(self.controller.numSteps).toBe(items.length);
+    _.each(self.controller.steps, function (step) {
+      expect(step.class).toBe('progtrckr-todo');
     });
+  });
 
-    it('all steps can be marked as done', function() {
-      var self = this,
-          items = _.map(_.range(3), function () { return self.factory.stringNext(); });
-      self.createController(items, items.length);
-      expect(self.controller.numSteps).toBe(items.length);
-      _.each(self.controller.steps, function (step) {
-        expect(step.class).toBe('progtrckr-done');
-      });
+  it('all steps can be marked as done', function() {
+    var self = this,
+        items = _.map(_.range(3), function () { return self.factory.stringNext(); });
+    self.createController(items, items.length);
+    expect(self.controller.numSteps).toBe(items.length);
+    _.each(self.controller.steps, function (step) {
+      expect(step.class).toBe('progtrckr-done');
     });
-
   });
 
 });

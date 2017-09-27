@@ -8,29 +8,24 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'biobankApp',
-  'biobankTest'
-], function(angular, mocks, _) {
-  'use strict';
+/* global angular */
 
-  /*
-   * Suite for ceventAnnotationTypesService
-   */
-  xdescribe('service: studyAnnotationTypesService', function () {
+import _ from 'lodash';
 
-    var context = {};
+/*
+ * Suite for ceventAnnotationTypesService
+ */
+xdescribe('service: studyAnnotationTypesService', function () {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+  var context = {};
 
-    beforeEach(inject(function ($httpBackend,
-                                factory,
-                                testDomainEntities,
-                                CollectionEventAnnotationType,
-                                ceventAnnotationTypesService) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function ($httpBackend,
+                                  factory,
+                                  testDomainEntities,
+                                  CollectionEventAnnotationType,
+                                  ceventAnnotationTypesService) {
       context.httpBackend                 = $httpBackend;
       context.annotationTypeType          = CollectionEventAnnotationType;
       context.studyAnnotationTypesService = ceventAnnotationTypesService;
@@ -40,25 +35,27 @@ define([
       //context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: false });
       context.serverAnnotationType = factory.studyAnnotationType(context.study);
       testDomainEntities.extend();
-    }));
+    });
 
-    sharedBehaviourForStudyAnnotationTypes(context);
   });
 
-  /*
-   * Suite for spcLinkAnnotationTypesService
-   */
-  xdescribe('service: spcLinkAnnotationTypesService', function () {
+  sharedBehaviourForStudyAnnotationTypes(context);
+});
 
-    var context = {};
+/*
+ * Suite for spcLinkAnnotationTypesService
+ */
+xdescribe('service: spcLinkAnnotationTypesService', function () {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+  var context = {};
 
-    beforeEach(inject(function ($httpBackend,
-                                factory,
-                                testDomainEntities,
-                                SpecimenLinkAnnotationType,
-                                spcLinkAnnotationTypesService) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function ($httpBackend,
+                                  factory,
+                                  testDomainEntities,
+                                  SpecimenLinkAnnotationType,
+                                  spcLinkAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = SpecimenLinkAnnotationType;
       context.studyAnnotationTypesService = spcLinkAnnotationTypesService;
@@ -68,25 +65,26 @@ define([
       //context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: false });
       context.serverAnnotationType = factory.studyAnnotationType(context.study);
       testDomainEntities.extend();
-    }));
-
-    sharedBehaviourForStudyAnnotationTypes(context);
+    });
   });
 
-  /**
-   * Suite for participantAnnotationTypesService
-   */
-  xdescribe('service: participantAnnotationTypesService', function () {
+  sharedBehaviourForStudyAnnotationTypes(context);
+});
 
-    var context = {};
+/**
+ * Suite for participantAnnotationTypesService
+ */
+xdescribe('service: participantAnnotationTypesService', function () {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+  var context = {};
 
-    beforeEach(inject(function ($httpBackend,
-                                factory,
-                                testDomainEntities,
-                                ParticipantAnnotationType,
-                                participantAnnotationTypesService) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function ($httpBackend,
+                                  factory,
+                                  testDomainEntities,
+                                  ParticipantAnnotationType,
+                                  participantAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
       context.annotationTypeType     = ParticipantAnnotationType;
       context.studyAnnotationTypesService = participantAnnotationTypesService;
@@ -95,102 +93,101 @@ define([
 
       context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: true });
       testDomainEntities.extend();
-    }));
-
-    sharedBehaviourForStudyAnnotationTypes(context);
+    });
   });
 
-  /*
-   * Shared spec for all 3 services listed above.
-   */
-  function sharedBehaviourForStudyAnnotationTypes(context) {
+  sharedBehaviourForStudyAnnotationTypes(context);
+});
 
-    describe('(shared)', function() {
+/*
+ * Shared spec for all 3 services listed above.
+ */
+function sharedBehaviourForStudyAnnotationTypes(context) {
 
-      var httpBackend,
-          studyAnnotationTypesService,
-          AnnotationTypeType,
-          serverAnnotationType,
-          serverAnnotationTypeNoId;
+  describe('(shared)', function() {
 
-      function uri(annotationTypeId, version) {
-        var result = '/studies/' + context.study.id + '/' + context.annotationTypeUriPart;
-        if (arguments.length > 0) {
-          result += '/' + annotationTypeId;
-        }
-        if (arguments.length > 1) {
-          result += '/' + version;
-        }
-        return result;
+    var httpBackend,
+        studyAnnotationTypesService,
+        AnnotationTypeType,
+        serverAnnotationType,
+        serverAnnotationTypeNoId;
+
+    function uri(annotationTypeId, version) {
+      var result = '/studies/' + context.study.id + '/' + context.annotationTypeUriPart;
+      if (arguments.length > 0) {
+        result += '/' + annotationTypeId;
       }
-
-      beforeEach(function () {
-        httpBackend                 = context.httpBackend;
-        studyAnnotationTypesService = context.studyAnnotationTypesService;
-        AnnotationTypeType          = context.annotationTypeType;
-        serverAnnotationType        = context.serverAnnotationType;
-        serverAnnotationTypeNoId    = _.omit(context.serverAnnotationType, 'id', 'version');
-      });
-
-      afterEach(function() {
-        httpBackend.verifyNoOutstandingExpectation();
-        httpBackend.verifyNoOutstandingRequest();
-      });
-
-      it('should have the following functions', function () {
-        expect(studyAnnotationTypesService.addOrUpdate).toBeFunction();
-        expect(studyAnnotationTypesService.remove).toBeFunction();
-      });
-
-      it('should allow adding an annotation type', function() {
-        var annotationType = new AnnotationTypeType(serverAnnotationTypeNoId);
-        var cmd = getAddCommand(annotationType);
-
-        var expectedResult = {status: 'success', data: 'success'};
-        httpBackend.expectPOST(uri(), cmd).respond(201, expectedResult);
-
-        studyAnnotationTypesService.addOrUpdate(annotationType).then(function(reply) {
-          expect(reply).toEqual('success');
-        });
-        httpBackend.flush();
-      });
-
-      it('should allow updating an annotation type', function() {
-        var annotationType = new AnnotationTypeType(serverAnnotationType);
-        var cmd = getUpdateCommand(annotationType);
-
-        var expectedResult = {status: 'success', data: 'success'};
-
-        httpBackend.expectPUT(uri(annotationType.id), cmd).respond(201, expectedResult);
-
-        studyAnnotationTypesService.addOrUpdate(annotationType).then(function(reply) {
-          expect(reply).toEqual('success');
-        });
-        httpBackend.flush();
-      });
-
-      it('should remove an annotation type', function() {
-        var annotationType = new AnnotationTypeType(serverAnnotationType);
-        httpBackend.expectDELETE(uri(annotationType.id, annotationType.version)).respond(201);
-        studyAnnotationTypesService.remove(annotationType);
-        httpBackend.flush();
-      });
-
-      function getAddCommand(annotationType) {
-        var result = _.pick(annotationType, 'studyId', 'name', 'valueType', 'options');
-        _.each(['description', 'maxValueCount', 'required'], function(optionalKey) {
-          if (!_.isUndefined(annotationType[optionalKey])) {
-            result[optionalKey] = annotationType[optionalKey];
-          }
-        });
+      if (arguments.length > 1) {
+        result += '/' + version;
       }
+      return result;
+    }
 
-      function getUpdateCommand(annotationType) {
-        return _.extend(getAddCommand(annotationType), { expectedVersion: annotationType.version });
-      }
-
+    beforeEach(function () {
+      httpBackend                 = context.httpBackend;
+      studyAnnotationTypesService = context.studyAnnotationTypesService;
+      AnnotationTypeType          = context.annotationTypeType;
+      serverAnnotationType        = context.serverAnnotationType;
+      serverAnnotationTypeNoId    = _.omit(context.serverAnnotationType, 'id', 'version');
     });
 
-  }
+    afterEach(function() {
+      httpBackend.verifyNoOutstandingExpectation();
+      httpBackend.verifyNoOutstandingRequest();
+    });
 
-});
+    it('should have the following functions', function () {
+      expect(studyAnnotationTypesService.addOrUpdate).toBeFunction();
+      expect(studyAnnotationTypesService.remove).toBeFunction();
+    });
+
+    it('should allow adding an annotation type', function() {
+      var annotationType = new AnnotationTypeType(serverAnnotationTypeNoId);
+      var cmd = getAddCommand(annotationType);
+
+      var expectedResult = {status: 'success', data: 'success'};
+      httpBackend.expectPOST(uri(), cmd).respond(201, expectedResult);
+
+      studyAnnotationTypesService.addOrUpdate(annotationType).then(function(reply) {
+        expect(reply).toEqual('success');
+      });
+      httpBackend.flush();
+    });
+
+    it('should allow updating an annotation type', function() {
+      var annotationType = new AnnotationTypeType(serverAnnotationType);
+      var cmd = getUpdateCommand(annotationType);
+
+      var expectedResult = {status: 'success', data: 'success'};
+
+      httpBackend.expectPUT(uri(annotationType.id), cmd).respond(201, expectedResult);
+
+      studyAnnotationTypesService.addOrUpdate(annotationType).then(function(reply) {
+        expect(reply).toEqual('success');
+      });
+      httpBackend.flush();
+    });
+
+    it('should remove an annotation type', function() {
+      var annotationType = new AnnotationTypeType(serverAnnotationType);
+      httpBackend.expectDELETE(uri(annotationType.id, annotationType.version)).respond(201);
+      studyAnnotationTypesService.remove(annotationType);
+      httpBackend.flush();
+    });
+
+    function getAddCommand(annotationType) {
+      var result = _.pick(annotationType, 'studyId', 'name', 'valueType', 'options');
+      _.each(['description', 'maxValueCount', 'required'], function(optionalKey) {
+        if (!_.isUndefined(annotationType[optionalKey])) {
+          result[optionalKey] = annotationType[optionalKey];
+        }
+      });
+    }
+
+    function getUpdateCommand(annotationType) {
+      return _.extend(getAddCommand(annotationType), { expectedVersion: annotationType.version });
+    }
+
+  });
+
+}

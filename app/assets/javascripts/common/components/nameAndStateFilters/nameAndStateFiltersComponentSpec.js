@@ -4,91 +4,70 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash'),
-      filtersSharedBehaviour = require('../../../test/filtersSharedBehaviour');
+import _ from 'lodash';
+import filtersSharedBehaviour from '../../../test/filtersSharedBehaviour';
 
-  describe('nameAndStateFiltersComponent', function() {
+describe('nameAndStateFiltersComponent', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
+      this.createController = (bindings) => {
+        var self = this,
+            defaultBindings = {},
+            actualBindings = {};
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+        self.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        self.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        self.filtersCleared = jasmine.createSpy().and.returnValue(null);
 
-      SuiteMixin.prototype.createController = function (bindings) {
-      var self = this,
-          defaultBindings = {},
-          actualBindings = {};
-
-      self.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
-      self.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
-      self.filtersCleared = jasmine.createSpy().and.returnValue(null);
-
-      defaultBindings = {
-        stateData:            [ 'enabled', 'disbled' ],
-        onNameFilterUpdated:  self.nameFilterUpdated,
-        onStateFilterUpdated: self.stateFilterUpdated,
-        onFiltersCleared:     self.filtersCleared
-      };
+        defaultBindings = {
+          stateData:            [ 'enabled', 'disbled' ],
+          onNameFilterUpdated:  self.nameFilterUpdated,
+          onStateFilterUpdated: self.stateFilterUpdated,
+          onFiltersCleared:     self.filtersCleared
+        };
 
         _.extend(actualBindings, defaultBindings, bindings);
 
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
-          [
-            '<name-and-state-filters ',
-            '    state-data="vm.stateData" ',
-            '    on-name-filter-updated="vm.onNameFilterUpdated" ',
-            '    on-state-filter-updated="vm.onStateFilterUpdated" ',
-            '    on-filters-cleared="vm.onFiltersCleared"> ',
-            '</name-and-state-filters>'
-          ].join(''),
+          `<name-and-state-filters
+              state-data="vm.stateData"
+              on-name-filter-updated="vm.onNameFilterUpdated"
+              on-state-filter-updated="vm.onStateFilterUpdated"
+              on-filters-cleared="vm.onFiltersCleared">
+            </name-and-state-filters>`,
           actualBindings,
           'nameAndStateFilters');
       };
+    });
+  });
 
-      return SuiteMixin;
-    }
+  describe('for name filter', function() {
+    var context = {};
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-
-      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
-      this.putHtmlTemplates(
-        '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
-        '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');
-    }));
-
-    describe('for name filter', function() {
-      var context = {};
-
-      beforeEach(function() {
-        context.createController = this.createController.bind(this);
-      });
-
-      filtersSharedBehaviour.nameFiltersharedBehaviour(context);
-
+    beforeEach(function() {
+      context.createController = this.createController.bind(this);
     });
 
-    describe('for state filter', function() {
-      var context = {};
+    filtersSharedBehaviour.nameFiltersharedBehaviour(context);
 
-      beforeEach(function() {
-        context.createController = this.createController.bind(this);
-      });
+  });
 
-      filtersSharedBehaviour.stateFiltersharedBehaviour(context);
+  describe('for state filter', function() {
+    var context = {};
 
+    beforeEach(function() {
+      context.createController = this.createController.bind(this);
     });
+
+    filtersSharedBehaviour.stateFiltersharedBehaviour(context);
 
   });
 

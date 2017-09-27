@@ -4,26 +4,44 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function(require) {
-  'use strict';
+/* global angular */
 
-  var mocks                           = require('angularMocks'),
-      _                               = require('lodash'),
-      faker                           = require('faker'),
-      annotationUpdateSharedBehaviour = require('../../../test/annotationUpdateSharedBehaviour');
+import _ from 'lodash';
+import faker  from 'faker';
+import sharedBehaviour from '../../../test/annotationUpdateSharedBehaviour';
 
-  describe('Component: ceventView', function() {
+describe('Component: ceventView', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+      this.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              '$state',
+                              'Study',
+                              'Participant',
+                              'CollectionEvent',
+                              'CollectionEventType',
+                              'AnnotationValueType',
+                              'AnnotationMaxValueCount',
+                              'Specimen',
+                              'domainNotificationService',
+                              'modalService',
+                              'notificationsService',
+                              'factory');
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.jsonCevent      = this.factory.collectionEvent();
+      this.jsonParticipant = this.factory.defaultParticipant();
+      this.jsonCeventType  = this.factory.defaultCollectionEventType();
 
-      SuiteMixin.prototype.collectionEventWithAnnotation = function (valueType, maxValueCount) {
+      this.participant     = new this.Participant(this.jsonParticipant);
+      this.collectionEvent = new this.CollectionEvent(this.jsonCevent);
+      this.pagedResult     = this.factory.pagedResult([ this.collectionEvent ]);
+
+      this.collectionEventWithAnnotation = (valueType, maxValueCount) => {
         var jsonAnnotationType,
             value,
             jsonAnnotation,
@@ -42,7 +60,7 @@ define(function(require) {
         return this.CollectionEvent.create(jsonCevent);
       };
 
-      SuiteMixin.prototype.createController = function (study, collectionEventTypes, collectionEvent) {
+      this.createController = (study, collectionEventTypes, collectionEvent) => {
         if (_.isUndefined(collectionEventTypes)) {
           fail('collectionEventTypes is undefined');
         }
@@ -53,13 +71,11 @@ define(function(require) {
 
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
-          [
-            '<cevent-view',
-            '  study="vm.study"',
-            '  collection-event-types="vm.collectionEventTypes"',
-            '  collection-event="vm.collectionEvent">',
-            '</cevent-view>'
-          ].join(''),
+          `<cevent-view
+             study="vm.study"
+             collection-event-types="vm.collectionEventTypes"
+             collection-event="vm.collectionEvent">
+           </cevent-view>`,
           {
             study:                study,
             collectionEvent:      collectionEvent,
@@ -67,366 +83,326 @@ define(function(require) {
           },
           'ceventView');
       };
+    });
+  });
 
-      return SuiteMixin;
-    }
+  it('has valid scope', function() {
+    var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                             this.AnnotationMaxValueCount.SELECT_MULTIPLE),
+        collectionEventTypes = [ collectionEvent.collectionEventType ],
+        study = new this.Study(this.factory.defaultStudy());
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    this.createController(study, collectionEventTypes, collectionEvent);
 
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+    expect(this.controller.collectionEventTypes).toBe(collectionEventTypes);
+    expect(this.controller.collectionEvent).toBe(collectionEvent);
+    expect(this.controller.panelOpen).toBeTrue();
 
-      this.injectDependencies('$rootScope',
-                              '$compile',
-                              '$q',
-                              '$state',
-                              'Study',
-                              'Participant',
-                              'CollectionEvent',
-                              'CollectionEventType',
-                              'AnnotationValueType',
-                              'AnnotationMaxValueCount',
-                              'Specimen',
-                              'domainNotificationService',
-                              'modalService',
-                              'notificationsService',
-                              'factory');
+    expect(this.controller.editTimeCompleted).toBeFunction();
+    expect(this.controller.editAnnotation).toBeFunction();
+    expect(this.controller.panelButtonClicked).toBeFunction();
+  });
 
-      this.putHtmlTemplates(
-        '/assets/javascripts/collection/components/ceventView/ceventView.html',
-        '/assets/javascripts/collection/components/ceventSpecimensView/ceventSpecimensView.html',
-        '/assets/javascripts/common/components/statusLine/statusLine.html',
-        '/assets/javascripts/common/directives/pagination.html');
+  it('panel can be closed and opened', function() {
+    var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                             this.AnnotationMaxValueCount.SELECT_MULTIPLE),
+        collectionEventTypes = [ collectionEvent.collectionEventType ],
+        study = new this.Study(this.factory.defaultStudy());
 
-      this.jsonCevent      = this.factory.collectionEvent();
-      this.jsonParticipant = this.factory.defaultParticipant();
-      this.jsonCeventType  = this.factory.defaultCollectionEventType();
+    this.createController(study, collectionEventTypes, collectionEvent);
+    this.controller.panelButtonClicked();
+    this.scope.$digest();
+    expect(this.controller.panelOpen).toBeFalse();
 
-      this.participant     = new this.Participant(this.jsonParticipant);
-      this.collectionEvent = new this.CollectionEvent(this.jsonCevent);
-      this.pagedResult     = this.factory.pagedResult([ this.collectionEvent ]);
+    this.controller.panelButtonClicked();
+    this.scope.$digest();
+    expect(this.controller.panelOpen).toBeTrue();
+  });
+
+  describe('updates to time completed', function () {
+
+    var context = {};
+
+    beforeEach(inject(function () {
+      context.controllerUpdateFuncName = 'editTimeCompleted';
+      context.modalInputFuncName       = 'dateTime';
+      context.ceventUpdateFuncName     = 'updateTimeCompleted';
+      context.collectionEvent          = this.collectionEvent;
+      context.newValue                 = faker.date.recent(10);
     }));
 
-    it('has valid scope', function() {
-      var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                               this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-          collectionEventTypes = [ collectionEvent.collectionEventType ],
-          study = new this.Study(this.factory.defaultStudy());
+    sharedUpdateBehaviour(context);
 
-      this.createController(study, collectionEventTypes, collectionEvent);
+  });
 
-      expect(this.controller.collectionEventTypes).toBe(collectionEventTypes);
-      expect(this.controller.collectionEvent).toBe(collectionEvent);
-      expect(this.controller.panelOpen).toBeTrue();
+  describe('updates to annotations', function () {
 
-      expect(this.controller.editTimeCompleted).toBeFunction();
-      expect(this.controller.editAnnotation).toBeFunction();
-      expect(this.controller.panelButtonClicked).toBeFunction();
-    });
+    var context = {};
 
-    it('panel can be closed and opened', function() {
-      var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                               this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-          collectionEventTypes = [ collectionEvent.collectionEventType ],
-          study = new this.Study(this.factory.defaultStudy());
+    beforeEach(inject(function () {
+      context.entity                   = this.CollectionEvent;
+      context.entityUpdateFuncName     = 'addAnnotation';
+    }));
 
-      this.createController(study, collectionEventTypes, collectionEvent);
-      this.controller.panelButtonClicked();
-      this.scope.$digest();
-      expect(this.controller.panelOpen).toBeFalse();
-
-      this.controller.panelButtonClicked();
-      this.scope.$digest();
-      expect(this.controller.panelOpen).toBeTrue();
-    });
-
-    describe('updates to time completed', function () {
-
-      var context = {};
+    describe('updates to a text annotation', function () {
 
       beforeEach(inject(function () {
-        context.controllerUpdateFuncName = 'editTimeCompleted';
+        var self = this,
+            collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT),
+            study = new this.Study(this.factory.defaultStudy());
+
+        context.entityInstance           = collectionEvent;
+        context.createController         = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'text';
+        context.annotation               = collectionEvent.annotations[0];
+        context.newValue                 = faker.random.word();
+
+        function createController() {
+          return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
+        }
+      }));
+
+      sharedBehaviour(context);
+
+    });
+
+    describe('updates to a date time annotation', function () {
+
+      beforeEach(inject(function () {
+        var self = this,
+            newValue = faker.date.recent(10),
+            collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME),
+            study = new this.Study(this.factory.defaultStudy());
+
+        context.entityInstance           = collectionEvent;
+        context.createController         = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'dateTime';
-        context.ceventUpdateFuncName     = 'updateTimeCompleted';
-        context.collectionEvent          = this.collectionEvent;
-        context.newValue                 = faker.date.recent(10);
+        context.annotation               = collectionEvent.annotations[0];
+        context.newValue                 = { date: newValue, time: newValue };
+
+        function createController() {
+          return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
+        }
       }));
 
-      sharedUpdateBehaviour(context);
+      sharedBehaviour(context);
 
     });
 
-    describe('updates to annotations', function () {
-
-      var context = {};
+    describe('updates to a number annotation', function () {
 
       beforeEach(inject(function () {
-        context.entity                   = this.CollectionEvent;
-        context.entityUpdateFuncName     = 'addAnnotation';
+        var self = this,
+            collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER),
+            study = new this.Study(this.factory.defaultStudy());
+
+        context.entityInstance           = collectionEvent;
+        context.createController          = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'number';
+        context.annotation               = collectionEvent.annotations[0];
+        context.newValue                 = 10;
+
+        function createController() {
+          return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
+        }
       }));
 
-      describe('updates to a text annotation', function () {
-
-        beforeEach(inject(function () {
-          var self = this,
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT),
-              study = new this.Study(this.factory.defaultStudy());
-
-          context.entityInstance           = collectionEvent;
-          context.createController         = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'text';
-          context.annotation               = collectionEvent.annotations[0];
-          context.newValue                 = faker.random.word();
-
-          function createController() {
-            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
-      });
-
-      describe('updates to a date time annotation', function () {
-
-        beforeEach(inject(function () {
-          var self = this,
-              newValue = faker.date.recent(10),
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME),
-              study = new this.Study(this.factory.defaultStudy());
-
-          context.entityInstance           = collectionEvent;
-          context.createController         = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'dateTime';
-          context.annotation               = collectionEvent.annotations[0];
-          context.newValue                 = { date: newValue, time: newValue };
-
-          function createController() {
-            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
-      });
-
-      describe('updates to a number annotation', function () {
-
-        beforeEach(inject(function () {
-          var self = this,
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER),
-              study = new this.Study(this.factory.defaultStudy());
-
-          context.entityInstance           = collectionEvent;
-          context.createController          = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'number';
-          context.annotation               = collectionEvent.annotations[0];
-          context.newValue                 = 10;
-
-          function createController() {
-            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
-      });
-
-      describe('updates to a single select annotation', function () {
-
-        beforeEach(inject(function () {
-          var self = this,
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                   this.AnnotationMaxValueCount.SELECT_SINGLE),
-              study = new this.Study(this.factory.defaultStudy());
-
-          context.entityInstance           = collectionEvent;
-          context.createController         = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'select';
-          context.annotation               = collectionEvent.annotations[0];
-          context.newValue                 = collectionEvent.annotations[0].annotationType.options[0];
-
-          function createController() {
-            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
-      });
-
-      describe('updates to a multiple select annotation', function () {
-
-        beforeEach(inject(function () {
-          var self = this,
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                   this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-              study = new this.Study(this.factory.defaultStudy());
-
-          context.entityInstance           = collectionEvent;
-          context.createController          = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'selectMultiple';
-          context.annotation               = collectionEvent.annotations[0];
-          context.newValue                 = collectionEvent.annotations[0].annotationType.options;
-
-          function createController() {
-            return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
-      });
+      sharedBehaviour(context);
 
     });
 
-    function sharedUpdateBehaviour(context) {
+    describe('updates to a single select annotation', function () {
 
-      describe('(shared) tests', function() {
+      beforeEach(inject(function () {
+        var self = this,
+            collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                                 this.AnnotationMaxValueCount.SELECT_SINGLE),
+            study = new this.Study(this.factory.defaultStudy());
 
-        beforeEach(inject(function() {
-          this.injectDependencies('CollectionEvent',
-                                  'modalInput',
-                                  'notificationsService');
-          this.collectionEvent = this.collectionEventWithAnnotation(
-            this.AnnotationValueType.SELECT,
-            this.AnnotationMaxValueCount.SELECT_MULTIPLE);
+        context.entityInstance           = collectionEvent;
+        context.createController         = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'select';
+        context.annotation               = collectionEvent.annotations[0];
+        context.newValue                 = collectionEvent.annotations[0].annotationType.options[0];
 
-          this.study = new this.Study(this.factory.defaultStudy());
+        function createController() {
+          return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
+        }
+      }));
 
-        }));
+      sharedBehaviour(context);
 
+    });
 
-        it('on update should invoke the update method on entity', function() {
-          spyOn(this.modalInput, context.modalInputFuncName)
-            .and.returnValue({ result: this.$q.when(context.newValue )});
-          spyOn(this.CollectionEvent.prototype, context.ceventUpdateFuncName)
-            .and.returnValue(this.$q.when(context.collectionEvent));
-          spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
+    describe('updates to a multiple select annotation', function () {
 
-          this.createController(this.study,
-                                [ this.collectionEvent.collectionEventType ],
-                                this.collectionEvent);
-          this.controller[context.controllerUpdateFuncName]();
-          this.scope.$digest();
+      beforeEach(inject(function () {
+        var self = this,
+            collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                                 this.AnnotationMaxValueCount.SELECT_MULTIPLE),
+            study = new this.Study(this.factory.defaultStudy());
 
-          expect(this.CollectionEvent.prototype[context.ceventUpdateFuncName]).toHaveBeenCalled();
-          expect(this.notificationsService.success).toHaveBeenCalled();
-        });
+        context.entityInstance           = collectionEvent;
+        context.createController          = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'selectMultiple';
+        context.annotation               = collectionEvent.annotations[0];
+        context.newValue                 = collectionEvent.annotations[0].annotationType.options;
 
-        it('error message should be displayed when update fails', function() {
-          this.createController(this.study,
-                                [ this.collectionEvent.collectionEventType ],
-                                this.collectionEvent);
-          spyOn(this.modalInput, context.modalInputFuncName)
-            .and.returnValue({ result: this.$q.when(context.newValue )});
-          spyOn(this.CollectionEvent.prototype, context.ceventUpdateFuncName)
-            .and.returnValue(this.$q.reject('simulated error'));
-          spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
+        function createController() {
+          return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
+        }
+      }));
 
-          this.controller[context.controllerUpdateFuncName]();
-          this.scope.$digest();
+      sharedBehaviour(context);
 
-          expect(this.notificationsService.updateError).toHaveBeenCalled();
-        });
+    });
 
-      });
-    }
+  });
 
-    describe('when removing a collection event', function() {
+  function sharedUpdateBehaviour(context) {
 
-      beforeEach(function() {
-        this.collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER);
+    describe('(shared) tests', function() {
+
+      beforeEach(inject(function() {
+        this.injectDependencies('CollectionEvent',
+                                'modalInput',
+                                'notificationsService');
+        this.collectionEvent = this.collectionEventWithAnnotation(
+          this.AnnotationValueType.SELECT,
+          this.AnnotationMaxValueCount.SELECT_MULTIPLE);
+
         this.study = new this.Study(this.factory.defaultStudy());
-      });
 
-      it('can remove the collection event when cevent has no specimens', function() {
-        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                 this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-            collectionEventTypes = [ collectionEvent.collectionEventType ];
+      }));
 
-        this.Specimen.list =
-          jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [] }));
 
-        this.modalService.modalOkCancel =
-          jasmine.createSpy('modalOkCancel').and.returnValue(this.$q.when('OK'));
+      it('on update should invoke the update method on entity', function() {
+        spyOn(this.modalInput, context.modalInputFuncName)
+          .and.returnValue({ result: this.$q.when(context.newValue )});
+        spyOn(this.CollectionEvent.prototype, context.ceventUpdateFuncName)
+          .and.returnValue(this.$q.when(context.collectionEvent));
+        spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-        this.CollectionEvent.prototype.remove =
-          jasmine.createSpy('remove').and.returnValue(this.$q.when(this.collectionEvent));
-
-        this.notificationsService.success =
-          jasmine.createSpy('remove').and.returnValue(this.$q.when(null));
-
-        this.$state.go =
-          jasmine.createSpy('state.go').and.returnValue(null);
-
-        this.createController(this.study, collectionEventTypes, collectionEvent);
-        this.controller.remove();
+        this.createController(this.study,
+                              [ this.collectionEvent.collectionEventType ],
+                              this.collectionEvent);
+        this.controller[context.controllerUpdateFuncName]();
         this.scope.$digest();
-        expect(this.CollectionEvent.prototype.remove).toHaveBeenCalled();
+
+        expect(this.CollectionEvent.prototype[context.ceventUpdateFuncName]).toHaveBeenCalled();
         expect(this.notificationsService.success).toHaveBeenCalled();
-        expect(this.modalService.modalOkCancel.calls.count()).toBe(1);
       });
 
-      it('cannot remove the collection event due to server error', function() {
-        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                 this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-            collectionEventTypes = [ collectionEvent.collectionEventType ];
+      it('error message should be displayed when update fails', function() {
+        this.createController(this.study,
+                              [ this.collectionEvent.collectionEventType ],
+                              this.collectionEvent);
+        spyOn(this.modalInput, context.modalInputFuncName)
+          .and.returnValue({ result: this.$q.when(context.newValue )});
+        spyOn(this.CollectionEvent.prototype, context.ceventUpdateFuncName)
+          .and.returnValue(this.$q.reject('simulated error'));
+        spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        this.createController(this.study, collectionEventTypes, collectionEvent);
-
-        this.Specimen.list =
-          jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [] }));
-
-        this.modalService.modalOkCancel =
-          jasmine.createSpy('modalOkCancel').and.returnValue(this.$q.when('OK'));
-
-        this.CollectionEvent.prototype.remove =
-          jasmine.createSpy('remove').and.returnValue(this.$q.reject('simulated error'));
-
-        this.notificationsService.success =
-          jasmine.createSpy('remove').and.returnValue(this.$q.when(null));
-
-        this.$state.go =
-          jasmine.createSpy('state.go').and.returnValue(null);
-
-        this.controller.remove();
+        this.controller[context.controllerUpdateFuncName]();
         this.scope.$digest();
-        expect(this.CollectionEvent.prototype.remove).toHaveBeenCalled();
-        expect(this.notificationsService.success).not.toHaveBeenCalled();
-        expect(this.modalService.modalOkCancel.calls.count()).toBe(2);
-      });
 
-      it('can NOT remove the collection event when cevent HAS specimens', function() {
-        var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                 this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-            collectionEventTypes = [ collectionEvent.collectionEventType ],
-            specimen = new this.Specimen(this.factory.specimen());
-
-        this.Specimen.list =
-          jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [ specimen ] }));
-
-        this.modalService.modalOk =
-          jasmine.createSpy('modalOk').and.returnValue(this.$q.when('OK'));
-
-        this.createController(this.study, collectionEventTypes, collectionEvent);
-        this.controller.remove();
-        this.scope.$digest();
-        expect(this.modalService.modalOk).toHaveBeenCalled();
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
       });
 
     });
+  }
 
-    xit('should allow to edit  the visit type', function() {
-      fail('this test should be written when the functionality is implemented');
+  describe('when removing a collection event', function() {
+
+    beforeEach(function() {
+      this.collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER);
+      this.study = new this.Study(this.factory.defaultStudy());
     });
 
+    it('can remove the collection event when cevent has no specimens', function() {
+      var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                               this.AnnotationMaxValueCount.SELECT_MULTIPLE),
+          collectionEventTypes = [ collectionEvent.collectionEventType ];
 
+      this.Specimen.list =
+        jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [] }));
+
+      this.modalService.modalOkCancel =
+        jasmine.createSpy('modalOkCancel').and.returnValue(this.$q.when('OK'));
+
+      this.CollectionEvent.prototype.remove =
+        jasmine.createSpy('remove').and.returnValue(this.$q.when(this.collectionEvent));
+
+      this.notificationsService.success =
+        jasmine.createSpy('remove').and.returnValue(this.$q.when(null));
+
+      this.$state.go =
+        jasmine.createSpy('state.go').and.returnValue(null);
+
+      this.createController(this.study, collectionEventTypes, collectionEvent);
+      this.controller.remove();
+      this.scope.$digest();
+      expect(this.CollectionEvent.prototype.remove).toHaveBeenCalled();
+      expect(this.notificationsService.success).toHaveBeenCalled();
+      expect(this.modalService.modalOkCancel.calls.count()).toBe(1);
+    });
+
+    it('cannot remove the collection event due to server error', function() {
+      var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                               this.AnnotationMaxValueCount.SELECT_MULTIPLE),
+          collectionEventTypes = [ collectionEvent.collectionEventType ];
+
+      this.createController(this.study, collectionEventTypes, collectionEvent);
+
+      this.Specimen.list =
+        jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [] }));
+
+      this.modalService.modalOkCancel =
+        jasmine.createSpy('modalOkCancel').and.returnValue(this.$q.when('OK'));
+
+      this.CollectionEvent.prototype.remove =
+        jasmine.createSpy('remove').and.returnValue(this.$q.reject('simulated error'));
+
+      this.notificationsService.success =
+        jasmine.createSpy('remove').and.returnValue(this.$q.when(null));
+
+      this.$state.go =
+        jasmine.createSpy('state.go').and.returnValue(null);
+
+      this.controller.remove();
+      this.scope.$digest();
+      expect(this.CollectionEvent.prototype.remove).toHaveBeenCalled();
+      expect(this.notificationsService.success).not.toHaveBeenCalled();
+      expect(this.modalService.modalOkCancel.calls.count()).toBe(2);
+    });
+
+    it('can NOT remove the collection event when cevent HAS specimens', function() {
+      var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                                               this.AnnotationMaxValueCount.SELECT_MULTIPLE),
+          collectionEventTypes = [ collectionEvent.collectionEventType ],
+          specimen = new this.Specimen(this.factory.specimen());
+
+      this.Specimen.list =
+        jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [ specimen ] }));
+
+      this.modalService.modalOk =
+        jasmine.createSpy('modalOk').and.returnValue(this.$q.when('OK'));
+
+      this.createController(this.study, collectionEventTypes, collectionEvent);
+      this.controller.remove();
+      this.scope.$digest();
+      expect(this.modalService.modalOk).toHaveBeenCalled();
+    });
+
+  });
+
+  xit('should allow to edit  the visit type', function() {
+    fail('this test should be written when the functionality is implemented');
   });
 
 });

@@ -5,8 +5,6 @@
 import _       from 'lodash';
 import angular from 'angular';
 
-const MODULE_NAME = 'biobank.modalinput';
-
 /**
  * The functions this service provides.
  */
@@ -29,11 +27,14 @@ const modalTypes = [
  * Creates a module with one service and multiple directives to allow the user to modify an entity value
  * while in a modal.
  */
-const module = angular.module(MODULE_NAME, []);
+const ModalInputModule = 'biobank.modalinput';
 
-module.service('modalInput', modalInputService);
+const Module = angular.module(ModalInputModule, [])
+  .service('modalInput', modalInputService);
+
 init();
 
+export default ModalInputModule;
 /*
  * Creates the required directives.
  */
@@ -41,7 +42,7 @@ function init() {
   _.each(modalTypes, function (type) {
     var name = 'modalInput' + _.upperFirst(type);
     var directive = modalInputDirectiveGenerator(type);
-    module.directive(name, directive);
+    Module.directive(name, directive);
   });
 }
 
@@ -173,5 +174,3 @@ function modalInputService($uibModal) {
   }
 
 }
-
-export default MODULE_NAME;

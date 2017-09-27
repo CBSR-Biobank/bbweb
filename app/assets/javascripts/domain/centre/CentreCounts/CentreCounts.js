@@ -24,7 +24,7 @@ define(['lodash'], function(_) {
     }
 
     CentreCounts.get = function () {
-      return biobankApi.get('/centres/counts').then(function (response) {
+      return biobankApi.get('/api/centres/counts').then(function (response) {
         return new CentreCounts({
           total:    response.total,
           disabled: response.disabledCount,

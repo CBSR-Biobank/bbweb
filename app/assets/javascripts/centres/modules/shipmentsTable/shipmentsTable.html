@@ -62,7 +62,7 @@
   </tbody>
 </table>
 
-<div class="row" ng-if="(vm.shipments.length <= 0) && !vm.stateFilter)">
+<div class="row" ng-if="((vm.shipments.length <= 0) && !vm.stateFilter)">
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
       <p><span class="glyphicon glyphicon-warning-sign"></span>
@@ -74,7 +74,7 @@
   </div>
 </div>
 
-<div class="row" ng-if="(vm.shipments.length <= 0) && vm.stateFilter)">
+<div class="row" ng-if="((vm.shipments.length <= 0) && vm.stateFilter)">
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
       <p><span class="glyphicon glyphicon-warning-sign"></span>

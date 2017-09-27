@@ -1,22 +1,18 @@
 /**
+ * Jasmine test suite
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-// Jasmine test suite
-//
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'biobankApp'
-], function(angular, mocks, _) {
-  'use strict';
+/* global angular */
 
-  describe('AnnotationTypeViewer', function() {
+import _ from 'lodash';
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+describe('AnnotationTypeViewer', function() {
 
-    beforeEach(inject(function(TestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(TestSuiteMixin) {
       _.extend(this, TestSuiteMixin.prototype);
       this.injectDependencies('$uibModal',
                               'Study',
@@ -35,102 +31,101 @@ define([
         { valueType: this.AnnotationValueType.SELECT,   maxValueCount: 1 },
         { valueType: this.AnnotationValueType.SELECT,   maxValueCount: 2 }
       ];
-    }));
-
-    it('should open a modal when created', function () {
-      var self = this,
-          count = 0;
-
-      spyOn(self.$uibModal, 'open').and.returnValue(this.testUtils.fakeModal());
-
-      _.each(this.annotatationTypeOptions, function (options) {
-        // jshint unused:false
-        var annotationType = new self.AnnotationType(self.factory.annotationType(options)),
-            viewer = new self.AnnotationTypeViewer(annotationType);
-        count++;
-        expect(self.$uibModal.open.calls.count()).toBe(count);
-      });
     });
+  });
 
-    it('should throw an error when created when it has no options', function() {
-      var self = this,
-          annotationType = new this.AnnotationType(
-            self.factory.annotationType({
-              valueType: self.AnnotationValueType.SELECT,
-              options: []
-            }));
+  it('should open a modal when created', function () {
+    var self = this,
+        count = 0;
 
-      expect(function () { return new self.AnnotationTypeViewer(annotationType); })
-        .toThrow(new Error('invalid annotation type options'));
+    spyOn(self.$uibModal, 'open').and.returnValue(this.testUtils.fakeModal());
+
+    _.each(this.annotatationTypeOptions, function (options) {
+      // jshint unused:false
+      var annotationType = new self.AnnotationType(self.factory.annotationType(options)),
+          viewer = new self.AnnotationTypeViewer(annotationType);
+      count++;
+      expect(self.$uibModal.open.calls.count()).toBe(count);
     });
+  });
 
-    it('should display valid attributes for all value types', function() {
-      var self = this,
-          EntityViewer = this.$injector.get('EntityViewer'),
-          attributes = [];
+  it('should throw an error when created when it has no options', function() {
+    var self = this,
+        annotationType = new this.AnnotationType(
+          self.factory.annotationType({
+            valueType: self.AnnotationValueType.SELECT,
+            options: []
+          }));
 
-      spyOn(EntityViewer.prototype, 'addAttribute').and.callFake(function (label, value) {
-        attributes.push({label: label, value: value});
-      });
+    expect(function () { return new self.AnnotationTypeViewer(annotationType); })
+      .toThrow(new Error('invalid annotation type options'));
+  });
 
-      _.each(self.annotatationTypeOptions, function (options) {
-        var annotationType, viewer, numAttributesExpected = 4;
-
+  it('should display valid attributes for all value types', function() {
+    var self = this,
+        EntityViewer = this.$injector.get('EntityViewer'),
         attributes = [];
 
-        annotationType = new self.AnnotationType(self.factory.annotationType(options));
-        viewer = new self.AnnotationTypeViewer(annotationType);
+    spyOn(EntityViewer.prototype, 'addAttribute').and.callFake(function (label, value) {
+      attributes.push({label: label, value: value});
+    });
 
-        if (annotationType.isValueTypeSelect()) {
-          numAttributesExpected += 1;
-        }
+    _.each(self.annotatationTypeOptions, function (options) {
+      var annotationType, viewer, numAttributesExpected = 4;
 
-        expect(attributes).toBeArrayOfSize(numAttributesExpected);
+      attributes = [];
 
-        _.each(attributes, function(attr) {
-          switch (attr.label) {
-          case 'Name':
-            expect(attr.value).toBe(annotationType.name);
-            break;
+      annotationType = new self.AnnotationType(self.factory.annotationType(options));
+      viewer = new self.AnnotationTypeViewer(annotationType);
 
-          case 'Type':
-            // in this case attr.value is a function that comes from annotationValueTypeLabelService
-            expect(attr.value()).toBe(annotationType.getValueTypeLabelFunc()());
-            break;
+      if (annotationType.isValueTypeSelect()) {
+        numAttributesExpected += 1;
+      }
 
-          case 'Required':
-            if (!_.isUndefined(annotationType.required)) {
-              expect(attr.value).toBe(annotationType.required ? 'Yes' : 'No');
-            } else {
-              jasmine.getEnv().fail('annotation type does not have a required attribute');
-            }
-            break;
+      expect(attributes).toBeArrayOfSize(numAttributesExpected);
 
-          case 'Selections Allowed':
-            if (annotationType.valueType === self.AnnotationValueType.SELECT) {
-              expect(attr.value).toBe(annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
-            } else {
-              jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
-            }
-            break;
+      _.each(attributes, function(attr) {
+        switch (attr.label) {
+        case 'Name':
+          expect(attr.value).toBe(annotationType.name);
+          break;
 
-          case 'Selections':
-            if (annotationType.valueType === self.AnnotationValueType.SELECT) {
-              expect(attr.value).toBe(annotationType.options.join(', '));
-            } else {
-              jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
-            }
-            break;
+        case 'Type':
+          // in this case attr.value is a function that comes from annotationValueTypeLabelService
+          expect(attr.value()).toBe(annotationType.getValueTypeLabelFunc()());
+          break;
 
-          case 'Description':
-            expect(attr.value).toBe(annotationType.description);
-            break;
-
-          default:
-            jasmine.getEnv().fail('label is invalid: ' + attr.label);
+        case 'Required':
+          if (!_.isUndefined(annotationType.required)) {
+            expect(attr.value).toBe(annotationType.required ? 'Yes' : 'No');
+          } else {
+            jasmine.getEnv().fail('annotation type does not have a required attribute');
           }
-        });
+          break;
 
+        case 'Selections Allowed':
+          if (annotationType.valueType === self.AnnotationValueType.SELECT) {
+            expect(attr.value).toBe(annotationType.maxValueCount === 1 ? 'Single' : 'Multiple');
+          } else {
+            jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
+          }
+          break;
+
+        case 'Selections':
+          if (annotationType.valueType === self.AnnotationValueType.SELECT) {
+            expect(attr.value).toBe(annotationType.options.join(', '));
+          } else {
+            jasmine.getEnv().fail('not a select annotation type' + annotationType.valueType);
+          }
+          break;
+
+        case 'Description':
+          expect(attr.value).toBe(annotationType.description);
+          break;
+
+        default:
+          jasmine.getEnv().fail('label is invalid: ' + attr.label);
+        }
       });
 
     });

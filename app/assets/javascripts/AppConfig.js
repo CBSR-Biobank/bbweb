@@ -8,6 +8,7 @@ export default class AppConfigProvider {
     // initial / default config
   constructor() {
     this.config = {
+      restApiUrlPrefix: '/api',
       dateFormat:       'YYYY-MM-DD',
       dateTimeFormat:   'YYYY-MM-DD HH:mm',
       datepickerFormat: 'yyyy-MM-dd HH:mm'

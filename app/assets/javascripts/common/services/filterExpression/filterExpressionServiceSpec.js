@@ -2,34 +2,31 @@
  * Jasmine test suite
  *
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash');
+import _ from 'lodash';
 
-  describe('filterExpressionService', function() {
+describe('filterExpressionService', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(TestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(TestSuiteMixin) {
       _.extend(this, TestSuiteMixin.prototype);
       this.injectDependencies('filterExpression');
-    }));
-
-    it('can create a filter expression', function() {
-      var result = this.filterExpression.create([{ key: 'name', value: 'test' }]);
-      expect(result).toEqual('name::test');
     });
+  });
 
-    it('expressions with empty values are ignored', function() {
-      var result = this.filterExpression.create([
-        { key: 'key1', value: '' },
-        { key: 'key2', value: 'val2' }
-      ]);
-      expect(result).toEqual('key2::val2');
-    });
+  it('can create a filter expression', function() {
+    var result = this.filterExpression.create([{ key: 'name', value: 'test' }]);
+    expect(result).toEqual('name::test');
+  });
 
+  it('expressions with empty values are ignored', function() {
+    var result = this.filterExpression.create([
+      { key: 'key1', value: '' },
+      { key: 'key2', value: 'val2' }
+    ]);
+    expect(result).toEqual('key2::val2');
   });
 
 });

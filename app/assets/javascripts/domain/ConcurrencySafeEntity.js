@@ -5,12 +5,20 @@
 define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
-  ConcurrencySafeEntityFactory.$inject = [ '$q', 'DomainEntity', 'DomainError', 'biobankApi' ];
+  ConcurrencySafeEntityFactory.$inject = [
+    '$q',
+    'DomainEntity',
+    'DomainError',
+    'biobankApi'
+  ];
 
   /**
    * A domain entity in the system that allows for optimistic concurrency versioning.
    */
-  function ConcurrencySafeEntityFactory($q, DomainEntity, DomainError, biobankApi) {
+  function ConcurrencySafeEntityFactory($q,
+                                        DomainEntity,
+                                        DomainError,
+                                        biobankApi) {
 
     /**
      * @classdesc Used to manage surrogate identity and optimistic concurrency versioning.

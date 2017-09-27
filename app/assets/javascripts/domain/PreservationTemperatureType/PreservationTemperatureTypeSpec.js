@@ -4,21 +4,21 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
-  'use strict';
+/* global angular */
 
-  describe('PreservationTemperatureType', function() {
+import _ from 'lodash';
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+describe('PreservationTemperatureType', function() {
 
-    it('should have values', inject(function (PreservationTemperatureType) {
-      expect(_.keys(PreservationTemperatureType)).not.toBeEmptyArray();
-    }));
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function (PreservationTemperatureType) {
+      this.PreservationTemperatureType = PreservationTemperatureType;
+    });
+  });
 
+  it('should have values', function () {
+    expect(_.keys(this.PreservationTemperatureType)).not.toBeEmptyArray();
   });
 
 });

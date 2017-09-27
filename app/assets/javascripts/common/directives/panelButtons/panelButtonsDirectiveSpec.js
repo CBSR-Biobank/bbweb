@@ -4,88 +4,74 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash',
-  'biobankApp'
-], function(angular, mocks, _) {
-  'use strict';
+/* global angular */
 
-  /**
-   * TODO: not sure how to test open / closed state of the panel since it is a ui-bootstrap panel.
-   */
-  describe('Directive: panelButtons', function() {
-    var modelFuncNames = ['add', 'panelToggle'];
+import _ from 'lodash';
 
-    var createScope = function (options) {
-      var self = this;
+/**
+ * TODO: not sure how to test open / closed state of the panel since it is a ui-bootstrap panel.
+ */
+describe('Directive: panelButtons', function() {
+  var modelFuncNames = ['add', 'panelToggle'];
 
-      self.scope = self.$rootScope.$new();
-
-      options = options || {};
-
-      self.scope.model = {
-        add:         function () {},
-        addEnabled:  options.addEnabled || false,
-        panelOpen:   true,
-        panelToggle: function () {}
-      };
-
-      _.each(modelFuncNames, function (funcName){
-        spyOn(self.scope.model, funcName).and.returnValue(funcName);
-      });
-
-      self.$compile(self.element)(self.scope);
-      self.scope.$digest();
-    };
-
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function (TestSuiteMixin, testUtils) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function (TestSuiteMixin) {
       _.extend(this, TestSuiteMixin.prototype);
 
       this.injectDependencies('$rootScope', '$compile');
 
-      this.putHtmlTemplates(
-        '/assets/javascripts/common/directives/panelButtons.html');
-
       this.element = angular.element(
-        '<panel-buttons on-add="model.add()"' +
-          '         add-button-title="add location"' +
-          '         add-button-enabled="model.addEnabled"' +
-          '         panel-open="model.panelOpen">' +
-          '</panel-buttons>');
-    }));
+        `<panel-buttons on-add="model.add()"
+           add-button-title="add location"
+           add-button-enabled="model.addEnabled"
+           panel-open="model.panelOpen">
+         </panel-buttons>'`);
 
-    it('clicking on a button invokes corresponding function', function() {
-      var buttons;
+      this.createScope = (options) => {
+        options = options || {};
+        this.scope = this.$rootScope.$new();
+        this.scope.model = {
+          add:         function () {},
+          addEnabled:  options.addEnabled || false,
+          panelOpen:   true,
+          panelToggle: function () {}
+        };
 
-      createScope.call(this, { addEnabled: true });
+        modelFuncNames.forEach((funcName) => spyOn(this.scope.model, funcName).and.returnValue(funcName));
 
-      buttons = this.element.find('button');
-      expect(buttons.length).toBe(2);
-      buttons.eq(0).click();
-      expect(this.scope.model.add).toHaveBeenCalled();
+        this.$compile(this.element)(this.scope);
+        this.scope.$digest();
+      };
     });
+  });
 
-    it('button not present if disabled', function() {
-      var buttons;
+  it('clicking on a button invokes corresponding function', function() {
+    var buttons;
 
-      createScope.call(this, { addEnabled: false });
-      buttons = this.element.find('button');
-      expect(buttons.length).toBe(1);
-    });
+    this.createScope({ addEnabled: true });
 
-    it('add button has the correct icon', function() {
-      var icons;
+    buttons = this.element.find('button');
+    expect(buttons.length).toBe(2);
+    buttons.eq(0).click();
+    expect(this.scope.model.add).toHaveBeenCalled();
+  });
 
-      createScope.call(this, { addEnabled: true });
-      icons = this.element.find('button i');
-      expect(icons.length).toBe(2);
-      expect(icons.eq(0)).toHaveClass('glyphicon-plus');
-    });
+  it('button not present if disabled', function() {
+    var buttons;
 
+    this.createScope({ addEnabled: false });
+    buttons = this.element.find('button');
+    expect(buttons.length).toBe(1);
+  });
+
+  it('add button has the correct icon', function() {
+    var icons;
+
+    this.createScope({ addEnabled: true });
+    icons = this.element.find('button i');
+    expect(icons.length).toBe(2);
+    expect(icons.eq(0)).toHaveClass('glyphicon-plus');
   });
 
 });

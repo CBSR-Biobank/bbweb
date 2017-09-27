@@ -6,14 +6,13 @@
  */
 import angular from 'angular';
 
-const MODULE_NAME = 'biobank.studies';
-
-angular.module(MODULE_NAME, [])
-  .factory('StudyAnnotationTypesService',       require('./StudyAnnotationTypesService'))
+const StudiesModule = angular.module('biobank.studies', [])
+  .factory('StudyAnnotationTypesService',       require('./services/StudyAnnotationTypes/StudyAnnotationTypesService'))
 
   .service('annotationValueTypeLabelService',   require('./services/annotationValueTypeLabelService'))
-  .service('specimenGroupsService',             require('./services/specimenGroupsService'))
+  .service('specimenGroupsService',             require('./services/specimenGroupsService/specimenGroupsService'))
   .service('spcLinkAnnotationTypesService',     require('./services/spcLinkAnnotationTypesService'))
-  .service('studyStateLabelService',            require('./services/studyStateLabelService'));
+  .service('studyStateLabelService',            require('./services/studyStateLabelService'))
+  .name;
 
-export default MODULE_NAME;
+export default StudiesModule;

@@ -4,31 +4,49 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks                  = require('angularMocks'),
-      _                      = require('lodash'),
-      entityUpdateSharedSpec = require('../../../../test/entityUpdateSharedSpec');
+import _ from 'lodash';
+import entityUpdateSharedSpec from '../../../../test/entityUpdateSharedSpec';
 
-  describe('Component: studySummary', function() {
+describe('Component: studySummary', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      var specimenDescription, ceventType;
 
-      function SuiteMixin() {
-      }
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Study',
+                              'CollectionEventType',
+                              'CollectionSpecimenDescription',
+                              'modalService',
+                              'notificationsService',
+                              'factory');
 
-      SuiteMixin.prototype.createScope = function () {
+      specimenDescription = this.factory.collectionSpecimenDescription();
+      this.study = this.Study.create(this.factory.study());
+      ceventType = this.CollectionEventType.create(
+        this.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]}));
+
+      spyOn(this.CollectionEventType, 'list').and.returnValue(this.$q.when([ ceventType ]));
+      spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when(true));
+
+      this.study = new this.Study(this.factory.study());
+
+      this.createScope = () => {
         var scope = ComponentTestSuiteMixin.prototype.createScope.call(this, { study: this.study });
         this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
         scope.$on('tabbed-page-update', this.eventRxFunc);
         return scope;
       };
 
-      SuiteMixin.prototype.createController = function (enableAllowed) {
+      this.createController = (enableAllowed) => {
         if (_.isUndefined(enableAllowed)) {
           enableAllowed = true;
         }
@@ -41,160 +59,120 @@ define(function (require) {
           { study: this.study },
           'studySummary');
       };
+    });
+  });
 
-      return SuiteMixin;
-    }
+  it('initialization is valid', function() {
+    this.createController();
+    expect(this.controller.study).toBe(this.study);
+    expect(this.controller.descriptionToggleLength).toBeDefined();
+    expect(this.controller.isEnableAllowed).toBeTrue();
+    expect(this.eventRxFunc).toHaveBeenCalled();
+  });
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+  it('should have valid settings when study has no collection event types', function() {
+    this.createController(false);
+    expect(this.controller.isEnableAllowed).toBeFalse();
+  });
 
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      var self = this,
-          specimenDescription,
-          ceventType;
+  describe('updates to name', function () {
 
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+    var context = {};
 
-      self.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
-                              '$state',
-                              'Study',
-                              'CollectionEventType',
-                              'CollectionSpecimenDescription',
-                              'modalService',
-                              'notificationsService',
-                              'factory');
-
-      specimenDescription = self.factory.collectionSpecimenDescription();
-      this.study = this.Study.create(self.factory.study());
-      ceventType = self.CollectionEventType.create(
-        self.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]}));
-
-      spyOn(self.CollectionEventType, 'list').and.returnValue(self.$q.when([ ceventType ]));
-      spyOn(self.modalService, 'showModal').and.returnValue(self.$q.when(true));
-
-      self.study = new self.Study(self.factory.study());
-
-      self.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/studySummary/studySummary.html',
-        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
-        '/assets/javascripts/common/components/statusLine/statusLine.html',
-        '/assets/javascripts/common/modalInput/modalInput.html');
-
-    }));
-
-    it('initialization is valid', function() {
-      this.createController();
-      expect(this.controller.study).toBe(this.study);
-      expect(this.controller.descriptionToggleLength).toBeDefined();
-      expect(this.controller.isEnableAllowed).toBeTrue();
-      expect(this.eventRxFunc).toHaveBeenCalled();
+    beforeEach(function () {
+      context.entity             = this.Study;
+      context.createController   = this.createController.bind(this);
+      context.updateFuncName     = 'updateName';
+      context.controllerFuncName = 'editName';
+      context.modalInputFuncName = 'text';
     });
 
-    it('should have valid settings when study has no collection event types', function() {
-      this.createController(false);
-      expect(this.controller.isEnableAllowed).toBeFalse();
+    entityUpdateSharedSpec(context);
+
+  });
+
+  describe('updates to description', function () {
+    var context = {};
+
+    beforeEach(function () {
+      context.entity             = this.Study;
+      context.createController   = this.createController.bind(this);
+      context.updateFuncName     = 'updateDescription';
+      context.controllerFuncName = 'editDescription';
+      context.modalInputFuncName = 'textArea';
     });
 
-    describe('updates to name', function () {
+    entityUpdateSharedSpec(context);
 
-      var context = {};
+  });
 
-      beforeEach(inject(function () {
-        context.entity             = this.Study;
-        context.createController   = this.createController.bind(this);
-        context.updateFuncName     = 'updateName';
-        context.controllerFuncName = 'editName';
-        context.modalInputFuncName = 'text';
-      }));
+  describe('enabling a study', function() {
+    var context = {};
 
-      entityUpdateSharedSpec(context);
-
+    beforeEach(function () {
+      context.state = 'enable';
     });
 
-    describe('updates to description', function () {
-      var context = {};
+    sharedStudyStateBehaviour(context);
+  });
 
-      beforeEach(inject(function () {
-        context.entity             = this.Study;
-        context.createController   = this.createController.bind(this);
-        context.updateFuncName     = 'updateDescription';
-        context.controllerFuncName = 'editDescription';
-        context.modalInputFuncName = 'textArea';
-      }));
+  describe('disabling a study', function() {
+    var context = {};
 
-      entityUpdateSharedSpec(context);
-
+    beforeEach(function () {
+      context.state = 'disable';
     });
 
-    describe('enabling a study', function() {
-      var context = {};
+    sharedStudyStateBehaviour(context);
+  });
 
-      beforeEach(inject(function () {
-        context.state = 'enable';
-      }));
+  describe('retiring a study', function() {
+    var context = {};
 
-      sharedStudyStateBehaviour(context);
+    beforeEach(function () {
+      context.state = 'retire';
     });
 
-    describe('disabling a study', function() {
-      var context = {};
+    sharedStudyStateBehaviour(context);
+  });
 
-      beforeEach(inject(function () {
-        context.state = 'disable';
-      }));
+  describe('unretiring a study', function() {
+    var context = {};
 
-      sharedStudyStateBehaviour(context);
+    beforeEach(function () {
+      context.state = 'unretire';
     });
 
-    describe('retiring a study', function() {
-      var context = {};
-
-      beforeEach(inject(function () {
-        context.state = 'retire';
-      }));
-
-      sharedStudyStateBehaviour(context);
-    });
-
-    describe('unretiring a study', function() {
-      var context = {};
-
-      beforeEach(inject(function () {
-        context.state = 'unretire';
-      }));
-
-      sharedStudyStateBehaviour(context);
-    });
+    sharedStudyStateBehaviour(context);
+  });
 
 
-    function sharedStudyStateBehaviour(context) {
+  function sharedStudyStateBehaviour(context) {
 
-      describe('(shared) study state', function () {
+    describe('(shared) study state', function () {
 
-        it('change state', function () {
-          spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
-          spyOn(this.Study, 'get').and.returnValue(this.$q.when(this.study));
-          spyOn(this.Study.prototype, context.state).and.returnValue(this.$q.when(this.study));
+      it('change state', function () {
+        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
+        spyOn(this.Study, 'get').and.returnValue(this.$q.when(this.study));
+        spyOn(this.Study.prototype, context.state).and.returnValue(this.$q.when(this.study));
 
-          this.createController();
-          this.controller.changeState(context.state);
-          this.scope.$digest();
-          expect(this.Study.prototype[context.state]).toHaveBeenCalled();
-        });
-
+        this.createController();
+        this.controller.changeState(context.state);
+        this.scope.$digest();
+        expect(this.Study.prototype[context.state]).toHaveBeenCalled();
       });
-    }
 
-    it('should throw error for when trying to change to an invalid state', function () {
-      var self = this,
-          badState = 'xxx';
-
-      this.createController();
-      expect(function () {
-        self.controller.changeState(badState);
-      }).toThrow(new Error('invalid state: ' + badState));
     });
+  }
+
+  it('should throw error for when trying to change to an invalid state', function () {
+    var self = this,
+        badState = 'xxx';
+
+    this.createController();
+    expect(function () {
+      self.controller.changeState(badState);
+    }).toThrow(new Error('invalid state: ' + badState));
   });
 
 });

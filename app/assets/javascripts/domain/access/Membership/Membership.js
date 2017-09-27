@@ -5,13 +5,13 @@
 define(function (require) {
   'use strict';
 
-  var _       = require('lodash'),
-      sprintf = require('sprintf-js').sprintf;
+  var _ = require('lodash');
 
   MembershipFactory.$inject = [
     '$q',
     '$log',
     'biobankApi',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'MembershipBase',
     'EntityInfo',
@@ -25,6 +25,7 @@ define(function (require) {
   function MembershipFactory($q,
                              $log,
                              biobankApi,
+                             DomainEntity,
                              ConcurrencySafeEntity,
                              MembershipBase,
                              EntityInfo,
@@ -63,7 +64,10 @@ define(function (require) {
     Membership.prototype = Object.create(MembershipBase.prototype);
     Membership.prototype.constructor = Membership;
 
-    Membership.REST_API_URL = '/access/memberships';
+    Membership.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'access/memberships' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
 
     Membership.SCHEMA = _.extend(
       _.clone(MembershipBase.SCHEMA),
@@ -144,7 +148,7 @@ define(function (require) {
      * @returns {Promise<domain.access.Membership>} The user within a promise.
      */
     Membership.get = function(id) {
-      return biobankApi.get(uri(id)).then(Membership.prototype.asyncCreate);
+      return biobankApi.get(Membership.url(id)).then(Membership.asyncCreate);
     };
 
     /**
@@ -175,7 +179,7 @@ define(function (require) {
         return value === '';
       });
 
-      return biobankApi.get(Membership.REST_API_URL, params).then(function(reply) {
+      return biobankApi.get(Membership.url(), params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
@@ -213,7 +217,7 @@ define(function (require) {
       json.allCentres = this.centreData.allEntities;
       json.studyIds   = this.studyData.getEntityIds();
       json.centreIds  = this.centreData.getEntityIds();
-      return biobankApi.post(uri(), json).then(Membership.asyncCreate);
+      return biobankApi.post(Membership.url(), json).then(Membership.asyncCreate);
     };
 
     /**
@@ -226,7 +230,7 @@ define(function (require) {
       if (_.isNil(this.id)) {
         throw new DomainError('membership has not been persisted');
       }
-      url = sprintf('%s/%d', uri(this.id), this.version);
+      url = Membership.url(this.id, this.version);
       return biobankApi.del(url);
     };
 
@@ -238,7 +242,7 @@ define(function (require) {
      * @returns {Promise<domain.access.Membership>} A promise containing the membershipo with the new name.
      */
     Membership.prototype.updateName = function (name) {
-      return this.update.call(this, updateUri('name', this.id), { name: name });
+      return this.update.call(this, Membership.url('name', this.id), { name: name });
     };
 
     /**
@@ -251,12 +255,12 @@ define(function (require) {
      */
     Membership.prototype.updateDescription = function (description) {
       return this.update.call(this,
-                              updateUri('description', this.id),
+                              Membership.url('description', this.id),
                               description ? { description: description } : {});
     };
 
     Membership.prototype.addUser = function (id) {
-      return this.update.call(this, updateUri('user', this.id), { userId: id });
+      return this.update.call(this, Membership.url('user', this.id), { userId: id });
     };
 
     Membership.prototype.removeUser = function (id) {
@@ -264,16 +268,16 @@ define(function (require) {
       if (_.isNil(this.id)) {
         throw new DomainError('membership has not been persisted');
       }
-      url = sprintf('%s/%d/%s', updateUri('user', this.id), this.version, id);
+      url = Membership.url('user', this.id, this.version, id);
       return biobankApi.del(url).then(Membership.asyncCreate);
     };
 
     Membership.prototype.allStudies = function () {
-      return this.update.call(this, updateUri('allStudies', this.id), {});
+      return this.update.call(this, Membership.url('allStudies', this.id), {});
     };
 
     Membership.prototype.addStudy = function (id) {
-      return this.update.call(this, updateUri('study', this.id), { studyId: id });
+      return this.update.call(this, Membership.url('study', this.id), { studyId: id });
     };
 
     Membership.prototype.removeStudy = function (id) {
@@ -281,16 +285,16 @@ define(function (require) {
       if (_.isNil(this.id)) {
         throw new DomainError('membership has not been persisted');
       }
-      url = sprintf('%s/%d/%s', updateUri('study', this.id), this.version, id);
+      url = Membership.url('study', this.id, this.version, id);
       return biobankApi.del(url).then(Membership.asyncCreate);
     };
 
     Membership.prototype.allCentres = function () {
-      return this.update.call(this, updateUri('allCentres', this.id), {});
+      return this.update.call(this, Membership.url('allCentres', this.id), {});
     };
 
     Membership.prototype.addCentre = function (id) {
-      return this.update.call(this, updateUri('centre', this.id), { centreId: id });
+      return this.update.call(this, Membership.url('centre', this.id), { centreId: id });
     };
 
     Membership.prototype.removeCentre = function (id) {
@@ -298,35 +302,9 @@ define(function (require) {
       if (_.isNil(this.id)) {
         throw new DomainError('membership has not been persisted');
       }
-      url = sprintf('%s/%d/%s', updateUri('centre', this.id), this.version, id);
+      url = Membership.url('centre', this.id, this.version, id);
       return biobankApi.del(url).then(Membership.asyncCreate);
     };
-
-    function uri(id) {
-      var result = Membership.REST_API_URL + '/';
-      if (arguments.length > 0) {
-        result += id;
-      }
-      return result;
-    }
-
-    function updateUri(/* path, membershipId */) {
-      var result = '/access/memberships/',
-          args = _.toArray(arguments),
-          path,
-          membershipId;
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += path;
-      }
-
-      if (args.length > 0) {
-        membershipId = args.shift();
-        result += '/' + membershipId;
-      }
-      return result;
-    }
 
     return Membership;
   }

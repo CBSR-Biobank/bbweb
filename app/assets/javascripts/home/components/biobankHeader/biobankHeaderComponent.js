@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/home/components/biobankHeader/biobankHeader.html',
+    template: require('./biobankHeader.html'),
     controller: BiobankHeaderController,
     controllerAs: 'vm',
     bindings: {

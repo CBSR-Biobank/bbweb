@@ -4,21 +4,17 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash');
+import _ from 'lodash';
 
-  describe('ceventSpecimensViewComponent', function() {
+describe('ceventSpecimensViewComponent', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      var self = this;
-
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin.prototype);
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               'Study',
@@ -28,9 +24,6 @@ define(function (require) {
                               'specimenAddModal',
                               'domainNotificationService',
                               'factory');
-      this.putHtmlTemplates(
-        '/assets/javascripts/collection/components/ceventSpecimensView/ceventSpecimensView.html',
-        '/assets/javascripts/common/directives/pagination.html');
 
       this.rawSpecimenDescription = this.factory.collectionSpecimenDescription();
       this.rawCollectionEventType = this.factory.collectionEventType(
@@ -42,21 +35,23 @@ define(function (require) {
                                         this.collectionEventType.specimenDescriptions[0]);
       this.study = new this.Study(this.factory.defaultStudy());
 
-      this.createController = function (study, collectionEvent) {
-        study = study || self.study;
-        collectionEvent = collectionEvent || self.collectionEvent;
+      this.createController = (study, collectionEvent) => {
+        study = study || this.study;
+        collectionEvent = collectionEvent || this.collectionEvent;
 
         ComponentTestSuiteMixin.prototype.createController.call(
-          self,
-          '<cevent-specimens-view study="vm.study" collection-event="vm.collectionEvent">' +
-            '<cevent-specimens-view>',
+          this,
+          `<cevent-specimens-view
+             study="vm.study"
+             collection-event="vm.collectionEvent">
+           </cevent-specimens-view>`,
           {
             study:           study,
             collectionEvent: collectionEvent
           },
           'ceventSpecimensView');
 
-        self.controller.tableController = {
+        this.controller.tableController = {
           tableState: jasmine.createSpy().and.returnValue({
             sort: {
               predicate: 'inventoryId',
@@ -68,15 +63,12 @@ define(function (require) {
         };
       };
 
-      this.createCentreLocations = function () {
-        var self = this,
-            centres = _.map(_.range(2), function () {
-              var locations = _.map(_.range(2), function () {
-                return self.factory.location();
-              });
-              return self.factory.centre({ locations: locations });
-            });
-        return self.factory.centreLocations(centres);
+      this.createCentreLocations = () => {
+        var centres = _.range(2).map(() => {
+          var locations = _.range(2).map(() => this.factory.location());
+          return this.factory.centre({ locations: locations });
+        });
+        return this.factory.centreLocations(centres);
       };
 
       spyOn(this.Specimen, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
@@ -84,93 +76,91 @@ define(function (require) {
       spyOn(this.specimenAddModal, 'open').and.returnValue({ result: this.$q.when([ this.specimen ])});
       spyOn(this.Study.prototype, 'allLocations')
         .and.returnValue(this.$q.when(this.createCentreLocations()));
-
-    }));
-
-    it('has valid scope', function() {
-      this.createController();
-
-      expect(this.controller.specimens).toBeEmptyArray();
-      expect(this.controller.centreLocations).toBeEmptyArray();
-      expect(this.controller.tableController).toBeDefined(); // defined by the test suite
-
-      expect(this.controller.addSpecimens).toBeFunction();
-      expect(this.controller.getTableData).toBeFunction();
-      expect(this.controller.removeSpecimen).toBeFunction();
     });
+  });
 
-    describe('when adding a specimen', function() {
+  it('has valid scope', function() {
+    this.createController();
 
-      describe('centre locations', function() {
+    expect(this.controller.specimens).toBeEmptyArray();
+    expect(this.controller.centreLocations).toBeEmptyArray();
+    expect(this.controller.tableController).toBeDefined(); // defined by the test suite
 
-        it('are retrieved the first time addSpecimens is called', function() {
-          this.createController();
-          expect(this.controller.centreLocations).toBeEmptyArray();
-          this.controller.addSpecimens();
-          this.scope.$digest();
-          expect(this.Study.prototype.allLocations).toHaveBeenCalled();
-          expect(this.controller.centreLocations).not.toBeEmptyArray();
-        });
+    expect(this.controller.addSpecimens).toBeFunction();
+    expect(this.controller.getTableData).toBeFunction();
+    expect(this.controller.removeSpecimen).toBeFunction();
+  });
 
-        it('are NOT retrieved a second time', function() {
-          this.createController();
-          this.controller.centreLocations = this.createCentreLocations();
-          this.controller.addSpecimens();
-          this.scope.$digest();
-          expect(this.Study.prototype.allLocations).not.toHaveBeenCalled();
-        });
+  describe('when adding a specimen', function() {
 
+    describe('centre locations', function() {
+
+      it('are retrieved the first time addSpecimens is called', function() {
+        this.createController();
+        expect(this.controller.centreLocations).toBeEmptyArray();
+        this.controller.addSpecimens();
+        this.scope.$digest();
+        expect(this.Study.prototype.allLocations).toHaveBeenCalled();
+        expect(this.controller.centreLocations).not.toBeEmptyArray();
       });
 
-      it('can add a specimen', function() {
+      it('are NOT retrieved a second time', function() {
         this.createController();
         this.controller.centreLocations = this.createCentreLocations();
         this.controller.addSpecimens();
         this.scope.$digest();
-        expect(this.Specimen.add).toHaveBeenCalledWith(
-          this.collectionEvent.id, [ this.specimen ]);
+        expect(this.Study.prototype.allLocations).not.toHaveBeenCalled();
       });
 
     });
 
-    describe('when removing a specimen', function() {
-
-      beforeEach(function() {
-        this.injectDependencies('modalService', 'domainNotificationService');
-        this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
-        this.Specimen.prototype.remove = jasmine.createSpy().and.returnValue(this.$q.when(true));
-      });
-
-      it('opens a modal to confirm the action', function() {
-        this.createController();
-        this.controller.removeSpecimen(this.specimen);
-        this.scope.$digest();
-        expect(this.Specimen.prototype.remove).toHaveBeenCalled();
-      });
-
-      it('specimen is not removed if user cancels when asked for confirmation', function() {
-        this.createController();
-        this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.reject('Cancel'));
-        this.controller.removeSpecimen(this.specimen);
-        this.scope.$digest();
-        expect(this.Specimen.prototype.remove).not.toHaveBeenCalled();
-      });
-
-    });
-
-    it('can view details for a single specimen', function() {
-      this.injectDependencies('$state');
-
-      spyOn(this.$state, 'go').and.returnValue(null);
+    it('can add a specimen', function() {
       this.createController();
-      this.controller.viewSpecimen(this.specimen);
+      this.controller.centreLocations = this.createCentreLocations();
+      this.controller.addSpecimens();
       this.scope.$digest();
-
-      expect(this.$state.go).toHaveBeenCalledWith(
-        'home.collection.study.participant.cevents.details.specimen',
-        { inventoryId: this.specimen.inventoryId });
+      expect(this.Specimen.add).toHaveBeenCalledWith(
+        this.collectionEvent.id, [ this.specimen ]);
     });
 
+  });
+
+  describe('when removing a specimen', function() {
+
+    beforeEach(function() {
+      this.injectDependencies('modalService', 'domainNotificationService');
+      this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
+      this.Specimen.prototype.remove = jasmine.createSpy().and.returnValue(this.$q.when(true));
+    });
+
+    it('opens a modal to confirm the action', function() {
+      this.createController();
+      this.controller.removeSpecimen(this.specimen);
+      this.scope.$digest();
+      expect(this.Specimen.prototype.remove).toHaveBeenCalled();
+    });
+
+    it('specimen is not removed if user cancels when asked for confirmation', function() {
+      this.createController();
+      this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.reject('Cancel'));
+      this.controller.removeSpecimen(this.specimen);
+      this.scope.$digest();
+      expect(this.Specimen.prototype.remove).not.toHaveBeenCalled();
+    });
+
+  });
+
+  it('can view details for a single specimen', function() {
+    this.injectDependencies('$state');
+
+    spyOn(this.$state, 'go').and.returnValue(null);
+    this.createController();
+    this.controller.viewSpecimen(this.specimen);
+    this.scope.$digest();
+
+    expect(this.$state.go).toHaveBeenCalledWith(
+      'home.collection.study.participant.cevents.details.specimen',
+      { inventoryId: this.specimen.inventoryId });
   });
 
 });

@@ -4,12 +4,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import angular from 'angular';
-import shipmentsTableModule from './modules/shipmentsTable';
+import ShipmentsTableModule from './modules/shipmentsTable';
+import angular              from 'angular';
 
-const MODULE_NAME = 'biobank.centres';
-
-angular.module(MODULE_NAME, [ shipmentsTableModule ])
+const CentresModule = angular.module('biobank.centres', [ ShipmentsTableModule ])
   .config(require('./states'))
 
   .constant('SHIPMENT_SEND_PROGRESS_ITEMS', [
@@ -28,7 +26,7 @@ angular.module(MODULE_NAME, [ shipmentsTableModule ])
   .controller('UnpackBaseController', require('./controllers/UnpackBaseController'))
 
   .component('centreShipments',        require('./components/centreShipments/centreShipmentsComponent'))
-  .component('shipmentsCompleted',      require('./components/shipmentsCompleted/shipmentsCompletedComponent'))
+  .component('shipmentsCompleted',     require('./components/shipmentsCompleted/shipmentsCompletedComponent'))
   .component('shipmentsIncoming',      require('./components/shipmentsIncoming/shipmentsIncomingComponent'))
   .component('shipmentsOutgoing',      require('./components/shipmentsOutgoing/shipmentsOutgoingComponent'))
   .component('shippingHome',           require('./components/shippingHome/shippingHomeComponent'))
@@ -59,6 +57,7 @@ angular.module(MODULE_NAME, [ shipmentsTableModule ])
   .service('shipmentSkipToUnpackedModalService',
            require('./services/shipmentSkipToUnpackedModal/shipmentSkipToUnpackedModalService'))
 
-  .service('centreStateLabelService',  require('./services/centreStateLabelService'));
+  .service('centreStateLabelService',  require('./services/centreStateLabelService'))
+  .name;
 
-export default MODULE_NAME;
+export default CentresModule;

@@ -4,25 +4,36 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash'),
-      faker = require('faker');
+import _ from 'lodash';
+import faker from 'faker';
 
-  describe('Component: collectionSpecimenDescriptionView', function() {
+describe('Component: collectionSpecimenDescriptionView', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+      this.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              'Study',
+                              'CollectionEventType',
+                              'CollectionSpecimenDescription',
+                              'factory');
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.jsonSpecimenDescription = this.factory.collectionSpecimenDescription();
+      this.jsonCeventType          = this.factory.collectionEventType({
+        specimenDescriptions: [ this.jsonSpecimenDescription ]
+      });
+      this.jsonStudy           = this.factory.defaultStudy;
 
-      SuiteMixin.prototype.createController = function () {
+      this.study               = new this.Study(this.jsonStudy);
+      this.collectionEventType = new this.CollectionEventType(this.jsonCeventType);
+      this.specimenDescription = new this.CollectionSpecimenDescription(this.jsonSpecimenDescription);
+      this.createController = () => {
         this.CollectionEventType.get = jasmine.createSpy()
           .and.returnValue(this.$q.when(this.collectionEventType));
 
@@ -42,224 +53,192 @@ define(function (require) {
           },
           'collectionSpecimenDescriptionView');
       };
+    });
+  });
 
-      return SuiteMixin;
-    }
+  it('should have valid scope', function() {
+    this.createController();
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    expect(this.controller.study).toBe(this.study);
+    expect(this.controller.collectionEventType).toBe(this.collectionEventType);
+    expect(this.controller.specimenDescription).toBe(this.specimenDescription);
 
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+    expect(this.controller.editName).toBeFunction();
+    expect(this.controller.editDescription).toBeFunction();
+    expect(this.controller.editAnatomicalSource).toBeFunction();
+    expect(this.controller.editPreservationType).toBeFunction();
+    expect(this.controller.editPreservationTemperature).toBeFunction();
+    expect(this.controller.editSpecimenType).toBeFunction();
+    expect(this.controller.editUnits).toBeFunction();
+    expect(this.controller.editAmount).toBeFunction();
+    expect(this.controller.editMaxCount).toBeFunction();
+    expect(this.controller.back).toBeFunction();
+  });
 
-      this.injectDependencies('$rootScope',
-                              '$compile',
-                              '$q',
-                              'Study',
-                              'CollectionEventType',
-                              'CollectionSpecimenDescription',
-                              'factory');
+  it('calling back returns to the proper state', function() {
+    var $state = this.$injector.get('$state');
 
-      this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
-        '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
-        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
+    spyOn($state, 'go').and.returnValue('ok');
 
-      this.jsonSpecimenDescription = this.factory.collectionSpecimenDescription();
-      this.jsonCeventType          = this.factory.collectionEventType({
-        specimenDescriptions: [ this.jsonSpecimenDescription ]
-      });
-      this.jsonStudy           = this.factory.defaultStudy;
+    this.createController();
+    this.controller.back();
+    this.scope.$digest();
 
-      this.study               = new this.Study(this.jsonStudy);
-      this.collectionEventType = new this.CollectionEventType(this.jsonCeventType);
-      this.specimenDescription = new this.CollectionSpecimenDescription(this.jsonSpecimenDescription);
-    }));
+    expect($state.go).toHaveBeenCalledWith(
+      'home.admin.studies.study.collection.ceventType',
+      { ceventTypeId: this.collectionEventType.id }
+    );
+  });
 
-    it('should have valid scope', function() {
-      this.createController();
+  describe('updates to name', function () {
 
-      expect(this.controller.study).toBe(this.study);
-      expect(this.controller.collectionEventType).toBe(this.collectionEventType);
-      expect(this.controller.specimenDescription).toBe(this.specimenDescription);
+    var context = {};
 
-      expect(this.controller.editName).toBeFunction();
-      expect(this.controller.editDescription).toBeFunction();
-      expect(this.controller.editAnatomicalSource).toBeFunction();
-      expect(this.controller.editPreservationType).toBeFunction();
-      expect(this.controller.editPreservationTemperature).toBeFunction();
-      expect(this.controller.editSpecimenType).toBeFunction();
-      expect(this.controller.editUnits).toBeFunction();
-      expect(this.controller.editAmount).toBeFunction();
-      expect(this.controller.editMaxCount).toBeFunction();
-      expect(this.controller.back).toBeFunction();
+    beforeEach(function () {
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editName';
+      context.modalInputFuncName       = 'text';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = faker.lorem.word();
     });
 
-    it('calling back returns to the proper state', function() {
-      var $state = this.$injector.get('$state');
+    sharedBehaviour(context);
 
-      spyOn($state, 'go').and.returnValue('ok');
+  });
 
-      this.createController();
-      this.controller.back();
-      this.scope.$digest();
+  describe('updates to description', function () {
 
-      expect($state.go).toHaveBeenCalledWith(
-        'home.admin.studies.study.collection.ceventType',
-        { ceventTypeId: this.collectionEventType.id }
-      );
+    var context = {};
+
+    beforeEach(function () {
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editDescription';
+      context.modalInputFuncName       = 'textArea';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = faker.lorem.sentences(4);
     });
 
-    describe('updates to name', function () {
+    sharedBehaviour(context);
 
-      var context = {};
+  });
 
-      beforeEach(inject(function () {
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editName';
-        context.modalInputFuncName       = 'text';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = faker.lorem.word();
-      }));
+  describe('updates to anatimical source', function () {
 
-      sharedBehaviour(context);
+    var context = {};
 
+    beforeEach(function () {
+      this.injectDependencies('AnatomicalSourceType');
+
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editAnatomicalSource';
+      context.modalInputFuncName       = 'select';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = this.AnatomicalSourceType.BLOOD;
     });
 
-    describe('updates to description', function () {
+    sharedBehaviour(context);
 
-      var context = {};
+  });
 
-      beforeEach(inject(function () {
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editDescription';
-        context.modalInputFuncName       = 'textArea';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = faker.lorem.sentences(4);
-      }));
+  describe('updates to preservation type', function () {
 
-      sharedBehaviour(context);
+    var context = {};
 
+    beforeEach(function () {
+      this.injectDependencies('PreservationType');
+
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editPreservationType';
+      context.modalInputFuncName       = 'select';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = this.PreservationType.FRESH_SPECIMEN;
     });
 
-    describe('updates to anatimical source', function () {
+    sharedBehaviour(context);
 
-      var context = {};
+  });
 
-      beforeEach(inject(function () {
-        this.injectDependencies('AnatomicalSourceType');
+  describe('updates to preservation temperature', function () {
 
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editAnatomicalSource';
-        context.modalInputFuncName       = 'select';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = this.AnatomicalSourceType.BLOOD;
-      }));
+    var context = {};
 
-      sharedBehaviour(context);
+    beforeEach(function () {
+      this.injectDependencies('PreservationTemperatureType');
 
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editPreservationTemperature';
+      context.modalInputFuncName       = 'select';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = this.PreservationTemperatureType.ROOM_TEMPERATURE;
     });
 
-    describe('updates to preservation type', function () {
+    sharedBehaviour(context);
 
-      var context = {};
+  });
 
-      beforeEach(inject(function () {
-        this.injectDependencies('PreservationType');
+  describe('updates to specimen type', function () {
 
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editPreservationType';
-        context.modalInputFuncName       = 'select';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = this.PreservationType.FRESH_SPECIMEN;
-      }));
+    var context = {};
 
-      sharedBehaviour(context);
+    beforeEach(function () {
+      this.injectDependencies('SpecimenType');
 
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editSpecimenType';
+      context.modalInputFuncName       = 'select';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = this.SpecimenType.BUFFY_COAT;
     });
 
-    describe('updates to preservation temperature', function () {
+    sharedBehaviour(context);
 
-      var context = {};
+  });
 
-      beforeEach(inject(function () {
-        this.injectDependencies('PreservationTemperatureType');
+  describe('updates to units', function () {
 
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editPreservationTemperature';
-        context.modalInputFuncName       = 'select';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = this.PreservationTemperatureType.ROOM_TEMPERATURE;
-      }));
+    var context = {};
 
-      sharedBehaviour(context);
-
+    beforeEach(function () {
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editUnits';
+      context.modalInputFuncName       = 'text';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = 'ounces';
     });
 
-    describe('updates to specimen type', function () {
+    sharedBehaviour(context);
 
-      var context = {};
+  });
 
-      beforeEach(inject(function () {
-        this.injectDependencies('SpecimenType');
+  describe('updates to amount', function () {
 
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editSpecimenType';
-        context.modalInputFuncName       = 'select';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = this.SpecimenType.BUFFY_COAT;
-      }));
+    var context = {};
 
-      sharedBehaviour(context);
-
+    beforeEach(function () {
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editAmount';
+      context.modalInputFuncName       = 'positiveFloat';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = '0.2';
     });
 
-    describe('updates to units', function () {
+    sharedBehaviour(context);
 
-      var context = {};
+  });
 
-      beforeEach(inject(function () {
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editUnits';
-        context.modalInputFuncName       = 'text';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = 'ounces';
-      }));
+  describe('updates to count', function () {
 
-      sharedBehaviour(context);
+    var context = {};
 
+    beforeEach(function () {
+      context.createController         = this.createController.bind(this);
+      context.controllerUpdateFuncName = 'editMaxCount';
+      context.modalInputFuncName       = 'naturalNumber';
+      context.ceventType               = this.collectionEventType;
+      context.newValue                 = '2';
     });
 
-    describe('updates to amount', function () {
-
-      var context = {};
-
-      beforeEach(inject(function () {
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editAmount';
-        context.modalInputFuncName       = 'positiveFloat';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = '0.2';
-      }));
-
-      sharedBehaviour(context);
-
-    });
-
-    describe('updates to count', function () {
-
-      var context = {};
-
-      beforeEach(inject(function () {
-        context.createController         = this.createController.bind(this);
-        context.controllerUpdateFuncName = 'editMaxCount';
-        context.modalInputFuncName       = 'naturalNumber';
-        context.ceventType               = this.collectionEventType;
-        context.newValue                 = '2';
-      }));
-
-      sharedBehaviour(context);
-
-    });
+    sharedBehaviour(context);
 
   });
 
@@ -276,9 +255,9 @@ define(function (require) {
 
     describe('(shared) tests', function() {
 
-      beforeEach(inject(function() {
+      beforeEach(function() {
         this.injectDependencies('modalInput', 'notificationsService');
-      }));
+      });
 
       it('on update should invoke the update method on entity', function() {
         var deferred = this.$q.defer();

@@ -2,24 +2,26 @@
  * Jasmine test suite
  *
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash');
+import _ from 'lodash';
 
-  describe('createController', function() {
+describe('createController', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              'Centre',
+                              'Shipment',
+                              'ShipmentState',
+                              'factory');
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
-
-      SuiteMixin.prototype.createController = function (centre) {
+      this.createController = (centre) => {
         centre = centre || this.centre;
 
         if (!centre) {
@@ -32,33 +34,12 @@ define(function (require) {
           { centre:  centre },
           'centreShipments');
       };
-
-      return SuiteMixin;
-    }
-
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-
-      this.putHtmlTemplates(
-        '/assets/javascripts/centres/components/centreShipments/centreShipments.html',
-        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
-
-      this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
-                              'Centre',
-                              'Shipment',
-                              'ShipmentState',
-                              'factory');
-    }));
-
-    it('should have valid scope', function() {
-      this.createController(new this.Centre(this.factory.centre()));
-      expect(this.controller.tabs).toBeNonEmptyArray();
     });
+  });
 
+  it('should have valid scope', function() {
+    this.createController(new this.Centre(this.factory.centre()));
+    expect(this.controller.tabs).toBeNonEmptyArray();
   });
 
 });

@@ -4,21 +4,18 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import angular                   from 'angular';
-import biobankUsers              from '../../users';
-import annotationTypesComponents from './modules/annotationTypes';
+import AdminStudiesAnnotationTypesModule from './modules/annotationTypes';
+import UsersModule                       from '../../users';
+import angular                               from 'angular';
 // import processingDirecitves      from './modules/processing');
 // import processing                from './processing');
 // import specimenGroups            from './specimenGroups');
 
-const MODULE_NAME = 'biobank.admin.studies';
-
-angular
-  .module(MODULE_NAME,
-          [
-            biobankUsers,
-            annotationTypesComponents
-          ])
+const AdminStudiesModule = angular.module('biobank.admin.studies',
+                                                 [
+                                                   UsersModule,
+                                                   AdminStudiesAnnotationTypesModule
+                                                 ])
   .component('studiesPagedList',        require('./components/studiesPagedList/studiesPagedListComponent'))
   .component('ceventTypeAdd',           require('./components/ceventTypeAdd/ceventTypeAddComponent'))
   .component('ceventTypeView',          require('./components/ceventTypeView/ceventTypeViewComponent'))
@@ -43,6 +40,7 @@ angular
 
   .config(require('./states'))
   .config(require('./ceventTypes/states'))
-  .config(require('./participants/states'));
+  .config(require('./participants/states'))
+  .name;
 
-export default MODULE_NAME;
+export default AdminStudiesModule;

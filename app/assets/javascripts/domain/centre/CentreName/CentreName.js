@@ -5,11 +5,14 @@
 define(function() {
   'use strict';
 
+  const _ = require('lodash');
+
   CentreNameFactory.$inject = [
     '$q',
     '$log',
     'biobankApi',
     'EntityName',
+    'DomainEntity',
     'DomainError',
     'CentreState'
   ];
@@ -18,11 +21,12 @@ define(function() {
    * Angular factory for Centres.
    */
   function CentreNameFactory($q,
-                            $log,
-                            biobankApi,
-                            EntityName,
-                            DomainError,
-                            CentreState) {
+                             $log,
+                             biobankApi,
+                             EntityName,
+                             DomainEntity,
+                             DomainError,
+                             CentreState) {
 
     /**
      * @classdesc A CentreName contains the ID, name and state for a Centre.
@@ -52,8 +56,6 @@ define(function() {
     CentreName.prototype = Object.create(EntityName.prototype);
     CentreName.prototype.constructor = CentreName;
 
-    CentreName.REST_API_URL = '/centres/names';
-
     /**
      * Creates a CentreName, but first it validates <code>obj</code> to ensure that it has a valid schema.
      *
@@ -67,6 +69,11 @@ define(function() {
      */
     CentreName.create = function (obj) {
       return EntityName.create(CentreName, obj);
+    };
+
+    CentreName.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'centres/names' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
     };
 
     /**
@@ -92,7 +99,7 @@ define(function() {
      *          domain.centres.Centre}.
      */
     CentreName.list = function (options) {
-      return EntityName.list(CentreName.REST_API_URL, options, CentreName.create);
+      return EntityName.list(CentreName.url(), options, CentreName.create);
     };
 
     /**

@@ -2,13 +2,16 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, sprintf) {
+define(function(require) {
   'use strict';
+
+  var _   = require('lodash');
 
   CentreFactory.$inject = [
     '$q',
     '$log',
     'biobankApi',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'DomainError',
     'CentreState',
@@ -34,6 +37,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
   function CentreFactory($q,
                          $log,
                          biobankApi,
+                         DomainEntity,
                          ConcurrencySafeEntity,
                          DomainError,
                          CentreState,
@@ -99,6 +103,11 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
 
     Centre.prototype = Object.create(ConcurrencySafeEntity.prototype);
     Centre.prototype.constructor = Centre;
+
+    Centre.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'centres' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
 
     /**
      * Used for validation.
@@ -250,7 +259,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
     Centre.list = function (options) {
-      var url = uri(),
+      var url = Centre.url(),
           params,
           validKeys = [
             'filter',
@@ -287,7 +296,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * @returns {Promise} The centre wrapped in a promise.
      */
     Centre.get = function (id) {
-      return biobankApi.get(uri(id)).then(function(reply) {
+      return biobankApi.get(Centre.url(id)).then(function(reply) {
         return Centre.asyncCreate(reply);
       });
     };
@@ -310,7 +319,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      */
     Centre.prototype.add = function () {
       var json = { name: this.name, description: this.description };
-      return biobankApi.post(uri(), json).then(function(reply) {
+      return biobankApi.post(Centre.url(), json).then(function(reply) {
         return Centre.asyncCreate(reply);
       });
     };
@@ -323,7 +332,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * @returns {Promise} A copy of this centre, but with the new name.
      */
     Centre.prototype.updateName = function (name) {
-      return this.update.call(this, uri('name', this.id), { name: name });
+      return this.update.call(this, Centre.url('name', this.id), { name: name });
     };
 
     /**
@@ -335,7 +344,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * @returns {Promise} A copy of this centre, but with the new description.
      */
     Centre.prototype.updateDescription = function (description) {
-      var url = uri('description', this.id);
+      var url = Centre.url('description', this.id);
       if (description) {
         return this.update.call(this, url, { description: description });
       }
@@ -351,7 +360,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * @returns {Promise} A copy of this centre, but with the study added to it.
      */
     Centre.prototype.addStudy = function (study) {
-      return this.update.call(this, uri('studies', this.id), { studyId: study.id });
+      return this.update.call(this, Centre.url('studies', this.id), { studyId: study.id });
     };
 
     /**
@@ -373,7 +382,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
         throw new DomainError('study ID not present: ' + study.id);
       }
 
-      url = sprintf.sprintf('%s/%d/%s', uri('studies', self.id), self.version, study.id);
+      url = Centre.url('studies', self.id, self.version, study.id);
       return biobankApi.del(url).then(Centre.asyncCreate);
     };
 
@@ -385,7 +394,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      * @returns {Promise} A copy of this centre, but with the location added to it.
      */
     Centre.prototype.addLocation = function (location) {
-      return this.update.call(this, uri('locations', this.id), _.omit(location, 'id'));
+      return this.update.call(this, Centre.url('locations', this.id), _.omit(location, 'id'));
     };
 
     /**
@@ -397,7 +406,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
      */
     Centre.prototype.updateLocation = function (location) {
       return this.update.call(this,
-                              uri('locations', this.id) + '/' + location.id,
+                              Centre.url('locations', this.id) + '/' + location.id,
                               location);
     };
 
@@ -416,7 +425,7 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
         throw new DomainError('location does not exist: ' + location.id);
       }
 
-      url = sprintf.sprintf('%s/%d/%s', uri('locations', self.id), self.version, location.id);
+      url = Centre.url('locations', self.id, self.version, location.id);
       return biobankApi.del(url).then(Centre.asyncCreate);
     };
 
@@ -471,29 +480,9 @@ define(['angular', 'lodash', 'tv4', 'sprintf-js'], function(angular, _, tv4, spr
 
     function changeState(centre, state) {
       var json = { expectedVersion: centre.version };
-      return biobankApi.post(uri(state, centre.id), json).then(function (reply) {
+      return biobankApi.post(Centre.url(state, centre.id), json).then(function (reply) {
         return Centre.asyncCreate(reply);
       });
-    }
-
-    function uri(/* path, centreId */) {
-      var args = _.toArray(arguments),
-          centreId,
-          path;
-
-      var result = '/centres/';
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += path;
-      }
-
-      if (args.length > 0) {
-        centreId = args.shift();
-        result += '/' + centreId;
-      }
-
-      return result;
     }
 
     return Centre;

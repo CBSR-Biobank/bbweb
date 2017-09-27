@@ -5,13 +5,13 @@
 define(['angular', 'jquery'], function (angular, $) {
   'use strict';
 
-  biobankApiService.$inject = ['$http', '$q', '$log'];
+  biobankApiService.$inject = ['$http', '$q', '$log', 'AppConfig' ];
 
   /**
    * Makes a request to the Biobank server REST API. All REST responses from the server have a similar
    * response JSON object. This service returns the 'data' field if the call was successful.
    */
-  function biobankApiService($http, $q, $log) {
+  function biobankApiService($http, $q, $log, AppConfig) {
     var service = {
       get:  get,
       post: post,
@@ -22,9 +22,13 @@ define(['angular', 'jquery'], function (angular, $) {
 
     //-------------
 
-    function call(method, url, config) {
+    function apiCall(method, url, config) {
+      if (url.indexOf(AppConfig.restApiUrlPrefix) < 0) {
+        throw new Error('invalid REST API url: ' + url);
+      }
+
       config = config || {};
-      angular.extend(config, { method: method, url: '/api' + url });
+      angular.extend(config, { method: method, url: url });
 
       return $http(config)
         .then(function(response) {
@@ -48,19 +52,19 @@ define(['angular', 'jquery'], function (angular, $) {
     }
 
     function get(url, params) {
-      return call('GET', url, { params: params });
+      return apiCall('GET', url, { params: params });
     }
 
     function post(url, data) {
-      return call('POST', url, { data: data });
+      return apiCall('POST', url, { data: data });
     }
 
     function put(url, data) {
-      return call('PUT', url, { data: data });
+      return apiCall('PUT', url, { data: data });
     }
 
     function del(url) {
-      return call('DELETE', url);
+      return apiCall('DELETE', url);
     }
   }
 

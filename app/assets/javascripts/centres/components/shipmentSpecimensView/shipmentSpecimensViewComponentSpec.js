@@ -2,31 +2,24 @@
  * Jasmine test suite
  *
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash'),
-      shipmentSpecimensControllerSharedBehaviour =
-      require('../../../test/shipmentSpecimensControllerSharedBehaviour');
+import _ from 'lodash';
+import sharedBehaviour from '../../../test/shipmentSpecimensControllerSharedBehaviour';
 
-  describe('shipmentSpecimensViewComponent', function() {
+describe('shipmentSpecimensViewComponent', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ShippingComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ShippingComponentTestSuiteMixin) {
       _.extend(this, ShippingComponentTestSuiteMixin.prototype);
-      this.putHtmlTemplates(
-        '/assets/javascripts/centres/components/shipmentSpecimensView/shipmentSpecimensView.html',
-        '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html',
-        '/assets/javascripts/shipmentSpecimens/components/ssSpecimensPagedTable/ssSpecimensPagedTable.html');
 
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               'Shipment',
                               'factory');
-      this.createController = function (shipment, readOnly) {
+      this.createController = (shipment, readOnly) => {
         readOnly = readOnly || false;
         ShippingComponentTestSuiteMixin.prototype.createController.call(
           this,
@@ -37,23 +30,22 @@ define(function (require) {
           },
           'shipmentSpecimensView');
       };
-    }));
-
-    it('has valid scope', function() {
-      var shipment = this.createShipment(),
-          readOnly = true;
-
-      this.createController(shipment, readOnly);
-
-      expect(this.controller.shipment).toBe(shipment);
-      expect(this.controller.readOnly).toBe(readOnly);
     });
+  });
 
-    describe('(shared)', function() {
+  it('has valid scope', function() {
+    var shipment = this.createShipment(),
+        readOnly = true;
 
-      shipmentSpecimensControllerSharedBehaviour();
+    this.createController(shipment, readOnly);
 
-    });
+    expect(this.controller.shipment).toBe(shipment);
+    expect(this.controller.readOnly).toBe(readOnly);
+  });
+
+  describe('(shared)', function() {
+
+    sharedBehaviour();
 
   });
 

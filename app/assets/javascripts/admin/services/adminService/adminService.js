@@ -5,9 +5,9 @@
 define(function () {
   'use strict';
 
-  adminService.$inject = ['biobankApi'];
+  adminService.$inject = ['UrlService', 'biobankApi'];
 
-  function adminService(biobankApi) {
+  function adminService(UrlService, biobankApi) {
     var service = {
       aggregateCounts: aggregateCounts
     };
@@ -15,7 +15,7 @@ define(function () {
 
     // FIXME: move this to the domain layer?
     function aggregateCounts() {
-      return biobankApi.get('/dtos/counts');
+      return biobankApi.get(UrlService.url('dtos/counts'));
     }
   }
 

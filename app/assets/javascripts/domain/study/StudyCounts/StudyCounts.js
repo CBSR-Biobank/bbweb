@@ -25,7 +25,7 @@ define(['lodash'], function(_) {
     }
 
     StudyCounts.get = function () {
-      return biobankApi.get('/studies/counts').then(function (response) {
+      return biobankApi.get('/api/studies/counts').then(function (response) {
         return new StudyCounts({
           total:    response.total,
           disabled: response.disabledCount,

@@ -2,14 +2,17 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function() {
+define(function(require) {
   'use strict';
+
+  const _ = require('lodash');
 
   StudyNameFactory.$inject = [
     '$q',
     '$log',
     'biobankApi',
     'EntityName',
+    'DomainEntity',
     'DomainError',
     'StudyState'
   ];
@@ -21,6 +24,7 @@ define(function() {
                             $log,
                             biobankApi,
                             EntityName,
+                            DomainEntity,
                             DomainError,
                             StudyState) {
 
@@ -52,8 +56,6 @@ define(function() {
     StudyName.prototype = Object.create(EntityName.prototype);
     StudyName.prototype.constructor = StudyName;
 
-    StudyName.REST_API_URL = '/studies/names';
-
     /**
      * Creates a StudyName, but first it validates <code>obj</code> to ensure that it has a valid schema.
      *
@@ -67,6 +69,11 @@ define(function() {
      */
     StudyName.create = function (obj) {
       return EntityName.create(StudyName, obj);
+    };
+
+    StudyName.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'studies/names' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
     };
 
     /**
@@ -92,7 +99,7 @@ define(function() {
      *          domain.studies.Study}.
      */
     StudyName.list = function (options) {
-      return EntityName.list(StudyName.REST_API_URL, options, StudyName.create);
+      return EntityName.list(StudyName.url(), options, StudyName.create);
     };
 
     /**

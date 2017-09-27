@@ -5,9 +5,9 @@
 define(['lodash'], function (_) {
   'use strict';
 
-  TestSuiteMixinFactory.$inject = ['$injector', '$templateCache'];
+  TestSuiteMixinFactory.$inject = ['$injector', 'UrlService'];
 
-  function TestSuiteMixinFactory($injector, $templateCache) {
+  function TestSuiteMixinFactory($injector, UrlService) {
 
     function TestSuiteMixin() {}
 
@@ -18,15 +18,12 @@ define(['lodash'], function (_) {
       });
     };
 
-    TestSuiteMixin.prototype.putHtmlTemplates = function (/* template1, template2, ... */) {
-      _.each(arguments, function (template) {
-        $templateCache.put(template,
-                           jasmine.getFixtures().getFixtureHtml_('../../../base/app' + template));
-      });
-    };
-
     TestSuiteMixin.prototype.capitalizeFirstLetter = function(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
+    };
+
+    TestSuiteMixin.prototype.url = function () {
+      return UrlService.url.apply(UrlService, _.toArray(arguments));
     };
 
     return TestSuiteMixin;

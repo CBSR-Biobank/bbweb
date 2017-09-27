@@ -4,49 +4,41 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  './studyAnnotationTypeSharedSpec',
-  'biobankApp'
-], function(angular, mocks, studyAnnotationTypeSharedSpec) {
-  'use strict';
 
-  xdescribe('SpecimenLinkAnnotationType', function() {
+import sharedSpec from '../../../test/studyAnnotationTypeSharedSpec';
 
-    var context = {}, SpecimenLinkAnnotationType, factory;
-    var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];
+xdescribe('SpecimenLinkAnnotationType', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+  var context = {}, SpecimenLinkAnnotationType, factory;
+  var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];
 
-    beforeEach(inject(function(_SpecimenLinkAnnotationType_,
-                               factory) {
-      SpecimenLinkAnnotationType = _SpecimenLinkAnnotationType_;
-      factory = factory;
+  beforeEach(mocks.module('biobankApp', 'biobank.test'));
 
-      context.annotationTypeType            = SpecimenLinkAnnotationType;
-      context.createAnnotationTypeFn        = createAnnotationType;
-      context.annotationTypeUriPart         = '/slannottypes';
-      context.objRequiredKeys          = requiredKeys;
-      context.createServerAnnotationTypeFn  = createServerAnnotationType;
-      context.annotationTypeListFn          = SpecimenLinkAnnotationType.list;
-      context.annotationTypeGetFn           = SpecimenLinkAnnotationType.get;
-    }));
+  beforeEach(inject(function(_SpecimenLinkAnnotationType_,
+                             factory) {
+    SpecimenLinkAnnotationType = _SpecimenLinkAnnotationType_;
+    factory = factory;
 
-    function createServerAnnotationType(options) {
-      var study = factory.study();
-      options = options || {};
-      return factory.studyAnnotationType(study, options);
-    }
+    context.annotationTypeType            = SpecimenLinkAnnotationType;
+    context.createAnnotationTypeFn        = createAnnotationType;
+    context.annotationTypeUriPart         = '/slannottypes';
+    context.objRequiredKeys          = requiredKeys;
+    context.createServerAnnotationTypeFn  = createServerAnnotationType;
+    context.annotationTypeListFn          = SpecimenLinkAnnotationType.list;
+    context.annotationTypeGetFn           = SpecimenLinkAnnotationType.get;
+  }));
 
-    function createAnnotationType(obj) {
-      obj = obj || {};
-      return new SpecimenLinkAnnotationType(obj);
-    }
+  function createServerAnnotationType(options) {
+    var study = factory.study();
+    options = options || {};
+    return factory.studyAnnotationType(study, options);
+  }
 
-    studyAnnotationTypeSharedSpec(context);
+  function createAnnotationType(obj) {
+    obj = obj || {};
+    return new SpecimenLinkAnnotationType(obj);
+  }
 
-  });
-
+  sharedSpec(context);
 
 });

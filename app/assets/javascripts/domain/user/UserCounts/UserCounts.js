@@ -25,7 +25,7 @@ define(['lodash'], function(_) {
     }
 
     UserCounts.get = function () {
-      return biobankApi.get('/users/counts').then(function (response) {
+      return biobankApi.get('/api/users/counts').then(function (response) {
         return new UserCounts({
           total:      response.total,
           registered: response.registeredCount,

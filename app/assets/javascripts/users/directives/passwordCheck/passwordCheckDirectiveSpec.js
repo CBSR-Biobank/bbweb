@@ -1,50 +1,51 @@
 /**
+ * Jasmine test suite
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-// Jasmine test suite
-//
-define(['angular', 'angularMocks', 'biobankApp'], function(angular, mocks) {
-  'use strict';
+/* global angular */
 
-  describe('Directive: passwordCheck', function() {
+import _ from 'lodash';
 
-    beforeEach(mocks.module('biobankApp'));
+describe('Directive: passwordCheck', function() {
 
-    beforeEach(inject(function($compile, $rootScope) {
-      this.element = angular.element([
-        '<form name="form">',
-        '  <input name="password" type="password" ng-model="model.password"/>',
-        '  <input name="confirmPassword" ',
-        '         type="password" ',
-        '         ng-model="model.confirmPassword" ',
-        '         password-check="model.password" ',
-        '         ng-required/>',
-        '</form>'
-      ].join(''));
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(
+      function($compile, $rootScope) {
+        this.element = angular.element(
+          `<form name="form">
+            <input name="password" type="password" ng-model="model.password"/>
+            <input name="confirmPassword"
+                   type="password"
+                   ng-model="model.confirmPassword"
+                   password-check="model.password"
+                   ng-required/>
+          </form>`
+        );
 
-      this.scope = $rootScope.$new();
-      this.scope.model = {
-        password: null,
-        confirmPassword: null
-      } ;
-      $compile(this.element)(this.scope);
-    }));
+        this.scope = $rootScope.$new();
+        this.scope.model = {
+          password: null,
+          confirmPassword: null
+        } ;
+        $compile(this.element)(this.scope);
+      });
+  });
 
-    it('success when passwords match', function() {
-      this.scope.form.password.$setViewValue('test-password');
-      this.scope.form.confirmPassword.$setViewValue('test-password');
-      this.scope.$digest();
-      expect(this.scope.form.confirmPassword.$valid).toBe(true);
-    });
+  it('success when passwords match', function() {
+    this.scope.form.password.$setViewValue('test-password');
+    this.scope.form.confirmPassword.$setViewValue('test-password');
+    this.scope.$digest();
+    expect(this.scope.form.confirmPassword.$valid).toBe(true);
+  });
 
-    it('failure when passwords do not match', function() {
-      this.scope.form.password.$setViewValue('test-password');
-      this.scope.form.confirmPassword.$setViewValue('abcdefghi');
-      this.scope.$digest();
-      expect(this.scope.form.confirmPassword.$valid).toBe(false);
-    });
-
+  it('failure when passwords do not match', function() {
+    this.scope.form.password.$setViewValue('test-password');
+    this.scope.form.confirmPassword.$setViewValue('abcdefghi');
+    this.scope.$digest();
+    expect(this.scope.form.confirmPassword.$valid).toBe(false);
   });
 
 });

@@ -4,26 +4,36 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function(require) {
-  'use strict';
+/* global angular */
 
-  var mocks                           = require('angularMocks'),
-      _                               = require('lodash'),
-      faker                           = require('faker'),
-      annotationUpdateSharedBehaviour = require('../../../test/annotationUpdateSharedBehaviour');
+import _ from 'lodash';
+import annotationUpdateSharedBehaviour from '../../../test/annotationUpdateSharedBehaviour';
+import faker  from 'faker';
 
-  describe('Component: participantSummary', function() {
+describe('Component: participantSummary', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+      this.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
+                              '$state',
+                              'Study',
+                              'Participant',
+                              'AnnotationValueType',
+                              'AnnotationMaxValueCount',
+                              'factory');
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.jsonParticipant = this.factory.participant();
+      this.jsonStudy       = this.factory.defaultStudy();
 
-      SuiteMixin.prototype.participantWithAnnotation = function (valueType, maxValueCount) {
+      this.participant = new this.Participant(this.jsonParticipant);
+      this.study       = new this.Study(this.jsonStudy);
+
+      this.participantWithAnnotation = (valueType, maxValueCount) => {
         var jsonAnnotationType,
             value,
             jsonAnnotation,
@@ -44,7 +54,7 @@ define(function(require) {
         return new this.Participant(jsonParticipant, study);
       };
 
-      SuiteMixin.prototype.createController = function (study, participant) {
+      this.createController = (study, participant) => {
         study = study || this.study;
         participant = participant || this.participant;
 
@@ -62,234 +72,205 @@ define(function(require) {
           },
           'participantSummary');
       };
+    });
+  });
 
-      return SuiteMixin;
-    }
+  it('has valid scope', function() {
+    this.createController(this.study, this.participant);
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    expect(this.controller.study).toBe(this.study);
+    expect(this.controller.participant).toBe(this.participant);
 
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+    expect(this.controller.editUniqueId).toBeFunction();
+    expect(this.controller.editAnnotation).toBeFunction();
+  });
 
-      this.injectDependencies('$rootScope',
-                              '$compile',
-                              '$q',
-                              '$state',
-                              'Study',
-                              'Participant',
-                              'AnnotationValueType',
-                              'AnnotationMaxValueCount',
-                              'factory');
+  describe('updates to time completed', function () {
 
-      this.putHtmlTemplates(
-        '/assets/javascripts/collection/components/participantSummary/participantSummary.html',
-        '/assets/javascripts/common/components/statusLine/statusLine.html');
+    var context = {};
 
-      this.jsonParticipant = this.factory.participant();
-      this.jsonStudy       = this.factory.defaultStudy();
+    beforeEach(inject(function () {
+      var self = this;
 
-      this.participant = new this.Participant(this.jsonParticipant);
-      this.study       = new this.Study(this.jsonStudy);
+      context.createController           = createController;
+      context.controllerUpdateFuncName  = 'editUniqueId';
+      context.modalInputFuncName        = 'text';
+      context.participantUpdateFuncName = 'updateUniqueId';
+      context.participant               = self.participant;
+      context.newValue                  = faker.random.word();
+
+      function createController() {
+        return self.createController(self.study, self.participant);
+      }
     }));
 
-    it('has valid scope', function() {
-      this.createController(this.study, this.participant);
+    sharedUpdateBehaviour(context);
 
-      expect(this.controller.study).toBe(this.study);
-      expect(this.controller.participant).toBe(this.participant);
+  });
 
-      expect(this.controller.editUniqueId).toBeFunction();
-      expect(this.controller.editAnnotation).toBeFunction();
-    });
+  describe('updates to annotations', function () {
 
-    describe('updates to time completed', function () {
+    var context = {};
 
-      var context = {};
+    beforeEach(inject(function () {
+      context.entity                   = this.Participant;
+      context.entityUpdateFuncName     = 'addAnnotation';
+    }));
+
+    describe('updates to a text annotation', function () {
 
       beforeEach(inject(function () {
-        var self = this;
+        var self = this,
+            participant = self.participantWithAnnotation(self.AnnotationValueType.TEXT);
 
         context.createController           = createController;
-        context.controllerUpdateFuncName  = 'editUniqueId';
-        context.modalInputFuncName        = 'text';
-        context.participantUpdateFuncName = 'updateUniqueId';
-        context.participant               = self.participant;
-        context.newValue                  = faker.random.word();
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'text';
+        context.annotation               = participant.annotations[0];
+        context.newValue                 = faker.random.word();
 
         function createController() {
-          return self.createController(self.study, self.participant);
+          return self.createController(self.study, participant);
         }
       }));
 
-      sharedUpdateBehaviour(context);
+      annotationUpdateSharedBehaviour(context);
 
     });
 
-    describe('updates to annotations', function () {
-
-      var context = {};
+    describe('updates to a date time annotation', function () {
 
       beforeEach(inject(function () {
-        context.entity                   = this.Participant;
-        context.entityUpdateFuncName     = 'addAnnotation';
+        var self = this,
+            participant = self.participantWithAnnotation(self.AnnotationValueType.DATE_TIME);
+
+        context.createController           = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'dateTime';
+        context.annotation               = participant.annotations[0];
+        context.newValue                 = faker.date.recent(10);
+
+        function createController() {
+          return self.createController(self.study, participant);
+        }
       }));
 
-      describe('updates to a text annotation', function () {
+      annotationUpdateSharedBehaviour(context);
 
-        beforeEach(inject(function () {
-          var self = this,
-              participant = self.participantWithAnnotation(self.AnnotationValueType.TEXT);
+    });
 
-          context.createController           = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'text';
-          context.annotation               = participant.annotations[0];
-          context.newValue                 = faker.random.word();
+    describe('updates to a number annotation', function () {
 
-          function createController() {
-            return self.createController(self.study, participant);
-          }
-        }));
+      beforeEach(inject(function () {
+        var self = this,
+            participant = self.participantWithAnnotation(self.AnnotationValueType.NUMBER);
 
-        annotationUpdateSharedBehaviour(context);
+        context.createController           = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'number';
+        context.annotation               = participant.annotations[0];
+        context.newValue                 = 10;
 
+        function createController() {
+          return self.createController(self.study, participant);
+        }
+      }));
+
+      annotationUpdateSharedBehaviour(context);
+
+    });
+
+    describe('updates to a single select annotation', function () {
+
+      beforeEach(inject(function () {
+        var self = this,
+            participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
+                                                         self.AnnotationMaxValueCount.SELECT_SINGLE);
+
+        context.createController           = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'select';
+        context.annotation               = participant.annotations[0];
+        context.newValue                 = participant.annotations[0].annotationType.options[0];
+
+        function createController() {
+          return self.createController(self.study, participant);
+        }
+      }));
+
+      annotationUpdateSharedBehaviour(context);
+
+    });
+
+    describe('updates to a multiple select annotation', function () {
+
+      beforeEach(inject(function () {
+        var self = this,
+            participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
+                                                         self.AnnotationMaxValueCount.SELECT_MULTIPLE);
+
+        context.createController           = createController;
+        context.controllerUpdateFuncName = 'editAnnotation';
+        context.modalInputFuncName       = 'selectMultiple';
+        context.annotation               = participant.annotations[0];
+        context.newValue                 = participant.annotations[0].annotationType.options;
+
+        function createController() {
+          return self.createController(self.study, participant);
+        }
+      }));
+
+      annotationUpdateSharedBehaviour(context);
+
+    });
+
+  });
+
+  function sharedUpdateBehaviour(context) {
+
+    describe('(shared) tests', function() {
+
+      beforeEach(inject(function() {
+        this.injectDependencies('Participant', 'modalInput', 'notificationsService');
+      }));
+
+
+      it('on update should invoke the update method on entity', function() {
+        var deferred = this.$q.defer();
+
+        deferred.resolve(context.newValue);
+
+        spyOn(this.modalInput, context.modalInputFuncName)
+          .and.returnValue({ result: deferred.promise});
+        spyOn(this.Participant.prototype, context.participantUpdateFuncName)
+          .and.returnValue(this.$q.when(context.participant));
+        spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
+
+        this.createController();
+        this.controller[context.controllerUpdateFuncName]();
+        this.scope.$digest();
+
+        expect(this.Participant.prototype[context.participantUpdateFuncName]).toHaveBeenCalled();
+        expect(this.notificationsService.success).toHaveBeenCalled();
       });
 
-      describe('updates to a date time annotation', function () {
+      it('error message should be displayed when update fails', function() {
+        this.createController();
 
-        beforeEach(inject(function () {
-          var self = this,
-              participant = self.participantWithAnnotation(self.AnnotationValueType.DATE_TIME);
+        spyOn(this.modalInput, context.modalInputFuncName)
+          .and.returnValue({ result: this.$q.resolve(context.newValue)});
+        spyOn(this.Participant.prototype, context.participantUpdateFuncName)
+          .and.returnValue(this.$q.reject('simulated error'));
+        spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-          context.createController           = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'dateTime';
-          context.annotation               = participant.annotations[0];
-          context.newValue                 = faker.date.recent(10);
+        this.controller[context.controllerUpdateFuncName]();
+        this.scope.$digest();
 
-          function createController() {
-            return self.createController(self.study, participant);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
-      });
-
-      describe('updates to a number annotation', function () {
-
-        beforeEach(inject(function () {
-          var self = this,
-              participant = self.participantWithAnnotation(self.AnnotationValueType.NUMBER);
-
-          context.createController           = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'number';
-          context.annotation               = participant.annotations[0];
-          context.newValue                 = 10;
-
-          function createController() {
-            return self.createController(self.study, participant);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
-      });
-
-      describe('updates to a single select annotation', function () {
-
-        beforeEach(inject(function () {
-          var self = this,
-              participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
-                                                           self.AnnotationMaxValueCount.SELECT_SINGLE);
-
-          context.createController           = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'select';
-          context.annotation               = participant.annotations[0];
-          context.newValue                 = participant.annotations[0].annotationType.options[0];
-
-          function createController() {
-            return self.createController(self.study, participant);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
-      });
-
-      describe('updates to a multiple select annotation', function () {
-
-        beforeEach(inject(function () {
-          var self = this,
-              participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
-                                                           self.AnnotationMaxValueCount.SELECT_MULTIPLE);
-
-          context.createController           = createController;
-          context.controllerUpdateFuncName = 'editAnnotation';
-          context.modalInputFuncName       = 'selectMultiple';
-          context.annotation               = participant.annotations[0];
-          context.newValue                 = participant.annotations[0].annotationType.options;
-
-          function createController() {
-            return self.createController(self.study, participant);
-          }
-        }));
-
-        annotationUpdateSharedBehaviour(context);
-
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
       });
 
     });
 
-    function sharedUpdateBehaviour(context) {
-
-      describe('(shared) tests', function() {
-
-        beforeEach(inject(function() {
-          this.injectDependencies('Participant', 'modalInput', 'notificationsService');
-        }));
-
-
-        it('on update should invoke the update method on entity', function() {
-          var deferred = this.$q.defer();
-
-          deferred.resolve(context.newValue);
-
-          spyOn(this.modalInput, context.modalInputFuncName)
-            .and.returnValue({ result: deferred.promise});
-          spyOn(this.Participant.prototype, context.participantUpdateFuncName)
-            .and.returnValue(this.$q.when(context.participant));
-          spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
-
-          this.createController();
-          this.controller[context.controllerUpdateFuncName]();
-          this.scope.$digest();
-
-          expect(this.Participant.prototype[context.participantUpdateFuncName]).toHaveBeenCalled();
-          expect(this.notificationsService.success).toHaveBeenCalled();
-        });
-
-        it('error message should be displayed when update fails', function() {
-          this.createController();
-
-          spyOn(this.modalInput, context.modalInputFuncName)
-            .and.returnValue({ result: this.$q.resolve(context.newValue)});
-          spyOn(this.Participant.prototype, context.participantUpdateFuncName)
-            .and.returnValue(this.$q.reject('simulated error'));
-          spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
-
-          this.controller[context.controllerUpdateFuncName]();
-          this.scope.$digest();
-
-          expect(this.notificationsService.updateError).toHaveBeenCalled();
-        });
-
-      });
-
-    }
-
-  });
+  }
 
 });

@@ -22,7 +22,6 @@ define(function () {
   CeventAddController.$inject = [
     '$state',
     'gettextCatalog',
-    'AppConfig',
     'notificationsService',
     'domainNotificationService',
     'timeService',
@@ -35,7 +34,6 @@ define(function () {
    */
   function CeventAddController($state,
                                gettextCatalog,
-                               AppConfig,
                                notificationsService,
                                domainNotificationService,
                                timeService,

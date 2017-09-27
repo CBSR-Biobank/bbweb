@@ -1,43 +1,17 @@
 /**
  * Jasmine test suite
  */
-define(function(require) {
-  'use strict';
+/* global angular */
 
-  var mocks                                = require('angularMocks'),
-      _                                    = require('lodash'),
-      annotationTypeAddComponentSharedSpec = require('../../../../../test/annotationTypeAddComponentSharedSpec');
+import _ from 'lodash';
+import annotationTypeAddComponentSharedSpec from '../../../../../test/annotationTypeAddComponentSharedSpec';
 
-  describe('Component: collectionEventAnnotationTypeAdd', function() {
+describe('Component: collectionEventAnnotationTypeAdd', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
-
-      function SuiteMixin() {
-      }
-
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
-
-      SuiteMixin.prototype.createController = function () {
-        ComponentTestSuiteMixin.prototype.createController.call(
-          this,
-          [
-            '<collection-event-annotation-type-add',
-            '  study="vm.study"',
-            '  collection-event-type="vm.ceventType">',
-            '</collection-event-annotation-type-add>'
-          ].join(''),
-          { ceventType: this.collectionEventType },
-          'collectionEventAnnotationTypeAdd');
-      };
-
-      return SuiteMixin;
-    }
-
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
       this.injectDependencies('$rootScope',
                               '$compile',
                               'CollectionEventType',
@@ -47,31 +21,36 @@ define(function(require) {
       this.collectionEventType = new this.CollectionEventType(
         this.factory.collectionEventType(this.factory.study()));
 
-      this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html',
-        '/assets/javascripts/admin/components/annotationTypeAdd/annotationTypeAdd.html');
-    }));
+      this.createController = () =>
+        ComponentTestSuiteMixin.prototype.createController.call(
+          this,
+            `<collection-event-annotation-type-add
+               study="vm.study"
+               collection-event-type="vm.ceventType">
+             </collection-event-annotation-type-add>`,
+          { ceventType: this.collectionEventType },
+          'collectionEventAnnotationTypeAdd');
+    });
+  });
 
-    it('should have  valid scope', function() {
-      this.createController();
-      expect(this.controller.collectionEventType).toBe(this.collectionEventType);
+  it('should have  valid scope', function() {
+    this.createController();
+    expect(this.controller.collectionEventType).toBe(this.collectionEventType);
+  });
+
+  describe('for onSubmit and onCancel', function () {
+    var context = {};
+
+    beforeEach(function () {
+      context.createController          = this.createController;
+      context.scope                     = this.scope;
+      context.controller                = this.controller;
+      context.entity                    = this.CollectionEventType;
+      context.addAnnotationTypeFuncName = 'addAnnotationType';
+      context.returnState               = 'home.admin.studies.study.collection.ceventType';
     });
 
-    describe('for onSubmit and onCancel', function () {
-      var context = {};
-
-      beforeEach(inject(function () {
-        context.createController          = this.createController;
-        context.scope                     = this.scope;
-        context.controller                = this.controller;
-        context.entity                    = this.CollectionEventType;
-        context.addAnnotationTypeFuncName = 'addAnnotationType';
-        context.returnState               = 'home.admin.studies.study.collection.ceventType';
-      }));
-
-      annotationTypeAddComponentSharedSpec(context);
-    });
-
+    annotationTypeAddComponentSharedSpec(context);
   });
 
 });

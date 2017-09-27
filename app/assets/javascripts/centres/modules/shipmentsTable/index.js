@@ -4,10 +4,9 @@
  */
 import angular from 'angular';
 
-const MODULE_NAME = 'shipmentsTableModule';
+const ShipmentsTableModule = angular.module('biobank.shipmentsTableModule', [])
+      .constant('SHIPMENT_TYPES',  require('./shipmentTypes'))
+      .component('shipmentsTable', require('./shipmentsTableComponent'))
+      .name;
 
-angular.module(MODULE_NAME, [])
-  .constant('SHIPMENT_TYPES',  require('./shipmentTypes'))
-  .component('shipmentsTable', require('./shipmentsTableComponent'));
-
-export default MODULE_NAME;
+export default ShipmentsTableModule;

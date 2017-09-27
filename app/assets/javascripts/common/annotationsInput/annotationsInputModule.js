@@ -2,10 +2,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import angular from 'angular';
 import _       from 'lodash';
-
-const MODULE_NAME = 'biobank.annotationsInput';
+import angular from 'angular';
 
 const annotations = [
   'text',
@@ -18,10 +16,15 @@ const annotations = [
 /**
  * Creates a module with one main directives and child directives.
  */
-const module = angular.module(MODULE_NAME, []);
 
-module.directive('annotationsInput', annotationsInputDirective);
+const AnnotationsInputModule = 'biobank.annotationsInput';
+
+const Module = angular.module(AnnotationsInputModule, []);
+
+Module.directive('annotationsInput', annotationsInputDirective);
 init();
+
+export default AnnotationsInputModule;
 
 /**
  * Creates the child directives.
@@ -30,7 +33,7 @@ function init() {
   _.each(annotations, function (annotation) {
     var name = annotation + 'Annotation',
         directive = directiveGenerator(name);
-    module.directive(name, directive);
+    Module.directive(name, directive);
   });
 }
 
@@ -38,7 +41,7 @@ function directiveGenerator(name) {
   return function () {
     var directive = {
       restrict: 'E',
-      templateUrl : '/assets/javascripts/common/annotationsInput/' + name + '.html'
+      template : require('./' + name + '.html')
     };
 
     if (name === 'dateTimeAnnotation') {
@@ -74,7 +77,7 @@ function annotationsInputDirective() {
     bindToController: {
       annotations: '='
     },
-    templateUrl : '/assets/javascripts/common/annotationsInput/annotationsInput.html',
+    template : require('./annotationsInput.html'),
     controller: AnnotationsInputCtrl,
     controllerAs: 'vm'
   };
@@ -84,5 +87,3 @@ function annotationsInputDirective() {
 
 function AnnotationsInputCtrl() {
 }
-
-export default MODULE_NAME;

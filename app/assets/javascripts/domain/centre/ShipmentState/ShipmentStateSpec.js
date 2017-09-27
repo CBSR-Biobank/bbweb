@@ -4,21 +4,21 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define([
-  'angular',
-  'angularMocks',
-  'lodash'
-], function(angular, mocks, _) {
-  'use strict';
+/* global angular */
 
-  describe('ShipmentState', function() {
+import _ from 'lodash';
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+describe('ShipmentState', function() {
 
-    it('should have values', inject(function (ShipmentState) {
-      expect(_.keys(ShipmentState)).not.toBeEmptyArray();
-    }));
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function (ShipmentState) {
+      this.ShipmentState = ShipmentState;
+    });
+  });
 
+  it('should have values', function () {
+    expect(_.keys(this.ShipmentState)).not.toBeEmptyArray();
   });
 
 });

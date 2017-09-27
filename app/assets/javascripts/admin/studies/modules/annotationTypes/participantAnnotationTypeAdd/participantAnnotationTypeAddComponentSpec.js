@@ -1,24 +1,25 @@
 /**
  * Jasmine test suite
  */
-define(function(require) {
-  'use strict';
+/* global angular */
 
-  var mocks                                = require('angularMocks'),
-      _                                    = require('lodash'),
-      annotationTypeAddComponentSharedSpec = require('../../../../../test/annotationTypeAddComponentSharedSpec');
+import _ from 'lodash';
+import sharedSpec from '../../../../../test/annotationTypeAddComponentSharedSpec';
 
-  describe('Component: participantAnnotationTypeAdd', function() {
+describe('Component: participantAnnotationTypeAdd', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
+      this.injectDependencies('$rootScope',
+                              '$compile',
+                              'Study',
+                              'factory');
 
-      function SuiteMixin() {
-      }
+      this.study = new this.Study(this.factory.study());
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
-
-      SuiteMixin.prototype.createController = function () {
+      this.createController = () => {
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
           [
@@ -29,46 +30,27 @@ define(function(require) {
           { study: this.study },
           'participantAnnotationTypeAdd');
       };
+    });
+  });
 
-      return SuiteMixin;
-    }
+  it('should have  valid scope', function() {
+    this.createController();
+    expect(this.controller.study).toBe(this.study);
+  });
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+  describe('for onSubmit and onCancel', function () {
+    var context = {};
 
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-      this.injectDependencies('$rootScope',
-                              '$compile',
-                              'Study',
-                              'factory');
-
-      this.study = new this.Study(this.factory.study());
-
-      this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
-        '/assets/javascripts/admin/components/annotationTypeAdd/annotationTypeAdd.html');
-    }));
-
-    it('should have  valid scope', function() {
-      this.createController();
-      expect(this.controller.study).toBe(this.study);
+    beforeEach(function () {
+      context.createController          = this.createController;
+      context.scope                     = this.scope;
+      context.controller                = this.controller;
+      context.entity                    = this.Study;
+      context.addAnnotationTypeFuncName = 'addAnnotationType';
+      context.returnState               = 'home.admin.studies.study.participants';
     });
 
-    describe('for onSubmit and onCancel', function () {
-      var context = {};
-
-      beforeEach(inject(function () {
-        context.createController          = this.createController;
-        context.scope                     = this.scope;
-        context.controller                = this.controller;
-        context.entity                    = this.Study;
-        context.addAnnotationTypeFuncName = 'addAnnotationType';
-        context.returnState               = 'home.admin.studies.study.participants';
-      }));
-
-      annotationTypeAddComponentSharedSpec(context);
-    });
-
+    sharedSpec(context);
   });
 
 });

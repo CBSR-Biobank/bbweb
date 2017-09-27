@@ -4,24 +4,26 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash');
+import _ from 'lodash';
 
-  describe('collectionSpecimenDescriptionSummaryDirective', function() {
+describe('collectionSpecimenDescriptionSummaryDirective', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+      this.injectDependencies('$rootScope',
+                              '$compile',
+                              'CollectionSpecimenDescription',
+                              'factory');
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.specimenDescription =
+        new this.CollectionSpecimenDescription(this.factory.collectionSpecimenDescription());
 
-      SuiteMixin.prototype.createController = function (specimenDescription) {
+      this.createController = (specimenDescription) => {
         specimenDescription = specimenDescription || this.specimenDescription;
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
@@ -34,33 +36,13 @@ define(function (require) {
           'collectionSpecimenDescriptionSummary'
         );
       };
-
-      return SuiteMixin;
-    }
-
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-
-      this.injectDependencies('$rootScope',
-                              '$compile',
-                              'CollectionSpecimenDescription',
-                              'factory');
-
-      this.putHtmlTemplates(
-        '/assets/javascripts/admin/studies/components/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummary.html');
-
-      this.specimenDescription =
-        new this.CollectionSpecimenDescription(this.factory.collectionSpecimenDescription());
-    }));
-
-    it('can be created', function() {
-      this.createController();
-      expect(this.scope.vm.specimenDescription).toBe(this.specimenDescription);
     });
-
-
   });
+
+  it('can be created', function() {
+    this.createController();
+    expect(this.scope.vm.specimenDescription).toBe(this.specimenDescription);
+  });
+
 
 });

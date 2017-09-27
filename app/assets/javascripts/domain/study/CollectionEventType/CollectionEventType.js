@@ -5,13 +5,13 @@
 define(function(require) {
   'use strict';
 
-  var _ = require('lodash'),
-      sprintf = require('sprintf-js').sprintf;
+  var _ = require('lodash');
 
   CollectionEventTypeFactory.$inject = [
     '$q',
     '$log',
     'biobankApi',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'CollectionSpecimenDescription',
     'DomainError',
@@ -26,29 +26,13 @@ define(function(require) {
   function CollectionEventTypeFactory($q,
                                       $log,
                                       biobankApi,
+                                      DomainEntity,
                                       ConcurrencySafeEntity,
                                       CollectionSpecimenDescription,
                                       DomainError,
                                       AnnotationType,
                                       HasCollectionSpecimenDescriptions,
                                       HasAnnotationTypes) {
-
-    var schema = {
-      'id': 'CollectionEventType',
-      'type': 'object',
-      'properties': {
-        'id':                   { 'type': 'string' },
-        'version':              { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':            { 'type': 'string' },
-        'timeModified':         { 'type': 'string' },
-        'name':                 { 'type': 'string' },
-        'description':          { 'type': [ 'string', 'null' ] },
-        'recurring':            { 'type': 'boolean' },
-        'specimenDescriptions': { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenDescription' } },
-        'annotationTypes':      { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
-      },
-      'required': [ 'id', 'version', 'timeAdded', 'name', 'recurring' ]
-    };
 
     /**
      * @classdesc A CollectionEventType defines a classification name, unique to the {@link
@@ -115,7 +99,7 @@ define(function(require) {
        */
       this.annotationTypes = [];
 
-      ConcurrencySafeEntity.call(this, schema, obj);
+      ConcurrencySafeEntity.call(this, CollectionEventType.SCHEMA, obj);
 
       options                      = options || {};
       options.study                = _.get(options, 'study', undefined);
@@ -135,6 +119,28 @@ define(function(require) {
              HasCollectionSpecimenDescriptions.prototype);
     CollectionEventType.prototype.constructor = CollectionEventType;
 
+    CollectionEventType.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'studies/cetypes' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
+
+    CollectionEventType.SCHEMA = {
+      'id': 'CollectionEventType',
+      'type': 'object',
+      'properties': {
+        'id':                   { 'type': 'string' },
+        'version':              { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':            { 'type': 'string' },
+        'timeModified':         { 'type': 'string' },
+        'name':                 { 'type': 'string' },
+        'description':          { 'type': [ 'string', 'null' ] },
+        'recurring':            { 'type': 'boolean' },
+        'specimenDescriptions': { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenDescription' } },
+        'annotationTypes':      { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
+      },
+      'required': [ 'id', 'version', 'timeAdded', 'name', 'recurring' ]
+    };
+
     /**
      * Checks if <tt>obj</tt> has valid properties to construct a
      * {@link domain.studies.CollectionEventType|CollectionEventType}.
@@ -145,7 +151,7 @@ define(function(require) {
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     CollectionEventType.isValid = function(obj) {
-      return ConcurrencySafeEntity.isValid(schema,
+      return ConcurrencySafeEntity.isValid(CollectionEventType.SCHEMA,
                                            [
                                              CollectionSpecimenDescription.SCHEMA,
                                              AnnotationType.SCHEMA
@@ -175,9 +181,8 @@ define(function(require) {
 
       if (obj.annotationTypes) {
         try {
-          options.annotationTypes = obj.annotationTypes.map(function (annotationType) {
-            return AnnotationType.create(annotationType);
-          });
+          options.annotationTypes =
+            obj.annotationTypes.map((annotationType) => AnnotationType.create(annotationType));
         } catch (e) {
           throw new DomainError('invalid annotation types from server: ' + validation.message);
         }
@@ -185,9 +190,8 @@ define(function(require) {
 
       if (obj.specimenDescriptions) {
         try {
-          options.specimenDescriptions = obj.specimenDescriptions.map(function (specimenDescription) {
-            return CollectionSpecimenDescription.create(specimenDescription);
-          });
+          options.specimenDescriptions = obj.specimenDescriptions
+            .map((specimenDescription) => CollectionSpecimenDescription.create(specimenDescription));
         } catch (e) {
           throw new DomainError('invalid specimen specs from server: ' + validation.message);
         }
@@ -227,9 +231,8 @@ define(function(require) {
      * @returns {Promise<domain.studies.CollectionEventType>} The collection event type within a promise.
      */
     CollectionEventType.get = function(studyId, id) {
-      return biobankApi.get(uri(studyId) + '/' + id).then(function(reply) {
-        return CollectionEventType.prototype.asyncCreate(reply);
-      });
+      return biobankApi.get(CollectionEventType.url(studyId, id))
+        .then((reply) => CollectionEventType.prototype.asyncCreate(reply));
     };
 
     /**
@@ -239,7 +242,7 @@ define(function(require) {
      * a promise.
      */
     CollectionEventType.list = function(studyId, options) {
-      var url = uri(studyId),
+      var url = CollectionEventType.url(studyId),
           params,
           validKeys = [
             'filter',
@@ -257,9 +260,7 @@ define(function(require) {
         var deferred = $q.defer();
 
         try {
-          reply.items = _.map(reply.items, function(obj){
-            return CollectionEventType.create(obj);
-          });
+          reply.items = reply.items.map((obj) => CollectionEventType.create(obj));
           deferred.resolve(reply);
         } catch (e) {
           deferred.reject(e);
@@ -294,20 +295,20 @@ define(function(require) {
 
     CollectionEventType.prototype.add = function() {
       var json = _.pick(this, 'studyId','name', 'recurring', 'description');
-      return biobankApi.post(sprintf('%s/%s', uri(), this.studyId), json)
+      return biobankApi.post(CollectionEventType.url(this.studyId), json)
         .then(function(reply) {
           return CollectionEventType.asyncCreate(reply);
         });
     };
 
     CollectionEventType.prototype.remove = function () {
-      var url = sprintf('%s/%s/%s/%d', uri(), this.studyId, this.id, this.version);
+      var url = CollectionEventType.url(this.studyId, this.id, this.version);
       return biobankApi.del(url);
     };
 
     CollectionEventType.prototype.updateName = function (name) {
       return ConcurrencySafeEntity.prototype.update.call(
-        this, uri('name', this.id), { studyId: this.studyId, name: name });
+        this, CollectionEventType.url('name', this.id), { studyId: this.studyId, name: name });
     };
 
     CollectionEventType.prototype.updateDescription = function (description) {
@@ -315,27 +316,25 @@ define(function(require) {
       if (description) {
         json.description = description;
       }
-      return ConcurrencySafeEntity.prototype.update.call(this, uri('description', this.id), json);
+      return ConcurrencySafeEntity.prototype.update.call(this, CollectionEventType.url('description', this.id), json);
     };
 
     CollectionEventType.prototype.updateRecurring = function (recurring) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
-        uri('recurring', this.id),
+        CollectionEventType.url('recurring', this.id),
         { studyId: this.studyId, recurring: recurring });
     };
 
     CollectionEventType.prototype.addSpecimenDescription = function (specimenDescription) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
-        uri('spcdesc', this.id),
+        CollectionEventType.url('spcdesc', this.id),
         _.extend({ studyId: this.studyId }, _.omit(specimenDescription, 'id')));
     };
 
     CollectionEventType.prototype.updateSpecimenDescription = function (specimenDescription) {
-      var url = sprintf('%s/%s',
-                        uri('spcdesc', this.id),
-                        specimenDescription.id);
+      var url = CollectionEventType.url('spcdesc', this.id, specimenDescription.id);
       return ConcurrencySafeEntity.prototype.update.call(
         this,
         url,
@@ -350,59 +349,32 @@ define(function(require) {
         throw new DomainError('specimen description with ID not present: ' + specimenDescription.id);
       }
 
-      url = sprintf('%s/%s/%d/%s',
-                            uri('spcdesc', this.studyId),
-                            this.id,
-                            this.version,
-                            specimenDescription.id);
+      url = CollectionEventType.url('spcdesc', this.studyId, this.id, this.version, specimenDescription.id);
       return biobankApi.del(url).then(CollectionEventType.asyncCreate);
     };
 
     CollectionEventType.prototype.addAnnotationType = function (annotationType) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
-        uri('annottype', this.id),
+        CollectionEventType.url('annottype', this.id),
         _.extend({ studyId: this.studyId }, _.omit(annotationType, 'uniqueId')));
     };
 
     CollectionEventType.prototype.updateAnnotationType = function (annotationType) {
       return ConcurrencySafeEntity.prototype.update.call(
         this,
-        uri('annottype', this.id) + '/' + annotationType.id,
+        CollectionEventType.url('annottype', this.id, annotationType.id),
         _.extend({ studyId: this.studyId }, annotationType));
     };
 
     CollectionEventType.prototype.removeAnnotationType = function (annotationType) {
-      var url = sprintf('%s/%s/%d/%s',
-                        uri('annottype', this.studyId),
-                        this.id,
-                        this.version,
-                        annotationType.id);
-
+      var url = CollectionEventType.url('annottype', this.studyId, this.id, this.version, annotationType.id);
       return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
     };
 
     CollectionEventType.prototype.inUse = function () {
-      return biobankApi.get(uri() + '/inuse/' + this.id);
+      return biobankApi.get(CollectionEventType.url('inuse', this.id));
     };
-
-    function uri(/* path, ceventTypeId */) {
-      var args = _.toArray(arguments),
-          result = '/studies/cetypes',
-          path,
-          ceventTypeId;
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += '/' + path;
-      }
-
-      if (args.length > 0) {
-        ceventTypeId = args.shift();
-        result += '/' + ceventTypeId;
-      }
-      return result;
-    }
 
     /** return constructor function */
     return CollectionEventType;

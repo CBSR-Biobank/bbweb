@@ -4,25 +4,20 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash'),
-      filtersSharedBehaviour = require('../../../test/filtersSharedBehaviour');
+import _ from 'lodash';
+import filtersSharedBehaviour from '../../../test/filtersSharedBehaviour';
 
-  describe('nameAndStateFiltersComponent', function() {
+describe('nameAndStateFiltersComponent', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
-
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
-
-      SuiteMixin.prototype.createController = function (bindings) {
+      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
+      this.createController = (bindings) => {
         var self = this,
             defaultBindings = {},
             actualBindings = {};
@@ -45,80 +40,64 @@ define(function (require) {
 
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
-          [
-            '<name-email-state-filters ',
-            '    state-data="vm.stateData" ',
-            '    selected-state="' + actualBindings.selectedState + '" ',
-            '    on-name-filter-updated="vm.onNameFilterUpdated" ',
-            '    on-email-filter-updated="vm.onEmailFilterUpdated" ',
-            '    on-state-filter-updated="vm.onStateFilterUpdated" ',
-            '    on-filters-cleared="vm.onFiltersCleared"> ',
-            '</name-email-state-filters>'
-          ].join(''),
+            `<name-email-state-filters
+                state-data="vm.stateData"
+                selected-state="${actualBindings.selectedState}"
+                on-name-filter-updated="vm.onNameFilterUpdated"
+                on-email-filter-updated="vm.onEmailFilterUpdated"
+                on-state-filter-updated="vm.onStateFilterUpdated"
+                on-filters-cleared="vm.onFiltersCleared">
+            </name-email-state-filters>`,
           actualBindings,
           'nameEmailStateFilters');
       };
+    });
+  });
 
-      return SuiteMixin;
-    }
+  describe('for name filter', function() {
+    var context = {};
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-
-      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
-      this.putHtmlTemplates(
-        '/assets/javascripts/common/components/nameEmailStateFilters/nameEmailStateFilters.html',
-        '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html');
-    }));
-
-    describe('for name filter', function() {
-      var context = {};
-
-      beforeEach(function() {
-        context.createController = this.createController.bind(this);
-      });
-
-      filtersSharedBehaviour.nameFiltersharedBehaviour(context);
-
+    beforeEach(function() {
+      context.createController = this.createController.bind(this);
     });
 
-    describe('for state filter', function() {
-      var context = {};
+    filtersSharedBehaviour.nameFiltersharedBehaviour(context);
 
-      beforeEach(function() {
-        context.createController = this.createController.bind(this);
-      });
+  });
 
-      filtersSharedBehaviour.stateFiltersharedBehaviour(context);
+  describe('for state filter', function() {
+    var context = {};
 
+    beforeEach(function() {
+      context.createController = this.createController.bind(this);
     });
 
-    it('has valid scope', function() {
-      this.createController();
-      expect(this.controller.emailFilter).toBeEmptyString();
-      expect(this.controller.emailFilterUpdated).toBeFunction();
-    });
+    filtersSharedBehaviour.stateFiltersharedBehaviour(context);
 
-    it('invokes the callback when the email filter is updated', function() {
-      this.createController();
+  });
 
-      this.controller.emailFilter = 'test';
-      this.controller.emailFilterUpdated();
-      this.scope.$digest();
+  it('has valid scope', function() {
+    this.createController();
+    expect(this.controller.emailFilter).toBeEmptyString();
+    expect(this.controller.emailFilterUpdated).toBeFunction();
+  });
 
-      expect(this.emailFilterUpdated).toHaveBeenCalled();
-    });
+  it('invokes the callback when the email filter is updated', function() {
+    this.createController();
 
-    it('invokes the callback when the filters are cleared', function() {
-      this.createController();
-      this.controller.clearFilters();
-      this.scope.$digest();
-      expect(this.controller.emailFilter).toBeEmptyString();
-      expect(this.filtersCleared).toHaveBeenCalled();
-    });
+    this.controller.emailFilter = 'test';
+    this.controller.emailFilterUpdated();
+    this.scope.$digest();
 
+    expect(this.emailFilterUpdated).toHaveBeenCalled();
+  });
+
+  it('invokes the callback when the filters are cleared', function() {
+    this.createController();
+    this.controller.clearFilters();
+    this.scope.$digest();
+    expect(this.controller.emailFilter).toBeEmptyString();
+    expect(this.filtersCleared).toHaveBeenCalled();
   });
 
 });

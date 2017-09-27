@@ -2,21 +2,17 @@
  * Jasmine test suite
  *
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash');
+import _ from 'lodash';
 
-  describe('specimenViewComponent', function() {
+describe('specimenViewComponent', function() {
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      var self = this;
-
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin.prototype);
-      self.injectDependencies('$q',
+      this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               'Study',
@@ -27,24 +23,17 @@ define(function (require) {
                               'specimenAddModal',
                               'domainNotificationService',
                               'factory');
-      this.putHtmlTemplates(
-        '/assets/javascripts/collection/components/specimenView/specimenView.html',
-        '/assets/javascripts/common/components/statusLine/statusLine.html',
-        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
 
-      this.createController = function (study,
-                                        participant,
-                                        collectionEventType,
-                                        collectionEvent,
-                                        specimen) {
+      this.createController =
+        (study, participant, collectionEventType, collectionEvent, specimen) =>
         ComponentTestSuiteMixin.prototype.createController.call(
-          self,
-          '<specimen-view study="vm.study"' +
-            '             participant="vm.participant"' +
-            '             collection-event-type="vm.collectionEventType"' +
-            '             collection-event="vm.collectionEvent"' +
-            '             specimen="vm.specimen">' +
-            '<specimen-view>',
+          this,
+          `<specimen-view study="vm.study"
+                          participant="vm.participant"
+                          collection-event-type="vm.collectionEventType"
+                          collection-event="vm.collectionEvent"
+                          specimen="vm.specimen">
+           <specimen-view>`,
           {
             study:               study,
             participant:         participant,
@@ -53,49 +42,46 @@ define(function (require) {
             specimen:            specimen
           },
           'specimenView');
-      };
 
       // the object must have keys in same order as the parameters for createController()
-      this.createEntities = function () {
-        var rawSpecimenDescription = self.factory.collectionSpecimenDescription(),
-            rawCollectionEventType = self.factory.collectionEventType(
+      this.createEntities = () => {
+        var rawSpecimenDescription = this.factory.collectionSpecimenDescription(),
+            rawCollectionEventType = this.factory.collectionEventType(
               { specimenDescriptions: [ rawSpecimenDescription ]}),
-            collectionEventType = self.CollectionEventType.create(rawCollectionEventType),
-            collectionEvent = new self.CollectionEvent(self.factory.collectionEvent(), collectionEventType),
-            specimen = new self.Specimen(self.factory.specimen(),
+            collectionEventType = this.CollectionEventType.create(rawCollectionEventType),
+            collectionEvent = new this.CollectionEvent(this.factory.collectionEvent(), collectionEventType),
+            specimen = new this.Specimen(this.factory.specimen(),
                                          collectionEventType.specimenDescriptions[0]),
-            participant = new self.Participant(self.factory.defaultParticipant()),
-            study = new self.Study(this.factory.defaultStudy());
+            participant = new this.Participant(this.factory.defaultParticipant()),
+            study = new this.Study(this.factory.defaultStudy());
 
         return {
-            study:               study,
-            participant:         participant,
-            collectionEventType: collectionEventType,
-            collectionEvent:     collectionEvent,
-            specimen:            specimen
+          study:               study,
+          participant:         participant,
+          collectionEventType: collectionEventType,
+          collectionEvent:     collectionEvent,
+          specimen:            specimen
         };
       };
-    }));
-
-    it('has valid scope', function() {
-      var entities = this.createEntities();
-      this.createController.apply(this, _.values(entities));
-      expect(this.controller.specimenDescription).toBeDefined();
     });
+  });
 
-    it('user can return to previous page', function() {
-      var entities = this.createEntities();
+  it('has valid scope', function() {
+    var entities = this.createEntities();
+    this.createController.apply(this, _.values(entities));
+    expect(this.controller.specimenDescription).toBeDefined();
+  });
 
-      this.injectDependencies('$state');
-      spyOn(this.$state, 'go').and.returnValue(null);
+  it('user can return to previous page', function() {
+    var entities = this.createEntities();
 
-      this.createController.apply(this, _.values(entities));
-      this.controller.back();
+    this.injectDependencies('$state');
+    spyOn(this.$state, 'go').and.returnValue(null);
 
-      expect(this.$state.go).toHaveBeenCalledWith('^');
-    });
+    this.createController.apply(this, _.values(entities));
+    this.controller.back();
 
-
+    expect(this.$state.go).toHaveBeenCalledWith('^');
   });
 
 });

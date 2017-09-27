@@ -2,15 +2,18 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function() {
+define(function(require) {
   'use strict';
+
+  const _ = require('lodash');
 
   usersServiceFactory.$inject = [
     '$q',
     '$cookies',
     '$log',
     'biobankApi',
-    'User'
+    'User',
+    'UrlService'
   ];
 
   /**
@@ -20,7 +23,8 @@ define(function() {
                                $cookies,
                                $log,
                                biobankApi,
-                               User) {
+                               User,
+                               UrlService) {
     var currentUser;
 
     var service = {
@@ -45,12 +49,12 @@ define(function() {
 
       if (!token) { return; }
 
-      biobankApi.get('/users/authenticate')
-        .then(function(user) {
+      biobankApi.get(UrlService.url('users/authenticate'))
+        .then((user) => {
           currentUser = User.create(user);
           $log.info('Welcome back, ' + currentUser.name);
         })
-        .catch(function() {
+        .catch(() => {
           /* the token is no longer valid */
           $log.info('Token no longer valid, please log in.');
           currentUser = undefined;
@@ -59,8 +63,8 @@ define(function() {
     }
 
     function retrieveCurrentUser() {
-      return biobankApi.get('/users/authenticate')
-        .then(function(user) {
+      return biobankApi.get(UrlService.url('users/authenticate'))
+        .then((user) => {
           currentUser = User.create(user);
           return currentUser;
         });
@@ -82,8 +86,8 @@ define(function() {
     }
 
     function login(credentials) {
-      return biobankApi.post('/users/login', credentials)
-        .then(function(user) {
+      return biobankApi.post(UrlService.url('users/login'), credentials)
+        .then((user) => {
           currentUser = User.create(user);
           $log.info('Welcome ' + currentUser.name);
           return currentUser;
@@ -91,7 +95,7 @@ define(function() {
     }
 
     function logout() {
-      return biobankApi.post('/users/logout').then(function() {
+      return biobankApi.post(UrlService.url('users/logout')).then(() => {
         $log.info('Good bye');
         $cookies.remove('XSRF-TOKEN');
         currentUser = undefined;
@@ -104,7 +108,7 @@ define(function() {
     }
 
     function passwordReset(email) {
-      return biobankApi.post('/users/passreset', { email: email });
+      return biobankApi.post(UrlService.url('users/passreset'), { email: email });
     }
 
   }

@@ -8,6 +8,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
   SpecimenFactory.$inject = [
     '$q',
     '$log',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'DomainError',
     'biobankApi',
@@ -27,6 +28,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
    */
   function SpecimenFactory($q,
                            $log,
+                           DomainEntity,
                            ConcurrencySafeEntity,
                            DomainError,
                            biobankApi,
@@ -47,8 +49,8 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      *        this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {domain.studies.CollectionSpecimenDescription} [specimenDescription] - The specimen spec from the collection
-     *        event type this specimen represents. An Undefined value is also valid.
+     * @param {domain.studies.CollectionSpecimenDescription} [specimenDescription] - The specimen spec from
+     *        the collection event type this specimen represents. An Undefined value is also valid.
      *
      */
     function Specimen(obj, specimenDescription) {
@@ -132,6 +134,11 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
 
     Specimen.prototype = Object.create(ConcurrencySafeEntity.prototype);
     Specimen.prototype.constructor = Specimen;
+
+    Specimen.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'participants/cevents/spcs' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
 
     /**
      * Used for validation.
@@ -244,7 +251,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         throw new DomainError('specimen id not specified');
       }
 
-      return biobankApi.get(uri(id)).then(function (reply) {
+      return biobankApi.get(Specimen.url(id)).then(function (reply) {
         return Specimen.asyncCreate(reply);
       });
     };
@@ -261,7 +268,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         throw new DomainError('specimen inventory id not specified');
       }
 
-      return biobankApi.get(uri() + '/invid/' + inventoryId).then(function (reply) {
+      return biobankApi.get(Specimen.url() + '/invid/' + inventoryId).then(function (reply) {
         return Specimen.asyncCreate(reply);
       });
     };
@@ -298,7 +305,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       params = _.omitBy(_.pick(options, validKeys), function (value) {
         return value === '';
       });
-      return biobankApi.get(uri(ceventId), params).then(function(reply) {
+      return biobankApi.get(Specimen.url(ceventId), params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
@@ -332,7 +339,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         result.locationId = specimen.locationInfo.locationId;
         return result;
       });
-      return biobankApi.post(uri(ceventId), json);
+      return biobankApi.post(Specimen.url(ceventId), json);
     };
 
     /**
@@ -382,22 +389,9 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       if (!collectionEventId) {
         throw new DomainError('collection event id not specified');
       }
-      url = sprintf.sprintf('%s/%s/%d', uri(collectionEventId), this.id, this.version);
+      url = sprintf.sprintf('%s/%s/%d', Specimen.url(collectionEventId), this.id, this.version);
       return biobankApi.del(url);
     };
-
-    function uri(/* specimenId */) {
-      var specimenId,
-          result = '/participants/cevents/spcs',
-          args = _.toArray(arguments);
-
-      if (args.length > 0) {
-        specimenId = args.shift();
-        result += '/' + specimenId;
-      }
-
-      return result;
-    }
 
     /** return constructor function */
     return Specimen;

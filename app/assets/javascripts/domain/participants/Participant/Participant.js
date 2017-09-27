@@ -2,13 +2,15 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
+define(function(require) {
   'use strict';
+
+  const _ = require('lodash');
 
   ParticipantFactory.$inject = [
     '$q',
     '$log',
-    'funutils',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'Study',
     'Annotation',
@@ -23,7 +25,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
    */
   function ParticipantFactory($q,
                               $log,
-                              funutils,
+                              DomainEntity,
                               ConcurrencySafeEntity,
                               Study,
                               Annotation,
@@ -31,21 +33,6 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
                               DomainError,
                               biobankApi,
                               HasAnnotations) {
-
-    var schema = {
-      'id': 'Participant',
-      'type': 'object',
-      'properties': {
-        'id':              { 'type': 'string' },
-        'version':         { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':       { 'type': 'string' },
-        'timeModified':    { 'type': [ 'string', 'null' ] },
-        'uniqueId':        { 'type': 'string' },
-        'studyId':         { 'type': 'string' },
-        'annotations':     { 'type': 'array', 'items':{ '$ref': 'Annotation' } }
-      },
-      'required': [ 'id', 'studyId', 'uniqueId', 'annotations', 'version' ]
-    };
 
     /**
      * Use this contructor to create a new Participant to be persited on the server. Use {@link
@@ -91,7 +78,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
        */
       this.annotations = [];
 
-      ConcurrencySafeEntity.call(this, schema, obj);
+      ConcurrencySafeEntity.call(this, Participant.SCHEMA, obj);
       _.extend(this, {
         study:       study,
         annotations: annotations
@@ -106,6 +93,23 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     _.extend(Participant.prototype, HasAnnotations.prototype);
     Participant.prototype.constructor = Participant;
 
+    Participant.REST_API_URL_SUFFIX = 'participants';
+
+    Participant.SCHEMA = {
+      'id': 'Participant',
+      'type': 'object',
+      'properties': {
+        'id':              { 'type': 'string' },
+        'version':         { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':       { 'type': 'string' },
+        'timeModified':    { 'type': [ 'string', 'null' ] },
+        'uniqueId':        { 'type': 'string' },
+        'studyId':         { 'type': 'string' },
+        'annotations':     { 'type': 'array', 'items':{ '$ref': 'Annotation' } }
+      },
+      'required': [ 'id', 'studyId', 'uniqueId', 'annotations', 'version' ]
+    };
+
     /**
      * Checks if <tt>obj</tt> has valid properties to construct a {@link
      * domain.studies.Participant|Participant}.
@@ -116,7 +120,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     Participant.isValid = function (obj) {
-      return ConcurrencySafeEntity.isValid(schema, [Annotation.schema ], obj);
+      return ConcurrencySafeEntity.isValid(Participant.SCHEMA, [Annotation.schema ], obj);
     };
 
     /**
@@ -172,6 +176,11 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       }
     };
 
+    Participant.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ Participant.REST_API_URL_SUFFIX ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
+
     /**
      * Retrieves a Participant from the server.
      *
@@ -180,7 +189,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @returns {Promise<domain.studies.Participant>} The participant within a promise.
      */
     Participant.get = function (studyId, id) {
-      return biobankApi.get(sprintf.sprintf('/participants/%s/%s', studyId, id))
+      return biobankApi.get(Participant.url(studyId, id))
         .then(Participant.prototype.asyncCreate);
     };
 
@@ -192,7 +201,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
      * @returns {Promise<domain.studies.Participant>} The participant within a promise.
      */
     Participant.getByUniqueId = function (studyId, uniqueId) {
-      return biobankApi.get(sprintf.sprintf('/participants/uniqueId/%s/%s', studyId, uniqueId))
+      return biobankApi.get(Participant.url('uniqueId', studyId, uniqueId))
         .then(function (reply) {
           return Participant.create(reply);
         });
@@ -231,7 +240,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       if (invalidAnnotationErrMsg) {
         deferred.reject(invalidAnnotationErrMsg);
       } else {
-        biobankApi.post(uri(self.studyId), cmd)
+        biobankApi.post(Participant.url(self.studyId), cmd)
           .then(self.asyncCreate)
           .then(function (participant) {
             deferred.resolve(participant);
@@ -247,7 +256,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     Participant.prototype.update = function (path, reqJson) {
       var self = this;
 
-      return ConcurrencySafeEntity.prototype.update.call(this, uri(path, self.id), reqJson)
+      return ConcurrencySafeEntity.prototype.update.call(this, Participant.url(path, self.id), reqJson)
         .then(postUpdate);
 
       function postUpdate(updatedParticipant) {
@@ -267,31 +276,9 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     };
 
     Participant.prototype.removeAnnotation = function (annotation) {
-      var url = sprintf.sprintf('%s/%d/%s',
-                                uri('annot', this.id),
-                                this.version,
-                                annotation.annotationTypeId);
+      var url = Participant.url('annot', this.id, this.version, annotation.annotationTypeId);
       return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url);
     };
-
-    function uri(/* path, participantId */) {
-      var path,
-          participantId,
-          result = '/participants',
-          args = _.toArray(arguments);
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += '/' + path;
-      }
-
-      if (args.length > 0) {
-        participantId = args.shift();
-        result += '/' + participantId;
-      }
-
-      return result;
-    }
 
     /** return constructor function */
     return Participant;

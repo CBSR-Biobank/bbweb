@@ -10,6 +10,7 @@ define(function() {
     '$log',
     'biobankApi',
     'EntityName',
+    'DomainEntity',
     'DomainError',
     'UserState'
   ];
@@ -21,6 +22,7 @@ define(function() {
                             $log,
                             biobankApi,
                             EntityName,
+                            DomainEntity,
                             DomainError,
                             UserState) {
 
@@ -52,8 +54,6 @@ define(function() {
     UserName.prototype = Object.create(EntityName.prototype);
     UserName.prototype.constructor = UserName;
 
-    UserName.REST_API_URL = '/users/names';
-
     /**
      * Creates a UserName, but first it validates <code>obj</code> to ensure that it has a valid schema.
      *
@@ -67,6 +67,11 @@ define(function() {
      */
     UserName.create = function (obj) {
       return EntityName.create(UserName, obj);
+    };
+
+    UserName.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'users/names' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
     };
 
     /**
@@ -95,7 +100,7 @@ define(function() {
      *          domain.users.User}.
      */
     UserName.list = function (options, omit) {
-      return EntityName.list(UserName.REST_API_URL, options, UserName.create, omit);
+      return EntityName.list(UserName.url(), options, UserName.create, omit);
     };
 
     /**

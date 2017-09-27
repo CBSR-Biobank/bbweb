@@ -9,7 +9,7 @@ define(function () {
    * A panel that can be collapsed by the user.
    */
   var component = {
-    templateUrl: '/assets/javascripts/common/components/collapsiblePanel/collapsiblePanel.html',
+    template: require('./collapsiblePanel.html'),
     transclude: true,
     controller: CollapsiblePanelController,
     controllerAs: 'vm',

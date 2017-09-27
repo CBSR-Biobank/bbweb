@@ -2,28 +2,33 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks                         = require('angularMocks'),
-      _                             = require('lodash'),
-      faker                         = require('faker'),
-      locationUpdateSharedBehaviour = require('../../../../test/locationUpdateSharedBehaviourSpec');
+import _ from 'lodash';
+import faker from 'faker';
+import sharedBehaviour from '../../../../test/locationUpdateSharedBehaviourSpec';
 
   describe('Component: centreLocationView', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function (ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+      this.injectDependencies('$rootScope',
+                              '$compile',
+                              '$state',
+                              'Centre',
+                              'Location',
+                              'factory');
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.location = new this.Location(this.factory.location());
+      this.centre = new this.Centre(this.factory.centre({ locations: [ this.location ]}));
+      this.returnStateName = 'home.admin.centres.centre.locations';
 
-      SuiteMixin.prototype.createController = function (centre, location) {
+      this.createController = (centre, location) => {
         centre = centre || this.centre;
         location = location || this.location;
 
@@ -36,31 +41,8 @@ define(function (require) {
           },
           'centreLocationView');
       };
-
-      return SuiteMixin;
-    }
-
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
-
-    beforeEach(inject(function (ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
-
-      this.injectDependencies('$rootScope',
-                              '$compile',
-                              '$state',
-                              'Centre',
-                              'Location',
-                              'factory');
-
-      this.location = new this.Location(this.factory.location());
-      this.centre = new this.Centre(this.factory.centre({ locations: [ this.location ]}));
-
-      this.putHtmlTemplates(
-        '/assets/javascripts/admin/centres/components/centreLocationView/centreLocationView.html',
-        '/assets/javascripts/common/components/breadcrumbs/breadcrumbs.html');
-
-      this.returnStateName = 'home.admin.centres.centre.locations';
-    }));
+    });
+  });
 
     it('scope should be valid', function() {
       this.createController();
@@ -102,7 +84,7 @@ define(function (require) {
           context.newValue                 = faker.random.word();
         }));
 
-        locationUpdateSharedBehaviour(context);
+        sharedBehaviour(context);
 
       });
 
@@ -114,7 +96,7 @@ define(function (require) {
           context.newValue                 = faker.random.word();
         }));
 
-        locationUpdateSharedBehaviour(context);
+        sharedBehaviour(context);
 
       });
 
@@ -126,7 +108,7 @@ define(function (require) {
           context.newValue                 = faker.random.word();
         }));
 
-        locationUpdateSharedBehaviour(context);
+        sharedBehaviour(context);
 
       });
 
@@ -138,7 +120,7 @@ define(function (require) {
           context.newValue                 = faker.random.word();
         }));
 
-        locationUpdateSharedBehaviour(context);
+        sharedBehaviour(context);
 
       });
 
@@ -150,7 +132,7 @@ define(function (require) {
           context.newValue                 = faker.random.word();
         }));
 
-        locationUpdateSharedBehaviour(context);
+        sharedBehaviour(context);
 
       });
 
@@ -162,7 +144,7 @@ define(function (require) {
           context.newValue                 = faker.random.word();
         }));
 
-        locationUpdateSharedBehaviour(context);
+        sharedBehaviour(context);
 
       });
 
@@ -174,7 +156,7 @@ define(function (require) {
           context.newValue                 = faker.random.word();
         }));
 
-        locationUpdateSharedBehaviour(context);
+        sharedBehaviour(context);
 
       });
 
@@ -182,5 +164,3 @@ define(function (require) {
 
 
   });
-
-});

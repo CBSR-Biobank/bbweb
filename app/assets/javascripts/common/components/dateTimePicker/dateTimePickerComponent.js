@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/common/components/dateTimePicker/dateTimePicker.html',
+    template : require('./dateTimePicker.html'),
     controller: DateTimePickerController,
     controllerAs: 'vm',
     bindings: {

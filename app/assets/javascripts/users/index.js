@@ -5,22 +5,21 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import angular from 'angular';
-import biobankCommon from '../common';
+import CommonModule from '../common';
+import angular      from 'angular';
 
-const MODULE_NAME = 'biobank.users';
+const UsersModule = angular.module('biobank.users', [ CommonModule ])
+      .config(require('./states'))
 
-angular.module(MODULE_NAME, [ biobankCommon ])
-  .config(require('./states'))
+      .component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'))
+      .component('login',          require('./components/login/loginComponent'))
+      .component('passwordSent',   require('./components/passwordSent/passwordSentComponent'))
+      .component('registerUser',   require('./components/registerUser/registerUserComponent'))
 
-  .component('forgotPassword', require('./components/forgotPassword/forgotPasswordComponent'))
-  .component('login',          require('./components/login/loginComponent'))
-  .component('passwordSent',   require('./components/passwordSent/passwordSentComponent'))
-  .component('registerUser',   require('./components/registerUser/registerUserComponent'))
+      .directive('passwordCheck',  require('./directives/passwordCheck/passwordCheckDirective'))
 
-  .directive('passwordCheck',  require('./directives/passwordCheck/passwordCheckDirective'))
+      .service('usersService',          require('./usersService'))
+      .service('userStateLabelService', require('./userStateLabelService'))
+      .name;
 
-  .service('usersService',          require('./usersService'))
-  .service('userStateLabelService', require('./userStateLabelService'));
-
-export default MODULE_NAME;
+export default UsersModule;

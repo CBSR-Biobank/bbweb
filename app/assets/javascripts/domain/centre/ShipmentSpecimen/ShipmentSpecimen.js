@@ -11,6 +11,7 @@ define(function (require) {
   ShipmentSpecimenFactory.$inject = [
     '$q',
     '$log',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'DomainError',
     'ShipmentItemState',
@@ -21,33 +22,13 @@ define(function (require) {
 
   function ShipmentSpecimenFactory($q,
                                    $log,
+                                   DomainEntity,
                                    ConcurrencySafeEntity,
                                    DomainError,
                                    ShipmentItemState,
                                    Specimen,
                                    biobankApi,
                                    centreLocationInfoSchema) {
-
-    var SCHEMA = {
-      'id': 'Shipment',
-      'type': 'object',
-      'properties': {
-        'id':           { 'type': 'string' },
-        'version':      { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':    { 'type': 'string' },
-        'timeModified': { 'type': [ 'string', 'null' ] },
-        'state':        { 'type': 'string' },
-        'shipmentId':   { 'type': 'string' },
-        'specimen':     { 'type': 'object', 'items': { '$ref': 'Specimen' } }
-      },
-      'required': [
-        'id',
-        'version',
-        'state',
-        'shipmentId',
-        'specimen'
-      ]
-    };
 
     /**
      * Use this contructor to create new Shipment Specimens to be persited on the server. Use [create()]{@link
@@ -104,7 +85,7 @@ define(function (require) {
        * @protected
        */
 
-      ConcurrencySafeEntity.call(this, SCHEMA, obj);
+      ConcurrencySafeEntity.call(this, ShipmentSpecimen.SCHEMA, obj);
 
       if (specimen) {
         _.extend(this, { specimen: specimen });
@@ -114,11 +95,34 @@ define(function (require) {
     ShipmentSpecimen.prototype = Object.create(ConcurrencySafeEntity.prototype);
     ShipmentSpecimen.prototype.constructor = ShipmentSpecimen;
 
+    ShipmentSpecimen.REST_API_URL_SUFFIX = 'shipments/specimens';
+
+    ShipmentSpecimen.SCHEMA = {
+      'id': 'Shipment',
+      'type': 'object',
+      'properties': {
+        'id':           { 'type': 'string' },
+        'version':      { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':    { 'type': 'string' },
+        'timeModified': { 'type': [ 'string', 'null' ] },
+        'state':        { 'type': 'string' },
+        'shipmentId':   { 'type': 'string' },
+        'specimen':     { 'type': 'object', 'items': { '$ref': 'Specimen' } }
+      },
+      'required': [
+        'id',
+        'version',
+        'state',
+        'shipmentId',
+        'specimen'
+      ]
+    };
+
     /*
      * @private
      */
     ShipmentSpecimen.isValid = function(obj) {
-      return ConcurrencySafeEntity.isValid(SCHEMA, null, obj);
+      return ConcurrencySafeEntity.isValid(ShipmentSpecimen.SCHEMA, null, obj);
     };
 
     /**
@@ -192,6 +196,11 @@ define(function (require) {
       }
     };
 
+    ShipmentSpecimen.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ ShipmentSpecimen.REST_API_URL_SUFFIX ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
+
     /**
      * Retrieves a Shipment Specimen from the server.
      *
@@ -204,7 +213,7 @@ define(function (require) {
         throw new DomainError('shipment specimen id not specified');
       }
 
-      return biobankApi.get(uri(id)).then(function (reply) {
+      return biobankApi.get(ShipmentSpecimen.url(id)).then(function (reply) {
         return ShipmentSpecimen.asyncCreate(reply);
       });
     };
@@ -236,7 +245,7 @@ define(function (require) {
      * @return {Promise} A promise. If the promise succeeds then a paged result is returned.
      */
     ShipmentSpecimen.list = function (shipmentId, options) {
-      var url = uri(shipmentId),
+      var url = ShipmentSpecimen.url(shipmentId),
           params,
           validKeys = [
             'filter',
@@ -289,34 +298,9 @@ define(function (require) {
      * @returns {Promise} A copy of this shipment, but with the state set to Lost.
      */
     ShipmentSpecimen.prototype.remove = function () {
-      var url = sprintf('%s/%s/%d', uri(this.shipmentId), this.id, this.version);
+      var url = ShipmentSpecimen.url(this.shipmentId, this.id, this.version);
       return biobankApi.del(url);
     };
-
-    function uri(/* path, shipmentId, shipmentSpecimenId */) {
-      var path,
-          shipmentId,
-          shipmentSpecimenId,
-          result = '/shipments/specimens/',
-          args = _.toArray(arguments);
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += path;
-      }
-
-      if (args.length > 0) {
-        shipmentId = args.shift();
-        result += '/' + shipmentId;
-      }
-
-      if (args.length > 0) {
-        shipmentSpecimenId = args.shift();
-        result += '/' + shipmentSpecimenId;
-      }
-
-      return result;
-    }
 
     return ShipmentSpecimen;
   }

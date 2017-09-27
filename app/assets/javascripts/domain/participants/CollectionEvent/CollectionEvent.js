@@ -11,7 +11,7 @@ define(function(require) {
   CollectionEventFactory.$inject = [
     '$q',
     '$log',
-    'funutils',
+    'DomainEntity',
     'ConcurrencySafeEntity',
     'DomainError',
     'CollectionEventType',
@@ -26,7 +26,7 @@ define(function(require) {
    */
   function CollectionEventFactory($q,
                                   $log,
-                                  funutils,
+                                  DomainEntity,
                                   ConcurrencySafeEntity,
                                   DomainError,
                                   CollectionEventType,
@@ -34,36 +34,6 @@ define(function(require) {
                                   annotationFactory,
                                   biobankApi,
                                   HasAnnotations) {
-
-    /**
-     * Used to validate the fields of a plain object that contains default fields.
-     *
-     * @see  CollectionEvent.create() and CollectionEvent.asyncCreate.
-     */
-    var schema = {
-      'id': 'CollectionEvent',
-      'type': 'object',
-      'properties': {
-        'id':                    { 'type': 'string' },
-        'participantId':         { 'type': 'string' },
-        'collectionEventTypeId': { 'type': 'string' },
-        'version':               { 'type': 'integer', 'minimum': 0 },
-        'timeAdded':             { 'type': 'string' },
-        'timeModified':          { 'type': [ 'string', 'null' ] },
-        'timeCompleted':         { 'type': 'string' },
-        'visitNumber':           { 'type': 'integer' },
-        'annotations':           { 'type': 'array' }
-      },
-      'required': [
-        'id',
-        'participantId',
-        'collectionEventTypeId',
-        'timeCompleted',
-        'visitNumber',
-        'annotations',
-        'version'
-      ]
-    };
 
     /**
      * Creates a new CollectionEvent.
@@ -113,7 +83,7 @@ define(function(require) {
        */
       this.annotations = [];
 
-      ConcurrencySafeEntity.call(this, schema, obj);
+      ConcurrencySafeEntity.call(this, CollectionEvent.SCHEMA, obj);
 
       if (this.collectionEventTypeId &&
           collectionEventType &&
@@ -133,6 +103,41 @@ define(function(require) {
     _.extend(CollectionEvent.prototype, HasAnnotations.prototype);
     CollectionEvent.prototype.constructor = CollectionEvent;
 
+    CollectionEvent.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
+      const args = [ 'participants/cevents' ].concat(_.toArray(arguments));
+      return DomainEntity.url.apply(null, args);
+    };
+
+    /**
+     * Used to validate the fields of a plain object that contains default fields.
+     *
+     * @see  CollectionEvent.create() and CollectionEvent.asyncCreate.
+     */
+    CollectionEvent.SCHEMA = {
+      'id': 'CollectionEvent',
+      'type': 'object',
+      'properties': {
+        'id':                    { 'type': 'string' },
+        'participantId':         { 'type': 'string' },
+        'collectionEventTypeId': { 'type': 'string' },
+        'version':               { 'type': 'integer', 'minimum': 0 },
+        'timeAdded':             { 'type': 'string' },
+        'timeModified':          { 'type': [ 'string', 'null' ] },
+        'timeCompleted':         { 'type': 'string' },
+        'visitNumber':           { 'type': 'integer' },
+        'annotations':           { 'type': 'array' }
+      },
+      'required': [
+        'id',
+        'participantId',
+        'collectionEventTypeId',
+        'timeCompleted',
+        'visitNumber',
+        'annotations',
+        'version'
+      ]
+    };
+
     /**
      * Checks if <tt>obj</tt> has valid properties to construct a
      * {@link domain.studies.CollectionEvent|CollectionEvent}.
@@ -143,7 +148,7 @@ define(function(require) {
      * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
      */
     CollectionEvent.isValid = function(obj) {
-      return ConcurrencySafeEntity.isValid(schema, null, obj);
+      return ConcurrencySafeEntity.isValid(CollectionEvent.SCHEMA, null, obj);
     };
 
     /**
@@ -215,7 +220,7 @@ define(function(require) {
         throw new DomainError('collection event id not specified');
       }
 
-      return biobankApi.get(uri(id)).then(function (reply) {
+      return biobankApi.get(this.url(id)).then(function (reply) {
         return CollectionEvent.asyncCreate(reply);
       });
     };
@@ -241,7 +246,7 @@ define(function(require) {
      *          domain.participants.CollectionEvent}.
      */
     CollectionEvent.list = function (participantId, options) {
-      var url = uriWithPath('list', participantId),
+      var url = this.url('list', participantId),
           params,
           validKeys = [
             'filter',
@@ -278,7 +283,7 @@ define(function(require) {
     CollectionEvent.getByVisitNumber = function (participantId,
                                                  visitNumber,
                                                  collectionEventType) {
-      return biobankApi.get(uri(participantId) + '/visitNumber/' + visitNumber)
+      return biobankApi.get(this.url(participantId) + '/visitNumber/' + visitNumber)
         .then(function (reply) {
           return CollectionEvent.create(reply, collectionEventType);
         });
@@ -319,7 +324,7 @@ define(function(require) {
                        'visitNumber');
 
       // convert annotations to server side entities
-      json.annotations = _.map(self.annotations, function (annotation) {
+      json.annotations = self.annotations.map((annotation) => {
         // make sure required annotations have values
         if (!annotation.isValueValid()) {
           throw new DomainError('required annotation has no value: annotationId: ' +
@@ -328,17 +333,17 @@ define(function(require) {
         return annotation.getServerAnnotation();
       });
 
-      return biobankApi.post(uri(self.participantId), json).then(function(reply) {
+      return biobankApi.post(CollectionEvent.url(self.participantId), json).then(function(reply) {
         return CollectionEvent.asyncCreate(reply);
       });
     };
 
     CollectionEvent.prototype.remove = function () {
-      return biobankApi.del(uri(this.participantId, this.id, this.version));
+      return biobankApi.del(CollectionEvent.url(this.participantId, this.id, this.version));
     };
 
     CollectionEvent.prototype.update = function (path, reqJson) {
-      return ConcurrencySafeEntity.prototype.update.call(this, uriWithPath(path, this.id), reqJson);
+      return ConcurrencySafeEntity.prototype.update.call(this, CollectionEvent.url(path, this.id), reqJson);
     };
 
     CollectionEvent.prototype.updateVisitNumber = function (visitNumber) {
@@ -355,55 +360,11 @@ define(function(require) {
 
     CollectionEvent.prototype.removeAnnotation = function (annotation) {
       var url = sprintf('%s/%d/%s',
-                        uri('annot', this.id),
+                        CollectionEvent.url('annot', this.id),
                         this.version,
                         annotation.annotationTypeId);
       return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url);
     };
-
-    function uri(/* participantId, collectionEventId, version */) {
-      var participantId,
-          collectionEventId,
-          version,
-          result = '/participants/cevents',
-          args = _.toArray(arguments);
-
-
-      if (args.length > 0) {
-        participantId = args.shift();
-        result += '/' + participantId;
-      }
-
-      if (args.length > 0) {
-        collectionEventId = args.shift();
-        result += '/' + collectionEventId;
-      }
-
-      if (args.length > 0) {
-        version = args.shift();
-        result += '/' + version;
-      }
-
-      return result;
-    }
-
-    function uriWithPath(/* path, collectionEventId */) {
-      var path,
-          collectionEventId,
-          result = uri(),
-          args = _.toArray(arguments);
-
-      if (args.length > 0) {
-        path = args.shift();
-        result += '/' + path;
-      }
-
-      if (args.length > 0) {
-        collectionEventId = args.shift();
-        result += '/' + collectionEventId;
-      }
-      return result;
-    }
 
     /** return constructor function */
     return CollectionEvent;

@@ -4,24 +4,35 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+/* global angular */
 
-  var mocks = require('angularMocks'),
-      _     = require('lodash');
+import _ from 'lodash';
 
-  describe('ceventsAddAndSelectDirective', function() {
+describe('ceventsAddAndSelectDirective', function() {
 
-    function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  beforeEach(() => {
+    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.inject(function(ComponentTestSuiteMixin) {
+      _.extend(this, ComponentTestSuiteMixin.prototype);
 
-      function SuiteMixin() {
-        ComponentTestSuiteMixin.call(this);
-      }
+      this.injectDependencies('$q',
+                              '$rootScope',
+                              '$compile',
+                              '$state',
+                              'Participant',
+                              'CollectionEvent',
+                              'CollectionEventType',
+                              'factory');
 
-      SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-      SuiteMixin.prototype.constructor = SuiteMixin;
+      this.jsonCevent      = this.factory.collectionEvent();
+      this.jsonParticipant = this.factory.defaultParticipant();
+      this.jsonCeventType  = this.factory.defaultCollectionEventType();
 
-      SuiteMixin.prototype.createController = function (participant, collectionEventTypes, collectionEvent) {
+      this.participant          = this.Participant.create(this.jsonParticipant);
+      this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
+      this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
+
+      this.createController = (participant, collectionEventTypes, collectionEvent) => {
         var replyItems;
 
         participant = participant || this.participant;
@@ -39,167 +50,136 @@ define(function (require) {
 
         ComponentTestSuiteMixin.prototype.createController.call(
           this,
-          [
-          '<cevents-add-and-select',
-          '  participant="vm.participant"',
-          '  collection-event-types="vm.collectionEventTypes">',
-          '</cevents-add-and-select>'
-          ].join(''),
+          `<cevents-add-and-select
+             participant="vm.participant"
+             collection-event-types="vm.collectionEventTypes">
+           </cevents-add-and-select>`,
           {
-          participant:          participant,
-          collectionEventTypes: collectionEventTypes
+            participant:          participant,
+            collectionEventTypes: collectionEventTypes
           },
           'ceventsAddAndSelect');
       };
+    });
+  });
 
-      return SuiteMixin;
-    }
+  it('has valid scope', function() {
+    this.createController();
+    expect(this.controller.participant).toBe(this.participant);
+    expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
 
-    beforeEach(mocks.module('biobankApp', 'biobank.test'));
+    expect(this.controller.pageChanged).toBeFunction();
+    expect(this.controller.add).toBeFunction();
+    expect(this.controller.eventInformation).toBeFunction();
+    expect(this.controller.displayState).toBe(this.controller.displayStates.HAVE_RESULTS);
+  });
 
-    beforeEach(inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+  describe('creating controller', function () {
 
-      this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
-                              '$state',
-                              'Participant',
-                              'CollectionEvent',
-                              'CollectionEventType',
-                              'factory');
-
-      this.putHtmlTemplates(
-        '/assets/javascripts/collection/components/ceventsAddAndSelect/ceventsAddAndSelect.html');
-
-      this.jsonCevent      = this.factory.collectionEvent();
-      this.jsonParticipant = this.factory.defaultParticipant();
-      this.jsonCeventType  = this.factory.defaultCollectionEventType();
-
-      this.participant          = this.Participant.create(this.jsonParticipant);
-      this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
-      this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
-    }));
-
-    it('has valid scope', function() {
-      this.createController();
-      expect(this.controller.participant).toBe(this.participant);
-      expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
-
-      expect(this.controller.pageChanged).toBeFunction();
-      expect(this.controller.add).toBeFunction();
-      expect(this.controller.eventInformation).toBeFunction();
-      expect(this.controller.displayState).toBe(this.controller.displayStates.HAVE_RESULTS);
+    it('throws an exception when no collection event types are avaiable', function() {
+      var self = this;
+      self.collectionEventTypes = [];
+      expect(function () { self.createController(); })
+        .toThrowError(/no collection event types defined for this study/);
     });
 
-    describe('creating controller', function () {
-
-      it('throws an exception when no collection event types are avaiable', function() {
-        var self = this;
-        self.collectionEventTypes = [];
-        expect(function () { self.createController(); })
-          .toThrowError(/no collection event types defined for this study/);
-      });
-
-      it('throws an exception when collection event does not match any collection event types', function() {
-        this.collectionEvent.collectionEventTypeId = this.factory.stringNext();
-        this.createController(this.participant, [ this.factory.collectionEventType()]);
-        expect(this.controller.collectionEventError).toBeTrue();
-      });
-
+    it('throws an exception when collection event does not match any collection event types', function() {
+      this.collectionEvent.collectionEventTypeId = this.factory.stringNext();
+      this.createController(this.participant, [ this.factory.collectionEventType()]);
+      expect(this.controller.collectionEventError).toBeTrue();
     });
 
-    it('has valid display state when there are no collection events', function() {
-      this.collectionEvent = undefined;
-      this.createController(this.participant, this.collectionEventTypes, undefined);
-      expect(this.controller.displayState).toBe(this.controller.displayStates.NONE_ADDED);
-    });
+  });
 
-    it('has valid display state when there are collection events', function() {
-      this.createController();
-      expect(this.controller.displayState).toBe(this.controller.displayStates.HAVE_RESULTS);
-    });
+  it('has valid display state when there are no collection events', function() {
+    this.collectionEvent = undefined;
+    this.createController(this.participant, this.collectionEventTypes, undefined);
+    expect(this.controller.displayState).toBe(this.controller.displayStates.NONE_ADDED);
+  });
 
-    it('when pageChanged is called the state is changed', function() {
+  it('has valid display state when there are collection events', function() {
+    this.createController();
+    expect(this.controller.displayState).toBe(this.controller.displayStates.HAVE_RESULTS);
+  });
+
+  it('when pageChanged is called the state is changed', function() {
+    spyOn(this.$state, 'go').and.returnValue('ok');
+    this.createController();
+    this.controller.pageChanged();
+    this.scope.$digest();
+    expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents');
+  });
+
+  describe('when add is called, the state is changed', function () {
+
+    it('to correct state when there is only a single collection event type defined', function() {
+      expect(this.collectionEventTypes).toBeArrayOfSize(1);
+
       spyOn(this.$state, 'go').and.returnValue('ok');
-      this.createController();
-      this.controller.pageChanged();
-      this.scope.$digest();
-      expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents');
-    });
-
-    describe('when add is called, the state is changed', function () {
-
-      it('to correct state when there is only a single collection event type defined', function() {
-        expect(this.collectionEventTypes).toBeArrayOfSize(1);
-
-        spyOn(this.$state, 'go').and.returnValue('ok');
-        spyOn(this.CollectionEvent, 'list').and.returnValue(this.$q.when(this.pagedResult));
-
-        this.createController();
-        this.controller.add();
-        this.scope.$digest();
-        expect(this.$state.go).toHaveBeenCalledWith(
-          'home.collection.study.participant.cevents.add.details',
-          { collectionEventTypeId: this.collectionEventTypes[0].id });
-      });
-
-      it('to correct state when there is more than one collection event type defined', function() {
-        var self = this;
-
-        self.collectionEventTypes = _.map(_.range(2), function () {
-          var jsonCeventType  = self.factory.defaultCollectionEventType();
-          return new self.CollectionEventType(jsonCeventType);
-        });
-
-        spyOn(self.$state, 'go').and.returnValue('ok');
-        self.createController();
-        self.controller.add();
-        self.scope.$digest();
-        expect(self.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add');
-      });
-
-    });
-
-    it('when eventInformation is called the state is changed', function() {
-      spyOn(this.$state, 'go').and.returnValue('ok');
+      spyOn(this.CollectionEvent, 'list').and.returnValue(this.$q.when(this.pagedResult));
 
       this.createController();
-      this.controller.eventInformation(this.collectionEvent);
+      this.controller.add();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(
-        'home.collection.study.participant.cevents.details',
-        { collectionEventId: this.collectionEvent.id });
+        'home.collection.study.participant.cevents.add.details',
+        { collectionEventTypeId: this.collectionEventTypes[0].id });
     });
 
-    describe('for updating visit number filter', function() {
+    it('to correct state when there is more than one collection event type defined', function() {
+      var self = this;
 
-      it('filter is updated when user enters a value', function() {
-        var visitNumber = '20';
-        this.createController();
-
-        this.CollectionEvent.list =
-          jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult([])));
-
-        this.controller.visitNumberFilter = visitNumber;
-        this.controller.visitFilterUpdated();
-        this.scope.$digest();
-
-        expect(this.controller.pagerOptions.filter).toEqual('visitNumber::' + visitNumber);
-        expect(this.controller.pagerOptions.page).toEqual(1);
-        expect(this.controller.displayState).toBe(this.controller.displayStates.NO_RESULTS);
+      self.collectionEventTypes = _.map(_.range(2), function () {
+        var jsonCeventType  = self.factory.defaultCollectionEventType();
+        return new self.CollectionEventType(jsonCeventType);
       });
 
-      it('filter is updated when user clears the value', function() {
-        this.createController();
-        this.controller.visitNumberFilter = '';
-        this.controller.visitFilterUpdated();
-        this.scope.$digest();
+      spyOn(self.$state, 'go').and.returnValue('ok');
+      self.createController();
+      self.controller.add();
+      self.scope.$digest();
+      expect(self.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add');
+    });
 
-        expect(this.controller.pagerOptions.filter).toBeEmptyString();
-        expect(this.controller.pagerOptions.page).toEqual(1);
-      });
+  });
 
+  it('when eventInformation is called the state is changed', function() {
+    spyOn(this.$state, 'go').and.returnValue('ok');
+
+    this.createController();
+    this.controller.eventInformation(this.collectionEvent);
+    this.scope.$digest();
+    expect(this.$state.go).toHaveBeenCalledWith(
+      'home.collection.study.participant.cevents.details',
+      { collectionEventId: this.collectionEvent.id });
+  });
+
+  describe('for updating visit number filter', function() {
+
+    it('filter is updated when user enters a value', function() {
+      var visitNumber = '20';
+      this.createController();
+
+      this.CollectionEvent.list =
+        jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult([])));
+
+      this.controller.visitNumberFilter = visitNumber;
+      this.controller.visitFilterUpdated();
+      this.scope.$digest();
+
+      expect(this.controller.pagerOptions.filter).toEqual('visitNumber::' + visitNumber);
+      expect(this.controller.pagerOptions.page).toEqual(1);
+      expect(this.controller.displayState).toBe(this.controller.displayStates.NO_RESULTS);
+    });
+
+    it('filter is updated when user clears the value', function() {
+      this.createController();
+      this.controller.visitNumberFilter = '';
+      this.controller.visitFilterUpdated();
+      this.scope.$digest();
+
+      expect(this.controller.pagerOptions.filter).toBeEmptyString();
+      expect(this.controller.pagerOptions.page).toEqual(1);
     });
 
   });
