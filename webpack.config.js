@@ -1,9 +1,9 @@
-/* global module, __dirname, process, babelSettings */
+/* global module, __dirname */
 /* eslint no-process-env: "off" */
 
 const path = require('path'),
       webpack = require('webpack'),
-      ExtractTextPlugin = require("extract-text-webpack-plugin"),
+      ExtractTextPlugin = require('extract-text-webpack-plugin'),
       CleanWebpackPlugin = require('clean-webpack-plugin');
 
 const config = {
@@ -15,7 +15,7 @@ const config = {
     filename: 'js/[name].bundle.js',
     chunkFilename: '[name].bundle.js',
     path: path.resolve(__dirname, 'public'),
-    publicPath: '/assets/'
+    publicPath: 'http://localhost:8080/assets/'
   },
   module: {
     rules: [
@@ -30,19 +30,19 @@ const config = {
       {
         test: /\.css$/,
         use: ExtractTextPlugin.extract({
-          fallback: "style-loader",
-          use: "css-loader"
+          fallback: 'style-loader',
+          use: 'css-loader'
         })
       },
       {
         test: /\.less$/,
         use: [
           // creates style nodes from JS strings
-          { loader: "style-loader" },
+          { loader: 'style-loader' },
           // translates CSS into CommonJS
-          { loader: "css-loader" },
+          { loader: 'css-loader' },
           // compiles Less to CSS
-          { loader: "less-loader" }
+          { loader: 'less-loader' }
         ]
       },
       {
@@ -77,7 +77,7 @@ const config = {
     new webpack.optimize.CommonsChunkPlugin({
       name: 'common' // Specify the common bundle's name.
     }),
-    new ExtractTextPlugin("css/styles.css")
+    new ExtractTextPlugin('css/styles.css')
   ],
 
   performance: {

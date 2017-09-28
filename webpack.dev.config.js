@@ -1,6 +1,7 @@
-/* global module */
+/* global module, __dirname */
 
-const webpack = require('webpack'),
+const path = require('path'),
+      webpack = require('webpack'),
       config  = require('./webpack.config');
 
 config.devtool = 'eval-source-map';
@@ -11,5 +12,19 @@ config.plugins = config.plugins.concat([
   // It also updates stylesheets and inline assets without page reloading.
   new webpack.HotModuleReplacementPlugin()
 ]);
+
+config.devServer = {
+  hot:         true, // this enables hot reload
+  inline:      true, // use inline method for hmr
+  host:        'localhost',
+  port:        8080,
+  contentBase: path.join(__dirname, 'public'),
+  compress:    true,
+  stats:       { colors: true },
+  headers: {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': 'true'
+  }
+};
 
 module.exports = config;

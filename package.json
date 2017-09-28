@@ -60,11 +60,13 @@
     "style-loader": "^0.18.2",
     "url-loader": "^0.5.9",
     "webpack": "^3.6.0",
-    "webpack-dev-middleware": "^1.11.0"
+    "webpack-dev-middleware": "^1.11.0",
+    "webpack-dev-server": "^2.9.1"
   },
   "scripts": {
     "prestart": "npm install",
     "pretest": "npm install",
+    "dev": "webpack-dev-server  --progress --colors --client-log-level none",
     "dev-build": "webpack --config webpack.dev.config.js --bail --debug --progress --profile --colors",
     "dev-build-watch": "webpack --config webpack.dev.config.js --progress --profile --colors --watch",
     "dev-start-server": "sbt run",
