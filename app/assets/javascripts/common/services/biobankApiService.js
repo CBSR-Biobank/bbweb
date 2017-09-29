@@ -24,7 +24,7 @@ define(['angular', 'jquery'], function (angular, $) {
 
     function call(method, url, config) {
       config = config || {};
-      angular.extend(config, { method: method, url: url });
+      angular.extend(config, { method: method, url: '/api' + url });
 
       return $http(config)
         .then(function(response) {

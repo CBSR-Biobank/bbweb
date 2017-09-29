@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html ng-app="biobankApp">
+  <head>
+    <title data-ng-bind="pageTitle"></title>
+    <link rel="stylesheet" media="screen" href="/css/styles.css" />
+  </head>
+  <body>
+    <biobank-header></biobank-header>
+    <div class="container" ng-cloak>
+      <div ui-view="main"></div>
+    </div>
+    <biobank-footer></biobank-footer>
+    <script type="text/javascript" src="/js/common.bundle.js"></script>
+    <script type="text/javascript" src="/js/index.bundle.js"></script>
+  </body>
+</html>

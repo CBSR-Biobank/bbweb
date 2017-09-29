@@ -21,9 +21,12 @@ config.devServer = {
   contentBase: path.join(__dirname, 'public'),
   compress:    true,
   stats:       { colors: true },
-  headers: {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Credentials': 'true'
+  proxy: {
+    '/api/**': {
+      target: 'http://localhost:9000',
+      pathRewrite: { '^/api' : '' },
+      logLevel: 'debug'
+    }
   }
 };
 

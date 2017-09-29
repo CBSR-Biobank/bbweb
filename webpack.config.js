@@ -15,7 +15,7 @@ const config = {
     filename: 'js/[name].bundle.js',
     chunkFilename: '[name].bundle.js',
     path: path.resolve(__dirname, 'public'),
-    publicPath: 'http://localhost:8080/assets/'
+    publicPath: '/'
   },
   module: {
     rules: [
