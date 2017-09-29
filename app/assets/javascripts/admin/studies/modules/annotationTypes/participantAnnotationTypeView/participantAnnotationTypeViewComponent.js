@@ -7,7 +7,7 @@ define(function (require) {
   var _       = require('lodash');
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/studies/components/annotationTypes/participantAnnotationTypeView/participantAnnotationTypeView.html',
+    template: require('./participantAnnotationTypeView.html'),
     controller: ParticipantAnnotationTypeViewController,
     controllerAs: 'vm',
     bindings: {

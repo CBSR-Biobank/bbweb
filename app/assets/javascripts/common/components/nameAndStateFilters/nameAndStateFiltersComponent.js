@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/common/components/nameAndStateFilters/nameAndStateFilters.html',
+    template: require('./nameAndStateFilters.html'),
     controller: Controller,
     controllerAs: 'vm',
     bindings: {

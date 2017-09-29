@@ -46,7 +46,7 @@ define(function () {
       if ((typeof error.message === 'string') &&
           (error.message.indexOf('expected version doesn\'t match current version') > -1)) {
           /* concurrent change error */
-          modalDefaults.templateUrl = '/assets/javascripts/common/modalConcurrencyError.html';
+          modalDefaults.template = require('./modalConcurrencyError.html');
           modalOptions.domainType = domainObjTypeName;
       } else {
         // most likely a programming error

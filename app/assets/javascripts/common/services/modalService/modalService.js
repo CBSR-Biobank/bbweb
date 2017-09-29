@@ -19,7 +19,7 @@ define(function (require) {
     var modalDefaults = { backdrop:    true,
                           keyboard:    true,
                           modalFade:   true,
-                          templateUrl: '/assets/javascripts/common/services/modalService/modal.html'
+                          template: require('./modal.html')
                         },
         modalOptions = { actionButtonText: gettextCatalog.getString('OK'),
                          headerHtml:       gettextCatalog.getString('Proceed?'),
@@ -69,7 +69,7 @@ define(function (require) {
 
     function modalOk(headerHtml, bodyHtml) {
       var modalDefaults = {
-        templateUrl: '/assets/javascripts/common/services/modalService/modalOk.html'
+        template: require('./modalOk.html')
       };
       var modalOptions = {
         headerHtml: headerHtml,

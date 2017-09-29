@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '',
+    template: '',
     controller: BiobankFooterCompnent,
     controllerAs: 'vm',
     bindings: {

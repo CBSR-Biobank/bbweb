@@ -8,7 +8,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/centres/components/centreAdd/centreAdd.html',
+    template: require('./centreAdd.html'),
     controller: CentreAddDirective,
     controllerAs: 'vm',
     bindings: {

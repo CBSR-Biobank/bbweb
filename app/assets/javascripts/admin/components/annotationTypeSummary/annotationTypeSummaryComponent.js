@@ -9,7 +9,7 @@ define(function () {
    * Displays a summary for the annotation type.
    */
   var component = {
-    templateUrl : '/assets/javascripts/admin/components/annotationTypeSummary/annotationTypeSummary.html',
+    template: require('./annotationTypeSummary.html'),
     controller: AnnotationTypeSummaryController,
     controllerAs: 'vm',
     bindings: {

@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/collection/components/collection/collection.html',
+    template: require('./collection.html'),
     controller: CollectionController,
     controllerAs: 'vm'
   };

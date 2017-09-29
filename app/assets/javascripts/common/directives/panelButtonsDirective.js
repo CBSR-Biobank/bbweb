@@ -20,7 +20,7 @@ define(function (){
         addButtonEnabled: '&',
         panelOpen: '='
       },
-      templateUrl: '/assets/javascripts/common/directives/panelButtons.html',
+      template: require('./panelButtons.html'),
       controller: PanelButtonsController,
       controllerAs: 'vm'
     };

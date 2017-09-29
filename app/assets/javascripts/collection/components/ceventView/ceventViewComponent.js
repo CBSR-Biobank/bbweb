@@ -8,7 +8,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl: '/assets/javascripts/collection/components/ceventView/ceventView.html',
+    template: require('./ceventView.html'),
     controller: CeventViewController,
     controllerAs: 'vm',
     bindings: {

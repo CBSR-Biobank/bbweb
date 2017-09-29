@@ -20,7 +20,7 @@ define(function () {
         onEdit:           '&',
         tooltip:          '@'
       },
-      templateUrl : '/assets/javascripts/common/directives/truncateToggle/truncateToggle.html',
+      template: require('./truncateToggle.html'),
       controller: TruncateToggleCtrl,
       controllerAs: 'vm'
     };

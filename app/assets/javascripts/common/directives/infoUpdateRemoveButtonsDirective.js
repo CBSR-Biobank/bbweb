@@ -23,7 +23,7 @@ define(function (){
         updateButtonEnabled: '&',
         removeButtonEnabled: '&'
       },
-      templateUrl: '/assets/javascripts/common/directives/infoUpdateRemoveButtons.html'
+      template: require('./infoUpdateRemoveButtons.html')
     };
     return directive;
   }

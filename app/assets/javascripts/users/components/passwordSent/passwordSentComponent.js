@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/users/components/passwordSent/passwordSent.html',
+    template: require('./passwordSent.html'),
     controller: PasswordSentController,
     controllerAs: 'vm',
     bindings: {

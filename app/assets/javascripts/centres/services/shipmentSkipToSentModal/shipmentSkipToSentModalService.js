@@ -24,7 +24,7 @@ define(function (require) {
       var modal;
 
       modal = $uibModal.open({
-        templateUrl: '/assets/javascripts/centres/services/shipmentSkipToSentModal/shipmentSkipToSentModal.html',
+        template: require('./shipmentSkipToSentModal.html'),
         controller: ModalController,
         controllerAs: 'vm',
         backdrop: true,

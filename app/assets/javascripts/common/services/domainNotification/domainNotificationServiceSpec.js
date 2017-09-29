@@ -35,7 +35,7 @@ define(['angular', 'angularMocks', 'lodash', 'biobankApp'], function(angular, mo
 
         this.domainNotificationService.updateErrorModal(err, domainEntityName);
         expect(this.modalService.showModal).toHaveBeenCalledWith({
-          templateUrl: '/assets/javascripts/common/modalConcurrencyError.html'
+          template: require('./modalConcurrencyError.html')
         }, {
           closeButtonText: 'Cancel',
           actionButtonText: 'OK',

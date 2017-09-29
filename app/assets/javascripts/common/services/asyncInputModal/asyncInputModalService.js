@@ -39,7 +39,7 @@ define(function () {
                        noResultsMessage,
                        getResults) {
       var modal = $uibModal.open({
-        templateUrl: '/assets/javascripts/common/services/asyncInputModal/asyncInputModal.html',
+        template: require('./asyncInputModal.html'),
         controller: ModalController,
         controllerAs: 'vm',
         backdrop: true,

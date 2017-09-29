@@ -17,7 +17,7 @@ define(['angular', 'lodash'], function(angular, _) {
         study: '=',
         processingTypes: '='
       },
-      templateUrl: '/assets/javascripts/admin/studies/directives/processing/processingTypesPanel/processingTypesPanel.html',
+      template: require('./processingTypesPanel.html'),
       controller: ProcessingTypesPanelCtrl,
       controllerAs: 'vm'
     };

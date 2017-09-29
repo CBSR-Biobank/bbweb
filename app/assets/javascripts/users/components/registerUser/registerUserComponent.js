@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/users/components/registerUser/registerUser.html',
+    template: require('./registerUser.html'),
     controller: RegisterUserController,
     controllerAs: 'vm',
     bindings: {}

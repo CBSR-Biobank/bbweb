@@ -6,7 +6,7 @@ define(['lodash'], function (_) {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/centres/components/shipmentAdd/shipmentAdd.html',
+    template: require('./shipmentAdd.html'),
     controller: ShipmentAddController,
     controllerAs: 'vm',
     bindings: {}

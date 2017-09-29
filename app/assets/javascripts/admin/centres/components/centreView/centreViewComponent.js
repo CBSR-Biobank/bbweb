@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/centres/components/centreView/centreView.html',
+    template: require('./centreView.html'),
     controller: CentreViewDirective,
     controllerAs: 'vm',
     bindings: {

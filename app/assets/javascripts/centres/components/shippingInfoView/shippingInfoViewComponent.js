@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/centres/components/shippingInfoView/shippingInfoView.html',
+    template: require('./shippingInfoView.html'),
     controller: ShippingInfoViewController,
     controllerAs: 'vm',
     bindings: {

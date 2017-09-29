@@ -10,7 +10,7 @@ define(function () {
    * for a different aspect of the centre.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/centres/components/centreSummary/centreSummary.html',
+    template: require('./centreSummary.html'),
     controller: CentreSummaryController,
     controllerAs: 'vm',
     bindings: {

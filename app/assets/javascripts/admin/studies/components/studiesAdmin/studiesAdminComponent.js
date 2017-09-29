@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/studies/components/studiesAdmin/studiesAdmin.html',
+    template: require('./studiesAdmin.html'),
     controller: StudiesAdminController,
     controllerAs: 'vm',
     bindings: {

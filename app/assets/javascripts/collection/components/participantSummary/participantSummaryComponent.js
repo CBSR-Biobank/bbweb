@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/collection/components/participantSummary/participantSummary.html',
+    template: require('./participantSummary.html'),
     controller: ParticipantSummaryController,
     controllerAs: 'vm',
     bindings: {

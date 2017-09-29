@@ -9,7 +9,7 @@ define(function () {
    *
    */
   var COMPONENT = {
-    templateUrl: '/assets/javascripts/centres/components/shipmentsOutgoing/shipmentsOutgoing.html',
+    template: require('./shipmentsOutgoing.html'),
     controller: OutgoingShipmentsController,
     controllerAs: 'vm',
     bindings: {

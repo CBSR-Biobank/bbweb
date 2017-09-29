@@ -8,7 +8,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl: '/assets/javascripts/collection/components/ceventsAddAndSelect/ceventsAddAndSelect.html',
+    template: require('./ceventsAddAndSelect.html'),
     controller: CeventsAddAndSelectDirective,
     controllerAs: 'vm',
     bindings: {

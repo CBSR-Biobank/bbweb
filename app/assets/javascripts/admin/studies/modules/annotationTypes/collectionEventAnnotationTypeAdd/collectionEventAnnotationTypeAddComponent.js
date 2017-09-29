@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/studies/components/annotationTypes/collectionEventAnnotationTypeAdd/collectionEventAnnotationTypeAdd.html',
+    template: require('./collectionEventAnnotationTypeAdd.html'),
     controller: CollectionEventAnnotationTypeAddController,
     controllerAs: 'vm',
     bindings: {

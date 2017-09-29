@@ -11,7 +11,7 @@ define(function (require) {
    * Allows the user to link a center to one or more study.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/centres/components/centreStudiesPanel/centreStudiesPanel.html',
+    template: require('./centreStudiesPanel.html'),
     controller: CentreStudiesPanelController,
     controllerAs: 'vm',
     bindings: {

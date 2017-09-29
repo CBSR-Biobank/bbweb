@@ -9,7 +9,7 @@ define(function () {
    * Displays all shipments destined to or from a centre.
    */
   var component = {
-    templateUrl : '/assets/javascripts/centres/components/centreShipments/centreShipments.html',
+    template: require('./centreShipments.html'),
     controller: CentreShipmentsController,
     controllerAs: 'vm',
     bindings: {

@@ -2,8 +2,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import angular from 'angular';
 import _       from 'lodash';
+import angular from 'angular';
 
 const MODULE_NAME = 'biobank.modalinput';
 
@@ -49,7 +49,7 @@ function modalInputDirectiveGenerator(type) {
   return function () {
     var directive = {
       restrict: 'E',
-      templateUrl : '/assets/javascripts/common/modalInput/' + type + '.html'
+      template: require('./' + type + '.html')
     };
     return directive;
   };
@@ -102,7 +102,7 @@ function modalInputService($uibModal) {
     var modal;
 
     modal = $uibModal.open({
-      templateUrl: '/assets/javascripts/common/modalInput/modalInput.html',
+      template: require('./modalInput.html'),
       controller: ModalController,
       controllerAs: 'vm',
       backdrop: true,

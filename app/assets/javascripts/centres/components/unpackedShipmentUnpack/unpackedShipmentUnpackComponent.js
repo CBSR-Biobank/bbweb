@@ -8,7 +8,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl: '/assets/javascripts/centres/components/unpackedShipmentUnpack/unpackedShipmentUnpack.html',
+    template: require('./unpackedShipmentUnpack.html'),
     controller: UnpackedShipmentUnpackController,
     controllerAs: 'vm',
     bindings: {

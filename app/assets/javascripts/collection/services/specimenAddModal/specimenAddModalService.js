@@ -39,7 +39,7 @@ define(function (require) {
      */
     function openModal(centreLocations, specimenDescriptions, defaultDatetime) {
       var modalInstance = $uibModal.open({
-        templateUrl: '/assets/javascripts/collection/services/specimenAddModal/specimenAddModal.html',
+        template: require('./specimenAddModal.html'),
         controller: ModalInstanceController,
         controllerAs: 'vm',
         backdrop: true,

@@ -32,7 +32,7 @@ define(function (require) {
    *    pressed.
    */
   var component = {
-    templateUrl : '/assets/javascripts/shipmentSpecimens/components/ssSpecimensPagedTable/ssSpecimensPagedTable.html',
+    template: require('./ssSpecimensPagedTable.html'),
     controller: Controller,
     controllerAs: 'vm',
     bindings: {

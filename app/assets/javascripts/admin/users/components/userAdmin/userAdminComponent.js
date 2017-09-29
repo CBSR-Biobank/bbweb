@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/users/components/userAdmin/userAdmin.html',
+    template: require('./userAdmin.html'),
     controller: UserAdminController,
     controllerAs: 'vm'
   };

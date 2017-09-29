@@ -29,7 +29,7 @@ define(function (require) {
    * @param {function} onLabelSelected - the function to invoke when a label is selected.
    */
   var component = {
-    templateUrl: '/assets/javascripts/common/components/labelsList/labelsList.html',
+    template: require('./labelsList.html'),
     controller: LabelsListController,
     controllerAs: 'vm',
     bindings: {

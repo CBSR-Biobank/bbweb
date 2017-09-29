@@ -32,7 +32,7 @@ define(function (require) {
    *        with property 'text-info' is used.
    */
   var component = {
-    templateUrl: '/assets/javascripts/common/components/statusLine/statusLine.html',
+    template: require('./statusLine.html'),
     controller: StatusLineController,
     controllerAs: 'vm',
     bindings: {

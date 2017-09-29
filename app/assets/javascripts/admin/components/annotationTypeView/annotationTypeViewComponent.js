@@ -11,7 +11,7 @@ define(function (require) {
    *
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/components/annotationTypeView/annotationTypeView.html',
+    template: require('./annotationTypeView.html'),
     controller: AnnotationTypeViewController,
     controllerAs: 'vm',
     bindings: {

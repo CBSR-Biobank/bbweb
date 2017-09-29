@@ -40,7 +40,7 @@ define(function (require) {
       }
 
       modal = $uibModal.open({
-        templateUrl: '/assets/javascripts/admin/services/annotationTypeUpdateModal/annotationTypeUpdateModal.html',
+        template: require('./annotationTypeUpdateModal.html'),
         controller: ModalController,
         controllerAs: 'vm',
         backdrop: true,

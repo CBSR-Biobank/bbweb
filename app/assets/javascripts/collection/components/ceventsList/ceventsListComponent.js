@@ -9,7 +9,7 @@ define(function () {
    * This component lists the collection events for a participant.
    */
   var component = {
-    templateUrl: '/assets/javascripts/collection/components/ceventsList/ceventsList.html',
+    template: require('./ceventsList.html'),
     controller: CeventsListController,
     controllerAs: 'vm',
     bindings: {

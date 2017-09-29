@@ -5,7 +5,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/studies/components/studyProcessingTab/studyProcessingTab.html',
+    template: require('./studyProcessingTab.html'),
     controller: StudyProcessingTabController,
     controllerAs: 'vm',
     bindings: {

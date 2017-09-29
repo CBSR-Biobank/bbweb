@@ -9,7 +9,7 @@ define(function () {
    * This component is used for adding a participant.
    */
   var component = {
-    templateUrl: '/assets/javascripts/collection/components/participantAdd/participantAdd.html',
+    template: require('./participantAdd.html'),
     controller: ParticipantAddController,
     controllerAs: 'vm',
     bindings: {

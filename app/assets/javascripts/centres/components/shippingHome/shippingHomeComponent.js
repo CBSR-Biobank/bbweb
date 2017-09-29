@@ -13,7 +13,7 @@ define(function (require) {
    * @param {domain.centres.CentreLocationDto} - the locations returned from the server.
    */
   var component = {
-    templateUrl : '/assets/javascripts/centres/components/shippingHome/shippingHome.html',
+    template: require('./shippingHome.html'),
     controller: ShippingHomeController,
     controllerAs: 'vm',
     bindings: {

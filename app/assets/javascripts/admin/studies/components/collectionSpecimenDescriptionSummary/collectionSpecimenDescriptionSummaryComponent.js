@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/studies/components/collectionSpecimenDescriptionSummary/collectionSpecimenDescriptionSummary.html',
+    template: require('./collectionSpecimenDescriptionSummary.html'),
     controller: CollectionSpecimenDescriptionSummaryController,
     controllerAs: 'vm',
     bindings: {

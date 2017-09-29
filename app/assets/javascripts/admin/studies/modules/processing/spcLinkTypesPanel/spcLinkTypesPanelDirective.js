@@ -16,7 +16,7 @@ define(['angular', 'lodash'], function(angular, _) {
         study: '=',
         processingDto: '='
       },
-      templateUrl: '/assets/javascripts/admin/studies/directives/processing/spcLinkTypesPanel/spcLinkTypesPanel.html',
+      template: require('./spcLinkTypesPanel.html'),
       controller: SpcLinkTypesPanelCtrl,
       controllerAs: 'vm'
     };

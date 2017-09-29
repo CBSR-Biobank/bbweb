@@ -23,7 +23,7 @@ define(function () {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/processing/processingTypeForm.html',
+            template: require('./processingTypeForm.html'),
             controller: 'ProcessingTypeEditCtrl as vm'
           }
         }
@@ -40,7 +40,7 @@ define(function () {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/processing/processingTypeForm.html',
+            template: require('./processingTypeForm.html'),
             controller: 'ProcessingTypeEditCtrl as vm'
           }
         }
@@ -54,7 +54,7 @@ define(function () {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
+            template: require('./annotationTypeForm.html'),
             controller: 'AnnotationTypeEditCtrl as vm'
           }
         }
@@ -71,7 +71,7 @@ define(function () {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/annotationTypes/annotationTypeForm.html',
+            template: require('./annotationTypeForm.html'),
             controller: 'AnnotationTypeEditCtrl as vm'
           }
         }
@@ -88,7 +88,7 @@ define(function () {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/processing/spcLinkTypeForm.html',
+            template: require('./spcLinkTypeForm.html'),
             controller: 'SpcLinkTypeEditCtrl as vm'
           }
         }
@@ -105,7 +105,7 @@ define(function () {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/processing/spcLinkTypeForm.html',
+            template: require('./spcLinkTypeForm.html'),
             controller: 'SpcLinkTypeEditCtrl as vm'
           }
         }

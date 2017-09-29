@@ -13,7 +13,7 @@ define(function (require) {
    * @return {object} An AngularJS component.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/studies/components/studiesPagedList/studiesPagedList.html',
+    template: require('./studiesPagedList.html'),
     controller: Controller,
     controllerAs: 'vm',
     bindings: {

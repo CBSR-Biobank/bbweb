@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/collection/components/participantGet/participantGet.html',
+    template: require('./participantGet.html'),
     controller: ParticipantGetController,
     controllerAs: 'vm',
     bindings: {

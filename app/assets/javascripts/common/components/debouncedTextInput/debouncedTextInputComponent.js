@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/common/components/debouncedTextInput/debouncedTextInput.html',
+    template: require('./debouncedTextInput.html'),
     controller: Controller,
     controllerAs: 'vm',
     bindings: {

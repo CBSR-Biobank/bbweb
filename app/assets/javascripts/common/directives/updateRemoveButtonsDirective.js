@@ -21,7 +21,7 @@ define(function (){
         updateButtonEnabled: '&',
         removeButtonEnabled: '&'
       },
-      templateUrl: '/assets/javascripts/common/directives/updateRemoveButtons.html'
+      template: require('./updateRemoveButtons.html')
     };
   }
 

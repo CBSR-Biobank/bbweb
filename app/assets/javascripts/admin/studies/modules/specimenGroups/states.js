@@ -23,7 +23,7 @@ define(function () {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
+            template: require('./specimenGroupForm.html'),
             controller: 'SpecimenGroupEditCtrl as vm'
           }
         }
@@ -41,7 +41,7 @@ define(function () {
         },
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/admin/studies/specimenGroups/specimenGroupForm.html',
+            template: require('./specimenGroupForm.html'),
             controller: 'SpecimenGroupEditCtrl as vm'
           }
         }

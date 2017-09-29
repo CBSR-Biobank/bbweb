@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/centres/components/centreLocationAdd/centreLocationAdd.html',
+    template: require('./centreLocationAdd.html'),
     controller: CentreLocationAddController,
     controllerAs: 'vm',
     bindings: {

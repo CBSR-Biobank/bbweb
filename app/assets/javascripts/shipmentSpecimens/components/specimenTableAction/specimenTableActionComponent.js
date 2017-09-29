@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/shipmentSpecimens/components/specimenTableAction/specimenTableAction.html',
+    template: require('./specimenTableAction.html'),
     controller: SpecimenTableActionDirective,
     controllerAs: 'vm',
     bindings: {

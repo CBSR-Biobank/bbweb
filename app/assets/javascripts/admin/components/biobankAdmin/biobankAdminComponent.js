@@ -9,7 +9,7 @@ define(function () {
    * Home page for Administration tasks.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/components/biobankAdmin/biobankAdmin.html',
+    template: require('./biobankAdmin.html'),
     controller: BiobankAdminController,
     controllerAs: 'vm',
     bindings: {

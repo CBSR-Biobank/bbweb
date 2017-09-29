@@ -7,7 +7,7 @@ define(function (require) {
   var _ = require('lodash');
 
   var component = {
-    templateUrl: '/assets/javascripts/common/components/labelsInput/labelsInput.html',
+    template: require('./labelsInput.html'),
     controller: LabelsInputController,
     controllerAs: 'vm',
     bindings: {

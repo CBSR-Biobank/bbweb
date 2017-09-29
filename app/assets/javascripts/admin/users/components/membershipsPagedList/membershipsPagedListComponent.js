@@ -11,7 +11,7 @@ define(function () {
    * @return {object} An AngularJS component.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/users/components/membershipsPagedList/membershipsPagedList.html',
+    template: require('./membershipsPagedList.html'),
     controller: Controller,
     controllerAs: 'vm',
     bindings: {

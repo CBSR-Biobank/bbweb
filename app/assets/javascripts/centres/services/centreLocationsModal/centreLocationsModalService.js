@@ -33,7 +33,7 @@ define(function (require) {
       ModalController.$inject = [];
 
       modal = $uibModal.open({
-        templateUrl: '/assets/javascripts/centres/services/centreLocationsModal/centreLocationsModal.html',
+        template: require('./centreLocationsModal.html'),
         controller: ModalController,
         controllerAs: 'vm',
         backdrop: true,

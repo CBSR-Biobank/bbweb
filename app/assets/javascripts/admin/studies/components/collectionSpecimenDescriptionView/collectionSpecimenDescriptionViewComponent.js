@@ -10,7 +10,7 @@ define(function (require) {
 
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/studies/components/collectionSpecimenDescriptionView/collectionSpecimenDescriptionView.html',
+    template: require('./collectionSpecimenDescriptionView.html'),
     controller: CollectionSpecimenDescriptionViewController,
     controllerAs: 'vm',
     bindings: {

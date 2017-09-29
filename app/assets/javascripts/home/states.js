@@ -28,7 +28,7 @@ define(['angular'], function(angular) {
         url: 'contact',
         views: {
           'main@': {
-            templateUrl: '/assets/javascripts/home/contact.html'
+            template: require('./contact.html')
           }
         }
       })

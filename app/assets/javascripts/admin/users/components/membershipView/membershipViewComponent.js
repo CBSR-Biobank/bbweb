@@ -8,7 +8,7 @@ define(function (require) {
       _       = require('lodash');
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/users/components/membershipView/membershipView.html',
+    template: require('./membershipView.html'),
     controller: MembershipViewController,
     controllerAs: 'vm',
     bindings: {

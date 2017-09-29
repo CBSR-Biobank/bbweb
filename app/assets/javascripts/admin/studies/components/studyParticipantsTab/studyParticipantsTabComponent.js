@@ -10,7 +10,7 @@ define(function (require) {
    * Displays the participant annotations defined for a study.
    */
   var component = {
-    templateUrl : '/assets/javascripts/admin/studies/components/studyParticipantsTab/studyParticipantsTab.html',
+    template: require('./studyParticipantsTab.html'),
     controller: StudyParticipantsTabController,
     controllerAs: 'vm',
     bindings: {

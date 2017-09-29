@@ -9,7 +9,7 @@ define(function (require) {
       sprintf = require('sprintf-js').sprintf;
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/centres/components/centreLocationView/centreLocationView.html',
+    template: require('./centreLocationView.html'),
     controller: CentreLocationViewController,
     controllerAs: 'vm',
     bindings: {

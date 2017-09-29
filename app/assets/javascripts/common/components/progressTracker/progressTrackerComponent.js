@@ -12,7 +12,7 @@ define(function (require) {
    * a certain order.
    */
   var component = {
-    templateUrl : '/assets/javascripts/common/components/progressTracker/progressTracker.html',
+    template: require('./progressTracker.html'),
     controller: ProgressTrackerController,
     controllerAs: 'vm',
     bindings: {

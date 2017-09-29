@@ -9,7 +9,7 @@ define(function (require) {
       sprintf = require('sprintf-js').sprintf;
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/studies/components/annotationTypes/collectionEventAnnotationTypeView/collectionEventAnnotationTypeView.html',
+    template: require('./collectionEventAnnotationTypeView.html'),
     controller: CollectionEventAnnotationTypeViewController,
     controllerAs: 'vm',
     bindings: {

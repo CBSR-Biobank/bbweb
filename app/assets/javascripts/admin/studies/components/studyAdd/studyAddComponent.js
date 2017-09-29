@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/studies/components/studyAdd/studyAdd.html',
+    template: require('./studyAdd.html'),
     controller: StudyAddController,
     controllerAs: 'vm',
     bindings: {

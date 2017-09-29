@@ -15,7 +15,7 @@ define(function () {
    * when he / she no longer wants to add a location.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/components/locationAdd/locationAdd.html',
+    template: require('./locationAdd.html'),
     controller: LocationAddController,
     controllerAs: 'vm',
     bindings: {

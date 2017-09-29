@@ -11,7 +11,7 @@ define(function (require) {
    * This component allows the user to select a {@link Study} from the list provided by function getStudies().
    */
   var component = {
-    templateUrl: '/assets/javascripts/collection/components/selectStudy/selectStudy.html',
+    template: require('./selectStudy.html'),
     controller: SelectStudyController,
     controllerAs: 'vm',
     bindings: {

@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl : '/assets/javascripts/admin/studies/components/annotationTypes/participantAnnotationTypeAdd/participantAnnotationTypeAdd.html',
+    template: require('./participantAnnotationTypeAdd.html'),
     controller: ParticipantAnnotationTypeAddController,
     controllerAs: 'vm',
     bindings: {

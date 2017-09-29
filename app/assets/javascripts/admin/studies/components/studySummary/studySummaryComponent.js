@@ -11,7 +11,7 @@ define(function () {
    * Emits event 'study-name-changed' when the user updates the name on the study.
    */
   var component = {
-    templateUrl : '/assets/javascripts/admin/studies/components/studySummary/studySummary.html',
+    template: require('./studySummary.html'),
     controller: StudySummaryController,
     controllerAs: 'vm',
     bindings: {

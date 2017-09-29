@@ -9,7 +9,7 @@ define(function () {
    * Allows the logged in user to modify another user's memberships.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/users/components/membershipAdmin/membershipAdmin.html',
+    template: require('./membershipAdmin.html'),
     controller: MembershipAdminsController,
     controllerAs: 'vm',
     bindings: {

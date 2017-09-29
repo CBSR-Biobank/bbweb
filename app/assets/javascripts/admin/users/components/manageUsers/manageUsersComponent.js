@@ -5,7 +5,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/users/components/manageUsers/manageUsers.html',
+    template: require('./manageUsers.html'),
     controller: Controller,
     controllerAs: 'vm',
     bindings: {

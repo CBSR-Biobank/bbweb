@@ -14,7 +14,7 @@ define(function (require) {
    * @return {object} An AngularJS directive.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/centres/components/centresPagedList/centresPagedList.html',
+    template: require('./centresPagedList.html'),
     controller: Controller,
     controllerAs: 'vm',
     bindings: {

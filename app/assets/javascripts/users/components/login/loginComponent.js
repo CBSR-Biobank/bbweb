@@ -13,7 +13,7 @@ define(function () {
    * http://timothy.userapp.io/post/63412334209/form-autocomplete-and-remember-password-with-angularjs
    */
   var component = {
-    templateUrl : '/assets/javascripts/users/components/login/login.html',
+    template: require('./login.html'),
     controller: LoginController,
     controllerAs: 'vm',
     bindings: {

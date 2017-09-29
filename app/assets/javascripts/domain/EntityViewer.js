@@ -43,7 +43,7 @@ define(function () {
         backdrop: true,
         keyboard: true,
         modalFade: true,
-        templateUrl: '/assets/javascripts/domain/entityViewer.html',
+        template: require('./entityViewer.html'),
         controller: controller
       };
 

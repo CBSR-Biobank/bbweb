@@ -6,7 +6,7 @@ define(function () {
   'use strict';
 
   var component = {
-    templateUrl: '/assets/javascripts/admin/studies/components/ceventTypeAdd/ceventTypeAdd.html',
+    template: require('./ceventTypeAdd.html'),
     controller: CeventTypeAddController,
     controllerAs: 'vm',
     bindings: {

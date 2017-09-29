@@ -9,7 +9,7 @@ define(function () {
    * Used to add a collection event.
    */
   var component = {
-    templateUrl: '/assets/javascripts/collection/components/ceventAdd/ceventAdd.html',
+    template: require('./ceventAdd.html'),
     controller: CeventAddController,
     controllerAs: 'vm',
     bindings: {

@@ -17,7 +17,7 @@ define(['angular', 'lodash'], function(angular, _) {
         specimenGroups: '=',
         specimenGroupIdsInUse: '='
       },
-      templateUrl: '/assets/javascripts/admin/studies/specimenGroups/directives/specimenGroupsPanel/specimenGroupsPanel.html',
+      template: require('./specimenGroupsPanel.html'),
       controller: SpecimenGroupsPanelCtrl,
       controllerAs: 'vm'
     };

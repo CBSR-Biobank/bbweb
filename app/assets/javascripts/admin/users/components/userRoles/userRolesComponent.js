@@ -9,7 +9,7 @@ define(function () {
    * Allows the logged in user to modify another user's roles.
    */
   var component = {
-    templateUrl: '/assets/javascripts/admin/users/components/userRoles/userRoles.html',
+    template: require('./userRoles.html'),
     controller: UserRolesController,
     controllerAs: 'vm',
     bindings: {

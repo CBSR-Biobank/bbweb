@@ -16,7 +16,7 @@ define(function (require) {
    * @param {domain.centres.ShipmentTypes} shipmentTypes - the type of shipments to display.
    */
   var COMPONENT = {
-    templateUrl : '/assets/javascripts/centres/modules/shipmentsTable/shipmentsTable.html',
+    template: require('./shipmentsTable.html'),
     controller: ShipmentsTableController,
     controllerAs: 'vm',
     bindings: {

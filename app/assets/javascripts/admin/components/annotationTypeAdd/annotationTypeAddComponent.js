@@ -14,7 +14,7 @@ define(function () {
    * @return {object} An AngularJS directive.
    */
   var component = {
-    templateUrl : '/assets/javascripts/admin/components/annotationTypeAdd/annotationTypeAdd.html',
+    template: require('./annotationTypeAdd.html'),
     controller: AnnotationTypeAddController,
     controllerAs: 'vm',
     bindings: {
