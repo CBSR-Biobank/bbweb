@@ -5,17 +5,17 @@
 # ~~~~
 
 # Home page
-->      /studies/cetypes                        org.biobank.controllers.study.CeventTypesRouter
-->      /studies/proctypes                      org.biobank.controllers.study.ProcessingTypesRouter
-->      /studies/proctypes/sltypes              org.biobank.controllers.study.SpecimenLinkTypesRouter
-->      /studies                                org.biobank.controllers.study.StudiesRouter
-->      /participants/cevents/spcs              org.biobank.controllers.participants.SpecimensRouter
-->      /participants/cevents                   org.biobank.controllers.participants.CollectionEventsRouter
-->      /participants                           org.biobank.controllers.participants.ParticipantsRouter
-->      /centres                                org.biobank.controllers.centres.CentresRouter
-->      /shipments                              org.biobank.controllers.centres.ShipmentsRouter
-->      /users                                  org.biobank.controllers.users.UsersRouter
-->      /access                                 org.biobank.controllers.access.AccessRouter
+->      /api/studies/cetypes                    org.biobank.controllers.study.CeventTypesRouter
+->      /api/studies/proctypes                  org.biobank.controllers.study.ProcessingTypesRouter
+->      /api/studies/proctypes/sltypes          org.biobank.controllers.study.SpecimenLinkTypesRouter
+->      /api/studies                            org.biobank.controllers.study.StudiesRouter
+->      /api/participants/cevents/spcs          org.biobank.controllers.participants.SpecimensRouter
+->      /api/participants/cevents               org.biobank.controllers.participants.CollectionEventsRouter
+->      /api/participants                       org.biobank.controllers.participants.ParticipantsRouter
+->      /api/centres                            org.biobank.controllers.centres.CentresRouter
+->      /api/shipments                          org.biobank.controllers.centres.ShipmentsRouter
+->      /api/users                              org.biobank.controllers.users.UsersRouter
+->      /api/access                             org.biobank.controllers.access.AccessRouter
 ->      /                                       org.biobank.controllers.ApplicationRouter
 
 GET     /assets/*file                           controllers.Assets.versioned(path="/public", file)
