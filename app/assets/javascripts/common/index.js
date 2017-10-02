@@ -9,7 +9,7 @@
 import angular                from 'angular';
 import annotationsInputModule from './annotationsInput/annotationsInputModule';
 import modalInputModule       from './modalInput/modalInputModule';
-import languageService        from './services/languageService';
+import languageService        from './services/language/languageService';
 
 const MODULE_NAME = 'biobank.common';
 
@@ -31,12 +31,12 @@ angular.module(MODULE_NAME, [ modalInputModule, annotationsInputModule ])
   .component('statusLine',              require('./components/statusLine/statusLineComponent'))
 
   .directive('focusMe',                 require('./directives/focusMeDirective'))
-  .directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtonsDirective'))
-  .directive('integer',                 require('./directives/integerDirective'))
-  .directive('panelButtons',            require('./directives/panelButtonsDirective'))
-  .directive('smartFloat',              require('./directives/smartFloatDirective'))
-  .directive('str2integer',             require('./directives/str2integerDirective'))
-  .directive('updateRemoveButtons',     require('./directives/updateRemoveButtonsDirective'))
+  .directive('infoUpdateRemoveButtons', require('./directives/infoUpdateRemoveButtons/infoUpdateRemoveButtonsDirective'))
+  .directive('integer',                 require('./directives/integer/integerDirective'))
+  .directive('panelButtons',            require('./directives/panelButtons/panelButtonsDirective'))
+  .directive('smartFloat',              require('./directives/smartFloat/smartFloatDirective'))
+  .directive('str2integer',             require('./directives/str2integer/str2integerDirective'))
+  .directive('updateRemoveButtons',     require('./directives/updateRemoveButtons/updateRemoveButtonsDirective'))
   .directive('pageSelect',              require('./directives/pageSelectDirective'))
   .directive('positiveFloat',           require('./directives/positiveFloat/positiveFloatDirective'))
   .directive('naturalNumber',           require('./directives/naturalNumber/naturalNumberDirective'))
@@ -52,12 +52,12 @@ angular.module(MODULE_NAME, [ modalInputModule, annotationsInputModule ])
   .service('breadcrumbService',         require('./services/breadcrumbService'))
   .service('Panel',                     require('./services/Panel'))
   .service('annotationUpdate',          require('./services/annotationUpdateService'))
-  .service('biobankApi',                require('./services/biobankApiService'))
-  .service('filterExpression',          require('./services/filterExpressionService'))
+  .service('biobankApi',                require('./services/biobankApi/biobankApiService'))
+  .service('filterExpression',          require('./services/filterExpression/filterExpressionService'))
   .service('funutils',                  require('./services/funutils'))
   .service('modalService',              require('./services/modalService/modalService'))
-  .service('notificationsService',      require('./services/notificationsService'))
-  .service('timeService',               require('./services/timeService'))
+  .service('notificationsService',      require('./services/notifications/notificationsService'))
+  .service('timeService',               require('./services/time/timeService'))
   .service('validationService',         require('./services/validationService'))
   .service('domainNotificationService', require('./services/domainNotification/domainNotificationService') )
   .service('languageService',           languageService)
