@@ -5,10 +5,13 @@
  * Karma configuration
  */
 
-/* global module, __dirname */
+/* global process, module, __dirname */
+/* eslint no-process-env: "off" */
 
 const path = require('path'),
       webpackConfig = require('./webpack.test.config');
+
+process.env.CHROME_BIN = require('puppeteer').executablePath();
 
 module.exports = KarmaConf;
 
@@ -48,10 +51,16 @@ function KarmaConf(config) {
     },
 
     reporters: [
-      'dots'
+      'dots',
       //'spec'
       //'failed'
+      'coverage-istanbul'
     ],
+
+    coverageIstanbulReporter: {
+      reports: [ 'html', 'text-summary' ],
+      fixWebpackSourcePaths: true
+    },
 
     specReporter: {
       maxLogLines: 10,
@@ -80,7 +89,7 @@ function KarmaConf(config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: [
-      'PhantomJS'
+      'ChromeHeadless'
       // 'ChromeExtra'
     ],
 

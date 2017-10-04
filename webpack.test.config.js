@@ -1,15 +1,21 @@
 /* global module */
 
-const webpack = require('webpack'),
+const path = require('path'),
+      webpack = require('webpack'),
       config  = require('./webpack.config');
 
 config.devtool = 'cheap-module-eval-source-map';
 
 config.module.rules = config.module.rules
-  .filter((rule) => !'.css'.match(rule.test))
+  .filter((rule) => !'.js'.match(rule.test))
   .concat([{
-    test: /\.css$/,
-    loader: 'style-loader!css-loader'
+    test: /\.js$/,
+    use: {
+      loader: 'istanbul-instrumenter-loader',
+      options: { esModules: true }
+    },
+    include: path.resolve('app/assets/javascripts'),
+    exclude: /(test|Spec.js$)/
   }]);
 
 config.plugins = [
