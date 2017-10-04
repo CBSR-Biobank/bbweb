@@ -64,6 +64,13 @@ const CommonModule = angular.module('biobank.common', [ ModalInputModule, Annota
       .service('UrlService',                UrlService)
 
       .factory('BbwebError',                require('./BbwebError'))
+      .run(loadTemplates)
       .name;
+
+loadTemplates.$inject = ['$templateCache'];
+function loadTemplates($templateCache) {
+  $templateCache.put('smartTablePaginationTemplate.html', require('./smartTablePaginationTemplate.html'));
+}
+
 
 export default CommonModule;
