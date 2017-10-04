@@ -1,7 +1,6 @@
 /* global module */
 
 const webpack = require('webpack'),
-      path    = require('path'),
       config  = require('./webpack.config');
 
 config.plugins = config.plugins.concat([

@@ -54,3 +54,4 @@ logback-test.xml
 /public/js/*bundle.js
 /public/*hot-update.js
 /public/*hot-update.json
+/public/stats.html

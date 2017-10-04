@@ -29,10 +29,7 @@ const config = {
       },
       {
         test: /\.css$/,
-        use: ExtractTextPlugin.extract({
-          fallback: 'style-loader',
-          use: 'css-loader'
-        })
+        loader: 'style-loader!css-loader'
       },
       {
         test: /\.less$/,
@@ -67,6 +64,8 @@ const config = {
   },
   plugins : [
     new CleanWebpackPlugin([
+      'public/*.hot-update.js',
+      'public/*.hot-update.json',
       'public/*.woff2',
       'public/*.eot',
       'public/*.svg',
@@ -75,9 +74,12 @@ const config = {
       'public/js'
     ]),
     new webpack.optimize.CommonsChunkPlugin({
-      name: 'common' // Specify the common bundle's name.
-    }),
-    new ExtractTextPlugin('css/styles.css')
+      name: 'vendor',
+      minChunks: function (module) {
+        // this assumes your vendor imports exist in the node_modules directory
+        return module.context && module.context.indexOf('node_modules') !== -1;
+      }
+    })
   ],
 
   performance: {
