@@ -214,7 +214,7 @@ define(function(require) {
      */
     Centre.locationsSearch = function (filter) {
       filter = filter || '';
-      return biobankApi.post('/centres/locations',
+      return biobankApi.post(Centre.url('locations'),
                              {
                                filter: filter,
                                limit: 10
@@ -233,6 +233,19 @@ define(function(require) {
       return _.map(centreLocations, function (centreLocation) {
         return _.extend({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
                         _.pick(centreLocation, 'centreId', 'locationId'));
+      });
+    };
+
+    /**
+     * Retrieves the centre with the given ID.
+     *
+     * @param {string} id - The ID associated with the centre.
+     *
+     * @returns {Promise} The centre wrapped in a promise.
+     */
+    Centre.get = function (id) {
+      return biobankApi.get(Centre.url(id)).then(function(reply) {
+        return Centre.asyncCreate(reply);
       });
     };
 
@@ -259,8 +272,7 @@ define(function(require) {
      * @return A promise. If the promise succeeds then a paged result is returned.
      */
     Centre.list = function (options) {
-      var url = Centre.url(),
-          params,
+      var params,
           validKeys = [
             'filter',
             'sort',
@@ -273,7 +285,7 @@ define(function(require) {
         return value === '';
       });
 
-      return biobankApi.get(url, params).then(function(reply) {
+      return biobankApi.get(Centre.url('search'), params).then(function(reply) {
         var deferred = $q.defer();
         try {
           // reply is a paged result
@@ -285,19 +297,6 @@ define(function(require) {
           deferred.reject('invalid centres from server');
         }
         return deferred.promise;
-      });
-    };
-
-    /**
-     * Retrieves the centre with the given ID.
-     *
-     * @param {string} id - The ID associated with the centre.
-     *
-     * @returns {Promise} The centre wrapped in a promise.
-     */
-    Centre.get = function (id) {
-      return biobankApi.get(Centre.url(id)).then(function(reply) {
-        return Centre.asyncCreate(reply);
       });
     };
 

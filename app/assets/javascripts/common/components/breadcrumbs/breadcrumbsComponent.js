@@ -8,7 +8,7 @@ class BreadcrumbsController {
 /**
  *
  */
-var component = {
+const component = {
   template: require('./breadcrumbs.html'),
   controller: BreadcrumbsController,
   controllerAs: 'vm',

@@ -2,79 +2,64 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+import _ from 'lodash';
 
-  var _ = require('lodash');
+var returnState = 'home.admin.studies.study.collection.ceventType';
 
-  var component = {
-    template: require('./collectionSpecimenDescriptionAdd.html'),
-    controller: CollectionSpecimenDescriptionAddController,
-    controllerAs: 'vm',
-    bindings: {
-      study:               '<',
-      collectionEventType: '<'
-    }
-  };
+/*
+ * Controller for this component.
+ */
+/* @ngInject */
+class Controller {
 
-  var returnState = 'home.admin.studies.study.collection.ceventType';
-
-  CollectionSpecimenDescriptionAddController.$inject = [
-    '$state',
-    'gettextCatalog',
-    'domainNotificationService',
-    'notificationsService',
-    'AnatomicalSourceType',
-    'PreservationType',
-    'PreservationTemperatureType',
-    'SpecimenType'
-  ];
-
-  /*
-   * Controller for this component.
-   */
-  function CollectionSpecimenDescriptionAddController($state,
-                                                      gettextCatalog,
-                                                      domainNotificationService,
-                                                      notificationsService,
-                                                      AnatomicalSourceType,
-                                                      PreservationType,
-                                                      PreservationTemperatureType,
-                                                      SpecimenType) {
-    var vm = this;
-    vm.$onInit = onInit;
-
-    //--
-
-    function onInit() {
-      vm.anatomicalSourceTypes = _.values(AnatomicalSourceType);
-      vm.preservTypes          = _.values(PreservationType);
-      vm.preservTempTypes      = _.values(PreservationTemperatureType);
-      vm.specimenTypes         = _.values(SpecimenType);
-
-      vm.submit = submit;
-      vm.cancel = cancel;
-    }
-
-    function submit(specimenDescription) {
-      vm.collectionEventType.addSpecimenDescription(specimenDescription)
-        .then(onAddSuccessful)
-        .catch(onAddFailed);
-
-      function onAddSuccessful() {
-        notificationsService.submitSuccess();
-        $state.go(returnState, {}, { reload: true });
-      }
-
-      function onAddFailed(error) {
-        return domainNotificationService.updateErrorModal(error, gettextCatalog.getString('study'));
-      }
-    }
-
-    function cancel() {
-      $state.go(returnState);
-    }
+  constructor($state,
+              gettextCatalog,
+              domainNotificationService,
+              notificationsService,
+              AnatomicalSourceType,
+              PreservationType,
+              PreservationTemperatureType,
+              SpecimenType) {
+    this.$state                      = $state;
+    this.gettextCatalog              = gettextCatalog;
+    this.domainNotificationService   = domainNotificationService;
+    this.notificationsService        = notificationsService;
+    this.AnatomicalSourceType        = AnatomicalSourceType;
+    this.PreservationType            = PreservationType;
+    this.PreservationTemperatureType = PreservationTemperatureType;
+    this.SpecimenType                = SpecimenType;
   }
 
-  return component;
-});
+  $onInit() {
+    this.anatomicalSourceTypes = _.values(this.AnatomicalSourceType);
+    this.preservTypes          = _.values(this.PreservationType);
+    this.preservTempTypes      = _.values(this.PreservationTemperatureType);
+    this.specimenTypes         = _.values(this.SpecimenType);
+  }
+
+  submit(specimenDescription) {
+    this.collectionEventType.addSpecimenDescription(specimenDescription)
+      .then(() => {
+        this.notificationsService.submitSuccess();
+        this.$state.go(returnState, {}, { reload: true });
+      })
+      .catch((error) =>
+             this.domainNotificationService.updateErrorModal(error, this.gettextCatalog.getString('study')));
+  }
+
+  cancel() {
+    this.$state.go(returnState);
+  }
+}
+
+const component = {
+  template: require('./collectionSpecimenDescriptionAdd.html'),
+  controller: Controller,
+  controllerAs: 'vm',
+  bindings: {
+    study:               '<',
+    collectionEventType: '<'
+  }
+};
+
+export default component;

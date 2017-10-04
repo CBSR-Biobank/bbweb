@@ -22,7 +22,7 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
     case GET(p"/counts") =>
       controller.centreCounts
 
-    case GET(p"/")  =>
+    case GET(p"/search")  =>
       // this action extracts parameters from the raw query string
       controller.list
 

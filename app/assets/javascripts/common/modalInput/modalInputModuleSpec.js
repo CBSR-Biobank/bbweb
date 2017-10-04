@@ -8,178 +8,26 @@
 
 import _ from 'lodash';
 import faker  from 'faker';
+import modalInputMatchers from './modalInputMatchers';
 import moment from 'moment';
 
-const sprintf = require('sprintf-js').sprintf;
-
-// FIXME: after transition to webpack is done, these test cases need to pass
 xdescribe('modalInputModule', function() {
 
-  function SuiteMixinFactory(ModalTestSuiteMixin) {
+  angular.mock.module.sharedInjector();
 
-    function SuiteMixin() {
-      ModalTestSuiteMixin.call(this);
+  beforeAll(angular.mock.module(
+    'ngAnimateMock',
+    'biobankApp',
+    'biobank.test',
+    function($exceptionHandlerProvider) {
+      $exceptionHandlerProvider.mode('log');
     }
-
-    SuiteMixin.prototype = Object.create(ModalTestSuiteMixin.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.openModal = function (modalInputFunc, defaultValue, title, label, options) {
-      title = title || this.factory.stringNext();
-      label = label || this.factory.stringNext();
-      this.modal = modalInputFunc(title, label, defaultValue, options);
-      this.modal.result.then(function () {}, function () {});
-      this.$rootScope.$digest();
-      this.modalElement = this.modalElementFind();
-      this.scope = this.modalElement.scope();
-    };
-
-    SuiteMixin.prototype.suiteAddMatchers = function () {
-      this.addModalMatchers();
-
-      jasmine.addMatchers({
-        toHaveLabelStartWith: function() {
-          return {
-            compare: function(actual, expected) {
-              var element = actual.find('label'),
-                  pass,
-                  message;
-
-              expected = expected || '';
-              pass    = element.text().slice(0, expected.length) === expected;
-              message = sprintf('Expected "%s" %s have label be "%s"',
-                                angular.mock.dump(element),
-                                pass ? 'not to' : 'to',
-                                expected);
-
-              return { pass: pass, message: message };
-            }
-          };
-        },
-        toHaveInputElementBeFocused: function() {
-          return {
-            compare: function(actual, expected) {
-              var element = actual.find('form').find('input'),
-                  pass = (element.length === 1) && (element.attr('focus-me') === 'true'),
-                  message = sprintf('Expected input element %s be valid',
-                                    angular.mock.dump(element),
-                                    pass ? 'not to' : 'to',
-                                    expected);
-
-              return { pass: pass, message: message };
-            }
-          };
-        },
-        toHaveInputs: function() {
-          return {
-            compare: function(actual, expected) {
-              var pass, message, element = actual.find('form').find('input');
-              expected = expected || 0;
-              pass = (element.length === expected);
-              message = sprintf('Expected "%s" %s have %d input elements',
-                                angular.mock.dump(element),
-                                pass ? 'not to' : 'to',
-                                expected);
-              return { pass: pass, message: message };
-            }
-          };
-        },
-        toHaveInputElementTypeAttrBe: function() {
-          return {
-            compare: function(actual, expected) {
-              var element = actual.find('form').find('input'),
-                  pass,
-                  message;
-
-              expected = expected || '';
-              pass = (element.length === 1) && (element.attr('type') === expected);
-              message = sprintf('Expected "%s"" type %s be "%s"',
-                                angular.mock.dump(element),
-                                pass ? 'not to' : 'to',
-                                expected);
-
-              return { pass: pass, message: message };
-            }
-          };
-        },
-        toHaveValidTextAreaElement: function() {
-          return {
-            compare: function(actual, expected) {
-              var element = actual.find('form').find('textarea'),
-                  pass,
-                  message;
-
-              pass = element.length === 1 &&
-                (element.attr('focus-me') === 'true') &&
-                (element.attr('ng-model') === 'vm.value') &&
-                (element.attr('ng-required') === 'vm.options.required');
-              message = sprintf('Expected modal %s have a textarea element',
-                                angular.mock.dump(element),
-                                pass ? 'not to' : 'to',
-                                expected);
-
-              return { pass: pass, message: message };
-            }
-          };
-        },
-        toHaveValuesInControllerScope: function() {
-          return {
-            compare: function(actual, expected) {
-              var scope = actual.scope().vm,
-                  pass,
-                  message;
-
-              expected = expected || {};
-              pass = _.chain(expected).keys().every(checkScopeValue).value();
-              message = sprintf('Expected modal controller scope "%s" %s have a values "%s"',
-                                angular.mock.dump(scope),
-                                pass ? 'not to' : 'to',
-                                angular.mock.dump(expected));
-
-              return { pass: pass, message: message };
-
-              function checkScopeValue(key) {
-                return _.has(scope, key) && _.isEqual(expected[key], scope[key]);
-              }
-            }
-          };
-        },
-        toHaveHelpBlocks: function() {
-          return {
-            compare: function(actual) {
-              var element = actual.find('form').find('.help-block'),
-                  pass,
-                  message;
-
-              pass = (element.length > 0);
-              message = sprintf('Expected modal %s have help blocks', pass ? 'not to' : 'to');
-              return { pass: pass, message: message };
-            }
-          };
-        }
-      });
-    };
-
-    return SuiteMixin;
-  }
-
-  // angular.mock.module.sharedInjector();
-
-  // beforeAll(angular.mock.module(
-  //   'ngAnimateMock',
-  //   'biobankApp',
-  //   'biobank.test',
-  //   function($exceptionHandlerProvider) {
-  //     $exceptionHandlerProvider.mode('log');
-  //   }
-  // ));
+  ));
 
   beforeEach(() => {
-    angular.mock.module('ngAnimateMock', 'biobankApp', 'biobank.test');
+    //angular.mock.module('ngAnimateMock', 'biobankApp', 'biobank.test');
     angular.mock.inject(function(ModalTestSuiteMixin) {
-      var SuiteMixin = SuiteMixinFactory(ModalTestSuiteMixin);
-
-      _.extend(this, SuiteMixin.prototype);
+      _.extend(this, ModalTestSuiteMixin.prototype);
 
       this.injectDependencies('$rootScope',
                               '$exceptionHandler',
@@ -188,19 +36,28 @@ xdescribe('modalInputModule', function() {
                               'modalInput',
                               'factory');
 
-      this.suiteAddMatchers();
+
+      this.addModalMatchers();
+      modalInputMatchers();
       this.label = this.factory.stringNext();
       this.title = this.factory.stringNext();
+
+      this.openModal = (modalInputFunc, defaultValue, title, label, options) => {
+        title = title || this.factory.stringNext();
+        label = label || this.factory.stringNext();
+        this.modal = modalInputFunc(title, label, defaultValue, options);
+        this.modal.result.then(function () {}, function () {});
+        this.$rootScope.$digest();
+        this.modalElement = this.modalElementFind();
+        this.scope = this.modalElement.scope();
+      };
     });
   });
 
   describe('boolean modal', function () {
 
-    beforeEach(function () {
-      this.defaultValue = false;
-    });
-
     it('has valid elements and scope', function() {
+      this.defaultValue = false;
       this.openModal(this.modalInput.boolean,
                      this.defaultValue,
                      this.title,
@@ -219,6 +76,7 @@ xdescribe('modalInputModule', function() {
     });
 
     it('form is invalid when value is required and both values are unchecked', function() {
+      this.defaultValue = false;
       this.openModal(this.modalInput.boolean,
                      this.defaultValue,
                      this.title,

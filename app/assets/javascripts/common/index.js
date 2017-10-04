@@ -10,14 +10,16 @@ import AnnotationsInputModule from './annotationsInput/annotationsInputModule';
 import ModalInputModule       from './modalInput/modalInputModule';
 import UrlService             from './services/url/UrlService';
 import angular                from 'angular';
+import breadcrumbs            from './components/breadcrumbs/breadcrumbsComponent';
 import languageService        from './services/language/languageService';
+import timeago                from './filters/timeagoFilter';
 
 const CommonModule = angular.module('biobank.common', [ ModalInputModule, AnnotationsInputModule ])
       .controller('TabbedPageController',          require('./controllers/TabbedPageController'))
       .controller('PagedListController',           require('./controllers/PagedListController'))
       .controller('NameAndStateFiltersController', require('./controllers/NameAndStateFiltersController'))
 
-      .component('breadcrumbs',             require('./components/breadcrumbs/breadcrumbsComponent'))
+      .component('breadcrumbs',             breadcrumbs)
       .component('collapsiblePanel',        require('./components/collapsiblePanel/collapsiblePanelComponent'))
       .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
       .component('debouncedTextInput',      require('./components/debouncedTextInput/debouncedTextInputComponent'))
@@ -43,7 +45,7 @@ const CommonModule = angular.module('biobank.common', [ ModalInputModule, Annota
 
       .filter('localTime',                  require('./filters/localTimeFilter'))
       .filter('nl2br',                      require('./filters/nl2brFilter'))
-      .filter('timeago',                    require('./filters/timeagoFilter'))
+      .filter('timeago',                    timeago)
       .filter('truncate',                   require('./filters/truncateFilter'))
       .filter('yesNo',                      require('./filters/yesNoFilter'))
 

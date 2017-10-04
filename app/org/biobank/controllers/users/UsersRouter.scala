@@ -26,7 +26,7 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
       // this action extracts parameters from the raw query string
       controller.userStudies
 
-    case GET(p"/") =>
+    case GET(p"/search") =>
       // this action extracts parameters from the query string
       controller.list
 
@@ -71,7 +71,6 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
 
   }
 }
-
 
 object UsersRouting {
 

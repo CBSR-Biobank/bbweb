@@ -117,7 +117,7 @@ describe('Study', function() {
 
   });
 
-  describe('when listing studies', function() {
+  describe('when searching studies', function() {
 
     it('can retrieve studies', function() {
       var studies = [ this.factory.study({ annotationTypes: [] }) ],
@@ -128,7 +128,7 @@ describe('Study', function() {
             pagedResult.items[0].compareToJsonEntity(studies[0]);
           };
 
-      this.$httpBackend.whenGET(this.url()).respond(this.reply(reply));
+      this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
       this.Study.list().then(testStudy).catch(failTest);
       this.$httpBackend.flush();
     });
@@ -144,7 +144,7 @@ describe('Study', function() {
           reply   = this.factory.pagedResult(studies);
 
       optionList.forEach((options) => {
-        var url = this.url() + '?' + this.$httpParamSerializer(options, true),
+        var url = this.url('search') + '?' + this.$httpParamSerializer(options, true),
             testStudy = (pagedResult) => {
               expect(pagedResult.items).toBeArrayOfSize(studies.length);
               pagedResult.items.forEach((study) => {
@@ -169,7 +169,7 @@ describe('Study', function() {
             });
           };
 
-      this.$httpBackend.whenGET(this.url()).respond(this.reply(reply));
+      this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
       this.Study.list(options).then(testStudy).catch(failTest);
       this.$httpBackend.flush();
     });
@@ -178,7 +178,7 @@ describe('Study', function() {
       var studies = [ _.omit(this.jsonStudy, 'name') ],
           reply = this.factory.pagedResult(studies);
 
-      this.$httpBackend.whenGET(this.url()).respond(this.reply(reply));
+      this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
       this.Study.list().then(listFail).catch(shouldFail);
       this.$httpBackend.flush();
 

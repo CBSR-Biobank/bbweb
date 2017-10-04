@@ -90,7 +90,7 @@ describe('User', function() {
 
     it('can list using when filtering by name only', function() {
       var filter = 'name::test',
-          url = this.url() + '?filter=' + filter,
+          url = this.url('search') + '?filter=' + filter,
           jsonUser = this.factory.user(),
           reply = this.factory.pagedResult([ jsonUser ]);
 
@@ -105,7 +105,7 @@ describe('User', function() {
 
     it('can list when using filtering by email only', function() {
       var filter = 'email::test',
-          url = this.url() + '?filter=' + filter,
+          url = this.url('search') + '?filter=' + filter,
           jsonUser = this.factory.user(),
           reply = this.factory.pagedResult([ jsonUser ]);
 
@@ -120,7 +120,7 @@ describe('User', function() {
 
     it('can list using sort parameter only', function() {
       var sort = 'name',
-          url = this.url() + '?sort=' + sort,
+          url = this.url('search') + '?sort=' + sort,
           jsonUser = this.factory.user(),
           reply = this.factory.pagedResult([ jsonUser ]);
 
@@ -136,7 +136,7 @@ describe('User', function() {
     it('should query for multiple users', function() {
       var filter   = 'email::test',
           sort     = '-email',
-          url      = this.url() + `?filter=${filter}&sort=${sort}`,
+          url      = this.url('search') + `?filter=${filter}&sort=${sort}`,
           jsonUser = this.factory.user(),
           reply    = this.factory.pagedResult([ jsonUser ]);
 
@@ -152,7 +152,7 @@ describe('User', function() {
     it('should handle an invalid response', function() {
       var reply = this.factory.pagedResult([ { 'a': 1 } ]);
 
-      this.$httpBackend.whenGET(this.url()).respond(this.reply(reply));
+      this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
 
       this.User.list().then(testFail).catch(checkError);
       this.$httpBackend.flush();

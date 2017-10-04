@@ -215,7 +215,7 @@ define(function(require) {
         return value === '';
       });
 
-      return biobankApi.get(User.url(), params).then(function(reply) {
+      return biobankApi.get(User.url('search'), params).then(function(reply) {
         // reply is a paged result
         var deferred = $q.defer();
         try {

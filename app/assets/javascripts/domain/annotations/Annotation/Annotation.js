@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['moment', 'lodash'], function(moment, _) {
+define(['lodash'], function(_) {
   'use strict';
 
   AnnotationFactory.$inject = [

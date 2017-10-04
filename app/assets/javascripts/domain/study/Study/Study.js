@@ -220,7 +220,7 @@ define(function(require) {
         return value === '';
       });
 
-      return biobankApi.get(Study.url(), params).then(createStudiesFromPagedResult);
+      return biobankApi.get(Study.url('search'), params).then(createStudiesFromPagedResult);
     };
 
     /**

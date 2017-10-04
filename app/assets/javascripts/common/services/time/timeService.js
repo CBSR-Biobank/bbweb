@@ -2,8 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['moment'], function(moment) {
+define(function(require) {
   'use strict';
+
+  const moment = require('moment');
 
   timeService.$inject = ['AppConfig'];
 

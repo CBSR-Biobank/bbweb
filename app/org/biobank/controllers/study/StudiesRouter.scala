@@ -42,7 +42,7 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
     case GET(p"/sgvaluetypes") =>
       controller.specimenGroupValueTypes
 
-    case GET(p"/") =>
+    case GET(p"/search") =>
       // this action extracts parameters from the raw query string
       controller.list
 

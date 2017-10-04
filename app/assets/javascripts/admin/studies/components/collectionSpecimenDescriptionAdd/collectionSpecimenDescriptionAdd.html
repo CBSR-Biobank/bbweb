@@ -4,9 +4,7 @@
     <small translate>Add Collection Specimen</small>
   </h1>
 </div>
-<form class="form-horizontal"
-      name="specForm"
-      novalidate>
+<form class="form-horizontal" name="specForm" novalidate>
 
   <!-- NAME -->
   <div class="form-group"
@@ -18,7 +16,7 @@
              class="form-control"
              ng-model="vm.specimenSpec.name"
              ng-minlength="2"
-             placeholder="{{'A short name for the specimen group'|translate}}"
+             placeholder="{{'A short name for the specimen'|translate}}"
              focus-me="true"
              required />
     </div>
@@ -38,14 +36,14 @@
                 class="form-control"
                 rows="10"
                 ng-model="vm.specimenSpec.description"
-                placeholder="{{'A description of the specimen group (optional)'|translate}}" />
+                placeholder="{{'A description of the specimen (optional)'|translate}}">
+      </textarea>
     </div>
   </div>
 
   <!-- ANATOMICAL SOURCE -->
   <div class="form-group"
-       ng-class="{ 'has-error' : specForm.anatomicalSourceType.$invalid &&
-                 !specForm.anatomicalSourceType.$pristine }">
+       ng-class="{ 'has-error' : specForm.anatomicalSourceType.$invalid && !specForm.anatomicalSourceType.$pristine }">
     <label for="anatomicalSourceType" class="col-md-2 form-control-label" translate>
       Anatomical Source
     </label>
@@ -68,7 +66,7 @@
   <!-- PRESERVATION TYPE -->
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.perservationType.$invalid &&
-                 !specForm.perservationType.$pristine }">
+              !specForm.perservationType.$pristine }">
     <label for="perservationType" class="col-md-2 form-control-label" translate>Preservation Type</label>
     <div class="col-md-10">
       <select class="form-control"
@@ -89,7 +87,7 @@
   <!-- PRESERVATION TEMPERATURE -->
   <div class="form-group"
        ng-class="{ 'has-error' : specForm.perservationTemperature.$invalid &&
-                 !specForm.perservationTemperature.$pristine }">
+              !specForm.perservationTemperature.$pristine }">
     <label for="perservationTemperature" class="col-md-2 form-control-label" translate>
       Preservation Temperature
     </label>

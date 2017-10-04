@@ -175,7 +175,7 @@ describe('Centre', function() {
           });
         };
 
-    this.$httpBackend.whenGET(this.url()).respond(this.reply(reply));
+    this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
     this.Centre.list().then(checkReply).catch(failTest);
     this.$httpBackend.flush();
   });
@@ -197,7 +197,7 @@ describe('Centre', function() {
         };
 
     optionList.forEach((options) => {
-      var url = this.url() + '?' + this.$httpParamSerializer(options);
+      var url = this.url('search') + '?' + this.$httpParamSerializer(options);
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
       this.Centre.list(options).then(testCentre).catch(failTest);
       this.$httpBackend.flush();
@@ -208,7 +208,7 @@ describe('Centre', function() {
     var centres = [ _.omit(this.factory.centre(), 'name') ],
         reply = this.factory.pagedResult(centres);
 
-    this.$httpBackend.whenGET(this.url()).respond(this.reply(reply));
+    this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
     this.Centre.list().then(listFail).catch(shouldFail);
     this.$httpBackend.flush();
 

@@ -143,8 +143,10 @@ define(function (require) {
 
       function removePromiseFunc() {
         return vm.collectionEventType.removeSpecimenDescription(specimenDescription)
-          .then(function () {
+          .then(function (collectionEventType) {
+            vm.collectionEventType = collectionEventType;
             notificationsService.success(gettextCatalog.getString('Specimen removed'));
+            $state.reload();
           });
       }
     }
@@ -164,7 +166,8 @@ define(function (require) {
 
         vm.remove(annotationType, function () {
           return vm.collectionEventType.removeAnnotationType(annotationType)
-            .then(function () {
+            .then(function (collectionEventType) {
+              vm.collectionEventType = collectionEventType;
               notificationsService.success(gettextCatalog.getString('Annotation removed'));
             });
         });

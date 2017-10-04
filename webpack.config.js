@@ -70,6 +70,7 @@ const config = {
       'public/*.eot',
       'public/*.svg',
       'public/*.ttf',
+      'public/stats.html',
       'public/css',
       'public/js'
     ]),
