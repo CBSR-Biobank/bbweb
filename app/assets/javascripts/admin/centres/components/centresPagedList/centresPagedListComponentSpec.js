@@ -81,26 +81,21 @@ describe('centresPagedListComponent', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
-      var self = this;
-
-      context.createController = function (centresCount) {
-        var centres;
+    beforeEach(function () {
+      context.createController = (centresCount) => {
         centresCount = centresCount || 0;
-        centres = _.map(_.range(centresCount), self.createEntity.bind(self));
-        self.createCountsSpy(2, 5);
-        self.createPagedResultsSpy(centres);
-        self.createController();
+        const centres = _.range(centresCount).map(() => this.createEntity());
+        this.createCountsSpy(2, 5);
+        this.createPagedResultsSpy(centres);
+        this.createController();
       };
 
-      context.getEntitiesLastCallArgs = function () {
-        return self.Centre.list.calls.mostRecent().args;
-      };
+      context.getEntitiesLastCallArgs = () => this.Centre.list.calls.mostRecent().args;
 
       context.stateFilterValue = this.CentreState.DISABLED;
       context.sortFields = ['Name', 'State'];
       context.defaultSortFiled = 'name';
-    }));
+    });
 
     sharedBehaviour(context);
 

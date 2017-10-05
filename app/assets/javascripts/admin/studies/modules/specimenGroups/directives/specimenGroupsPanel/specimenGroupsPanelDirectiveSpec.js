@@ -39,9 +39,7 @@ xdescribe('Directive: specimenGroupsPanelDirective', function() {
       var entities = {};
 
       entities.study = new Study(factory.study());
-      entities.specimenGroups = _.map(_.range(2), function () {
-        return new SpecimenGroup(factory.processingType(entities.study));
-      });
+      entities.specimenGroups = _.range(2).map(() => SpecimenGroup.create(factory.processingType(entities.study)));
       entities.specimenGroupIdsInUse = [ entities.specimenGroups[0].id ];
 
       return entities;

@@ -26,9 +26,7 @@ define(function (require) {
 
     function openModal(heading, label, placeholder, value, locationInfosToOmit) {
       var modal,
-          locationIdsToOmit =  _.map(locationInfosToOmit, function (locInfo) {
-            return locInfo.locationId;
-          });
+          locationIdsToOmit =  _.map(locationInfosToOmit, 'locationId');
 
       ModalController.$inject = [];
 

@@ -31,12 +31,10 @@ define(function (require) {
 
     function onInit() {
       vm.numSteps = vm.items.length;
-      vm.steps = _.map(vm.items, function (item, index) {
-        return  {
-          name: item,
-          class: (index < vm.current) ? 'progtrckr-done' : 'progtrckr-todo'
-        };
-      });
+      vm.steps = vm.items.map((item, index) => ({
+        name: item,
+        class: (index < vm.current) ? 'progtrckr-done' : 'progtrckr-todo'
+      }));
     }
   }
 

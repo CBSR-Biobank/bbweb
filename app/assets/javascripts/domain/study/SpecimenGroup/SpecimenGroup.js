@@ -81,11 +81,8 @@ define(['lodash'], function(_) {
     };
 
     SpecimenGroup.list = function (studyId) {
-      return biobankApi.get(uri(studyId)).then(function(reply) {
-        return _.map(reply, function (cet) {
-          return SpecimenGroup.create(cet);
-        });
-      });
+      return biobankApi.get(uri(studyId))
+        .then((reply) => reply.map((cet) => SpecimenGroup.create(cet)));
     };
 
     SpecimenGroup.prototype.addOrUpdate = function () {

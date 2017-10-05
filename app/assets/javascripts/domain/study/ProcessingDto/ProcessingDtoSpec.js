@@ -37,27 +37,19 @@ xdescribe('ProcessingDto', function() {
     function create() {
       var entities = {};
       entities.study = factory.study();
-      entities.processingTypes = _.map(_.range(2), function () {
-        return factory.processingType(entities.study);
-      });
-      entities.specimenGroups = _.map(_.range(2), function () {
-        return factory.specimenGroup(entities.study);
-      });
-      entities.specimenLinkAnnotationTypes = _.map(
-        _.values(AnnotationValueType),
-        function (valueType) {
-          return factory.studyAnnotationType(entities.study, {
-            valueType: valueType
-          });
-        });
+      entities.processingTypes = _.range(2).map(() => factory.processingType(entities.study));
+      entities.specimenGroups  = _.range(2).map(() => factory.specimenGroup(entities.study));
+      entities.specimenLinkAnnotationTypes = _.values(AnnotationValueType)
+        .map((valueType) => factory.studyAnnotationType(entities.study, {
+          valueType: valueType
+        }));
       entities.specimenLinkAnnotationTypeIdsInUse = [ entities.specimenLinkAnnotationTypes[0] ];
-      entities.specimenLinkTypes = _.map(_.range(2), function (id) {
-        return factory.specimenLinkType(entities.processingTypes[id], {
+      entities.specimenLinkTypes = _.range(2)
+        .map((id) => factory.specimenLinkType(entities.processingTypes[id], {
           inputGroup: entities.specimenGroups[0],
           outputGorup: entities.specimenGroups[1],
           annotationTypes: entities.specimenLinkAnnotationTypes
-        });
-      });
+        }));
       return entities;
     }
   }
@@ -121,11 +113,9 @@ xdescribe('ProcessingDto', function() {
     expect(dto.specimenLinkAnnotationTypes).toContainAll(serverObj.specimenLinkAnnotationTypes);
     expect(dto.specimenGroups).toContainAll(serverObj.specimenGroups);
 
-    _.each(dto.specimenLinkTypes, function (slt) {
+    dto.specimenLinkTypes.forEach((slt) => {
       expect(slt.annotationTypeDataIds()).toBeArrayOfSize(serverObj.specimenLinkAnnotationTypes.length);
-
-      expect(slt.annotationTypeDataIds()).toContainAll(
-        _.map(serverObj.specimenLinkAnnotationTypes, 'id'));
+      expect(slt.annotationTypeDataIds()).toContainAll(_.map(serverObj.specimenLinkAnnotationTypes, 'id'));
     });
   }
 

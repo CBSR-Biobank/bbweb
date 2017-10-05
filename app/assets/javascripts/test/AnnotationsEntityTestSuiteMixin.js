@@ -33,7 +33,7 @@ define(['lodash'], function (_) {
     AnnotationsEntityTestSuiteMixin.prototype.jsonAnnotationData = function () {
       var annotationTypes = factory.allAnnotationTypes();
 
-      return _.map(annotationTypes, function (annotationType) {
+      return annotationTypes.map((annotationType) => {
         var value = factory.valueForAnnotation(annotationType);
         var annotation = factory.annotation(value, annotationType);
 

@@ -77,26 +77,21 @@ describe('usersPagedListComponent', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
-      var self = this;
-
-      context.createController = function (usersCount) {
-        var users;
+    beforeEach(function () {
+      context.createController = (usersCount) => {
         usersCount = usersCount || 0;
-        users = _.map(_.range(usersCount), self.createEntity.bind(self));
-        self.createCountsSpy(2, 5, 3);
-        self.createUserListSpy(users);
-        self.createController();
+        const users = _.range(usersCount).map(() => this.createEntity());
+        this.createCountsSpy(2, 5, 3);
+        this.createUserListSpy(users);
+        this.createController();
       };
 
-      context.getEntitiesLastCallArgs = function () {
-        return self.User.list.calls.mostRecent().args;
-      };
+      context.getEntitiesLastCallArgs = () => this.User.list.calls.mostRecent().args;
 
       context.stateFilterValue = this.UserState.ACTIVE;
       context.sortFields = ['Name', 'Email', 'State'];
       context.defaultSortFiled = 'name';
-    }));
+    });
 
     sharedBehaviour(context);
 
@@ -111,25 +106,23 @@ describe('usersPagedListComponent', function() {
     });
 
     it('getItemIcon returns a valid icon', function() {
-      var self = this,
-          statesInfo = [
+      var statesInfo = [
             { state: this.UserState.REGISTERED, icon: 'glyphicon-cog' },
             { state: this.UserState.ACTIVE,     icon: 'glyphicon-user' },
             { state: this.UserState.LOCKED,     icon: 'glyphicon-lock' }
           ];
 
-      statesInfo.forEach(function (info) {
-        var user = new self.User(self.factory.user({ state: info.state }));
-        expect(self.controller.getItemIcon(user)).toEqual(info.icon);
+      statesInfo.forEach((info) => {
+        var user = this.User.create(this.factory.user({ state: info.state }));
+        expect(this.controller.getItemIcon(user)).toEqual(info.icon);
       });
     });
 
     it('getItemIcon throws an error for and invalid state', function() {
-      var self = this,
-          user = new this.User(this.factory.user({ state: this.factory.stringNext() }));
+      var user = new this.User(this.factory.user({ state: this.factory.stringNext() }));
 
-      expect(function () {
-        self.controller.getItemIcon(user);
+      expect(() => {
+        this.controller.getItemIcon(user);
       }).toThrowError(/invalid user state/);
     });
 

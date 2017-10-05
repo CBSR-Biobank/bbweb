@@ -183,9 +183,7 @@ define(function (require) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
-          reply.items = _.map(reply.items, function(obj){
-            return Membership.create(obj);
-          });
+          reply.items = reply.items.map((obj) => Membership.create(obj));
           deferred.resolve(reply);
         } catch (e) {
           deferred.reject('invalid memberships from server');

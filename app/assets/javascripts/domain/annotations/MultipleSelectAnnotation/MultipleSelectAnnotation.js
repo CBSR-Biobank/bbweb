@@ -22,13 +22,13 @@ define(['lodash'], function(_) {
       self.valueType = 'MultipleSelect';
 
       function initializeMultipleSelect() {
-        var result = _.map(annotationType.options, function (opt) {
-          return { name: opt, checked: false };
-        });
-        _.each(obj.selectedValues, function (sv) {
-          var value = _.find(result, { name: sv });
-          value.checked = true;
-        });
+        var result = annotationType.options.map((opt) => ({ name: opt, checked: false }));
+        if (obj.selectedValues) {
+          obj.selectedValues.forEach((sv) => {
+            var value = _.find(result, { name: sv });
+            value.checked = true;
+          });
+        }
         return result;
       }
     }

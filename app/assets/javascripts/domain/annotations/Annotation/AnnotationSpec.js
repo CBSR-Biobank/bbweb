@@ -55,9 +55,7 @@ describe('Annotation', function() {
        * Creates annotation type options to create an annotation of each type of object.
        */
       this.getAnnotationTypeOptionsForAll = () => {
-        var result = _.map(_.values(this.AnnotationValueType), function (valueType) {
-          return { valueType: valueType };
-        });
+        var result = _.values(this.AnnotationValueType).map((valueType) => ({ valueType: valueType }));
         result.push({
           valueType: this.AnnotationValueType.SELECT,
           maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE,

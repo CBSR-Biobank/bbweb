@@ -33,30 +33,27 @@ describe('progressTrackerComponent', function() {
   });
 
   it('has valid scope', function() {
-    var self = this,
-        items = _.map(_.range(3), function () { return self.factory.stringNext(); }),
+    var items = _.range(3).map(() => this.factory.stringNext()),
         current = items[0];
-    self.createController(items, current);
-    expect(self.controller.numSteps).toBe(items.length);
-    expect(self.controller.steps).toBeArrayOfSize(items.length);
+    this.createController(items, current);
+    expect(this.controller.numSteps).toBe(items.length);
+    expect(this.controller.steps).toBeArrayOfSize(items.length);
   });
 
   it('all steps can be marked as todo', function() {
-    var self = this,
-        items = _.map(_.range(3), function () { return self.factory.stringNext(); });
-    self.createController(items, 0);
-    expect(self.controller.numSteps).toBe(items.length);
-    _.each(self.controller.steps, function (step) {
+    var items = _.range(3).map(() => this.factory.stringNext());
+    this.createController(items, 0);
+    expect(this.controller.numSteps).toBe(items.length);
+    this.controller.steps.forEach((step) => {
       expect(step.class).toBe('progtrckr-todo');
     });
   });
 
   it('all steps can be marked as done', function() {
-    var self = this,
-        items = _.map(_.range(3), function () { return self.factory.stringNext(); });
-    self.createController(items, items.length);
-    expect(self.controller.numSteps).toBe(items.length);
-    _.each(self.controller.steps, function (step) {
+    var items = _.range(3).map(() => this.factory.stringNext());
+    this.createController(items, items.length);
+    expect(this.controller.numSteps).toBe(items.length);
+    this.controller.steps.forEach((step) => {
       expect(step.class).toBe('progtrckr-done');
     });
   });

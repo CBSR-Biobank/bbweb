@@ -44,7 +44,7 @@ describe('centreLocationsModalService', function() {
 
       this.centreAndLocations = () => {
         var self = this;
-        return _.map(_.range(3), function () {
+        return _.range(3).map(() => {
           var location = self.factory.location(),
               centre = self.factory.centre({ locations: [ location ] });
           return {
@@ -80,9 +80,7 @@ describe('centreLocationsModalService', function() {
   });
 
   it('can display location infos', function() {
-    var locationInfos = _.map(this.centreAndLocations(), function (o) {
-      return o.locationInfo;
-    });
+    var locationInfos = _.map(this.centreAndLocations(), 'locationInfo');
 
     this.Centre.locationsSearch = jasmine.createSpy('centreAndLocations')
       .and.returnValue(this.$q.when(locationInfos));
@@ -97,9 +95,7 @@ describe('centreLocationsModalService', function() {
   });
 
   it('can omit a location info', function() {
-    var locationInfos = _.map(this.centreAndLocations(), function (o) {
-      return o.locationInfo;
-    }),
+    var locationInfos = _.map(this.centreAndLocations(), 'locationInfo'),
         locationInfoToOmit = locationInfos[0],
         locationInfosToDisplay = locationInfos.slice(1);
 

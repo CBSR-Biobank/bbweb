@@ -363,9 +363,8 @@ describe('Participant', function() {
   });
 
   function annotationsForCommand(participant) {
-    return _.map(participant.annotations, function (annotation) {
-      return annotation.getServerAnnotation();
-    });
+    if (!participant.annotations) { return []; }
+    return participant.annotations.map((annotation) => annotation.getServerAnnotation());
   }
 
   function addJson(participant) {

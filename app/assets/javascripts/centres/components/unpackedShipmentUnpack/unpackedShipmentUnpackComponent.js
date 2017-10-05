@@ -90,9 +90,7 @@ define(function (require) {
         return null;
       }
 
-      var inventoryIds = _.map(vm.inventoryIds.split(','), function (nonTrimmedInventoryId) {
-        return nonTrimmedInventoryId.trim();
-      });
+      var inventoryIds = vm.inventoryIds.split(',').map((nonTrimmedInventoryId) => nonTrimmedInventoryId.trim());
       return vm.shipment.tagSpecimensAsReceived(inventoryIds)
         .then(function () {
           vm.inventoryIds = '';

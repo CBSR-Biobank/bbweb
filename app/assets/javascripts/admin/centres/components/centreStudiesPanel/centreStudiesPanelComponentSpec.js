@@ -44,7 +44,7 @@ describe('Component: centreStudiesPanel', function() {
            </centre-studies-panel>`,
           {
             centre:        entities.centre,
-            centreStudies: _.map(entities.studies.slice(0, 2), function (study) { return study.id; }),
+            centreStudies: entities.studies.slice(0, 2).map((study) => study.id),
             studyNames:    this.studyNames(entities.studies)
           },
           'centreStudiesPanel');

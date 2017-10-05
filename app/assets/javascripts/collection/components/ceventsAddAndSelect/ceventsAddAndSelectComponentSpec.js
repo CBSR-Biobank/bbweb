@@ -129,7 +129,7 @@ describe('ceventsAddAndSelectDirective', function() {
     it('to correct state when there is more than one collection event type defined', function() {
       var self = this;
 
-      self.collectionEventTypes = _.map(_.range(2), function () {
+      self.collectionEventTypes = _.range(2).map(() => {
         var jsonCeventType  = self.factory.defaultCollectionEventType();
         return new self.CollectionEventType(jsonCeventType);
       });

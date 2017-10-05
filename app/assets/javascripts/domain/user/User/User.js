@@ -219,9 +219,7 @@ define(function(require) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
-          reply.items = _.map(reply.items, function(obj){
-            return User.create(obj);
-          });
+          reply.items = reply.items.map((obj) => User.create(obj));
           deferred.resolve(reply);
         } catch (e) {
           deferred.reject('invalid users from server');

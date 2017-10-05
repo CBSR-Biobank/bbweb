@@ -309,9 +309,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
-          reply.items = _.map(reply.items, function(obj){
-            return Specimen.create(obj);
-          });
+          reply.items = reply.items.map((obj) => Specimen.create(obj));
           deferred.resolve(reply);
         } catch (e) {
           deferred.reject('invalid specimens from server');
@@ -334,7 +332,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
     Specimen.add = function (ceventId, specimens) {
       var json = { collectionEventId: ceventId };
 
-      json.specimenData = _.map(specimens, function (specimen) {
+      json.specimenData = specimens.map((specimen) => {
         var result = _.pick(specimen, 'inventoryId', 'specimenDescriptionId', 'timeCreated', 'amount');
         result.locationId = specimen.locationInfo.locationId;
         return result;

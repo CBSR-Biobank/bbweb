@@ -429,7 +429,7 @@ xdescribe('modalInputModule', function() {
   describe('select modal', function() {
 
     beforeEach(function () {
-      this.options = _.map(_.range(3), function () { return faker.lorem.word(); });
+      this.options = _.range(3).map(() => faker.lorem.word());
       this.defaultValue = this.options[0];
     });
 
@@ -491,7 +491,7 @@ xdescribe('modalInputModule', function() {
   describe('select multiple modal', function() {
 
     beforeEach(function () {
-      this.options = _.map(_.range(3), function () { return faker.random.word(); });
+      this.options = _.range(3).map(() => faker.random.word());
       this.defaultValue = [ this.options[0] ];
     });
 

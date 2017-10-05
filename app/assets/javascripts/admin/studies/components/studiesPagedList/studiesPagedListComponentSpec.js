@@ -81,26 +81,21 @@ describe('Component: studiesPagedList', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
-      var self = this;
-
-      context.createController = function (studiesCount) {
-        var studies;
+    beforeEach(function () {
+      context.createController = (studiesCount) => {
         studiesCount = studiesCount || 0;
-        studies = _.map(_.range(studiesCount), self.createEntity.bind(self));
-        self.createCountsSpy(2, 5, 3);
-        self.createPagedResultsSpy(studies);
-        self.createController();
+        const studies = _.range(studiesCount).map(() => this.createEntity());
+        this.createCountsSpy(2, 5, 3);
+        this.createPagedResultsSpy(studies);
+        this.createController();
       };
 
-      context.getEntitiesLastCallArgs = function () {
-        return self.Study.list.calls.mostRecent().args;
-      };
+      context.getEntitiesLastCallArgs = () => this.Study.list.calls.mostRecent().args;
 
       context.stateFilterValue = this.StudyState.DISABLED;
       context.sortFields = ['Name', 'State'];
       context.defaultSortFiled = 'name';
-    }));
+    });
 
     sharedBehaviour(context);
 

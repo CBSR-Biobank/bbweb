@@ -122,13 +122,11 @@ define(['lodash'], function(_) {
     };
 
     SpecimenLinkType.list = function(processingTypeId) {
-      return biobankApi.get(uri(processingTypeId)).then(function(reply) {
-        return _.map(reply, function (cet) {
-          return SpecimenLinkType.create(cet);
-        });
-      });
+      return biobankApi.get(uri(processingTypeId))
+        .then((reply) => reply.map((cet) => SpecimenLinkType.create(cet)));
     };
 
+    // FIXME: fix the unused parameter
     SpecimenLinkType.prototype.addOrUpdate = function (annotationTypes) {
       var self = this,
           cmd = _.extend(_.pick(this,

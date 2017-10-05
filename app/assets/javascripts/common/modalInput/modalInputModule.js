@@ -158,9 +158,10 @@ function modalInputService($uibModal) {
           throw new Error('defaultValue is not an array');
         }
 
-        return _.map(options.selectOptions, function (opt) {
-          return { name: opt, checked: _.includes(vm.defaultValue, opt)};
-        });
+        return options.selectOptions.map((opt) => ({
+          name: opt,
+          checked: _.includes(vm.defaultValue, opt)
+        }));
       }
 
       function multipleSelectSomeSelected() {

@@ -264,9 +264,7 @@ define(function(require) {
         // reply is a paged result
         var deferred = $q.defer();
         try {
-          reply.items = _.map(reply.items, function(obj){
-            return CollectionEvent.create(obj);
-          });
+          reply.items = reply.items.map((obj) => CollectionEvent.create(obj));
           deferred.resolve(reply);
         } catch (e) {
           deferred.reject('invalid studies from server');

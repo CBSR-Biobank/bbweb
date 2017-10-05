@@ -44,7 +44,7 @@ describe('shipmentAddComponent', function() {
 
       this.centreLocations = (numCentres) => {
         var self = this;
-        return _.map(_.range(numCentres), function () {
+        return _.range(numCentres).map(() => {
           var centre = self.factory.centre({ locations: [ self.factory.location() ]});
           return self.factory.centreLocationDto(centre);
         });

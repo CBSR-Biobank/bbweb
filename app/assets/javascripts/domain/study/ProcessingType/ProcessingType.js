@@ -65,11 +65,9 @@ define(['lodash'], function(_) {
         });
     };
 
-    ProcessingType.list = function(studyId) {
+    ProcessingType.list = function (studyId) {
       return biobankApi.get(uri(studyId)).then(function(reply) {
-        return _.map(reply, function (cet) {
-          return ProcessingType.create(cet);
-        });
+        return reply.map((cet) => ProcessingType.create(cet));
       });
     };
 

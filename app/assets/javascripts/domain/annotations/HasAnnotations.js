@@ -49,21 +49,21 @@ define(['lodash'], function (_) {
     };
 
     HasAnnotations.prototype.setAnnotationTypes = function (annotationTypes) {
-      var self = this,
-          differentIds;
+      var differentIds;
 
-      self.annotations = self.annotations || [];
+      annotationTypes = annotationTypes || [];
+      this.annotations = this.annotations || [];
 
       // make sure the annotations ids match up with the corresponding annotation types
-      differentIds = _.difference(_.map(self.annotations, 'annotationTypeId'),
+      differentIds = _.difference(_.map(this.annotations, 'annotationTypeId'),
                                   _.map(annotationTypes, 'id'));
 
       if (differentIds.length > 0) {
         throw new DomainError('annotation types not found: ' + differentIds);
       }
 
-      self.annotations = _.map(annotationTypes, function (annotationType) {
-        var jsonAnnotationMaybe = _.find(self.annotations, { annotationTypeId: annotationType.id });
+      this.annotations = annotationTypes.map((annotationType) => {
+        var jsonAnnotationMaybe = _.find(this.annotations, { annotationTypeId: annotationType.id });
 
         if ((jsonAnnotationMaybe instanceof Annotation) &&
             (jsonAnnotationMaybe.annotationType) &&

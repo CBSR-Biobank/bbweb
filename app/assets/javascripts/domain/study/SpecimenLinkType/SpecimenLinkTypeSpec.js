@@ -39,12 +39,8 @@ xdescribe('SpecimenLinkType', function() {
     processingType = factory.processingType(study);
     sltFromServer  = factory.specimenLinkType(processingType);
 
-    specimenGroups = _.map(_.range(2), function() {
-      return factory.specimenGroup(study);
-    });
-    annotationTypes = _.map(_.range(2), function() {
-      return factory.annotationType(study);
-    });
+    specimenGroups  = _.range(2).map(() => factory.specimenGroup(study));
+    annotationTypes = _.range(2).map(() => factory.annotationType(study));
 
     return {
       study:           study,

@@ -37,9 +37,7 @@ xdescribe('Directive: processingTypesPanelDirective', function() {
     function create() {
       var entities = {};
       entities.study = new Study(factory.study());
-      entities.processingTypes = _.map(_.range(2), function () {
-        return new ProcessingType(factory.processingType(entities.study));
-      });
+      entities.processingTypes = _.range(2).map( () => new ProcessingType(factory.processingType(entities.study)));
       return entities;
     }
   }

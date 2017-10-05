@@ -264,9 +264,7 @@ define(function (require) {
         var deferred = $q.defer();
         try {
           // reply is a paged result
-          reply.items = _.map(reply.items, function(obj){
-            return ShipmentSpecimen.create(obj);
-          });
+          reply.items = reply.items.map((obj) => ShipmentSpecimen.create(obj));
           deferred.resolve(reply);
         } catch (e) {
           deferred.reject('invalid shipment specimens from server');

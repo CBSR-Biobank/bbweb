@@ -83,9 +83,7 @@ define(function (require) {
      * User entered inventory IDs entered to be marked as extra in this shipment.
      */
     function onInventoryIdsSubmit() {
-      var inventoryIds = _.map(vm.inventoryIds.split(','), function (nonTrimmedInventoryId) {
-        return nonTrimmedInventoryId.trim();
-      });
+      var inventoryIds = vm.inventoryIds.split(',').map((nonTrimmedInventoryId) => nonTrimmedInventoryId.trim());
       return vm.tagSpecimensAsExtra(inventoryIds);
     }
 

@@ -49,25 +49,19 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
       };
 
       entities.study = new Study(factory.study());
-      entities.processingTypes = _.map(_.range(2), function () {
-        return new ProcessingType(factory.processingType(entities.study));
-      });
+      entities.processingTypes = _.range(2).map(() => ProcessingType.create(factory.processingType(entities.study)));
 
       if (options.studyHasSpecimenGroups) {
-        entities.specimenGroups = _.map(_.range(2), function () {
-          return factory.specimenGroup(entities.study);
-        });
+        entities.specimenGroups = _.range(2).map(() => factory.specimenGroup(entities.study));
       } else {
         entities.specimenGroups = [];
       }
 
       if (options.studyHasAnnotationTypes) {
-        entities.annotationTypes = _.map(
-          _.values(AnnotationValueType),
-          function(valueType) {
-            return new SpecimenLinkAnnotationType(
-              factory.annotationType({ valueType: valueType }));
-          });
+        entities.annotationTypes = _.values(AnnotationValueType)
+          .map((valueType) => new SpecimenLinkAnnotationType(
+            factory.annotationType({ valueType: valueType })
+          ));
         entities.annotationTypeIdsInUse = [entities.annotationTypes[0]];
       } else {
         entities.annotationTypes = [];

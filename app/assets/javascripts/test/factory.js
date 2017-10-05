@@ -592,9 +592,7 @@ define(function (require) {
         }
 
         if (_.isUndefined(options.options)) {
-          options.options = _.map(_.range(2), function() {
-            return domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE());
-          });
+          options.options = _.range(2).map(() => domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE()));
         }
       }
 
@@ -604,9 +602,8 @@ define(function (require) {
     }
 
     function allAnnotationTypes() {
-      var annotationTypes = _.map(_.values(AnnotationValueType), function (valueType) {
-        return annotationType({ valueType: valueType });
-      });
+      var annotationTypes = _.values(AnnotationValueType)
+          .map((valueType) => annotationType({ valueType: valueType }));
       annotationTypes.push(annotationType({
         valueType:     AnnotationValueType.SELECT,
         maxValueCount: AnnotationMaxValueCount.SELECT_MULTIPLE,
@@ -716,7 +713,7 @@ define(function (require) {
     }
 
     function annotations(annotationTypes) {
-      return _.map(annotationTypes, function (annotationType) {
+      return annotationTypes.map((annotationType) => {
         var value = valueForAnnotation(annotationType);
         return annotation({ value: value }, annotationType);
       });
@@ -743,14 +740,12 @@ define(function (require) {
 
     function centreLocations(centres) {
       return _.flatMap(centres, function (centre) {
-        return _.map(centre.locations, function (location) {
-          return {
+        return centre.locations.map((location) => ({
             centreId:     centre.id,
             locationId:   location.id,
             centreName:   centre.name,
             locationName: location.name
-          };
-        });
+        }));
       });
     }
 

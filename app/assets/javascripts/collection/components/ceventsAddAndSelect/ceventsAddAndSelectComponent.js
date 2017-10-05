@@ -70,7 +70,7 @@ define(function (require) {
     }
 
     function setCollectionEventType(cevents) {
-      _.map(cevents, function (cevent) {
+      cevents.forEach((cevent) => {
         var ceventType = _.find(vm.collectionEventTypes, { id: cevent.collectionEventTypeId });
         if (_.isUndefined(ceventType)) {
           vm.collectionEventError = true;

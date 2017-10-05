@@ -70,7 +70,7 @@ describe('shipmentsTableComponent', function() {
     expect(this.controller.tableDataLoading).toBeTrue();
     expect(_.map(this.controller.states, 'label')).toContain('any');
 
-    _.map(this.ShipmentStates, function (state) {
+    _.values(this.ShipmentStates).forEach((state) => {
       expect(this.controller.states).toContain({ label: state, value: state.toLowerCase() });
     });
   });

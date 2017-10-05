@@ -50,12 +50,10 @@ define(['lodash'], function (_) {
     }
 
     function getLabels() {
-      return _.map(AnnotationValueType, function (valueType) {
-        return {
-          id:        valueType,
-          labelFunc: valueTypeToLabelFunc(valueType)
-        };
-      });
+      return _.values(AnnotationValueType).map((valueType) => ({
+        id:        valueType,
+        labelFunc: valueTypeToLabelFunc(valueType)
+      }));
     }
 
   }

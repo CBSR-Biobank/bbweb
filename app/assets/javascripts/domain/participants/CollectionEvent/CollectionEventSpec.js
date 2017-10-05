@@ -585,8 +585,6 @@ describe('CollectionEvent', function() {
   }
 
   function annotationsForJson(collectionEvent) {
-    return _.map(collectionEvent.annotations, function (annotation) {
-      return annotation.getServerAnnotation();
-    });
+    return collectionEvent.annotations.map((annotation) => annotation.getServerAnnotation());
   }
 });

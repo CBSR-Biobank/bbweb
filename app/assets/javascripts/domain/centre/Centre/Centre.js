@@ -230,10 +230,9 @@ define(function(require) {
      * @returns {Promise<Array<domain.centres.CentreLocationName>>} A promise.
      */
     Centre.centreLocationToNames = function (centreLocations) {
-      return _.map(centreLocations, function (centreLocation) {
-        return _.extend({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
-                        _.pick(centreLocation, 'centreId', 'locationId'));
-      });
+      return centreLocations.map((centreLocation) =>
+                                 _.extend({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
+                                          _.pick(centreLocation, 'centreId', 'locationId')));
     };
 
     /**
@@ -289,9 +288,7 @@ define(function(require) {
         var deferred = $q.defer();
         try {
           // reply is a paged result
-          reply.items = _.map(reply.items, function(obj){
-            return Centre.create(obj);
-          });
+          reply.items = reply.items.map((obj) => Centre.create(obj));
           deferred.resolve(reply);
         } catch (e) {
           deferred.reject('invalid centres from server');

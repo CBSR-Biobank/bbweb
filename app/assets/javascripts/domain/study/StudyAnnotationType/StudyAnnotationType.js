@@ -56,11 +56,8 @@ define(['angular', 'lodash'], function(angular, _) {
      * @param {String} studyId - the ID for the parent study.
      */
     StudyAnnotationType.list = function (validator, createFn, annotationTypeUriPart, studyId) {
-      return biobankApi.get('/studies/' + studyId + '/' + annotationTypeUriPart).then(function (reply) {
-        return _.map(reply, function(obj) {
-          return create(validator, createFn, obj);
-        });
-      });
+      return biobankApi.get('/studies/' + studyId + '/' + annotationTypeUriPart)
+        .then((reply) => reply.map((obj) => create(validator, createFn, obj)));
     };
 
     /**

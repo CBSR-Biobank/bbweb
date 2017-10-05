@@ -222,26 +222,29 @@ define(function(require) {
      * annotations are valid, then a request is made to the server to add the participant.
      */
     Participant.prototype.add = function () {
-      var self = this,
-          deferred = $q.defer(),
+      var deferred = $q.defer(),
           invalidAnnotationErrMsg = null,
-          cmd = _.pick(self, 'studyId', 'uniqueId');
+          cmd = _.pick(this, 'studyId', 'uniqueId');
 
       // convert annotations to server side entities
-      cmd.annotations = _.map(self.annotations, function (annotation) {
-        // make sure required annotations have values
-        if (!annotation.isValueValid()) {
-          invalidAnnotationErrMsg = 'required annotation has no value: annotationId: ' +
-            annotation.annotationTypeId;
-        }
-        return annotation.getServerAnnotation();
-      });
+      if (this.annotations) {
+        cmd.annotations = this.annotations.map((annotation) => {
+          // make sure required annotations have values
+          if (!annotation.isValueValid()) {
+            invalidAnnotationErrMsg = 'required annotation has no value: annotationId: ' +
+              annotation.annotationTypeId;
+          }
+          return annotation.getServerAnnotation();
+        });
+      } else {
+        cmd.annotations = [];
+      }
 
       if (invalidAnnotationErrMsg) {
         deferred.reject(invalidAnnotationErrMsg);
       } else {
-        biobankApi.post(Participant.url(self.studyId), cmd)
-          .then(self.asyncCreate)
+        biobankApi.post(Participant.url(this.studyId), cmd)
+          .then(this.asyncCreate)
           .then(function (participant) {
             deferred.resolve(participant);
           });

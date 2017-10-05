@@ -42,14 +42,9 @@ xdescribe('Controller: SpcLinkTypeEditCtrl', function() {
 
       study = factory.study();
       processingType = factory.processingType(study);
-      specimenGroups = _.map(_.range(2), function () {
-        return factory.specimenGroup(study);
-      });
-      annotationTypes = _.map(
-        _.values(AnnotationValueType),
-        function(valueType) {
-          return new AnnotationType({ valueType: valueType });
-        });
+      specimenGroups = _.range(2).map(() => factory.specimenGroup(study));
+      annotationTypes = _.values(AnnotationValueType)
+        .map((valueType) => new AnnotationType({ valueType: valueType }));
 
       serverSlt = factory.specimenLinkType(processingType, {
         inputGroup: specimenGroups[0],

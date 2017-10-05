@@ -55,26 +55,18 @@ define(['lodash'], function(_) {
       obj = obj || {};
       _.extend(this, defaults, _.pick(obj, 'specimenLinkAnnotationTypeIdsInUse'));
 
-      self.processingTypes = _.map(obj.processingTypes, function(serverPt) {
-        return new ProcessingType(serverPt);
-      });
+      self.processingTypes = obj.processingTypes.map((serverPt) => new ProcessingType(serverPt));
 
-      self.specimenLinkTypes = _.map(obj.specimenLinkTypes, function(serverSlt) {
-        return new SpecimenLinkType(serverSlt, {
+      self.specimenLinkTypes = obj.specimenLinkTypes
+        .map((serverSlt) => new SpecimenLinkType(serverSlt, {
           studySpecimenGroups:  obj.specimenGroups,
           studyAnnotationTypes: obj.specimenLinkAnnotationTypes
-        });
-      });
+        }));
 
-      self.specimenLinkAnnotationTypes = _.map(
-        obj.specimenLinkAnnotationTypes,
-        function (serverAt) {
-          return new SpecimenLinkAnnotationType(serverAt);
-        });
+      self.specimenLinkAnnotationTypes = obj.specimenLinkAnnotationTypes
+        .map((serverAt) => new SpecimenLinkAnnotationType(serverAt));
 
-      self.specimenGroups = _.map(obj.specimenGroups, function(serverSg) {
-        return new SpecimenGroup(serverSg);
-      });
+      self.specimenGroups = obj.specimenGroups.map((serverSg) => new SpecimenGroup(serverSg));
     }
 
     /**

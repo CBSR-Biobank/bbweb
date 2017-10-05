@@ -95,9 +95,8 @@ define(function (require) {
           if (!pagedResult) { return; }
 
           vm.pagedResult = pagedResult;
-          vm.pagedResult.items = _.map(vm.pagedResult.items, function (entity) {
+          vm.pagedResult.items.forEach((entity) => {
             entity.icon = vm.getItemIcon(entity);
-            return entity;
           });
           vm.displayState = displayState();
         })

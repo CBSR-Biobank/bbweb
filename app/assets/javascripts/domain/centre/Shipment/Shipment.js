@@ -281,9 +281,7 @@ define(function (require) {
         var deferred = $q.defer();
         try {
           // reply is a paged result
-          reply.items = _.map(reply.items, function(obj){
-            return Shipment.create(obj);
-          });
+          reply.items = reply.items.map((obj) => Shipment.create(obj));
           deferred.resolve(reply);
         } catch (e) {
           deferred.reject('invalid shipments from server');
@@ -612,12 +610,10 @@ define(function (require) {
         throw new DomainError('shipmentSpecimens should be an array');
       }
       reqJson =  {
-        shipmentSpecimenData: _.map(shipmentSpecimens, function (ss) {
-          return {
+        shipmentSpecimenData: shipmentSpecimens.map((ss) => ({
             shipmentSpecimenId: ss.id,
             expectedVersion: ss.version
-          };
-        })
+        }))
       };
       if (shipmentContainerId) {
         _.extend(reqJson, { shipmentContainerId: shipmentContainerId });
