@@ -5,7 +5,7 @@
 define(function () {
   'use strict';
 
-  //NameAndStateFiltersController.$inject = [];
+  NameAndStateFiltersController.$inject = ['vm'];
 
   /*
    * Controller base class used by nameAndStateFiltersComponent and nameEmailStateFiltersComponent.
