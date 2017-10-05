@@ -9,11 +9,8 @@ class ApplicationRouter @Inject()(controller: Application) extends SimpleRouter 
 
   override def routes: Routes = {
 
-    case GET(p"/api/dtos/counts") =>
+    case GET(p"/counts") =>
       controller.aggregateCounts
-
-    case GET(p"/") =>
-      controller.index
 
   }
 }

@@ -16,6 +16,7 @@
 ->      /api/shipments                          org.biobank.controllers.centres.ShipmentsRouter
 ->      /api/users                              org.biobank.controllers.users.UsersRouter
 ->      /api/access                             org.biobank.controllers.access.AccessRouter
-->      /                                       org.biobank.controllers.ApplicationRouter
+->      /api/dtos                               org.biobank.controllers.ApplicationRouter
 
+GET     /                                       controllers.Assets.at(path="/public", file="index.html")
 GET     /assets/*file                           controllers.Assets.versioned(path="/public", file)

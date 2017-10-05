@@ -32,11 +32,6 @@ class Application @Inject() (controllerComponents: ControllerComponents,
 
   val log: Logger = Logger(this.getClass)
 
-  def index: Action[AnyContent] = Action {
-    // does not return a JSON object, but HTML content
-    Results.Ok(views.html.index())
-  }
-
   def aggregateCounts: Action[Unit] =
     action.async(parse.empty) { implicit request =>
       Future {
