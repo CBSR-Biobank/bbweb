@@ -60,6 +60,7 @@
     "style-loader": "^0.19.0",
     "url-loader": "^0.5.9",
     "webpack": "^3.6.0",
+    "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-middleware": "^1.12.0",
     "webpack-dev-server": "^2.9.1",
     "webpack-visualizer-plugin": "^0.1.11"
@@ -72,7 +73,7 @@
     "dev-build": "webpack --config webpack.dev.config.js --bail --debug --progress --profile --colors",
     "dev-build-watch": "webpack --config webpack.dev.config.js --progress --profile --colors --watch",
     "dev-server": "sbt run",
-    "dist-build": "NODE_ENV=production webpack --config webpack.dist.config.js -p --display-modules --progress",
+    "dist-build": "webpack --config webpack.dist.config.js --display-modules --progress",
     "start": "webpack --config webpack.dev.config.js --profile --progress --colors",
     "test": "karma start karma.conf.js",
     "test-single-run": "karma start karma.conf.js --single-run",

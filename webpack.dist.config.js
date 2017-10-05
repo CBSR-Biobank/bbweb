@@ -2,23 +2,43 @@
 
 const webpack = require('webpack'),
       config  = require('./webpack.config');
+//, BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin,
+//, CompressionPlugin = require('compression-webpack-plugin');
+
+config.cache = false;
+config.devtool = 'cheap-module-source-map';
 
 config.plugins = config.plugins.concat([
+  //new BundleAnalyzerPlugin(),
 
-  // Reduces bundles total size
+  new webpack.DefinePlugin({
+    'process.env.NODE_ENV': '"production"'
+  }),
+
+  new webpack.optimize.DedupePlugin(),
+
   new webpack.optimize.UglifyJsPlugin({
+    ie8: false,
+    parallel: true,
+    exclude: [/\.min\.js$/gi], // skip pre-minified libs
+    mangle: true,
     compress: {
-      screw_ie8: true
+      warnings: false // Suppress uglification warnings
     },
-    mangle: {
-
-      // You can specify all variables that should not be mangled.
-      // For example if your vendor dependency doesn't use modules
-      // and relies on global variables. Most of angular modules relies on
-      // angular global variable, so we should keep it unchanged
-      except: ['$super', '$', 'exports', 'angular']
+    output: {
+      comments: false,
+      beautify: false
     }
-  })
+  }),
+  // new CompressionPlugin({
+  //   asset: '[path].gz[query]',
+  //   algorithm: 'gzip',
+  //   test: /\.js$|\.css$|\.html$/,
+  //   threshold: 10240,
+  //   minRatio: 0
+  // })
+  new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+  new webpack.NoEmitOnErrorsPlugin()
 ]);
 
 module.exports = config;
