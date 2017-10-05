@@ -8,7 +8,7 @@ import play.api.libs.json._
 private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri(): String = "/shipments/"
+  def uri(): String = "/api/shipments/"
 
   def uri(shipment: Shipment): String = uri + s"${shipment.id.id}"
 

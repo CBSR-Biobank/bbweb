@@ -96,7 +96,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Processing Type REST API") {
 
-    describe("GET /studies/proctypes") {
+    describe("GET /api/studies/proctypes") {
       it("list none") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
@@ -186,7 +186,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/proctypes") {
+    describe("POST /api/studies/proctypes") {
 
       it("add a processing type") {
         val study = factory.createDisabledStudy
@@ -271,7 +271,7 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("DELETE /studies/proctypes/:studyId/:id/:ver") {
+    describe("DELETE /api/studies/proctypes/:studyId/:id/:ver") {
       it("remove a processing type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)

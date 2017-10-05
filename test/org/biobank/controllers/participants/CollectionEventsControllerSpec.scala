@@ -20,10 +20,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
 
-  def listUri(participantId: ParticipantId): String =
-    s"/participants/cevents/list/${participantId.id}"
-
-  def uri(): String = "/participants/cevents"
+  def uri(): String = "/api/participants/cevents"
 
   def uri(collectionEvent: CollectionEvent): String =
     uri + s"/${collectionEvent.id}"
@@ -50,10 +47,13 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     uri(participant.id) + s"?ceventId=${cevent.id.id}"
 
   def uriWithVisitNumber(participant: Participant, cevent: CollectionEvent): String =
-    s"/participants/cevents/visitNumber/${participant.id.id}/${cevent.visitNumber}"
+    uri + s"/visitNumber/${participant.id.id}/${cevent.visitNumber}"
+
+  def listUri(participantId: ParticipantId): String =
+    uri + s"/list/${participantId.id}"
 
   def updateUri(cevent: CollectionEvent, path: String): String =
-    s"/participants/cevents/$path/${cevent.id.id}"
+    uri + s"/$path/${cevent.id.id}"
 
   protected def createEntity(annotationTypes: Set[AnnotationType],
                              annotations:     Set[Annotation]): CollectionEvent = {
@@ -246,7 +246,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
   describe("Collection Event REST API") {
 
-    describe("GET /participants/cevents/:ceventId") {
+    describe("GET /api/participants/cevents/:ceventId") {
 
       it("get a single collection event for a participant") {
         createEntities { (study, participant, ceventType) =>
@@ -284,7 +284,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    describe("GET /participants/cevents/list/{participantId}") {
+    describe("GET /api/participants/cevents/list/{participantId}") {
 
       it("list none") {
         createEntities { (study, participant, ceventType) =>
@@ -485,7 +485,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    describe("GET /participants/cevents/visitNumber/:participantId/:vn") {
+    describe("GET /api/participants/cevents/visitNumber/:participantId/:vn") {
 
       it("get a collection event by visit number") {
         createEntities { (study, participant, ceventType) =>
@@ -533,7 +533,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
       }
     }
 
-    describe("POST /participants/cevents/:participantId") {
+    describe("POST /api/participants/cevents/:participantId") {
 
       it("add a collection event with no annotations") {
         createEntities { (study, participant, ceventType) =>
@@ -790,7 +790,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    describe("POST /participants/cevents/visitNumber/:ceventId") {
+    describe("POST /api/participants/cevents/visitNumber/:ceventId") {
 
       it("update the visit number on a collection event") {
         createEntities { (study, participant, ceventType) =>
@@ -890,7 +890,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    describe("POST /participants/cevents/timeCompleted/:ceventId") {
+    describe("POST /api/participants/cevents/timeCompleted/:ceventId") {
 
       it("update the time completed on a collection event") {
         createEntities { (study, participant, ceventType) =>
@@ -967,7 +967,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    describe("POST /participants/cevents/annot/:ceventId") {
+    describe("POST /api/participants/cevents/annot/:ceventId") {
 
       annotationTypeUpdateSharedBehaviour
 
@@ -985,13 +985,13 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
     }
 
-    describe("DELETE /participants/cevents/annot/:ceventId/:annotTypeId/:ver") {
+    describe("DELETE /api/participants/cevents/annot/:ceventId/:annotTypeId/:ver") {
 
       annotationTypeRemoveSharedBehaviour
 
     }
 
-    describe("DELETE /participants/cevents/:participantId/:ceventId/:ver") {
+    describe("DELETE /api/participants/cevents/:participantId/:ceventId/:ver") {
 
       it("remove a collection event") {
         createEntities { (study, participant, ceventType) =>

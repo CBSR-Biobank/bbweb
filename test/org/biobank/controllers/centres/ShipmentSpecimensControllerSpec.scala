@@ -21,20 +21,20 @@ class ShipmentSpecimensControllerSpec
   import org.biobank.TestUtils._
 
   override def uri(shipment: Shipment): String =
-    s"/shipments/specimens/${shipment.id.id}"
+    uri() + s"specimens/${shipment.id.id}"
 
   override def uri(shipment: Shipment, path: String): String =
-    s"/shipments/specimens/$path/${shipment.id.id}"
+    uri() + s"specimens/$path/${shipment.id.id}"
 
   def uri(shipment: Shipment, shipmentSpecimen: ShipmentSpecimen, path: String): String =
-    s"/shipments/specimens/$path/${shipment.id.id}/${shipmentSpecimen.id.id}"
+    uri() + s"specimens/$path/${shipment.id.id}/${shipmentSpecimen.id.id}"
 
   def uri(shipment: Shipment, shipmentSpecimen: ShipmentSpecimen): String =
-    s"/shipments/specimens/${shipment.id.id}/${shipmentSpecimen.id.id}"
+    uri() + s"specimens/${shipment.id.id}/${shipmentSpecimen.id.id}"
 
   describe("Shipment specimens REST API") {
 
-    describe("GET /shipments/specimens/:id") {
+    describe("GET /api/shipments/specimens/:id") {
 
       it("work for shipment with no specimens") {
         val f = createdShipmentFixture
@@ -221,7 +221,7 @@ class ShipmentSpecimensControllerSpec
       }
     }
 
-    describe("GET /shipments/specimens/:shId/:shSpcId") {
+    describe("GET /api/shipments/specimens/:shId/:shSpcId") {
 
       it("get a shipment specimen") {
         val f = shipmentSpecimensFixture(1)
@@ -251,7 +251,7 @@ class ShipmentSpecimensControllerSpec
 
     }
 
-    describe("GET /shipments/specimens/canadd/:shId/:invId") {
+    describe("GET /api/shipments/specimens/canadd/:shId/:invId") {
 
       it("can add a specimen inventory Id") {
         val f = specimensFixture(1)
@@ -331,7 +331,7 @@ class ShipmentSpecimensControllerSpec
       }
     }
 
-    describe("POST /shipments/specimens/:id") {
+    describe("POST /api/shipments/specimens/:id") {
 
       it("add a specimen to a shipment") {
         val f = specimensFixture(1)
@@ -698,7 +698,7 @@ class ShipmentSpecimensControllerSpec
 
     }
 
-    describe("DELETE /shipments/specimens/:shId/:shSpcId/:ver") {
+    describe("DELETE /api/shipments/specimens/:shId/:shSpcId/:ver") {
 
       it("must remove a specimen from shipment in created state") {
         val f = specimensFixture(1)

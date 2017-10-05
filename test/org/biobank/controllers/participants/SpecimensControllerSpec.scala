@@ -16,7 +16,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
   import org.biobank.TestUtils._
 
-  def uri(): String = "/participants/cevents/spcs"
+  def uri(): String = "/api/participants/cevents/spcs"
 
   def uri(collectionEvent: CollectionEvent): String =
     uri + s"/${collectionEvent.id}"
@@ -74,7 +74,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
   describe("Specimens REST API") {
 
-    describe("GET /participants/cevents/spcs/get/:spcId") {
+    describe("GET /api/participants/cevents/spcs/get/:spcId") {
 
       it("return a specimen") {
         val f = createEntitiesAndSpecimens
@@ -99,7 +99,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
     }
 
-    describe("GET /participants/cevents/spcs/invid/:invId") {
+    describe("GET /api/participants/cevents/spcs/invid/:invId") {
 
       it("return a specimen by inventory ID") {
         val f = createEntitiesAndSpecimens
@@ -123,7 +123,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
     }
 
 
-    describe("GET /participants/cevents/spcs/:ceventId") {
+    describe("GET /api/participants/cevents/spcs/:ceventId") {
 
       it("list none") {
         val e = createEntities
@@ -317,7 +317,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
     }
 
-    describe("POST /participants/cevents/spcs/:ceventId") {
+    describe("POST /api/participants/cevents/spcs/:ceventId") {
 
       it("add a specimen to a collection event") {
         val e = createEntities

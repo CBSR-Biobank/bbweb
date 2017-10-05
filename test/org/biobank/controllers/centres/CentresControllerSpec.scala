@@ -17,7 +17,7 @@ import play.api.test.Helpers._
 class CentresControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri(): String = "/centres/"
+  def uri(): String = "/api/centres/"
 
   def uri(path: String): String = uri + s"$path"
 
@@ -54,7 +54,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     val cmdJson = Json.obj("id"              -> nameGenerator.next[Centre],
                            "expectedVersion" -> 0L) ++ jsonField
 
-    val json = makeRequest(POST, s"/centres/$path/$invalidCentreId", NOT_FOUND, cmdJson)
+    val json = makeRequest(POST, uri(path) + s"/$invalidCentreId", NOT_FOUND, cmdJson)
 
     (json \ "status").as[String] must include ("error")
 
@@ -127,7 +127,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Centre REST API") {
 
-    describe("GET /centres/:id") {
+    describe("GET /api/centres/:id") {
 
       it("read a centre") {
         val centre = factory.createDisabledCentre
@@ -149,16 +149,16 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("GET /centres") {
+    describe("GET /api/centres/search") {
 
       it("list none") {
-        PagedResultsSpec(this).emptyResults(uri)
+        PagedResultsSpec(this).emptyResults(uri("search"))
       }
 
       it("list a centre") {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"))
         compareObj(jsonItem, centre)
       }
 
@@ -167,7 +167,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
+          uri = uri("search"),
           offset = 0,
           total = centres.size.toLong,
           maybeNext = None,
@@ -182,7 +182,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val jsonItem = PagedResultsSpec(this).
-          singleItemResult(uri, Map("filter" -> s"name::${centre.name}"))
+          singleItemResult(uri("search"), Map("filter" -> s"name::${centre.name}"))
         compareObj(jsonItem, centres(0))
       }
 
@@ -193,7 +193,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("filter" -> "state::disabled"))
+          .singleItemResult(uri("search"), Map("filter" -> "state::disabled"))
         compareObj(jsonItem, centres(0))
       }
 
@@ -206,7 +206,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         val expectedCentres = List(centres(0), centres(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
+          uri = uri("search"),
           queryParams = Map("filter" -> "state::disabled"),
           offset = 0,
           total = expectedCentres.size.toLong,
@@ -226,7 +226,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
         val expectedCentres = List(centres(2), centres(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
+          uri = uri("search"),
           queryParams = Map("filter" -> "state::enabled"),
           offset = 0,
           total = expectedCentres.size.toLong,
@@ -245,7 +245,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
+          uri = uri("search"),
           queryParams = Map("sort" -> "name"),
           offset = 0,
           total = centres.size.toLong,
@@ -264,7 +264,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
+          uri = uri("search"),
           queryParams = Map("sort" -> "state"),
           offset = 0,
           total = centres.size.toLong,
@@ -281,7 +281,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri,
+          uri = uri("search"),
           queryParams = Map("sort" -> "-state"),
           offset = 0,
           total = centres.size.toLong,
@@ -296,7 +296,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       it("fail on attempt to list centres filtered by an invalid state name") {
         val invalidStateName = "state::" + nameGenerator.next[Study]
         val reply = makeRequest(GET,
-                                uri + s"?filter=$invalidStateName",
+                                uri("search") + s"?filter=$invalidStateName",
                                 NOT_FOUND)
 
         (reply \ "status").as[String] must include ("error")
@@ -313,7 +313,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-          uri = uri,
+          uri = uri("search"),
           queryParams = Map("sort" -> "name", "limit" -> "1"),
           total = centres.size.toLong,
           maybeNext = Some(2))
@@ -329,7 +329,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-          uri = uri,
+          uri = uri("search"),
           queryParams = Map("sort" -> "name", "page" -> "4", "limit" -> "1"),
           total = 4,
           offset = 3,
@@ -340,12 +340,12 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when using an invalid query parameters") {
-        PagedResultsSpec(this).failWithInvalidParams(uri)
+        PagedResultsSpec(this).failWithInvalidParams(uri("search"))
       }
 
     }
 
-    describe("GET /centres/counts") {
+    describe("GET /api/centres/counts") {
 
       it("return empty counts") {
         val json = makeRequest(GET, uri("counts"))
@@ -369,7 +369,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /centres") {
+    describe("POST /api/centres") {
 
       it("add a centre") {
         val centre = factory.createDisabledCentre
@@ -425,7 +425,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /centres/name/:id") {
+    describe("POST /api/centres/name/:id") {
 
       it("update a centre's name") {
         val newName = nameGenerator.next[Centre]
@@ -490,7 +490,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /centres/description/:id") {
+    describe("POST /api/centres/description/:id") {
 
       it("update a centre's description") {
         val newDescription = nameGenerator.next[Centre]
@@ -537,7 +537,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /centres/enable/:id") {
+    describe("POST /api/centres/enable/:id") {
 
       it("enable a centre with at least one location") {
         val location = factory.createLocation
@@ -593,7 +593,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /centres/disable/:id") {
+    describe("POST /api/centres/disable/:id") {
 
       it("disable a centre") {
         val centre = factory.createEnabledCentre
@@ -637,7 +637,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /centres/locations/:id") {
+    describe("POST /api/centres/locations/:id") {
 
       it("add a location to a disabled centre") {
         val centre = factory.createDisabledCentre
@@ -707,7 +707,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /centres/locations/:id/:locationId") {
+    describe("POST /api/centres/locations/:id/:locationId") {
 
       it("update a location on a disabled centre") {
         val location = factory.createLocation
@@ -781,7 +781,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     }
 
 
-    describe("DELETE /centres/locations/:centreId/:ver/:locationId") {
+    describe("DELETE /api/centres/locations/:centreId/:ver/:locationId") {
 
       it("delete a location from a centre") {
         val locations = List(factory.createLocation, factory.createLocation)
@@ -848,7 +848,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /centres/studies/:centerId") {
+    describe("POST /api/centres/studies/:centerId") {
 
       it("add a study to a centre") {
         val centre = factory.createDisabledCentre.copy(studyIds = Set.empty)
@@ -908,7 +908,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("DELETE /centres/studies/:id/:ver/:studyId") {
+    describe("DELETE /api/centres/studies/:id/:ver/:studyId") {
 
       it("remove a study") {
         val study = factory.createDisabledStudy
@@ -972,7 +972,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("GET /centres/names") {
+    describe("GET /api/centres/names") {
 
       describe("must return centre names") {
 
@@ -1032,7 +1032,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /centres/locations") {
+    describe("POST /api/centres/locations") {
 
       it("return centre locations") {
         val location = factory.createLocation

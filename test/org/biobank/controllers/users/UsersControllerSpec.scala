@@ -25,7 +25,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
     addMembershipForUser(user)
   }
 
-  private def uri: String = "/users/"
+  private def uri: String = "/api/users/"
 
   private def uri(user: User): String = uri + s"${user.id.id}"
 
@@ -88,10 +88,10 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
   describe("Users REST API") {
 
-    describe("GET /users") {
+    describe("GET /api/users/search") {
 
       it("lists the default user") {
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"))
         (jsonItem \ "id").as[String] must be (Global.DefaultUserId.id)
       }
 
@@ -99,7 +99,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val users = (0 until 2).map(_ => factory.createRegisteredUser).toList
         users.foreach(userRepository.put)
 
-        val jsonItems = multipleItemsResultWithDefaultUser(uri       = uri,
+        val jsonItems = multipleItemsResultWithDefaultUser(uri       = uri("search"),
                                                            offset    = 0,
                                                            total     = users.size.toLong,
                                                            maybeNext = None,
@@ -113,8 +113,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
                          factory.createRegisteredUser.copy(name = "user2"))
         val user = users(0)
         users.foreach(userRepository.put)
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri, Map("filter" -> s"name::${user.name}"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"),
+                                                               Map("filter" -> s"name::${user.name}"))
         compareObj(jsonItem, users(0))
       }
 
@@ -124,7 +124,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val user = users(0)
         users.foreach(userRepository.put)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("filter" -> s"email::${user.email}"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"),
+                                                               Map("filter" -> s"email::${user.email}"))
         compareObj(jsonItem, users(0))
       }
 
@@ -134,7 +135,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
                          factory.createActiveUser.copy(email = "user3@test.com"))
         users.foreach(userRepository.put)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("filter" -> "state::registered"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"),
+                                                               Map("filter" -> "state::registered"))
         compareObj(jsonItem, users(0))
       }
 
@@ -145,7 +147,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         users.foreach(userRepository.put)
 
         val expectedUsers = List(users(1), users(2))
-        val jsonItems = multipleItemsResultWithDefaultUser(uri = uri,
+        val jsonItems = multipleItemsResultWithDefaultUser(uri = uri("search"),
                                                            queryParams = Map("filter" -> "state::active"),
                                                            offset = 0,
                                                            total = expectedUsers.size.toLong,
@@ -164,7 +166,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
         val expectedUsers = List(users(1), users(2))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri,
+            uri = uri("search"),
             queryParams = Map("filter" -> "state::locked"),
             offset = 0,
             total = expectedUsers.size.toLong,
@@ -183,7 +185,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
         val sortExprs = Table("sort by", "name", "-name")
         forAll(sortExprs) { sortExpr =>
-          val jsonItems = multipleItemsResultWithDefaultUser(uri         = uri,
+          val jsonItems = multipleItemsResultWithDefaultUser(uri         = uri("search"),
                                                              queryParams = Map("sort" -> sortExpr),
                                                              offset      = 0,
                                                              total       = users.size.toLong,
@@ -211,7 +213,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
         val sortExprs = Table("sort by", "email", "-email")
         forAll(sortExprs) { sortExpr =>
-          val jsonItems = multipleItemsResultWithDefaultUser(uri         = uri,
+          val jsonItems = multipleItemsResultWithDefaultUser(uri         = uri("search"),
                                                              queryParams = Map("sort" -> sortExpr),
                                                              offset      = 0,
                                                              total       = users.size.toLong,
@@ -239,7 +241,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
         val sortExprs = Table("sort by", "state", "-state")
         forAll(sortExprs) { sortExpr =>
-          val jsonItems = multipleItemsResultWithDefaultUser(uri = uri,
+          val jsonItems = multipleItemsResultWithDefaultUser(uri = uri("search"),
                                                              queryParams = Map("sort" -> sortExpr),
                                                              offset = 0,
                                                              total = users.size.toLong,
@@ -266,7 +268,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         users.foreach(userRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri,
+            uri         = uri("search"),
             queryParams = Map("filter" -> "email:like:test",
                               "sort"   -> "email", "limit" -> "1"),
             total       = users.size.toLong,
@@ -276,12 +278,12 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
 
       it("fail when using an invalid query parameters") {
-        PagedResultsSpec(this).failWithInvalidParams(uri)
+        PagedResultsSpec(this).failWithInvalidParams(uri("search"))
       }
 
     }
 
-    describe("GET /users/names") {
+    describe("GET /api/users/names") {
 
       def userToDto(user: User): NameAndStateDto = NameAndStateDto(user.id.id, user.name, user.state.id)
 
@@ -343,7 +345,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("GET /users/counts") {
+    describe("GET /api/users/counts") {
 
       def checkCounts(json:            JsValue,
                       registeredCount: Long,
@@ -383,7 +385,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("POST /users") {
+    describe("POST /api/users") {
 
       it("register a user") {
         val user = factory.createRegisteredUser
@@ -430,7 +432,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("POST /users/name/:id") {
+    describe("POST /api/users/name/:id") {
 
       it("update a user's name") {
         val user = factory.createActiveUser
@@ -470,7 +472,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("POST /users/email/:id") {
+    describe("POST /api/users/email/:id") {
 
       it("update a user's email") {
         val user = factory.createActiveUser.copy(timeAdded = OffsetDateTime.now.minusMonths(1))
@@ -530,7 +532,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("POST /users/password/:id") {
+    describe("POST /api/users/password/:id") {
 
       it("update a user's password") {
         val plainPassword = nameGenerator.next[User]
@@ -605,7 +607,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("POST /users/avatarurl/:id") {
+    describe("POST /api/users/avatarurl/:id") {
 
       it("update a user's avatar URL") {
         val user = factory.createActiveUser.copy(timeAdded = OffsetDateTime.now.minusMonths(1))
@@ -685,7 +687,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("GET /users/:id") {
+    describe("GET /api/users/:id") {
 
       it("return a user") {
         val f = new activeUserFixture
@@ -703,7 +705,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("POST /users/activate") {
+    describe("POST /api/users/activate") {
 
       it("activate a user") {
         val user = factory.createRegisteredUser
@@ -729,7 +731,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("POST /users/lock") {
+    describe("POST /api/users/lock") {
 
       it("lock a user") {
         val users = Table("users that can be locked",
@@ -772,7 +774,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("POST /users/unlock") {
+    describe("POST /api/users/unlock") {
 
       it("must unlock a user") {
         val user = factory.createLockedUser
@@ -815,7 +817,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("POST /users/login") {
+    describe("POST /api/users/login") {
 
       it("allow a user to log in") {
         val plainPassword = nameGenerator.next[String]
@@ -874,11 +876,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         ()
       }
 
-      it("not allow mismatched tokens in request for an non asyncaction") {
+      it("111 not allow mismatched tokens in request for an non asyncaction") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
-
-
         val validToken = doLogin(user.email, plainPassword)
         val badToken = nameGenerator.next[String]
 
@@ -953,7 +953,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("POST /logout") {
+    describe("POST /api/logout") {
 
       it("disallow access to logged out users") {
         val plainPassword = nameGenerator.next[String]
@@ -974,7 +974,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("POST /users/passreset") {
+    describe("POST /api/users/passreset") {
 
       it("allow an active user to reset his/her password") {
         val user = createActiveUserInRepository(nameGenerator.next[String])
@@ -1008,7 +1008,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     }
 
-    describe("GET /users/authenticate") {
+    describe("GET /api/users/authenticate") {
 
       it("allow a user to authenticate") {
         val plainPassword = nameGenerator.next[String]
@@ -1034,7 +1034,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("GET /users/studies") {
+    describe("GET /api/users/studies") {
 
       // these tests can only test the studies the default user has access to, since the
       // test framework logs in as the default user.

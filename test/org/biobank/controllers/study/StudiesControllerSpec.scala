@@ -34,7 +34,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       .foreach(addToRepository)
   }
 
-  private def uri(): String = "/studies/"
+  private def uri(): String = "/api/studies/"
 
   private def uri(path: String): String = uri + s"$path"
 
@@ -120,7 +120,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Study REST API") {
 
-    describe("GET /studies/collectionStudies") {
+    describe("GET /api/studies/collectionStudies") {
 
       it("returns the studies that a user can collect specimens for") {
         val f = new CollectionFixture
@@ -142,7 +142,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("GET /studies/counts") {
+    describe("GET /api/studies/counts") {
 
       it("return empty counts") {
         val json = makeRequest(GET, uri("counts"))
@@ -183,16 +183,16 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("GET /studies") {
+    describe("GET /api/studies/search") {
 
       it("list none") {
-        PagedResultsSpec(this).emptyResults(uri)
+        PagedResultsSpec(this).emptyResults(uri("search"))
       }
 
       it("list a study") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri)
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"))
         compareObj(jsonItem, study)
       }
 
@@ -202,7 +202,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studies.foreach(studyRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri,
+            uri = uri("search"),
             offset = 0,
             total = studies.size.toLong,
             maybeNext = None,
@@ -216,7 +216,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = studies(0)
         studies.foreach(studyRepository.put)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri, Map("filter" -> s"name::${study.name}"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"),
+                                                               Map("filter" -> s"name::${study.name}"))
         compareObj(jsonItem, study)
       }
 
@@ -225,8 +226,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createEnabledStudy,
                            factory.createRetiredStudy)
         studies.foreach(studyRepository.put)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri, Map("filter" -> "state::disabled"))
+        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"),
+                                                               Map("filter" -> "state::disabled"))
         compareObj(jsonItem, studies(0))
       }
 
@@ -239,7 +240,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         val expectedStudies = List(studies(0), studies(1))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri,
+            uri = uri("search"),
             queryParams = Map("filter" -> "state::disabled"),
             offset = 0,
             total = expectedStudies.size.toLong,
@@ -259,7 +260,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         val expectedStudies = List(studies(2), studies(3))
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri,
+            uri = uri("search"),
             queryParams = Map("filter" -> "state::enabled"),
             offset = 0,
             total = expectedStudies.size.toLong,
@@ -273,7 +274,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail on attempt to list studies filtered by an invalid state name") {
         val invalidStateName = "state::" + nameGenerator.next[Study]
         val reply = makeRequest(GET,
-                                uri + s"?filter=$invalidStateName",
+                                uri("search") + s"?filter=$invalidStateName",
                                 NOT_FOUND)
 
         (reply \ "status").as[String] must include ("error")
@@ -290,7 +291,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studies.foreach(studyRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri,
+            uri = uri("search"),
             queryParams = Map("sort" -> "name"),
             offset = 0,
             total = studies.size.toLong,
@@ -309,7 +310,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledStudy)
         studies.foreach(studyRepository.put)
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri         = uri,
+            uri         = uri("search"),
             queryParams = Map("sort" -> "state"),
             offset      = 0,
             total       = studies.size.toLong,
@@ -327,7 +328,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studies.foreach(studyRepository.put)
 
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri,
+            uri = uri("search"),
             queryParams = Map("sort" -> "-state"),
             offset = 0,
             total = studies.size.toLong,
@@ -342,7 +343,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail on attempt to list studies sorted by an invalid state name") {
         val invalidStateName = nameGenerator.next[Study]
         val reply = makeRequest(GET,
-                                uri + s"?sort=$invalidStateName",
+                                uri("search") + s"?sort=$invalidStateName",
                                 BAD_REQUEST)
 
         (reply \ "status").as[String] must include ("error")
@@ -358,7 +359,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studies.foreach(studyRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri = uri,
+            uri = uri("search"),
             queryParams = Map("sort" -> "name", "limit" -> "1"),
             total = studies.size.toLong,
             maybeNext = Some(2))
@@ -374,7 +375,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studies.foreach(studyRepository.put)
 
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri = uri,
+            uri = uri("search"),
             queryParams = Map("sort" -> "name", "page" -> "4", "limit" -> "1"),
             total = 4,
             offset = 3,
@@ -385,12 +386,12 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when using an invalid query parameters") {
-        PagedResultsSpec(this).failWithInvalidParams(uri)
+        PagedResultsSpec(this).failWithInvalidParams(uri("search"))
       }
 
     }
 
-    describe("GET /studies/:id") {
+    describe("GET /api/studies/:id") {
 
       it("read a study") {
         val study = factory.createEnabledStudy
@@ -401,7 +402,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fails for an invalid study ID") {
         val studyId = nameGenerator.next[Study]
-        val json = makeRequest(GET, s"/studies/$studyId", NOT_FOUND)
+        val json = makeRequest(GET, uri(studyId), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -410,7 +411,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies") {
+    describe("POST /api/studies") {
 
       it("add a study") {
         val study = factory.createDisabledStudy
@@ -468,7 +469,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies/name/:id") {
+    describe("POST /api/studies/name/:id") {
 
       it("update a study's name") {
         val newName = nameGenerator.next[Study]
@@ -549,7 +550,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies/description/:id") {
+    describe("POST /api/studies/description/:id") {
 
       it("update a study's description") {
         val newDescription = Some(nameGenerator.next[Study])
@@ -598,7 +599,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies/pannottype/:id") {
+    describe("POST /api/studies/pannottype/:id") {
 
       it("add a participant annotation type") {
         val annotType = factory.createAnnotationType
@@ -665,7 +666,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies/pannottype/:id/:annotTypeId") {
+    describe("POST /api/studies/pannottype/:id/:annotTypeId") {
 
       it("update a participant annotation type") {
         val annotType = factory.createAnnotationType
@@ -738,7 +739,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("DELETE /studies/pannottype/:id/:ver/:uniqueId") {
+    describe("DELETE /api/studies/pannottype/:id/:ver/:uniqueId") {
 
       it("remove a participant annotation type") {
         val annotationType = factory.createAnnotationType
@@ -786,7 +787,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail when removing annotation type and study ID does not exist") {
         val studyId = nameGenerator.next[Study]
 
-        val json = makeRequest(DELETE, s"/studies/pannottype/$studyId/0/xyz", NOT_FOUND)
+        val json = makeRequest(DELETE, uri + s"pannottype/$studyId/0/xyz", NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -828,7 +829,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies/enable/:id") {
+    describe("POST /api/studies/enable/:id") {
 
       it("enable a study") {
         val study = factory.createDisabledStudy
@@ -910,7 +911,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/disable/:id") {
+    describe("POST /api/studies/disable/:id") {
 
       it("disable a study") {
         val study = factory.createEnabledStudy
@@ -949,7 +950,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/retire/:id") {
+    describe("POST /api/studies/retire/:id") {
 
       it("retire a study") {
         val study = factory.createDisabledStudy
@@ -988,7 +989,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/unretire/:id") {
+    describe("POST /api/studies/unretire/:id") {
 
       it("unretire a study") {
         val study = factory.createRetiredStudy
@@ -1027,7 +1028,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("GET /studies/valuetypes") {
+    describe("GET /api/studies/valuetypes") {
       it("list all") {
         val json = makeRequest(GET, uri("valuetypes"))
         val values = (json \ "data").as[List[String]]
@@ -1035,7 +1036,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("GET /studies/anatomicalsrctypes") {
+    describe("GET /api/studies/anatomicalsrctypes") {
       it("list all") {
         val json = makeRequest(GET, uri("anatomicalsrctypes"))
         val values = (json \ "data").as[List[String]]
@@ -1043,7 +1044,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("GET /studies/specimentypes") {
+    describe("GET /api/studies/specimentypes") {
       it("list all") {
         val json = makeRequest(GET, uri("specimentypes"))
         val values = (json \ "data").as[List[String]]
@@ -1051,7 +1052,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("GET /studies/preservtypes") {
+    describe("GET /api/studies/preservtypes") {
       it("list all") {
         val json = makeRequest(GET, uri("preservtypes"))
         val values = (json \ "data").as[List[String]]
@@ -1059,7 +1060,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("GET /studies/preservtemptypes ") {
+    describe("GET /api/studies/preservtemptypes ") {
       it("list all") {
         val json = makeRequest(GET, uri("preservtemptypes"))
         val values = (json \ "data").as[List[String]]
@@ -1067,7 +1068,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("GET /studies/sgvaluetypes ") {
+    describe("GET /api/studies/sgvaluetypes ") {
       it("list all") {
         val json = makeRequest(GET, uri("sgvaluetypes"))
         val jsonObj = (json \ "data").as[JsObject]
@@ -1078,7 +1079,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("GET /studies/names") {
+    describe("GET /api/studies/names") {
 
       it("list multiple study names in ascending order") {
 
@@ -1145,7 +1146,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("GET /studies/centres/:id") {
+    describe("GET /api/studies/centres/:id") {
 
       it("list the centres associated with a study") {
         val study = factory.createEnabledStudy

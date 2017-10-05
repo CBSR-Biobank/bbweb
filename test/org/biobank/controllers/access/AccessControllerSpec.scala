@@ -67,7 +67,7 @@ class AccessControllerSpec
     Set(user, membership).foreach(addToRepository)
   }
 
-  private def uri: String = "/access/"
+  private def uri: String = "/api/access/"
 
   //private def uri(item: AccessItem): String = uri + s"${item.id.id}"
 
@@ -80,7 +80,7 @@ class AccessControllerSpec
 
   describe("Users REST API") {
 
-    describe("GET /access/roles") {
+    describe("GET /api/access/roles") {
 
       it("list the first page of roles") {
         val limit = 5
@@ -139,11 +139,11 @@ class AccessControllerSpec
 
     }
 
-    describe("GET /access/roles/permissions/:roleId") {
+    describe("GET /api/access/roles/permissions/:roleId") {
 
     }
 
-    describe("GET /access/membership") {
+    describe("GET /api/access/membership") {
 
       val DefaultMembershipName = "All studies and all centres"
 
@@ -254,7 +254,7 @@ class AccessControllerSpec
 
     }
 
-    describe("GET /access/membership/:membershipId") {
+    describe("GET /api/access/membership/:membershipId") {
 
       it("returns a membership") {
         val f = new MembershipFixture
@@ -278,7 +278,7 @@ class AccessControllerSpec
 
     }
 
-    describe("POST /access/memberships") {
+    describe("POST /api/access/memberships") {
 
       it("can create a membership") {
         val f = new MembershipFixture
@@ -395,7 +395,7 @@ class AccessControllerSpec
 
     }
 
-    describe("POST /access/memberships/name/:membershipId") {
+    describe("POST /api/access/memberships/name/:membershipId") {
 
       def updateNameJson(membership: Membership, name: String) = {
         Json.obj("expectedVersion" -> membership.version, "name" -> name)
@@ -464,7 +464,7 @@ class AccessControllerSpec
 
     }
 
-    describe("POST /access/memberships/description/:membershipId") {
+    describe("POST /api/access/memberships/description/:membershipId") {
 
       def updateDescriptionJson(membership: Membership, description: Option[String]) = {
         Json.obj("expectedVersion" -> membership.version) ++
@@ -514,7 +514,7 @@ class AccessControllerSpec
 
     }
 
-    describe("POST /access/memberships/user/:membershipId") {
+    describe("POST /api/access/memberships/user/:membershipId") {
 
       def addUserJson(membership: Membership, user: User) = {
         Json.obj("userId" -> user.id.id, "expectedVersion" -> membership.version)
@@ -586,7 +586,7 @@ class AccessControllerSpec
 
     }
 
-    describe("POST /access/memberships/allStudies/:membershipId") {
+    describe("POST /api/access/memberships/allStudies/:membershipId") {
 
       it("can assign a membership, for a single study, to be for all studies") {
         val f = new MembershipFixture
@@ -617,7 +617,7 @@ class AccessControllerSpec
 
     }
 
-    describe("POST /access/memberships/study/:membershipId") {
+    describe("POST /api/access/memberships/study/:membershipId") {
 
       def addStudyJson(membership: Membership, study: Study) = {
         Json.obj("studyId" -> study.id.id, "expectedVersion" -> membership.version)
@@ -709,7 +709,7 @@ class AccessControllerSpec
 
     }
 
-    describe("POST /access/memberships/allCentres/:membershipId") {
+    describe("POST /api/access/memberships/allCentres/:membershipId") {
 
       it("can assign a membership, for a single centre, to be for all centres") {
         val f = new MembershipFixture
@@ -740,7 +740,7 @@ class AccessControllerSpec
 
     }
 
-    describe("POST /access/memberships/centre/:membershipId") {
+    describe("POST /api/access/memberships/centre/:membershipId") {
 
       def addCentreJson(membership: Membership, centre: Centre) = {
         Json.obj("centreId" -> centre.id.id, "expectedVersion" -> membership.version)
@@ -832,7 +832,7 @@ class AccessControllerSpec
 
     }
 
-    describe("DELETE /access/memberships/user/:membershipId/:version/:userId") {
+    describe("DELETE /api/access/memberships/user/:membershipId/:version/:userId") {
 
       it("can remove a user") {
         val f = new MembershipFixture
@@ -898,7 +898,7 @@ class AccessControllerSpec
 
     }
 
-    describe("DELETE /access/memberships/study/:membershipId/:version/:studyId") {
+    describe("DELETE /api/access/memberships/study/:membershipId/:version/:studyId") {
 
       it("can remove a study") {
         val f = new MembershipFixture
@@ -976,7 +976,7 @@ class AccessControllerSpec
 
     }
 
-    describe("DELETE /access/memberships/centre/:membershipId/:version/:centreId") {
+    describe("DELETE /api/access/memberships/centre/:membershipId/:version/:centreId") {
 
       it("can remove a centre") {
         val f = new MembershipFixture
@@ -1054,7 +1054,7 @@ class AccessControllerSpec
 
     }
 
-    describe("DELETE /access/memberships/:membershipId/:version") {
+    describe("DELETE /api/access/memberships/:membershipId/:version") {
 
       it("can remove a membership") {
         val f = new MembershipFixture

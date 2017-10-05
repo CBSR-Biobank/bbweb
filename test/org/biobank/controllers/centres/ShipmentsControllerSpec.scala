@@ -59,7 +59,7 @@ class ShipmentsControllerSpec
 
   describe("Shipment REST API") {
 
-    describe("GET /shipments/list/:centreId") {
+    describe("GET /api/shipments/list/:centreId") {
 
       it("list a shipment") {
         val f = createdShipmentFixture
@@ -352,7 +352,7 @@ class ShipmentsControllerSpec
 
     }
 
-    describe("GET /shipments/:id") {
+    describe("GET /api/shipments/:id") {
 
       it("get a shipment") {
         val f = createdShipmentFixture
@@ -374,7 +374,7 @@ class ShipmentsControllerSpec
       }
     }
 
-    describe("POST /shipments") {
+    describe("POST /api/shipments") {
 
       def shipmentToAddJson(shipment: Shipment) =
         Json.obj("courierName"    -> shipment.courierName,
@@ -450,7 +450,7 @@ class ShipmentsControllerSpec
     }
 
 
-    describe("POST /shipments/courier/:id") {
+    describe("POST /api/shipments/courier/:id") {
 
       it("allow updating the courier name") {
         val f = createdShipmentFixture
@@ -509,7 +509,7 @@ class ShipmentsControllerSpec
 
     }
 
-    describe("POST /shipments/trackingnumber/:id") {
+    describe("POST /api/shipments/trackingnumber/:id") {
 
       it("allow updating the tracking number") {
         val f = createdShipmentFixture
@@ -568,7 +568,7 @@ class ShipmentsControllerSpec
 
     }
 
-    describe("POST /shipments/fromlocation/:id") {
+    describe("POST /api/shipments/fromlocation/:id") {
 
       it("allow updating the location the shipment is from") {
         val f = createdShipmentFixture
@@ -647,7 +647,7 @@ class ShipmentsControllerSpec
 
     }
 
-    describe("POST /shipments/tolocation/:id") {
+    describe("POST /api/shipments/tolocation/:id") {
 
       it("allow updating the location the shipment is going to") {
         val f = createdShipmentFixture
@@ -726,7 +726,7 @@ class ShipmentsControllerSpec
 
     }
 
-    describe("POST /shipments/state/:id") {
+    describe("POST /api/shipments/state/:id") {
 
       def changeStateCommon(shipment:  Shipment,
                             newState:  EntityState,
@@ -1190,7 +1190,7 @@ class ShipmentsControllerSpec
 
     }
 
-    describe("POST /shipments/state/skip-to-sent/:id") {
+    describe("POST /api/shipments/state/skip-to-sent/:id") {
 
       it("switch from CREATED to SENT state") {
         val f = createdShipmentFixture
@@ -1238,7 +1238,7 @@ class ShipmentsControllerSpec
 
     }
 
-    describe("POST /shipments/state/skip-to-unpacked/:id") {
+    describe("POST /api/shipments/state/skip-to-unpacked/:id") {
 
       it("switch from SENT to UNPACKED state") {
         val f = sentShipmentFixture
@@ -1284,7 +1284,7 @@ class ShipmentsControllerSpec
 
     }
 
-    describe("DELETE /shipments/:id/:ver") {
+    describe("DELETE /api/shipments/:id/:ver") {
 
       it("must delete a shipment in created state") {
         val f = createdShipmentFixture

@@ -119,7 +119,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
   describe("SpecimenLink Type REST API") {
 
-    describe("GET /studies/sltypes") {
+    describe("GET /api/studies/sltypes") {
       it("list none") {
         createEntities() { (study, processingType) =>
           val json = makeRequest(GET, uri(processingType))
@@ -212,7 +212,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
     }
 
-    describe("POST /studies/sltypes") {
+    describe("POST /api/studies/sltypes") {
       it("add a specimen link type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
@@ -339,7 +339,7 @@ class SpecimenLinkTypesControllerSpec extends ControllerFixture with JsonHelper 
 
     }
 
-    describe("DELETE /studies/sltypes") {
+    describe("DELETE /api/studies/sltypes") {
       it("remove a specimen link type") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)

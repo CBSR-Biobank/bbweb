@@ -27,7 +27,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     ceTypes.foreach(addToRepository)
   }
 
-  private def uri(): String = "/studies/cetypes"
+  private def uri(): String = "/api/studies/cetypes"
 
   private def uri(study: Study): String = uri + s"/${study.id.id}"
 
@@ -166,7 +166,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Collection Event Type REST API") {
 
-    describe("GET /studies/cetypes/:studyId/:ceventId") {
+    describe("GET /api/studies/cetypes/:studyId/:ceventId") {
 
       it("get a single collection event type") {
         createEntities { (study, cet) =>
@@ -204,7 +204,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("GET /studies/cetypes") {
+    describe("GET /api/studies/cetypes") {
 
       it("list none") {
         val study = factory.createDisabledStudy
@@ -307,7 +307,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies/cetypes/:studyId") {
+    describe("POST /api/studies/cetypes/:studyId") {
 
       it("add a collection event type") {
         val study = factory.createDisabledStudy
@@ -400,7 +400,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("DELETE /studies/cetypes/:studyId/:id/:ver") {
+    describe("DELETE /api/studies/cetypes/:studyId/:id/:ver") {
 
       it("remove a collection event type") {
         createEntities { (study, cet) =>
@@ -426,7 +426,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies/cetypes/name/:id") {
+    describe("POST /api/studies/cetypes/name/:id") {
 
       it("update a collection event type's name") {
         createEntities { (study, cet) =>
@@ -546,7 +546,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/cetypes/description/:id") {
+    describe("POST /api/studies/cetypes/description/:id") {
 
       it("update a collection event type's name") {
         createEntities { (study, cet) =>
@@ -603,7 +603,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/cetypes/recurring/:id") {
+    describe("POST /api/studies/cetypes/recurring/:id") {
 
       it("update a collection event type's name") {
         createEntities { (study, cet) =>
@@ -662,7 +662,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/cetypes/annottypes/:id") {
+    describe("POST /api/studies/cetypes/annottypes/:id") {
 
       it("add an annotation type") {
         createEntities { (study, cet) =>
@@ -739,7 +739,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/cetypes/annottype/:cetId/:annotationTypeId") {
+    describe("POST /api/studies/cetypes/annottype/:cetId/:annotationTypeId") {
 
       it("update an annotation type") {
         createEntities { (study, cet) =>
@@ -824,7 +824,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("DELETE /studies/cetypes/annottype/:id/:ver/:uniqueId") {
+    describe("DELETE /api/studies/cetypes/annottype/:id/:ver/:uniqueId") {
 
       it("remove an annotation type") {
         createEntities { (study, cet) =>
@@ -833,7 +833,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.id}")
+              uri + s"/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.id}")
 
           (json \ "status").as[String] must include ("success")
 
@@ -868,7 +868,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/annottype/${study.id}/${cet.id}/$badVersion/${annotationType.id}",
+              uri + s"/annottype/${study.id}/${cet.id}/$badVersion/${annotationType.id}",
               BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")
@@ -885,7 +885,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            s"/studies/cetypes/annottype/$studyId/$cetId/0/xyz", NOT_FOUND)
+            uri + s"/annottype/$studyId/$cetId/0/xyz", NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -899,7 +899,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            s"/studies/cetypes/annottype/${study.id}/$cetId/0/xyz", NOT_FOUND)
+            uri + s"/annottype/${study.id}/$cetId/0/xyz", NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -915,7 +915,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/annottype/${study.id}/${cet.id}/${cet.version}/$badUniqueId",
+              uri + s"/annottype/${study.id}/${cet.id}/${cet.version}/$badUniqueId",
               NOT_FOUND)
 
           (json \ "status").as[String] must include ("error")
@@ -937,7 +937,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.id}",
+              uri + s"/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.id}",
               BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")
@@ -948,7 +948,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("POST /studies/cetypes/spcdesc/:id") {
+    describe("POST /api/studies/cetypes/spcdesc/:id") {
 
       it("add a specimen spec") {
         createEntities { (study, cet) =>
@@ -1029,7 +1029,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("POST /studies/cetypes/spcdesc/:cetId/:specimenDescriptionId") {
+    describe("POST /api/studies/cetypes/spcdesc/:cetId/:specimenDescriptionId") {
 
       it("update an specimen description") {
         createEntities { (study, cet) =>
@@ -1115,7 +1115,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
     }
 
-    describe("DELETE /studies/cetypes/spcdesc/:id/:ver/:uniqueId") {
+    describe("DELETE /api/studies/cetypes/spcdesc/:id/:ver/:uniqueId") {
 
       it("remove an specimen spec") {
         createEntities { (study, cet) =>
@@ -1124,7 +1124,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/spcdesc/${study.id}/${cet.id}/${cet.version}/${specimenDescription.id.id}")
+              uri + s"/spcdesc/${study.id}/${cet.id}/${cet.version}/${specimenDescription.id.id}")
 
           (json \ "status").as[String] must include ("success")
 
@@ -1159,7 +1159,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/spcdesc/${study.id}/${cet.id}/$badVersion/${specimenDescription.id}",
+              uri + s"/spcdesc/${study.id}/${cet.id}/$badVersion/${specimenDescription.id}",
               BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")
@@ -1176,7 +1176,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            s"/studies/cetypes/spcdesc/$studyId/$cetId/0/xyz", NOT_FOUND)
+            uri + s"/spcdesc/$studyId/$cetId/0/xyz", NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -1190,7 +1190,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            s"/studies/cetypes/spcdesc/${study.id}/$cetId/0/xyz", NOT_FOUND)
+            uri + s"/spcdesc/${study.id}/$cetId/0/xyz", NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -1206,7 +1206,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/spcdesc/${study.id}/${cet.id}/${cet.version}/$badUniqueId",
+              uri + s"/spcdesc/${study.id}/${cet.id}/${cet.version}/$badUniqueId",
               NOT_FOUND)
 
           (json \ "status").as[String] must include ("error")
@@ -1228,7 +1228,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
           val json = makeRequest(
               DELETE,
-              s"/studies/cetypes/spcdesc/${study.id}/${cet.id}/${cet.version}/${specimenDescription.id}",
+              uri + s"/spcdesc/${study.id}/${cet.id}/${cet.version}/${specimenDescription.id}",
               BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")

@@ -16,7 +16,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
 
-  def uri: String = "/participants"
+  def uri: String = "/api/participants"
 
   def uri(study: Study): String = uri + s"/${study.id.id}"
 
@@ -140,7 +140,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
   describe("Study REST API") {
 
-    describe("GET /participants/:studyId/:id") {
+    describe("GET /api/participants/:studyId/:id") {
 
       it("get participant") {
 
@@ -172,7 +172,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     }
 
-    describe("GET /participants/uniqueId/:studyId/:id") {
+    describe("GET /api/participants/uniqueId/:studyId/:id") {
 
       it("must return false for a participant ID that exists") {
         val study = factory.createEnabledStudy
@@ -218,7 +218,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     }
 
-    describe("POST /participants/:studyId") {
+    describe("POST /api/participants/:studyId") {
 
       it("add a participant with no annotation types") {
         val study = factory.createEnabledStudy
@@ -351,7 +351,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
       }
     }
 
-    describe("POST /participants/uniqueId/:id") {
+    describe("POST /api/participants/uniqueId/:id") {
 
       it("update a participant's unique id") {
         val study = factory.createEnabledStudy
@@ -424,13 +424,13 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     }
 
-    describe("POST /participants/annot/:id") {
+    describe("POST /api/participants/annot/:id") {
 
       annotationTypeUpdateSharedBehaviour
 
     }
 
-    describe("DELETE /participants/annot/:id/:annotTypeId/:ver") {
+    describe("DELETE /api/participants/annot/:id/:annotTypeId/:ver") {
 
       annotationTypeRemoveSharedBehaviour
 
