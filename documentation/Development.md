@@ -75,25 +75,41 @@ Install the following packages globally (`npm install -g <pacakge_name>`):
 
 ### Running
 
-* To start the server in development mode, use the following command:
+* To start the server in production mode, use the following commands:
+
+    ```sh
+    npm run dist-build
+    APPLICATION_SECRET="abcdefghijklmnopqrstuvwxyz" sbt start
+    ```
+
+    In the browser open the following link: http://localhost:9000/#!/
+
+* To start the application in development mode, use the following commands:
+
+    ```sh
+    npm run dev-build
+    npm run dev-start-server
+    ```
+
+    In the browser open the following link: http://localhost:9000/#!/
+
+* When modifying code in the client application, use the following commands to start the server and build the
+  client side and also watch for changes in the client files (uses `webpack-dev-server`):
+
+    In one shell:
 
     ```sh
     npm run dev-start-server
     ```
 
-* To build the client application, use the following command:
+    In another shell:
 
-     ```sh
-     npm run dev-build
-     ```
+    ```sh
+    npm run dev
+    ```
 
-    This must be done before the server is started.
-
-* To modifying code in the client application, use the following command for hot module replacement:
-
-     ```sh
-     npm run dev-build
-     ```
+    In the browser open the following link: http://localhost:8080/#!/. *Note that this link is for a
+    different port.*
 
 ### Testing
 
@@ -101,10 +117,39 @@ Install the following packages globally (`npm install -g <pacakge_name>`):
 
 Use the command `sbt test` to run the server tests.
 
+##### Scalatest
+
+###### Run one or more tests within a Suite
+
+Use the `-z` flag to run a test with the specified substring:
+
+```sbt
+test-only *__CLASS_NAME__ -- -z "sub string"
+```
+
+###### Scala code coverage
+
+**sbt-scoverage** is used to determine code coverage. See the
+[GitHub page](https://github.com/scoverage/sbt-scoverage)
+for instructions on how to use it.
+
+To generate the HTML report use the command:
+
+```sh
+sbt clean coverage test
+sbt coverageReport
+```
+
+Or, within the SBT cli:
+
+```sh
+; clean; coverage; test; coverageReport
+```
+
 #### Client Tests
 
-Using [Karma](https://karma-runner.github.io/1.0/index.html) and [Jasmine](https://jasmine.github.io/) for
-client unit tests.
+Using the [Karma](https://karma-runner.github.io/1.0/index.html) and [Jasmine](https://jasmine.github.io/)
+packages for client unit tests.
 
 * Use the following command to start tests on the command line:
 
@@ -118,21 +163,12 @@ client unit tests.
     npm run test-in-chrome
     ```
 
+    Press the `Debug` button, open a JavaScript file in DevTools to place a breakpoint, and reload the page.
+    Execution stops at the breakpoint.
+
 ##### Code Coverage
 
-
-*THIS SECTION NEEDS UPDATING AFTER MOVING TO WEBPACK*
-
-##### Run tests in Chrome
-
-Use the following command to start tests in Chrome:
-
-```sh
-npm run test
-```
-
-Press the `Debug` button, open a JavaScript file in DevTools to place a breakpoint, and reload the page.
-Execution stops at the breakpoint.
+Uses `istanbul-instrumenter-loader` and `karma-coverage-istanbul-reporter` npm packages to perform code coverage analysis on the client code. After running `npm test` open the `coverage/index.html` file in your browser to inpect the results.
 
 ### Debug
 
@@ -151,35 +187,6 @@ to disk. This must be disabled for the production server (see [conf/ehcache.xml]
 * The Akka logging configuration for the web application is in [conf/application.conf]
   (../conf/application.conf). It is in [conf/reference.conf] (../conf/reference.conf) for the testing
   environment.
-
-## Scalatest
-
-### Run one or more tests within a Suite
-
-Use the `-z` flag to run a test with the specified substring:
-
-```sbt
-test-only *__CLASS_NAME__ -- -z "sub string"
-```
-
-## Scala code coverage
-
-**sbt-scoverage** is used to determine code coverage. See the
-[GitHub page](https://github.com/scoverage/sbt-scoverage)
-for instructions on how to use it.
-
-To generate the HTML report use the command:
-
-```sh
-sbt clean coverage test
-sbt coverageReport
-```
-
-Or, within the SBT cli:
-
-```sh
-; clean; coverage; test; coverageReport
-```
 
 # Translations
 

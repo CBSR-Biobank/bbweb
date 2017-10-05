@@ -114,6 +114,7 @@ sbt playGenerateSecret
 First, create the application with the following command:
 
 ```sh
+npm dist-build
 sbt clean dist
 ```
 
