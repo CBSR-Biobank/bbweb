@@ -1,15 +1,17 @@
 /* global module */
 
 const webpack = require('webpack'),
-      config  = require('./webpack.config');
-//, BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin,
+      config  = require('./webpack.config'),
+      BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 //, CompressionPlugin = require('compression-webpack-plugin');
 
 config.cache = false;
 config.devtool = 'cheap-module-source-map';
 
 config.plugins = config.plugins.concat([
-  //new BundleAnalyzerPlugin(),
+  new BundleAnalyzerPlugin({
+    analyzerMode: 'static'
+  }),
 
   new webpack.DefinePlugin({
     'process.env': {

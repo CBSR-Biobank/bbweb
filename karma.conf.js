@@ -9,9 +9,12 @@
 /* eslint no-process-env: "off" */
 
 const path = require('path'),
-      webpackConfig = require('./webpack.test.config');
+      webpackTestConfig = require('./webpack.test.config'),
+      webpackTestCoverageConfig = require('./webpack.test.coverage.config');
 
-process.env.CHROME_BIN = require('puppeteer').executablePath();
+if (!process.env.CHROME_BIN || (process.env.CHROME_BIN === '')) {
+  process.env.CHROME_BIN = require('puppeteer').executablePath();
+}
 
 module.exports = KarmaConf;
 
@@ -19,7 +22,7 @@ module.exports = KarmaConf;
  * Karma configuration
  */
 function KarmaConf(config) {
-  config.set({
+  var bbwebTestConfig = {
 
     client: {
       captureConsole: false
@@ -51,16 +54,10 @@ function KarmaConf(config) {
     },
 
     reporters: [
-      'dots',
+      'dots'
       //'spec'
       //'failed'
-      'coverage-istanbul'
     ],
-
-    coverageIstanbulReporter: {
-      reports: [ 'html', 'text-summary' ],
-      fixWebpackSourcePaths: true
-    },
 
     specReporter: {
       maxLogLines: 10,
@@ -80,7 +77,8 @@ function KarmaConf(config) {
     colors: true,
 
     // level of logging
-    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
+    // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO
+    // || config.LOG_DEBUG
     logLevel: config.LOG_INFO,
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -88,10 +86,7 @@ function KarmaConf(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: [
-      'ChromeHeadless'
-      // 'ChromeExtra'
-    ],
+    browsers: [ 'ChromeHeadless' ],
 
     customLaunchers: {
       Chrome_with_debugging: {
@@ -104,10 +99,22 @@ function KarmaConf(config) {
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: true,
 
-    webpack: webpackConfig,
     webpackMiddleware: {
       noInfo: 'errors-only'
     }
 
-  });
+  };
+
+  if ((process.env.TEST_MODE !== undefined) && (process.env.TEST_MODE === 'coverage')) {
+    bbwebTestConfig.webpack = webpackTestCoverageConfig;
+    bbwebTestConfig.coverageIstanbulReporter = {
+      reports: [ 'html', 'text-summary' ],
+      fixWebpackSourcePaths: true
+    };
+    bbwebTestConfig.reporters = bbwebTestConfig.reporters.concat('coverage-istanbul');
+  } else {
+    bbwebTestConfig.webpack = webpackTestConfig;
+  }
+
+  config.set(bbwebTestConfig);
 }
