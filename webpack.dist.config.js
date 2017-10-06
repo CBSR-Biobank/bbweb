@@ -19,8 +19,6 @@ config.plugins = config.plugins.concat([
     }
   }),
 
-  new webpack.optimize.DedupePlugin(),
-
   new webpack.optimize.UglifyJsPlugin({
     ie8: false,
     parallel: true,
