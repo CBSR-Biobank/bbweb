@@ -119,7 +119,7 @@ describe('annotationsInputModule', function() {
     // option
     expect(self.element.find('select option').length).toBe(annotationType.options.length + 1);
 
-    _.each(annotationType.options, function (option) {
+    annotationType.options.forEach((option) => {
       self.scope.form.annotationSubForm.annotationSelectValue.$setViewValue(option);
       expect(self.scope.vm.annotations[0].value).toBe(option);
       expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
@@ -169,7 +169,7 @@ describe('annotationsInputModule', function() {
        // has the right number of check boxes
        expect(self.element.find('input').length).toBe(annotationType.options.length);
 
-       _.each(_.range(annotationType.options.length), function (inputNum) {
+       _.range(annotationType.options.length).forEach((inputNum) => {
          self.element.find('input').eq(inputNum).click();
          expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
          self.element.find('input').eq(inputNum).click();

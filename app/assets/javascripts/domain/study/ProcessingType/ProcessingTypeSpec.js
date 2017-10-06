@@ -106,7 +106,7 @@ xdescribe('ProcessingType', function() {
     var entities = createEntities();
     httpBackend.whenGET(uri(entities.study.id)).respond(this.reply([ entities.serverPt ]));
     ProcessingType.list(entities.study.id).then(function(list) {
-      _.each(list, function (pt) {
+      list.forEach((pt) => {
         pt.compareToJsonEntity(entities.serverPt);
       });
       done();

@@ -66,7 +66,7 @@ describe('UserName', function() {
 
   it('state predicates return valid results', function() {
     var self = this;
-    _.each(_.values(self.UserState), function(state) {
+    _.values(self.UserState).forEach((state) => {
       var userName = self.UserName.create(self.factory.userNameDto({ state: state }));
       expect(userName.isRegistered()).toBe(state === self.UserState.REGISTERED);
       expect(userName.isActive()).toBe(state === self.UserState.ACTIVE);

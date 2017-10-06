@@ -133,7 +133,7 @@ describe('Annotation', function() {
     it('can create annotation with empty value', function() {
       var self = this;
 
-      _.each(self.getAnnotationTypeOptionsForAll(), function (annotationTypeOptions) {
+      self.getAnnotationTypeOptionsForAll().forEach((annotationTypeOptions) => {
         var annotationType,
             jsonAnnotation,
             annotation;
@@ -232,7 +232,7 @@ describe('Annotation', function() {
     });
 
     it('has valid values when created from server response', function() {
-      _.each(this.getAnnotationAndTypeForAllValueTypes(), function (entities) {
+      this.getAnnotationAndTypeForAllValueTypes().forEach((entities) => {
         entities.annotation.compareToJsonEntity(entities.serverAnnotation);
       });
     });
@@ -248,7 +248,7 @@ describe('Annotation', function() {
   });
 
   it('calling getAnnotationTypeId gives a valid result', function() {
-    _.each(this.getAnnotationAndTypeForAllValueTypes(), function (entities) {
+    this.getAnnotationAndTypeForAllValueTypes().forEach((entities) => {
       expect(entities.annotation.getAnnotationTypeId()).toBe(entities.annotationType.id);
     });
   });
@@ -256,7 +256,7 @@ describe('Annotation', function() {
   describe('calling getValueType', function() {
 
     it('calling getValueType returns the annotation types value type', function() {
-      _.each(this.getAnnotationAndTypeForAllValueTypes(), function (entities) {
+      this.getAnnotationAndTypeForAllValueTypes().forEach((entities) => {
         expect(entities.annotation.getValueType())
           .toBe(entities.annotationType.valueType);
       });
@@ -275,7 +275,7 @@ describe('Annotation', function() {
   describe('calling getLabel', function() {
 
     it('calling getLabel returns the annotation types name', function() {
-      _.each(this.getAnnotationAndTypeForAllValueTypes(), function (entities) {
+      this.getAnnotationAndTypeForAllValueTypes().forEach((entities) => {
         expect(entities.annotation.getLabel())
           .toBe(entities.annotationType.name);
       });
@@ -294,14 +294,14 @@ describe('Annotation', function() {
   describe('calling isValueValid', function() {
 
     it('returns true if the annotation is not required', function() {
-      _.each(this.getAnnotationAndTypeForAllValueTypes(), function (entities) {
+      this.getAnnotationAndTypeForAllValueTypes().forEach((entities) => {
         expect(entities.annotation.isValueValid()).toBe(true);
       });
     });
 
     it('returns FALSE if the annotation is required and has no value', function() {
       var self = this;
-      _.each(self.getAnnotationTypeOptionsForAll(), function (annotationTypeOptions) {
+      self.getAnnotationTypeOptionsForAll().forEach((annotationTypeOptions) => {
         var annotationType,
             serverAnnotation,
             annotation;
@@ -318,7 +318,7 @@ describe('Annotation', function() {
 
     it('returns TRUE if the annotation is required and has a value', function() {
       var self = this;
-      _.each(self.getAnnotationTypeOptionsForAll(), function (annotationTypeOptions) {
+      self.getAnnotationTypeOptionsForAll().forEach((annotationTypeOptions) => {
         var annotationType,
             value,
             serverAnnotation,
@@ -345,7 +345,7 @@ describe('Annotation', function() {
         valueTypes = [ self.AnnotationValueType.TEXT, self.AnnotationValueType.DATE_TIME ],
         timeStr;
 
-    _.each(valueTypes, function (valueType) {
+    valueTypes.forEach((valueType) => {
       annotationType = self.createAnnotationType({ valueType: valueType });
 
       value = self.factory.valueForAnnotation(annotationType);
@@ -412,9 +412,9 @@ describe('Annotation', function() {
   });
 
   it('getServerAnnotation returns valid results for non select annotation types', function() {
-    _.each(this.getAnnotationAndTypeForAllValueTypes(), function (entities) {
+    this.getAnnotationAndTypeForAllValueTypes().forEach((entities) => {
       var serverAnnot = entities.annotation.getServerAnnotation();
-      _.each(_.keys(serverAnnot), function (key) {
+      _.keys(serverAnnot).forEach((key) => {
         expect(serverAnnot[key]).toEqual(entities.serverAnnotation[key]);
       });
     });
@@ -422,7 +422,7 @@ describe('Annotation', function() {
 
   it('getServerAnnotation returns valid results for annotation with empty value', function() {
     var self = this;
-    _.each(self.getAnnotationTypeOptionsForAll(), function (annotationTypeOptions) {
+    self.getAnnotationTypeOptionsForAll().forEach((annotationTypeOptions) => {
       var annotationType,
           serverAnnotation,
           annotation;
@@ -434,7 +434,7 @@ describe('Annotation', function() {
       annotation = self.annotationFactory.create(serverAnnotation, annotationType, true);
 
       var serverAnnot = annotation.getServerAnnotation();
-      _.each(_.keys(serverAnnot), function (key) {
+      _.keys(serverAnnot).forEach((key) => {
         expect(serverAnnot[key]).toEqual(serverAnnotation[key]);
       });
     });

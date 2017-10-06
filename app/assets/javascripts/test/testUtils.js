@@ -69,9 +69,7 @@ define(function (require) {
           return {
             compare: function(actual, expected) {
               return {
-                pass: _.each(expected, function (item) {
-                  return util.contains(actual, item, customEqualityTesters);
-                })
+                pass: expected.every((item) => util.contains(actual, item, customEqualityTesters))
               };
             }
           };

@@ -131,7 +131,7 @@ xdescribe('SpecimenLinkType', function() {
       .respond(this.reply([ entities.sltFromServer ]));
 
     SpecimenLinkType.list(entities.processingType.id).then(function(list) {
-      _.each(list, function (slt) {
+      list.forEach((slt) => {
         slt.compareToJsonEntity(entities.sltFromServer);
       });
       done();
@@ -217,7 +217,7 @@ xdescribe('SpecimenLinkType', function() {
     expect(entities.slt.inputGroup).toEqual(entities.specimenGroups[0]);
     expect(entities.slt.outputGroup).toEqual(entities.specimenGroups[1]);
 
-    _.each(entities.annotationTypes, function(at) {
+    entities.annotationTypes.forEach((at) => {
       expect(entities.slt.getAnnotationTypeDataById(at.id).annotationType).toEqual(at);
     });
   });

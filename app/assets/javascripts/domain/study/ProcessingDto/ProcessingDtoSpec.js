@@ -81,19 +81,19 @@ xdescribe('ProcessingDto', function() {
     ProcessingDto.get(entities.study.id).then(function(dto) {
       compareToServerObj(dto, entities);
 
-      _.each(dto.processingTypes, function(pt) {
+      dto.processingTypes.forEach((pt) => {
         expect(pt).toEqual(jasmine.any(ProcessingType));
       });
 
-      _.each(dto.specimenLinkTypes, function(slt) {
+      dto.specimenLinkTypes.forEach((slt) => {
         expect(slt).toEqual(jasmine.any(SpecimenLinkType));
       });
 
-      _.each(dto.specimenLinkAnnotationTypes, function(slat) {
+      dto.specimenLinkAnnotationTypes.forEach((slat) => {
         expect(slat).toEqual(jasmine.any(SpecimenLinkAnnotationType));
       });
 
-      _.each(dto.specimenGroups, function(sg) {
+      dto.specimenGroups.forEach((sg) => {
         expect(sg).toEqual(jasmine.any(SpecimenGroup));
       });
 

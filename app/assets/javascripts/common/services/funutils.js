@@ -70,7 +70,7 @@ define(['lodash'], function(_) {
     function pickOptional(obj /*, keys */) {
       var keys = _.drop(arguments);
       var result = {};
-      _.each(keys, function(key) {
+      keys.forEach((key) => {
         if ((obj[key] !== undefined) && (obj[key] !== null)) {
           result[key] = obj[key];
         }

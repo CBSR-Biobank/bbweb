@@ -93,7 +93,7 @@ describe('Component: studiesPagedList', function() {
       context.getEntitiesLastCallArgs = () => this.Study.list.calls.mostRecent().args;
 
       context.stateFilterValue = this.StudyState.DISABLED;
-      context.sortFields = ['Name', 'State'];
+      context.sortFieldIds = ['name', 'state'];
       context.defaultSortFiled = 'name';
     });
 

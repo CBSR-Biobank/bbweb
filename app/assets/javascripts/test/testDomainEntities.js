@@ -79,7 +79,7 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
       var obj = args.shift();
       var entity = args.shift();
 
-      _.each(args, function(arg) {
+      args.forEach((arg) => {
         //console.log('validateAttrs', arg, obj[arg], entity[arg]);
         expect(obj[arg]).toEqual(entity[arg]);
       });
@@ -104,7 +104,7 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
       var obj = args.shift();
       var entity = args.shift();
 
-      _.each(args, function(attr) {
+      args.forEach((attr) => {
         if (obj[attr] !== null) {
           expect(obj[attr]).toEqual(entity[attr]);
         } else {
@@ -190,7 +190,7 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
         ConcurrencySafeEntity.prototype.compareToJsonEntity.call(this, serverEntity);
         validateAttrs(this, serverEntity, 'studyId', 'uniqueId');
 
-        _.each(this.annotations, function (annotation) {
+        this.annotations.forEach((annotation) => {
           var serverAnnotation = _.find(serverEntity.annotations,
                                         { annotationTypeId: annotation.getAnnotationTypeId() });
           Annotation.prototype.compareToJsonEntity.call(annotation, serverAnnotation);
@@ -207,7 +207,7 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
                       'visitNumber');
 
         expect(this.annotations).toBeArrayOfSize(serverEntity.annotations.length);
-        _.each(this.annotations, function (annotation) {
+        this.annotations.forEach((annotation) => {
 
           // only compare annotations if annotation is of type Annotation
           if (annotation.getAnnotationTypeId) {
@@ -231,7 +231,8 @@ define(['angular', 'lodash', 'moment'], function(angular, _, moment) {
       MultipleSelectAnnotation.prototype.compareToJsonEntity = function (serverEntity) {
         if (serverEntity.selectedValues.length > 0) {
           expect(this.values).toBeArrayOfSize(serverEntity.selectedValues.length);
-          expect(this.values).toContainAll(_.map(serverEntity.selectedValues, 'value'));
+          expect(_.map(this.values.filter((value) => value.checked), 'name'))
+            .toContainAll(serverEntity.selectedValues);
         }
       };
 

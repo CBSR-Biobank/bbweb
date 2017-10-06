@@ -63,7 +63,7 @@ define(function (require) {
           active: false
         }
       ];
-      _.each(vm.tabs, function (tab, index) {
+      vm.tabs.forEach((tab, index) => {
         tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
         if (tab.active) {
           vm.active = index;

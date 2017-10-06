@@ -74,7 +74,7 @@ export default function studyAnnotationTypeSharedSpec(context) {
       annotationTypeListFn(serverAnnotationType.studyId).then(function (annotationTypes) {
         expect(annotationTypes).toBeArrayOfSize(objs.length);
 
-        _.each(annotationTypes, function(at) {
+        annotationTypes.forEach((at) => {
           expect(at).toEqual(jasmine.any(AnnotationTypeType));
         });
         done();
@@ -86,13 +86,13 @@ export default function studyAnnotationTypeSharedSpec(context) {
       var serverAnnotationType = createServerAnnotationTypeFn();
       var lastReplyKey = _.last(objRequiredKeys);
 
-      _.each(objRequiredKeys, function(key) {
+      objRequiredKeys.forEach((key) => {
         var badObjs = [ _.omit(serverAnnotationType, key) ];
 
         httpBackend.whenGET(uri(serverAnnotationType.studyId)).respond(this.reply(badObjs));
 
         annotationTypeListFn(serverAnnotationType.studyId).then(function (reply) {
-          _.each(reply, function(err) {
+          reply.forEach((err) => {
             expect(err).toEqual(jasmine.any(Error));
           });
 
@@ -123,7 +123,7 @@ export default function studyAnnotationTypeSharedSpec(context) {
       var serverAnnotationType = createServerAnnotationTypeFn();
       var lastReplyKey = _.last(objRequiredKeys);
 
-      _.each(objRequiredKeys, function(key) {
+      objRequiredKeys.forEach((key) => {
         var badObj = _.omit(serverAnnotationType, key);
 
         httpBackend.whenGET(uri(serverAnnotationType.studyId) + '?annotTypeId=' + serverAnnotationType.id)
@@ -280,7 +280,7 @@ export default function studyAnnotationTypeSharedSpec(context) {
                                              done) {
       var lastReplyKey = _.last(objRequiredKeys);
 
-      _.each(objRequiredKeys, function(key) {
+      objRequiredKeys.forEach((key) => {
         var annotationType = createAnnotationTypeFn(serverAnnotationType);
         var replyBadAnnotationType = _.omit(replyAnnotationType, key);
 

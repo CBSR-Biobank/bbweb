@@ -25,7 +25,7 @@ define(['lodash'], function(_) {
       }));
 
       it('should have expected functions', function() {
-        _.each(valueMap, function (entry) {
+        valueMap.forEach((entry) => {
           // console.log(entry[0], entry[1], EnumerationClass[entry[1]]);
           expect(EnumerationClass[entry[1]]).toBeFunction();
         });
@@ -40,7 +40,7 @@ define(['lodash'], function(_) {
       it('should have correct values', function() {
         var values;
 
-        _.each(valueMap, function (entry) {
+        valueMap.forEach((entry) => {
           expect(EnumerationClass[entry[1]]()).toBe(entry[0]);
         });
 

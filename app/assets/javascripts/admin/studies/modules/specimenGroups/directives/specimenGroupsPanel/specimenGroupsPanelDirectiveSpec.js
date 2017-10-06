@@ -118,7 +118,7 @@ xdescribe('Directive: specimenGroupsPanelDirective', function() {
         statuses    = [StudyState.ENABLED, StudyState.RETIRED];
 
     createController(entities);
-    _.each(statuses, function (status) {
+    statuses.forEach((status) => {
       entities.study.status = status;
 
       expect(function () { controller.update(entities.specimenGroups[0]); }).
@@ -156,7 +156,7 @@ xdescribe('Directive: specimenGroupsPanelDirective', function() {
         statuses    = [StudyState.ENABLED, StudyState.RETIRED];
 
     createController(entities);
-    _.each(statuses, function (status) {
+    statuses.forEach((status) => {
       entities.study.status = status;
 
       expect(function () { controller.remove(entities.specimenGroups[0]); }).

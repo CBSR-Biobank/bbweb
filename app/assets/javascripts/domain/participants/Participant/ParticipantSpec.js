@@ -122,7 +122,7 @@ describe('Participant', function() {
     participant = new self.Participant({}, study, annotations);
 
     expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
-    _.each(participant.annotations, function (annotation) {
+    participant.annotations.forEach((annotation) => {
       var jsonAnnotation = _.find(jsonAnnotationData.annotations,
                                   { annotationTypeId: annotation.annotationTypeId }),
           annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
@@ -148,7 +148,7 @@ describe('Participant', function() {
         participant = new this.Participant({}, study);
 
     expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
-    _.each(participant.annotations, function (annotation) {
+    participant.annotations.forEach((annotation) => {
       var annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
       self.validateAnnotationClass(annotationType, annotation);
       expect(annotation.required).toBe(annotationType.required);
@@ -298,7 +298,7 @@ describe('Participant', function() {
 
       participant = new this.Participant(_.omit(jsonParticipant, 'id'), study);
 
-      _.each(participant.annotations, function (annotation) {
+      participant.annotations.forEach((annotation) => {
         annotation.required = true;
         expect(annotation.getDisplayValue()).toBeFalsy();
       });

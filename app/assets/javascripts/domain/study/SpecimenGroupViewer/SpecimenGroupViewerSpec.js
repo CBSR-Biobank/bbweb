@@ -55,7 +55,7 @@ describe('SpecimenGroupViewer', function() {
 
     expect(attributes).toBeArrayOfSize(7);
 
-    _.each(attributes, function(attr) {
+    attributes.forEach((attr) => {
       switch (attr.label) {
       case 'Name':
         expect(attr.value).toBe(specimenGroup.name);

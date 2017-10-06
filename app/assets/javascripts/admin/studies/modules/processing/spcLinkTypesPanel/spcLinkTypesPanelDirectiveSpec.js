@@ -122,10 +122,10 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
     createController(entities);
 
     expect(controller.study).toBe(entities.study);
-    _.each(entities.processingTypes, function (pt) {
+    entities.processingTypes.forEach((pt) => {
       expect(controller.processingTypesById[pt.id]).toBe(pt);
     });
-    _.each(entities.specimenGroups, function (sg) {
+    entities.specimenGroups.forEach((sg) => {
       expect(controller.specimenGroupsById[sg.id]).toBe(sg);
     });
     expect(controller.specimenLinkTypes).toBeArrayOfSize(entities.specimenLinkTypes.length);
@@ -196,7 +196,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
         statuses    = [StudyState.ENABLED, StudyState.RETIRED];
 
     createController(entities);
-    _.each(statuses, function (status) {
+    statuses.forEach((status) => {
       entities.study.status = status;
 
       expect(function () { controller.update(entities.specimenLinkTypes[0]); }).
@@ -226,7 +226,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
         statuses    = [StudyState.ENABLED, StudyState.RETIRED];
 
     scope = createController(entities);
-    _.each(statuses, function (status) {
+    statuses.forEach((status) => {
       entities.study.status = status;
 
       expect(function () { controller.remove(entities.specimenLinkTypes[0]); }).

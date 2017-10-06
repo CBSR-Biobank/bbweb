@@ -91,7 +91,7 @@ xdescribe('SpcLinkTypeViewer', function() {
 
     expect(attributes).toBeArrayOfSize(10);
 
-    _.each(attributes, function(attr) {
+    attributes.forEach((attr) => {
       switch (attr.label) {
       case 'Processing Type':
         expect(attr.value).toBe(entities.processingType.name);

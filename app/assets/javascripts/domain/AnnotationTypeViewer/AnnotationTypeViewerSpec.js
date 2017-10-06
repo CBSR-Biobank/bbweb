@@ -40,7 +40,7 @@ describe('AnnotationTypeViewer', function() {
 
     spyOn(self.$uibModal, 'open').and.returnValue(this.testUtils.fakeModal());
 
-    _.each(this.annotatationTypeOptions, function (options) {
+    this.annotatationTypeOptions.forEach((options) => {
       // jshint unused:false
       var annotationType = new self.AnnotationType(self.factory.annotationType(options)),
           viewer = new self.AnnotationTypeViewer(annotationType);
@@ -70,7 +70,7 @@ describe('AnnotationTypeViewer', function() {
       attributes.push({label: label, value: value});
     });
 
-    _.each(self.annotatationTypeOptions, function (options) {
+    self.annotatationTypeOptions.forEach((options) => {
       var annotationType, viewer, numAttributesExpected = 4;
 
       attributes = [];
@@ -84,7 +84,7 @@ describe('AnnotationTypeViewer', function() {
 
       expect(attributes).toBeArrayOfSize(numAttributesExpected);
 
-      _.each(attributes, function(attr) {
+      attributes.forEach((attr) => {
         switch (attr.label) {
         case 'Name':
           expect(attr.value).toBe(annotationType.name);

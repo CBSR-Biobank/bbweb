@@ -39,7 +39,7 @@ export default ModalInputModule;
  * Creates the required directives.
  */
 function init() {
-  _.each(modalTypes, function (type) {
+  modalTypes.forEach((type) => {
     var name = 'modalInput' + _.upperFirst(type);
     var directive = modalInputDirectiveGenerator(type);
     Module.directive(name, directive);
@@ -86,7 +86,7 @@ function modalInputService($uibModal) {
   var service = {};
 
   // create a service function for each modal type
-  _.each(modalTypes, function (modalType) {
+  modalTypes.forEach((modalType) => {
     service[modalType] = function (title, label, defaultValue, options) {
       return modalInput(modalType, title, label, defaultValue, options);
     };

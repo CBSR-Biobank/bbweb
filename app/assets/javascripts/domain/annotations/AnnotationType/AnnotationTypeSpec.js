@@ -31,7 +31,7 @@ describe('AnnotationType', function() {
 
     var fields = [ 'id', 'name', 'valueType', 'required' ];
 
-    _.each(fields, function (field) {
+    fields.forEach((field) => {
       var jsonMissingField = _.omit(annotationTypeJson, field);
       var validation = self.AnnotationType.isValid(jsonMissingField);
       expect(validation.valid).toEqual(false);
@@ -70,7 +70,7 @@ describe('AnnotationType', function() {
 
     var fields = [ 'id', 'name', 'valueType', 'required' ];
 
-    _.each(fields, function (field) {
+    fields.forEach((field) => {
       var jsonMissingField = _.omit(annotationTypeJson, field);
       expect(function () { self.AnnotationType.create(jsonMissingField); })
         .toThrowError(/invalid object from server/);
@@ -80,7 +80,7 @@ describe('AnnotationType', function() {
   it('valueType predicates return valid results', function() {
     var self = this;
 
-    _.each(_.values(self.AnnotationValueType), function (valueType) {
+    _.values(self.AnnotationValueType).forEach((valueType) => {
       var annotationType = new self.AnnotationType(
         self.factory.annotationType({ valueType: valueType }));
 
@@ -94,7 +94,7 @@ describe('AnnotationType', function() {
   it('isSingleSelect returns valid results', function() {
     var self = this;
 
-    _.each(_.range(4), function (maxValueCount) {
+    _.range(4).forEach((maxValueCount) => {
       var annotationType = new self.AnnotationType(
         self.factory.annotationType({
           valueType: self.AnnotationValueType.SELECT,
@@ -109,7 +109,7 @@ describe('AnnotationType', function() {
   it('isMultipleSelect returns valid results', function() {
     var self = this;
 
-    _.each(_.range(4), function (maxValueCount) {
+    _.range(4).forEach((maxValueCount) => {
       var annotationType = new self.AnnotationType(
         self.factory.annotationType({
           valueType: self.AnnotationValueType.SELECT,
@@ -124,7 +124,7 @@ describe('AnnotationType', function() {
   it('isMaxValueCountValid returns valid results', function() {
     var self = this, annotationType;
 
-    _.each(_.range(4), function (maxValueCount) {
+    _.range(4).forEach((maxValueCount) => {
       annotationType = new self.AnnotationType(
         self.factory.annotationType({
           valueType: self.AnnotationValueType.SELECT,
@@ -136,7 +136,7 @@ describe('AnnotationType', function() {
           (maxValueCount === self.AnnotationMaxValueCount.SELECT_MULTIPLE));
     });
 
-    _.each(_.range(4), function (maxValueCount) {
+    _.range(4).forEach((maxValueCount) => {
       annotationType = new self.AnnotationType(
         self.factory.annotationType({
           valueType: self.AnnotationValueType.TEXT,
@@ -154,7 +154,7 @@ describe('AnnotationType', function() {
           return valueType === self.AnnotationValueType.SELECT;
         });
 
-    _.each(valueTypesNoSelect, function (valueType) {
+    valueTypesNoSelect.forEach((valueType) => {
       var annotationType = new self.AnnotationType(
         self.factory.annotationType({ valueType: valueType }));
 

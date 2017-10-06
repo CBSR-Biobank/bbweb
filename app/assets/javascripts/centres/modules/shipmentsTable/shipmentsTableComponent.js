@@ -141,7 +141,7 @@ define(function (require) {
         vm.tableDataLoading = false;
 
         vm.shipmentDates = {};
-        _.each(vm.shipments, function (shipment) {
+        vm.shipments.forEach((shipment) => {
           if (shipment.isCreated()) {
             vm.shipmentDates[shipment.id] = timeService.dateToDisplayString(shipment.timeAdded);
           } else {

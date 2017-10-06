@@ -13,7 +13,7 @@ define(['lodash'], function (_) {
 
     TestSuiteMixin.prototype.injectDependencies = function (/* dep1, dep2, ..., depn */) {
       var self = this;
-      _.each(arguments, function (dependency) {
+      _.toArray(arguments).forEach((dependency) => {
         self[dependency] = $injector.get(dependency);
       });
     };

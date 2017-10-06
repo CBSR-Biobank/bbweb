@@ -78,7 +78,7 @@ describe('Component: participantView', function() {
       'home.collection.study.participant.cevents'
     ];
 
-    _.each(states, function (state) {
+    states.forEach((state) => {
       self.$state.current.name = state;
       self.createController();
       tab = _.find(self.controller.tabs, { sref: state });

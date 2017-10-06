@@ -113,7 +113,7 @@ xdescribe('Directive: processingTypesPanelDirective', function() {
         entities = createEntities(),
         statuses = [StudyState.ENABLED, StudyState.RETIRED];
 
-    _.each(statuses, function (status) {
+    statuses.forEach((status) => {
       entities.study.status = status;
       createController(entities.study, entities.processingTypes);
       expect(function () { controller.update(entities.processingTypes[0]); })
@@ -140,7 +140,7 @@ xdescribe('Directive: processingTypesPanelDirective', function() {
         entities = createEntities(),
         statuses = [StudyState.ENABLED, StudyState.RETIRED];
 
-    _.each(statuses, function (status) {
+    statuses.forEach((status) => {
       entities.study.status = status;
       createController(entities.study, entities.processingTypes);
       expect(function () { controller.remove(entities.processingTypes[0]); })

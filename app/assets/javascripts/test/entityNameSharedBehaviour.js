@@ -72,7 +72,7 @@ define(function (require) {
 
         function testEntity(reply) {
           expect(reply).toBeArrayOfSize(names.length);
-          _.each(reply, function (study) {
+          reply.forEach((study) => {
             expect(study).toEqual(jasmine.any(context.constructor));
           });
         }

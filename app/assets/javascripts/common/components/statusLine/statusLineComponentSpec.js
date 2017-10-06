@@ -83,7 +83,7 @@ describe('Component: statusLine', function() {
       context.createController(stateLabelFunc, centre.timeAdded, centre.timeModified);
       items = this.element.find(context.mainElement);
       expect(items.length).toBe(3);
-      _.each(_.range(3), function (n) {
+      _.range(3).forEach((n) => {
         var strong = items.eq(n).find('span');
         expect(strong.length).toBe(1);
       });

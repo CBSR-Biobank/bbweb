@@ -93,7 +93,7 @@ describe('centresPagedListComponent', function() {
       context.getEntitiesLastCallArgs = () => this.Centre.list.calls.mostRecent().args;
 
       context.stateFilterValue = this.CentreState.DISABLED;
-      context.sortFields = ['Name', 'State'];
+      context.sortFieldIds = ['name', 'state'];
       context.defaultSortFiled = 'name';
     });
 

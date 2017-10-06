@@ -494,7 +494,7 @@ describe('CollectionEvent', function() {
       jsonCevent = _.omit(this.factory.collectionEvent({ annotations: [ jsonAnnotation ]}), 'id)');
       collectionEvent = new this.CollectionEvent(jsonCevent, ceventType);
 
-      _.each(collectionEvent.annotations, function (annotation) {
+      collectionEvent.annotations.forEach((annotation) => {
         expect(annotation.getDisplayValue()).toBeFalsy();
       });
 

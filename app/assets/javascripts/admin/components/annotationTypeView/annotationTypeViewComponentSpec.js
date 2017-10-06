@@ -144,7 +144,7 @@ describe('annotationTypeViewDirective', function() {
           })
           .value();
 
-      _.each(annotationTypes, function (annotationType) {
+      annotationTypes.forEach((annotationType) => {
         expect(function () {
           self.createController({ study: undefined, annotationType: annotationType });
           self.controller.editSelectionOptions();

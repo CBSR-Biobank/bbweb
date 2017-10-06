@@ -113,7 +113,7 @@ xdescribe('SpecimenGroup', function() {
     var entities = createEntities();
     httpBackend.whenGET(uri(entities.study.id)).respond(this.reply([ entities.serverSg ]));
     SpecimenGroup.list(entities.study.id).then(function(list) {
-      _.each(list, function (sg) {
+      list.forEach((sg) => {
         sg.compareToJsonEntity(entities.serverSg);
       });
       done();

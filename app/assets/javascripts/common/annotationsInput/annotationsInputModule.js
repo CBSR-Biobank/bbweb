@@ -30,7 +30,7 @@ export default AnnotationsInputModule;
  * Creates the child directives.
  */
 function init() {
-  _.each(annotations, function (annotation) {
+  annotations.forEach((annotation) => {
     var name = annotation + 'Annotation',
         directive = directiveGenerator(name);
     Module.directive(name, directive);

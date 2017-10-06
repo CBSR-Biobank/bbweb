@@ -333,7 +333,7 @@ xdescribe('modalInputModule', function() {
       inputs = this.modalElement.find('form').find('input');
       expect(inputs.attr('focus-me')).toBe('true');
 
-      _.each(inputs, function (input) {
+      inputs.forEach((input) => {
         expect(angular.element(input).attr('type')).toBe('password');
       });
 
@@ -451,7 +451,7 @@ xdescribe('modalInputModule', function() {
       expect(this.modalElement).not.toHaveHelpBlocks();
 
       optionElements = this.modalElement.find('form').find('option');
-      _.each(optionElements, function (optElement) {
+      optionElements.forEach((optElement) => {
         var text = angular.element(optElement).text();
         if (text !== '-- make a selection --') {
           expect(self.options).toContain(text);
@@ -512,7 +512,7 @@ xdescribe('modalInputModule', function() {
       expect(this.modalElement).toHaveInputs(this.options.length);
 
       labelElements = this.modalElement.find('form').find('label');
-      _.each(labelElements, function (element, index) {
+      labelElements.forEach((element, index) => {
         if (index === 0) { return; } // skip the first label since it's for the group
         expect(self.options).toContain(angular.element(element).text().trim());
       });
@@ -539,11 +539,11 @@ xdescribe('modalInputModule', function() {
       expect(this.modalElement).toHaveLabelStartWith(self.label);
       expect(this.modalElement).toHaveInputs(this.options.length);
 
-      _.each(this.scope.vm.value, function (value) {
+      this.scope.vm.value.forEach((value) => {
         value.checked = true;
       });
       this.scope.$digest();
-      _.each(this.scope.vm.value, function (value) {
+      this.scope.vm.value.forEach((value) => {
         value.checked = false;
       });
       this.scope.$digest();
