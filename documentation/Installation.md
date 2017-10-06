@@ -128,7 +128,7 @@ unzip -d ~/bbweb_releases target/universal/bbweb-VERSION.zip
 Generate an application secret using the command given to start the server:
 
 ```sh
-setsid ~/bbweb_releases/bbweb-VERSION/bin/bbweb -Dplay.crypto.secret="__value_generated_above__"
+setsid ~/bbweb_releases/bbweb-VERSION/bin/bbweb -Dplay.http.secret.key=="__value_generated_above__"
 ```
 
 Replace `__value_generated_above__` with the value generated from the `sbt playGenerateSecret` command.
