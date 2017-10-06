@@ -8,12 +8,12 @@ resolvers ++= Seq(
 )
 
 // Use the Play sbt plugin for Play projects
-addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.3")
+addSbtPlugin("com.typesafe.play" % "sbt-plugin" % "2.6.6")
 
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 
-addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.1.0")
+addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.2.2")
 
-addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.1.1")
+addSbtPlugin("org.wartremover" % "sbt-wartremover" % "2.2.1")
 
-addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.1.1")
+addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.2.2-RC2")

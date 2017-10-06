@@ -116,8 +116,6 @@ libraryDependencies ++= Seq(
     "org.mockito"                 %  "mockito-core"                        % "2.8.47"  % "test"
   )
 
-incOptions := incOptions.value.withNameHashing(true)
-
 routesGenerator := InjectedRoutesGenerator
 
 // To completely override the optimization process, use this config option:
