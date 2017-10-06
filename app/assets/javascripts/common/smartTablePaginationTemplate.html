@@ -1,13 +1,37 @@
-<div class="pagination" ng-if="pages.length >= 2">
-  <ul class="pagination">
-    <li ng-if="currentPage > 1"><a ng-click="selectPage(currentPage - 1)">&lt;</a></li>
-    <li ng-if="1 !== pages[0]"><a ng-click="selectPage(1)">1...</a></li>
-    <li ng-repeat="page in pages" ng-class="{active: page==currentPage}">
-      <a ng-click="selectPage(page)">{{page}}</a>
+<div ng-if="pages.length >= 2">
+  <ul class="pagination pagination-sm">
+    <li class="pagination-first"
+        ng-disabled="currentPage <= 1"
+        ng-class="{disabled: currentPage <= 1}">
+      <a href ng-click="selectPage(1)">&laquo;</a>
     </li>
-    <li ng-if="numPages !== pages[pages.length - 1]">
-      <a ng-click="selectPage(numPages)">...{{numPages}}</a>
+    <li class="pagination-prev"
+        ng-disabled="currentPage <= 1"
+        ng-class="{disabled: currentPage <= 1}">
+      <a href ng-click="selectPage(currentPage - 1)">&lt;</a>
     </li>
-    <li ng-if="currentPage < numPages"><a ng-click="selectPage(currentPage + 1)">&gt;</a></li>
+    <li ng-class="pagination-page"
+        ng-if="pages[0] > 1">
+      <a href ng-click="selectPage(pages[0] - 1)">...</a>
+    </li>
+    <li class="pagination-page"
+        ng-disabled="page == currentPage"
+        ng-repeat="page in pages"
+        ng-class="{active: currentPage == page}" }">
+      <a href ng-click="selectPage(page)">{{page}}</a>
+    </li>
+    <li ng-class="pagination-page"
+        ng-if="pages[pages.length - 1] !== numPages">
+      <a href ng-click="selectPage(pages[pages.length - 1] + 1)">...</a>
+    </li>
+    <li class="pagination-next"
+        ng-class="{disabled: currentPage >= numPages}">
+      <a href ng-click="selectPage(currentPage + 1)">&gt;</a>
+    </li>
+    <li class="pagination-last"
+        ng-disabled="currentPage >= numPages"
+        ng-class="{disabled: currentPage >= numPages}">
+      <a href ng-click="selectPage(numPages)">&raquo;</a>
+    </li>
   </ul>
 </div>
