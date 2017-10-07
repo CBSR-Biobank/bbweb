@@ -19,4 +19,4 @@
 ->      /api/dtos                               org.biobank.controllers.ApplicationRouter
 
 GET     /                                       controllers.Assets.at(path="/public", file="index.html")
-GET     /assets/*file                           controllers.Assets.versioned(path="/public", file)
+GET     /assets/*file                           controllers.Assets.at(path="/public", file)
