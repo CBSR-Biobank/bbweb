@@ -5,7 +5,7 @@ const path = require('path'),
       config  = require('./webpack.config'),
       Visualizer = require('webpack-visualizer-plugin');
 
-config.devtool = 'eval-source-map';
+config.devtool = 'inline-source-map';
 
 config.plugins = config.plugins.concat([
   new webpack.DefinePlugin({
