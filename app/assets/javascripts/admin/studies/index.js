@@ -8,6 +8,7 @@ import AdminStudiesAnnotationTypesModule from './modules/annotationTypes';
 import UsersModule                       from '../../users';
 import angular                           from 'angular';
 import collectionSpecimenDescriptionAdd  from './components/collectionSpecimenDescriptionAdd/collectionSpecimenDescriptionAddComponent';
+import studiesPagedList                  from './components/studiesPagedList/studiesPagedListComponent';
 // import processingDirecitves      from './modules/processing');
 // import processing                from './processing');
 // import specimenGroups            from './specimenGroups');
@@ -17,7 +18,7 @@ const AdminStudiesModule = angular.module('biobank.admin.studies',
                                                    UsersModule,
                                                    AdminStudiesAnnotationTypesModule
                                                  ])
-  .component('studiesPagedList',        require('./components/studiesPagedList/studiesPagedListComponent'))
+  .component('studiesPagedList',        studiesPagedList)
   .component('ceventTypeAdd',           require('./components/ceventTypeAdd/ceventTypeAddComponent'))
   .component('ceventTypeView',          require('./components/ceventTypeView/ceventTypeViewComponent'))
   .component('ceventTypesAddAndSelect',

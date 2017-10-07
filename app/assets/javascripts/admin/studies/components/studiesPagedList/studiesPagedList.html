@@ -1,10 +1,10 @@
 <div class="voffset-bottom-3">
   <name-and-state-filters
-     state-data="vm.filters['StateFilter'].allChoices()"
+     state-data="vm.filters['stateFilter'].allChoices()"
      selected-state="all"
-     on-name-filter-updated="vm.updateSearchFilter('NameFilter')"
-     on-state-filter-updated="vm.updateSearchFilter('StateFilter')"
-     on-filters-cleared="vm.filtersCleared">
+     on-name-filter-updated="vm.updateSearchFilter('nameFilter')"
+     on-state-filter-updated="vm.updateSearchFilter('stateFilter')"
+     on-filters-cleared="vm.onFiltersCleared">
   </name-and-state-filters>
 </div>
 

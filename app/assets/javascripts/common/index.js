@@ -12,11 +12,11 @@ import UrlService             from './services/url/UrlService';
 import angular                from 'angular';
 import breadcrumbs            from './components/breadcrumbs/breadcrumbsComponent';
 import languageService        from './services/language/languageService';
+import nameAndStateFilters    from './components/nameAndStateFilters/nameAndStateFiltersComponent';
 import timeago                from './filters/timeagoFilter';
 
 const CommonModule = angular.module('biobank.common', [ ModalInputModule, AnnotationsInputModule ])
       .controller('TabbedPageController',          require('./controllers/TabbedPageController'))
-      .controller('PagedListController',           require('./controllers/PagedListController'))
       .controller('NameAndStateFiltersController', require('./controllers/NameAndStateFiltersController'))
 
       .component('breadcrumbs',             breadcrumbs)
@@ -26,7 +26,7 @@ const CommonModule = angular.module('biobank.common', [ ModalInputModule, Annota
       .component('labelsInput',             require('./components/labelsInput/labelsInputComponent'))
       .component('labelsList',              require('./components/labelsList/labelsListComponent'))
       .component('nameFilter',              require('./components/nameFilter/nameFilterComponent'))
-      .component('nameAndStateFilters',     require('./components/nameAndStateFilters/nameAndStateFiltersComponent'))
+      .component('nameAndStateFilters',     nameAndStateFilters)
       .component('nameEmailStateFilters',   require('./components/nameEmailStateFilters/nameEmailStateFiltersComponent'))
       .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))
       .component('statusLine',              require('./components/statusLine/statusLineComponent'))

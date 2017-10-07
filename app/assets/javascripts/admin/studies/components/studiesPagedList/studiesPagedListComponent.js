@@ -2,112 +2,100 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
 
-  var _ = require('lodash');
+import PagedListController from '../../../../common/controllers/PagedListController';
+import _ from 'lodash';
 
-  /**
-   * Displays studies in a panel list.
-   *
-   * @return {object} An AngularJS component.
-   */
-  var component = {
-    template: require('./studiesPagedList.html'),
-    controller: Controller,
-    controllerAs: 'vm',
-    bindings: {
-    }
-  };
+/*
+ * Controller for this component.
+ */
+class Controller extends PagedListController {
 
-  Controller.$inject = [
-    '$controller',
-    '$log',
-    '$scope',
-    '$state',
-    'Study',
-    'StudyState',
-    'StudyCounts',
-    'gettextCatalog',
-    'NameFilter',
-    'StateFilter',
-    'studyStateLabelService'
-  ];
+  constructor($log,
+              $state,
+              Study,
+              StudyState,
+              StudyCounts,
+              gettextCatalog,
+              NameFilter,
+              StateFilter,
+              studyStateLabelService) {
+    'ngInject';
 
-  /*
-   * Controller for this component.
-   */
-  function Controller($controller,
-                      $log,
-                      $scope,
-                      $state,
-                      Study,
-                      StudyState,
-                      StudyCounts,
-                      gettextCatalog,
-                      NameFilter,
-                      StateFilter,
-                      studyStateLabelService) {
-    var vm = this,
-        stateData = _.values(StudyState).map(function (state) {
-          return { id: state, label: studyStateLabelService.stateToLabelFunc(state) };
-        });
-    vm.$onInit = onInit;
-    vm.filters = {};
-    vm.filters[NameFilter.name]  = new NameFilter();
-    vm.filters[StateFilter.name] = new StateFilter(true, stateData, 'all');
+    const stateData = _.values(StudyState).map((state) => ({
+      id: state,
+      label: studyStateLabelService.stateToLabelFunc(state)
+    }));
 
-    vm.stateLabelFuncs = {};
-    _.values(StudyState).forEach(function (state) {
-      vm.stateLabelFuncs[state] = studyStateLabelService.stateToLabelFunc(state);
+    super($log,
+          $state,
+          gettextCatalog,
+          {
+            nameFilter: new NameFilter(),
+            stateFilter: new StateFilter(true, stateData, 'all')
+          },
+          5);
+
+    this.Study                  = Study;
+    this.StudyState             = StudyState;
+    this.StudyCounts            = StudyCounts;
+    this.NameFilter             = NameFilter;
+    this.StateFilter            = StateFilter;
+    this.studyStateLabelService = studyStateLabelService;
+
+    this.stateLabelFuncs = {};
+    _.values(this.StudyState).forEach((state) => {
+      this.stateLabelFuncs[state] = this.studyStateLabelService.stateToLabelFunc(state);
     });
-
-    //--
-
-    function onInit() {
-      vm.counts      = {};
-      vm.limit       = 5;
-      vm.getItems    = getItems;
-      vm.getItemIcon = getItemIcon;
-
-      // initialize this controller's base class
-      $controller('PagedListController', {
-        vm:             vm,
-        $log:           $log,
-        $state:         $state,
-        gettextCatalog: gettextCatalog
-      });
-
-      return StudyCounts.get()
-        .then(function (counts) {
-          vm.counts = counts;
-        })
-        .catch(function (error) {
-          $log.error(error);
-        });
-    }
-
-    function getItems(options) {
-      // KLUDGE: for now, fix after Entity Pagers have been implemented
-      return StudyCounts.get()
-        .then(function (counts) {
-          vm.counts = counts;
-          return Study.list(options);
-        });
-    }
-
-    function getItemIcon(study) {
-      if (study.isDisabled()) {
-        return 'glyphicon-cog';
-      } else if (study.isEnabled()) {
-        return 'glyphicon-ok-circle';
-      } else if (study.isRetired()) {
-        return 'glyphicon-remove-sign';
-      } else {
-        throw new Error('invalid study state: ' + study.state);
-      }
-    }
   }
 
-  return component;
-});
+  $onInit() {
+    this.counts = {};
+
+    return this.StudyCounts.get()
+      .then((counts) => {
+        this.counts = counts;
+        super.$onInit();
+      })
+      .catch((error) => {
+        this.$log.error(error);
+      });
+  }
+
+  getItems(options) {
+    // KLUDGE: for now, fix after Entity Pagers have been implemented
+    return this.StudyCounts.get()
+      .then((counts) => {
+        this.counts = counts;
+        return this.Study.list(options);
+      });
+  }
+
+  getItemIcon(study) {
+    if (study.isDisabled()) {
+      return 'glyphicon-cog';
+    }
+    if (study.isEnabled()) {
+      return 'glyphicon-ok-circle';
+    }
+    if (study.isRetired()) {
+      return 'glyphicon-remove-sign';
+    }
+    throw new Error('invalid study state: ' + study.state);
+  }
+}
+
+/**
+ * Displays studies in a panel list.
+ *
+ * @return {object} An AngularJS component.
+ */
+const component = {
+  template: require('./studiesPagedList.html'),
+  controller: Controller,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default component;

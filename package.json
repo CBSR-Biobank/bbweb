@@ -68,7 +68,7 @@
     "prestart": "npm install",
     "pretest": "npm install",
     "analyzer": "webpack --json | webpack-bundle-size-analyzer",
-    "dev": "webpack-dev-server --config webpack.dev.config.js --progress --colors --client-log-level none",
+    "dev": "webpack-dev-server --config webpack.dev.config.js --progress --client-log-level none",
     "dev-build": "webpack --config webpack.dev.config.js --bail --debug --progress --profile --colors",
     "dev-build-watch": "webpack --config webpack.dev.config.js --progress --profile --colors --watch",
     "dev-server": "sbt run",

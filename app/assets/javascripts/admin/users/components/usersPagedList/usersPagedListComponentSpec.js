@@ -60,8 +60,8 @@ describe('usersPagedListComponent', function() {
     this.createController();
 
     expect(this.controller.limit).toBeDefined();
-    expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeArrayOfObjects();
-    expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeNonEmptyArray();
+    expect(this.controller.filters.stateFilter.allChoices()).toBeArrayOfObjects();
+    expect(this.controller.filters.stateFilter.allChoices()).toBeNonEmptyArray();
     expect(this.controller.getItems).toBeFunction();
     expect(this.controller.getItemIcon).toBeFunction();
   });
@@ -135,7 +135,7 @@ describe('usersPagedListComponent', function() {
     this.createCountsSpy(2, 5);
     this.createUserListSpy([]);
     this.createController();
-    this.controller.updateSearchFilter('EmailFilter')(emailFilterValue);
+    this.controller.updateSearchFilter('emailFilter')(emailFilterValue);
     this.scope.$digest();
 
     spyArgs = this.User.list.calls.mostRecent().args[0];
@@ -147,7 +147,7 @@ describe('usersPagedListComponent', function() {
     this.createCountsSpy(2, 5);
     this.createUserListSpy([]);
     this.createController();
-    this.controller.updateSearchFilter('EmailFilter')('test@test.com');
+    this.controller.updateSearchFilter('emailFilter')('test@test.com');
     this.controller.filtersCleared();
     this.scope.$digest();
     expect(this.controller.emailFilter).toBeEmptyString();

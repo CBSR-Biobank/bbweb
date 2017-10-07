@@ -2,112 +2,98 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
+import PagedListController from '../../../../common/controllers/PagedListController';
+import _ from 'lodash';
 
-  var _ = require('lodash');
+/*
+ * Controller for this component.
+ */
+class Controller extends PagedListController {
 
-  /**
-   * Displays items in a panel list. Can only be used for collections {@link domain.study.Study} and {@link
-   * domain.cnetres.Centres}.
-   *
-   * @return {object} An AngularJS directive.
-   */
-  var component = {
-    template: require('./centresPagedList.html'),
-    controller: Controller,
-    controllerAs: 'vm',
-    bindings: {
-    }
-  };
+  constructor($q,
+              $log,
+              $state,
+              Centre,
+              CentreState,
+              CentreCounts,
+              gettextCatalog,
+              NameFilter,
+              StateFilter,
+              centreStateLabelService) {
+    'ngInject';
 
-  Controller.$inject = [
-    '$controller',
-    '$q',
-    '$log',
-    '$scope',
-    'Centre',
-    'CentreState',
-    'CentreCounts',
-    '$state',
-    'gettextCatalog',
-    'NameFilter',
-    'StateFilter',
-    'centreStateLabelService'
-  ];
+    const stateData = _.values(CentreState).map((state) => ({
+      id: state,
+      label: centreStateLabelService.stateToLabelFunc(state)
+    }));
 
-  /*
-   * Controller for this component.
-   */
-  function Controller($controller,
-                      $q,
-                      $log,
-                      $scope,
-                      Centre,
-                      CentreState,
-                      CentreCounts,
-                      $state,
-                      gettextCatalog,
-                      NameFilter,
-                      StateFilter,
-                      centreStateLabelService) {
-    var vm = this,
-        stateData = _.values(CentreState).map(function (state) {
-          return { id: state, label: centreStateLabelService.stateToLabelFunc(state) };
-        });
-    vm.$onInit = onInit;
-    vm.filters = {};
-    vm.filters[NameFilter.name]  = new NameFilter();
-    vm.filters[StateFilter.name] = new StateFilter(true, stateData, 'all');
+    super($log,
+          $state,
+          gettextCatalog,
+          {
+            nameFilter: new NameFilter(),
+            stateFilter: new StateFilter(true, stateData, 'all')
+          },
+          5);
 
-    //--
+    this.$q                      = $q;
+    this.Centre                  = Centre;
+    this.CentreState             = CentreState;
+    this.CentreCounts            = CentreCounts;
+    this.NameFilter              = NameFilter;
+    this.StateFilter             = StateFilter;
+    this.centreStateLabelService = centreStateLabelService;
 
-    function onInit() {
-      vm.counts      = {};
-      vm.limit       = 5;
-      vm.getItems    = getItems;
-      vm.getItemIcon = getItemIcon;
-
-      // initialize this controller's base class
-      $controller('PagedListController', {
-        vm:             vm,
-        $log:           $log,
-        $state:         $state,
-        gettextCatalog: gettextCatalog
-      });
-
-       vm.stateLabelFuncs = {};
-       _.values(CentreState).forEach(function (state) {
-          vm.stateLabelFuncs[state] = centreStateLabelService.stateToLabelFunc(state);
-       });
-
-      CentreCounts.get()
-        .then(function (counts) {
-          vm.counts = counts;
-        })
-         .catch(function (error) {
-          $log.error(error);
-        });
-   }
-
-    function getItems(options) {
-      return CentreCounts.get()
-        .then(function (counts) {
-          vm.counts = counts;
-          return Centre.list(options);
-        });
-    }
-
-    function getItemIcon(centre) {
-      if (centre.isDisabled()) {
-        return 'glyphicon-cog';
-      } else if (centre.isEnabled()) {
-        return 'glyphicon-ok-circle';
-      } else {
-        throw new Error('invalid centre state: ' + centre.state);
-      }
-    }
+    this.stateLabelFuncs = {};
+    _.values(this.CentreState).forEach((state) => {
+      this.stateLabelFuncs[state] = this.centreStateLabelService.stateToLabelFunc(state);
+    });
   }
 
-  return component;
-});
+  $onInit() {
+    this.counts = {};
+
+    this.CentreCounts.get()
+      .then((counts) => {
+        this.counts = counts;
+        super.$onInit();
+      })
+      .catch((error) => {
+        this.$log.error(error);
+      });
+  }
+
+  getItems(options) {
+    return this.CentreCounts.get()
+      .then((counts) => {
+        this.counts = counts;
+        return this.Centre.list(options);
+      });
+  }
+
+  getItemIcon(centre) {
+    if (centre.isDisabled()) {
+      return 'glyphicon-cog';
+    }
+    if (centre.isEnabled()) {
+      return 'glyphicon-ok-circle';
+    }
+    throw new Error('invalid centre state: ' + centre.state);
+  }
+}
+
+/**
+ * Displays items in a panel list. Can only be used for collections {@link domain.study.Study} and {@link
+ * domain.cnetres.Centres}.
+ *
+ * @return {object} An AngularJS directive.
+ */
+const component = {
+  template: require('./centresPagedList.html'),
+  controller: Controller,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default component;

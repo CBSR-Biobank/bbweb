@@ -6,9 +6,10 @@
  */
 import UsersModule from '../../users';
 import angular     from 'angular';
+import centresPagedList from './components/centresPagedList/centresPagedListComponent';
 
 const AdminCentresModule = angular.module('biobank.admin.centres', [ UsersModule ])
-      .component('centresPagedList',   require('./components/centresPagedList/centresPagedListComponent'))
+      .component('centresPagedList',   centresPagedList)
       .component('centreAdd',          require('./components/centreAdd/centreAddComponent'))
       .component('centreLocationAdd',  require('./components/centreLocationAdd/centreLocationAddComponent'))
       .component('centreLocationView', require('./components/centreLocationView/centreLocationViewComponent'))

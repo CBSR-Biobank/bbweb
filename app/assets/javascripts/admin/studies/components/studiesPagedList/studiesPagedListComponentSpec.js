@@ -64,8 +64,8 @@ describe('Component: studiesPagedList', function() {
     this.createController();
 
     expect(this.controller.limit).toBeDefined();
-    expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeArrayOfObjects();
-    expect(this.controller.filters[this.StateFilter.name].allChoices()).toBeNonEmptyArray();
+    expect(this.controller.filters.stateFilter.allChoices()).toBeArrayOfObjects();
+    expect(this.controller.filters.stateFilter.allChoices()).toBeNonEmptyArray();
     expect(this.controller.getItems).toBeFunction();
     expect(this.controller.getItemIcon).toBeFunction();
   });
