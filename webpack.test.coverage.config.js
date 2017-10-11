@@ -18,14 +18,10 @@ config.module.rules = config.module.rules
       options: { esModules: true }
     },
     include: path.resolve('app/assets/javascripts'),
+    enforce: 'post',
     exclude: /(test|Spec.js$)/
   }]);
 
-config.plugins = [
-  // Adds webpack HMR support. It act's like livereload,
-  // reloading page after webpack rebuilt modules.
-  // It also updates stylesheets and inline assets without page reloading.
-  new webpack.HotModuleReplacementPlugin()
-];
+config.plugins = [];
 
 module.exports = config;

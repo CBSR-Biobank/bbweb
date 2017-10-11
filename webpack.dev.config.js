@@ -2,8 +2,7 @@
 
 const path = require('path'),
       webpack = require('webpack'),
-      config  = require('./webpack.config'),
-      Visualizer = require('webpack-visualizer-plugin');
+      config  = require('./webpack.config');
 
 config.devtool = 'inline-source-map';
 
@@ -18,7 +17,6 @@ config.plugins = config.plugins.concat([
   // reloading page after webpack rebuilt modules.
   // It also updates stylesheets and inline assets without page reloading.
   new webpack.HotModuleReplacementPlugin(),
-  new Visualizer()
 ]);
 
 config.devServer = {
