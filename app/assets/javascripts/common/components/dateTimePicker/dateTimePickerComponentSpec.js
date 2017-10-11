@@ -11,7 +11,7 @@ describe('dateTimePickerComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
@@ -21,7 +21,7 @@ describe('dateTimePickerComponent', function() {
         var labelAttrs = (labelCols) ? `label-cols="${labelCols}"` : '',
             inputAttrs = (inputCols) ? `input-cols="${inputCols}"` : '';
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<date-time-picker label="${label}"
               default-value="vm.defaultValue"

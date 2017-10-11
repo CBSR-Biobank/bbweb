@@ -13,7 +13,7 @@ describe('ceventsAddAndSelectDirective', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -48,7 +48,7 @@ describe('ceventsAddAndSelectDirective', function() {
         this.CollectionEvent.list =
           jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult(replyItems)));
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<cevents-add-and-select
              participant="vm.participant"

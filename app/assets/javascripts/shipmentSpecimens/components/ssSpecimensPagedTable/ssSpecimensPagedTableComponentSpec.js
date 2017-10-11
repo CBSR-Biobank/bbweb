@@ -14,7 +14,7 @@ describe('ssSpecimensPagedTableComponent', function() {
       ComponentTestSuiteMixin.call(this);
     }
 
-    SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
+    SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin);
     SuiteMixin.prototype.constructor = SuiteMixin;
 
 
@@ -64,7 +64,7 @@ describe('ssSpecimensPagedTableComponent', function() {
          noSpecimensMessage,
          actions,
          onActionSelected) => {
-           ComponentTestSuiteMixin.prototype.createController.call(
+           ComponentTestSuiteMixin.createController.call(
              this,
              `<ss-specimens-paged-table
                 default-sort-field="${defaultSortField}"

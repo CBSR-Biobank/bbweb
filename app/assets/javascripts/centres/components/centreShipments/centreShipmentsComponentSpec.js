@@ -11,7 +11,7 @@ describe('createController', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -28,7 +28,7 @@ describe('createController', function() {
           throw new Error('no centre to create component with');
         }
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<centre-shipments centre="vm.centre"></centre-shipments',
           { centre:  centre },

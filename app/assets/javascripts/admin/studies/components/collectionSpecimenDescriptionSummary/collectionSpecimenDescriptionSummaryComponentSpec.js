@@ -13,7 +13,7 @@ describe('collectionSpecimenDescriptionSummaryDirective', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -25,7 +25,7 @@ describe('collectionSpecimenDescriptionSummaryDirective', function() {
 
       this.createController = (specimenDescription) => {
         specimenDescription = specimenDescription || this.specimenDescription;
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           [
             '<collection-specimen-description-summary',

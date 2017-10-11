@@ -18,7 +18,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function (TestSuiteMixin, testUtils) {
-      _.extend(this, TestSuiteMixin.prototype);
+      _.extend(this, TestSuiteMixin);
 
       factory = this.$injector.get('factory');
 

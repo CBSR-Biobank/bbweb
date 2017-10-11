@@ -13,7 +13,7 @@ describe('Component: centreLocationAdd', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function (ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -29,7 +29,7 @@ describe('Component: centreLocationAdd', function() {
       this.returnStateName = 'home.admin.centres.centre.locations';
 
       this.createController = (centre) =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<centre-location-add centre="vm.centre"></centre-location-add>',
           { centre: centre },

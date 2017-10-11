@@ -11,7 +11,7 @@ describe('shipmentAddComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin, testUtils) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -26,7 +26,7 @@ describe('shipmentAddComponent', function() {
 
       testUtils.addCustomMatchers();
       this.createController = () =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<shipment-add centre="vm.centre"></shipment-add',
           undefined,

@@ -9,54 +9,46 @@
 import _ from 'lodash';
 
 describe('Directive: updateRemoveButtons', function() {
-  var buttonClickFuncNames = ['update', 'remove'];
-
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function (TestSuiteMixin, testUtils) {
-      _.extend(this, TestSuiteMixin.prototype);
+    angular.mock.inject(function (DirectiveTestSuiteMixin, testUtils) {
+      _.extend(this, DirectiveTestSuiteMixin);
 
       this.injectDependencies('$rootScope', '$compile');
 
       testUtils.addCustomMatchers();
-      this.createScope = (options) => {
+
+      this.createController = (options) => {
         options = options || {};
 
-        this.element = angular.element(
+        DirectiveTestSuiteMixin.createController.call(
+          this,
           `<update-remove-buttons
-             on-update="model.update()"
-             on-remove="model.remove()"
-             update-button-enabled="model.updateAllowed"
-             remove-button-enabled="model.removeAllowed">
-          </update-remove-buttons>`);
-
-        this.scope = this.$rootScope.$new();
-        this.scope.model = {};
-        this.scope.model.updateAllowed = options.updateAllowed || false;
-        this.scope.model.removeAllowed = options.removeAllowed || false;
-
-        buttonClickFuncNames.forEach((key) => {
-          this.scope.model[key] = function () {};
-          spyOn(this.scope.model, key).and.returnValue(key);
-        });
-
-        this.$compile(this.element)(this.scope);
-        this.scope.$digest();
+             on-update="vm.update()"
+             on-remove="vm.remove()"
+             update-button-enabled="vm.updateAllowed"
+             remove-button-enabled="vm.removeAllowed">
+          </update-remove-buttons>`,
+          {
+            update: jasmine.createSpy().and.returnValue(null),
+            remove: jasmine.createSpy().and.returnValue(null),
+            updateAllowed: options.updateAllowed || false,
+            removeAllowed: options.removeAllowed || false
+          });
       };
     });
   });
 
   it('clicking on a button invokes corresponding function', function() {
-    var buttons;
+    this.createController({ updateAllowed: true, removeAllowed: true});
 
-    this.createScope({ updateAllowed: true, removeAllowed: true});
-    buttons = this.element.find('button');
+    const buttons = this.element.find('button');
     expect(buttons.length).toBe(2);
     _.range(buttons.length).forEach((i) => {
       buttons.eq(i).click();
       switch (i) {
-      case 0: expect(this.scope.model.update).toHaveBeenCalled(); break;
-      case 1: expect(this.scope.model.remove).toHaveBeenCalled(); break;
+      case 0: expect(this.controller.update).toHaveBeenCalled(); break;
+      case 1: expect(this.controller.remove).toHaveBeenCalled(); break;
       }
     });
   });
@@ -64,34 +56,34 @@ describe('Directive: updateRemoveButtons', function() {
   it('only update button displayed when only one enabled', function() {
     var buttons;
 
-    this.createScope({ updateAllowed: true, removeAllowed: false });
+    this.createController({ updateAllowed: true, removeAllowed: false });
 
     buttons = this.element.find('button');
     expect(buttons.length).toBe(1);
 
     buttons.eq(0).click();
-    expect(this.scope.model.update).toHaveBeenCalled();
-    expect(this.scope.model.remove).not.toHaveBeenCalled();
+    expect(this.controller.update).toHaveBeenCalled();
+    expect(this.controller.remove).not.toHaveBeenCalled();
   });
 
   it('only remove button displayed when only one enabled', function() {
     var buttons;
 
-    this.createScope({ updateAllowed: false, removeAllowed: true});
+    this.createController({ updateAllowed: false, removeAllowed: true});
 
     buttons = this.element.find('button');
     expect(buttons.length).toBe(1);
 
     buttons.eq(0).click();
 
-    expect(this.scope.model.update).not.toHaveBeenCalled();
-    expect(this.scope.model.remove).toHaveBeenCalled();
+    expect(this.controller.update).not.toHaveBeenCalled();
+    expect(this.controller.remove).toHaveBeenCalled();
   });
 
   it('buttons should have valid icons', function() {
     var icons;
 
-    this.createScope({ updateAllowed: true, removeAllowed: true});
+    this.createController({ updateAllowed: true, removeAllowed: true});
     icons = this.element.find('button i');
 
     expect(icons.length).toBe(2);
@@ -102,7 +94,7 @@ describe('Directive: updateRemoveButtons', function() {
   it('buttons should have valid titles', function() {
     var buttons;
 
-    this.createScope({ updateAllowed: true, removeAllowed: true});
+    this.createController({ updateAllowed: true, removeAllowed: true});
     buttons = this.element.find('button');
 
     expect(buttons.length).toBe(2);

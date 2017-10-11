@@ -13,7 +13,7 @@ describe('Component: ceventGetType', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin, testUtils) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -39,7 +39,7 @@ describe('Component: ceventGetType', function() {
       spyOn(this.$state, 'go').and.returnValue(null);
 
       this.createController = () =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<cevent-get-type
              study="vm.study"

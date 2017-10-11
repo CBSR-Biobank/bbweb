@@ -16,7 +16,7 @@ describe('Component: studySummary', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       var specimenDescription, ceventType;
 
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -40,7 +40,7 @@ describe('Component: studySummary', function() {
       this.study = new this.Study(this.factory.study());
 
       this.createScope = () => {
-        var scope = ComponentTestSuiteMixin.prototype.createScope.call(this, { study: this.study });
+        var scope = ComponentTestSuiteMixin.createScope.call(this, { study: this.study });
         this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
         scope.$on('tabbed-page-update', this.eventRxFunc);
         return scope;
@@ -53,7 +53,7 @@ describe('Component: studySummary', function() {
         this.Study.prototype.isEnableAllowed =
           jasmine.createSpy().and.returnValue(this.$q.when(enableAllowed));
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<study-summary study="vm.study"></study-summary>',
           { study: this.study },

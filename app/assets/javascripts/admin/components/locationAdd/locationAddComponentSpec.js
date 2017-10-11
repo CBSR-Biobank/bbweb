@@ -13,7 +13,7 @@ describe('Component: locationAdd', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$rootScope',
                               '$compile',
                               '$state',
@@ -33,7 +33,7 @@ describe('Component: locationAdd', function() {
       this.onSubmit = jasmine.createSpy('onSubmit');
       this.onCancel = jasmine.createSpy('onCancel');
       this.createController = (onSubmit, onCancel) => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<location-add on-submit="vm.onSubmit" on-cancel="vm.onCancel"> </location-add>',
           {

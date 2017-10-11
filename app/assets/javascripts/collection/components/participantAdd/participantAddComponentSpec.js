@@ -13,7 +13,7 @@ describe('Component: participantAdd', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -36,7 +36,7 @@ describe('Component: participantAdd', function() {
         study = study || this.study;
         uniqueId = uniqueId || this.uniqueId;
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<participant-add
              study="vm.study"

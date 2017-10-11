@@ -13,13 +13,13 @@ describe('Component: passwordSent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$rootScope', '$compile', 'factory');
       this.email = this.factory.emailNext();
 
       this.createController = (email) => {
         email = email || this.email;
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<password-sent email="vm.email"></password-sent>',
           { email: email },

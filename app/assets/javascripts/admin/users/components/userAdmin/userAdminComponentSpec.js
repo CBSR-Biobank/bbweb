@@ -14,7 +14,7 @@ describe('Component: userAdminComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -32,7 +32,7 @@ describe('Component: userAdminComponent', function() {
           jasmine.createSpy().and.returnValue(this.$q.when(new this.User()));
         this.UserCounts.get = jasmine.createSpy().and.returnValue(this.$q.when(userCounts));
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<user-admin></user-admin>',
           undefined,

@@ -13,7 +13,7 @@ describe('annotationTypeViewDirective', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -37,7 +37,7 @@ describe('annotationTypeViewDirective', function() {
         options.study = options.study || this.study;
         options.annotationType = options.annotationType || this.annotationType;
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           [
             '<annotation-type-view ',

@@ -13,7 +13,7 @@ describe('Component: ceventTypeAdd', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -24,7 +24,7 @@ describe('Component: ceventTypeAdd', function() {
       this.study = new this.Study(this.factory.study());
 
       this.createController = (study) => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<cevent-type-add study="vm.study"><cevent-type-add>',
           { study: study },

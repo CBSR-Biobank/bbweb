@@ -13,7 +13,7 @@ describe('Component: centreStudiesPanel', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin, testUtils) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -28,14 +28,14 @@ describe('Component: centreStudiesPanel', function() {
       testUtils.addCustomMatchers();
 
       this.createScope = (scopeVars) => {
-        var scope = ComponentTestSuiteMixin.prototype.createScope.call(this, scopeVars);
+        var scope = ComponentTestSuiteMixin.createScope.call(this, scopeVars);
         this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
         scope.$on('tabbed-page-update', this.eventRxFunc);
         return scope;
       };
 
       this.createController = (entities) => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<centre-studies-panel
              centre="vm.centre"

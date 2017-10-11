@@ -13,7 +13,7 @@ describe('centreLocationsModalService', function() {
   beforeEach(() => {
     angular.mock.module('ngAnimateMock', 'biobankApp', 'biobank.test');
     angular.mock.inject(function(ModalTestSuiteMixin, testUtils) {
-      _.extend(this, ModalTestSuiteMixin.prototype);
+      _.extend(this, ModalTestSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
                               '$animate',

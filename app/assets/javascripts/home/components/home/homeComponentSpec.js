@@ -8,12 +8,12 @@
 
 import _ from 'lodash';
 
-describe('homeDirective', function() {
+describe('Component: home', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function (ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -23,7 +23,7 @@ describe('homeDirective', function() {
                               'usersService',
                               'factory');
       this.createController = () =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<home></home>',
           undefined,

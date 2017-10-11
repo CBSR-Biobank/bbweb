@@ -11,7 +11,7 @@ describe('collapsiblePanelComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -19,7 +19,7 @@ describe('collapsiblePanelComponent', function() {
                               'factory');
 
       this.createController = (heading) =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<collapsible-panel heading="' + heading + '"><collapsible-panel>',
           undefined,

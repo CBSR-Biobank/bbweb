@@ -16,7 +16,7 @@ describe('Component: participantAnnotationTypeView', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       var jsonAnnotType;
 
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -32,7 +32,7 @@ describe('Component: participantAnnotationTypeView', function() {
       this.annotationType = new this.AnnotationType(jsonAnnotType);
 
       this.createController = () =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<participant-annotation-type-view
             study="vm.study"

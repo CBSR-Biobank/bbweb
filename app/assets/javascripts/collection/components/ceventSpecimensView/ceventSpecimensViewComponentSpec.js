@@ -13,7 +13,7 @@ describe('ceventSpecimensViewComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
@@ -39,7 +39,7 @@ describe('ceventSpecimensViewComponent', function() {
         study = study || this.study;
         collectionEvent = collectionEvent || this.collectionEvent;
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<cevent-specimens-view
              study="vm.study"

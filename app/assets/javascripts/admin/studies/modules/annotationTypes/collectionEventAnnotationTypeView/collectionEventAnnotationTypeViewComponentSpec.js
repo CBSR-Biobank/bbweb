@@ -14,7 +14,7 @@ describe('Component: collectionEventAnnotationTypeView', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -29,7 +29,7 @@ describe('Component: collectionEventAnnotationTypeView', function() {
         this.CollectionEventType.get =
           jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<collection-event-annotation-type-view
              study="vm.study"

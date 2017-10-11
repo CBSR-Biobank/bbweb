@@ -12,7 +12,7 @@ describe('specimenStateLabelService', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin.prototype);
+      _.extend(this, TestSuiteMixin);
       this.injectDependencies('specimenStateLabelService',
                               'SpecimenState');
     });

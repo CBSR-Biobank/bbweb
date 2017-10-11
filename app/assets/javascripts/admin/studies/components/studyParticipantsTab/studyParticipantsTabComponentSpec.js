@@ -13,7 +13,7 @@ describe('studyParticipantsTabDirectiveDirective', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -31,14 +31,14 @@ describe('studyParticipantsTabDirectiveDirective', function() {
       spyOn(this.$state, 'go').and.returnValue('ok');
 
       this.createScope = () => {
-        var scope = ComponentTestSuiteMixin.prototype.createScope.call(this, { study: this.study });
+        var scope = ComponentTestSuiteMixin.createScope.call(this, { study: this.study });
         this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
         scope.$on('tabbed-page-update', this.eventRxFunc);
         return scope;
       };
 
       this.createController = () => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<study-participants-tab study="vm.study"></study-participants-tab>',
           { study: this.study },

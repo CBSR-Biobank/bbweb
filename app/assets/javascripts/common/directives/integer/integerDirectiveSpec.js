@@ -6,60 +6,60 @@
  */
 /* global angular */
 
+import _ from 'lodash';
+
 describe('Directive: integer', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function ($rootScope, $compile) {
-      this.scope = $rootScope.$new();
+    angular.mock.inject(function (DirectiveTestSuiteMixin) {
+      _.extend(this, DirectiveTestSuiteMixin);
 
-      this.element = angular.element(
+      DirectiveTestSuiteMixin.createController.call(
+        this,
         `<form name="testForm">
-            <input type="number"
-                   name="theNumber"
-                   ng-model="theNumber"
-                   integer
-                   required />
-          </form>`);
-
-      this.scope.theNumber = null;
-      $compile(this.element)(this.scope);
-      this.scope.$digest();
+             <input type="number"
+                    name="theNumber"
+                    ng-model="vm.theNumber"
+                    integer
+                    required></input>
+         </form>`,
+        { theNumber: null });
     });
   });
 
   it('should allow a positive integer', function() {
     var anInteger = 1;
     this.scope.testForm.theNumber.$setViewValue(anInteger.toString());
-    expect(this.scope.theNumber).toEqual(anInteger);
+    expect(this.controller.theNumber).toEqual(anInteger);
     expect(this.scope.testForm.theNumber.$valid).toBe(true);
   });
 
   it('should allow a negative integer', function() {
     var anInteger = -1;
     this.scope.testForm.theNumber.$setViewValue(anInteger.toString());
-    expect(this.scope.theNumber).toEqual(anInteger);
+    expect(this.controller.theNumber).toEqual(anInteger);
     expect(this.scope.testForm.theNumber.$valid).toBe(true);
   });
 
   it('should not allow a positive floating point', function() {
     var aFloat = 1.10;
     this.scope.testForm.theNumber.$setViewValue(aFloat.toString());
-    expect(this.scope.theNumber).toBeUndefined();
+    expect(this.controller.theNumber).toBeUndefined();
     expect(this.scope.testForm.theNumber.$valid).toBe(false);
   });
 
   it('should not allow a negative floating point', function() {
     var aFloat = -1.10;
     this.scope.testForm.theNumber.$setViewValue(aFloat.toString());
-    expect(this.scope.theNumber).toBeUndefined();
+    expect(this.controller.theNumber).toBeUndefined();
     expect(this.scope.testForm.theNumber.$valid).toBe(false);
   });
 
   it('should not allow an alphanumeric value', function() {
     var aString = 'x110';
     this.scope.testForm.theNumber.$setViewValue(aString);
-    expect(this.scope.theNumber).toBeUndefined();
+    expect(this.controller.theNumber).toBeUndefined();
     expect(this.scope.testForm.theNumber.$valid).toBe(false);
   });
 

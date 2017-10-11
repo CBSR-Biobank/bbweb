@@ -2,53 +2,45 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  ShippingComponentTestSuiteMixinFactory.$inject = [
-    '$q',
-    'ComponentTestSuiteMixin',
-    'Shipment',
-    'ShipmentSpecimen',
-    'factory'];
+import _ from 'lodash';
 
-  function ShippingComponentTestSuiteMixinFactory($q,
-                                                  ComponentTestSuiteMixin,
-                                                  Shipment,
-                                                  ShipmentSpecimen,
-                                                  factory) {
+/* @ngInject */
+export default function ShippingComponentTestSuiteMixinFactory($q,
+                                                               ComponentTestSuiteMixin,
+                                                               Shipment,
+                                                               ShipmentSpecimen,
+                                                               factory) {
 
-    function ShippingComponentTestSuiteMixin() {
-      ComponentTestSuiteMixin.call(this);
+
+  return _.extend(
+    {
+      createShipment: createShipment,
+      createShipmentWithSpecimens: createShipmentWithSpecimens,
+      createGetShipmentSpy: createGetShipmentSpy,
+      createShipmentSpecimensListSpy: createShipmentSpecimensListSpy
+    },
+    ComponentTestSuiteMixin);
+
+  function createShipment(state) {
+    var options = {};
+    if (state) {
+      options.state = state;
     }
-
-    ShippingComponentTestSuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-    ShippingComponentTestSuiteMixin.prototype.constructor = ShippingComponentTestSuiteMixin;
-
-    ShippingComponentTestSuiteMixin.prototype.createShipment = function (state) {
-      var options = {};
-      if (state) {
-        options.state = state;
-      }
-      return new Shipment(factory.shipment(options));
-    };
-
-    ShippingComponentTestSuiteMixin.prototype.createShipmentWithSpecimens = function (specimenCount) {
-      return new Shipment(factory.shipment({ specimenCount: specimenCount }));
-    };
-
-    ShippingComponentTestSuiteMixin.prototype.createGetShipmentSpy = function (shipment) {
-      spyOn(Shipment, 'get').and.returnValue($q.when(shipment));
-    };
-
-    ShippingComponentTestSuiteMixin.prototype.createShipmentSpecimensListSpy = function (shipmentSpecimens) {
-      var reply = factory.pagedResult(shipmentSpecimens);
-      spyOn(ShipmentSpecimen, 'list').and.returnValue($q.when(reply));
-    };
-
-    return ShippingComponentTestSuiteMixin;
+    return new Shipment(factory.shipment(options));
   }
 
-  return ShippingComponentTestSuiteMixinFactory;
+  function createShipmentWithSpecimens(specimenCount) {
+    return new Shipment(factory.shipment({ specimenCount: specimenCount }));
+  }
 
-});
+  function createGetShipmentSpy(shipment) {
+    spyOn(Shipment, 'get').and.returnValue($q.when(shipment));
+  }
+
+  function createShipmentSpecimensListSpy(shipmentSpecimens) {
+    var reply = factory.pagedResult(shipmentSpecimens);
+    spyOn(ShipmentSpecimen, 'list').and.returnValue($q.when(reply));
+  }
+
+}

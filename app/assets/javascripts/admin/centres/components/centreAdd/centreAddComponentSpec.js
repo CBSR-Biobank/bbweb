@@ -13,7 +13,7 @@ describe('Directive: centreAddDirective()', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function (ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -29,7 +29,7 @@ describe('Directive: centreAddDirective()', function() {
       };
 
       this.createController = (centre) =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<centre-add centre="vm.centre"></centre-add>',
           { centre: centre },

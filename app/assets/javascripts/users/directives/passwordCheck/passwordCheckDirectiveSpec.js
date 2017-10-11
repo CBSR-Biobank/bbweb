@@ -12,26 +12,24 @@ describe('Directive: passwordCheck', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(
-      function($compile, $rootScope) {
-        this.element = angular.element(
-          `<form name="form">
-            <input name="password" type="password" ng-model="model.password"/>
+    angular.mock.inject(function (DirectiveTestSuiteMixin) {
+      _.extend(this, DirectiveTestSuiteMixin);
+
+      DirectiveTestSuiteMixin.createController.call(
+        this,
+        `<form name="form">
+            <input name="password" type="password" ng-model="vm.password"/>
             <input name="confirmPassword"
                    type="password"
-                   ng-model="model.confirmPassword"
-                   password-check="model.password"
-                   ng-required/>
-          </form>`
-        );
-
-        this.scope = $rootScope.$new();
-        this.scope.model = {
+                   ng-model="vm.confirmPassword"
+                   password-check="vm.password"
+                   ng-required></input>
+         </form>`,
+        {
           password: null,
           confirmPassword: null
-        } ;
-        $compile(this.element)(this.scope);
-      });
+        });
+    });
   });
 
   it('success when passwords match', function() {

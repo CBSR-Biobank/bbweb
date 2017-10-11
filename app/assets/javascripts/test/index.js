@@ -7,33 +7,34 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import angular from 'angular';
+import ComponentTestSuiteMixin         from './ComponentTestSuiteMixin';
+import DirectiveTestSuiteMixin         from './DirectiveTestSuiteMixin';
+import ModalTestSuiteMixin             from '../../../assets/javascripts/test/ModalTestSuiteMixin';
+import ShippingComponentTestSuiteMixin from '../../../assets/javascripts/test/ShippingComponentTestSuiteMixin';
+import TestSuiteMixin                  from './TestSuiteMixin';
+import angular                         from 'angular';
 
 const TestModule = angular.module('biobank.test', [])
-  .service('testDomainEntities',
-           require('../../../assets/javascripts/test/testDomainEntities'))
-  .service('factory',
-           require('../../../assets/javascripts/test/factory'))
-  .service('testUtils',
-           require('../../../assets/javascripts/test/testUtils'))
-  .factory('EntityTestSuite',
-           require('../../../assets/javascripts/test/EntityTestSuite'))
-  .factory('ModalTestSuiteMixin',
-           require('../../../assets/javascripts/test/ModalTestSuiteMixin'))
-  .factory('TestSuiteMixin',
-           require('../../../assets/javascripts/test/TestSuiteMixin'))
-  .factory('ServerReplyMixin',
-           require('../../../assets/javascripts/test/ServerReplyMixin'))
-  .factory('AnnotationsEntityTestSuiteMixin',
-           require('../../../assets/javascripts/test/AnnotationsEntityTestSuiteMixin'))
-  .factory('ComponentTestSuiteMixin',
-           require('../../../assets/javascripts/test/ComponentTestSuiteMixin'))
-  .factory('DirectiveTestSuiteMixin',
-           require('../../../assets/javascripts/test/DirectiveTestSuiteMixin'))
-  .factory('ShippingComponentTestSuiteMixin',
-           require('../../../assets/javascripts/test/ShippingComponentTestSuiteMixin'))
-  .factory('MebershipSpecCommon',
-           require('../../../assets/javascripts/test/MembershipSpecCommon'))
-  .name;
+      .service('testDomainEntities',
+               require('../../../assets/javascripts/test/testDomainEntities'))
+      .service('factory',
+               require('../../../assets/javascripts/test/factory'))
+      .service('testUtils',
+               require('../../../assets/javascripts/test/testUtils'))
+      .service('TestSuiteMixin',                  TestSuiteMixin)
+      .service('ComponentTestSuiteMixin',         ComponentTestSuiteMixin)
+      .service('DirectiveTestSuiteMixin',         DirectiveTestSuiteMixin)
+      .service('ModalTestSuiteMixin',             ModalTestSuiteMixin)
+      .service('ShippingComponentTestSuiteMixin', ShippingComponentTestSuiteMixin)
+
+      .factory('EntityTestSuite',
+               require('../../../assets/javascripts/test/EntityTestSuite'))
+      .factory('ServerReplyMixin',
+               require('../../../assets/javascripts/test/ServerReplyMixin'))
+      .factory('AnnotationsEntityTestSuiteMixin',
+               require('../../../assets/javascripts/test/AnnotationsEntityTestSuiteMixin'))
+      .factory('MebershipSpecCommon',
+               require('../../../assets/javascripts/test/MembershipSpecCommon'))
+      .name;
 
 export default TestModule;

@@ -13,7 +13,7 @@ describe('Component: participantGet', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$log',
@@ -33,7 +33,7 @@ describe('Component: participantGet', function() {
       this.createController = (study) => {
         study = study || this.study;
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<participant-get study="vm.study"></participant-get>',
           { study: study },

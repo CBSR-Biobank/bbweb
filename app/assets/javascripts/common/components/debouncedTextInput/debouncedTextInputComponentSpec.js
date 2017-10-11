@@ -13,7 +13,7 @@ describe('Component: debouncedTextInput', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
       this.createController = (label, value) => {
@@ -21,7 +21,7 @@ describe('Component: debouncedTextInput', function() {
           value = this.factory.stringNext();
         }
         this.onValueChanged = jasmine.createSpy().and.returnValue(null);
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<debounced-text-input
               label="${label}"

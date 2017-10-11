@@ -2,23 +2,21 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  DirectiveTestSuiteMixinFactory.$inject = ['ComponentTestSuiteMixin'];
+import _ from 'lodash';
 
-  function DirectiveTestSuiteMixinFactory(ComponentTestSuiteMixin) {
+/* @ngInject */
+export default function DirectiveTestSuiteMixin(ComponentTestSuiteMixin) {
 
-    function DirectiveTestSuiteMixin() {
-      ComponentTestSuiteMixin.call(this);
-    }
+  return _.extend({},
+                  ComponentTestSuiteMixin,
+                  {
+                    createController: createController
+                  });
 
-    DirectiveTestSuiteMixin.prototype = Object.create(ComponentTestSuiteMixin.prototype);
-    DirectiveTestSuiteMixin.prototype.constructor = DirectiveTestSuiteMixin;
-
-    return DirectiveTestSuiteMixin;
+  function createController(htmlElement, scopeVars) {
+    ComponentTestSuiteMixin.createController.call(this, htmlElement, scopeVars, undefined);
+    this.controller = this.element.scope().vm;
   }
 
-  return DirectiveTestSuiteMixinFactory;
-
-});
+}

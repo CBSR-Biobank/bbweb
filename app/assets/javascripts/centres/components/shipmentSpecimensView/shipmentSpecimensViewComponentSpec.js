@@ -12,7 +12,7 @@ describe('shipmentSpecimensViewComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ShippingComponentTestSuiteMixin) {
-      _.extend(this, ShippingComponentTestSuiteMixin.prototype);
+      _.extend(this, ShippingComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -21,7 +21,7 @@ describe('shipmentSpecimensViewComponent', function() {
                               'factory');
       this.createController = (shipment, readOnly) => {
         readOnly = readOnly || false;
-        ShippingComponentTestSuiteMixin.prototype.createController.call(
+        ShippingComponentTestSuiteMixin.createController.call(
           this,
           '<shipment-specimens-view shipment="vm.shipment" read-only="vm.readOnly"></shipment-specimens-view',
           {

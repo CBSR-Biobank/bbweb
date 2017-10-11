@@ -13,7 +13,7 @@ describe('Component: registerUser', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(TestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, TestSuiteMixin.prototype, ServerReplyMixin.prototype);
+      _.extend(this, TestSuiteMixin, ServerReplyMixin.prototype);
       this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',

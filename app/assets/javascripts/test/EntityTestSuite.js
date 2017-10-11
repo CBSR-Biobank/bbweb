@@ -18,7 +18,7 @@ define(['lodash'], function (_) {
       TestSuiteMixin.call(this);
     }
 
-    EntityTestSuite.prototype = Object.create(TestSuiteMixin.prototype);
+    EntityTestSuite.prototype = Object.create(TestSuiteMixin);
     EntityTestSuite.prototype.constructor = EntityTestSuite;
 
     /**

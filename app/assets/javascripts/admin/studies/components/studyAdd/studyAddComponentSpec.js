@@ -13,7 +13,7 @@ describe('Component: studyAdd', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -25,7 +25,7 @@ describe('Component: studyAdd', function() {
       this.returnState = 'home.admin.studies';
 
       this.createController = () => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<study-add study="vm.study"></study-add>',
           { study: this.study },

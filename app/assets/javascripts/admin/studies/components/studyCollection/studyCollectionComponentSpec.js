@@ -15,7 +15,7 @@ describe('studyCollectionComponent', function() {
     angular.mock.inject(function(TestSuiteMixin) {
       var jsonStudy, jsonCet;
 
-      _.extend(this, TestSuiteMixin.prototype);
+      _.extend(this, TestSuiteMixin);
       this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',

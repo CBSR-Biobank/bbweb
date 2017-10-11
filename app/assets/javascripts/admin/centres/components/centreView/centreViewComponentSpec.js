@@ -13,7 +13,7 @@ describe('Component: centreView', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -24,7 +24,7 @@ describe('Component: centreView', function() {
       this.centre = new this.Centre(this.factory.centre());
 
       this.createController = (centre) =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<centre-view centre="vm.centre"></centre-view>',
           { centre: centre },

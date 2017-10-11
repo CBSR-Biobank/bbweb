@@ -1,34 +1,38 @@
 /**
+ * A mixin for test suites.
+ *
+ * @mixin testSuiteMixin
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
-  'use strict';
 
-  TestSuiteMixinFactory.$inject = ['$injector', 'UrlService'];
+import _ from 'lodash';
 
-  function TestSuiteMixinFactory($injector, UrlService) {
+/* @ngInject */
+export default function TestSuiteMixin($injector, UrlService) {
 
-    function TestSuiteMixin() {}
+  return {
+    injectDependencies:    injectDependencies,
+    capitalizeFirstLetter: capitalizeFirstLetter,
+    url:                   url
+  };
 
-    TestSuiteMixin.prototype.injectDependencies = function (/* dep1, dep2, ..., depn */) {
-      var self = this;
-      _.toArray(arguments).forEach((dependency) => {
-        self[dependency] = $injector.get(dependency);
-      });
-    };
+  //--
 
-    TestSuiteMixin.prototype.capitalizeFirstLetter = function(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
-    };
-
-    TestSuiteMixin.prototype.url = function () {
-      return UrlService.url.apply(UrlService, _.toArray(arguments));
-    };
-
-    return TestSuiteMixin;
+  // cannot use arrow function since "arguments" is used
+  function injectDependencies(/* dep1, dep2, ..., depn */) {
+    Array.from(arguments).forEach((dependency) => {
+      this[dependency] = $injector.get(dependency);
+    });
   }
 
-  return TestSuiteMixinFactory;
+  function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+  }
 
-});
+  function url() {
+    return UrlService.url.apply(UrlService, _.toArray(arguments));
+  }
+
+}

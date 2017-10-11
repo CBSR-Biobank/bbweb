@@ -15,7 +15,7 @@ describe('ceventTypesAddAndSelectComponent', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       var jsonStudy, jsonCet;
 
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -48,7 +48,7 @@ describe('ceventTypesAddAndSelectComponent', function() {
         this.CollectionEventType.list =
           jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult(collectionEventTypes)));
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<cevent-types-add-and-select study="vm.study" collection-event-types="vm.collectionEventTypes">' +
             '</cevent-types-add-and-select>',

@@ -13,7 +13,7 @@ describe('Component: biobankAdmin', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
@@ -22,7 +22,7 @@ describe('Component: biobankAdmin', function() {
                               'usersService',
                               'factory');
       this.createController = () => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<biobank-admin></biobank-admin>',
           undefined,

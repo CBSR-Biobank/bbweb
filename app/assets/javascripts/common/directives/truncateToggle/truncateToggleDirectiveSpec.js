@@ -13,29 +13,22 @@ describe('Directive: truncateToggle', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function (TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin.prototype);
+    angular.mock.inject(function (DirectiveTestSuiteMixin) {
+      _.extend(this, DirectiveTestSuiteMixin);
       this.injectDependencies('$rootScope', '$compile', '$filter', 'gettextCatalog');
 
-      this.createScope = (text, toggleLength) => {
-        var self = this;
-
-        self.element = angular.element(
+      this.createController = (text, toggleLength) => {
+        DirectiveTestSuiteMixin.createController.call(
+          this,
           `<truncate-toggle
-             text="model.text"
-             toggle-length="model.toggleLength"
+             text="vm.text"
+             toggle-length="vm.toggleLength"
              text-empty-warning="${textEmptyWarning}">
-          </truncate-toggle>`);
-
-        self.scope = self.$rootScope.$new();
-
-        self.scope.model = {
-          text:         text,
-          toggleLength: toggleLength
-        };
-
-        this.$compile(self.element)(self.scope);
-        self.scope.$digest();
+          </truncate-toggle>`,
+          {
+            text:         text,
+            toggleLength: toggleLength
+          });
       };
     });
   });
@@ -46,7 +39,7 @@ describe('Directive: truncateToggle', function() {
         text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
         '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
-    this.createScope(text, 20);
+    this.createController(text, 20);
 
     divs = angular.element(this.element[0].getElementsByClassName('col-md-12'));
     expect(divs.length).toBe(1);
@@ -55,7 +48,7 @@ describe('Directive: truncateToggle', function() {
     buttons = this.element.find('button');
     expect(buttons.length).toBe(1);
     buttons.eq(0).click();
-    expect(divs.eq(0).text().length).toBe(this.scope.model.toggleLength);
+    expect(divs.eq(0).text().length).toBe(this.controller.toggleLength);
   });
 
   it('pressing the button twice displays whole string', function() {
@@ -64,7 +57,7 @@ describe('Directive: truncateToggle', function() {
         text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
         '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
-    this.createScope(text, 20);
+    this.createController(text, 20);
 
     divs = angular.element(this.element[0].getElementsByClassName('col-md-12'));
     expect(divs.length).toBe(1);
@@ -81,7 +74,7 @@ describe('Directive: truncateToggle', function() {
         text = '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ' +
         '123456789 123456789 123456789 123456789 123456789 123456789 123456789 123456789 ';
 
-    this.createScope(text, 20);
+    this.createController(text, 20);
     buttons = this.element.find('button');
     expect(buttons.length).toBe(1);
     expect(buttons.eq(0).text().trim()).toBe(this.gettextCatalog.getString('Show less'));
@@ -91,7 +84,7 @@ describe('Directive: truncateToggle', function() {
     var divs,
         text = '';
 
-    this.createScope(text, 20);
+    this.createController(text, 20);
     divs = angular.element(this.element[0].getElementsByClassName('alert'));
     expect(divs.length).toBe(1);
     expect(divs.eq(0).text().trim()).toBe(textEmptyWarning);

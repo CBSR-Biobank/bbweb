@@ -13,7 +13,7 @@ describe('AnnotationType', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(TestSuiteMixin, testDomainEntities) {
-      _.extend(this, TestSuiteMixin.prototype);
+      _.extend(this, TestSuiteMixin);
       this.injectDependencies('AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',

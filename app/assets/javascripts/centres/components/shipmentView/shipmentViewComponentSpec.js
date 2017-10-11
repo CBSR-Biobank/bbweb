@@ -11,7 +11,7 @@ describe('shipmentViewComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ShippingComponentTestSuiteMixin) {
-      _.extend(this, ShippingComponentTestSuiteMixin.prototype);
+      _.extend(this, ShippingComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -20,7 +20,7 @@ describe('shipmentViewComponent', function() {
                               'ShipmentState',
                               'factory');
       this.createController = function (shipment) {
-        ShippingComponentTestSuiteMixin.prototype.createController.call(
+        ShippingComponentTestSuiteMixin.createController.call(
           this,
           '<shipment-view shipment="vm.shipment"></shipment-view>',
           { shipment: shipment },

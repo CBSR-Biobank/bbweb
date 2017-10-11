@@ -14,7 +14,7 @@ describe('Component: centreSummary', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -26,14 +26,14 @@ describe('Component: centreSummary', function() {
                               'factory');
       this.centre = new this.Centre(this.factory.centre());
       this.createScope = () => {
-        var scope = ComponentTestSuiteMixin.prototype.createScope.call(this, { centre: this.centre });
+        var scope = ComponentTestSuiteMixin.createScope.call(this, { centre: this.centre });
         this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
         scope.$on('tabbed-page-update', this.eventRxFunc);
         return scope;
       };
 
       this.createController = (centre) =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<centre-summary centre="vm.centre"></centre-summary>',
           { centre: centre },

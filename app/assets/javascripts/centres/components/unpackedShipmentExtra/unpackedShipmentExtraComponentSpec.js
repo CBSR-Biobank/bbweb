@@ -11,7 +11,7 @@ describe('unpackedShipmentExtraComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, ShippingComponentTestSuiteMixin.prototype, ServerReplyMixin.prototype);
+      _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin.prototype);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -25,7 +25,7 @@ describe('unpackedShipmentExtraComponent', function() {
                               'factory');
 
       this.createController = (shipment) =>
-        ShippingComponentTestSuiteMixin.prototype.createController.call(
+        ShippingComponentTestSuiteMixin.createController.call(
           this,
           '<unpacked-shipment-extra shipment="vm.shipment"><unpacked-shipment-extra>',
           { shipment: shipment },

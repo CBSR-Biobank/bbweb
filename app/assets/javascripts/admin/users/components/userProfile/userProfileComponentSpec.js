@@ -13,7 +13,7 @@ describe('Component: userProfile', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -28,7 +28,7 @@ describe('Component: userProfile', function() {
       this.ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
 
       this.createController = (user) => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<user-profile user="vm.user"></user-profile>',
           { user: user },

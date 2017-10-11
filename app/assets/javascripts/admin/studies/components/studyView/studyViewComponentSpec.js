@@ -13,7 +13,7 @@ describe('Directive: studyViewDirective', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function($window, ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       $window.localStorage.setItem = jasmine.createSpy().and.returnValue(null);
       $window.localStorage.getItem = jasmine.createSpy().and.returnValue(null);
@@ -28,7 +28,7 @@ describe('Directive: studyViewDirective', function() {
       this.study = new this.Study(this.factory.study());
 
       this.createController = () =>
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<study-view study="vm.study"></study-view>',
           { study: this.study },

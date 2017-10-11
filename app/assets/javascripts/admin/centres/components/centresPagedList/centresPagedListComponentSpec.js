@@ -14,7 +14,7 @@ describe('centresPagedListComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -28,7 +28,7 @@ describe('centresPagedListComponent', function() {
                               'factory');
 
       this.createController = () => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<centres-paged-list></centres-paged-list',
           undefined,

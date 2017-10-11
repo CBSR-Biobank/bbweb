@@ -13,7 +13,7 @@ describe('Component: collectionSpecimenDescriptionAdd', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -33,7 +33,7 @@ describe('Component: collectionSpecimenDescriptionAdd', function() {
 
       spyOn(this.$state, 'go').and.returnValue(null);
       this.createController = () => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           [
             '<collection-specimen-description-add',

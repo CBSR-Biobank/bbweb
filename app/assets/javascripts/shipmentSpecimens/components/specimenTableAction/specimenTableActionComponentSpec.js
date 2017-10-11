@@ -11,7 +11,7 @@ describe('Component: specimenTableAction', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin, testUtils) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -20,7 +20,7 @@ describe('Component: specimenTableAction', function() {
       testUtils.addCustomMatchers();
 
       this.createController = (action, onActionSelected) => {
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           `<specimen-table-action
              action="action"

@@ -14,7 +14,7 @@ describe('ceventTypeViewComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin.prototype);
+      _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -44,7 +44,7 @@ describe('ceventTypeViewComponent', function() {
 
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
 
-        ComponentTestSuiteMixin.prototype.createController.call(
+        ComponentTestSuiteMixin.createController.call(
           this,
           '<cevent-type-view study="vm.study" collection-event-type="vm.ceventType"></cevent-type-view>',
           {

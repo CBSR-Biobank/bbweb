@@ -13,7 +13,7 @@ describe('unpackedShipmentViewComponent', function() {
     angular.mock.inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin, testUtils) {
       var self = this;
 
-      _.extend(this, ShippingComponentTestSuiteMixin.prototype, ServerReplyMixin.prototype);
+      _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin.prototype);
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
@@ -27,7 +27,7 @@ describe('unpackedShipmentViewComponent', function() {
       this.createController = (shipment) => {
         self.Shipment.get = jasmine.createSpy().and.returnValue(self.$q.when(shipment));
 
-        ShippingComponentTestSuiteMixin.prototype.createController.call(
+        ShippingComponentTestSuiteMixin.createController.call(
           this,
           '<unpacked-shipment-view shipment="vm.shipment"><unpacked-shipment-view>',
           { shipment: shipment },
