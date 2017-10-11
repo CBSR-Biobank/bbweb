@@ -2,8 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(function (require) {
   'use strict';
+
+  const angular = require('angular');
 
   domainNotificationService.$inject = [
     '$q',
@@ -88,20 +90,15 @@ define(function () {
                           removeFailedHeaderHtml,
                           removeFaileBodyHtml) {
       return modalService.modalOkCancel(headerHtml, bodyHtml)
-        .then(removeConfirmed)
-        .catch(function () {});
-
-      function removeConfirmed() {
-        return promiseFunc()
-          .catch(function (error) {
-            var errMsg = JSON.stringify(error);
-            if (error.status && (error.status === 401)) {
-              errMsg = gettextCatalog.getString('You do not have permission to perform this action');
-            }
-            return modalService
-              .modalOkCancel(removeFailedHeaderHtml, removeFaileBodyHtml + ': ' + errMsg);
-          });
-      }
+        .then(() => promiseFunc().catch((error) => {
+          var errMsg = JSON.stringify(error);
+          if (error.status && (error.status === 401)) {
+            errMsg = gettextCatalog.getString('You do not have permission to perform this action');
+          }
+          return modalService.modalOkCancel(removeFailedHeaderHtml,
+                                            removeFaileBodyHtml + ': ' + errMsg);
+        }))
+        .catch(angular.noop);
     }
   }
 

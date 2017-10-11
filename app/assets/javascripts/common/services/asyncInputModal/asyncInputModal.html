@@ -24,7 +24,8 @@
                uib-typeahead="value.obj as value.label for value in vm.getValues($viewValue)"
                typeahead-loading="loadingValue"
                typeahead-on-select="vm.valueSelected($item)"
-               typeahead-no-results="noValueResults"/>
+               typeahead-no-results="noValueResults"
+               autocomplete="off"/>
         <i ng-show="loadingValue" class="glyphicon glyphicon-refresh"></i>
         <div ng-show="noValueResults">
           <i class="glyphicon glyphicon-remove"></i>{{vm.noResultsMessage}}

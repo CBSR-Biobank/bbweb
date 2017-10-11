@@ -7,6 +7,7 @@
 import StudiesModule        from '../../studies';
 import angular              from 'angular';
 import membershipsPagedList from './components/membershipsPagedList/membershipsPagedListComponent';
+import membershipView       from './components/membershipView/membershipViewComponent';
 import usersPagedList       from './components/usersPagedList/usersPagedListComponent';
 
 const AdminUsersModule = angular.module('biobank.admin.users', [ StudiesModule ])
@@ -18,7 +19,7 @@ const AdminUsersModule = angular.module('biobank.admin.users', [ StudiesModule ]
       .component('userRoles',       require('./components/userRoles/userRolesComponent'))
       .component('membershipAdmin', require('./components/membershipAdmin/membershipAdminComponent'))
       .component('membershipAdd',   require('./components/membershipAdd/membershipAddComponent'))
-      .component('membershipView',  require('./components/membershipView/membershipViewComponent'))
+      .component('membershipView',  membershipView)
       .component('membershipsPagedList', membershipsPagedList)
       .name;
 

@@ -95,11 +95,14 @@ define(function() {
      * @param {int} [options.limit=10] The total number of centres to return per page. The maximum page size
      *        is 10. If a value larger than 10 is used then the response is an error.
      *
+     * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+     *        from the server.
+     *
      * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
      *          domain.centres.Centre}.
      */
-    CentreName.list = function (options) {
-      return EntityName.list(CentreName.url(), options, CentreName.create);
+    CentreName.list = function (options, omit) {
+      return EntityName.list(CentreName.url(), options, CentreName.create, omit);
     };
 
     /**

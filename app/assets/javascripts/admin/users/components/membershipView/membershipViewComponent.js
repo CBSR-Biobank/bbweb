@@ -1,231 +1,284 @@
 /**
  *
  */
-define(function (require) {
-  'use strict';
+import _       from 'lodash';
+import angular from 'angular';
 
-  var angular = require('angular'),
-      _       = require('lodash');
+class MembershipViewController {
 
-  var component = {
-    template: require('./membershipView.html'),
-    controller: MembershipViewController,
-    controllerAs: 'vm',
-    bindings: {
-      membership: '<'
-    }
-  };
+  constructor($state,
+              notificationsService,
+              domainNotificationService,
+              gettextCatalog,
+              breadcrumbService,
+              usersService,
+              modalInput,
+              asyncInputModal,
+              EntityInfo,
+              UserName,
+              StudyName,
+              CentreName) {
+    'ngInject';
 
-  MembershipViewController.$inject = [
-    '$state',
-    'notificationsService',
-    'domainNotificationService',
-    'gettextCatalog',
-     'breadcrumbService',
-    'usersService',
-    'modalInput',
-    'asyncInputModal',
-    'EntityInfo',
-    'UserName'
-  ];
+    this.$state = $state;
+    this.notificationsService = notificationsService;
+    this.domainNotificationService = domainNotificationService;
+    this.gettextCatalog = gettextCatalog;
+    this.breadcrumbService = breadcrumbService;
+    this.usersService = usersService;
+    this.modalInput = modalInput;
+    this.asyncInputModal = asyncInputModal;
+    this.EntityInfo = EntityInfo;
+    this.UserName = UserName;
+    this.StudyName = StudyName;
+    this.CentreName = CentreName;
 
-  /*
-   *
-   */
-  function MembershipViewController($state,
-                                    notificationsService,
-                                    domainNotificationService,
-                                    gettextCatalog,
-                                    breadcrumbService,
-                                    usersService,
-                                    modalInput,
-                                    asyncInputModal,
-                                    EntityInfo,
-                                    UserName) {
-    var vm = this;
-    vm.$onInit = onInit;
-
-    vm.remove          = remove;
-    vm.editName        = editName;
-    vm.editDescription = editDescription;
-    vm.addUser         = addUser;
-    vm.addStudy        = addStudy;
-    vm.addCentre       = addCentre;
-    vm.back            = back;
-
-    //--
-
-    function onInit() {
-      vm.userCanUpdate = usersService.getCurrentUser().hasRole('UserAdministrator');
-
-      vm.breadcrumbs = [
-        breadcrumbService.forState('home'),
-        breadcrumbService.forState('home.admin'),
-        breadcrumbService.forState('home.admin.users'),
-        breadcrumbService.forState('home.admin.users.memberships'),
-        breadcrumbService.forStateWithFunc('home.admin.users.memberships.membership', membershipName)
-      ];
-
-      vm.noStudiesMembership = (!vm.membership.studyData.allEntities &&
-                                (vm.membership.studyData.entityData.length <= 0));
-
-      vm.noCentresMembership = (!vm.membership.centreData.allEntities &&
-                                (vm.membership.centreData.entityData.length <= 0));
-
-      vm.userNameLabels = userNameLabels();
-      vm.studyNameLabels = studyNameLabels();
-      vm.centreNameLabels = centreNameLabels();
-
-      vm.userNameLabelSelected = userNameLabelSelected;
-    }
-
-    function membershipName() {
-      return vm.membership.name;
-    }
-
-    function entityNameToLabels(entityData) {
-      return _.sortBy(entityData.map(function (userInfo) {
-        return {
-          label:   userInfo.name,
-          tooltip: gettextCatalog.getString('Remove ' + userInfo.name),
-          obj:     userInfo
-        };
-      }), [ 'label' ]);
-    }
-
-    function userNameLabels() {
-      return entityNameToLabels(vm.membership.userData);
-    }
-
-    function studyNameLabels() {
-      return entityNameToLabels(vm.membership.studyData.entityData);
-    }
-
-    function centreNameLabels() {
-      return entityNameToLabels(vm.membership.centreData.entityData);
-    }
-
-    function remove() {
-      domainNotificationService.removeEntity(
-        promiseFn,
-        gettextCatalog.getString('Remove membership'),
-        gettextCatalog.getString('Are you sure you want to remove the membership named <b>{{name}}</b>?',
-                                 { name: vm.membership.name }),
-        gettextCatalog.getString('Remove failed'),
-        gettextCatalog.getString('Membership with name {{name}} cannot be removed',
-                                 { name: vm.membership.name }));
-
-      function promiseFn() {
-        return vm.membership.remove().then(function () {
-          notificationsService.success(gettextCatalog.getString('Membership removed'));
-          $state.go('home.admin.users.memberships', {}, { reload: true });
-        });
-      }
-    }
-
-    function postUpdate(message, title, timeout) {
-      timeout = timeout || 1500;
-      return function (membership) {
-        vm.membership = membership;
-        notificationsService.success(message, title, timeout);
-      };
-    }
-
-    function editName() {
-      modalInput.text(gettextCatalog.getString('Membership name'),
-                      gettextCatalog.getString('Name'),
-                      vm.membership.name,
-                      { required: true, minLength: 2 }).result
-        .then(
-          function (name) {
-            vm.membership.updateName(name)
-              .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                               gettextCatalog.getString('Change successful')))
-              .catch(notificationsService.updateError);
-          },
-          angular.noop);
-    }
-
-    function editDescription() {
-      modalInput.textArea(gettextCatalog.getString('Membership description'),
-                      gettextCatalog.getString('Description'),
-                      vm.membership.description).result
-        .then(
-          function (description) {
-            vm.membership.updateDescription(description)
-              .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
-                               gettextCatalog.getString('Change successful')))
-              .catch(notificationsService.updateError);
-          },
-          angular.noop);
-    }
-
-    function addUser() {
-      asyncInputModal.open(gettextCatalog.getString('Add user to membership'),
-                           gettextCatalog.getString('User'),
-                           gettextCatalog.getString('enter a user\'s name or partial name'),
-                           gettextCatalog.getString('No matching users found'),
-                           getResults).result
-        .then(addUserToMembership, angular.noop);
-
-      function getResults(viewValue) {
-        return UserName.list({ filter: 'name:like:' + viewValue}, vm.membership.userData)
-          .then(function (nameObjs) {
-            return nameObjs.map(function (nameObj) {
-              return { label: nameObj.name, obj: nameObj };
-            });
-          });
-      }
-
-      function addUserToMembership(modalValue) {
-        vm.membership.addUser(modalValue.obj.id).then(function (membership) {
-          vm.membership = membership;
-          vm.userNameLabels = userNameLabels();
-        });
-      }
-    }
-
-    function userNameLabelSelected(userName) {
-      domainNotificationService.removeEntity(
-        promiseFn,
-        gettextCatalog.getString('Remove user from membership'),
-        gettextCatalog.getString(
-          'Are you sure you want to remove the user named <strong>{{name}}</strong> from this membership?',
-          { name: userName.name }),
-        gettextCatalog.getString('Remove failed'),
-        gettextCatalog.getString(
-          'User named {{name}} cannot be removed',
-          { name: userName.name }));
-
-      function promiseFn() {
-        return vm.membership.removeUser(userName.id).then(function (membership) {
-          notificationsService.success(gettextCatalog.getString(
-            'User {{name}} removed',
-            { name: userName.name }));
-          updateMembership(membership);
-        });
-      }
-    }
-
-
-    function addStudy() {
-    }
-
-    function addCentre() {
-    }
-
-    function back() {
-      $state.go('home.admin.users.memberships');
-    }
-
-    function updateMembership(membership) {
-      vm.membership = membership;
-      vm.userNameLabels = userNameLabels();
-      vm.studyNameLabels = studyNameLabels();
-      vm.centreNameLabels = centreNameLabels();
-    }
-
+    this.onUserLabelSelected   = this.userLabelSelected.bind(this);
+    this.onStudyLabelSelected  = this.studyLabelSelected.bind(this);
+    this.onCentreLabelSelected = this.centreLabelSelected.bind(this);
   }
 
-  return component;
-});
+  $onInit() {
+    this.userCanUpdate = this.usersService.getCurrentUser().hasRole('UserAdministrator');
+
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.users'),
+      this.breadcrumbService.forState('home.admin.users.memberships'),
+      this.breadcrumbService.forStateWithFunc(
+        'home.admin.users.memberships.membership',
+        () => this.membership.name)
+    ];
+
+    this.noStudiesMembership = (!this.membership.studyData.allEntities &&
+                              (this.membership.studyData.entityData.length <= 0));
+
+    this.noCentresMembership = (!this.membership.centreData.allEntities &&
+                              (this.membership.centreData.entityData.length <= 0));
+
+    this.userNameLabels   = this.userNamesToLabels();
+    this.studyNameLabels  = this.studyNamesToLabels();
+    this.centreNameLabels = this.centreNamesToLabels();
+  }
+
+  entityNamesToLabels(entityData) {
+    var labels = entityData.map((userInfo) => ({
+      label:   userInfo.name,
+      tooltip: this.gettextCatalog.getString('Remove ' + userInfo.name),
+      obj:     userInfo
+    }));
+    return _.sortBy(labels, [ 'label' ]);
+  }
+
+  userNamesToLabels() {
+    return this.entityNamesToLabels(this.membership.userData);
+  }
+
+  studyNamesToLabels() {
+    return this.entityNamesToLabels(this.membership.studyData.entityData);
+  }
+
+  centreNamesToLabels() {
+    return this.entityNamesToLabels(this.membership.centreData.entityData);
+  }
+
+  remove() {
+    this.domainNotificationService.removeEntity(
+      promiseFn,
+      this.gettextCatalog.getString('Remove membership'),
+      this.gettextCatalog.getString('Are you sure you want to remove the membership named <b>{{name}}</b>?',
+                               { name: this.membership.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString('Membership with name {{name}} cannot be removed',
+                               { name: this.membership.name }));
+
+    function promiseFn() {
+      return this.membership.remove().then(() => {
+        this.notificationsService.success(this.gettextCatalog.getString('Membership removed'));
+        this.$state.go('home.admin.users.memberships', {}, { reload: true });
+      });
+    }
+  }
+
+  postUpdate(message, title, timeout) {
+    timeout = timeout || 1500;
+    return function (membership) {
+      this.membership = membership;
+      this.notificationsService.success(message, title, timeout);
+    };
+  }
+
+  editName() {
+    this.modalInput.text(this.gettextCatalog.getString('Membership name'),
+                         this.gettextCatalog.getString('Name'),
+                         this.membership.name,
+                         { required: true, minLength: 2 }).result
+      .then((name) => {
+          this.membership.updateName(name)
+            .then(this.postUpdate(this.gettextCatalog.getString('Name changed successfully.'),
+                                  this.gettextCatalog.getString('Change successful')))
+            .catch(this.notificationsService.updateError);
+      })
+      .catch(angular.noop);
+  }
+
+  editDescription() {
+    this.modalInput.textArea(this.gettextCatalog.getString('Membership description'),
+                        this.gettextCatalog.getString('Description'),
+                        this.membership.description).result
+      .then((description) => {
+          this.membership.updateDescription(description)
+            .then(this.postUpdate(this.gettextCatalog.getString('Description changed successfully.'),
+                                  this.gettextCatalog.getString('Change successful')))
+            .catch(this.notificationsService.updateError);
+      })
+      .catch(angular.noop);
+  }
+
+  addUser() {
+    const getResults = (viewValue) =>
+          this.UserName.list({ filter: 'name:like:' + viewValue}, this.membership.userData)
+          .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
+
+    this.asyncInputModal.open(this.gettextCatalog.getString('Add user to membership'),
+                              this.gettextCatalog.getString('User'),
+                              this.gettextCatalog.getString('enter a user\'s name or partial name'),
+                              this.gettextCatalog.getString('No matching users found'),
+                              getResults).result
+      .then((modalValue) => {
+        this.membership.addUser(modalValue.obj.id).then((membership) => {
+          this.membership = membership;
+          this.userNameLabels = this.userNamesToLabels();
+        });
+      })
+      .catch(angular.noop);
+  }
+
+  // called to remove a user from the membership
+  userLabelSelected(userName) {
+    const promiseFn = () =>
+          this.membership.removeUser(userName.id).then((membership) => {
+            this.notificationsService.success(this.gettextCatalog.getString(
+              'User {{name}} removed',
+              { name: userName.name }));
+            this.updateMembership(membership);
+          });
+
+    this.domainNotificationService.removeEntity(
+      promiseFn,
+      this.gettextCatalog.getString('Remove user from membership'),
+      this.gettextCatalog.getString(
+        'Are you sure you want to remove the user named <strong>{{name}}</strong> from this membership?',
+        { name: userName.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString(
+        'User named {{name}} cannot be removed',
+        { name: userName.name }));
+  }
+
+
+  addStudy() {
+    const getResults = (viewValue) =>
+          this.StudyName.list({ filter: 'name:like:' + viewValue}, this.membership.studyData.entityData)
+          .then((nameObjs) =>
+                nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
+
+    this.asyncInputModal.open(this.gettextCatalog.getString('Add study to membership'),
+                              this.gettextCatalog.getString('Study'),
+                              this.gettextCatalog.getString('enter a study\'s name or partial name'),
+                              this.gettextCatalog.getString('No matching studys found'),
+                              getResults).result
+      .then((modalValue) => {
+        this.membership.addStudy(modalValue.obj.id).then((membership) => {
+          this.membership = membership;
+          this.studyNameLabels = this.studyNamesToLabels();
+        });
+      })
+      .catch(angular.noop);
+  }
+
+  studyLabelSelected(studyName) {
+    const promiseFn = () =>
+          this.membership.removeStudy(studyName.id).then((membership) => {
+            this.notificationsService.success(this.gettextCatalog.getString(
+              'Study {{name}} removed',
+              { name: studyName.name }));
+            this.updateMembership(membership);
+          });
+
+    this.domainNotificationService.removeEntity(
+      promiseFn,
+      this.gettextCatalog.getString('Remove study from membership'),
+      this.gettextCatalog.getString(
+        'Are you sure you want to remove the study named <strong>{{name}}</strong> from this membership?',
+        { name: studyName.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString(
+        'Study named {{name}} cannot be removed',
+        { name: studyName.name }));
+  }
+
+  addCentre() {
+    const getResults = (viewValue) =>
+          this.CentreName.list({ filter: 'name:like:' + viewValue}, this.membership.centreData.entityData)
+          .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
+
+    this.asyncInputModal.open(this.gettextCatalog.getString('Add centre to membership'),
+                              this.gettextCatalog.getString('Centre'),
+                              this.gettextCatalog.getString('enter a centre\'s name or partial name'),
+                              this.gettextCatalog.getString('No matching centres found'),
+                              getResults).result
+      .then((modalValue) => {
+        this.membership.addCentre(modalValue.obj.id).then((membership) => {
+          this.membership = membership;
+          this.centreNameLabels = this.centreNamesToLabels();
+        });
+      })
+      .catch(angular.noop);
+  }
+
+  centreLabelSelected(centreName) {
+    const promiseFn = () =>
+          this.membership.removeCentre(centreName.id).then((membership) => {
+            this.notificationsService.success(this.gettextCatalog.getString(
+              'Centre {{name}} removed',
+              { name: centreName.name }));
+            this.updateMembership(membership);
+          });
+
+    this.domainNotificationService.removeEntity(
+      promiseFn,
+      this.gettextCatalog.getString('Remove centre from membership'),
+      this.gettextCatalog.getString(
+        'Are you sure you want to remove the centre named <strong>{{name}}</strong> from this membership?',
+        { name: centreName.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString(
+        'Centre named {{name}} cannot be removed',
+        { name: centreName.name }));
+  }
+
+  back() {
+    this.$state.go('home.admin.users.memberships');
+  }
+
+  updateMembership(membership) {
+    this.membership       = membership;
+    this.userNameLabels   = this.userNamesToLabels();
+    this.studyNameLabels  = this.studyNamesToLabels();
+    this.centreNameLabels = this.centreNamesToLabels();
+  }
+
+}
+
+var component = {
+  template: require('./membershipView.html'),
+  controller: MembershipViewController,
+  controllerAs: 'vm',
+  bindings: {
+    membership: '<'
+  }
+};
+
+export default component;

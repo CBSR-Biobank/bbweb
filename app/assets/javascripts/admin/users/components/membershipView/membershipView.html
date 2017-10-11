@@ -64,7 +64,7 @@
         </div>
         <div class="col-md-8">
           <labels-list label-data="vm.userNameLabels"
-                       on-label-selected="vm.userNameLabelSelected">
+                       on-label-selected="vm.onUserLabelSelected">
           </labels-list>
         </div>
         <div class="col-md-2">
@@ -88,7 +88,9 @@
           <translate>All studies</translate>
         </div>
         <div class="col-md-8" ng-if="!vm.membership.studyData.allEntities">
-          <labels-list label-data="vm.studyNameLabels"></labels-list>
+          <labels-list label-data="vm.studyNameLabels"
+                       on-label-selected="vm.onStudyLabelSelected">
+          </labels-list>
         </div>
         <div class="col-md-8" ng-if="vm.noStudiesMembership">
           <translate>None</translate>
@@ -114,7 +116,9 @@
           <translate>All centres</translate>
         </div>
         <div class="col-md-8" ng-if="!vm.membership.centreData.allEntities">
-          <labels-list label-data="vm.centreNameLabels"></labels-list>
+          <labels-list label-data="vm.centreNameLabels"
+                       on-label-selected="vm.onCentreLabelSelected">
+          </labels-list>
         </div>
         <div class="col-md-8" ng-if="vm.noCentresMembership">
           <translate>None</translate>

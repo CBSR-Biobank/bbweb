@@ -95,11 +95,14 @@ define(function(require) {
      * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size
      *        is 10. If a value larger than 10 is used then the response is an error.
      *
+     * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+     *        from the server.
+     *
      * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
      *          domain.studies.Study}.
      */
-    StudyName.list = function (options) {
-      return EntityName.list(StudyName.url(), options, StudyName.create);
+    StudyName.list = function (options, omit) {
+      return EntityName.list(StudyName.url(), options, StudyName.create, omit);
     };
 
     /**
