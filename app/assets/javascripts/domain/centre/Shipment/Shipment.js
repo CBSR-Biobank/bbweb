@@ -5,8 +5,7 @@
 define(function (require) {
   'use strict';
 
-  var _       = require('lodash'),
-      sprintf = require('sprintf-js').sprintf;
+  var _ = require('lodash');
 
   ShipmentFactory.$inject = [
     '$q',

@@ -2,10 +2,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
-
-  //var sprintf = require('sprintf-js').sprintf;
 
   UserMembershipFactory.$inject = [
     '$q',

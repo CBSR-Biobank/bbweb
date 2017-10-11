@@ -5,8 +5,7 @@
 define(function(require) {
   'use strict';
 
-  var _       = require('lodash'),
-      sprintf = require('sprintf-js').sprintf;
+  var _ = require('lodash');
 
   StudyFactory.$inject = [
     '$q',
@@ -350,10 +349,7 @@ define(function(require) {
      * type.
      */
     Study.prototype.removeAnnotationType = function (annotationType) {
-      var url = sprintf('%s/%d/%s',
-                        Study.url('pannottype', this.id),
-                        this.version,
-                        annotationType.id);
+      var url = Study.url('pannottype', this.id, this.version, annotationType.id);
       return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
     };
 

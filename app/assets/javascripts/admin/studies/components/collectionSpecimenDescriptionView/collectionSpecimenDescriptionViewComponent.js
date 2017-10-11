@@ -5,8 +5,7 @@
 define(function (require) {
   'use strict';
 
-  var _       = require('lodash'),
-      sprintf = require('sprintf-js').sprintf;
+  var _ = require('lodash');
 
 
   var component = {
@@ -59,13 +58,11 @@ define(function (require) {
         breadcrumbService.forState('home.admin'),
         breadcrumbService.forState('home.admin.studies'),
         breadcrumbService.forStateWithFunc(
-          sprintf('home.admin.studies.study.collection.ceventType({ studyId: "%s", ceventTypeId: "%s" })',
-                  vm.collectionEventType.studyId,
-                  vm.collectionEventType.id),
-          function () { return vm.study.name; }),
+          `home.admin.studies.study.collection.ceventType({ studyId: "${vm.collectionEventType.studyId}", ceventTypeId: "${vm.collectionEventType.id}" })`,
+          () => vm.study.name),
         breadcrumbService.forStateWithFunc(
           'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
-          function () { return vm.specimenDescription.name; })
+          () => vm.specimenDescription.name)
       ];
 
       vm.returnState = {

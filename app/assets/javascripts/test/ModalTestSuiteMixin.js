@@ -5,8 +5,7 @@
 define(function (require) {
   'use strict';
 
-  var angular = require('angular'),
-      sprintf = require('sprintf-js').sprintf;
+  var angular = require('angular');
 
   ModalTestSuiteMixinFactory.$inject = [
     '$rootScope',
@@ -59,9 +58,7 @@ define(function (require) {
             compare: function(actual, expected) {
               var modalDomEls = actual.find('body > div.modal'),
                   pass        = util.equals(modalDomEls.length, expected, customEqualityTesters),
-                  message     = sprintf('Expected document %s have "%s" modals opened.',
-                                        pass ? 'not to' : 'to',
-                                        expected);
+                  message     = `Expected document ${pass ? 'not to' : 'to'} have "${expected}" modals opened.`;
 
               return { pass: pass, message: message };
             }
@@ -72,10 +69,7 @@ define(function (require) {
             compare: function(actual, expected) {
               var element = actual.find('.modal-title'),
                   pass    = util.equals(element.text(), expected, customEqualityTesters),
-                  message = sprintf('Expected "%s" %s have title be "%s"',
-                                    angular.mock.dump(element),
-                                    pass ? 'not to' : 'to',
-                                    expected);
+                  message = `Expected "${angular.mock.dump(element)}" ${pass ? 'not to' : 'to'} have title be "${expected}"`;
 
               return { pass: pass, message: message };
             }
@@ -86,10 +80,7 @@ define(function (require) {
             compare: function(actual, expected) {
               var element = actual.find('.modal-body > div'),
                   pass    = util.equals(element.text(), expected, customEqualityTesters),
-                  message = sprintf('Expected "%s" %s have be "%s"',
-                                    angular.mock.dump(element),
-                                    pass ? 'not to' : 'to',
-                                    expected);
+                  message = `Expected "${angular.mock.dump(element)}" ${pass ? 'not to' : 'to'} be "${expected}"`;
 
               return { pass: pass, message: message };
             }

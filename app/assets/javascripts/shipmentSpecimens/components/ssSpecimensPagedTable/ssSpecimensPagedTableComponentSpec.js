@@ -6,8 +6,6 @@
 
 import _ from 'lodash';
 
-const sprintf = require('sprintf-js').sprintf;
-
 describe('ssSpecimensPagedTableComponent', function() {
 
   function SuiteMixinFactory(ComponentTestSuiteMixin) {
@@ -58,18 +56,6 @@ describe('ssSpecimensPagedTableComponent', function() {
                               '$state',
                               'ShipmentSpecimen',
                               'factory');
-
-      var elementFormat =
-          `<ss-specimens-paged-table
-             default-sort-field="%s"
-             refresh="vm.refresh"
-             show-item-state="vm.showItemState"
-             on-get-specimens="vm.onGetSpecimens"
-             no-specimens-message="%s"
-             actions="vm.actions"
-             on-action-selected="vm.onActionSelected">
-           </ss-specimens-paged-table>`;
-
       this.createController =
         (defaultSortField,
          refresh,
@@ -80,7 +66,15 @@ describe('ssSpecimensPagedTableComponent', function() {
          onActionSelected) => {
            ComponentTestSuiteMixin.prototype.createController.call(
              this,
-             sprintf(elementFormat, defaultSortField, noSpecimensMessage),
+             `<ss-specimens-paged-table
+                default-sort-field="${defaultSortField}"
+                refresh="vm.refresh"
+                show-item-state="vm.showItemState"
+                on-get-specimens="vm.onGetSpecimens"
+                no-specimens-message="${noSpecimensMessage}"
+                actions="vm.actions"
+                on-action-selected="vm.onActionSelected">
+              </ss-specimens-paged-table>`,
              {
                refresh:          refresh,
                showItemState:    showItemState,

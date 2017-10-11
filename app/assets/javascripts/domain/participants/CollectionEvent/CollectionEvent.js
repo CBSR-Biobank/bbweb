@@ -5,8 +5,7 @@
 define(function(require) {
   'use strict';
 
-  var _       = require('lodash'),
-      sprintf = require('sprintf-js').sprintf;
+  var _ = require('lodash');
 
   CollectionEventFactory.$inject = [
     '$q',
@@ -357,10 +356,7 @@ define(function(require) {
     };
 
     CollectionEvent.prototype.removeAnnotation = function (annotation) {
-      var url = sprintf('%s/%d/%s',
-                        CollectionEvent.url('annot', this.id),
-                        this.version,
-                        annotation.annotationTypeId);
+      var url = CollectionEvent.url('annot', this.id, this.version, annotation.annotationTypeId);
       return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url);
     };
 

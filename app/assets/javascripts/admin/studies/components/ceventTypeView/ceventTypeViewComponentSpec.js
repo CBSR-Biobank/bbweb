@@ -35,7 +35,8 @@ describe('ceventTypeViewComponent', function() {
       this.study                  = new this.Study(this.jsonStudy);
       this.collectionEventType    = new this.CollectionEventType(this.jsonCet);
 
-      spyOn(this.$state, 'go').and.returnValue(null);
+      this.$state.reload = jasmine.createSpy().and.returnValue(null);
+      this.$state.go = jasmine.createSpy().and.returnValue(null);
 
       this.createController = (study, collectionEventType) => {
         study = study || this.study;
@@ -91,7 +92,7 @@ describe('ceventTypeViewComponent', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       var self = this;
       context.entity             = this.CollectionEventType;
       context.createController   = function () { self.createController(); };
@@ -99,7 +100,7 @@ describe('ceventTypeViewComponent', function() {
       context.controllerFuncName = 'editName';
       context.modalInputFuncName = 'text';
       context.newValue           = this.factory.stringNext();
-    }));
+    });
 
     entityUpdateSharedSpec(context);
 
@@ -109,7 +110,7 @@ describe('ceventTypeViewComponent', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       var self = this;
       context.entity             = this.CollectionEventType;
       context.createController   = function () { self.createController(); };
@@ -117,7 +118,7 @@ describe('ceventTypeViewComponent', function() {
       context.controllerFuncName = 'editDescription';
       context.modalInputFuncName = 'textArea';
       context.newValue           = this.factory.stringNext();
-    }));
+    });
 
     entityUpdateSharedSpec(context);
 
@@ -127,7 +128,7 @@ describe('ceventTypeViewComponent', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       var self = this;
       context.entity             = this.CollectionEventType;
       context.createController   = function () { self.createController(); };
@@ -135,7 +136,7 @@ describe('ceventTypeViewComponent', function() {
       context.controllerFuncName = 'editRecurring';
       context.modalInputFuncName = 'boolean';
       context.newValue           = false;
-    }));
+    });
 
     entityUpdateSharedSpec(context);
 

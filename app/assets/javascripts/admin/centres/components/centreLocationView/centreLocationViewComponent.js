@@ -5,8 +5,7 @@
 define(function (require) {
   'use strict';
 
-  var _       = require('lodash'),
-      sprintf = require('sprintf-js').sprintf;
+  var _ = require('lodash');
 
   var component = {
     template: require('./centreLocationView.html'),
@@ -45,13 +44,11 @@ define(function (require) {
         breadcrumbService.forState('home.admin'),
         breadcrumbService.forState('home.admin.centres'),
         breadcrumbService.forStateWithFunc(
-          sprintf('home.admin.centres.centre.locations({ centreId: "%s", locationId: "%s" })',
-                  vm.centre.id,
-                  vm.location.id),
-          function () { return vm.centre.name; }),
+          `home.admin.centres.centre.locations({ centreId: "${vm.centre.id}", locationId: "${vm.location.id}" })`,
+          () => vm.centre.name),
         breadcrumbService.forStateWithFunc(
           'home.admin.centres.centre.locations.locationsView',
-          function () { return vm.location.name; })
+          () => vm.location.name)
       ];
 
       vm.back               = back;

@@ -2,8 +2,6 @@
 
 import _ from 'lodash';
 
-const sprintf = require('sprintf-js').sprintf;
-
 /**
  * Jasmine matchers to test the modalInput Module.
  *
@@ -20,10 +18,7 @@ export default function modalInputMatcher () {
 
           expected = expected || '';
           pass    = element.text().slice(0, expected.length) === expected;
-          message = sprintf('Expected "%s" %s have label be "%s"',
-                            angular.mock.dump(element),
-                            pass ? 'not to' : 'to',
-                            expected);
+          message = `Expected "${angular.mock.dump(element)}" ${pass ? 'not to' : 'to'} have label be "${expected}"`;
 
           return { pass: pass, message: message };
         }
@@ -31,13 +26,10 @@ export default function modalInputMatcher () {
     },
     toHaveInputElementBeFocused: function() {
       return {
-        compare: function(actual, expected) {
+        compare: function(actual) {
           var element = actual.find('form').find('input'),
               pass = (element.length === 1) && (element.attr('focus-me') === 'true'),
-              message = sprintf('Expected input element %s be valid',
-                                angular.mock.dump(element),
-                                pass ? 'not to' : 'to',
-                                expected);
+              message = `Expected input element ${angular.mock.dump(element)} be valid`;
 
           return { pass: pass, message: message };
         }
@@ -49,10 +41,7 @@ export default function modalInputMatcher () {
           var pass, message, element = actual.find('form').find('input');
           expected = expected || 0;
           pass = (element.length === expected);
-          message = sprintf('Expected "%s" %s have %d input elements',
-                            angular.mock.dump(element),
-                            pass ? 'not to' : 'to',
-                            expected);
+          message = `Expected "${angular.mock.dump(element)}" %s have ${expected} input elements`;
           return { pass: pass, message: message };
         }
       };
@@ -66,10 +55,7 @@ export default function modalInputMatcher () {
 
           expected = expected || '';
           pass = (element.length === 1) && (element.attr('type') === expected);
-          message = sprintf('Expected "%s"" type %s be "%s"',
-                            angular.mock.dump(element),
-                            pass ? 'not to' : 'to',
-                            expected);
+          message = `Expected "${angular.mock.dump(element)}"" type ${pass ? 'not to' : 'to'} be "${expected}"`;
 
           return { pass: pass, message: message };
         }
@@ -77,7 +63,7 @@ export default function modalInputMatcher () {
     },
     toHaveValidTextAreaElement: function() {
       return {
-        compare: function(actual, expected) {
+        compare: function(actual) {
           var element = actual.find('form').find('textarea'),
               pass,
               message;
@@ -86,10 +72,7 @@ export default function modalInputMatcher () {
             (element.attr('focus-me') === 'true') &&
             (element.attr('ng-model') === 'vm.value') &&
             (element.attr('ng-required') === 'vm.options.required');
-          message = sprintf('Expected modal %s have a textarea element',
-                            angular.mock.dump(element),
-                            pass ? 'not to' : 'to',
-                            expected);
+          message = `Expected modal ${angular.mock.dump(element)} have a textarea element`;
 
           return { pass: pass, message: message };
         }
@@ -104,10 +87,7 @@ export default function modalInputMatcher () {
 
           expected = expected || {};
           pass = _.chain(expected).keys().every(checkScopeValue).value();
-          message = sprintf('Expected modal controller scope "%s" %s have a values "%s"',
-                            angular.mock.dump(scope),
-                            pass ? 'not to' : 'to',
-                            angular.mock.dump(expected));
+          message = `Expected modal controller scope "${angular.mock.dump(scope)}" ${pass ? 'not to' : 'to'} have a values "${expected}"`;
 
           return { pass: pass, message: message };
 
@@ -125,7 +105,7 @@ export default function modalInputMatcher () {
               message;
 
           pass = (element.length > 0);
-          message = sprintf('Expected modal %s have help blocks', pass ? 'not to' : 'to');
+          message = `Expected modal ${pass ? 'not to' : 'to'} have help blocks`;
           return { pass: pass, message: message };
         }
       };

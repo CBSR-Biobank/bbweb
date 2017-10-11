@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
+define(['lodash'], function(_) {
   'use strict';
 
   SpecimenFactory.$inject = [
@@ -387,7 +387,7 @@ define(['lodash', 'tv4', 'sprintf-js'], function(_, tv4, sprintf) {
       if (!collectionEventId) {
         throw new DomainError('collection event id not specified');
       }
-      url = sprintf.sprintf('%s/%s/%d', Specimen.url(collectionEventId), this.id, this.version);
+      url = Specimen.url(collectionEventId, this.id, this.version);
       return biobankApi.del(url);
     };
 
