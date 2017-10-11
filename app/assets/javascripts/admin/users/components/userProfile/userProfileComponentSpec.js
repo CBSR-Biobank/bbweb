@@ -47,8 +47,8 @@ describe('Component: userProfile', function() {
   it('correct display when user has no memberships', function() {
     var user = new this.User(this.factory.user({ membership: undefined }));
     this.createController(user);
-    expect(this.controller.studyMemberships).toEqual('None');
-    expect(this.controller.centreMemberships).toEqual('None');
+    expect(this.controller.studyMembershipLabels).toBeUndefined();
+    expect(this.controller.centreMembershipLabels).toBeUndefined();
   });
 
   it('correct display when user has membership to all studies and centres', function() {
@@ -59,8 +59,8 @@ describe('Component: userProfile', function() {
       }
     }));
     this.createController(user);
-    expect(this.controller.studyMemberships).toEqual('All Studies');
-    expect(this.controller.centreMemberships).toEqual('All Centres');
+    expect(this.controller.studyMembershipLabels).toBeUndefined();
+    expect(this.controller.centreMembershipLabels).toBeUndefined();
   });
 
   it('correct display when user has membership to some studies and centres', function() {
@@ -85,20 +85,25 @@ describe('Component: userProfile', function() {
           }
         }));
     this.createController(user);
-    expect(this.controller.studyMemberships).toEqual(studyName);
-    expect(this.controller.centreMemberships).toEqual(centreName);
+    const studyLabels = _.map(this.controller.studyMembershipLabels, 'label');
+    expect(studyLabels).toBeArrayOfSize(1);
+    expect(studyLabels).toContain(studyName);
+
+    const centreLabels = _.map(this.controller.centreMembershipLabels, 'label');
+    expect(centreLabels).toBeArrayOfSize(1);
+    expect(centreLabels).toContain(centreName);
   });
 
   describe('updates to name', function () {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.controllerFuncName = 'updateName';
       context.modalInputFuncName = 'text';
       context.modalReturnValue = this.factory.stringNext();
       context.userUpdateFuncName = 'updateName';
-    }));
+    });
 
     sharedUpdateBehaviour(context);
 
@@ -108,12 +113,12 @@ describe('Component: userProfile', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.controllerFuncName = 'updateEmail';
       context.modalInputFuncName = 'email';
       context.modalReturnValue = this.factory.emailNext();
       context.userUpdateFuncName = 'updateEmail';
-    }));
+    });
 
     sharedUpdateBehaviour(context);
 
@@ -123,12 +128,12 @@ describe('Component: userProfile', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.controllerFuncName = 'updateAvatarUrl';
       context.modalInputFuncName = 'url';
       context.modalReturnValue = this.factory.urlNext();
       context.userUpdateFuncName = 'updateAvatarUrl';
-    }));
+    });
 
     sharedUpdateBehaviour(context);
 

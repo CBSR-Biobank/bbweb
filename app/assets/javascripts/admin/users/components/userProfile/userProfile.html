@@ -88,7 +88,12 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3"><strong translate>Study Memberships</strong></div>
-        <div class="col-md-7">{{vm.studyMemberships}}</div>
+        <div class="col-md-7" ng-if="vm.studyMembershipLabels">
+          <labels-list label-data="vm.studyMembershipLabels"></labels-list>
+        </div>
+        <div class="col-md-7" ng-if="!vm.studyMembershipLabels">
+          {{'None'|translate}}
+        </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
                   uib-tooltip="{{'Update study memberships'|translate}}"
@@ -103,7 +108,12 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3"><strong translate>Centre Memberships</strong></div>
-        <div class="col-md-7">{{vm.centreMemberships}}</div>
+        <div class="col-md-7">
+          <labels-list label-data="vm.centreMembershipLabels"></labels-list>
+        </div>
+        <div class="col-md-7" ng-if="!vm.studyMembershipLabels">
+          {{'None'|translate}}
+        </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
                   uib-tooltip="{{'Update centre memberships'|translate}}"

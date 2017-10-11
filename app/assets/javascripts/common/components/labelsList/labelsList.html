@@ -5,6 +5,6 @@
      ng-click="vm.removeLabel(labelInfo)"
      uib-tooltip="{{labelInfo.tooltip}}"
      style="margin-right: 2px; margin-bottom: 2px; display: inline-block;">
-    {{labelInfo.label}} <i class="glyphicon glyphicon-remove-sign"></i>
+    {{labelInfo.label}} <i class="glyphicon glyphicon-remove-sign" ng-if="vm.onLabelSelected()"></i>
   </a>
 </h4>

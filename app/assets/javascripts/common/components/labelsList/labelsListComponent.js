@@ -60,7 +60,9 @@ define(function (require) {
     }
 
     function removeLabel(label) {
-      vm.onLabelSelected()(label.obj);
+      if (vm.onLabelSelected()) {
+        vm.onLabelSelected()(label.obj);
+      }
     }
 
   }

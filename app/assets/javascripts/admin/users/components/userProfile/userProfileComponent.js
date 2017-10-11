@@ -2,8 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function () {
+define(function (require) {
   'use strict';
+
+  const _ = require('lodash');
 
   var component = {
     template: require('./userProfile.html'),
@@ -74,25 +76,23 @@ define(function () {
         if (vm.user.membership.isForAllStudies()) {
           vm.studyMemberships = gettextCatalog.getString('All Studies');
         } else if (vm.user.membership.studyData.entityData.length > 0){
-          vm.studyMemberships = vm.user.membership.studyData.entityData
-            .map(function (entityInfo) {
-              return entityInfo.name;
-            })
-            .join(', ');
-        } else {
-          vm.studyMemberships = gettextCatalog.getString('None');
+          vm.studyMembershipLabels = _.sortBy(
+            vm.user.membership.studyData.entityData.map((entityInfo) => ({
+              label: entityInfo.name
+            })),
+            [ 'label']
+          );
         }
 
         if (vm.user.membership.isForAllCentres()) {
           vm.centreMemberships = gettextCatalog.getString('All Centres');
         } else if (vm.user.membership.centreData.entityData.length > 0){
-          vm.centreMemberships = vm.user.membership.centreData.entityData
-            .map(function (entityInfo) {
-              return entityInfo.name;
-            })
-            .join(', ');
-        } else {
-          vm.centreMemberships = gettextCatalog.getString('None');
+          vm.centreMembershipLabels = _.sortBy(
+            vm.user.membership.centreData.entityData.map((entityInfo) => ({
+              label: entityInfo.name
+            })),
+            [ 'label' ]
+          );
         }
       } else {
         vm.studyMemberships = gettextCatalog.getString('None');
