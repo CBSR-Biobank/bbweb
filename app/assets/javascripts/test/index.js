@@ -7,16 +7,16 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import AnnotationsEntityTestSuiteMixin  from './AnnotationsEntityTestSuiteMixin';
-import ComponentTestSuiteMixin          from './ComponentTestSuiteMixin';
-import DirectiveTestSuiteMixin          from './DirectiveTestSuiteMixin';
-import EntityTestSuiteMixin             from './EntityTestSuiteMixin';
+import AnnotationsEntityTestSuiteMixin  from './mixins/AnnotationsEntityTestSuiteMixin';
+import ComponentTestSuiteMixin          from './mixins/ComponentTestSuiteMixin';
+import DirectiveTestSuiteMixin          from './mixins/DirectiveTestSuiteMixin';
+import EntityTestSuiteMixin             from './mixins/EntityTestSuiteMixin';
 import Factory                          from './Factory';
-import MebershipSpecCommon              from './MembershipSpecCommon';
-import ModalTestSuiteMixin              from './ModalTestSuiteMixin';
-import ServerReplyMixin                 from '../../../assets/javascripts/test/ServerReplyMixin';
-import ShippingComponentTestSuiteMixin  from './ShippingComponentTestSuiteMixin';
-import TestSuiteMixin                   from './TestSuiteMixin';
+import MebershipSpecCommon              from './mixins/MembershipSpecCommon';
+import ModalTestSuiteMixin              from './mixins/ModalTestSuiteMixin';
+import ServerReplyMixin                 from './mixins/ServerReplyMixin';
+import ShippingComponentTestSuiteMixin  from './mixins/ShippingComponentTestSuiteMixin';
+import TestSuiteMixin                   from './mixins/TestSuiteMixin';
 import TestUtils                        from './TestUtils';
 import angular                          from 'angular';
 
