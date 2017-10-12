@@ -25,7 +25,7 @@ describe('usersPagedListComponent', function() {
                               'EmailFilter',
                               'StateFilter',
                               '$state',
-                              'factory');
+                              'Factory');
 
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(
@@ -46,11 +46,11 @@ describe('usersPagedListComponent', function() {
       };
 
       this.createUserListSpy = (users) => {
-        var reply = this.factory.pagedResult(users);
+        var reply = this.Factory.pagedResult(users);
         spyOn(this.User, 'list').and.returnValue(this.$q.when(reply));
       };
 
-      this.createEntity = () => this.User.create(this.factory.user());
+      this.createEntity = () => this.User.create(this.Factory.user());
     });
   });
 
@@ -113,13 +113,13 @@ describe('usersPagedListComponent', function() {
           ];
 
       statesInfo.forEach((info) => {
-        var user = this.User.create(this.factory.user({ state: info.state }));
+        var user = this.User.create(this.Factory.user({ state: info.state }));
         expect(this.controller.getItemIcon(user)).toEqual(info.icon);
       });
     });
 
     it('getItemIcon throws an error for and invalid state', function() {
-      var user = new this.User(this.factory.user({ state: this.factory.stringNext() }));
+      var user = new this.User(this.Factory.user({ state: this.Factory.stringNext() }));
 
       expect(() => {
         this.controller.getItemIcon(user);

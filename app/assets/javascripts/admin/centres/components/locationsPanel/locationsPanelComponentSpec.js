@@ -23,7 +23,7 @@ describe('Component: locationsPanel', function() {
                               'Location',
                               'modalService',
                               'domainNotificationService',
-                              'factory');
+                              'Factory');
 
       testUtils.addCustomMatchers();
 
@@ -43,8 +43,8 @@ describe('Component: locationsPanel', function() {
       };
 
       this.createEntities = () => ({
-        centre: this.Centre.create(this.factory.centre()),
-        locations: _.range(3).map(() => this.Location.create(this.factory.location()))
+        centre: this.Centre.create(this.Factory.centre()),
+        locations: _.range(3).map(() => this.Location.create(this.Factory.location()))
       });
 
     });
@@ -101,8 +101,8 @@ describe('Component: locationsPanel', function() {
   });
 
   it('allows a user to view a location', function() {
-    var centre = new this.Centre(this.factory.centre()),
-        location = new this.Location(this.factory.location());
+    var centre = new this.Centre(this.Factory.centre()),
+        location = new this.Location(this.Factory.location());
 
     spyOn(this.$state, 'go').and.returnValue(null);
 

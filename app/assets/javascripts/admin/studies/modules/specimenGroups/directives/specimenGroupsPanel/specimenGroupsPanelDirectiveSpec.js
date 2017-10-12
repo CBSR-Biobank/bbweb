@@ -29,7 +29,7 @@ xdescribe('Directive: specimenGroupsPanelDirective', function() {
   function setupEntities(injector) {
     var Study         = injector.get('Study'),
         SpecimenGroup = injector.get('SpecimenGroup'),
-        factory  = injector.get('factory');
+        factory  = injector.get('Factory');
 
     return create;
 

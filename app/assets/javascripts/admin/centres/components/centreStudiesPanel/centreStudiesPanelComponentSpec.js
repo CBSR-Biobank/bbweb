@@ -23,7 +23,7 @@ describe('Component: centreStudiesPanel', function() {
                               'Study',
                               'EntityViewer',
                               'modalService',
-                              'factory');
+                              'Factory');
 
       testUtils.addCustomMatchers();
 
@@ -59,8 +59,8 @@ describe('Component: centreStudiesPanel', function() {
       this.studyNames = (studies) => studies.map((study) => this.studyNameDto(study));
 
       this.createEntities = () => {
-        var studies = _.range(3).map(() =>  this.Study.create(this.factory.study())),
-            centre = this.Centre.create(this.factory.centre());
+        var studies = _.range(3).map(() =>  this.Study.create(this.Factory.study())),
+            centre = this.Centre.create(this.Factory.centre());
         return { centre: centre, studies: studies};
       };
     });

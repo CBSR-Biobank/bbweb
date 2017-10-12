@@ -118,8 +118,8 @@ define(function (require) {
 
         beforeEach(function() {
           this.fixtures = function (jsonWithEntityFunc) {
-            var id         = this.factory.stringNext(),
-                name       = this.factory.stringNext(),
+            var id         = this.Factory.stringNext(),
+                name       = this.Factory.stringNext(),
                 json       = jsonWithEntityFunc.call(this, id, name),
                 membership = this.membershipFromJson(json);
             return {
@@ -145,7 +145,7 @@ define(function (require) {
 
         it('returns false for a name not in the set', function() {
           var f = this.fixtures(context.jsonWithEntityFunc);
-          expect(context.isMemberOfFunc.call(f.membership, this.factory.stringNext())).toBeFalse();
+          expect(context.isMemberOfFunc.call(f.membership, this.Factory.stringNext())).toBeFalse();
         });
 
       });

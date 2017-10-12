@@ -17,13 +17,13 @@ describe('AnnotationType', function() {
       this.injectDependencies('AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
-                              'factory');
+                              'Factory');
     });
   });
 
   it('invalid objects are reported', function () {
     var self = this,
-        annotationTypeJson = self.factory.annotationType({
+        annotationTypeJson = self.Factory.annotationType({
           valueType: self.AnnotationValueType.SELECT,
           options: []
         });
@@ -51,7 +51,7 @@ describe('AnnotationType', function() {
 
   it('create fails for invalid JSON', function () {
     var self = this,
-        annotationTypeJson = self.factory.annotationType({
+        annotationTypeJson = self.Factory.annotationType({
           valueType: self.AnnotationValueType.SELECT,
           options: []
         });
@@ -70,7 +70,7 @@ describe('AnnotationType', function() {
 
     _.values(self.AnnotationValueType).forEach((valueType) => {
       var annotationType = new self.AnnotationType(
-        self.factory.annotationType({ valueType: valueType }));
+        self.Factory.annotationType({ valueType: valueType }));
 
       expect(annotationType.isValueTypeText()).toBe(valueType === self.AnnotationValueType.TEXT);
       expect(annotationType.isValueTypeNumber()).toBe(valueType === self.AnnotationValueType.NUMBER);
@@ -84,7 +84,7 @@ describe('AnnotationType', function() {
 
     _.range(4).forEach((maxValueCount) => {
       var annotationType = new self.AnnotationType(
-        self.factory.annotationType({
+        self.Factory.annotationType({
           valueType: self.AnnotationValueType.SELECT,
           maxValueCount: maxValueCount
         }));
@@ -99,7 +99,7 @@ describe('AnnotationType', function() {
 
     _.range(4).forEach((maxValueCount) => {
       var annotationType = new self.AnnotationType(
-        self.factory.annotationType({
+        self.Factory.annotationType({
           valueType: self.AnnotationValueType.SELECT,
           maxValueCount: maxValueCount
         }));
@@ -114,7 +114,7 @@ describe('AnnotationType', function() {
 
     _.range(4).forEach((maxValueCount) => {
       annotationType = new self.AnnotationType(
-        self.factory.annotationType({
+        self.Factory.annotationType({
           valueType: self.AnnotationValueType.SELECT,
           maxValueCount: maxValueCount
         }));
@@ -126,7 +126,7 @@ describe('AnnotationType', function() {
 
     _.range(4).forEach((maxValueCount) => {
       annotationType = new self.AnnotationType(
-        self.factory.annotationType({
+        self.Factory.annotationType({
           valueType: self.AnnotationValueType.TEXT,
           maxValueCount: maxValueCount
         }));
@@ -144,7 +144,7 @@ describe('AnnotationType', function() {
 
     valueTypesNoSelect.forEach((valueType) => {
       var annotationType = new self.AnnotationType(
-        self.factory.annotationType({ valueType: valueType }));
+        self.Factory.annotationType({ valueType: valueType }));
 
       expect(function () { annotationType.addOption(); })
         .toThrow(new Error('value type is not select: ' + valueType));
@@ -154,7 +154,7 @@ describe('AnnotationType', function() {
   it('addOption adds an item to the options array', function() {
     var self = this,
         annotationType = new self.AnnotationType(
-          self.factory.annotationType({
+          self.Factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             options: []
           }));
@@ -167,7 +167,7 @@ describe('AnnotationType', function() {
   it('removeOption throws an error if options array is empty', function() {
     var self = this,
         annotationType = new self.AnnotationType(
-          self.factory.annotationType({
+          self.Factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             options: []
           }));
@@ -180,7 +180,7 @@ describe('AnnotationType', function() {
     var self = this,
         options = ['option1', 'option2'],
         annotationType = new self.AnnotationType(
-          self.factory.annotationType({
+          self.Factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             options: options.slice()
           }));
@@ -193,25 +193,25 @@ describe('AnnotationType', function() {
   describe('getValueTypeLabelFunc', function() {
 
     it('returns valid type for value type TEXT', function() {
-      var annotationType = new this.AnnotationType(this.factory.annotationType(
+      var annotationType = new this.AnnotationType(this.Factory.annotationType(
         { valueType: this.AnnotationValueType.TEXT }));
       expect(annotationType.getValueTypeLabelFunc()().toLowerCase()).toBe(this.AnnotationValueType.TEXT);
     });
 
     it('returns valid type for value type NUMBER', function() {
-      var annotationType = new this.AnnotationType(this.factory.annotationType(
+      var annotationType = new this.AnnotationType(this.Factory.annotationType(
         { valueType: this.AnnotationValueType.NUMBER }));
       expect(annotationType.getValueTypeLabelFunc()().toLowerCase()).toBe(this.AnnotationValueType.NUMBER);
     });
 
     it('returns valid type for value type DATE_TIME', function() {
-      var annotationType = new this.AnnotationType(this.factory.annotationType(
+      var annotationType = new this.AnnotationType(this.Factory.annotationType(
         { valueType: this.AnnotationValueType.DATE_TIME }));
       expect(annotationType.getValueTypeLabelFunc()()).toBe('Date and time');
     });
 
     it('returns valid type for value type SINGLE SELECT', function() {
-      var annotationType = new this.AnnotationType(this.factory.annotationType(
+      var annotationType = new this.AnnotationType(this.Factory.annotationType(
         {
           valueType: this.AnnotationValueType.SELECT,
           maxValueCount: this.AnnotationMaxValueCount.SELECT_SINGLE
@@ -220,7 +220,7 @@ describe('AnnotationType', function() {
     });
 
     it('returns valid type for value type MULTIPLE SELECT', function() {
-      var annotationType = new this.AnnotationType(this.factory.annotationType(
+      var annotationType = new this.AnnotationType(this.Factory.annotationType(
         {
           valueType: this.AnnotationValueType.SELECT,
           maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE
@@ -230,8 +230,8 @@ describe('AnnotationType', function() {
 
     it('throws exception for invalid value type', function() {
       var self = this,
-          annotationType = new self.AnnotationType(self.factory.annotationType(
-            { valueType: self.factory.stringNext() }));
+          annotationType = new self.AnnotationType(self.Factory.annotationType(
+            { valueType: self.Factory.stringNext() }));
       expect(function () {
         annotationType.getValueTypeLabelFunc()();
       }).toThrowError(/no such label/);
@@ -242,7 +242,7 @@ describe('AnnotationType', function() {
   describe('calling valueTypeChanged', function() {
 
     it('clears the options array', function() {
-      var annotationTypeJson = this.factory.annotationType({
+      var annotationTypeJson = this.Factory.annotationType({
         valueType: this.AnnotationValueType.SELECT,
         options: ['opt1', 'opt2']
       }),
@@ -254,7 +254,7 @@ describe('AnnotationType', function() {
     });
 
     it('max value count is set to NONE', function() {
-      var annotationTypeJson = this.factory.annotationType({
+      var annotationTypeJson = this.Factory.annotationType({
         valueType: this.AnnotationValueType.SELECT,
         options: ['opt1', 'opt2']
       }),

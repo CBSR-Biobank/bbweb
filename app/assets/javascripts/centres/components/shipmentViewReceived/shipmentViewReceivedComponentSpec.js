@@ -25,7 +25,7 @@ describe('shipmentViewReceivedComponent', function() {
                               'modalInput',
                               'notificationsService',
                               'modalService',
-                              'factory');
+                              'Factory');
       testUtils.addCustomMatchers();
       this.createController = (shipment) =>
         ShippingComponentTestSuiteMixin.createController.call(

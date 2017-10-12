@@ -19,7 +19,7 @@ describe('createController', function() {
                               'Centre',
                               'Shipment',
                               'ShipmentState',
-                              'factory');
+                              'Factory');
 
       this.createController = (centre) => {
         centre = centre || this.centre;
@@ -38,7 +38,7 @@ describe('createController', function() {
   });
 
   it('should have valid scope', function() {
-    this.createController(new this.Centre(this.factory.centre()));
+    this.createController(new this.Centre(this.Factory.centre()));
     expect(this.controller.tabs).toBeNonEmptyArray();
   });
 

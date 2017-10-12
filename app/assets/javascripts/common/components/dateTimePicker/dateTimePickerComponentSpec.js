@@ -15,7 +15,7 @@ describe('dateTimePickerComponent', function() {
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              'factory');
+                              'Factory');
 
       this.createController = (label, defaultValue, required, onEdit, labelCols, inputCols) => {
         var labelAttrs = (labelCols) ? `label-cols="${labelCols}"` : '',
@@ -41,7 +41,7 @@ describe('dateTimePickerComponent', function() {
   });
 
   it('has valid scope', function() {
-    var label        = this.factory.stringNext(),
+    var label        = this.Factory.stringNext(),
         defaultValue = new Date(),
         required     = true,
         onEdit       = jasmine.createSpy().and.returnValue(null),
@@ -61,7 +61,7 @@ describe('dateTimePickerComponent', function() {
     var defaultValue = new Date(),
         onEdit       = jasmine.createSpy().and.returnValue(null);
 
-    this.createController(this.factory.stringNext(), defaultValue, true, onEdit);
+    this.createController(this.Factory.stringNext(), defaultValue, true, onEdit);
     this.controller.onChange();
     this.scope.$digest();
     expect(onEdit).toHaveBeenCalledWith(defaultValue);

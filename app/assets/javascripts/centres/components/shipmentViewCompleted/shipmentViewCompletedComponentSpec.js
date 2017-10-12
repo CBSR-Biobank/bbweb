@@ -17,7 +17,7 @@ describe('shipmentViewCompletedComponent', function() {
                               '$rootScope',
                               '$compile',
                               'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
-                              'factory');
+                              'Factory');
       testUtils.addCustomMatchers();
 
       this.createController = (shipment) =>

@@ -30,7 +30,7 @@ xdescribe('Controller: ProcessingTypeEditCtrl', function() {
                                  _ProcessingType_,
                                  _domainNotificationService_,
                                  _notificationsService_,
-                                 _factory_) {
+                                 _Factory_) {
       q                          = $q;
       rootScope                  = $rootScope;
       controller                 = $controller;
@@ -39,7 +39,7 @@ xdescribe('Controller: ProcessingTypeEditCtrl', function() {
       ProcessingType             = _ProcessingType_;
       domainNotificationService        = _domainNotificationService_;
       notificationsService       = _notificationsService_;
-      factory               = _factory_;
+      Factory               = _Factory_;
     });
   });
 

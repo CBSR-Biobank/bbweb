@@ -28,10 +28,10 @@ describe('ceventTypeViewComponent', function() {
                               'notificationsService',
                               'domainNotificationService',
                               'modalService',
-                              'factory');
+                              'Factory');
 
-      this.jsonStudy              = this.factory.study();
-      this.jsonCet                = this.factory.collectionEventType(this.jsonStudy);
+      this.jsonStudy              = this.Factory.study();
+      this.jsonCet                = this.Factory.collectionEventType(this.jsonStudy);
       this.study                  = new this.Study(this.jsonStudy);
       this.collectionEventType    = new this.CollectionEventType(this.jsonCet);
 
@@ -78,7 +78,7 @@ describe('ceventTypeViewComponent', function() {
   });
 
   it('calling editAnnotationType should change to the correct state', function() {
-    var annotType = new this.AnnotationType(this.factory.annotationType());
+    var annotType = new this.AnnotationType(this.Factory.annotationType());
 
     this.createController();
     this.controller.editAnnotationType(annotType);
@@ -99,7 +99,7 @@ describe('ceventTypeViewComponent', function() {
       context.updateFuncName     = 'updateName';
       context.controllerFuncName = 'editName';
       context.modalInputFuncName = 'text';
-      context.newValue           = this.factory.stringNext();
+      context.newValue           = this.Factory.stringNext();
     });
 
     entityUpdateSharedSpec(context);
@@ -117,7 +117,7 @@ describe('ceventTypeViewComponent', function() {
       context.updateFuncName     = 'updateDescription';
       context.controllerFuncName = 'editDescription';
       context.modalInputFuncName = 'textArea';
-      context.newValue           = this.factory.stringNext();
+      context.newValue           = this.Factory.stringNext();
     });
 
     entityUpdateSharedSpec(context);
@@ -144,7 +144,7 @@ describe('ceventTypeViewComponent', function() {
 
   it('editing a specimen description changes to correct state', function() {
     var specimenDescription =
-        new this.CollectionSpecimenDescription(this.factory.collectionSpecimenDescription());
+        new this.CollectionSpecimenDescription(this.Factory.collectionSpecimenDescription());
 
     this.createController();
     this.controller.editSpecimenDescription(specimenDescription);
@@ -158,8 +158,8 @@ describe('ceventTypeViewComponent', function() {
 
     it('can be removed when in valid state', function() {
       var modalService = this.$injector.get('modalService'),
-          jsonSpecimenDescription = this.factory.collectionSpecimenDescription(),
-          jsonCeventType = this.factory.collectionEventType(
+          jsonSpecimenDescription = this.Factory.collectionSpecimenDescription(),
+          jsonCeventType = this.Factory.collectionEventType(
             { specimenDescriptions: [ jsonSpecimenDescription ]}),
           ceventType = this.CollectionEventType.create(jsonCeventType);
 
@@ -180,7 +180,7 @@ describe('ceventTypeViewComponent', function() {
     it('throws an error if study is not disabled', function() {
       var self = this,
           specimenDescription = new self.CollectionSpecimenDescription(
-            self.factory.collectionSpecimenDescription());
+            self.Factory.collectionSpecimenDescription());
 
       spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
@@ -199,8 +199,8 @@ describe('ceventTypeViewComponent', function() {
 
     it('can be removed when in valid state', function() {
       var modalService = this.$injector.get('modalService'),
-          jsonAnnotType = this.factory.annotationType(),
-          jsonCeventType = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
+          jsonAnnotType = this.Factory.annotationType(),
+          jsonCeventType = this.Factory.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
           ceventType = this.CollectionEventType.create(jsonCeventType);
 
       spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
@@ -217,7 +217,7 @@ describe('ceventTypeViewComponent', function() {
     });
 
     it('throws an error if modifications are not allowed', function() {
-      var annotationType = new this.AnnotationType(this.factory.annotationType());
+      var annotationType = new this.AnnotationType(this.Factory.annotationType());
 
       spyOn(this.modalService, 'modalOk').and.returnValue(null);
       spyOn(this.CollectionEventType.prototype, 'removeAnnotationType').and.callThrough();
@@ -232,7 +232,7 @@ describe('ceventTypeViewComponent', function() {
 
     it('throws an error if study is not disabled', function() {
       var self = this,
-          annotationType = new this.AnnotationType(this.factory.annotationType());
+          annotationType = new this.AnnotationType(this.Factory.annotationType());
 
       spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 

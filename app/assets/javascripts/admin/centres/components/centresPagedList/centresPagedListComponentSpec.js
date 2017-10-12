@@ -25,7 +25,7 @@ describe('centresPagedListComponent', function() {
                               'NameFilter',
                               'StateFilter',
                               '$state',
-                              'factory');
+                              'Factory');
 
       this.createController = () => {
         ComponentTestSuiteMixin.createController.call(
@@ -46,12 +46,12 @@ describe('centresPagedListComponent', function() {
       };
 
       this.createEntity = () => {
-        var entity = new this.Centre(this.factory.centre());
+        var entity = new this.Centre(this.Factory.centre());
         return entity;
       };
 
       this.createPagedResultsSpy = (centres) => {
-        var reply = this.factory.pagedResult(centres);
+        var reply = this.Factory.pagedResult(centres);
         spyOn(this.Centre, 'list').and.returnValue(this.$q.when(reply));
       };
 
@@ -117,14 +117,14 @@ describe('centresPagedListComponent', function() {
           ];
 
       statesInfo.forEach(function (info) {
-        var centre = new self.Centre(self.factory.centre({ state: info.state }));
+        var centre = new self.Centre(self.Factory.centre({ state: info.state }));
         expect(self.controller.getItemIcon(centre)).toEqual(info.icon);
       });
     });
 
     it('getItemIcon throws an error for and invalid state', function() {
       var self = this,
-          centre = new this.Centre(this.factory.centre({ state: this.factory.stringNext() }));
+          centre = new this.Centre(this.Factory.centre({ state: this.Factory.stringNext() }));
 
       expect(function () {
         self.controller.getItemIcon(centre);

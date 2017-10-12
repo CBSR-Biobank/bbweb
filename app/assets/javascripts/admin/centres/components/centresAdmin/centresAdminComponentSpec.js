@@ -18,7 +18,7 @@ describe('Component: centresAdmin', function() {
                               '$compile',
                               'Centre',
                               'CentreCounts',
-                              'factory');
+                              'Factory');
 
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(
@@ -31,7 +31,7 @@ describe('Component: centresAdmin', function() {
 
   it('scope is valid on startup', function() {
     spyOn(this.CentreCounts, 'get').and.returnValue(this.$q.when({ total: 0, disabled: 0, enabled: 0 }));
-    spyOn(this.Centre, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
+    spyOn(this.Centre, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
     this.createController();
     expect(this.scope).toBeDefined();
   });

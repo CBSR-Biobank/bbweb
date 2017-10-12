@@ -18,12 +18,12 @@ xdescribe('ProcessingType', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function($httpBackend,
                                  _ProcessingType_,
-                                 _factory_,
+                                 _Factory_,
                                  ServerReplyMixin) {
       _.extend(this, ServerReplyMixin.prototype);
     httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
-      factory        = _factory_;
+      Factory        = _Factory_;
     });
   });
 

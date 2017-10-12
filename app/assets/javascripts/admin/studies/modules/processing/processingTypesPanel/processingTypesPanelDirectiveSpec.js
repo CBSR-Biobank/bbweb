@@ -28,7 +28,7 @@ xdescribe('Directive: processingTypesPanelDirective', function() {
   function setupEntities(injector) {
     var Study          = injector.get('Study'),
         ProcessingType = injector.get('ProcessingType'),
-        factory   = injector.get('factory');
+        factory   = injector.get('Factory');
 
     return create;
 

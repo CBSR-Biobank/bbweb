@@ -8,16 +8,16 @@
 
 import _ from 'lodash';
 
-describe('ProcessingTypeViewer', function() {
+xdescribe('ProcessingTypeViewer', function() {
 
   var ProcessingTypeViewer, factory, centre;
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(_ProcessingTypeViewer_,
-                                 _factory_) {
+                                 _Factory_) {
       ProcessingTypeViewer = _ProcessingTypeViewer_;
-      factory   = _factory_;
+      Factory   = _Factory_;
 
       centre = factory.centre();
     });

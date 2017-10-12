@@ -20,7 +20,7 @@ describe('Centre', function() {
                               'Location',
                               'funutils',
                               'testUtils',
-                              'factory');
+                              'Factory');
 
       // used by promise tests
       this.expectCentre = (entity) => {
@@ -76,22 +76,22 @@ describe('Centre', function() {
   });
 
   it('fails when creating from a non object', function() {
-    var badCentreJson = _.omit(this.factory.centre(), 'name');
+    var badCentreJson = _.omit(this.Factory.centre(), 'name');
 
     expect(() => { this.Centre.create(badCentreJson); })
       .toThrowError(/invalid object from server/);
   });
 
   it('can be created with a location', function() {
-    var location = this.factory.location(),
-        rawCentre = this.factory.centre({ locations: [ location ]}),
+    var location = this.Factory.location(),
+        rawCentre = this.Factory.centre({ locations: [ location ]}),
         centre = this.Centre.create(rawCentre);
 
     expect(centre.locations).toBeArrayOfSize(1);
   });
 
   it('fails when creating from a bad study ID', function() {
-    var badCentreJson = this.factory.centre({ studyNames: [ null, '' ] });
+    var badCentreJson = this.Factory.centre({ studyNames: [ null, '' ] });
 
     expect(() => {
       this.Centre.create(badCentreJson);
@@ -99,7 +99,7 @@ describe('Centre', function() {
   });
 
   it('fails when creating from a bad location', function() {
-    var badCentreJson = this.factory.centre({ locations: [ 1 ] });
+    var badCentreJson = this.Factory.centre({ locations: [ 1 ] });
 
     expect(() => {
       this.Centre.create(badCentreJson);
@@ -108,14 +108,14 @@ describe('Centre', function() {
 
   it('state predicates return valid results', function() {
     _.values(this.CentreState).forEach((state) => {
-      var centre = new this.Centre(this.factory.centre({ state: state }));
+      var centre = new this.Centre(this.Factory.centre({ state: state }));
       expect(centre.isDisabled()).toBe(state === this.CentreState.DISABLED);
       expect(centre.isEnabled()).toBe(state === this.CentreState.ENABLED);
     });
   });
 
   it('can retrieve a single centre', function() {
-    var centre = this.factory.centre(),
+    var centre = this.Factory.centre(),
         checkReply= (reply) => {
           expect(reply).toEqual(jasmine.any(this.Centre));
         };
@@ -126,7 +126,7 @@ describe('Centre', function() {
   });
 
   it('fails when getting a centre and it has a bad format', function() {
-    var centre = _.omit(this.factory.centre(), 'name');
+    var centre = _.omit(this.Factory.centre(), 'name');
     this.$httpBackend.whenGET(this.url(centre.id)).respond(this.reply(centre));
     this.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
     this.$httpBackend.flush();
@@ -137,7 +137,7 @@ describe('Centre', function() {
   });
 
   it('fails when getting a centre and it has a bad study ID', function() {
-    var centre = this.factory.centre({ studyNames: [ '' ]});
+    var centre = this.Factory.centre({ studyNames: [ '' ]});
 
     this.$httpBackend.whenGET(this.url(centre.id)).respond(this.reply(centre));
     this.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
@@ -149,8 +149,8 @@ describe('Centre', function() {
   });
 
   it('fails when getting a centre and it has a bad location', function() {
-    var location = _.omit(this.factory.location(), 'name'),
-        centre = this.factory.centre({ locations: [ location ]});
+    var location = _.omit(this.Factory.location(), 'name'),
+        centre = this.Factory.centre({ locations: [ location ]});
 
     this.$httpBackend.whenGET(this.url(centre.id)).respond(this.reply(centre));
     this.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
@@ -163,8 +163,8 @@ describe('Centre', function() {
   });
 
   it('can retrieve centres', function() {
-    var centres = [ this.factory.centre() ],
-        reply = this.factory.pagedResult(centres),
+    var centres = [ this.Factory.centre() ],
+        reply = this.Factory.pagedResult(centres),
         checkReply = (pagedResult) => {
           expect(pagedResult.items).toBeArrayOfSize(centres.length);
           pagedResult.items.forEach((item) => {
@@ -184,8 +184,8 @@ describe('Centre', function() {
       { page: 2 },
       { limit: 10 }
     ],
-        centres = [ this.factory.centre() ],
-        reply   = this.factory.pagedResult(centres),
+        centres = [ this.Factory.centre() ],
+        reply   = this.Factory.pagedResult(centres),
         testCentre = (pagedResult)  => {
           expect(pagedResult.items).toBeArrayOfSize(centres.length);
           pagedResult.items.forEach((centre) => {
@@ -202,8 +202,8 @@ describe('Centre', function() {
   });
 
   it('fails when list returns an invalid centre', function() {
-    var centres = [ _.omit(this.factory.centre(), 'name') ],
-        reply = this.factory.pagedResult(centres);
+    var centres = [ _.omit(this.Factory.centre(), 'name') ],
+        reply = this.Factory.pagedResult(centres);
 
     this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
     this.Centre.list().then(listFail).catch(shouldFail);
@@ -219,7 +219,7 @@ describe('Centre', function() {
   });
 
   it('can add a centre', function() {
-    var jsonCentre = this.factory.centre(),
+    var jsonCentre = this.Factory.centre(),
         centre = new this.Centre(_.omit(jsonCentre, 'id')),
         json = _.pick(centre, 'name', 'description'),
         checkReply = (replyCentre) => {
@@ -232,7 +232,7 @@ describe('Centre', function() {
   });
 
   it('can update the name on a centre', function() {
-    var jsonCentre = this.factory.centre(),
+    var jsonCentre = this.Factory.centre(),
         centre     = new this.Centre(jsonCentre);
 
     this.updateEntity.call(this,
@@ -247,7 +247,7 @@ describe('Centre', function() {
   });
 
   it('can update the description on a centre', function() {
-    var jsonCentre = this.factory.centre({ description: this.factory.stringNext() }),
+    var jsonCentre = this.Factory.centre({ description: this.Factory.stringNext() }),
         centre     = new this.Centre(jsonCentre);
 
     this.updateEntity.call(this,
@@ -272,23 +272,23 @@ describe('Centre', function() {
   });
 
   it('can disable a centre', function() {
-    var jsonCentre = this.factory.centre({ state: this.CentreState.ENABLED });
+    var jsonCentre = this.Factory.centre({ state: this.CentreState.ENABLED });
     this.changeStatusShared(jsonCentre, 'disable', this.CentreState.DISABLED);
   });
 
   it('throws an error when disabling a centre and it is already disabled', function() {
-    var centre = new this.Centre(this.factory.centre({ state: this.CentreState.DISABLED }));
+    var centre = new this.Centre(this.Factory.centre({ state: this.CentreState.DISABLED }));
     expect(() => { centre.disable(); })
       .toThrowError('already disabled');
   });
 
   it('can enable a centre', function() {
-    var jsonCentre = this.factory.centre({ state: this.CentreState.DISABLED });
+    var jsonCentre = this.Factory.centre({ state: this.CentreState.DISABLED });
     this.changeStatusShared(jsonCentre, 'enable', this.CentreState.ENABLED);
   });
 
   it('throws an error when enabling a centre and it is already enabled', function() {
-    var centre = new this.Centre(this.factory.centre({ state: this.CentreState.ENABLED }));
+    var centre = new this.Centre(this.Factory.centre({ state: this.CentreState.ENABLED }));
     expect(() => { centre.enable(); })
       .toThrowError('already enabled');
   });
@@ -296,8 +296,8 @@ describe('Centre', function() {
   describe('locations', function () {
 
     it('adds a location', function() {
-      var jsonLocation = this.factory.location(),
-          jsonCentre   = this.factory.centre(),
+      var jsonLocation = this.Factory.location(),
+          jsonCentre   = this.Factory.centre(),
           centre       = new this.Centre(jsonCentre);
 
       this.updateEntity.call(this,
@@ -312,8 +312,8 @@ describe('Centre', function() {
     });
 
     it('updates a location', function() {
-      var jsonLocation = this.factory.location(),
-          jsonCentre   = this.factory.centre(),
+      var jsonLocation = this.Factory.location(),
+          jsonCentre   = this.Factory.centre(),
           centre       = new this.Centre(jsonCentre);
 
       this.updateEntity.call(this,
@@ -335,8 +335,8 @@ describe('Centre', function() {
     });
 
     it('can remove a location', function() {
-      var jsonLocation = new this.Location(this.factory.location()),
-          jsonCentre   = this.factory.centre({ locations: [ jsonLocation ]}),
+      var jsonLocation = new this.Location(this.Factory.location()),
+          jsonCentre   = this.Factory.centre({ locations: [ jsonLocation ]}),
           centre       = new this.Centre(jsonCentre),
           url          = this.url('locations', centre.id) + '/' + centre.version + '/' + jsonLocation.id,
           checkCentre = (reply) => {
@@ -353,8 +353,8 @@ describe('Centre', function() {
   describe('studies', function () {
 
     it('can add a study', function() {
-      var jsonStudy  = this.factory.study(),
-          jsonCentre = this.factory.centre(),
+      var jsonStudy  = this.Factory.study(),
+          jsonCentre = this.Factory.centre(),
           centre     = new this.Centre(jsonCentre);
 
       this.updateEntity.call(this,
@@ -369,8 +369,8 @@ describe('Centre', function() {
     });
 
     it('can remove a study', function() {
-      var jsonStudy  = this.factory.study(),
-          jsonCentre = this.factory.centre({ studyNames: [ this.factory.studyNameDto(jsonStudy) ]}),
+      var jsonStudy  = this.Factory.study(),
+          jsonCentre = this.Factory.centre({ studyNames: [ this.Factory.studyNameDto(jsonStudy) ]}),
           centre     = new this.Centre(jsonCentre),
           url        = this.url('studies', centre.id) + '/' + centre.version + '/' + jsonStudy.id,
           checkCentre = (reply) => {
@@ -383,8 +383,8 @@ describe('Centre', function() {
     });
 
     it('should not remove a study that does not exist', function() {
-      var study = this.factory.study(),
-          centre = new this.Centre(this.factory.centre());
+      var study = this.Factory.study(),
+          centre = new this.Centre(this.Factory.centre());
 
       expect(() => {
         centre.removeStudy(study);

@@ -34,17 +34,17 @@ xdescribe('modalInputModule', function() {
                               '$animate',
                               '$document',
                               'modalInput',
-                              'factory');
+                              'Factory');
 
 
       this.addModalMatchers();
       modalInputMatchers();
-      this.label = this.factory.stringNext();
-      this.title = this.factory.stringNext();
+      this.label = this.Factory.stringNext();
+      this.title = this.Factory.stringNext();
 
       this.openModal = (modalInputFunc, defaultValue, title, label, options) => {
-        title = title || this.factory.stringNext();
-        label = label || this.factory.stringNext();
+        title = title || this.Factory.stringNext();
+        label = label || this.Factory.stringNext();
         this.modal = modalInputFunc(title, label, defaultValue, options);
         this.modal.result.then(function () {}, function () {});
         this.$rootScope.$digest();
@@ -592,7 +592,7 @@ xdescribe('modalInputModule', function() {
   describe('text modal', function() {
 
     beforeEach(function () {
-      this.defaultValue = this.factory.stringNext();
+      this.defaultValue = this.Factory.stringNext();
     });
 
     it('has valid elements and scope', function() {
@@ -651,7 +651,7 @@ xdescribe('modalInputModule', function() {
 
     it('modal should be closed when OK button is pressed', function() {
       this.openModal(this.modalInput.text,
-                     this.factory.stringNext(),
+                     this.Factory.stringNext(),
                      this.title,
                      this.label);
 
@@ -669,7 +669,7 @@ xdescribe('modalInputModule', function() {
 
     it('modal should be closed when Cancel button is pressed', function() {
       this.openModal(this.modalInput.text,
-                     this.factory.stringNext(),
+                     this.Factory.stringNext(),
                      this.title,
                      this.label);
 

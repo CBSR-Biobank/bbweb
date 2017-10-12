@@ -23,9 +23,9 @@ describe('studyParticipantsTabDirectiveDirective', function() {
                               'modalService',
                               'Study',
                               'AnnotationType',
-                              'factory');
+                              'Factory');
 
-      this.jsonStudy = this.factory.study();
+      this.jsonStudy = this.Factory.study();
       this.study     = new this.Study(this.jsonStudy);
 
       spyOn(this.$state, 'go').and.returnValue('ok');
@@ -71,7 +71,7 @@ describe('studyParticipantsTabDirectiveDirective', function() {
   describe('for annotation types', function() {
 
     beforeEach(function() {
-      this.annotationType = new this.AnnotationType(this.factory.annotationType());
+      this.annotationType = new this.AnnotationType(this.Factory.annotationType());
     });
 
     it('invoking editAnnotationType changes state', function() {

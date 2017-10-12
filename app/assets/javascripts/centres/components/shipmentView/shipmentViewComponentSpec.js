@@ -18,7 +18,7 @@ describe('shipmentViewComponent', function() {
                               '$compile',
                               'Shipment',
                               'ShipmentState',
-                              'factory');
+                              'Factory');
       this.createController = function (shipment) {
         ShippingComponentTestSuiteMixin.createController.call(
           this,

@@ -16,7 +16,7 @@ describe('nameAndStateFiltersComponent', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
 
-      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
+      this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
       this.createController = (bindings) => {
         var self = this,
             defaultBindings = {},

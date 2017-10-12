@@ -21,7 +21,7 @@ describe('Component: home', function() {
                               '$httpBackend',
                               'User',
                               'usersService',
-                              'factory');
+                              'Factory');
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(
           this,
@@ -32,7 +32,7 @@ describe('Component: home', function() {
   });
 
   it('has valid scope', function() {
-    var user = this.User.create(this.factory.user());
+    var user = this.User.create(this.Factory.user());
     this.usersService.requestCurrentUser =
       jasmine.createSpy().and.returnValue(this.$q.when(user));
     this.createController();

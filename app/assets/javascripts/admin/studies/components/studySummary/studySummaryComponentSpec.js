@@ -27,17 +27,17 @@ describe('Component: studySummary', function() {
                               'CollectionSpecimenDescription',
                               'modalService',
                               'notificationsService',
-                              'factory');
+                              'Factory');
 
-      specimenDescription = this.factory.collectionSpecimenDescription();
-      this.study = this.Study.create(this.factory.study());
+      specimenDescription = this.Factory.collectionSpecimenDescription();
+      this.study = this.Study.create(this.Factory.study());
       ceventType = this.CollectionEventType.create(
-        this.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]}));
+        this.Factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]}));
 
       spyOn(this.CollectionEventType, 'list').and.returnValue(this.$q.when([ ceventType ]));
       spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when(true));
 
-      this.study = new this.Study(this.factory.study());
+      this.study = new this.Study(this.Factory.study());
 
       this.createScope = () => {
         var scope = ComponentTestSuiteMixin.createScope.call(this, { study: this.study });

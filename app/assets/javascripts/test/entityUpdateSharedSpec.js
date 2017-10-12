@@ -55,7 +55,7 @@ define(['lodash'], function(_) {
       });
 
       it('should display an error in a modal when update fails', function() {
-        var newValue = this.factory.stringNext();
+        var newValue = this.Factory.stringNext();
 
         this.deferred.resolve(newValue);
         expect(context.entity.prototype[context.updateFuncName]).toBeFunction();

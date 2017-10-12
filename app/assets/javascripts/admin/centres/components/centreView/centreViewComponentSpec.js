@@ -19,9 +19,9 @@ describe('Component: centreView', function() {
                               '$compile',
                               '$state',
                               'Centre',
-                              'factory');
+                              'Factory');
 
-      this.centre = new this.Centre(this.factory.centre());
+      this.centre = new this.Centre(this.Factory.centre());
 
       this.createController = (centre) =>
         ComponentTestSuiteMixin.createController.call(

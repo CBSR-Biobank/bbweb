@@ -20,7 +20,7 @@ describe('ShipmentSpecimen domain object:', function() {
                               'funutils',
                               'testUtils',
                               'UrlService',
-                              'factory');
+                              'Factory');
       // used by promise tests
       this.expectShipmentSpecimen = (entity) => {
         expect(entity).toEqual(jasmine.any(this.ShipmentSpecimen));
@@ -62,15 +62,15 @@ describe('ShipmentSpecimen domain object:', function() {
     });
 
     it('fails when creating from a bad shipment ID', function() {
-      var badJson = this.factory.shipmentSpecimen({ shipmentId: undefined });
+      var badJson = this.Factory.shipmentSpecimen({ shipmentId: undefined });
 
       expect(() => { this.ShipmentSpecimen.create(badJson); })
         .toThrowError(/invalid object from server.*shipmentId/);
     });
 
     it('fails when creating from a bad specimen', function() {
-      var specimen = this.factory.specimen(),
-          badJson = this.factory.shipmentSpecimen({ specimen: _.omit(specimen, 'originLocationInfo') });
+      var specimen = this.Factory.specimen(),
+          badJson = this.Factory.shipmentSpecimen({ specimen: _.omit(specimen, 'originLocationInfo') });
 
       expect(() => {
         this.ShipmentSpecimen.create(badJson);
@@ -78,15 +78,15 @@ describe('ShipmentSpecimen domain object:', function() {
     });
 
     it('fails when creating from a bad location ID', function() {
-      var specimen = this.factory.specimen(),
-          badJson = this.factory.shipmentSpecimen({ specimen: _.omit(specimen, 'locationInfo') });
+      var specimen = this.Factory.specimen(),
+          badJson = this.Factory.shipmentSpecimen({ specimen: _.omit(specimen, 'locationInfo') });
 
       expect(() => { this.ShipmentSpecimen.create(badJson); })
         .toThrowError(/invalid object from server.*locationInfo/);
     });
 
     it('fails when creating from a bad state', function() {
-      var badJson = this.factory.shipmentSpecimen({ state: undefined });
+      var badJson = this.Factory.shipmentSpecimen({ state: undefined });
 
       expect(() => { this.ShipmentSpecimen.create(badJson); })
         .toThrowError(/invalid object from server.*state/);
@@ -97,7 +97,7 @@ describe('ShipmentSpecimen domain object:', function() {
   describe('when getting a single shipment', function() {
 
     it('can retrieve a single shipment specimen', function() {
-      var ss = this.factory.shipmentSpecimen(),
+      var ss = this.Factory.shipmentSpecimen(),
           checkReply = (reply) => {
             expect(reply).toEqual(jasmine.any(this.ShipmentSpecimen));
           };
@@ -115,7 +115,7 @@ describe('ShipmentSpecimen domain object:', function() {
                                ];
 
       requiredProperties.forEach((property) => {
-        var ss = _.omit(this.factory.shipmentSpecimen(), property);
+        var ss = _.omit(this.Factory.shipmentSpecimen(), property);
 
         this.$httpBackend.whenGET(this.url('specimens', ss.id)).respond(this.reply(ss));
         this.ShipmentSpecimen.get(ss.id).then(shouldNotFail).catch(shouldFail);
@@ -136,9 +136,9 @@ describe('ShipmentSpecimen domain object:', function() {
   describe('when listing shipment specimens', function() {
 
     it('can retrieve shipment specimens', function() {
-      var ssArray = [ this.factory.shipmentSpecimen() ],
+      var ssArray = [ this.Factory.shipmentSpecimen() ],
           shipmentId = ssArray[0].shipmentId,
-          reply = this.factory.pagedResult(ssArray),
+          reply = this.Factory.pagedResult(ssArray),
           checkReply = (pagedResult) => {
             expect(pagedResult.items).toBeArrayOfSize(ssArray.length);
             pagedResult.items.forEach((item) => {
@@ -160,9 +160,9 @@ describe('ShipmentSpecimen domain object:', function() {
           ];
 
       optionList.forEach((options) => {
-        var ssArray    = [ this.factory.shipmentSpecimen() ],
+        var ssArray    = [ this.Factory.shipmentSpecimen() ],
             shipmentId = ssArray[0].shipmentId,
-            reply      = this.factory.pagedResult(ssArray),
+            reply      = this.Factory.pagedResult(ssArray),
             url        = this.url('specimens', shipmentId) + '?' + this.$httpParamSerializer(options),
             testShipmentSpecimens = (pagedResult) => {
               expect(pagedResult.items).toBeArrayOfSize(ssArray.length);
@@ -178,9 +178,9 @@ describe('ShipmentSpecimen domain object:', function() {
     });
 
     it('fails when list returns an invalid shipment', function() {
-      var ssArray    = [ _.omit(this.factory.shipmentSpecimen(), 'state') ],
+      var ssArray    = [ _.omit(this.Factory.shipmentSpecimen(), 'state') ],
           shipmentId = ssArray[0].shipmentId,
-          reply      = this.factory.pagedResult(ssArray);
+          reply      = this.Factory.pagedResult(ssArray);
 
       this.$httpBackend.whenGET(this.url('specimens', shipmentId)).respond(this.reply(reply));
       this.ShipmentSpecimen.list(shipmentId).then(listFail).catch(shouldFail);

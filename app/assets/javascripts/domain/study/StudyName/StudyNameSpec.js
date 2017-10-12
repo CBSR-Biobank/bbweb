@@ -20,10 +20,10 @@ describe('StudyName', function() {
                               'EntityName',
                               'StudyName',
                               'StudyState',
-                              'factory');
+                              'Factory');
 
       //this.testUtils.addCustomMatchers();
-      this.jsonStudyName = this.factory.studyNameDto();
+      this.jsonStudyName = this.Factory.studyNameDto();
 
       // used by promise tests
       this.expectStudy = (entity) => {
@@ -54,7 +54,7 @@ describe('StudyName', function() {
       context.constructor = this.StudyName;
       context.createFunc  = this.StudyName.create;
       context.restApiUrl  = this.url();
-      context.factoryFunc = this.factory.studyNameDto;
+      context.factoryFunc = this.Factory.studyNameDto.bind(this.Factory);
       context.listFunc    = this.StudyName.list;
     });
 
@@ -64,7 +64,7 @@ describe('StudyName', function() {
 
   it('state predicates return valid results', function() {
     _.values(this.StudyState).forEach((state) => {
-      var studyName = this.StudyName.create(this.factory.studyNameDto({ state: state }));
+      var studyName = this.StudyName.create(this.Factory.studyNameDto({ state: state }));
       expect(studyName.isDisabled()).toBe(state === this.StudyState.DISABLED);
       expect(studyName.isEnabled()).toBe(state === this.StudyState.ENABLED);
       expect(studyName.isRetired()).toBe(state === this.StudyState.RETIRED);

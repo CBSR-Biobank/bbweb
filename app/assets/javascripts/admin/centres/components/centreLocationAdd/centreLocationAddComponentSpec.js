@@ -20,12 +20,12 @@ describe('Component: centreLocationAdd', function() {
                               '$state',
                               'Centre',
                               'Location',
-                              'factory',
+                              'Factory',
                               'domainNotificationService',
                               'notificationsService');
 
-      this.centre = new this.Centre(this.factory.centre());
-      this.location = new this.Location(this.factory.location());
+      this.centre = new this.Centre(this.Factory.centre());
+      this.location = new this.Location(this.Factory.location());
       this.returnStateName = 'home.admin.centres.centre.locations';
 
       this.createController = (centre) =>

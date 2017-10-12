@@ -23,19 +23,19 @@ describe('MultipleSelectAnnotation', function() {
                               'AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
-                              'factory');
+                              'Factory');
     });
   });
 
   it('set value can be assigned a string', function() {
     var self = this,
-        jsonAnnotationType = self.factory.annotationType({
+        jsonAnnotationType = self.Factory.annotationType({
           valueType:     self.AnnotationValueType.SELECT,
           maxValueCount: self.AnnotationMaxValueCount.SELECT_MULTIPLE,
           options:       [ 'option1', 'option2' ],
           required:      true
         }),
-        jsonAnnotation = self.factory.annotation({}, jsonAnnotationType),
+        jsonAnnotation = self.Factory.annotation({}, jsonAnnotationType),
         annotationType = new self.AnnotationType(jsonAnnotationType),
         annotation = new self.MultipleSelectAnnotation(jsonAnnotation, annotationType);
 

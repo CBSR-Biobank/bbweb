@@ -19,11 +19,11 @@ describe('Component: locationAdd', function() {
                               '$state',
                               'Centre',
                               'Location',
-                              'factory',
+                              'Factory',
                               'domainNotificationService',
                               'notificationsService');
 
-      this.centre = new this.Centre(this.factory.centre());
+      this.centre = new this.Centre(this.Factory.centre());
       this.location = new this.Location();
 
       this.currentState = {

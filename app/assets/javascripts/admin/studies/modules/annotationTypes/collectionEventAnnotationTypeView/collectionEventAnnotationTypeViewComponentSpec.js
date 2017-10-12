@@ -23,7 +23,7 @@ describe('Component: collectionEventAnnotationTypeView', function() {
                               'Study',
                               'CollectionEventType',
                               'AnnotationType',
-                              'factory');
+                              'Factory');
 
       this.createController = (study, collectionEventType, annotationType) => {
         this.CollectionEventType.get =
@@ -45,9 +45,9 @@ describe('Component: collectionEventAnnotationTypeView', function() {
       };
 
       this.createEntities = () => {
-        var jsonAnnotType       = this.factory.annotationType(),
-            jsonStudy           = this.factory.study(),
-            jsonCet             = this.factory.collectionEventType(jsonStudy),
+        var jsonAnnotType       = this.Factory.annotationType(),
+            jsonStudy           = this.Factory.study(),
+            jsonCet             = this.Factory.collectionEventType(jsonStudy),
             study               = this.Study.create(jsonStudy),
             collectionEventType = this.CollectionEventType.create(
               _.extend({}, jsonCet, { annotationTypes: [ jsonAnnotType] })),

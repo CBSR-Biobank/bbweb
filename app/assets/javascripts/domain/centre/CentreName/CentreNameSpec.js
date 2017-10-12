@@ -22,7 +22,7 @@ describe('CentreName', function() {
                               'EntityName',
                               'CentreName',
                               'CentreState',
-                              'factory');
+                              'Factory');
       // used by promise tests
       this.expectCentre = (entity) => {
         expect(entity).toEqual(jasmine.any(this.CentreName));
@@ -52,7 +52,7 @@ describe('CentreName', function() {
       context.constructor = this.CentreName;
       context.createFunc  = this.CentreName.create;
       context.restApiUrl  = this.url();
-      context.factoryFunc = this.factory.centreNameDto;
+      context.factoryFunc = this.Factory.userNameDto.bind(this.Factory);
       context.listFunc    = this.CentreName.list;
     });
 
@@ -62,7 +62,7 @@ describe('CentreName', function() {
 
   it('state predicates return valid results', function() {
     _.values(this.CentreState).forEach((state) => {
-      var entityName = this.CentreName.create(this.factory.centreNameDto({ state: state }));
+      var entityName = this.CentreName.create(this.Factory.centreNameDto({ state: state }));
       expect(entityName.isDisabled()).toBe(state === this.CentreState.DISABLED);
       expect(entityName.isEnabled()).toBe(state === this.CentreState.ENABLED);
     });

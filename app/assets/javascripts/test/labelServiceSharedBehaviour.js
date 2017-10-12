@@ -15,9 +15,9 @@ define(['lodash'], function(_) {
 
     it('throws error when invalid state is used', function() {
       var self = this;
-      this.injectDependencies('factory');
+      this.injectDependencies('Factory');
       expect(function () {
-        context.toLabelFunc(self.factory.stringNext());
+        context.toLabelFunc(self.Factory.stringNext());
       }).toThrowError(/no such label:/);
     });
 

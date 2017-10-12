@@ -21,7 +21,7 @@ describe('Directive: annotationTypeAddDirective', function() {
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
                               'annotationValueTypeLabelService',
-                              'factory');
+                              'Factory');
 
       this.onSubmit = jasmine.createSpy('onSubmit');
       this.onCancel = jasmine.createSpy('onCancel');
@@ -61,7 +61,7 @@ describe('Directive: annotationTypeAddDirective', function() {
     this.controller.annotationType.maxValueCount = this.AnnotationMaxValueCount.NONE;
     expect(this.controller.maxValueCountRequired()).toBe(true);
 
-    this.controller.annotationType.maxValueCount = this.factory.stringNext();
+    this.controller.annotationType.maxValueCount = this.Factory.stringNext();
     expect(this.controller.maxValueCountRequired()).toBe(true);
 
     this.controller.annotationType.maxValueCount = this.AnnotationMaxValueCount.SELECT_SINGLE;
@@ -145,7 +145,7 @@ describe('Directive: annotationTypeAddDirective', function() {
   it('should invoke submit function', function() {
     this.createController();
 
-    var annotType = new this.AnnotationType(this.factory.annotationType());
+    var annotType = new this.AnnotationType(this.Factory.annotationType());
     this.controller.submit(annotType);
     expect(this.onSubmit).toHaveBeenCalledWith(annotType);
   });

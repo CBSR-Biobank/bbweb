@@ -20,7 +20,7 @@ describe('unpackedShipmentUnpackComponent', function() {
                               'ShipmentSpecimen',
                               'ShipmentItemState',
                               'modalService',
-                              'factory');
+                              'Factory');
 
       this.createController = (shipment) =>
         ShippingComponentTestSuiteMixin.createController.call(
@@ -57,12 +57,12 @@ describe('unpackedShipmentUnpackComponent', function() {
     it('retrieves extra specimens', function() {
       var self = this,
           shipment = this.createShipment(),
-          shipmentSpecimens = [ new this.ShipmentSpecimen(this.factory.shipmentSpecimen()) ],
+          shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
           promiseSucceeded = false,
           args;
 
       spyOn(this.ShipmentSpecimen, 'list')
-        .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
+        .and.returnValue(this.$q.when(this.Factory.pagedResult(shipmentSpecimens)));
 
       this.createController(shipment);
       this.controller.getPresentSpecimens().then(function (result) {
@@ -78,11 +78,11 @@ describe('unpackedShipmentUnpackComponent', function() {
     });
 
     it('returns empty array if shipment is undefined', function() {
-      var shipmentSpecimens = [ new this.ShipmentSpecimen(this.factory.shipmentSpecimen()) ],
+      var shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
           promiseSucceeded = false;
 
       spyOn(this.ShipmentSpecimen, 'list')
-        .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
+        .and.returnValue(this.$q.when(this.Factory.pagedResult(shipmentSpecimens)));
 
       this.createController();
       this.controller.shipment = undefined;
@@ -106,7 +106,7 @@ describe('unpackedShipmentUnpackComponent', function() {
       spyOn(this.Shipment.prototype, 'tagSpecimensAsReceived').and.returnValue(this.$q.when(true));
 
       this.createController(shipment);
-      this.controller.inventoryIds = this.factory.stringNext() + ','  + this.factory.stringNext();
+      this.controller.inventoryIds = this.Factory.stringNext() + ','  + this.Factory.stringNext();
       tableRefreshCount = this.controller.refreshTable;
       this.controller.onInventoryIdsSubmit();
       this.scope.$digest();
@@ -121,15 +121,15 @@ describe('unpackedShipmentUnpackComponent', function() {
             this.errorReply('EntityCriteriaError: invalid inventory Ids: xxxx'),
             this.errorReply('EntityCriteriaError: specimens not in this shipment: xxxx'),
             this.errorReply('EntityCriteriaError: shipment specimens not present: xxx'),
-            this.errorReply(this.factory.stringNext()),
-            this.factory.stringNext()
+            this.errorReply(this.Factory.stringNext()),
+            this.Factory.stringNext()
           ],
           tableRefreshCount;
 
       spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
 
       this.createController(shipment);
-      this.controller.inventoryIds = this.factory.stringNext() + ','  + this.factory.stringNext();
+      this.controller.inventoryIds = this.Factory.stringNext() + ','  + this.Factory.stringNext();
       tableRefreshCount = this.controller.refreshTable;
 
       errors.forEach(function (error, index) {
@@ -167,7 +167,7 @@ describe('unpackedShipmentUnpackComponent', function() {
 
   it('specimen can be tagged as missing', function() {
     this.shipment = this.createShipment();
-    this.shipmentSpecimen = new this.ShipmentSpecimen(this.factory.shipmentSpecimen());
+    this.shipmentSpecimen = new this.ShipmentSpecimen(this.Factory.shipmentSpecimen());
 
     spyOn(this.Shipment.prototype, 'tagSpecimensAsMissing').and.returnValue(this.$q.when(this.shipment));
 

@@ -15,7 +15,7 @@ describe('EntitySet', function() {
 
       this.injectDependencies('$rootScope',
                               'EntitySet',
-                              'factory',
+                              'Factory',
                               'testUtils');
 
       this.testUtils.addCustomMatchers();
@@ -23,8 +23,8 @@ describe('EntitySet', function() {
       this.jsonObj = () => ({
         allEntities: false,
         entityData: [{
-          id: this.factory.stringNext(),
-          name: this.factory.stringNext()
+          id: this.Factory.stringNext(),
+          name: this.Factory.stringNext()
         }]
       });
 
@@ -129,26 +129,26 @@ describe('EntitySet', function() {
   describe('isMemberOf', function() {
 
     it('returns true for a name in the set', function() {
-      var id        = this.factory.stringNext(),
-          name      = this.factory.stringNext(),
+      var id        = this.Factory.stringNext(),
+          name      = this.Factory.stringNext(),
           entitySet = this.EntitySet.create({ allEntities: false, entityData: [{ id: id, name: name}]});
       expect(entitySet.allEntities).toBeFalse();
       expect(entitySet.isMemberOf(name)).toBeTrue();
     });
 
     it('returns false for a name not in the set', function() {
-      var id        = this.factory.stringNext(),
-          name      = this.factory.stringNext(),
+      var id        = this.Factory.stringNext(),
+          name      = this.Factory.stringNext(),
           entitySet = this.EntitySet.create({ allEntities: false, entityData: [{ id: id, name: name}]});
       expect(entitySet.allEntities).toBeFalse();
-      expect(entitySet.isMemberOf(this.factory.stringNext())).toBeFalse();
+      expect(entitySet.isMemberOf(this.Factory.stringNext())).toBeFalse();
     });
 
   });
 
   it('addEntity adds an entity', function() {
-    var id        = this.factory.stringNext(),
-        name      = this.factory.stringNext(),
+    var id        = this.Factory.stringNext(),
+        name      = this.Factory.stringNext(),
         entitySet = new this.EntitySet();
     expect(entitySet.allEntities).toBeFalse();
     expect(entitySet.entityData).toBeEmptyArray();
@@ -158,8 +158,8 @@ describe('EntitySet', function() {
   });
 
   it('removeEntity removes an entity by name', function() {
-    var id        = this.factory.stringNext(),
-        name      = this.factory.stringNext(),
+    var id        = this.Factory.stringNext(),
+        name      = this.Factory.stringNext(),
         entitySet = this.EntitySet.create({ allEntities: false, entityData: [{ id: id, name: name}]});
     expect(entitySet.allEntities).toBeFalse();
     expect(entitySet.entityData).toBeNonEmptyArray();

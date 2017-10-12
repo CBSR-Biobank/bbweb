@@ -16,7 +16,7 @@ describe('unpackedShipmentInfoComponent', function() {
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              'factory');
+                              'Factory');
 
       this.createController = (shipment) =>
         ShippingComponentTestSuiteMixin.createController.call(

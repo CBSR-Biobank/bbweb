@@ -64,7 +64,7 @@ export default function sharedBehaviour(context) {
         var self = this;
         context.createController(0);
         expect(function () {
-          self.controller.updateSearchFilter(self.factory.stringNext());
+          self.controller.updateSearchFilter(self.Factory.stringNext());
         }).toThrowError(/filter never assigned/);
       });
 
@@ -124,8 +124,8 @@ export default function sharedBehaviour(context) {
 
     it('filters are cleared', function() {
       context.createController(1);
-      this.controller.nameFilter = this.factory.stringNext();
-      this.controller.selectedState = this.factory.stringNext();
+      this.controller.nameFilter = this.Factory.stringNext();
+      this.controller.selectedState = this.Factory.stringNext();
       this.controller.filtersCleared();
       this.scope.$digest();
       expect(this.controller.filters.nameFilter.getValue()).toBeEmptyString();

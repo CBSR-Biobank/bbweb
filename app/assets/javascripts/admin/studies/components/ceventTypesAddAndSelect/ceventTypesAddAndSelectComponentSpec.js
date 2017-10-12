@@ -23,10 +23,10 @@ describe('ceventTypesAddAndSelectComponent', function() {
                               '$state',
                               'Study',
                               'CollectionEventType',
-                              'factory');
+                              'Factory');
 
-      jsonStudy = this.factory.study();
-      jsonCet   = this.factory.collectionEventType(jsonStudy);
+      jsonStudy = this.Factory.study();
+      jsonCet   = this.Factory.collectionEventType(jsonStudy);
 
       this.study = new this.Study(jsonStudy);
       this.collectionEventType = new this.CollectionEventType(jsonCet);
@@ -46,7 +46,7 @@ describe('ceventTypesAddAndSelectComponent', function() {
         }
 
         this.CollectionEventType.list =
-          jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult(collectionEventTypes)));
+          jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult(collectionEventTypes)));
 
         ComponentTestSuiteMixin.createController.call(
           this,
@@ -100,11 +100,11 @@ describe('ceventTypesAddAndSelectComponent', function() {
   describe('for updating name filter', function() {
 
     it('filter is updated when user enters a value', function() {
-      var name = this.factory.stringNext();
+      var name = this.Factory.stringNext();
       this.createController();
 
       this.CollectionEventType.list =
-        jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult([])));
+        jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult([])));
 
       this.controller.nameFilter = name;
       this.controller.nameFilterUpdated();

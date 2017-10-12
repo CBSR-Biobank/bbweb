@@ -27,11 +27,11 @@ describe('Specimen', function() {
                               'CollectionEventType',
                               'CollectionEvent',
                               'Specimen',
-                              'factory',
+                              'Factory',
                               'testUtils');
 
       testUtils.addCustomMatchers();
-      this.jsonSpecimen = this.factory.specimen();
+      this.jsonSpecimen = this.Factory.specimen();
 
       // used by promise tests
       this.expectSpecimen = (entity) => {
@@ -76,7 +76,7 @@ describe('Specimen', function() {
   });
 
   it('constructor with specimen spec has valid values', function() {
-    var specimenDescription = this.factory.collectionSpecimenDescription(),
+    var specimenDescription = this.Factory.collectionSpecimenDescription(),
         specimen = new this.Specimen({}, specimenDescription);
     expect(specimen.specimenDescriptionId).toBe(specimenDescription.id);
   });
@@ -103,7 +103,7 @@ describe('Specimen', function() {
   describe('getting specimen by ID', function() {
 
     it('can retrieve a single sepcimen by ID', function() {
-      var jsonSpecimen = this.factory.specimen();
+      var jsonSpecimen = this.Factory.specimen();
 
       this.$httpBackend.whenGET(this.url(jsonSpecimen.id)).respond(this.reply(jsonSpecimen));
 
@@ -124,7 +124,7 @@ describe('Specimen', function() {
   describe('getting specimen by inventory ID', function() {
 
     it('can retrieve a single sepcimen by inventory ID', function() {
-      var jsonSpecimen = this.factory.specimen();
+      var jsonSpecimen = this.Factory.specimen();
 
       this.$httpBackend.whenGET(this.url() + '/invid/' + jsonSpecimen.inventoryId)
         .respond(this.reply(jsonSpecimen));
@@ -151,14 +151,14 @@ describe('Specimen', function() {
           specimens,
           reply;
 
-      this.factory.centre({ locations: [ this.factory.location() ]});
+      this.Factory.centre({ locations: [ this.Factory.location() ]});
 
-      specimenDescription = this.factory.collectionSpecimenDescription();
-      this.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]});
+      specimenDescription = this.Factory.collectionSpecimenDescription();
+      this.Factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]});
 
-      cevent    = this.factory.collectionEvent();
-      specimens = _.range(3).map(() => this.factory.specimen());
-      reply     = this.factory.pagedResult(specimens);
+      cevent    = this.Factory.collectionEvent();
+      specimens = _.range(3).map(() => this.Factory.specimen());
+      reply     = this.Factory.pagedResult(specimens);
 
       this.$httpBackend.whenGET(this.url(cevent.id)).respond(this.reply(reply));
 
@@ -172,8 +172,8 @@ describe('Specimen', function() {
     });
 
     it('can list specimens using sorting', function() {
-      var cevent = this.factory.collectionEvent(),
-          reply = this.factory.pagedResult([]),
+      var cevent = this.Factory.collectionEvent(),
+          reply = this.Factory.pagedResult([]),
           sortingTypes = [ 'id', '-timeCreated', 'state' ];
 
       sortingTypes.forEach((sortingType) => {
@@ -188,8 +188,8 @@ describe('Specimen', function() {
     });
 
     it('can list specimens using page number', function() {
-      var cevent = this.factory.collectionEvent(),
-          reply = this.factory.pagedResult([]),
+      var cevent = this.Factory.collectionEvent(),
+          reply = this.Factory.pagedResult([]),
           page = 2;
 
       this.$httpBackend.whenGET(this.url(cevent.id) + '?page=' + page)
@@ -202,8 +202,8 @@ describe('Specimen', function() {
     });
 
     it('can list specimens using page size number', function() {
-      var cevent = this.factory.collectionEvent(),
-          reply = this.factory.pagedResult([]),
+      var cevent = this.Factory.collectionEvent(),
+          reply = this.Factory.pagedResult([]),
           limit = 2;
 
       this.$httpBackend.whenGET(this.url(cevent.id) + '?limit=' + limit)
@@ -216,8 +216,8 @@ describe('Specimen', function() {
     });
 
     it('returns rejected promise if specimens have invalid format', function() {
-      var cevent = this.factory.collectionEvent(),
-          reply = this.factory.pagedResult([{ tmp: 1 }]),
+      var cevent = this.Factory.collectionEvent(),
+          reply = this.Factory.pagedResult([{ tmp: 1 }]),
           catchTriggered = false;
 
       this.$httpBackend.whenGET(this.url(cevent.id)).respond(this.reply(reply));
@@ -241,11 +241,11 @@ describe('Specimen', function() {
         specimens,
         json;
 
-    this.factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]});
-    specimenDescription  = this.factory.collectionSpecimenDescription();
-    jsonCevent    = this.factory.collectionEvent();
+    this.Factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]});
+    specimenDescription  = this.Factory.collectionSpecimenDescription();
+    jsonCevent    = this.Factory.collectionEvent();
     cevent        = new this.CollectionEvent(jsonCevent);
-    jsonSpecimens = _.range(3).map(() => this.factory.specimen());
+    jsonSpecimens = _.range(3).map(() => this.Factory.specimen());
     specimens     = jsonSpecimens.map((json) => this.Specimen.create(json));
     json          = addJson(cevent, jsonSpecimens);
 
@@ -256,8 +256,8 @@ describe('Specimen', function() {
   });
 
   it('can assign the specimen spec', function() {
-    var specimen = new this.Specimen(this.factory.specimen()),
-        specimenDescription  = this.factory.collectionSpecimenDescription();
+    var specimen = new this.Specimen(this.Factory.specimen()),
+        specimenDescription  = this.Factory.collectionSpecimenDescription();
     expect(specimen.specimenDescriptionId).not.toBe(specimenDescription.id);
     expect(specimen.specimenDescription).not.toEqual(specimenDescription);
     specimen.setSpecimenDescription(specimenDescription);
@@ -268,14 +268,14 @@ describe('Specimen', function() {
   describe('for name', function() {
 
     it('can get the specimen specs name', function() {
-      var specimenDescription  = this.factory.collectionSpecimenDescription(),
-          specimen = new this.Specimen(this.factory.specimen());
+      var specimenDescription  = this.Factory.collectionSpecimenDescription(),
+          specimen = new this.Specimen(this.Factory.specimen());
       specimen.setSpecimenDescription(specimenDescription);
       expect(specimen.name()).toBe(specimenDescription.name);
     });
 
     it('throws a domain error if specimen spec not assigned', function() {
-      var specimen = new this.Specimen(this.factory.specimen());
+      var specimen = new this.Specimen(this.Factory.specimen());
       expect(() => {
         specimen.name();
       }).toThrowError(/specimen spec not assigned/);
@@ -285,14 +285,14 @@ describe('Specimen', function() {
   describe('for name', function() {
 
     it('can get the specimen specs default amount', function() {
-      var specimenDescription  = this.factory.collectionSpecimenDescription(),
-          specimen = new this.Specimen(this.factory.specimen());
+      var specimenDescription  = this.Factory.collectionSpecimenDescription(),
+          specimen = new this.Specimen(this.Factory.specimen());
       specimen.setSpecimenDescription(specimenDescription);
       expect(specimen.defaultAmount()).toBe(specimenDescription.amount);
     });
 
     it('throws a domain error if specimen spec not assigned', function() {
-      var specimen = new this.Specimen(this.factory.specimen());
+      var specimen = new this.Specimen(this.Factory.specimen());
       expect(() => {
         specimen.defaultAmount();
       }).toThrowError(/specimen spec not assigned/);
@@ -300,8 +300,8 @@ describe('Specimen', function() {
   });
 
   it('should be able to remove a specimen', function() {
-    var cevent   = new this.CollectionEvent(this.factory.collectionEvent()),
-        specimen = new this.Specimen(this.factory.specimen()),
+    var cevent   = new this.CollectionEvent(this.Factory.collectionEvent()),
+        specimen = new this.Specimen(this.Factory.specimen()),
         url      = this.url(cevent.id, specimen.id, specimen.version);
 
     specimen.collectionEventId = cevent.id;

@@ -21,12 +21,12 @@ describe('annotationsInputModule', function() {
                               'AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
-                              'factory');
+                              'Factory');
       this.createAnnotation = (valueType) =>
         this.annotationFactory.create(
           undefined,
           new this.AnnotationType(
-            this.factory.annotationType({ valueType: valueType, required: true })
+            this.Factory.annotationType({ valueType: valueType, required: true })
           ));
 
       this.createController = (annotations) => {
@@ -48,7 +48,7 @@ describe('annotationsInputModule', function() {
   });
 
   it('works for a TEXT annotation', function() {
-    var annotationValue = this.factory.stringNext(),
+    var annotationValue = this.Factory.stringNext(),
         annotations = [ this.createAnnotation(this.AnnotationValueType.TEXT) ];
 
     this.createController(annotations);
@@ -72,7 +72,7 @@ describe('annotationsInputModule', function() {
   });
 
   it('validation fails for a NUMBER annotation and an invalid number', function() {
-    var annotationValue = this.factory.stringNext(),
+    var annotationValue = this.Factory.stringNext(),
         annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
 
     this.createController(annotations);
@@ -103,7 +103,7 @@ describe('annotationsInputModule', function() {
         annotationType, annotations;
 
     annotationType = new self.AnnotationType(
-      self.factory.annotationType({
+      self.Factory.annotationType({
         valueType:     self.AnnotationValueType.SELECT,
         maxValueCount: self.AnnotationMaxValueCount.SELECT_SINGLE,
         options:       [ 'option1', 'option2' ],
@@ -130,7 +130,7 @@ describe('annotationsInputModule', function() {
     var annotationType, annotation;
 
     annotationType = new this.AnnotationType(
-      this.factory.annotationType({
+      this.Factory.annotationType({
         valueType: this.AnnotationValueType.SELECT,
         maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE,
         options: [ 'option1', 'option2', 'option3' ],
@@ -155,7 +155,7 @@ describe('annotationsInputModule', function() {
            annotationType, annotation;
 
        annotationType = new self.AnnotationType(
-         self.factory.annotationType({
+         self.Factory.annotationType({
            valueType:     self.AnnotationValueType.SELECT,
            maxValueCount: self.AnnotationMaxValueCount.SELECT_MULTIPLE,
            options:       [ 'option1', 'option2', 'option3' ],

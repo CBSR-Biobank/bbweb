@@ -17,7 +17,7 @@ describe('MembershipBase', function() {
       this.injectDependencies('$rootScope',
                               'MembershipBase',
                               'EntitySet',
-                              'factory',
+                              'Factory',
                               'testUtils');
 
       this.testUtils.addCustomMatchers();

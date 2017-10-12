@@ -22,7 +22,7 @@ xdescribe('SpecimenLinkType', function() {
       httpBackend      = this.$injector.get('$httpBackend');
       funutils         = this.$injector.get('funutils');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
-      factory          = this.$injector.get('factory');
+      factory          = this.$injector.get('Factory');
       testUtils.addCustomMatchers();
     });
   });

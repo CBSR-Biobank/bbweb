@@ -9,14 +9,14 @@
 
 import ComponentTestSuiteMixin         from './ComponentTestSuiteMixin';
 import DirectiveTestSuiteMixin         from './DirectiveTestSuiteMixin';
+import Factory                         from './Factory';
 import ModalTestSuiteMixin             from './ModalTestSuiteMixin';
 import ShippingComponentTestSuiteMixin from './ShippingComponentTestSuiteMixin';
 import TestSuiteMixin                  from './TestSuiteMixin';
 import angular                         from 'angular';
 
 const TestModule = angular.module('biobank.test', [])
-      .service('factory',
-               require('../../../assets/javascripts/test/factory'))
+      .service('Factory',                         Factory)
       .service('testUtils',
                require('../../../assets/javascripts/test/testUtils'))
       .service('TestSuiteMixin',                  TestSuiteMixin)

@@ -20,7 +20,7 @@ describe('shipmentViewLostComponent', function() {
                               'modalService',
                               'Shipment',
                               'notificationsService',
-                              'factory');
+                              'Factory');
 
       this.createController = (shipment) =>
         ShippingComponentTestSuiteMixin.createController.call(

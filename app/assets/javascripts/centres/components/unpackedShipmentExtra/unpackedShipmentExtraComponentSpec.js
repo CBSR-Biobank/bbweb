@@ -22,7 +22,7 @@ describe('unpackedShipmentExtraComponent', function() {
                               'modalService',
                               'domainNotificationService',
                               'notificationsService',
-                              'factory');
+                              'Factory');
 
       this.createController = (shipment) =>
         ShippingComponentTestSuiteMixin.createController.call(
@@ -59,12 +59,12 @@ describe('unpackedShipmentExtraComponent', function() {
     it('retrieves extra specimens', function() {
       var self = this,
           shipment = this.createShipment(),
-          shipmentSpecimens = [ new this.ShipmentSpecimen(this.factory.shipmentSpecimen()) ],
+          shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
           promiseSucceeded = false,
           args;
 
       spyOn(this.ShipmentSpecimen, 'list')
-        .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
+        .and.returnValue(this.$q.when(this.Factory.pagedResult(shipmentSpecimens)));
 
       this.createController(shipment);
       this.controller.getExtraSpecimens().then(function (result) {
@@ -80,11 +80,11 @@ describe('unpackedShipmentExtraComponent', function() {
     });
 
     it('returns empty array if shipment is undefined', function() {
-      var shipmentSpecimens = [ new this.ShipmentSpecimen(this.factory.shipmentSpecimen()) ],
+      var shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
           promiseSucceeded = false;
 
       spyOn(this.ShipmentSpecimen, 'list')
-        .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
+        .and.returnValue(this.$q.when(this.Factory.pagedResult(shipmentSpecimens)));
 
       this.createController();
       this.controller.shipment = undefined;
@@ -108,7 +108,7 @@ describe('unpackedShipmentExtraComponent', function() {
       spyOn(this.Shipment.prototype, 'tagSpecimensAsExtra').and.returnValue(this.$q.when(true));
 
       this.createController(shipment);
-      this.controller.inventoryIds = this.factory.stringNext() + ','  + this.factory.stringNext();
+      this.controller.inventoryIds = this.Factory.stringNext() + ','  + this.Factory.stringNext();
       tableRefreshCount = this.controller.refreshTable;
       this.controller.onInventoryIdsSubmit();
       this.scope.$digest();
@@ -124,15 +124,15 @@ describe('unpackedShipmentExtraComponent', function() {
             this.errorReply('EntityCriteriaError: specimens are already in an active shipment: xxxx'),
             this.errorReply('EntityCriteriaError: invalid inventory Ids: xxx'),
             this.errorReply('EntityCriteriaError: invalid centre for specimen inventory IDs: xxx'),
-            this.errorReply(this.factory.stringNext()),
-            this.factory.stringNext()
+            this.errorReply(this.Factory.stringNext()),
+            this.Factory.stringNext()
           ],
           tableRefreshCount;
 
       spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
 
       this.createController(shipment);
-      this.controller.inventoryIds = this.factory.stringNext() + ','  + this.factory.stringNext();
+      this.controller.inventoryIds = this.Factory.stringNext() + ','  + this.Factory.stringNext();
       tableRefreshCount = this.controller.refreshTable;
 
       errors.forEach(function (error, index) {
@@ -159,9 +159,9 @@ describe('unpackedShipmentExtraComponent', function() {
 
     beforeEach(function() {
       this.shipment = this.createShipment();
-      this.specimen = this.factory.specimen();
+      this.specimen = this.Factory.specimen();
       this.shipmentSpecimen = new this.ShipmentSpecimen(
-        this.factory.shipmentSpecimen({ specimen: this.specimen }));
+        this.Factory.shipmentSpecimen({ specimen: this.specimen }));
 
       spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
       spyOn(this.notificationsService, 'success').and.returnValue(null);

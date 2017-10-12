@@ -24,10 +24,10 @@ describe('Component: collectionSpecimenDescriptionAdd', function() {
                               'Study',
                               'CollectionEventType',
                               'CollectionSpecimenDescription',
-                              'factory');
+                              'Factory');
 
-      this.jsonCevenType       = this.factory.collectionEventType();
-      this.jsonStudy           = this.factory.defaultStudy();
+      this.jsonCevenType       = this.Factory.collectionEventType();
+      this.jsonStudy           = this.Factory.defaultStudy();
       this.collectionEventType = new this.CollectionEventType(this.jsonCevenType);
       this.study               = new this.Study(this.jsonStudy);
 
@@ -68,7 +68,7 @@ describe('Component: collectionSpecimenDescriptionAdd', function() {
   describe('on submit', function() {
 
     beforeEach(function() {
-      this.jsonSpec            = this.factory.collectionSpecimenDescription();
+      this.jsonSpec            = this.Factory.collectionSpecimenDescription();
       this.specimenDescription = new this.CollectionSpecimenDescription(this.jsonSpec);
     });
 

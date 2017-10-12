@@ -19,7 +19,7 @@ describe('Component: statusLine', function() {
                               '$compile',
                               'Centre',
                               '$filter',
-                              'factory');
+                              'Factory');
 
       this.stateLabelFunc = jasmine.createSpy().and.returnValue(null);
 
@@ -75,9 +75,9 @@ describe('Component: statusLine', function() {
   function sharedBehaviour(context) {
 
     it('has the correct number of items', function() {
-      var stateLabel = this.factory.stringNext(),
+      var stateLabel = this.Factory.stringNext(),
           stateLabelFunc = jasmine.createSpy().and.returnValue(stateLabel),
-          centre = this.Centre.create(this.factory.centre()),
+          centre = this.Centre.create(this.Factory.centre()),
           items;
 
       context.createController(stateLabelFunc, centre.timeAdded, centre.timeModified);
@@ -93,16 +93,16 @@ describe('Component: statusLine', function() {
     });
 
     it('items have the default class', function() {
-      var stateLabel = this.factory.stringNext(),
+      var stateLabel = this.Factory.stringNext(),
           stateLabelFunc = jasmine.createSpy().and.returnValue(stateLabel),
-          centre = this.Centre.create(this.factory.centre());
+          centre = this.Centre.create(this.Factory.centre());
 
       context.createController(stateLabelFunc, centre.timeAdded, centre.timeModified);
       expect(this.controller.class).toEqual(context.itemClass);
     });
 
     it('if timeAdded is before the year 200, displays correct label', function() {
-      var centre = this.Centre.create(this.factory.centre()),
+      var centre = this.Centre.create(this.Factory.centre()),
           timeAdded = new Date(1999, 1),
           items;
 
@@ -113,7 +113,7 @@ describe('Component: statusLine', function() {
     });
 
     it('displays correpct value if timeModified has a value', function() {
-      var centre = this.Centre.create(this.factory.centre()),
+      var centre = this.Centre.create(this.Factory.centre()),
           items;
 
       context.createController(undefined, centre.timeAdded, centre.timeModified);
@@ -123,7 +123,7 @@ describe('Component: statusLine', function() {
     });
 
     it('displays correct value if timeModified is undefined', function() {
-      var centre = new this.Centre(this.factory.centre()),
+      var centre = new this.Centre(this.Factory.centre()),
           items;
 
       centre.timeModified = undefined;
@@ -133,7 +133,7 @@ describe('Component: statusLine', function() {
     });
 
     it('does not show status if stateLabelFunc is undefined', function() {
-      var centre = new this.Centre(this.factory.centre()),
+      var centre = new this.Centre(this.Factory.centre()),
           items;
 
       this.stateLabelFunc = undefined;

@@ -16,7 +16,7 @@ describe('Component: specimenTableAction', function() {
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              'factory');
+                              'Factory');
       testUtils.addCustomMatchers();
 
       this.createController = (action, onActionSelected) => {

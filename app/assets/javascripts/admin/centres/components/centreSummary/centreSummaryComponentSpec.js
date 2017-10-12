@@ -23,8 +23,8 @@ describe('Component: centreSummary', function() {
                               'CentreState',
                               'notificationsService',
                               'modalService',
-                              'factory');
-      this.centre = new this.Centre(this.factory.centre());
+                              'Factory');
+      this.centre = new this.Centre(this.Factory.centre());
       this.createScope = () => {
         var scope = ComponentTestSuiteMixin.createScope.call(this, { centre: this.centre });
         this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
@@ -56,7 +56,7 @@ describe('Component: centreSummary', function() {
 
     beforeEach(function () {
       var self = this,
-          centre = new this.Centre(this.factory.centre());
+          centre = new this.Centre(this.Factory.centre());
 
       context.entity             = self.Centre;
       context.createController   = this.createController.bind(this, centre);
@@ -75,7 +75,7 @@ describe('Component: centreSummary', function() {
 
     beforeEach(function () {
       var self = this,
-          centre = new self.Centre(self.factory.centre());
+          centre = new self.Centre(self.Factory.centre());
 
       context.entity             = this.Centre;
       context.createController   = this.createController.bind(this, centre);
@@ -95,7 +95,7 @@ describe('Component: centreSummary', function() {
 
       beforeEach(function () {
         var self = this,
-            centre = new self.Centre(self.factory.centre());
+            centre = new self.Centre(self.Factory.centre());
 
         context.createController = this.createController.bind(this, centre);
         context.centre           = centre;
@@ -111,7 +111,7 @@ describe('Component: centreSummary', function() {
 
       beforeEach(function () {
         var self = this,
-            centre = new self.Centre(self.factory.centre({ state: self.CentreState.ENABLED }));
+            centre = new self.Centre(self.Factory.centre({ state: self.CentreState.ENABLED }));
 
         context.createController = this.createController.bind(this, centre);
         context.centre           = centre;
@@ -124,7 +124,7 @@ describe('Component: centreSummary', function() {
 
     it('changing state to an invalid value causes an exception', function() {
       var self = this,
-          invalidState = self.factory.stringNext();
+          invalidState = self.Factory.stringNext();
       self.createController();
       expect(function () { self.controller.changeState(invalidState); })
         .toThrowError(/invalid state/);

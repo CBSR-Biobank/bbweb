@@ -16,7 +16,7 @@ describe('collapsiblePanelComponent', function() {
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              'factory');
+                              'Factory');
 
       this.createController = (heading) =>
         ComponentTestSuiteMixin.createController.call(
@@ -28,14 +28,14 @@ describe('collapsiblePanelComponent', function() {
   });
 
   it('has valid scope', function() {
-    var heading = this.factory.stringNext();
+    var heading = this.Factory.stringNext();
     this.createController(heading);
     expect(this.controller.heading).toEqual(heading);
     expect(this.controller.panelOpen).toBeTrue();
   });
 
   it('panel can be collapsed', function() {
-    var heading = this.factory.stringNext(),
+    var heading = this.Factory.stringNext(),
         panelState;
     this.createController(heading);
     panelState = this.controller.panelOpen;

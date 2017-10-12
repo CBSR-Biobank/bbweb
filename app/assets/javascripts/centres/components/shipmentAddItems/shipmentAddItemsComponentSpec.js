@@ -25,7 +25,7 @@ describe('shipmentAddItemsComponent', function() {
                               'shipmentSkipToSentModalService',
                               'domainNotificationService',
                               'notificationsService',
-                              'factory');
+                              'Factory');
       testUtils.addCustomMatchers();
 
       this.createController = (shipment) =>

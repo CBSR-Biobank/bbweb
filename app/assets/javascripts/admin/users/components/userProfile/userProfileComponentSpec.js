@@ -18,7 +18,7 @@ describe('Component: userProfile', function() {
       this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
-                              'factory',
+                              'Factory',
                               '$uibModal',
                               'modalService',
                               'modalInput',
@@ -38,21 +38,21 @@ describe('Component: userProfile', function() {
   });
 
   it('should have valid scope', function() {
-    var user = this.User.create(this.factory.user());
+    var user = this.User.create(this.Factory.user());
     this.createController(user);
     expect(this.controller.user.id).toEqual(user.id);
     expect(this.controller.user).toEqual(jasmine.any(this.User));
   });
 
   it('correct display when user has no memberships', function() {
-    var user = new this.User(this.factory.user({ membership: undefined }));
+    var user = new this.User(this.Factory.user({ membership: undefined }));
     this.createController(user);
     expect(this.controller.studyMembershipLabels).toBeUndefined();
     expect(this.controller.centreMembershipLabels).toBeUndefined();
   });
 
   it('correct display when user has membership to all studies and centres', function() {
-    var user = new this.User(this.factory.user({
+    var user = new this.User(this.Factory.user({
       membership: {
         studyData:  { allEntities: true, entityData: [] },
         centreData: { allEntities: true, entityData: [] }
@@ -64,21 +64,21 @@ describe('Component: userProfile', function() {
   });
 
   it('correct display when user has membership to some studies and centres', function() {
-    var studyName = this.factory.stringNext(),
-        centreName = this.factory.stringNext(),
-        user = new this.User(this.factory.user({
+    var studyName = this.Factory.stringNext(),
+        centreName = this.Factory.stringNext(),
+        user = new this.User(this.Factory.user({
           membership: {
             studyData: {
               allEntities: false,
               entityData: [{
-                id: this.factory.stringNext(),
+                id: this.Factory.stringNext(),
                 name: studyName
               }]
             },
             centreData: {
               allEntities: false,
               entityData: [{
-                id: this.factory.stringNext(),
+                id: this.Factory.stringNext(),
                 name: centreName
               }]
             }
@@ -101,7 +101,7 @@ describe('Component: userProfile', function() {
     beforeEach(function () {
       context.controllerFuncName = 'updateName';
       context.modalInputFuncName = 'text';
-      context.modalReturnValue = this.factory.stringNext();
+      context.modalReturnValue = this.Factory.stringNext();
       context.userUpdateFuncName = 'updateName';
     });
 
@@ -116,7 +116,7 @@ describe('Component: userProfile', function() {
     beforeEach(function () {
       context.controllerFuncName = 'updateEmail';
       context.modalInputFuncName = 'email';
-      context.modalReturnValue = this.factory.emailNext();
+      context.modalReturnValue = this.Factory.emailNext();
       context.userUpdateFuncName = 'updateEmail';
     });
 
@@ -131,7 +131,7 @@ describe('Component: userProfile', function() {
     beforeEach(function () {
       context.controllerFuncName = 'updateAvatarUrl';
       context.modalInputFuncName = 'url';
-      context.modalReturnValue = this.factory.urlNext();
+      context.modalReturnValue = this.Factory.urlNext();
       context.userUpdateFuncName = 'updateAvatarUrl';
     });
 
@@ -140,7 +140,7 @@ describe('Component: userProfile', function() {
   });
 
   it('can remove a users avatar', function() {
-    var user = new this.User(this.factory.user());
+    var user = new this.User(this.Factory.user());
 
     spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
     spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(this.$q.when(new this.User()));
@@ -153,7 +153,7 @@ describe('Component: userProfile', function() {
   });
 
   it('should display a notification error when removing avatar URL fails', function() {
-    var user = new this.User(this.factory.user());
+    var user = new this.User(this.Factory.user());
 
     this.createController(user);
 
@@ -168,7 +168,7 @@ describe('Component: userProfile', function() {
   });
 
   it('can update users password', function() {
-    var user = new this.User(this.factory.user());
+    var user = new this.User(this.Factory.user());
 
     this.createController(user);
 
@@ -183,7 +183,7 @@ describe('Component: userProfile', function() {
   });
 
   it('should display a notification error when current password is invalid', function() {
-    var user = new this.User(this.factory.user());
+    var user = new this.User(this.Factory.user());
     this.createController(user);
 
     spyOn(this.modalInput, 'password').and.returnValue(
@@ -198,7 +198,7 @@ describe('Component: userProfile', function() {
   });
 
   it('should display a notification error when updating password fails', function() {
-    var user = new this.User(this.factory.user());
+    var user = new this.User(this.Factory.user());
 
     spyOn(this.modalInput, 'password').and.returnValue(
       { result: this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
@@ -218,7 +218,7 @@ describe('Component: userProfile', function() {
 
     beforeEach(function () {
       this.injectDependencies('modalInput', 'notificationsService');
-      this.user = new this.User(this.factory.user());
+      this.user = new this.User(this.Factory.user());
     });
 
     describe('(shared) update functions', function () {

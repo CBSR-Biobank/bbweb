@@ -21,7 +21,7 @@ describe('unpackedShipmentItemsComponent', function() {
                               'Shipment',
                               'ShipmentSpecimen',
                               'modalService',
-                              'factory');
+                              'Factory');
 
       this.createController = (shipment, itemState) =>
         ShippingComponentTestSuiteMixin.createController.call(
@@ -105,7 +105,7 @@ describe('unpackedShipmentItemsComponent', function() {
 
     beforeEach(function() {
       this.shipment = this.createShipment();
-      this.shipmentSpecimen = new this.ShipmentSpecimen(this.factory.shipmentSpecimen());
+      this.shipmentSpecimen = new this.ShipmentSpecimen(this.Factory.shipmentSpecimen());
 
       spyOn(this.Shipment.prototype, 'tagSpecimensAsPresent').and.returnValue(this.$q.when(this.shipment));
       this.createController(this.shipment, this.ShipmentItemState.RECEIVED);
@@ -141,11 +141,11 @@ describe('unpackedShipmentItemsComponent', function() {
 
       it('retrieves extra specimens', function() {
         var self = this,
-            shipmentSpecimens = [ new this.ShipmentSpecimen(this.factory.shipmentSpecimen()) ],
+            shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
             promiseSucceeded = false;
 
         spyOn(this.ShipmentSpecimen, 'list')
-          .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
+          .and.returnValue(this.$q.when(this.Factory.pagedResult(shipmentSpecimens)));
 
         context.createController();
         this.controller.getSpecimens().then(function (result) {
@@ -159,11 +159,11 @@ describe('unpackedShipmentItemsComponent', function() {
       });
 
       it('returns empty array if shipment is undefined', function() {
-        var shipmentSpecimens = [ new this.ShipmentSpecimen(this.factory.shipmentSpecimen()) ],
+        var shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
             promiseSucceeded = false;
 
         spyOn(this.ShipmentSpecimen, 'list')
-          .and.returnValue(this.$q.when(this.factory.pagedResult(shipmentSpecimens)));
+          .and.returnValue(this.$q.when(this.Factory.pagedResult(shipmentSpecimens)));
 
         context.createController();
         this.controller.shipment = undefined;

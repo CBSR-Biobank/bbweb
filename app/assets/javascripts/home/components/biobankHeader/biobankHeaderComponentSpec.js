@@ -20,7 +20,7 @@ describe('Component: biobankHeader', function() {
                               '$state',
                               'User',
                               'usersService',
-                              'factory');
+                              'Factory');
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(
           this,
@@ -37,7 +37,7 @@ describe('Component: biobankHeader', function() {
   });
 
   it('update user on login', function() {
-    var jsonUser = this.factory.user();
+    var jsonUser = this.Factory.user();
 
     this.createController();
     expect(this.controller.user).toBeUndefined();

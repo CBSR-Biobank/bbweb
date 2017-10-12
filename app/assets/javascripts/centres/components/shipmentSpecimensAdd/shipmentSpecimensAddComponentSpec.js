@@ -22,7 +22,7 @@ describe('shipmentSpecimensAddComponent', function() {
                               'ShipmentSpecimen',
                               'notificationsService',
                               'modalService',
-                              'factory');
+                              'Factory');
 
       this.createController = (shipment, readOnly) => {
         ShippingComponentTestSuiteMixin.createController.call(
@@ -61,7 +61,7 @@ describe('shipmentSpecimensAddComponent', function() {
       spyOn(this.notificationsService, 'success').and.returnValue(null);
 
       this.createController(shipment);
-      this.controller.inventoryIds = this.factory.stringNext();
+      this.controller.inventoryIds = this.Factory.stringNext();
       refreshCount = this.controller.refreshSpecimensTable;
       this.controller.addSpecimens();
       this.scope.$digest();
@@ -84,7 +84,7 @@ describe('shipmentSpecimensAddComponent', function() {
       spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when(null));
 
       this.createController(this.createShipment());
-      this.controller.inventoryIds = this.factory.stringNext();
+      this.controller.inventoryIds = this.Factory.stringNext();
 
       errors.forEach(function (error, index) {
         self.Shipment.prototype.addSpecimens =
@@ -114,7 +114,7 @@ describe('shipmentSpecimensAddComponent', function() {
     it('can remove a shipment', function() {
       var shipment = this.createShipment(),
           shipmentSpecimen = new this.ShipmentSpecimen(
-            this.factory.shipmentSpecimen({ shipmentId: shipment.id })),
+            this.Factory.shipmentSpecimen({ shipmentId: shipment.id })),
           refreshCount;
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
@@ -135,7 +135,7 @@ describe('shipmentSpecimensAddComponent', function() {
     it('removal of a shipment can be cancelled', function() {
       var shipment = this.createShipment(),
           shipmentSpecimen = new this.ShipmentSpecimen(
-            this.factory.shipmentSpecimen({ shipmentId: shipment.id })),
+            this.Factory.shipmentSpecimen({ shipmentId: shipment.id })),
           refreshCount;
 
       spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));

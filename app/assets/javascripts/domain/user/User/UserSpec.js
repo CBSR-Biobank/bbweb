@@ -16,19 +16,18 @@ describe('User', function() {
       this.injectDependencies('$httpBackend',
                               'User',
                               'UserState',
-                              'factory');
+                              'Factory');
 
       // used by promise tests
       this.expectUser = (entity) => {
         expect(entity).toEqual(jasmine.any(this.User));
       };
 
-      this.statusChangeShared = (user, statusChangePath, userMethod, newStatus) => {
+      this.statusChangeShared = (jsonObj, user, statusChangePath, userMethod) => {
         var json = { id: user.id, expectedVersion: user.version };
-        var reply = this.factory.user(user);
 
         this.$httpBackend.expectPOST(this.url(statusChangePath, user.id), json)
-          .respond(this.reply(reply));
+          .respond(this.reply(jsonObj));
 
         user[userMethod]().then((replyUser) => {
           expect(replyUser).toEqual(jasmine.any(this.User));
@@ -72,7 +71,7 @@ describe('User', function() {
   });
 
   it('fails when creating from object with missing required keys', function() {
-    var obj = this.factory.user(),
+    var obj = this.Factory.user(),
         requiredKeys = ['id', 'name', 'email', 'state'];
 
     requiredKeys.forEach((key) => {
@@ -89,8 +88,8 @@ describe('User', function() {
     it('can list using when filtering by name only', function() {
       var filter = 'name::test',
           url = this.url('search') + '?filter=' + filter,
-          jsonUser = this.factory.user(),
-          reply = this.factory.pagedResult([ jsonUser ]);
+          jsonUser = this.Factory.user(),
+          reply = this.Factory.pagedResult([ jsonUser ]);
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
@@ -104,8 +103,8 @@ describe('User', function() {
     it('can list when using filtering by email only', function() {
       var filter = 'email::test',
           url = this.url('search') + '?filter=' + filter,
-          jsonUser = this.factory.user(),
-          reply = this.factory.pagedResult([ jsonUser ]);
+          jsonUser = this.Factory.user(),
+          reply = this.Factory.pagedResult([ jsonUser ]);
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
@@ -119,8 +118,8 @@ describe('User', function() {
     it('can list using sort parameter only', function() {
       var sort = 'name',
           url = this.url('search') + '?sort=' + sort,
-          jsonUser = this.factory.user(),
-          reply = this.factory.pagedResult([ jsonUser ]);
+          jsonUser = this.Factory.user(),
+          reply = this.Factory.pagedResult([ jsonUser ]);
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
@@ -135,8 +134,8 @@ describe('User', function() {
       var filter   = 'email::test',
           sort     = '-email',
           url      = this.url('search') + `?filter=${filter}&sort=${sort}`,
-          jsonUser = this.factory.user(),
-          reply    = this.factory.pagedResult([ jsonUser ]);
+          jsonUser = this.Factory.user(),
+          reply    = this.Factory.pagedResult([ jsonUser ]);
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
@@ -148,7 +147,7 @@ describe('User', function() {
     });
 
     it('should handle an invalid response', function() {
-      var reply = this.factory.pagedResult([ { 'a': 1 } ]);
+      var reply = this.Factory.pagedResult([ { 'a': 1 } ]);
 
       this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
 
@@ -167,7 +166,7 @@ describe('User', function() {
   });
 
   it('can retrieve a single user', function() {
-    var user = this.factory.user();
+    var user = this.Factory.user();
 
     this.$httpBackend.whenGET(this.url(user.id)).respond(this.reply(user));
     this.User.get(user.id).then((reply) => {
@@ -177,8 +176,8 @@ describe('User', function() {
   });
 
   it('can register a user', function() {
-    var password   = this.factory.stringNext(),
-        serverUser = this.factory.user(),
+    var password   = this.Factory.stringNext(),
+        serverUser = this.Factory.user(),
         user       = new this.User(_.omit(serverUser, 'id')),
         cmd        = registerCommand(user, password);
 
@@ -191,7 +190,7 @@ describe('User', function() {
   });
 
   it('can update a users name', function() {
-    var jsonUser = this.factory.user(),
+    var jsonUser = this.Factory.user(),
         user = new this.User(jsonUser);
 
     this.updateEntity.call(this,
@@ -206,7 +205,7 @@ describe('User', function() {
   });
 
   it('can update a users email', function() {
-    var jsonUser = this.factory.user(),
+    var jsonUser = this.Factory.user(),
         user = new this.User(jsonUser);
 
     this.updateEntity.call(this,
@@ -221,8 +220,8 @@ describe('User', function() {
   });
 
   it('can update a users avatar url', function() {
-    var newAvatarUrl = this.factory.stringNext(),
-        jsonUser = this.factory.user({ avatarUrl: newAvatarUrl }),
+    var newAvatarUrl = this.Factory.stringNext(),
+        jsonUser = this.Factory.user({ avatarUrl: newAvatarUrl }),
         user = new this.User(jsonUser);
 
     this.updateEntity.call(this,
@@ -237,9 +236,9 @@ describe('User', function() {
   });
 
   it('can update a users password', function() {
-    var currentPassword = this.factory.stringNext(),
-        newPassword = this.factory.stringNext(),
-        jsonUser = this.factory.user(),
+    var currentPassword = this.Factory.stringNext(),
+        newPassword = this.Factory.stringNext(),
+        jsonUser = this.Factory.user(),
         user = new this.User(jsonUser);
 
     this.updateEntity.call(this,
@@ -257,30 +256,34 @@ describe('User', function() {
   });
 
   it('can activate a registered user', function() {
-    var user = new this.User(this.factory.user());
-    this.statusChangeShared(user, 'activate', 'activate', this.UserState.ACTIVE);
+    var jsonObj = this.Factory.user(),
+        user = this.User.create(jsonObj);
+    this.statusChangeShared(jsonObj, user, 'activate', 'activate', this.UserState.ACTIVE);
   });
 
   it('can lock an active user', function() {
-    var user = new this.User(_.extend(this.factory.user(), { state: this.UserState.ACTIVE }));
-    this.statusChangeShared(user, 'lock', 'lock', this.UserState.LOCKED);
+    var jsonObj = _.extend(this.Factory.user(), { state: this.UserState.ACTIVE }),
+        user = new this.User(jsonObj);
+    this.statusChangeShared(jsonObj, user, 'lock', 'lock', this.UserState.LOCKED);
   });
 
   it('can lock an REGISTERED user', function() {
-    var user = new this.User(_.extend(this.factory.user(), { state: this.UserState.REGISTERED }));
-    this.statusChangeShared(user, 'lock', 'lock', this.UserState.LOCKED);
+    var jsonObj = _.extend(this.Factory.user(), { state: this.UserState.REGISTERED }),
+        user = new this.User(jsonObj);
+    this.statusChangeShared(jsonObj, user, 'lock', 'lock', this.UserState.LOCKED);
   });
 
   it('can unlock a locked user', function() {
-    var user = new this.User(_.extend(this.factory.user(), { state: this.UserState.LOCKED }));
-    this.statusChangeShared(user, 'unlock', 'unlock', this.UserState.ACTIVE);
+    var jsonObj = _.extend(this.Factory.user(), { state: this.UserState.LOCKED }),
+        user = new this.User(jsonObj);
+    this.statusChangeShared(jsonObj, user, 'unlock', 'unlock', this.UserState.ACTIVE);
   });
 
   it('fails when calling activate and the user is not registered', function() {
     var statuses = [ this.UserState.ACTIVE, this.UserState.LOCKED ];
 
     statuses.forEach((state) => {
-      var user = new this.User(_.extend(this.factory.user(), { state: state }));
+      var user = new this.User(_.extend(this.Factory.user(), { state: state }));
 
       expect(() => { user.activate(); })
         .toThrow(new Error('user state is not registered: ' + state));
@@ -291,7 +294,7 @@ describe('User', function() {
     var statuses = [ this.UserState.LOCKED ];
 
     statuses.forEach((state) => {
-      var user = new this.User(_.extend(this.factory.user(), { state: state }));
+      var user = new this.User(_.extend(this.Factory.user(), { state: state }));
 
       expect(() => { user.lock(); })
         .toThrowError(/user state is not registered or active/);
@@ -302,7 +305,7 @@ describe('User', function() {
     var statuses = [ this.UserState.REGISTERED, this.UserState.ACTIVE ];
 
     statuses.forEach((state) => {
-      var user = new this.User(_.extend(this.factory.user(), { state: state }));
+      var user = new this.User(_.extend(this.Factory.user(), { state: state }));
 
       expect(() => { user.unlock(); })
         .toThrow(new Error('user state is not locked: ' + state));
@@ -311,7 +314,7 @@ describe('User', function() {
 
   it('state predicates are valid valid', function() {
     _.values(this.UserState).forEach((state) => {
-      var jsonUser = this.factory.user({ state: state }),
+      var jsonUser = this.Factory.user({ state: state }),
           user     = new this.User(jsonUser);
 
       expect(user.isRegistered()).toBe(state === this.UserState.REGISTERED);

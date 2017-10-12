@@ -6,24 +6,23 @@
  */
 /* global angular */
 
-describe('SpecimenGroupViewer', function() {
+xdescribe('SpecimenGroupViewer', function() {
 
-  var SpecimenGroupViewer, factory, centre;
+  var SpecimenGroupViewer, Factory, centre;
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(_SpecimenGroupViewer_,
-                                 _factory_) {
+                                 _Factory_) {
       SpecimenGroupViewer = _SpecimenGroupViewer_;
-      factory   = _factory_;
+      Factory   = _Factory_;
 
-      centre = factory.centre();
+      centre = Factory.centre();
     });
   });
 
   it('should open a modal when created', inject(function (testUtils) {
-    var count = 0,
-        modal = this.$injector.get('$uibModal'),
+    var modal = this.$injector.get('$uibModal'),
         study,
         specimenGroup,
         viewer;
@@ -33,8 +32,8 @@ describe('SpecimenGroupViewer', function() {
     });
 
     // jshint unused:false
-    study = factory.study();
-    specimenGroup = factory.specimenGroup(study);
+    study = Factory.study();
+    specimenGroup = Factory.specimenGroup(study);
     viewer = new SpecimenGroupViewer(specimenGroup);
 
     expect(modal.open).toHaveBeenCalled();
@@ -49,8 +48,8 @@ describe('SpecimenGroupViewer', function() {
     });
 
     attributes = [];
-    study = factory.study();
-    specimenGroup = factory.specimenGroup(study);
+    study = Factory.study();
+    specimenGroup = Factory.specimenGroup(study);
     viewer = new SpecimenGroupViewer(specimenGroup);
 
     expect(attributes).toBeArrayOfSize(7);

@@ -25,7 +25,7 @@ define(function() {
     describe('(shared) tests', function() {
 
       beforeEach(inject(function() {
-        this.injectDependencies('AnnotationType', 'factory');
+        this.injectDependencies('AnnotationType', 'Factory');
       }));
 
       it('on update should invoke the update method on entity', function() {

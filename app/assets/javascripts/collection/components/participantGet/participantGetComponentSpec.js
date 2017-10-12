@@ -23,10 +23,10 @@ describe('Component: participantGet', function() {
                               'modalService',
                               'Study',
                               'Participant',
-                              'factory');
+                              'Factory');
 
-      this.jsonParticipant = this.factory.participant();
-      this.jsonStudy       = this.factory.defaultStudy();
+      this.jsonParticipant = this.Factory.participant();
+      this.jsonStudy       = this.Factory.defaultStudy();
       this.participant     = new this.Participant(this.jsonParticipant);
       this.study           = new this.Study(this.jsonStudy);
 
@@ -41,10 +41,10 @@ describe('Component: participantGet', function() {
       };
 
       this.createStudies = (numStudies) =>
-        _.range(numStudies).map(() => this.Study.create(self.factory.study()));
+        _.range(numStudies).map(() => this.Study.create(self.Factory.study()));
 
       this.createGetStudiesFn = (studies) =>
-        (pagerOptions) =>  this.$q.when(_.extend(this.factory.pagedResult(studies, pagerOptions),
+        (pagerOptions) =>  this.$q.when(_.extend(this.Factory.pagedResult(studies, pagerOptions),
                                                 { items: studies.slice(0, pagerOptions.limit) }));
     });
   });
@@ -74,7 +74,7 @@ describe('Component: participantGet', function() {
       spyOn(this.$state, 'go').and.returnValue('ok');
 
       this.createController();
-      this.controller.uniqueId = this.factory.stringNext();
+      this.controller.uniqueId = this.Factory.stringNext();
       this.controller.onSubmit();
       this.scope.$digest();
 
@@ -84,7 +84,7 @@ describe('Component: participantGet', function() {
     });
 
     it('with a NOT_FOUND opens a modal', function() {
-      var uniqueId = this.factory.stringNext(),
+      var uniqueId = this.Factory.stringNext(),
           errorMsg = {
             status:  'error',
             message: 'EntityCriteriaNotFound: participant with unique ID does not exist: xxx'
@@ -107,7 +107,7 @@ describe('Component: participantGet', function() {
     });
 
     it('with a NOT_FOUND opens a modal and cancel is pressed', function() {
-      var uniqueId = this.factory.stringNext(),
+      var uniqueId = this.Factory.stringNext(),
           errorMsg = {
             status:  'error',
             message: 'EntityCriteriaNotFound: participant with unique ID does not exist: xxx'
@@ -136,7 +136,7 @@ describe('Component: participantGet', function() {
         }));
       spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('Ok'));
 
-      this.controller.uniqueId = this.factory.stringNext();
+      this.controller.uniqueId = this.Factory.stringNext();
       this.controller.onSubmit();
       this.scope.$digest();
 
@@ -149,7 +149,7 @@ describe('Component: participantGet', function() {
         { status: 400, data: { message: 'xxx' } }));
       spyOn(this.$log, 'error').and.callThrough();
 
-      this.controller.uniqueId = this.factory.stringNext();
+      this.controller.uniqueId = this.Factory.stringNext();
       this.controller.onSubmit();
       this.scope.$digest();
 

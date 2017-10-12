@@ -20,7 +20,7 @@ describe('Component: biobankAdmin', function() {
                               'User',
                               'adminService',
                               'usersService',
-                              'factory');
+                              'Factory');
       this.createController = () => {
         ComponentTestSuiteMixin.createController.call(
           this,
@@ -33,7 +33,7 @@ describe('Component: biobankAdmin', function() {
   });
 
   it('has valid scope', function() {
-    var user = this.User.create(this.factory.user()),
+    var user = this.User.create(this.Factory.user()),
         counts = {
           studies: 1,
           centres: 2,

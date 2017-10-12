@@ -26,7 +26,7 @@ describe('Shipment domain object:', function() {
                               'Specimen',
                               'funutils',
                               'testUtils',
-                              'factory');
+                              'Factory');
       // used by promise tests
       this.expectShipment = (entity) => {
         expect(entity).toEqual(jasmine.any(this.Shipment));
@@ -64,21 +64,21 @@ describe('Shipment domain object:', function() {
     });
 
     it('fails when creating from a non object', function() {
-      var badJson = _.omit(this.factory.shipment(), 'courierName');
+      var badJson = _.omit(this.Factory.shipment(), 'courierName');
 
       expect(() => { this.Shipment.create(badJson); })
         .toThrowError(/invalid object from server/);
     });
 
     it('fails when creating from a bad from location ID', function() {
-      var badJson = this.factory.shipment({ fromLocationInfo: undefined });
+      var badJson = this.Factory.shipment({ fromLocationInfo: undefined });
 
       expect(() => this.Shipment.create(badJson))
         .toThrowError(/invalid object from server.*fromLocationInfo/);
     });
 
     it('fails when creating from a bad to location ID', function() {
-      var badJson = this.factory.shipment({ toLocationInfo: undefined });
+      var badJson = this.Factory.shipment({ toLocationInfo: undefined });
 
       expect(() => this.Shipment.create(badJson))
         .toThrowError(/invalid object from server.*toLocationInfo/);
@@ -97,7 +97,7 @@ describe('Shipment domain object:', function() {
     }
 
     it('can retrieve a single shipment', function() {
-      var shipment = this.factory.shipment(),
+      var shipment = this.Factory.shipment(),
           checkReply = (reply) => {
             expect(reply).toEqual(jasmine.any(this.Shipment));
           };
@@ -108,7 +108,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('fails when getting a shipment and it has a bad format', function() {
-      var shipment = _.omit(this.factory.shipment(), 'courierName');
+      var shipment = _.omit(this.Factory.shipment(), 'courierName');
 
       this.$httpBackend.whenGET(this.url(shipment.id)).respond(this.reply(shipment));
       this.Shipment.get(shipment.id).then(shouldNotFail).catch(shouldFail);
@@ -116,7 +116,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('fails when getting a shipment and it has a bad from location', function() {
-      var shipment = _.omit(this.factory.shipment(), 'fromLocationInfo');
+      var shipment = _.omit(this.Factory.shipment(), 'fromLocationInfo');
 
       this.$httpBackend.whenGET(this.url(shipment.id)).respond(this.reply(shipment));
       this.Shipment.get(shipment.id).then(shouldNotFail).catch(shouldFail);
@@ -124,7 +124,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('fails when getting a shipment and it has a bad to location', function() {
-      var shipment = _.omit(this.factory.shipment(), 'toLocationInfo');
+      var shipment = _.omit(this.Factory.shipment(), 'toLocationInfo');
 
       this.$httpBackend.whenGET(this.url(shipment.id)).respond(this.reply(shipment));
       this.Shipment.get(shipment.id).then(shouldNotFail).catch(shouldFail);
@@ -142,9 +142,9 @@ describe('Shipment domain object:', function() {
   describe('when listing shipments', function() {
 
     it('can retrieve shipments', function() {
-      var shipment     = this.factory.shipment(),
+      var shipment     = this.Factory.shipment(),
           shipments    = [ shipment ],
-          reply        = this.factory.pagedResult(shipments),
+          reply        = this.Factory.pagedResult(shipments),
           checkReply = (pagedResult) => {
             expect(pagedResult.items).toBeArrayOfSize(shipments.length);
             pagedResult.items.forEach((item) => {
@@ -158,7 +158,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('can use options', function() {
-      var centre = this.factory.centre(),
+      var centre = this.Factory.centre(),
           optionList = [
             { filter: 'fromCentre:eq:' + centre.name },
             { filter: 'toCentre:ne:' + centre.name },
@@ -172,8 +172,8 @@ describe('Shipment domain object:', function() {
           ];
 
       optionList.forEach((options) => {
-        var shipments = [ this.factory.shipment() ],
-            reply     = this.factory.pagedResult(shipments),
+        var shipments = [ this.Factory.shipment() ],
+            reply     = this.Factory.pagedResult(shipments),
             testShipment = (pagedResult) => {
               expect(pagedResult.items).toBeArrayOfSize(shipments.length);
               pagedResult.items.forEach((study) => {
@@ -188,8 +188,8 @@ describe('Shipment domain object:', function() {
     });
 
     it('fails when list returns an invalid shipment', function() {
-      var shipments = [ _.omit(this.factory.shipment(), 'courierName') ],
-          reply = this.factory.pagedResult(shipments);
+      var shipments = [ _.omit(this.Factory.shipment(), 'courierName') ],
+          reply = this.Factory.pagedResult(shipments);
 
       this.$httpBackend.whenGET(this.url('list')).respond(this.reply(reply));
       this.Shipment.list().then(listFail).catch(shouldFail);
@@ -208,7 +208,7 @@ describe('Shipment domain object:', function() {
   describe('when adding a shipment', function() {
 
     it('can add a shipment', function() {
-      var jsonShipment = this.factory.shipment(),
+      var jsonShipment = this.Factory.shipment(),
           shipment = new this.Shipment(_.omit(jsonShipment, 'id')),
           json = _.extend(_.pick(shipment, 'courierName', 'trackingNumber'),
                           {
@@ -229,7 +229,7 @@ describe('Shipment domain object:', function() {
   describe('when updating a shipment', function() {
 
     it('can update the courier name on a shipment', function() {
-      var jsonShipment = this.factory.shipment(),
+      var jsonShipment = this.Factory.shipment(),
           shipment     = new this.Shipment(jsonShipment);
 
       this.updateEntity(shipment,
@@ -243,7 +243,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('can update the tracking number on a shipment', function() {
-      var jsonShipment = this.factory.shipment(),
+      var jsonShipment = this.Factory.shipment(),
           shipment     = new this.Shipment(jsonShipment);
 
       this.updateEntity(shipment,
@@ -257,7 +257,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('can update the FROM location on a shipment', function() {
-      var jsonShipment = this.factory.shipment(),
+      var jsonShipment = this.Factory.shipment(),
           shipment     = new this.Shipment(jsonShipment);
 
       this.updateEntity(shipment,
@@ -271,7 +271,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('can update the TO location on a shipment', function() {
-      var jsonShipment = this.factory.shipment(),
+      var jsonShipment = this.Factory.shipment(),
           shipment     = new this.Shipment(jsonShipment);
 
       this.updateEntity(shipment,
@@ -289,7 +289,7 @@ describe('Shipment domain object:', function() {
       var context = {};
 
       beforeEach(function () {
-        context.jsonShipment = this.factory.shipment();
+        context.jsonShipment = this.Factory.shipment();
         context.expectedShipment = this.expectShipment;
         context.stateChangeTime = undefined;
       });
@@ -381,7 +381,7 @@ describe('Shipment domain object:', function() {
     describe('can change state on a shipment', function() {
 
       beforeEach(function() {
-        this.jsonShipment = this.factory.shipment();
+        this.jsonShipment = this.Factory.shipment();
         this.time         = moment(faker.date.recent(10)).format();
         this.shipment     = new this.Shipment(this.jsonShipment);
       });
@@ -416,22 +416,22 @@ describe('Shipment domain object:', function() {
   describe('state predicates', function() {
 
     it('for CREATED state predicate', function() {
-      var shipment = new this.Shipment(this.factory.shipment({ state: this.ShipmentState.CREATED }));
+      var shipment = new this.Shipment(this.Factory.shipment({ state: this.ShipmentState.CREATED }));
       expect(shipment.isCreated()).toBeTrue();
     });
 
     it('for PACKED state predicate', function() {
-      var shipment = new this.Shipment(this.factory.shipment({ state: this.ShipmentState.PACKED }));
+      var shipment = new this.Shipment(this.Factory.shipment({ state: this.ShipmentState.PACKED }));
       expect(shipment.isPacked()).toBeTrue();
     });
 
     it('for SENT state predicate', function() {
-      var shipment = new this.Shipment(this.factory.shipment({ state: this.ShipmentState.SENT }));
+      var shipment = new this.Shipment(this.Factory.shipment({ state: this.ShipmentState.SENT }));
       expect(shipment.isSent()).toBeTrue();
     });
 
     it('for UNPACKED state predicate', function() {
-      var shipment = new this.Shipment(this.factory.shipment({ state: this.ShipmentState.UNPACKED }));
+      var shipment = new this.Shipment(this.Factory.shipment({ state: this.ShipmentState.UNPACKED }));
       expect(shipment.isUnpacked()).toBeTrue();
     });
 
@@ -442,7 +442,7 @@ describe('Shipment domain object:', function() {
         this.ShipmentState.RECEIVED,
         this.ShipmentState.LOST,
       ].forEach((state) => {
-        var shipment = new this.Shipment(this.factory.shipment({ state: state }));
+        var shipment = new this.Shipment(this.Factory.shipment({ state: state }));
         expect(shipment.isNotCreatedNorUnpacked()).toBeTrue();
       });
     });
@@ -452,9 +452,9 @@ describe('Shipment domain object:', function() {
   describe('for canAddInventoryId', function() {
 
     it('can add specimen', function() {
-      var jsonSpecimen = this.factory.specimen(),
-          shipment = new this.Shipment(this.factory.shipment()),
-          inventoryId = this.factory.stringNext(),
+      var jsonSpecimen = this.Factory.specimen(),
+          shipment = new this.Shipment(this.Factory.shipment()),
+          inventoryId = this.Factory.stringNext(),
           checkReply = (reply) => {
             expect(reply).toEqual(jasmine.any(this.Specimen));
           };
@@ -469,7 +469,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('throws an exception if id is falsy', function() {
-      var shipment = new this.Shipment(this.factory.shipment());
+      var shipment = new this.Shipment(this.Factory.shipment());
 
       expect(() => {
         shipment.canAddInventoryId();
@@ -481,8 +481,8 @@ describe('Shipment domain object:', function() {
   describe('when adding shipment specimens', function() {
 
     it('can add a shipment', function() {
-      var jsonSpecimen = this.factory.specimen(),
-          jsonShipment = this.factory.shipment(),
+      var jsonSpecimen = this.Factory.specimen(),
+          jsonShipment = this.Factory.shipment(),
           shipment = new this.Shipment(jsonShipment),
           checkReply = (reply) => {
             expect(reply).toEqual(jasmine.any(this.Shipment));
@@ -498,7 +498,7 @@ describe('Shipment domain object:', function() {
     });
 
     it('addSpecimens throws an exception if id is falsy', function() {
-      var shipment = new this.Shipment(this.factory.shipment());
+      var shipment = new this.Shipment(this.Factory.shipment());
 
       expect(() => {
         shipment.addSpecimens();
@@ -510,9 +510,9 @@ describe('Shipment domain object:', function() {
   describe('when updating a shipment specimen', function() {
 
     it('can update the shipment container on a shipment specimen', function() {
-      var jsonSs       = this.factory.shipmentSpecimen(),
+      var jsonSs       = this.Factory.shipmentSpecimen(),
           ss           = new this.ShipmentSpecimen(jsonSs),
-          jsonShipment = this.factory.shipment(),
+          jsonShipment = this.Factory.shipment(),
           shipment     = new this.Shipment(jsonShipment),
           reqJson      = {
             shipmentContainerId: ss.shipmentContainerId,
@@ -588,7 +588,7 @@ describe('Shipment domain object:', function() {
   });
 
   it('can remove a shipment', function() {
-    var jsonShipment = this.factory.shipment(),
+    var jsonShipment = this.Factory.shipment(),
         shipment     = new this.Shipment(jsonShipment),
         url          = this.url(shipment.id, shipment.version);
 
@@ -653,9 +653,9 @@ describe('Shipment domain object:', function() {
   function changeShipmentSpecimenStateSharedBehaviour(context) {
 
     it('can change state on a shipment specimen', function() {
-      var jsonSs       = this.factory.shipmentSpecimen(),
+      var jsonSs       = this.Factory.shipmentSpecimen(),
           ss           = new this.ShipmentSpecimen(jsonSs),
-          jsonShipment = this.factory.shipment(),
+          jsonShipment = this.Factory.shipment(),
           shipment     = new this.Shipment(jsonShipment),
           inventoryIds = [ ss.specimen.inventoryId ],
           reqJson      = { specimenInventoryIds: inventoryIds };

@@ -21,9 +21,9 @@ describe('shipmentsTableComponent', function() {
                               'Shipment',
                               'ShipmentState',
                               'SHIPMENT_TYPES',
-                              'factory');
+                              'Factory');
 
-      this.centre = new this.Centre(this.factory.centre());
+      this.centre = new this.Centre(this.Factory.centre());
       this.createController = (centre, shipmentTypes, statesToDisplay) => {
         shipmentTypes = shipmentTypes || this.SHIPMENT_TYPES.INCOMING;
         statesToDisplay = statesToDisplay || [];
@@ -84,7 +84,7 @@ describe('shipmentsTableComponent', function() {
         shipmentTypes;
 
     shipment.state = this.ShipmentState.PACKED;
-    spyOn(this.Shipment, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([ shipment ])));
+    spyOn(this.Shipment, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([ shipment ])));
 
     shipmentTypes = [
       this.SHIPMENT_TYPES.INCOMING,
@@ -113,7 +113,7 @@ describe('shipmentsTableComponent', function() {
 
     this.createController(this.centre);
     _.keys(this.ShipmentState).forEach((state) => {
-      var shipment = this.factory.shipment({ state: state }),
+      var shipment = this.Factory.shipment({ state: state }),
           args;
 
       this.controller.shipmentInformation(shipment);

@@ -22,7 +22,7 @@ describe('unpackedShipmentViewComponent', function() {
                               'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
                               'modalService',
                               'notificationsService',
-                              'factory');
+                              'Factory');
 
       this.createController = (shipment) => {
         self.Shipment.get = jasmine.createSpy().and.returnValue(self.$q.when(shipment));
@@ -80,7 +80,7 @@ describe('unpackedShipmentViewComponent', function() {
     it('user can return shipment to received state', function() {
       spyOn(this.$state, 'go').and.returnValue(null);
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
+      spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
       spyOn(this.Shipment.prototype, 'receive').and.returnValue(this.$q.when(this.shipment));
 
       this.controller.returnToReceivedState();
@@ -91,10 +91,10 @@ describe('unpackedShipmentViewComponent', function() {
     });
 
     it('user is informed if shipment cannot be returned to received state', function() {
-      var shipmentSpecimen = new this.ShipmentSpecimen(this.factory.shipmentSpecimen());
+      var shipmentSpecimen = new this.ShipmentSpecimen(this.Factory.shipmentSpecimen());
 
       spyOn(this.ShipmentSpecimen, 'list').and.returnValue(
-        this.$q.when(this.factory.pagedResult([ shipmentSpecimen ])));
+        this.$q.when(this.Factory.pagedResult([ shipmentSpecimen ])));
       spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
 
       this.controller.returnToReceivedState();
@@ -114,7 +114,7 @@ describe('unpackedShipmentViewComponent', function() {
 
     it('user can place shipment in completed state', function() {
       this.injectDependencies('modalInput');
-      spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
+      spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
       spyOn(this.modalInput, 'dateTime').and.returnValue({ result: this.$q.when(new Date()) });
       spyOn(this.Shipment.prototype, 'complete').and.returnValue(this.$q.when(this.shipment));
       spyOn(this.$state, 'go').and.returnValue(null);
@@ -127,10 +127,10 @@ describe('unpackedShipmentViewComponent', function() {
     });
 
     it('user is informed if shipment cannot be placed in completed state', function() {
-      var shipmentSpecimen = new this.ShipmentSpecimen(this.factory.shipmentSpecimen());
+      var shipmentSpecimen = new this.ShipmentSpecimen(this.Factory.shipmentSpecimen());
 
       spyOn(this.ShipmentSpecimen, 'list').and.returnValue(
-        this.$q.when(this.factory.pagedResult([ shipmentSpecimen ])));
+        this.$q.when(this.Factory.pagedResult([ shipmentSpecimen ])));
       spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
 
       this.controller.completeShipment();

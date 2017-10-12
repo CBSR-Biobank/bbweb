@@ -13,7 +13,7 @@ define(['lodash'], function (_) {
     'NumberAnnotation',
     'SingleSelectAnnotation',
     'MultipleSelectAnnotation',
-    'factory'
+    'Factory'
   ];
 
   /**

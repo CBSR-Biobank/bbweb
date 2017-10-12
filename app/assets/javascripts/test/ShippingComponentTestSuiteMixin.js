@@ -10,7 +10,7 @@ export default function ShippingComponentTestSuiteMixinFactory($q,
                                                                ComponentTestSuiteMixin,
                                                                Shipment,
                                                                ShipmentSpecimen,
-                                                               factory) {
+                                                               Factory) {
 
 
   return _.extend(
@@ -27,11 +27,11 @@ export default function ShippingComponentTestSuiteMixinFactory($q,
     if (state) {
       options.state = state;
     }
-    return new Shipment(factory.shipment(options));
+    return new Shipment(Factory.shipment(options));
   }
 
   function createShipmentWithSpecimens(specimenCount) {
-    return new Shipment(factory.shipment({ specimenCount: specimenCount }));
+    return new Shipment(Factory.shipment({ specimenCount: specimenCount }));
   }
 
   function createGetShipmentSpy(shipment) {
@@ -39,7 +39,7 @@ export default function ShippingComponentTestSuiteMixinFactory($q,
   }
 
   function createShipmentSpecimensListSpy(shipmentSpecimens) {
-    var reply = factory.pagedResult(shipmentSpecimens);
+    var reply = Factory.pagedResult(shipmentSpecimens);
     spyOn(ShipmentSpecimen, 'list').and.returnValue($q.when(reply));
   }
 

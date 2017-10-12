@@ -23,9 +23,9 @@ describe('Directive: studyViewDirective', function() {
                               '$window',
                               '$state',
                               'Study',
-                              'factory');
+                              'Factory');
 
-      this.study = new this.Study(this.factory.study());
+      this.study = new this.Study(this.Factory.study());
 
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(

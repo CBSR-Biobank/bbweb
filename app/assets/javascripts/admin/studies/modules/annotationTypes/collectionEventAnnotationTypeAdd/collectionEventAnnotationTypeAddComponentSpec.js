@@ -16,10 +16,10 @@ describe('Component: collectionEventAnnotationTypeAdd', function() {
                               '$compile',
                               'CollectionEventType',
                               'AnnotationType',
-                              'factory');
+                              'Factory');
 
       this.collectionEventType = new this.CollectionEventType(
-        this.factory.collectionEventType(this.factory.study()));
+        this.Factory.collectionEventType(this.Factory.study()));
 
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(

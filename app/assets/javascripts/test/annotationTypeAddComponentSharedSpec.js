@@ -26,13 +26,13 @@ define(function() {
         this.injectDependencies('$q',
                                 '$state',
                                 'AnnotationType',
-                                'factory');
+                                'Factory');
 
         spyOn(this.$state, 'go').and.returnValue('ok');
       }));
 
       it('should change to correct state on submit', function() {
-        var annotType = new this.AnnotationType(this.factory.annotationType());
+        var annotType = new this.AnnotationType(this.Factory.annotationType());
 
         spyOn(context.entity.prototype, context.addAnnotationTypeFuncName)
           .and.returnValue(this.$q.when(this.study));

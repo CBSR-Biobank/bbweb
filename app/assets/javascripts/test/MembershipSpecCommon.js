@@ -9,7 +9,7 @@ define(function (require) {
       moment = require('moment'),
       faker  = require('faker');
 
-  MebershipSpecCommonFactory.$inject = ['EntityTestSuite', 'factory'];
+  MebershipSpecCommonFactory.$inject = ['EntityTestSuite', 'Factory'];
 
   function MebershipSpecCommonFactory(EntityTestSuite, factory) {
 

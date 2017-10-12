@@ -22,10 +22,10 @@ describe('Component: centreLocationView', function() {
                               '$state',
                               'Centre',
                               'Location',
-                              'factory');
+                              'Factory');
 
-      this.location = new this.Location(this.factory.location());
-      this.centre = new this.Centre(this.factory.centre({ locations: [ this.location ]}));
+      this.location = new this.Location(this.Factory.location());
+      this.centre = new this.Centre(this.Factory.centre({ locations: [ this.location ]}));
       this.returnStateName = 'home.admin.centres.centre.locations';
 
       this.createController = (centre, location) => {

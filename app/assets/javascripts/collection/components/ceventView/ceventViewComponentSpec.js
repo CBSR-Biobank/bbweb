@@ -31,15 +31,15 @@ describe('Component: ceventView', function() {
                               'domainNotificationService',
                               'modalService',
                               'notificationsService',
-                              'factory');
+                              'Factory');
 
-      this.jsonCevent      = this.factory.collectionEvent();
-      this.jsonParticipant = this.factory.defaultParticipant();
-      this.jsonCeventType  = this.factory.defaultCollectionEventType();
+      this.jsonCevent      = this.Factory.collectionEvent();
+      this.jsonParticipant = this.Factory.defaultParticipant();
+      this.jsonCeventType  = this.Factory.defaultCollectionEventType();
 
       this.participant     = new this.Participant(this.jsonParticipant);
       this.collectionEvent = new this.CollectionEvent(this.jsonCevent);
-      this.pagedResult     = this.factory.pagedResult([ this.collectionEvent ]);
+      this.pagedResult     = this.Factory.pagedResult([ this.collectionEvent ]);
 
       this.collectionEventWithAnnotation = (valueType, maxValueCount) => {
         var jsonAnnotationType,
@@ -50,12 +50,12 @@ describe('Component: ceventView', function() {
 
         maxValueCount = maxValueCount || 0;
 
-        jsonAnnotationType  = this.factory.annotationType({ valueType: valueType,
+        jsonAnnotationType  = this.Factory.annotationType({ valueType: valueType,
                                                             maxValueCount: maxValueCount });
-        jsonCeventType      = this.factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ]});
-        value               = this.factory.valueForAnnotation(jsonAnnotationType);
-        jsonAnnotation      = this.factory.annotation({ value: value }, jsonAnnotationType);
-        jsonCevent          = this.factory.collectionEvent({ collectionEvent: jsonCeventType,
+        jsonCeventType      = this.Factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ]});
+        value               = this.Factory.valueForAnnotation(jsonAnnotationType);
+        jsonAnnotation      = this.Factory.annotation({ value: value }, jsonAnnotationType);
+        jsonCevent          = this.Factory.collectionEvent({ collectionEvent: jsonCeventType,
                                                              annotations: [ jsonAnnotation ]});
         return this.CollectionEvent.create(jsonCevent);
       };
@@ -90,7 +90,7 @@ describe('Component: ceventView', function() {
     var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                              this.AnnotationMaxValueCount.SELECT_MULTIPLE),
         collectionEventTypes = [ collectionEvent.collectionEventType ],
-        study = new this.Study(this.factory.defaultStudy());
+        study = new this.Study(this.Factory.defaultStudy());
 
     this.createController(study, collectionEventTypes, collectionEvent);
 
@@ -107,7 +107,7 @@ describe('Component: ceventView', function() {
     var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                              this.AnnotationMaxValueCount.SELECT_MULTIPLE),
         collectionEventTypes = [ collectionEvent.collectionEventType ],
-        study = new this.Study(this.factory.defaultStudy());
+        study = new this.Study(this.Factory.defaultStudy());
 
     this.createController(study, collectionEventTypes, collectionEvent);
     this.controller.panelButtonClicked();
@@ -149,7 +149,7 @@ describe('Component: ceventView', function() {
       beforeEach(inject(function () {
         var self = this,
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT),
-            study = new this.Study(this.factory.defaultStudy());
+            study = new this.Study(this.Factory.defaultStudy());
 
         context.entityInstance           = collectionEvent;
         context.createController         = createController;
@@ -173,7 +173,7 @@ describe('Component: ceventView', function() {
         var self = this,
             newValue = faker.date.recent(10),
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME),
-            study = new this.Study(this.factory.defaultStudy());
+            study = new this.Study(this.Factory.defaultStudy());
 
         context.entityInstance           = collectionEvent;
         context.createController         = createController;
@@ -196,7 +196,7 @@ describe('Component: ceventView', function() {
       beforeEach(inject(function () {
         var self = this,
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER),
-            study = new this.Study(this.factory.defaultStudy());
+            study = new this.Study(this.Factory.defaultStudy());
 
         context.entityInstance           = collectionEvent;
         context.createController          = createController;
@@ -220,7 +220,7 @@ describe('Component: ceventView', function() {
         var self = this,
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                                  this.AnnotationMaxValueCount.SELECT_SINGLE),
-            study = new this.Study(this.factory.defaultStudy());
+            study = new this.Study(this.Factory.defaultStudy());
 
         context.entityInstance           = collectionEvent;
         context.createController         = createController;
@@ -244,7 +244,7 @@ describe('Component: ceventView', function() {
         var self = this,
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                                  this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-            study = new this.Study(this.factory.defaultStudy());
+            study = new this.Study(this.Factory.defaultStudy());
 
         context.entityInstance           = collectionEvent;
         context.createController          = createController;
@@ -276,7 +276,7 @@ describe('Component: ceventView', function() {
           this.AnnotationValueType.SELECT,
           this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
-        this.study = new this.Study(this.factory.defaultStudy());
+        this.study = new this.Study(this.Factory.defaultStudy());
 
       }));
 
@@ -321,7 +321,7 @@ describe('Component: ceventView', function() {
 
     beforeEach(function() {
       this.collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER);
-      this.study = new this.Study(this.factory.defaultStudy());
+      this.study = new this.Study(this.Factory.defaultStudy());
     });
 
     it('can remove the collection event when cevent has no specimens', function() {
@@ -385,7 +385,7 @@ describe('Component: ceventView', function() {
       var collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                                this.AnnotationMaxValueCount.SELECT_MULTIPLE),
           collectionEventTypes = [ collectionEvent.collectionEventType ],
-          specimen = new this.Specimen(this.factory.specimen());
+          specimen = new this.Specimen(this.Factory.specimen());
 
       this.Specimen.list =
         jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [ specimen ] }));

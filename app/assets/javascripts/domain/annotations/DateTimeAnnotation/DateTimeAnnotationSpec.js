@@ -22,13 +22,13 @@ describe('DateTimeAnnotation', function() {
       this.injectDependencies('DateTimeAnnotation',
                               'AnnotationType',
                               'AnnotationValueType',
-                              'factory');
+                              'Factory');
     });
   });
 
   it('set value can be assigned a string', function() {
-    var jsonAnnotationType = this.factory.annotationType({ valueType: this.AnnotationValueType.DATE_TIME }),
-        jsonAnnotation = this.factory.annotation({}, jsonAnnotationType),
+    var jsonAnnotationType = this.Factory.annotationType({ valueType: this.AnnotationValueType.DATE_TIME }),
+        jsonAnnotation = this.Factory.annotation({}, jsonAnnotationType),
         annotationType = new this.AnnotationType(jsonAnnotationType),
         annotation = new this.DateTimeAnnotation(jsonAnnotation, annotationType);
 

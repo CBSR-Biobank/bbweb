@@ -25,7 +25,7 @@ describe('Component: studiesPagedList', function() {
                               'NameFilter',
                               'StateFilter',
                               '$state',
-                              'factory');
+                              'Factory');
 
       this.createController = () => {
         ComponentTestSuiteMixin.createController.call(
@@ -47,12 +47,12 @@ describe('Component: studiesPagedList', function() {
       };
 
       this.createPagedResultsSpy = (studies) => {
-        var reply = this.factory.pagedResult(studies);
+        var reply = this.Factory.pagedResult(studies);
         spyOn(this.Study, 'list').and.returnValue(this.$q.when(reply));
       };
 
       this.createEntity = () => {
-        var entity = new this.Study(this.factory.study());
+        var entity = new this.Study(this.Factory.study());
         return entity;
       };
     });
@@ -118,14 +118,14 @@ describe('Component: studiesPagedList', function() {
           ];
 
       statesInfo.forEach(function (info) {
-        var study = new self.Study(self.factory.study({ state: info.state }));
+        var study = new self.Study(self.Factory.study({ state: info.state }));
         expect(self.controller.getItemIcon(study)).toEqual(info.icon);
       });
     });
 
     it('getItemIcon throws an error for and invalid state', function() {
       var self = this,
-          study = new this.Study(this.factory.study({ state: this.factory.stringNext() }));
+          study = new this.Study(this.Factory.study({ state: this.Factory.stringNext() }));
 
       expect(function () {
         self.controller.getItemIcon(study);

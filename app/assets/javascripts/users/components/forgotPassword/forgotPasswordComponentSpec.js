@@ -22,7 +22,7 @@ describe('Component: forgotPassword', function() {
                               'usersService',
                               'modalService',
                               'notificationsService',
-                              'factory');
+                              'Factory');
 
       this.createController = () => {
         ComponentTestSuiteMixin.createController.call(
@@ -41,7 +41,7 @@ describe('Component: forgotPassword', function() {
   });
 
   it('goes to correct state on submit', function() {
-    var email = this.factory.emailNext();
+    var email = this.Factory.emailNext();
 
     spyOn(this.usersService, 'passwordReset').and.returnValue(this.$q.when('OK'));
     spyOn(this.$state, 'go').and.returnValue(null);
@@ -54,7 +54,7 @@ describe('Component: forgotPassword', function() {
   });
 
   it('goes to correct state if email is not registered', function() {
-    var email = this.factory.emailNext();
+    var email = this.Factory.emailNext();
 
     spyOn(this.$state, 'go').and.returnValue(null);
 
@@ -67,7 +67,7 @@ describe('Component: forgotPassword', function() {
   });
 
   it('displays information in modal on password reset failure and user presses OK', function() {
-    var email = this.factory.emailNext();
+    var email = this.Factory.emailNext();
 
     spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
     spyOn(this.$state, 'go').and.returnValue(null);
@@ -81,7 +81,7 @@ describe('Component: forgotPassword', function() {
   });
 
   it('displays information in modal on password reset failure and user closes window', function() {
-    var email = this.factory.emailNext();
+    var email = this.Factory.emailNext();
 
     spyOn(this.$state, 'go').and.returnValue(null);
     this.createController();

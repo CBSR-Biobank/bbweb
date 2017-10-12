@@ -22,7 +22,7 @@ define(function () {
         var shipment = this.createShipment();
 
         spyOn(this.ShipmentSpecimen, 'list')
-          .and.returnValue(this.$q.when(this.factory.pagedResult([], { maxPages: 1 })));
+          .and.returnValue(this.$q.when(this.Factory.pagedResult([], { maxPages: 1 })));
 
         this.createController(shipment);
         this.controller.getSpecimens({}).then(function (result) {

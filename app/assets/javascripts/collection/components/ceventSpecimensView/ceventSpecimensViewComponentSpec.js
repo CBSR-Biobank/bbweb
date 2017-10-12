@@ -23,17 +23,17 @@ describe('ceventSpecimensViewComponent', function() {
                               'CollectionEventType',
                               'specimenAddModal',
                               'domainNotificationService',
-                              'factory');
+                              'Factory');
 
-      this.rawSpecimenDescription = this.factory.collectionSpecimenDescription();
-      this.rawCollectionEventType = this.factory.collectionEventType(
+      this.rawSpecimenDescription = this.Factory.collectionSpecimenDescription();
+      this.rawCollectionEventType = this.Factory.collectionEventType(
         { specimenDescriptions: [ this.rawSpecimenDescription ]});
       this.collectionEventType = new this.CollectionEventType(this.rawCollectionEventType);
-      this.collectionEvent = new this.CollectionEvent(this.factory.collectionEvent(),
+      this.collectionEvent = new this.CollectionEvent(this.Factory.collectionEvent(),
                                                       this.collectionEventType);
-      this.specimen = new this.Specimen(this.factory.specimen(),
+      this.specimen = new this.Specimen(this.Factory.specimen(),
                                         this.collectionEventType.specimenDescriptions[0]);
-      this.study = new this.Study(this.factory.defaultStudy());
+      this.study = new this.Study(this.Factory.defaultStudy());
 
       this.createController = (study, collectionEvent) => {
         study = study || this.study;
@@ -65,13 +65,13 @@ describe('ceventSpecimensViewComponent', function() {
 
       this.createCentreLocations = () => {
         var centres = _.range(2).map(() => {
-          var locations = _.range(2).map(() => this.factory.location());
-          return this.factory.centre({ locations: locations });
+          var locations = _.range(2).map(() => this.Factory.location());
+          return this.Factory.centre({ locations: locations });
         });
-        return this.factory.centreLocations(centres);
+        return this.Factory.centreLocations(centres);
       };
 
-      spyOn(this.Specimen, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
+      spyOn(this.Specimen, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
       spyOn(this.Specimen, 'add').and.returnValue(this.$q.when(this.sepcimen));
       spyOn(this.specimenAddModal, 'open').and.returnValue({ result: this.$q.when([ this.specimen ])});
       spyOn(this.Study.prototype, 'allLocations')

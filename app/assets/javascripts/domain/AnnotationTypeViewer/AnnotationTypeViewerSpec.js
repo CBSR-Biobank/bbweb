@@ -19,10 +19,10 @@ describe('AnnotationTypeViewer', function() {
                               'AnnotationType',
                               'AnnotationValueType',
                               'AnnotationTypeViewer',
-                              'factory',
+                              'Factory',
                               'testUtils');
 
-      this.study = new this.Study(this.factory.study());
+      this.study = new this.Study(this.Factory.study());
 
       this.annotatationTypeOptions = [
         { valueType: this.AnnotationValueType.TEXT      },
@@ -42,7 +42,7 @@ describe('AnnotationTypeViewer', function() {
 
     this.annotatationTypeOptions.forEach((options) => {
       // jshint unused:false
-      var annotationType = new self.AnnotationType(self.factory.annotationType(options)),
+      var annotationType = new self.AnnotationType(self.Factory.annotationType(options)),
           viewer = new self.AnnotationTypeViewer(annotationType);
       count++;
       expect(self.$uibModal.open.calls.count()).toBe(count);
@@ -52,7 +52,7 @@ describe('AnnotationTypeViewer', function() {
   it('should throw an error when created when it has no options', function() {
     var self = this,
         annotationType = new this.AnnotationType(
-          self.factory.annotationType({
+          self.Factory.annotationType({
             valueType: self.AnnotationValueType.SELECT,
             options: []
           }));
@@ -75,7 +75,7 @@ describe('AnnotationTypeViewer', function() {
 
       attributes = [];
 
-      annotationType = new self.AnnotationType(self.factory.annotationType(options));
+      annotationType = new self.AnnotationType(self.Factory.annotationType(options));
       viewer = new self.AnnotationTypeViewer(annotationType);
 
       if (annotationType.isValueTypeSelect()) {

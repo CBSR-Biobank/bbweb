@@ -22,7 +22,7 @@ describe('specimenViewComponent', function() {
                               'Specimen',
                               'specimenAddModal',
                               'domainNotificationService',
-                              'factory');
+                              'Factory');
 
       this.createController =
         (study, participant, collectionEventType, collectionEvent, specimen) =>
@@ -45,15 +45,15 @@ describe('specimenViewComponent', function() {
 
       // the object must have keys in same order as the parameters for createController()
       this.createEntities = () => {
-        var rawSpecimenDescription = this.factory.collectionSpecimenDescription(),
-            rawCollectionEventType = this.factory.collectionEventType(
+        var rawSpecimenDescription = this.Factory.collectionSpecimenDescription(),
+            rawCollectionEventType = this.Factory.collectionEventType(
               { specimenDescriptions: [ rawSpecimenDescription ]}),
             collectionEventType = this.CollectionEventType.create(rawCollectionEventType),
-            collectionEvent = new this.CollectionEvent(this.factory.collectionEvent(), collectionEventType),
-            specimen = new this.Specimen(this.factory.specimen(),
+            collectionEvent = new this.CollectionEvent(this.Factory.collectionEvent(), collectionEventType),
+            specimen = new this.Specimen(this.Factory.specimen(),
                                          collectionEventType.specimenDescriptions[0]),
-            participant = new this.Participant(this.factory.defaultParticipant()),
-            study = new this.Study(this.factory.defaultStudy());
+            participant = new this.Participant(this.Factory.defaultParticipant()),
+            study = new this.Study(this.Factory.defaultStudy());
 
         return {
           study:               study,

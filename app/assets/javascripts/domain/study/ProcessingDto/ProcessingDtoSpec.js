@@ -21,7 +21,7 @@ xdescribe('ProcessingDto', function() {
 
       httpBackend   = this.$injector.get('$httpBackend');
       ProcessingDto = this.$injector.get('ProcessingDto');
-      factory  = this.$injector.get('factory');
+      factory  = this.$injector.get('Factory');
       testUtils.addCustomMatchers();
 
       createEntities = setupEntities(this.$injector);

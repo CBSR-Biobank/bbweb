@@ -21,10 +21,10 @@ describe('UserName', function() {
                               'EntityName',
                               'UserName',
                               'UserState',
-                              'factory');
+                              'Factory');
 
       //this.testUtils.addCustomMatchers();
-      this.jsonUserName = this.factory.userNameDto();
+      this.jsonUserName = this.Factory.userNameDto();
 
       this.expectUser = (entity) => {
         expect(entity).toEqual(jasmine.any(this.UserName));
@@ -54,7 +54,7 @@ describe('UserName', function() {
       context.constructor = this.UserName;
       context.createFunc  = this.UserName.create;
       context.restApiUrl  = this.url();
-      context.factoryFunc = this.factory.userNameDto;
+      context.factoryFunc = this.Factory.userNameDto.bind(this.Factory);
       context.listFunc    = this.UserName.list;
     });
 
@@ -65,7 +65,7 @@ describe('UserName', function() {
   it('state predicates return valid results', function() {
     var self = this;
     _.values(self.UserState).forEach((state) => {
-      var userName = self.UserName.create(self.factory.userNameDto({ state: state }));
+      var userName = self.UserName.create(self.Factory.userNameDto({ state: state }));
       expect(userName.isRegistered()).toBe(state === self.UserState.REGISTERED);
       expect(userName.isActive()).toBe(state === self.UserState.ACTIVE);
       expect(userName.isLocked()).toBe(state === self.UserState.LOCKED);

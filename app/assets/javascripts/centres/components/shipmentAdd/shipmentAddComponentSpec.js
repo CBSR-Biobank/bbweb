@@ -22,7 +22,7 @@ describe('shipmentAddComponent', function() {
                               'ShipmentState',
                               'SHIPMENT_SEND_PROGRESS_ITEMS',
                               'domainNotificationService',
-                              'factory');
+                              'Factory');
 
       testUtils.addCustomMatchers();
       this.createController = () =>
@@ -33,7 +33,7 @@ describe('shipmentAddComponent', function() {
           'shipmentAdd');
 
       this.createPagedResultsSpy = (shipments) => {
-        var reply = this.factory.pagedResult(shipments);
+        var reply = this.Factory.pagedResult(shipments);
         spyOn(this.Shipment, 'list').and.returnValue(this.$q.when(reply));
       };
 
@@ -45,8 +45,8 @@ describe('shipmentAddComponent', function() {
       this.centreLocations = (numCentres) => {
         var self = this;
         return _.range(numCentres).map(() => {
-          var centre = self.factory.centre({ locations: [ self.factory.location() ]});
-          return self.factory.centreLocationDto(centre);
+          var centre = self.Factory.centre({ locations: [ self.Factory.location() ]});
+          return self.Factory.centreLocationDto(centre);
         });
       };
     });
@@ -73,7 +73,7 @@ describe('shipmentAddComponent', function() {
   });
 
   it('on submit button pressed should go to next state', function() {
-    var shipment = new this.Shipment(this.factory.shipment());
+    var shipment = new this.Shipment(this.Factory.shipment());
 
     spyOn(this.$state, 'go').and.returnValue(null);
     spyOn(this.Shipment.prototype, 'add').and.returnValue(this.$q.when(shipment));

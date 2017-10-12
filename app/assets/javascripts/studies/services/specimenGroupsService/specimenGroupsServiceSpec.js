@@ -16,10 +16,10 @@ xdescribe('Service: specimenGroupsService', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function ($httpBackend,
                                   _specimenGroupsService_,
-                                  _factory_) {
+                                  _Factory_) {
       specimenGroupsService = _specimenGroupsService_;
       httpBackend = $httpBackend;
-      factory = _factory_;
+      Factory = _Factory_;
     });
   });
 

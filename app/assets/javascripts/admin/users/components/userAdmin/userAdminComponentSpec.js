@@ -22,7 +22,7 @@ describe('Component: userAdminComponent', function() {
                               'usersService',
                               'User',
                               'UserCounts',
-                              'factory');
+                              'Factory');
 
       /*
        * Have to create controller as a directive so that $onInit() is fired on the controller.
@@ -53,7 +53,7 @@ describe('Component: userAdminComponent', function() {
       };
 
       this.createUserListSpy = (users) => {
-        var reply = this.factory.pagedResult(users);
+        var reply = this.Factory.pagedResult(users);
         this.User.list = jasmine.createSpy().and.returnValue(this.$q.when(reply));
       };
     });

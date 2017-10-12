@@ -20,14 +20,14 @@ describe('centreLocationsModalService', function() {
                               '$document',
                               'centreLocationsModalService',
                               'Centre',
-                              'factory');
+                              'Factory');
       this.addModalMatchers();
       testUtils.addCustomMatchers();
       this.openModal = (heading, label, placeholder, value, locationInfosToOmit) => {
-        heading             = heading     || this.factory.stringNext();
-        label               = label       || this.factory.stringNext();
-        placeholder         = placeholder || this.factory.stringNext();
-        value               = value       || this.factory.stringNext();
+        heading             = heading     || this.Factory.stringNext();
+        label               = label       || this.Factory.stringNext();
+        placeholder         = placeholder || this.Factory.stringNext();
+        value               = value       || this.Factory.stringNext();
         locationInfosToOmit = locationInfosToOmit || [];
 
         this.modal = this.centreLocationsModalService.open(heading,
@@ -45,11 +45,11 @@ describe('centreLocationsModalService', function() {
       this.centreAndLocations = () => {
         var self = this;
         return _.range(3).map(() => {
-          var location = self.factory.location(),
-              centre = self.factory.centre({ locations: [ location ] });
+          var location = self.Factory.location(),
+              centre = self.Factory.centre({ locations: [ location ] });
           return {
             centre: centre,
-            locationInfo: self.factory.centreLocationInfo(centre)
+            locationInfo: self.Factory.centreLocationInfo(centre)
           };
         });
       };

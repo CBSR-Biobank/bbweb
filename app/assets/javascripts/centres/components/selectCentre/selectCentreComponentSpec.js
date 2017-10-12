@@ -17,7 +17,7 @@ describe('selectCentreComponent', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
 
-      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
+      this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
       this.createController = (options) => {
         ComponentTestSuiteMixin.createController.call(
           this,
@@ -46,7 +46,7 @@ describe('selectCentreComponent', function() {
   });
 
   it('displays the list of centres', function() {
-    var centres = _.range(20).map(() => this.factory.centre()),
+    var centres = _.range(20).map(() => this.Factory.centre()),
         limit = centres.length / 2;
 
     this.createController({ getCentres: this.createGetCentresFn(centres), limit: limit });
@@ -56,7 +56,7 @@ describe('selectCentreComponent', function() {
   });
 
   it('displays the pannel header correctly', function() {
-    var centres = _.range(20).map(() => this.factory.centre()),
+    var centres = _.range(20).map(() => this.Factory.centre()),
         limit = centres.length / 2;
 
     this.createController({ getCentres: this.createGetCentresFn(centres), limit: limit });
@@ -64,14 +64,14 @@ describe('selectCentreComponent', function() {
   });
 
   it('has a name filter', function() {
-    var centres = [ this.factory.centre() ];
+    var centres = [ this.Factory.centre() ];
     this.createController({ getCentres: this.createGetCentresFn(centres), limit: centres.length });
     expect(this.element.find('input').length).toBe(1);
   });
 
 
   it('displays pagination controls', function() {
-    var centres = _.range(20).map(() => this.factory.centre()),
+    var centres = _.range(20).map(() => this.Factory.centre()),
         limit = centres.length / 2;
 
     this.createController({ getCentres: this.createGetCentresFn(centres), limit: limit });
@@ -80,7 +80,7 @@ describe('selectCentreComponent', function() {
   });
 
   it('updates to name filter cause centres to be re-loaded', function() {
-    var centres = _.range(20).map(() => this.factory.centre()),
+    var centres = _.range(20).map(() => this.Factory.centre()),
         limit = centres.length / 2;
 
     this.createController({ getCentres: this.createGetCentresFn(centres), limit: limit });
@@ -97,7 +97,7 @@ describe('selectCentreComponent', function() {
   });
 
   it('page change causes centres to be re-loaded', function() {
-    var centres = _.range(8).map(() => this.factory.centre()),
+    var centres = _.range(8).map(() => this.Factory.centre()),
         limit = centres.length / 2;
 
     this.createController({ getCentres: this.createGetCentresFn(centres), limit: limit });
@@ -107,7 +107,7 @@ describe('selectCentreComponent', function() {
   });
 
   it('clear filter causes centres to be re-loaded', function() {
-    var centres = _.range(8).map(() => this.factory.centre()),
+    var centres = _.range(8).map(() => this.Factory.centre()),
         limit = centres.length / 2;
 
     this.createController({ getCentres: this.createGetCentresFn(centres), limit: limit });
@@ -117,7 +117,7 @@ describe('selectCentreComponent', function() {
   });
 
   it('studyGlyphicon returns valid image tag', function() {
-    var centres = _.range(8).map(() => this.factory.centre()),
+    var centres = _.range(8).map(() => this.Factory.centre()),
         limit = centres.length / 2;
 
     this.createController({ getCentres: this.createGetCentresFn(centres), limit: limit });

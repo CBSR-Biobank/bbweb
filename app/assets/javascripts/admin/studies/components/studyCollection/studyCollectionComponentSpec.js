@@ -21,10 +21,10 @@ describe('studyCollectionComponent', function() {
                               '$q',
                               'Study',
                               'CollectionEventType',
-                              'factory');
+                              'Factory');
 
-      jsonStudy = this.factory.study();
-      jsonCet   = this.factory.collectionEventType(jsonStudy);
+      jsonStudy = this.Factory.study();
+      jsonCet   = this.Factory.collectionEventType(jsonStudy);
 
       this.study = new this.Study(jsonStudy);
       this.collectionEventType = new this.CollectionEventType(jsonCet);
@@ -36,7 +36,7 @@ describe('studyCollectionComponent', function() {
         ceTypes = ceTypes || [];
 
         this.CollectionEventType.list = jasmine.createSpy().and
-          .returnValue(this.$q.when(this.factory.pagedResult(ceTypes)));
+          .returnValue(this.$q.when(this.Factory.pagedResult(ceTypes)));
         this.element = angular.element('<study-collection study="study"></study-collection>');
         this.scope = this.$rootScope.$new();
         this.scope.study = study;
@@ -53,10 +53,10 @@ describe('studyCollectionComponent', function() {
 
   it('initialization is valid', function() {
     var self = this,
-        basename = self.factory.stringNext(),
+        basename = self.Factory.stringNext(),
         numCeTypes = 3,
         ceTypes = _.times(numCeTypes, function (index) {
-          var ceType = self.CollectionEventType.create(self.factory.collectionEventType());
+          var ceType = self.CollectionEventType.create(self.Factory.collectionEventType());
           ceType.name = basename + '_' + (numCeTypes - index);
           return ceType;
         });
@@ -74,8 +74,8 @@ describe('studyCollectionComponent', function() {
 
   it('should update the Collection Event Types when event is emitted', function() {
     var childScope,
-        ceType = this.CollectionEventType.create(this.factory.collectionEventType()),
-        newName = this.factory.stringNext();
+        ceType = this.CollectionEventType.create(this.Factory.collectionEventType()),
+        newName = this.Factory.stringNext();
 
     this.createController(this.study, [ ceType ]);
     childScope = this.element.isolateScope().$new();

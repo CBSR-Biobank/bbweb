@@ -29,7 +29,7 @@ define(['lodash'], function (_) {
     describe('(shared)', function () {
 
       beforeEach(function() {
-        this.injectDependencies('$rootScope', 'factory');
+        this.injectDependencies('$rootScope', 'Factory');
       });
 
       it('can add annotation', function () {
@@ -61,7 +61,7 @@ define(['lodash'], function (_) {
       });
 
       it('fails when removing an invalid annotation', function () {
-        var annotation = _.extend({}, context.annotation, { annotationTypeId: this.factory.stringNext() });
+        var annotation = _.extend({}, context.annotation, { annotationTypeId: this.Factory.stringNext() });
         context.entity[context.removeFuncName](annotation)
           .catch(function (err) {
             expect(err).toStartWith('annotation with annotation type ID not present:');

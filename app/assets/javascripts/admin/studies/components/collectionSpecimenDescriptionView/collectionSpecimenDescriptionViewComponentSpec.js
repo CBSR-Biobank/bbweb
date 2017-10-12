@@ -22,13 +22,13 @@ describe('Component: collectionSpecimenDescriptionView', function() {
                               'Study',
                               'CollectionEventType',
                               'CollectionSpecimenDescription',
-                              'factory');
+                              'Factory');
 
-      this.jsonSpecimenDescription = this.factory.collectionSpecimenDescription();
-      this.jsonCeventType          = this.factory.collectionEventType({
+      this.jsonSpecimenDescription = this.Factory.collectionSpecimenDescription();
+      this.jsonCeventType          = this.Factory.collectionEventType({
         specimenDescriptions: [ this.jsonSpecimenDescription ]
       });
-      this.jsonStudy           = this.factory.defaultStudy;
+      this.jsonStudy           = this.Factory.defaultStudy;
 
       this.study               = new this.Study(this.jsonStudy);
       this.collectionEventType = new this.CollectionEventType(this.jsonCeventType);

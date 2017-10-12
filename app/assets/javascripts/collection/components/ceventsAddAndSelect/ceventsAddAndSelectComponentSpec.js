@@ -22,11 +22,11 @@ describe('ceventsAddAndSelectDirective', function() {
                               'Participant',
                               'CollectionEvent',
                               'CollectionEventType',
-                              'factory');
+                              'Factory');
 
-      this.jsonCevent      = this.factory.collectionEvent();
-      this.jsonParticipant = this.factory.defaultParticipant();
-      this.jsonCeventType  = this.factory.defaultCollectionEventType();
+      this.jsonCevent      = this.Factory.collectionEvent();
+      this.jsonParticipant = this.Factory.defaultParticipant();
+      this.jsonCeventType  = this.Factory.defaultCollectionEventType();
 
       this.participant          = this.Participant.create(this.jsonParticipant);
       this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
@@ -46,7 +46,7 @@ describe('ceventsAddAndSelectDirective', function() {
         }
 
         this.CollectionEvent.list =
-          jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult(replyItems)));
+          jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult(replyItems)));
 
         ComponentTestSuiteMixin.createController.call(
           this,
@@ -84,8 +84,8 @@ describe('ceventsAddAndSelectDirective', function() {
     });
 
     it('throws an exception when collection event does not match any collection event types', function() {
-      this.collectionEvent.collectionEventTypeId = this.factory.stringNext();
-      this.createController(this.participant, [ this.factory.collectionEventType()]);
+      this.collectionEvent.collectionEventTypeId = this.Factory.stringNext();
+      this.createController(this.participant, [ this.Factory.collectionEventType()]);
       expect(this.controller.collectionEventError).toBeTrue();
     });
 
@@ -130,7 +130,7 @@ describe('ceventsAddAndSelectDirective', function() {
       var self = this;
 
       self.collectionEventTypes = _.range(2).map(() => {
-        var jsonCeventType  = self.factory.defaultCollectionEventType();
+        var jsonCeventType  = self.Factory.defaultCollectionEventType();
         return new self.CollectionEventType(jsonCeventType);
       });
 
@@ -161,7 +161,7 @@ describe('ceventsAddAndSelectDirective', function() {
       this.createController();
 
       this.CollectionEvent.list =
-        jasmine.createSpy().and.returnValue(this.$q.when(this.factory.pagedResult([])));
+        jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult([])));
 
       this.controller.visitNumberFilter = visitNumber;
       this.controller.visitFilterUpdated();

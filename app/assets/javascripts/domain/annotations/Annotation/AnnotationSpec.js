@@ -21,13 +21,13 @@ describe('Annotation', function() {
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
                               'timeService',
-                              'factory');
+                              'Factory');
 
       testUtils.addCustomMatchers();
 
       this.createAnnotationType = (options) => {
         options = options || {};
-        return new this.AnnotationType(this.factory.annotationType(options));
+        return new this.AnnotationType(this.Factory.annotationType(options));
       };
 
       this.getAnnotationAndType = (annotTypeOptions) => {
@@ -39,8 +39,8 @@ describe('Annotation', function() {
         annotTypeOptions = annotTypeOptions || {};
 
         annotationType   = this.createAnnotationType(annotTypeOptions);
-        value            = this.factory.valueForAnnotation(annotationType);
-        jsonAnnotation   = this.factory.annotation({ value: value }, annotationType);
+        value            = this.Factory.valueForAnnotation(annotationType);
+        jsonAnnotation   = this.Factory.annotation({ value: value }, annotationType);
         annotation       = this.annotationFactory.create(jsonAnnotation, annotationType);
 
         return {
@@ -77,7 +77,7 @@ describe('Annotation', function() {
 
   it('constructor throws error for an invalid annotation value type', function() {
     var self = this,
-        annotationType = self.createAnnotationType({ valueType: self.factory.stringNext() });
+        annotationType = self.createAnnotationType({ valueType: self.Factory.stringNext() });
 
     expect(function () {
       var annotation = new self.Annotation({}, annotationType);
@@ -110,8 +110,8 @@ describe('Annotation', function() {
 
     it('fails when creating from an object missing annotation type ID', function() {
       var self = this,
-          annotationTypeJson = this.factory.annotationType(),
-          badAnnotationJson = _.omit(self.factory.annotation({}, annotationTypeJson), 'annotationTypeId');
+          annotationTypeJson = this.Factory.annotationType(),
+          badAnnotationJson = _.omit(self.Factory.annotation({}, annotationTypeJson), 'annotationTypeId');
 
       expect(function () {
         self.Annotation.create(badAnnotationJson);
@@ -120,8 +120,8 @@ describe('Annotation', function() {
 
     it('fails when creating from an object missing selected values', function() {
       var self = this,
-          annotationTypeJson = this.factory.annotationType(),
-          badAnnotationJson = _.omit(self.factory.annotation({}, annotationTypeJson), 'selectedValues');
+          annotationTypeJson = this.Factory.annotationType(),
+          badAnnotationJson = _.omit(self.Factory.annotation({}, annotationTypeJson), 'selectedValues');
 
       expect(function () {
         self.Annotation.create(badAnnotationJson);
@@ -140,7 +140,7 @@ describe('Annotation', function() {
         annotationTypeOptions.required = true;
 
         annotationType = self.createAnnotationType(annotationTypeOptions);
-        jsonAnnotation = self.factory.annotation(null, annotationType);
+        jsonAnnotation = self.Factory.annotation(null, annotationType);
         annotation = self.annotationFactory.create(jsonAnnotation, annotationType);
         expect(annotation.getDisplayValue()).toBeFalsy();
       });
@@ -195,7 +195,7 @@ describe('Annotation', function() {
         required:      true
       });
 
-      serverAnnotation = self.factory.annotation(value, annotationType);
+      serverAnnotation = self.Factory.annotation(value, annotationType);
       serverAnnotation.selectedValues = annotationType.options;
       expect(function () { return self.annotationFactory.create(serverAnnotation, annotationType); })
         .toThrowError('invalid value for selected values');
@@ -223,7 +223,7 @@ describe('Annotation', function() {
             required:      true
           }),
           jsonAnnotation = {
-            annotationTypeId: self.factory.stringNext(),
+            annotationTypeId: self.Factory.stringNext(),
             selectedValues: { tmp: 1 }
           };
       expect(function () { self.annotationFactory.create(jsonAnnotation, annotationType); })
@@ -302,7 +302,7 @@ describe('Annotation', function() {
         annotationTypeOptions.required = true;
 
         annotationType = self.createAnnotationType(annotationTypeOptions);
-        serverAnnotation = self.factory.annotation(null, annotationType);
+        serverAnnotation = self.Factory.annotation(null, annotationType);
         annotation = self.annotationFactory.create(serverAnnotation, annotationType, true);
         expect(annotation.isValueValid()).toBe(false);
       });
@@ -320,8 +320,8 @@ describe('Annotation', function() {
         annotationTypeOptions.required = true;
 
         annotationType   = self.createAnnotationType(annotationTypeOptions);
-        value            = self.factory.valueForAnnotation(annotationType);
-        serverAnnotation = self.factory.annotation({ value: value }, annotationType);
+        value            = self.Factory.valueForAnnotation(annotationType);
+        serverAnnotation = self.Factory.annotation({ value: value }, annotationType);
         annotation       = self.annotationFactory.create(serverAnnotation, annotationType, true);
         expect(annotation.isValueValid()).toBe(true);
       });
@@ -341,8 +341,8 @@ describe('Annotation', function() {
     valueTypes.forEach((valueType) => {
       annotationType = self.createAnnotationType({ valueType: valueType });
 
-      value = self.factory.valueForAnnotation(annotationType);
-      serverAnnotation = self.factory.annotation({ value: value }, annotationType);
+      value = self.Factory.valueForAnnotation(annotationType);
+      serverAnnotation = self.Factory.annotation({ value: value }, annotationType);
       annotation = self.annotationFactory.create(serverAnnotation, annotationType);
 
       if (valueType === self.AnnotationValueType.TEXT) {
@@ -363,8 +363,8 @@ describe('Annotation', function() {
 
     annotationType = this.createAnnotationType({ valueType: this.AnnotationValueType.NUMBER });
 
-    value = this.factory.valueForAnnotation(annotationType);
-    serverAnnotation = this.factory.annotation({ value: value }, annotationType);
+    value = this.Factory.valueForAnnotation(annotationType);
+    serverAnnotation = this.Factory.annotation({ value: value }, annotationType);
 
     annotation = this.annotationFactory.create(serverAnnotation, annotationType);
     expect(annotation.getValue()).toEqual(parseFloat(serverAnnotation.numberValue));
@@ -380,8 +380,8 @@ describe('Annotation', function() {
       required:      true
     });
 
-    value = this.factory.valueForAnnotation(annotationType);
-    serverAnnotation = this.factory.annotation({ value: value }, annotationType);
+    value = this.Factory.valueForAnnotation(annotationType);
+    serverAnnotation = this.Factory.annotation({ value: value }, annotationType);
 
     annotation = this.annotationFactory.create(serverAnnotation, annotationType);
     expect(annotation.getValue()).toEqual(serverAnnotation.selectedValues[0]);
@@ -397,8 +397,8 @@ describe('Annotation', function() {
       required:      true
     });
 
-    value = this.factory.valueForAnnotation(annotationType);
-    serverAnnotation = this.factory.annotation({ value: value }, annotationType);
+    value = this.Factory.valueForAnnotation(annotationType);
+    serverAnnotation = this.Factory.annotation({ value: value }, annotationType);
     annotation = this.annotationFactory.create(serverAnnotation, annotationType);
 
     expect(annotation.getDisplayValue()).toEqual(serverAnnotation.selectedValues.join(', '));
@@ -423,7 +423,7 @@ describe('Annotation', function() {
       annotationTypeOptions.required = true;
 
       annotationType = self.createAnnotationType(annotationTypeOptions);
-      serverAnnotation = self.factory.annotation({ value: '' }, annotationType);
+      serverAnnotation = self.Factory.annotation({ value: '' }, annotationType);
       annotation = self.annotationFactory.create(serverAnnotation, annotationType, true);
 
       var serverAnnot = annotation.getServerAnnotation();
@@ -455,7 +455,7 @@ describe('Annotation', function() {
 
   it('calling setValue assigns the value', function() {
     var annotation = new this.Annotation(),
-        newValue = this.factory.stringNext();
+        newValue = this.Factory.stringNext();
     annotation.setValue(newValue);
     expect(annotation.value).toBe(newValue);
   });

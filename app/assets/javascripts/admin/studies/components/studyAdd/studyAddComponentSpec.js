@@ -18,7 +18,7 @@ describe('Component: studyAdd', function() {
       this.injectDependencies('$rootScope',
                               '$compile',
                               'Study',
-                              'factory');
+                              'Factory');
 
       this.study = new this.Study();
       this.titleContains = 'Add';

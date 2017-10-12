@@ -22,11 +22,11 @@ describe('Component: ceventGetType', function() {
                               'Study',
                               'Participant',
                               'CollectionEventType',
-                              'factory');
+                              'Factory');
 
-      this.jsonCeventTypes = _.range(2).map(() => this.factory.collectionEventType());
-      this.jsonParticipant = this.factory.participant();
-      this.jsonStudy       = this.factory.defaultStudy();
+      this.jsonCeventTypes = _.range(2).map(() => this.Factory.collectionEventType());
+      this.jsonParticipant = this.Factory.participant();
+      this.jsonStudy       = this.Factory.defaultStudy();
 
       this.collectionEventTypes =
         this.jsonCeventTypes.map((jsonCeventType) => this.CollectionEventType.create(jsonCeventType));

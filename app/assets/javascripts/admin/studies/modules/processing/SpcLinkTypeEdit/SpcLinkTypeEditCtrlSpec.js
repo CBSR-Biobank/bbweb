@@ -20,7 +20,7 @@ xdescribe('Controller: SpcLinkTypeEditCtrl', function() {
       createEntities   = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
-      factory     = this.$injector.get('factory');
+      factory     = this.$injector.get('Factory');
       testUtils.addCustomMatchers();
     });
   });

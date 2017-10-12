@@ -22,18 +22,18 @@ describe('Component: ceventList', function() {
                               'Participant',
                               'CollectionEvent',
                               'CollectionEventType',
-                              'factory');
+                              'Factory');
 
-      this.jsonCevent      = this.factory.collectionEvent();
-      this.jsonCeventType  = this.factory.defaultCollectionEventType();
-      this.jsonParticipant = this.factory.defaultParticipant();
+      this.jsonCevent      = this.Factory.collectionEvent();
+      this.jsonCeventType  = this.Factory.defaultCollectionEventType();
+      this.jsonParticipant = this.Factory.defaultParticipant();
 
       this.participant          = new this.Participant(this.jsonParticipant);
       this.collectionEventTypes = [ new this.CollectionEventType(this.jsonCeventType) ];
       this.collectionEvent      = new this.CollectionEvent(this.jsonCevent);
 
       this.CollectionEvent.list = jasmine.createSpy()
-        .and.returnValue(this.$q.when(this.factory.pagedResult([ this.collectionEvent ])));
+        .and.returnValue(this.$q.when(this.Factory.pagedResult([ this.collectionEvent ])));
 
       this.createController = (participant, collectionEventTypes) => {
         participant = participant || this.participant;

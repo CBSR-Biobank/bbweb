@@ -15,7 +15,7 @@ describe('progressTrackerComponent', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
 
-      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
+      this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
 
       this.createController = (items, current) => {
         ComponentTestSuiteMixin.createController.call(
@@ -33,7 +33,7 @@ describe('progressTrackerComponent', function() {
   });
 
   it('has valid scope', function() {
-    var items = _.range(3).map(() => this.factory.stringNext()),
+    var items = _.range(3).map(() => this.Factory.stringNext()),
         current = items[0];
     this.createController(items, current);
     expect(this.controller.numSteps).toBe(items.length);
@@ -41,7 +41,7 @@ describe('progressTrackerComponent', function() {
   });
 
   it('all steps can be marked as todo', function() {
-    var items = _.range(3).map(() => this.factory.stringNext());
+    var items = _.range(3).map(() => this.Factory.stringNext());
     this.createController(items, 0);
     expect(this.controller.numSteps).toBe(items.length);
     this.controller.steps.forEach((step) => {
@@ -50,7 +50,7 @@ describe('progressTrackerComponent', function() {
   });
 
   it('all steps can be marked as done', function() {
-    var items = _.range(3).map(() => this.factory.stringNext());
+    var items = _.range(3).map(() => this.Factory.stringNext());
     this.createController(items, items.length);
     expect(this.controller.numSteps).toBe(items.length);
     this.controller.steps.forEach((step) => {

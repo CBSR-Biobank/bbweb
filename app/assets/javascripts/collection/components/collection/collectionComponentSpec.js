@@ -19,7 +19,7 @@ describe('Component: collection', function() {
                               '$rootScope',
                               '$compile',
                               'Study',
-                              'factory');
+                              'Factory');
 
       this.createController = () => {
         this.element = angular.element('<collection></collection>');
@@ -32,16 +32,16 @@ describe('Component: collection', function() {
   });
 
   it('has valid scope', function() {
-    spyOn(this.Study, 'collectionStudies').and.returnValue(this.$q.when(this.factory.pagedResult([])));
+    spyOn(this.Study, 'collectionStudies').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
     this.createController();
     expect(this.controller.isCollectionAllowed).toBe(false);
     expect(this.controller.updateEnabledStudies).toBeFunction();
   });
 
   it('has valid scope when collections are allowed', function() {
-    var study = this.factory.study();
+    var study = this.Factory.study();
     spyOn(this.Study, 'collectionStudies')
-      .and.returnValue(this.$q.when(this.factory.pagedResult([study])));
+      .and.returnValue(this.$q.when(this.Factory.pagedResult([study])));
     this.createController();
     expect(this.controller.isCollectionAllowed).toBe(true);
     expect(this.controller.updateEnabledStudies).toBeFunction();
@@ -51,7 +51,7 @@ describe('Component: collection', function() {
     var callsCount;
 
     this.Study.collectionStudies = jasmine.createSpy()
-      .and.returnValue(this.$q.when(this.factory.pagedResult([])));
+      .and.returnValue(this.$q.when(this.Factory.pagedResult([])));
 
     this.createController();
     callsCount = this.Study.collectionStudies.calls.count();

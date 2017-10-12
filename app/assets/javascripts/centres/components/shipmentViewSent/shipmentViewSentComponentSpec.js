@@ -26,7 +26,7 @@ describe('shipmentViewSentComponent', function() {
                               'notificationsService',
                               'modalService',
                               'shipmentSkipToUnpackedModalService',
-                              'factory');
+                              'Factory');
       testUtils.addCustomMatchers();
 
       this.createController = (shipment) =>

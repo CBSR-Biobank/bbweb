@@ -20,7 +20,7 @@ describe('modalService', function() {
                               '$document',
                               'modalService',
                               '$filter',
-                              'factory');
+                              'Factory');
       function openCommon() {
         /*jshint validthis:true */
         this.$rootScope.$digest();
@@ -125,8 +125,8 @@ describe('modalService', function() {
 
     it('can open a modal and close it with the OK button', function() {
       var modalInfo,                                // eslint-disable-line no-unused-vars
-          header = this.factory.stringNext(),
-          body = this.factory.stringNext();
+          header = this.Factory.stringNext(),
+          body = this.Factory.stringNext();
 
       modalInfo = this.openModalOk(header, body);
       expect(this.$document).toHaveModalsOpen(1);
@@ -138,8 +138,8 @@ describe('modalService', function() {
 
     it('has valid header and body', function() {
       var modalInfo,                                // eslint-disable-line no-unused-vars
-          header = this.factory.stringNext(),
-          body = this.factory.stringNext();
+          header = this.Factory.stringNext(),
+          body = this.Factory.stringNext();
 
       modalInfo = this.openModalOk(header, body);
       expect(this.$document).toHaveModalsOpen(1);
@@ -158,8 +158,8 @@ describe('modalService', function() {
 
     it('can open a modal and close it with the OK button', function() {
       var modalInfo,                                // eslint-disable-line no-unused-vars
-          header = this.factory.stringNext(),
-          body = this.factory.stringNext();
+          header = this.Factory.stringNext(),
+          body = this.Factory.stringNext();
 
       modalInfo = this.openModalOkCancel(header, body);
       expect(this.$document).toHaveModalsOpen(1);
@@ -171,8 +171,8 @@ describe('modalService', function() {
 
     it('can open a modal and close it with the CANCEL button', function() {
       var modalInfo,                                // eslint-disable-line no-unused-vars
-          header = this.factory.stringNext(),
-          body = this.factory.stringNext();
+          header = this.Factory.stringNext(),
+          body = this.Factory.stringNext();
 
       modalInfo = this.openModalOkCancel(header, body);
       expect(this.$document).toHaveModalsOpen(1);
@@ -184,8 +184,8 @@ describe('modalService', function() {
 
     it('has valid header and body', function() {
       var modalInfo,                                // eslint-disable-line no-unused-vars
-          header = this.factory.stringNext(),
-          body = this.factory.stringNext();
+          header = this.Factory.stringNext(),
+          body = this.Factory.stringNext();
 
       modalInfo = this.openModalOkCancel(header, body);
       expect(this.$document).toHaveModalsOpen(1);

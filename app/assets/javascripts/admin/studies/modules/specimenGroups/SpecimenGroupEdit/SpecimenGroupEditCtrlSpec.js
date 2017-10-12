@@ -55,7 +55,7 @@ xdescribe('Controller: SpecimenGroupEditCtrl', function() {
       function setupEntities(userContext) {
         var Study         = userContext.$injector.get('Study'),
             SpecimenGroup = userContext.$injector.get('SpecimenGroup'),
-            factory  = userContext.$injector.get('factory');
+            factory  = userContext.$injector.get('Factory');
 
         return create;
 

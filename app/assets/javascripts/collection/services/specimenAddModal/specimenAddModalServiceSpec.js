@@ -24,7 +24,7 @@ describe('Service: specimenAddModal', function() {
                               'AppConfig',
                               'Specimen',
                               'timeService',
-                              'factory');
+                              'Factory');
       this.addModalMatchers();
 
       this.openModal = (centreLocations, specimenDescriptions, defaultDatetime) => {
@@ -45,14 +45,14 @@ describe('Service: specimenAddModal', function() {
 
       this.createCentreLocations = () => {
         var centres =_.range(2).map(() => {
-          var locations = _.range(2).map(() => this.factory.location());
-          return this.factory.centre({ locations: locations });
+          var locations = _.range(2).map(() => this.Factory.location());
+          return this.Factory.centre({ locations: locations });
         });
-        return this.factory.centreLocations(centres);
+        return this.Factory.centreLocations(centres);
       };
 
       this.createSpecimenDescriptions = () =>
-        _.range(2).map(() => this.factory.collectionSpecimenDescription());
+        _.range(2).map(() => this.Factory.collectionSpecimenDescription());
     });
   });
 
@@ -230,7 +230,7 @@ describe('Service: specimenAddModal', function() {
         jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'));
 
       this.scope.vm.specimens = [];
-      this.scope.vm.inventoryId = this.factory.stringNext();
+      this.scope.vm.inventoryId = this.Factory.stringNext();
       this.scope.vm.inventoryIdUpdated();
       this.scope.$digest();
       expect(this.scope.form.inventoryId.$setValidity.calls.allArgs())
@@ -238,13 +238,13 @@ describe('Service: specimenAddModal', function() {
     });
 
     it('validity is assigned correctly for a an inventory id already in the system', function() {
-      var specimen = new this.Specimen(this.factory.specimen());
+      var specimen = new this.Specimen(this.Factory.specimen());
 
       this.Specimen.getByInventoryId =
         jasmine.createSpy('getByInventoryId').and.returnValue(this.$q.when(specimen));
 
       this.scope.vm.specimens = [];
-      this.scope.vm.inventoryId = this.factory.stringNext();
+      this.scope.vm.inventoryId = this.Factory.stringNext();
       this.scope.vm.inventoryIdUpdated();
       this.scope.$digest();
       expect(this.scope.form.inventoryId.$setValidity.calls.allArgs())

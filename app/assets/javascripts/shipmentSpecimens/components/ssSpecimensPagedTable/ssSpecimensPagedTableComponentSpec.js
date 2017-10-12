@@ -55,7 +55,7 @@ describe('ssSpecimensPagedTableComponent', function() {
                               '$compile',
                               '$state',
                               'ShipmentSpecimen',
-                              'factory');
+                              'Factory');
       this.createController =
         (defaultSortField,
          refresh,
@@ -123,7 +123,7 @@ describe('ssSpecimensPagedTableComponent', function() {
         actions            = [],
         onActionSelected   = jasmine.createSpy('onActionSelected').and.returnValue(null),
         onGetSpecimens     = jasmine.createSpy('onGetSpecimens')
-        .and.returnValue(this.$q.when(this.factory.pagedResult([])));
+        .and.returnValue(this.$q.when(this.Factory.pagedResult([])));
 
     this.createController('inventoryId',
                           refreshTable,
@@ -151,7 +151,7 @@ describe('ssSpecimensPagedTableComponent', function() {
         }],
         onGetSpecimens = jasmine.createSpy('onGetSpecimens').and.returnValue(null),
         onActionSelected = jasmine.createSpy('onActionSelected').and.returnValue(null),
-        shipmentSpecimen = new this.ShipmentSpecimen(this.factory.shipmentSpecimen());
+        shipmentSpecimen = new this.ShipmentSpecimen(this.Factory.shipmentSpecimen());
 
     this.createController('inventoryId',
                           refreshTable,

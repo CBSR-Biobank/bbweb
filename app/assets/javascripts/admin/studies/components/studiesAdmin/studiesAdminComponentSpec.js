@@ -18,7 +18,7 @@ describe('Component: studiesAdmin', function() {
                               '$compile',
                               'Study',
                               'StudyCounts',
-                              'factory');
+                              'Factory');
 
       this.createController = () => {
         this.element = angular.element('<studies-admin></studies-admin>');
@@ -37,7 +37,7 @@ describe('Component: studiesAdmin', function() {
       enabled: 0,
       retired: 0
     }));
-    spyOn(this.Study, 'list').and.returnValue(this.$q.when(this.factory.pagedResult([])));
+    spyOn(this.Study, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
     this.createController();
     expect(this.controller.breadcrumbs).toBeDefined();
   });

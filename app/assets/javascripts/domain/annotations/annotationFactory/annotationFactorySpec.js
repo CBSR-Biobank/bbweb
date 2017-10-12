@@ -23,20 +23,20 @@ describe('MultipleSelectAnnotation', function() {
                               'AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
-                              'factory');
+                              'Factory');
     });
   });
 
   it('cannot be created with invalid selected values', function() {
     var self = this,
-        jsonAnnotationType = self.factory.annotationType({
+        jsonAnnotationType = self.Factory.annotationType({
           valueType:     self.AnnotationValueType.SELECT,
           maxValueCount: self.AnnotationMaxValueCount.SELECT_MULTIPLE,
           options:       [ 'option1', 'option2' ],
           required:      true
         }),
         annotationType = new self.AnnotationType(jsonAnnotationType),
-        jsonAnnotation = self.factory.annotation({ selectedValues: [ this.factory.stringNext() ] },
+        jsonAnnotation = self.Factory.annotation({ selectedValues: [ this.Factory.stringNext() ] },
                                                  jsonAnnotationType),
         annotation;
 

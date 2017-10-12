@@ -24,12 +24,12 @@ describe('Component: ceventAdd', function() {
                               'Participant',
                               'CollectionEvent',
                               'CollectionEventType',
-                              'factory');
+                              'Factory');
 
-      this.jsonCevent      = this.factory.collectionEvent();
-      this.jsonCeventType  = this.factory.defaultCollectionEventType();
-      this.jsonParticipant = this.factory.defaultParticipant();
-      this.jsonStudy       = this.factory.defaultStudy();
+      this.jsonCevent      = this.Factory.collectionEvent();
+      this.jsonCeventType  = this.Factory.defaultCollectionEventType();
+      this.jsonParticipant = this.Factory.defaultParticipant();
+      this.jsonStudy       = this.Factory.defaultStudy();
 
       this.study               = new this.Study(this.jsonStudy);
       this.participant         = new this.Participant(this.jsonParticipant);

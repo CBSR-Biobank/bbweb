@@ -25,10 +25,10 @@ describe('Component: participantSummary', function() {
                               'Participant',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
-                              'factory');
+                              'Factory');
 
-      this.jsonParticipant = this.factory.participant();
-      this.jsonStudy       = this.factory.defaultStudy();
+      this.jsonParticipant = this.Factory.participant();
+      this.jsonStudy       = this.Factory.defaultStudy();
 
       this.participant = new this.Participant(this.jsonParticipant);
       this.study       = new this.Study(this.jsonStudy);
@@ -43,12 +43,12 @@ describe('Component: participantSummary', function() {
 
         maxValueCount = maxValueCount || 0;
 
-        jsonAnnotationType = this.factory.annotationType({ valueType: valueType,
+        jsonAnnotationType = this.Factory.annotationType({ valueType: valueType,
                                                            maxValueCount: maxValueCount });
-        value              = this.factory.valueForAnnotation(jsonAnnotationType);
-        jsonAnnotation     = this.factory.annotation({ value: value }, jsonAnnotationType);
-        jsonStudy          = this.factory.study({ annotationTypes: [ jsonAnnotationType ]});
-        jsonParticipant    = this.factory.participant({ annotations: [ jsonAnnotation ] });
+        value              = this.Factory.valueForAnnotation(jsonAnnotationType);
+        jsonAnnotation     = this.Factory.annotation({ value: value }, jsonAnnotationType);
+        jsonStudy          = this.Factory.study({ annotationTypes: [ jsonAnnotationType ]});
+        jsonParticipant    = this.Factory.participant({ annotations: [ jsonAnnotation ] });
         study              = this.Study.create(jsonStudy);
 
         return new this.Participant(jsonParticipant, study);

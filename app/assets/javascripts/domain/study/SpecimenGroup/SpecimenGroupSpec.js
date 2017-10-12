@@ -20,13 +20,13 @@ xdescribe('SpecimenGroup', function() {
     angular.mock.inject(function($httpBackend,
                                  _funutils_,
                                  _SpecimenGroup_,
-                                 _factory_,
+                                 _Factory_,
                                  ServerReplyMixin) {
       _.extend(this, ServerReplyMixin.prototype);
       httpBackend   = $httpBackend;
       funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;
-      factory       = _factory_;
+      Factory       = _Factory_;
     });
   });
 

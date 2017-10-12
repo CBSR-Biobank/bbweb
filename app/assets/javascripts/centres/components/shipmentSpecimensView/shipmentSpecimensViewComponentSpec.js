@@ -18,7 +18,7 @@ describe('shipmentSpecimensViewComponent', function() {
                               '$rootScope',
                               '$compile',
                               'Shipment',
-                              'factory');
+                              'Factory');
       this.createController = (shipment, readOnly) => {
         readOnly = readOnly || false;
         ShippingComponentTestSuiteMixin.createController.call(

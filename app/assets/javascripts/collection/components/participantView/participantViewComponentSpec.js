@@ -23,10 +23,10 @@ describe('Component: participantView', function() {
                               'modalService',
                               'Study',
                               'Participant',
-                              'factory');
+                              'Factory');
 
-      this.jsonParticipant = this.factory.participant();
-      this.jsonStudy       = this.factory.defaultStudy();
+      this.jsonParticipant = this.Factory.participant();
+      this.jsonStudy       = this.Factory.defaultStudy();
       this.participant     = new this.Participant(this.jsonParticipant);
       this.study           = new this.Study(this.jsonStudy);
 

@@ -20,7 +20,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
     angular.mock.inject(function (TestSuiteMixin, testUtils) {
       _.extend(this, TestSuiteMixin);
 
-      factory = this.$injector.get('factory');
+      factory = this.$injector.get('Factory');
 
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
@@ -34,7 +34,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
         SpecimenLinkAnnotationType = injector.get('SpecimenLinkAnnotationType'),
         AnnotationValueType        = injector.get('AnnotationValueType'),
         SpecimenLinkType           = injector.get('SpecimenLinkType'),
-        factory               = injector.get('factory');
+        factory               = injector.get('Factory');
 
     return create;
 

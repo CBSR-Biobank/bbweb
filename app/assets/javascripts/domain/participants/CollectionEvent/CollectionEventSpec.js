@@ -32,25 +32,25 @@ describe('CollectionEvent', function() {
                               'AnnotationValueType',
                               'AnnotationType',
                               'annotationFactory',
-                              'factory',
+                              'Factory',
                               'testUtils');
 
       testUtils.addCustomMatchers();
 
-      this.jsonStudy = this.factory.study();
-      this.jsonCet = this.factory.collectionEventType();
+      this.jsonStudy = this.Factory.study();
+      this.jsonCet = this.Factory.collectionEventType();
 
       this.getCollectionEventEntities = (isNew) => {
-        var jsonAnnotationTypes = this.factory.allAnnotationTypes(),
+        var jsonAnnotationTypes = this.Factory.allAnnotationTypes(),
             collectionEventType,
             initServerCollectionEvent,
             jsonCevent,
             collectionEvent;
 
         collectionEventType = this.CollectionEventType.create(
-          this.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes }));
+          this.Factory.collectionEventType({ annotationTypes: jsonAnnotationTypes }));
 
-        jsonCevent = this.factory.collectionEvent();
+        jsonCevent = this.Factory.collectionEvent();
         initServerCollectionEvent = isNew ? _.omit(jsonCevent, 'id'): jsonCevent;
         collectionEvent = new this.CollectionEvent(initServerCollectionEvent, collectionEventType);
 
@@ -89,7 +89,7 @@ describe('CollectionEvent', function() {
   });
 
   it('constructor with default parameters has default values', function() {
-    var ceventType = new this.CollectionEventType(this.factory.collectionEventType()),
+    var ceventType = new this.CollectionEventType(this.Factory.collectionEventType()),
         collectionEvent = new this.CollectionEvent({}, ceventType);
 
     expect(collectionEvent.id).toBeNull();
@@ -123,7 +123,7 @@ describe('CollectionEvent', function() {
     jsonAnnotations     = _.map(jsonAnnotationEntities, 'jsonAnnotation');
     annotations         = _.map(jsonAnnotationEntities, 'annotation');
 
-    this.jsonCet = this.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
+    this.jsonCet = this.Factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
     ceventType = this.CollectionEventType.create(this.jsonCet);
     collectionEvent = new this.CollectionEvent({}, ceventType, annotations);
 
@@ -140,7 +140,7 @@ describe('CollectionEvent', function() {
         jsonAnnotationTypes = _.map(annotationData, 'annotationType'),
         ceventType;
 
-    this.jsonCet = this.factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
+    this.jsonCet = this.Factory.collectionEventType({ annotationTypes: jsonAnnotationTypes });
     ceventType = this.CollectionEventType.create(this.jsonCet);
 
     var collectionEvent = new this.CollectionEvent({ }, ceventType);
@@ -158,18 +158,18 @@ describe('CollectionEvent', function() {
         jsonCet,
         jsonCevent;
 
-    var annotationType = this.AnnotationType.create(this.factory.annotationType());
+    var annotationType = this.AnnotationType.create(this.Factory.annotationType());
 
     // put an invalid value in jsonAnnotation.annotationTypeId
     _.extend(
       jsonAnnotation,
-      this.factory.annotation(this.factory.valueForAnnotation(annotationType), annotationType),
-      { annotationTypeId: this.factory.stringNext() });
+      this.Factory.annotation(this.Factory.valueForAnnotation(annotationType), annotationType),
+      { annotationTypeId: this.Factory.stringNext() });
 
-    jsonCet = this.factory.collectionEventType(this.jsonStudy,
+    jsonCet = this.Factory.collectionEventType(this.jsonStudy,
                                                { annotationTypes: [annotationType] });
 
-    jsonCevent = this.factory.collectionEvent();
+    jsonCevent = this.Factory.collectionEvent();
 
     expect(() =>
            this.CollectionEvent.create(
@@ -184,12 +184,12 @@ describe('CollectionEvent', function() {
     var serverCollectionEvent,
         ceventType;
 
-    serverCollectionEvent = this.factory.collectionEvent({
-      collectionEventTypeId: this.factory.domainEntityNameNext(
-        this.factory.ENTITY_NAME_COLLECTION_EVENT_TYPE())
+    serverCollectionEvent = this.Factory.collectionEvent({
+      collectionEventTypeId: this.Factory.domainEntityNameNext(
+        this.Factory.ENTITY_NAME_COLLECTION_EVENT_TYPE())
     });
     ceventType = this.CollectionEventType.create(
-      this.factory.collectionEventType(this.jsonStudy));
+      this.Factory.collectionEventType(this.jsonStudy));
 
     expect(() => new this.CollectionEvent(serverCollectionEvent, ceventType))
      .toThrowError('invalid collection event type');
@@ -209,9 +209,9 @@ describe('CollectionEvent', function() {
     });
 
     it('fails when creating from an object with annotation with invalid keys', function() {
-      var jsonAnnotationType = this.factory.annotationType(),
-          jsonCet =  this.factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ] }),
-          jsonCevent = this.factory.collectionEvent({
+      var jsonAnnotationType = this.Factory.annotationType(),
+          jsonCet =  this.Factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ] }),
+          jsonCevent = this.Factory.collectionEvent({
             collectionEventType: jsonCet,
             annotations: [ { annotationTypeId: jsonAnnotationType.id, tmp: 1 } ]
           });
@@ -234,7 +234,7 @@ describe('CollectionEvent', function() {
     });
 
     it('fails when creating async from invalid annotations', function() {
-      var cevent         = this.factory.collectionEvent(),
+      var cevent         = this.Factory.collectionEvent(),
           catchTriggered = false;
 
       cevent.collectionEventType = undefined;
@@ -253,7 +253,7 @@ describe('CollectionEvent', function() {
   describe('when getting a single collection event', function() {
 
     beforeEach(function() {
-      this.collectionEvent = this.factory.collectionEvent();
+      this.collectionEvent = this.Factory.collectionEvent();
     });
 
     it('can retrieve a single collection event', function() {
@@ -289,9 +289,9 @@ describe('CollectionEvent', function() {
   describe('when listing collection events', function() {
 
     it('can list collection events for a participant', function() {
-      var participant = this.factory.defaultParticipant(),
-          collectionEvents = _.range(2).map(() => this.factory.collectionEvent()),
-          reply = this.factory.pagedResult(collectionEvents),
+      var participant = this.Factory.defaultParticipant(),
+          collectionEvents = _.range(2).map(() => this.Factory.collectionEvent()),
+          reply = this.Factory.pagedResult(collectionEvents),
           serverEntity;
 
       this.$httpBackend.whenGET(this.url('list', participant.id))
@@ -310,9 +310,9 @@ describe('CollectionEvent', function() {
     });
 
     it('can list collection events sorted by corresponding fields', function() {
-      var study = this.factory.study(),
-          participant = this.factory.participant({ studyId: study.id }),
-          reply = this.factory.pagedResult([]),
+      var study = this.Factory.study(),
+          participant = this.Factory.participant({ studyId: study.id }),
+          reply = this.Factory.pagedResult([]),
           sortFields = [ 'visitNumber', 'timeCompleted'];
 
       sortFields.forEach((sortField) => {
@@ -327,9 +327,9 @@ describe('CollectionEvent', function() {
     });
 
     it('can list collection events using a page number', function() {
-      var study = this.factory.study(),
-          participant = this.factory.participant({ studyId: study.id }),
-          reply = this.factory.pagedResult([]),
+      var study = this.Factory.study(),
+          participant = this.Factory.participant({ studyId: study.id }),
+          reply = this.Factory.pagedResult([]),
           pageNumber = 2;
 
       this.$httpBackend.whenGET(this.url('list', participant.id) + '?page=' + pageNumber)
@@ -342,9 +342,9 @@ describe('CollectionEvent', function() {
     });
 
     it('can list collection events using a page size', function() {
-      var study = this.factory.study(),
-          participant = this.factory.participant({ studyId: study.id }),
-          reply = this.factory.pagedResult([]),
+      var study = this.Factory.study(),
+          participant = this.Factory.participant({ studyId: study.id }),
+          reply = this.Factory.pagedResult([]),
           limit = 2;
 
       this.$httpBackend.whenGET(this.url('list', participant.id) + '?limit=' + limit)
@@ -358,8 +358,8 @@ describe('CollectionEvent', function() {
 
     it('can retrieve a single collection event by visit number', function() {
       var entities        = this.getCollectionEventEntities(true),
-          jsonParticipant = this.factory.defaultParticipant(),
-          jsonCevent      = this.factory.defaultCollectionEvent();
+          jsonParticipant = this.Factory.defaultParticipant(),
+          jsonCevent      = this.Factory.defaultCollectionEvent();
 
       this.$httpBackend.whenGET(this.url(jsonParticipant.id, 'visitNumber',  jsonCevent.visitNumber))
         .respond(this.reply(jsonCevent));
@@ -375,8 +375,8 @@ describe('CollectionEvent', function() {
     });
 
     it('can list collection events using ordering', function() {
-      var participant = this.factory.participant(),
-          reply = this.factory.pagedResult([]),
+      var participant = this.Factory.participant(),
+          reply = this.Factory.pagedResult([]),
           sortExprs = [
             { sort: 'visitNumber' },
             { sort: '-visitNumber' }
@@ -394,8 +394,8 @@ describe('CollectionEvent', function() {
     });
 
     it('returns rejected promise if collection events have invalid format', function() {
-      var participant    = this.factory.participant(),
-          reply          = this.factory.pagedResult([{ tmp: 1 }]),
+      var participant    = this.Factory.participant(),
+          reply          = this.Factory.pagedResult([{ tmp: 1 }]),
           catchTriggered = false;
 
       this.$httpBackend.whenGET(this.url('list', participant.id)).respond(this.reply(reply));
@@ -420,7 +420,7 @@ describe('CollectionEvent', function() {
            collectionEvent;
 
        ceventType = this.CollectionEventType.create(
-         this.factory.collectionEventType({
+         this.Factory.collectionEventType({
            annotationTypes: annotationTypes
          }));
        collectionEvent = new this.CollectionEvent({}, ceventType);
@@ -433,7 +433,7 @@ describe('CollectionEvent', function() {
      });
 
   it('can add a collectionEvent', function() {
-    var jsonCevent      = this.factory.collectionEvent(),
+    var jsonCevent      = this.Factory.collectionEvent(),
         collectionEvent = this.CollectionEvent.create(jsonCevent),
         json            = addJson(collectionEvent);
 
@@ -465,18 +465,18 @@ describe('CollectionEvent', function() {
   });
 
   it('can not add a collection event with empty required annotations', function() {
-    var jsonAnnotationTypes = this.factory.allAnnotationTypes();
+    var jsonAnnotationTypes = this.Factory.allAnnotationTypes();
 
     jsonAnnotationTypes.forEach((jsonAnnotType) => {
       var jsonAnnotation, annotationType, ceventType, jsonCevent, collectionEvent;
 
-      jsonAnnotation = this.factory.annotation({ value: null, annotationTypeId: jsonAnnotType.id});
+      jsonAnnotation = this.Factory.annotation({ value: null, annotationTypeId: jsonAnnotType.id});
 
       annotationType = new this.AnnotationType(jsonAnnotType);
       ceventType = this.CollectionEventType.create(
-        this.factory.collectionEventType({ annotationTypes: [ annotationType ] }));
+        this.Factory.collectionEventType({ annotationTypes: [ annotationType ] }));
       ceventType.annotationTypes[0].required = true;
-      jsonCevent = _.omit(this.factory.collectionEvent({ annotations: [ jsonAnnotation ]}), 'id)');
+      jsonCevent = _.omit(this.Factory.collectionEvent({ annotations: [ jsonAnnotation ]}), 'id)');
       collectionEvent = new this.CollectionEvent(jsonCevent, ceventType);
 
       collectionEvent.annotations.forEach((annotation) => {
@@ -498,7 +498,7 @@ describe('CollectionEvent', function() {
                       cevent.visitNumber,
                       this.url('visitNumber', cevent.id),
                       { visitNumber: cevent.visitNumber },
-                      this.factory.defaultCollectionEvent(),
+                      this.Factory.defaultCollectionEvent(),
                       this.expectCevent,
                       this.failTest);
   });
@@ -512,7 +512,7 @@ describe('CollectionEvent', function() {
                       cevent.timeCompleted,
                       this.url('timeCompleted', cevent.id),
                       { timeCompleted: cevent.timeCompleted },
-                      this.factory.defaultCollectionEvent(),
+                      this.Factory.defaultCollectionEvent(),
                       this.expectCevent,
                       this.failTest);
   });
@@ -533,10 +533,10 @@ describe('CollectionEvent', function() {
     var context = {};
 
     beforeEach(function () {
-      var annotationType = this.factory.annotationType(),
-          annotation = this.factory.annotation(undefined, annotationType),
-          jsonCet    = this.factory.collectionEventType({ annotationTypes: [ annotationType ]}),
-          jsonCevent = this.factory.collectionEvent({
+      var annotationType = this.Factory.annotationType(),
+          annotation = this.Factory.annotation(undefined, annotationType),
+          jsonCet    = this.Factory.collectionEventType({ annotationTypes: [ annotationType ]}),
+          jsonCevent = this.Factory.collectionEvent({
             collectionEvenType: jsonCet,
             annotations: [ annotation ]
           }),

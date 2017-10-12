@@ -21,7 +21,7 @@ describe('shippingInfoViewComponent', function() {
                               'modalInput',
                               'notificationsService',
                               'centreLocationsModalService',
-                              'factory');
+                              'Factory');
 
       this.createController = (shipment) =>
         ShippingComponentTestSuiteMixin.createController.call(
@@ -38,7 +38,7 @@ describe('shippingInfoViewComponent', function() {
     beforeEach(function() {
       context.modalService = 'modalInput';
       context.modalInputFuncName = 'text';
-      context.modalInputReturnValue = this.factory.stringNext();
+      context.modalInputReturnValue = this.Factory.stringNext();
       context.shipmentUpdateFuncName = 'updateCourierName';
       context.controllerUpdateFuncName = 'editCourierName';
     });
@@ -52,7 +52,7 @@ describe('shippingInfoViewComponent', function() {
     beforeEach(function() {
       context.modalService = 'modalInput';
       context.modalInputFuncName = 'text';
-      context.modalInputReturnValue = this.factory.stringNext();
+      context.modalInputReturnValue = this.Factory.stringNext();
       context.shipmentUpdateFuncName = 'updateTrackingNumber';
       context.controllerUpdateFuncName = 'editTrackingNumber';
     });
@@ -66,7 +66,7 @@ describe('shippingInfoViewComponent', function() {
     beforeEach(function() {
       context.modalService = 'centreLocationsModalService';
       context.modalInputFuncName = 'open';
-      context.modalInputReturnValue = this.factory.stringNext();
+      context.modalInputReturnValue = this.Factory.stringNext();
       context.shipmentUpdateFuncName = 'updateFromLocation';
       context.controllerUpdateFuncName = 'editFromLocation';
     });
@@ -80,7 +80,7 @@ describe('shippingInfoViewComponent', function() {
     beforeEach(function() {
       context.modalService = 'centreLocationsModalService';
       context.modalInputFuncName = 'open';
-      context.modalInputReturnValue = this.factory.stringNext();
+      context.modalInputReturnValue = this.Factory.stringNext();
       context.shipmentUpdateFuncName = 'updateToLocation';
       context.controllerUpdateFuncName = 'editToLocation';
     });

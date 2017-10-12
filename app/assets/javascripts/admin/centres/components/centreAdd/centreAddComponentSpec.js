@@ -18,7 +18,7 @@ describe('Directive: centreAddDirective()', function() {
       this.injectDependencies('$rootScope',
                               '$compile',
                               'Centre',
-                              'factory',
+                              'Factory',
                               'notificationsService',
                               'domainNotificationService');
 

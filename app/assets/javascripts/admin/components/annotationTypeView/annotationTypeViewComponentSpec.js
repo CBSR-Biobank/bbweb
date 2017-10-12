@@ -25,11 +25,11 @@ describe('annotationTypeViewDirective', function() {
                               'AnnotationMaxValueCount',
                               'modalInput',
                               'notificationsService',
-                              'factory');
+                              'Factory');
 
       this.returnState      = 'my-return-state';
-      this.study            = new this.Study(this.factory.study());
-      this.annotationType   = new this.AnnotationType(this.factory.annotationType());
+      this.study            = new this.Study(this.Factory.study());
+      this.annotationType   = new this.AnnotationType(this.Factory.annotationType());
       this.onUpdate         = jasmine.createSpy('onUpdate').and.returnValue(this.$q.when(this.study));
 
       this.createController = (options) => {
@@ -118,7 +118,7 @@ describe('annotationTypeViewDirective', function() {
 
     it('can edit selections on a single select', inject(function (annotationTypeUpdateModal) {
       var annotationType = new this.AnnotationType(
-        this.factory.annotationType({
+        this.Factory.annotationType({
           valueType:     this.AnnotationValueType.SELECT,
           maxValueCount: this.AnnotationMaxValueCount.SELECT_SINGLE,
           options:       [ 'option1', 'option2' ],
@@ -134,7 +134,7 @@ describe('annotationTypeViewDirective', function() {
 
     it('an exception is thrown for annotation types that are not select', function () {
       var self = this,
-          annotationTypes = _.chain(self.factory.allAnnotationTypes())
+          annotationTypes = _.chain(self.Factory.allAnnotationTypes())
           .filter(function (json) {
             return (json.valueType !== self.AnnotationValueType.SELECT);
           })
@@ -159,7 +159,7 @@ describe('annotationTypeViewDirective', function() {
     describe('(shared) update functions', function () {
 
       it('should update a field', function() {
-        var newValue = this.factory.stringNext();
+        var newValue = this.Factory.stringNext();
 
         spyOn(this.modalInput, context.modalInputFuncName).and.returnValue(
           { result: this.$q.when(newValue)});

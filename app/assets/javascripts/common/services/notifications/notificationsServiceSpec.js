@@ -17,9 +17,9 @@ describe('notificationsService', function() {
                               '$rootScope',
                               'notificationsService',
                               'toastr',
-                              'factory');
+                              'Factory');
 
-      this.user = this.factory.user();
+      this.user = this.Factory.user();
       spyOn(this.toastr, 'success').and.returnValue(null);
       spyOn(this.toastr, 'error').and.returnValue(null);
     });
@@ -31,8 +31,8 @@ describe('notificationsService', function() {
   });
 
   it('success with timeout', function() {
-    var message = this.factory.stringNext(),
-        title = this.factory.stringNext(),
+    var message = this.Factory.stringNext(),
+        title = this.Factory.stringNext(),
         timeOut = 100,
         args;
 
@@ -48,8 +48,8 @@ describe('notificationsService', function() {
   });
 
   it('success with no timeout', function() {
-    var message = this.factory.stringNext(),
-        title = this.factory.stringNext(),
+    var message = this.Factory.stringNext(),
+        title = this.Factory.stringNext(),
         args;
 
     this.notificationsService.success(message, title);
@@ -62,8 +62,8 @@ describe('notificationsService', function() {
   });
 
   it('error with timeout', function() {
-    var message = this.factory.stringNext(),
-        title = this.factory.stringNext(),
+    var message = this.Factory.stringNext(),
+        title = this.Factory.stringNext(),
         timeOut = 100,
         args;
 
@@ -79,8 +79,8 @@ describe('notificationsService', function() {
   });
 
   it('error with no timeout', function() {
-    var message = this.factory.stringNext(),
-        title = this.factory.stringNext(),
+    var message = this.Factory.stringNext(),
+        title = this.Factory.stringNext(),
         args;
 
     this.notificationsService.error(message, title);
@@ -94,7 +94,7 @@ describe('notificationsService', function() {
   });
 
   it('updateError with error message', function() {
-    var err = { message: this.factory.stringNext() },
+    var err = { message: this.Factory.stringNext() },
         args;
 
     this.notificationsService.updateError(err);

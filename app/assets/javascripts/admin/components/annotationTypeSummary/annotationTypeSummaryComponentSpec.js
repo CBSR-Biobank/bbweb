@@ -17,7 +17,7 @@ describe('annotationTypeSummaryComponent', function() {
 
       this.injectDependencies('$componentController',
                               'AnnotationType',
-                              'factory');
+                              'Factory');
     });
   });
 
@@ -26,7 +26,7 @@ describe('annotationTypeSummaryComponent', function() {
       'annotationTypeSummary',
       null,
       {
-        annotationType: new this.AnnotationType(this.factory.annotationType()),
+        annotationType: new this.AnnotationType(this.Factory.annotationType()),
         test: 'xxx'
       });
   });

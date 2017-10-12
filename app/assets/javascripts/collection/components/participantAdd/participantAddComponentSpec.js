@@ -23,10 +23,10 @@ describe('Component: participantAdd', function() {
                               'notificationsService',
                               'Study',
                               'Participant',
-                              'factory');
+                              'Factory');
 
-      this.jsonParticipant = this.factory.participant();
-      this.jsonStudy       = this.factory.defaultStudy();
+      this.jsonParticipant = this.Factory.participant();
+      this.jsonStudy       = this.Factory.defaultStudy();
       this.study           = new this.Study(this.jsonStudy);
       this.uniqueId        = this.jsonParticipant.uniqueId;
 
@@ -47,10 +47,10 @@ describe('Component: participantAdd', function() {
       };
 
       this.createStudies = (numStudies) =>
-        _.range(numStudies).map(() => this.Study.create(self.factory.study()));
+        _.range(numStudies).map(() => this.Study.create(self.Factory.study()));
 
       this.createGetStudiesFn = (studies) =>
-        (pagerOptions) => this.$q.when(_.extend(this.factory.pagedResult(studies, pagerOptions),
+        (pagerOptions) => this.$q.when(_.extend(this.Factory.pagedResult(studies, pagerOptions),
                                                { items: studies.slice(0, pagerOptions.limit) }));
     });
   });

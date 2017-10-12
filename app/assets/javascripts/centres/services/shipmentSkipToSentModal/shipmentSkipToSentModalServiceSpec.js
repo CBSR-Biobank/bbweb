@@ -17,7 +17,7 @@ describe('shipmentSkipToSentModalService', function() {
                               '$animate',
                               '$document',
                               'shipmentSkipToSentModalService',
-                              'factory');
+                              'Factory');
       this.addModalMatchers();
       testUtils.addCustomMatchers();
 

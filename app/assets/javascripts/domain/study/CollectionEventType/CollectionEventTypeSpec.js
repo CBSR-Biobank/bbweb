@@ -21,11 +21,11 @@ describe('CollectionEventType', function() {
                               '$httpBackend',
                               'Study',
                               'CollectionEventType',
-                              'factory',
+                              'Factory',
                               'testUtils');
 
-      this.jsonCet   = this.factory.collectionEventType();
-      this.jsonStudy = this.factory.defaultStudy();
+      this.jsonCet   = this.Factory.collectionEventType();
+      this.jsonStudy = this.Factory.defaultStudy();
 
       this.testUtils.addCustomMatchers();
       CollectionEventType = this.CollectionEventType;
@@ -43,19 +43,19 @@ describe('CollectionEventType', function() {
        * Returns 3 collection event types, each one with a different missing field.
        */
       this.getBadCollectionEventTypes = () => {
-        var badSpecimenDescription   = _.omit(this.factory.collectionSpecimenDescription(), 'name'),
-            badAnnotationType = _.omit(this.factory.annotationType(), 'name'),
+        var badSpecimenDescription   = _.omit(this.Factory.collectionSpecimenDescription(), 'name'),
+            badAnnotationType = _.omit(this.Factory.annotationType(), 'name'),
             data = [
               {
-                cet: _.omit(this.factory.collectionEventType(), 'name'),
+                cet: _.omit(this.Factory.collectionEventType(), 'name'),
                 errMsg : 'Missing required property'
               },
               {
-                cet: this.factory.collectionEventType({ specimenDescriptions: [ badSpecimenDescription ]}),
+                cet: this.Factory.collectionEventType({ specimenDescriptions: [ badSpecimenDescription ]}),
                 errMsg : 'specimenDescriptions.*Missing required property'
               },
               {
-                cet: this.factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
+                cet: this.Factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
                 errMsg : 'annotationTypes.*Missing required property'
               }
             ];
@@ -90,15 +90,15 @@ describe('CollectionEventType', function() {
   });
 
   it('fails when creating from an invalid json object', function() {
-    var badJsonCet = _.omit(this.factory.collectionEventType(this.jsonStudy), 'name');
+    var badJsonCet = _.omit(this.Factory.collectionEventType(this.jsonStudy), 'name');
     expect(() => {
       CollectionEventType.create(badJsonCet);
     }).toThrowError(/invalid collection event type from server/);
   });
 
   it('fails when creating from a bad json specimen spec', function() {
-    var jsonSpec = _.omit(this.factory.collectionSpecimenDescription(), 'name'),
-        badJsonCet = _.extend(this.factory.collectionEventType(this.jsonStudy),
+    var jsonSpec = _.omit(this.Factory.collectionSpecimenDescription(), 'name'),
+        badJsonCet = _.extend(this.Factory.collectionEventType(this.jsonStudy),
                               { specimenDescriptions: [ jsonSpec ] });
 
     expect(() => {
@@ -107,8 +107,8 @@ describe('CollectionEventType', function() {
   });
 
   it('fails when creating from bad json annotation type data', function() {
-    var jsonAnnotType = _.omit(this.factory.annotationType(), 'name'),
-        badJsonCet = _.extend(this.factory.collectionEventType(this.jsonStudy),
+    var jsonAnnotType = _.omit(this.Factory.annotationType(), 'name'),
+        badJsonCet = _.extend(this.Factory.collectionEventType(this.jsonStudy),
                               { annotationTypes: [ jsonAnnotType ] });
 
     expect(() => { CollectionEventType.create(badJsonCet); })
@@ -147,7 +147,7 @@ describe('CollectionEventType', function() {
 
   it('can list collection event types', function() {
     var url = this.url(this.jsonStudy.id),
-        reply = this.factory.pagedResult([ this.jsonCet ]);
+        reply = this.Factory.pagedResult([ this.jsonCet ]);
 
     this.$httpBackend.whenGET(url).respond(this.reply(reply));
     CollectionEventType.list(this.jsonStudy.id)
@@ -169,7 +169,7 @@ describe('CollectionEventType', function() {
         reqHandler = this.$httpBackend.whenGET(url);
 
     data.forEach((item) => {
-      reqHandler.respond(this.reply(this.factory.pagedResult([ item.cet ])));
+      reqHandler.respond(this.reply(this.Factory.pagedResult([ item.cet ])));
       CollectionEventType.list(this.jsonStudy.id).then(getFail).catch(shouldFail);
       this.$httpBackend.flush();
 
@@ -267,8 +267,8 @@ describe('CollectionEventType', function() {
   describe('for specimen specs', function() {
 
     beforeEach(function() {
-      this.jsonSpec = this.factory.collectionSpecimenDescription();
-      this.jsonCet  = this.factory.collectionEventType({ specimenDescriptions: [ this.jsonSpec ] });
+      this.jsonSpec = this.Factory.collectionSpecimenDescription();
+      this.jsonCet  = this.Factory.collectionEventType({ specimenDescriptions: [ this.jsonSpec ] });
       this.cet      = this.CollectionEventType.create(this.jsonCet);
     });
 
@@ -305,8 +305,8 @@ describe('CollectionEventType', function() {
     beforeEach(function() {
       var study = this.Study.create(this.jsonStudy);
 
-      this.jsonAnnotType = this.factory.annotationType();
-      this.jsonCet       = this.factory.collectionEventType({ annotationTypes: [ this.jsonAnnotType ]});
+      this.jsonAnnotType = this.Factory.annotationType();
+      this.jsonCet       = this.Factory.collectionEventType({ annotationTypes: [ this.jsonAnnotType ]});
       this.cet           = this.CollectionEventType.create(this.jsonCet, { study: study });
     });
 
@@ -339,7 +339,7 @@ describe('CollectionEventType', function() {
       });
 
       it('fails when removing an invalid annotation type', function() {
-        var jsonAnnotType = _.extend({}, this.jsonAnnotType, { id: this.factory.stringNext() });
+        var jsonAnnotType = _.extend({}, this.jsonAnnotType, { id: this.Factory.stringNext() });
         this.cet.removeAnnotationType(jsonAnnotType)
           .catch((err) => {
             expect(err.message).toContain('annotation type with ID not present:');
@@ -352,7 +352,7 @@ describe('CollectionEventType', function() {
   });
 
   it('inUse has valid URL and returns FALSE', function() {
-    var cet     = new this.CollectionEventType(this.factory.collectionEventType());
+    var cet     = new this.CollectionEventType(this.Factory.collectionEventType());
     this.$httpBackend.whenGET(this.url('inuse', cet.id)).respond(this.reply(false));
     cet.inUse()
       .then((reply) => {
@@ -363,7 +363,7 @@ describe('CollectionEventType', function() {
   });
 
   it('inUse has valid URL and returns TRUE', function() {
-    var cet     = new this.CollectionEventType(this.factory.collectionEventType());
+    var cet     = new this.CollectionEventType(this.Factory.collectionEventType());
     this.$httpBackend.whenGET(this.url('inuse', cet.id)).respond(this.reply(true));
     cet.inUse()
       .then((reply) => {

@@ -18,10 +18,10 @@ describe('collectionSpecimenDescriptionSummaryDirective', function() {
       this.injectDependencies('$rootScope',
                               '$compile',
                               'CollectionSpecimenDescription',
-                              'factory');
+                              'Factory');
 
       this.specimenDescription =
-        new this.CollectionSpecimenDescription(this.factory.collectionSpecimenDescription());
+        new this.CollectionSpecimenDescription(this.Factory.collectionSpecimenDescription());
 
       this.createController = (specimenDescription) => {
         specimenDescription = specimenDescription || this.specimenDescription;

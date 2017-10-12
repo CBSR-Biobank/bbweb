@@ -19,7 +19,7 @@ describe('Membership', function() {
     SuiteMixin.prototype.constructor = SuiteMixin;
 
     SuiteMixin.prototype.jsonObj = function () {
-      return this.factory.membership();
+      return this.Factory.membership();
     };
 
     SuiteMixin.prototype.jsonObjWithEntities = function (studyEntityData, centreEntityData) {
@@ -41,25 +41,25 @@ describe('Membership', function() {
     };
 
     SuiteMixin.prototype.jsonMembershipWithAllStudies = function () {
-      var json = this.factory.membership();
+      var json = this.Factory.membership();
       json.studyData.allEntities = true;
       return json;
     };
 
     SuiteMixin.prototype.jsonMembershipWithStudy = function (id, name) {
-      var json = this.factory.membership();
+      var json = this.Factory.membership();
       json.studyData.entityData = [{ id: id, name: name}];
       return json;
     };
 
     SuiteMixin.prototype.jsonMembershipWithAllCentres = function () {
-      var json = this.factory.membership();
+      var json = this.Factory.membership();
       json.centreData.allEntities = true;
       return json;
     };
 
     SuiteMixin.prototype.jsonMembershipWithCentre = function (id, name) {
-      var json = this.factory.membership();
+      var json = this.Factory.membership();
       json.centreData.entityData = [{ id: id, name: name}];
       return json;
     };
@@ -70,7 +70,7 @@ describe('Membership', function() {
     };
 
     SuiteMixin.prototype.fixtures = function (options) {
-      var jsonMembership = this.factory.membership(options),
+      var jsonMembership = this.Factory.membership(options),
           membership     = this.Membership.create(jsonMembership);
       return {
         jsonMembership: jsonMembership,
@@ -92,7 +92,7 @@ describe('Membership', function() {
                               'Membership',
                               'EntitySet',
                               'EntityInfo',
-                              'factory',
+                              'Factory',
                               'testUtils');
 
       this.testUtils.addCustomMatchers();
@@ -130,10 +130,10 @@ describe('Membership', function() {
   });
 
   it('can be constructed with user data', function() {
-    var json = this.factory.membership({
+    var json = this.Factory.membership({
       userData: [{
-        id:   this.factory.stringNext(),
-        name: this.factory.stringNext()
+        id:   this.Factory.stringNext(),
+        name: this.Factory.stringNext()
       }]
     }),
         membership = new this.Membership(json);
@@ -144,8 +144,8 @@ describe('Membership', function() {
   describe('when getting a single membership', function() {
 
     it('can retrieve a single membership', function() {
-      var id = this.factory.stringNext(),
-          json = this.factory.membership();
+      var id = this.Factory.stringNext(),
+          json = this.Factory.membership();
       this.$httpBackend.whenGET(this.url(id)).respond(this.reply(json));
       this.Membership.get(id).then(this.expectMembership).catch(failTest);
       this.$httpBackend.flush();
@@ -153,7 +153,7 @@ describe('Membership', function() {
 
     it('fails when getting a membership and it has a bad format', function() {
       this.Membership.SCHEMA.required.forEach((property) => {
-        var json = this.factory.membership(),
+        var json = this.Factory.membership(),
             badJson = _.omit(json, property);
         this.$httpBackend.whenGET(this.url(json.id)).respond(this.reply(badJson));
         this.Membership.get(json.id).then(shouldNotFail).catch(shouldFail);
@@ -174,8 +174,8 @@ describe('Membership', function() {
   describe('when listing memberships', function() {
 
     it('can retrieve', function() {
-      var memberships = [ this.factory.membership() ],
-          reply = this.factory.pagedResult(memberships),
+      var memberships = [ this.Factory.membership() ],
+          reply = this.Factory.pagedResult(memberships),
           testMembership = (pagedResult) => {
             expect(pagedResult.items).toBeArrayOfSize(1);
             expect(pagedResult.items[0]).toEqual(jasmine.any(this.Membership));
@@ -192,8 +192,8 @@ describe('Membership', function() {
             { page: 2 },
             { limit: 10 }
           ],
-          memberships = [ this.factory.membership() ],
-          reply = this.factory.pagedResult(memberships);
+          memberships = [ this.Factory.membership() ],
+          reply = this.Factory.pagedResult(memberships);
 
       optionList.forEach((options) => {
         var url = this.url() + '?' + this.$httpParamSerializer(options),
@@ -212,8 +212,8 @@ describe('Membership', function() {
 
     it('listing omits empty options', function() {
       var options = { filter: ''},
-          memberships = [ this.factory.membership() ],
-          reply = this.factory.pagedResult(memberships),
+          memberships = [ this.Factory.membership() ],
+          reply = this.Factory.pagedResult(memberships),
           testMembership = (pagedResult) => {
             expect(pagedResult.items).toBeArrayOfSize(memberships.length);
             pagedResult.items.forEach((membership) => {
@@ -227,8 +227,8 @@ describe('Membership', function() {
     });
 
     it('fails when an invalid membership is returned', function() {
-      var json = [ _.omit(this.factory.membership(), 'id') ],
-          reply = this.factory.pagedResult(json);
+      var json = [ _.omit(this.Factory.membership(), 'id') ],
+          reply = this.Factory.pagedResult(json);
 
       this.$httpBackend.whenGET(this.url()).respond(this.reply(reply));
       this.Membership.list().then(listFail).catch(shouldFail);
@@ -248,14 +248,14 @@ describe('Membership', function() {
   it('can add a membership', function() {
     var options =
         {
-          userData: [ this.factory.membershipEntityData() ],
+          userData: [ this.Factory.membershipEntityData() ],
           studyData: {
             allEntities: false,
-            entityData: [ this.factory.membershipEntityData() ]
+            entityData: [ this.Factory.membershipEntityData() ]
           },
           centreData: {
             allEntities: false,
-            entityData: [ this.factory.membershipEntityData() ]
+            entityData: [ this.Factory.membershipEntityData() ]
           }
         },
         f       = this.fixtures(options),
@@ -280,7 +280,7 @@ describe('Membership', function() {
   describe('when removing a membership', function() {
 
     it('should remove a membership', function() {
-      var membership = this.Membership.create(this.factory.membership()),
+      var membership = this.Membership.create(this.Factory.membership()),
           url = this.url(membership.id, membership.version);
 
       this.$httpBackend.expectDELETE(url).respond(this.reply(true));
@@ -299,7 +299,7 @@ describe('Membership', function() {
 
   it('can update the name', function() {
     var f    = this.fixtures(),
-        name = this.factory.stringNext();
+        name = this.Factory.stringNext();
 
     this.updateEntity.call(this,
                            f.membership,
@@ -314,7 +314,7 @@ describe('Membership', function() {
 
   it('can update the description', function() {
     var f           = this.fixtures(),
-        description = this.factory.stringNext();
+        description = this.Factory.stringNext();
 
     this.updateEntity.call(this,
                            f.membership,
@@ -339,7 +339,7 @@ describe('Membership', function() {
 
   it('can add a user', function() {
     var f      = this.fixtures(),
-        userId = this.factory.stringNext();
+        userId = this.Factory.stringNext();
 
     this.updateEntity.call(this,
                            f.membership,
@@ -355,7 +355,7 @@ describe('Membership', function() {
   describe('when removing a user', function() {
 
     it('can remove a user', function() {
-      var f       = this.fixtures({ userData: [ this.factory.membershipEntityData() ] }),
+      var f       = this.fixtures({ userData: [ this.Factory.membershipEntityData() ] }),
           userId  = f.jsonMembership.userData[0].id,
           url     = this.url('user', f.membership.id, f.membership.version, userId);
 
@@ -393,7 +393,7 @@ describe('Membership', function() {
 
   it('can add a study', function() {
     var f       = this.fixtures(),
-        studyId = this.factory.stringNext();
+        studyId = this.Factory.stringNext();
 
     this.updateEntity.call(this,
                            f.membership,
@@ -422,7 +422,7 @@ describe('Membership', function() {
 
   it('can add a centre', function() {
     var f        = this.fixtures(),
-        centreId = this.factory.stringNext();
+        centreId = this.Factory.stringNext();
 
     this.updateEntity.call(this,
                            f.membership,
@@ -460,9 +460,9 @@ describe('Membership', function() {
     describe('(shared) removes an entity', function () {
 
       it('makes the correct REST API call', function() {
-        var entityId   = this.factory.stringNext(),
+        var entityId   = this.Factory.stringNext(),
             fieldName  = context.entityName + 'Data',
-            json       = context.jsonWithEntityFunc.call(this, entityId, this.factory.stringNext()),
+            json       = context.jsonWithEntityFunc.call(this, entityId, this.Factory.stringNext()),
             membership = this.membershipFromJson(json),
             url        = this.url(context.entityName, membership.id, membership.version, entityId);
 
@@ -484,7 +484,7 @@ describe('Membership', function() {
       var membership = this.membershipFromConstructor();
 
       expect(() => {
-        context.removeEntityFunc.call(membership, this.factory.stringNext());
+        context.removeEntityFunc.call(membership, this.Factory.stringNext());
       }).toThrowError(/membership has not been persisted/);
     });
 

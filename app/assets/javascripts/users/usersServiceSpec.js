@@ -18,9 +18,9 @@ describe('Service: userService', function() {
                               '$cookies',
                               'biobankApi',
                               'User',
-                              'factory');
+                              'Factory');
 
-      this.jsonUser = this.factory.user();
+      this.jsonUser = this.Factory.user();
       this.user = this.User.create(this.jsonUser);
     });
   });
@@ -39,7 +39,7 @@ describe('Service: userService', function() {
     it('should allow a user to re-connect', function() {
       var usersService;
 
-      this.$cookies.put('XSRF-TOKEN', this.factory.stringNext());
+      this.$cookies.put('XSRF-TOKEN', this.Factory.stringNext());
       this.$httpBackend.expectGET(this.url('users/authenticate')).respond(this.reply(this.jsonUser));
 
       usersService = this.$injector.get('usersService');
@@ -56,7 +56,7 @@ describe('Service: userService', function() {
       // this must be disabled for this test
       this.$injector.get('modalService').modalOk = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
 
-      this.$cookies.put('XSRF-TOKEN', this.factory.stringNext());
+      this.$cookies.put('XSRF-TOKEN', this.Factory.stringNext());
       this.$httpBackend.expectGET(this.url('users/authenticate'))
         .respond(401, this.errorReply('simulated auth failure'));
 
@@ -99,13 +99,13 @@ describe('Service: userService', function() {
       };
 
       it('should allow a user to login', function () {
-        var token = this.factory.stringNext;
+        var token = this.Factory.stringNext;
         doLogin.call(this, token, this.user);
       });
 
       it('should return the user that is logged in', function() {
         var self = this,
-            token = this.factory.stringNext;
+            token = this.Factory.stringNext;
 
         doLogin.call(self, token, self.user);
         self.usersService.requestCurrentUser().then(function (reply) {

@@ -19,7 +19,7 @@ describe('annotationTypeUpdateModalService', function() {
                               'AnnotationType',
                               'AnnotationValueType',
                               'annotationTypeUpdateModal',
-                              'factory');
+                              'Factory');
 
       this.addModalMatchers();
       testUtils.addCustomMatchers();
@@ -33,7 +33,7 @@ describe('annotationTypeUpdateModalService', function() {
       };
 
       this.createAnnotationType = (valueType) =>
-        new this.AnnotationType(this.factory.annotationType({ valueType: valueType }));
+        new this.AnnotationType(this.Factory.annotationType({ valueType: valueType }));
 
       this.createSelectAnnotationType = () =>
         this.createAnnotationType(this.AnnotationValueType.SELECT);

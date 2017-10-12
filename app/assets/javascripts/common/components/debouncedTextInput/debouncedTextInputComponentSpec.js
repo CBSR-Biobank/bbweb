@@ -15,10 +15,10 @@ describe('Component: debouncedTextInput', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
 
-      this.injectDependencies('$q', '$rootScope', '$compile', 'factory');
+      this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
       this.createController = (label, value) => {
         if (_.isNil(value)) {
-          value = this.factory.stringNext();
+          value = this.Factory.stringNext();
         }
         this.onValueChanged = jasmine.createSpy().and.returnValue(null);
         ComponentTestSuiteMixin.createController.call(
@@ -38,22 +38,22 @@ describe('Component: debouncedTextInput', function() {
   });
 
   it('label is valid', function() {
-    var label = this.factory.stringNext();
+    var label = this.Factory.stringNext();
     this.createController(label);
     expect(this.controller.label).toBe(label);
   });
 
   it('changes are applied when scope variables are updated', function() {
-    var newValue = this.factory.stringNext();
-    this.createController(this.factory.stringNext());
+    var newValue = this.Factory.stringNext();
+    this.createController(this.Factory.stringNext());
     this.scope.vm.value = newValue;
     this.scope.$digest();
     expect(this.controller.value).toBe(newValue);
   });
 
   it('function is invoked when changes are made to the input', function() {
-    var newValue = this.factory.stringNext();
-    this.createController(this.factory.stringNext());
+    var newValue = this.Factory.stringNext();
+    this.createController(this.Factory.stringNext());
     this.scope.vm.value = newValue;
     this.scope.$digest();
     this.controller.updated();

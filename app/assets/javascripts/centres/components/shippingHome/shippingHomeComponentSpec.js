@@ -18,7 +18,7 @@ describe('shippingHomeComponent', function() {
                               '$compile',
                               '$state',
                               'Centre',
-                              'factory');
+                              'Factory');
       this.createController = () => {
         this.element = angular.element('<shipping-home><shipping-home>');
         this.scope = this.$rootScope.$new();
@@ -29,16 +29,16 @@ describe('shippingHomeComponent', function() {
 
       this.createCentreLocations = (centres) => {
         centres.forEach((centre) => {
-          var locs = _.range(2).map(() => this.factory.location());
+          var locs = _.range(2).map(() => this.Factory.location());
           centre.locations = locs;
         });
-        return this.factory.centreLocations(centres);
+        return this.Factory.centreLocations(centres);
       };
     });
   });
 
   it('has valid scope', function() {
-    var centres = _.range(2).map(() => this.factory.centre()),
+    var centres = _.range(2).map(() => this.Factory.centre()),
         centreLocations = this.createCentreLocations(centres),
         args;
 
@@ -76,7 +76,7 @@ describe('shippingHomeComponent', function() {
   });
 
   it('changes state when a centre is selected', function() {
-    var centre = new this.Centre(this.factory.centre());
+    var centre = new this.Centre(this.Factory.centre());
 
     spyOn(this.Centre, 'locationsSearch').and.returnValue(this.$q.when([]));
     spyOn(this.Centre, 'list').and.returnValue(this.$q.when([]));

@@ -19,9 +19,9 @@ describe('Component: ceventTypeAdd', function() {
                               '$compile',
                               'Study',
                               'CollectionEventType',
-                              'factory');
+                              'Factory');
 
-      this.study = new this.Study(this.factory.study());
+      this.study = new this.Study(this.Factory.study());
 
       this.createController = (study) => {
         ComponentTestSuiteMixin.createController.call(
@@ -44,7 +44,7 @@ describe('Component: ceventTypeAdd', function() {
         $state               = this.$injector.get('$state'),
         ceventType;
 
-    ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
+    ceventType = new this.CollectionEventType(this.Factory.collectionEventType(this.study));
     this.createController(this.study);
 
     spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {
@@ -66,7 +66,7 @@ describe('Component: ceventTypeAdd', function() {
         domainNotificationService = this.$injector.get('domainNotificationService'),
         ceventType;
 
-    ceventType = new this.CollectionEventType(this.factory.collectionEventType(this.study));
+    ceventType = new this.CollectionEventType(this.Factory.collectionEventType(this.study));
     this.createController(this.study);
 
     spyOn(this.CollectionEventType.prototype, 'add').and.callFake(function () {

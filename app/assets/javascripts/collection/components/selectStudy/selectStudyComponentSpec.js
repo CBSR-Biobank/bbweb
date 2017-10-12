@@ -20,7 +20,7 @@ describe('Component: selectStudy', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
 
-      this.injectDependencies('$q', '$rootScope', '$compile', 'Study', 'factory');
+      this.injectDependencies('$q', '$rootScope', '$compile', 'Study', 'Factory');
 
       this.createController = (scopeVars) => {
         ComponentTestSuiteMixin.createController.call(
@@ -38,10 +38,10 @@ describe('Component: selectStudy', function() {
       };
 
       this.createStudies = (numStudies) =>
-        _.range(numStudies).map(() => this.Study.create(this.factory.study()));
+        _.range(numStudies).map(() => this.Study.create(this.Factory.study()));
 
       this.createGetStudiesFn = (studies) =>
-        (pagerOptions) => this.$q.when(_.extend(this.factory.pagedResult(studies, pagerOptions),
+        (pagerOptions) => this.$q.when(_.extend(this.Factory.pagedResult(studies, pagerOptions),
                                                { items: studies.slice(0, pagerOptions.limit) }));
     });
   });
@@ -160,13 +160,13 @@ describe('Component: selectStudy', function() {
 
     beforeEach(function() {
       this.injectDependencies('$state', 'Study');
-      this.study = new this.Study(this.factory.study());
+      this.study = new this.Study(this.Factory.study());
     });
 
     it('a state change is triggered when a study is selected', function() {
-      var location = this.factory.location(),
-          centre = this.factory.centre({ locations: [ location ] }),
-          centreLocations = this.factory.centreLocations([ centre ]),
+      var location = this.Factory.location(),
+          centre = this.Factory.centre({ locations: [ location ] }),
+          centreLocations = this.Factory.centreLocations([ centre ]),
           args;
 
       spyOn(this.$state, 'go').and.returnValue(null);

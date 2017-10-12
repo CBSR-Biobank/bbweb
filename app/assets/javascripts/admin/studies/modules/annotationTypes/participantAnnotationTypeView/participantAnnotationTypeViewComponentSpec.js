@@ -24,10 +24,10 @@ describe('Component: participantAnnotationTypeView', function() {
                               'notificationsService',
                               'Study',
                               'AnnotationType',
-                              'factory');
+                              'Factory');
 
-      jsonAnnotType = this.factory.annotationType();
-      this.study = this.Study.create(_.extend(this.factory.study(),
+      jsonAnnotType = this.Factory.annotationType();
+      this.study = this.Study.create(_.extend(this.Factory.study(),
                                               { annotationTypes: [ jsonAnnotType ]}));
       this.annotationType = new this.AnnotationType(jsonAnnotType);
 
