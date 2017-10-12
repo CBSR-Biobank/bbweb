@@ -18,7 +18,7 @@ export default class Factory {
               AnnotationMaxValueCount,
               AnatomicalSourceType,
               PreservationTemperatureType,
-              PreservationType,
+               PreservationType,
               SpecimenType,
               StudyState,
               CentreState,

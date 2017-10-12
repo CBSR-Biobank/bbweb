@@ -62,13 +62,13 @@ xdescribe('SpcLinkTypeViewer', function() {
     };
   }
 
-  it('should open a modal when created', inject(function (testUtils) {
+  it('should open a modal when created', inject(function (TestUtils) {
     var modal = this.$injector.get('$uibModal'),
         entities = createEntities(),
         viewer;
 
     spyOn(modal, 'open').and.callFake(function () {
-      return testUtils.fakeModal();
+      return TestUtils.fakeModal();
     });
 
     // jshint unused:false

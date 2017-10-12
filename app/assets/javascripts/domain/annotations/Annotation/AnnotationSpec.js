@@ -12,7 +12,7 @@ describe('Annotation', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite, testUtils) {
+    angular.mock.inject(function(EntityTestSuite, TestUtils) {
       _.extend(this, EntityTestSuite.prototype);
       this.injectDependencies('Study',
                               'AnnotationType',
@@ -23,7 +23,7 @@ describe('Annotation', function() {
                               'timeService',
                               'Factory');
 
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
 
       this.createAnnotationType = (options) => {
         options = options || {};

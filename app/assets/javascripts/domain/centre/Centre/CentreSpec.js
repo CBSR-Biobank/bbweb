@@ -19,7 +19,7 @@ describe('Centre', function() {
                               'CentreState',
                               'Location',
                               'funutils',
-                              'testUtils',
+                              'TestUtils',
                               'Factory');
 
       // used by promise tests

@@ -12,7 +12,7 @@ describe('centreLocationsModalService', function() {
 
   beforeEach(() => {
     angular.mock.module('ngAnimateMock', 'biobankApp', 'biobank.test');
-    angular.mock.inject(function(ModalTestSuiteMixin, testUtils) {
+    angular.mock.inject(function(ModalTestSuiteMixin, TestUtils) {
       _.extend(this, ModalTestSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
@@ -22,7 +22,7 @@ describe('centreLocationsModalService', function() {
                               'Centre',
                               'Factory');
       this.addModalMatchers();
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
       this.openModal = (heading, label, placeholder, value, locationInfosToOmit) => {
         heading             = heading     || this.Factory.stringNext();
         label               = label       || this.Factory.stringNext();

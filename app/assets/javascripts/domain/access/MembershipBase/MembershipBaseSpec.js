@@ -18,9 +18,9 @@ describe('MembershipBase', function() {
                               'MembershipBase',
                               'EntitySet',
                               'Factory',
-                              'testUtils');
+                              'TestUtils');
 
-      this.testUtils.addCustomMatchers();
+      this.TestUtils.addCustomMatchers();
     });
   });
 

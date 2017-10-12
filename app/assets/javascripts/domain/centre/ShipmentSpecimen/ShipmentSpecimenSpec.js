@@ -18,7 +18,7 @@ describe('ShipmentSpecimen domain object:', function() {
                               'ShipmentSpecimen',
                               'ShipmentItemState',
                               'funutils',
-                              'testUtils',
+                              'TestUtils',
                               'UrlService',
                               'Factory');
       // used by promise tests

@@ -11,12 +11,12 @@ import _ from 'lodash';
 describe('Directive: updateRemoveButtons', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function (DirectiveTestSuiteMixin, testUtils) {
+    angular.mock.inject(function (DirectiveTestSuiteMixin, TestUtils) {
       _.extend(this, DirectiveTestSuiteMixin);
 
       this.injectDependencies('$rootScope', '$compile');
 
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
 
       this.createController = (options) => {
         options = options || {};

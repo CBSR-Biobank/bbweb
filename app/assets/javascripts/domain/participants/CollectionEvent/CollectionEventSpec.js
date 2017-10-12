@@ -16,7 +16,7 @@ describe('CollectionEvent', function() {
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin,
                                  AnnotationsEntityTestSuiteMixin,
-                                 testUtils) {
+                                 TestUtils) {
       _.extend(this,
                EntityTestSuite.prototype,
                ServerReplyMixin.prototype,
@@ -33,9 +33,9 @@ describe('CollectionEvent', function() {
                               'AnnotationType',
                               'annotationFactory',
                               'Factory',
-                              'testUtils');
+                              'TestUtils');
 
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
 
       this.jsonStudy = this.Factory.study();
       this.jsonCet = this.Factory.collectionEventType();

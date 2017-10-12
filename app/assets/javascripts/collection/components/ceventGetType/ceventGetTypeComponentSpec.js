@@ -12,7 +12,7 @@ describe('Component: ceventGetType', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin, testUtils) {
+    angular.mock.inject(function(ComponentTestSuiteMixin, TestUtils) {
       _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
@@ -34,7 +34,7 @@ describe('Component: ceventGetType', function() {
       this.participant = new this.Participant(this.jsonParticipant);
       this.study       = new this.Study(this.jsonStudy);
 
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
 
       spyOn(this.$state, 'go').and.returnValue(null);
 

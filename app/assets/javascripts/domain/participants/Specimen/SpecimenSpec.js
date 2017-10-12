@@ -15,7 +15,7 @@ describe('Specimen', function() {
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin,
                                  AnnotationsEntityTestSuiteMixin,
-                                 testUtils) {
+                                 TestUtils) {
       _.extend(this,
                EntityTestSuite.prototype,
                ServerReplyMixin.prototype,
@@ -28,9 +28,9 @@ describe('Specimen', function() {
                               'CollectionEvent',
                               'Specimen',
                               'Factory',
-                              'testUtils');
+                              'TestUtils');
 
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
       this.jsonSpecimen = this.Factory.specimen();
 
       // used by promise tests

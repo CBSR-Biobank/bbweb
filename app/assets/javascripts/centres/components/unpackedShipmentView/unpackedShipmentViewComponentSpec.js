@@ -10,7 +10,7 @@ describe('unpackedShipmentViewComponent', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin, testUtils) {
+    angular.mock.inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin, TestUtils) {
       var self = this;
 
       _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin.prototype);
@@ -34,7 +34,7 @@ describe('unpackedShipmentViewComponent', function() {
           'unpackedShipmentView');
       };
 
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
     });
   });
 

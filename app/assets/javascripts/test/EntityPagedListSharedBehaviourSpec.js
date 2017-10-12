@@ -12,8 +12,8 @@ export default function sharedBehaviour(context) {
 
   describe('EntityPagedListSharedBehaviour', function() {
 
-    beforeEach(inject(function(testUtils) {
-      testUtils.addCustomMatchers();
+    beforeEach(inject(function(TestUtils) {
+      TestUtils.addCustomMatchers();
     }));
 
     it('has valid scope', function() {

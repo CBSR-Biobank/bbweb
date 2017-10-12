@@ -17,8 +17,8 @@ define(['lodash'], function(_) {
 
       var EnumerationClass, valueMap;
 
-      beforeEach(inject(function($httpBackend, testUtils) {
-        testUtils.addCustomMatchers();
+      beforeEach(inject(function($httpBackend, TestUtils) {
+        TestUtils.addCustomMatchers();
 
         EnumerationClass = context.enumerationClass;
         valueMap         = context.valueMap;

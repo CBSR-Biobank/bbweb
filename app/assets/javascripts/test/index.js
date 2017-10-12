@@ -13,12 +13,12 @@ import Factory                         from './Factory';
 import ModalTestSuiteMixin             from './ModalTestSuiteMixin';
 import ShippingComponentTestSuiteMixin from './ShippingComponentTestSuiteMixin';
 import TestSuiteMixin                  from './TestSuiteMixin';
+import TestUtils                       from './TestUtils';
 import angular                         from 'angular';
 
 const TestModule = angular.module('biobank.test', [])
       .service('Factory',                         Factory)
-      .service('testUtils',
-               require('../../../assets/javascripts/test/testUtils'))
+      .service('TestUtils',                       TestUtils)
       .service('TestSuiteMixin',                  TestSuiteMixin)
       .service('ComponentTestSuiteMixin',         ComponentTestSuiteMixin)
       .service('DirectiveTestSuiteMixin',         DirectiveTestSuiteMixin)

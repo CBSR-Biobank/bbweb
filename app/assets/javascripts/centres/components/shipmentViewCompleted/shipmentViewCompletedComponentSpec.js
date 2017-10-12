@@ -10,7 +10,7 @@ describe('shipmentViewCompletedComponent', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(ShippingComponentTestSuiteMixin, testUtils) {
+    angular.mock.inject(function(ShippingComponentTestSuiteMixin, TestUtils) {
       _.extend(this, ShippingComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
@@ -18,7 +18,7 @@ describe('shipmentViewCompletedComponent', function() {
                               '$compile',
                               'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
                               'Factory');
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
 
       this.createController = (shipment) =>
         ShippingComponentTestSuiteMixin.createController.call(

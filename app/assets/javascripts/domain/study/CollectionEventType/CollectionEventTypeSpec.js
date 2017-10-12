@@ -22,12 +22,12 @@ describe('CollectionEventType', function() {
                               'Study',
                               'CollectionEventType',
                               'Factory',
-                              'testUtils');
+                              'TestUtils');
 
       this.jsonCet   = this.Factory.collectionEventType();
       this.jsonStudy = this.Factory.defaultStudy();
 
-      this.testUtils.addCustomMatchers();
+      this.TestUtils.addCustomMatchers();
       CollectionEventType = this.CollectionEventType;
 
       // used by promise tests

@@ -25,7 +25,7 @@ describe('Shipment domain object:', function() {
                               'ShipmentState',
                               'Specimen',
                               'funutils',
-                              'testUtils',
+                              'TestUtils',
                               'Factory');
       // used by promise tests
       this.expectShipment = (entity) => {

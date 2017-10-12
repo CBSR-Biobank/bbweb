@@ -17,12 +17,12 @@ xdescribe('Directive: specimenGroupsPanelDirective', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function (TestSuiteMixin, testUtils) {
+    angular.mock.inject(function (TestSuiteMixin, TestUtils) {
       _.extend(this, TestSuiteMixin);
 
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
     });
   });
 

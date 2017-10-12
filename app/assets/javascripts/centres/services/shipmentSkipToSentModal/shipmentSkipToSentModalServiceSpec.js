@@ -10,7 +10,7 @@ describe('shipmentSkipToSentModalService', function() {
 
   beforeEach(() => {
     angular.mock.module('ngAnimateMock', 'biobankApp', 'biobank.test');
-    angular.mock.inject(function(ModalTestSuiteMixin, testUtils) {
+    angular.mock.inject(function(ModalTestSuiteMixin, TestUtils) {
       _.extend(this, ModalTestSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
@@ -19,7 +19,7 @@ describe('shipmentSkipToSentModalService', function() {
                               'shipmentSkipToSentModalService',
                               'Factory');
       this.addModalMatchers();
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
 
       this.openModal = () => {
         this.modal = this.shipmentSkipToSentModalService.open();

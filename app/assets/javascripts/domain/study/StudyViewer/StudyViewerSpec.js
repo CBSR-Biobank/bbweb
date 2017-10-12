@@ -16,7 +16,7 @@ describe('StudyViewer', function() {
       _.extend(this, TestSuiteMixin);
       this.injectDependencies('StudyViewer',
                               'Study',
-                              'testUtils',
+                              'TestUtils',
                               'EntityViewer',
                               '$filter',
                               'Factory');
@@ -27,7 +27,7 @@ describe('StudyViewer', function() {
 
   it('should open a modal when created', function () {
     var modal = this.$injector.get('$uibModal');
-    spyOn(modal, 'open').and.returnValue(this.testUtils.fakeModal());
+    spyOn(modal, 'open').and.returnValue(this.TestUtils.fakeModal());
 
     // jshint unused:false
     var study = this.Factory.study();

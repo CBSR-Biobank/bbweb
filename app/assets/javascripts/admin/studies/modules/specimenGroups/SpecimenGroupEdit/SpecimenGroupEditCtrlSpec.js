@@ -39,7 +39,7 @@ xdescribe('Controller: SpecimenGroupEditCtrl', function() {
 
     describe('(shared)', function() {
 
-      beforeEach(angular.inject(function(testUtils) {
+      beforeEach(angular.inject(function(TestUtils) {
         this.createEntities   = setupEntities(this);
         this.createController = setupController(this);
         this.context          = context;
@@ -49,7 +49,7 @@ xdescribe('Controller: SpecimenGroupEditCtrl', function() {
         this.PreservationTemperatureType = this.$injector.get('PreservationTemperatureType');
         this.SpecimenType                = this.$injector.get('SpecimenType');
 
-        testUtils.addCustomMatchers();
+        TestUtils.addCustomMatchers();
       }));
 
       function setupEntities(userContext) {

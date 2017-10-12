@@ -12,7 +12,7 @@ describe('Component: locationsPanel', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin, testUtils) {
+    angular.mock.inject(function(ComponentTestSuiteMixin, TestUtils) {
       _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
@@ -25,7 +25,7 @@ describe('Component: locationsPanel', function() {
                               'domainNotificationService',
                               'Factory');
 
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
 
       this.createScope = (scopeVars) => {
         var scope = ComponentTestSuiteMixin.createScope.call(this, scopeVars);

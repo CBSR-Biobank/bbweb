@@ -19,9 +19,9 @@ describe('Study', function() {
                               'StudyState',
                               'funutils',
                               'Factory',
-                              'testUtils');
+                              'TestUtils');
 
-      this.testUtils.addCustomMatchers();
+      this.TestUtils.addCustomMatchers();
       this.jsonStudy = this.Factory.study();
 
       // used by promise tests

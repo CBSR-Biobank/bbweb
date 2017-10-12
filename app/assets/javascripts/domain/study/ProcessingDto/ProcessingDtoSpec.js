@@ -16,13 +16,13 @@ xdescribe('ProcessingDto', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(ServerReplyMixin, testUtils) {
+    angular.mock.inject(function(ServerReplyMixin, TestUtils) {
       _.extend(this, ServerReplyMixin.prototype);
 
       httpBackend   = this.$injector.get('$httpBackend');
       ProcessingDto = this.$injector.get('ProcessingDto');
       factory  = this.$injector.get('Factory');
-      testUtils.addCustomMatchers();
+      TestUtils.addCustomMatchers();
 
       createEntities = setupEntities(this.$injector);
     });
