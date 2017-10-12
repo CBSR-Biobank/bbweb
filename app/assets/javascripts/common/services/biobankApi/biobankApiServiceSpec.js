@@ -13,7 +13,7 @@ describe('biobankApi service', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(TestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, TestSuiteMixin, ServerReplyMixin.prototype);
+      _.extend(this, TestSuiteMixin, ServerReplyMixin);
       this.injectDependencies('$q', '$httpBackend', 'biobankApi');
     });
   });

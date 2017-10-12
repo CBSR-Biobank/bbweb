@@ -15,7 +15,7 @@ describe('CentreName', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin) {
-      _.extend(this, EntityTestSuite, ServerReplyMixin.prototype);
+      _.extend(this, EntityTestSuite, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',

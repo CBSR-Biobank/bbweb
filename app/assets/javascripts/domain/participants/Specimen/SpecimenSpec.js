@@ -18,7 +18,7 @@ describe('Specimen', function() {
                                  TestUtils) {
       _.extend(this,
                EntityTestSuite,
-               ServerReplyMixin.prototype,
+               ServerReplyMixin,
                AnnotationsEntityTestSuiteMixin.prototype);
 
       this.injectDependencies('$httpBackend',

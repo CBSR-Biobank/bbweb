@@ -30,9 +30,8 @@ export default function ModalTestSuiteMixinFactory($rootScope, $animate, $docume
     $rootScope.$digest();
   }
 
-  function dismiss (modal, reason, noFlush) {
+  function dismiss (modal = this.modal, reason, noFlush) {
     var closed;
-    modal = modal || this.modal;
     closed = modal.dismiss(reason);
     $rootScope.$digest();
     if (!noFlush) {

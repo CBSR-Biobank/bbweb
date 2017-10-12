@@ -16,7 +16,7 @@ describe('Shipment domain object:', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function (ServerReplyMixin, EntityTestSuite) {
-      _.extend(this, EntityTestSuite, ServerReplyMixin.prototype);
+      _.extend(this, EntityTestSuite, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',

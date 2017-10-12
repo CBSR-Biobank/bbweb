@@ -2,28 +2,25 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
 
-  var _ = require('lodash');
+/**
+ * This is a mixin that can be added UserContext object of a Jasmine test suite.
+ *
+ * @return {object} Object containing the functions that will be mixed in.
+ */
+export default function ServerReplyMixinFactory () {
 
+  return {
+    reply: reply,
+    errorReply: errorReply
+  };
 
-  function ServerReplyMixinFactory($templateCache) {
-
-    function ServerReplyMixin() {}
-
-    ServerReplyMixin.prototype.reply = function (obj) {
-      obj = _.isUndefined(obj) ? {} : obj;
-      return { status: 'success', data: obj };
-    };
-
-    ServerReplyMixin.prototype.errorReply = function(message) {
-       return { status: 'error', message: message || 'error'};
-    };
-
-    return ServerReplyMixin;
+  function reply(obj = {}) {
+    return { status: 'success', data: obj };
   }
 
-  return ServerReplyMixinFactory;
+  function errorReply(message = 'error') {
+    return { status: 'error', message: message };
+  }
 
-});
+}

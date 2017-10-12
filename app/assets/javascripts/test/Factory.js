@@ -106,12 +106,11 @@ export default class Factory {
    *
    * @param domainEntityType the name of the domain entity type. Eg: 'study', 'centre', 'user', etc.
    */
-  domainEntityNameNext(domainEntityType) {
-    domainEntityType = domainEntityType || 'string';
+  domainEntityNameNext(domainEntityType = 'string') {
     return _.uniqueId(domainEntityType + '_');
   }
 
-  specimenLinkType(options) {
+  specimenLinkType(options = {}) {
     const processingType = this.defaultProcessingType(),
         defaults = {
           id:                    this.domainEntityNameNext(this.ENTITY_NAME_SPECIMEN_LINK_TYPE()),
@@ -126,7 +125,7 @@ export default class Factory {
           outputContainerTypeId: null
         },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        slt = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        slt = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
 
     this.updateDefaultEntity(this.ENTITY_NAME_SPECIMEN_LINK_TYPE(), slt);
     return slt;
@@ -136,7 +135,7 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_SPECIMEN_LINK_TYPE(), this.specimenLinkType);
   }
 
-  processingType(options) {
+  processingType(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
           id:          this.domainEntityNameNext(this.ENTITY_NAME_PROCESSING_TYPE()),
@@ -146,7 +145,7 @@ export default class Factory {
           enabled:     false
         },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        pt = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        pt = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_PROCESSING_TYPE(), pt);
     return pt;
   }
@@ -158,7 +157,7 @@ export default class Factory {
   /**
    * Returns a collection event type as returned by the server.
    */
-  collectionEventType(options) {
+  collectionEventType(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
           id:                   this.domainEntityNameNext(this.ENTITY_NAME_COLLECTION_EVENT_TYPE()),
@@ -170,7 +169,7 @@ export default class Factory {
           recurring:            false
         },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        cet = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        cet = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_COLLECTION_EVENT_TYPE(), cet);
     return cet;
   }
@@ -195,7 +194,7 @@ export default class Factory {
     return faker.random.arrayElement(_.values(this.SpecimenType));
   }
 
-  specimenGroup(options) {
+  specimenGroup(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
           id:                          this.domainEntityNameNext(this.ENTITY_NAME_SPECIMEN_GROUP()),
@@ -209,7 +208,7 @@ export default class Factory {
           specimenType:                this.randomSpecimenType()
         },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        sg = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        sg = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_SPECIMEN_GROUP(), sg);
     return sg;
   }
@@ -218,7 +217,7 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_SPECIMEN_GROUP(), this.specimenGroup);
   }
 
-  study(options) {
+  study(options = {}) {
     var defaults =  { id:              this.domainEntityNameNext(this.ENTITY_NAME_STUDY()),
                       name:            this.stringNext(),
                       description:     faker.lorem.sentences(4),
@@ -226,7 +225,7 @@ export default class Factory {
                       state:           this.StudyState.DISABLED
                     },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        s = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        s = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_STUDY(), s);
     return s;
   }
@@ -235,9 +234,8 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_STUDY(), this.study);
   }
 
-  entityNameDto(createFunc, options) {
+  entityNameDto(createFunc, options = {}) {
     var c;
-    options = options || {};
     c = createFunc.call(this, _.pick(options, ['id', 'name', 'state']));
     return _.pick(c, ['id', 'name', 'state']);
   }
@@ -258,7 +256,7 @@ export default class Factory {
    * If this.defaultStudy has annotation types, then participant will have annotations based on the study's,
    * unless options.annotationTypes is defined.
    */
-  participant(options) {
+  participant(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
           id:          this.domainEntityNameNext(this.ENTITY_NAME_PARTICIPANT()),
@@ -268,8 +266,6 @@ export default class Factory {
         },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
         p;
-
-    options = options || {};
 
     p = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
 
@@ -290,7 +286,7 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_PARTICIPANT(), this.participant);
   }
 
-  collectionEvent(options) {
+  collectionEvent(options = {}) {
     var participant = this.defaultParticipant(),
         collectionEventType = this.defaultCollectionEventType(),
         defaults = {
@@ -305,7 +301,6 @@ export default class Factory {
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
         ce;
 
-    options = options || {};
     ce = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
 
     if (!options.annotations) {
@@ -348,7 +343,7 @@ export default class Factory {
     };
   }
 
-  specimen(options) {
+  specimen(options = {}) {
     var ceventType = this.collectionEventType({ specimenDescriptions: [ this.collectionSpecimenDescription() ] }),
         ctr = this.centre({ locations: [ this.location() ]}),
         defaults = {
@@ -363,8 +358,6 @@ export default class Factory {
         },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
         spc;
-
-    options = options || {};
 
     if (ceventType.specimenDescriptions && (ceventType.specimenDescriptions.length > 0)) {
       defaults.specimenDescriptionId = ceventType.specimenDescriptions[0].id;
@@ -384,7 +377,7 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_SPECIMEN(), this.specimen);
   }
 
-  centre(options) {
+  centre(options = {}) {
     var defaults = { id:          this.domainEntityNameNext(this.ENTITY_NAME_CENTRE()),
                      name:        this.stringNext(),
                      description: this.stringNext(),
@@ -393,7 +386,7 @@ export default class Factory {
                      locations:   []
                    },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        c = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        c = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_CENTRE(), c);
     return c;
   }
@@ -402,7 +395,7 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_CENTRE(), this.centre);
   }
 
-  shipment(options) {
+  shipment(options = {}) {
     var loc = this.location(),
         ctr = this.centre({ locations: [ loc ]}),
         locationInfo = {
@@ -420,7 +413,7 @@ export default class Factory {
           specimenCount:    0
         },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        s = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        s = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_SHIPMENT(), s);
     return s;
   }
@@ -429,7 +422,7 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_SHIPMENT(), this.shipment);
   }
 
-  shipmentSpecimen(options) {
+  shipmentSpecimen(options = {}) {
     var shipment = this.defaultShipment(),
         specimen = this.defaultSpecimen(),
         defaults = { id:           this.domainEntityNameNext(this.ENTITY_NAME_SHIPMENT()),
@@ -438,7 +431,7 @@ export default class Factory {
                      specimen:     specimen
                    },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        ss = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        ss = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_SHIPMENT_SPECIMEN(), ss);
     return ss;
   }
@@ -447,7 +440,7 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_SHIPMENT_SPECIMEN(), this.shipment);
   }
 
-  user(options) {
+  user(options =  { membership: {} }) {
     var defaults = { id:         this.domainEntityNameNext(this.ENTITY_NAME_USER()),
                      name:       this.stringNext(),
                      email:      this.stringNext(),
@@ -459,12 +452,8 @@ export default class Factory {
         membership,
         u;
 
-    options = options || {};
-    if (_.isNil(options.membership)) {
-      options.membership = {};
-    }
     membership = this.userMembership(options.membership);
-    u = _.extend(defaults, this.commonFields(), _.pick(options || {}, validKeys), { membership: membership });
+    u = _.extend(defaults, this.commonFields(), _.pick(options, validKeys), { membership: membership });
     this.updateDefaultEntity(this.ENTITY_NAME_USER(), u);
     return u;
   }
@@ -480,7 +469,7 @@ export default class Factory {
    * @param {Int} option.maxValueCount when valueType is 'Select', use 1 for single selection or '2' for
    * multiple selection.
    */
-  annotationType(options) {
+  annotationType(options = {}) {
     var defaults = { id:            this.domainEntityNameNext(this.ENTITY_NAME_ANNOTATION_TYPE()),
                      name:          this.stringNext(),
                      description:   null,
@@ -491,8 +480,6 @@ export default class Factory {
                    },
         validKeys = _.keys(defaults),
         at;
-
-    options = options || {};
 
     if (!options.valueType) {
       options.valueType = this.AnnotationValueType.TEXT;
@@ -524,7 +511,7 @@ export default class Factory {
     return annotationTypes;
   }
 
-  collectionSpecimenDescription(options) {
+  collectionSpecimenDescription(options = {}) {
     var defaults = { id:                          this.domainEntityNameNext(this.ENTITY_NAME_SPECIMEN_GROUP()),
                      name:                        this.stringNext(),
                      description:                 faker.lorem.sentences(4),
@@ -537,7 +524,7 @@ export default class Factory {
                      amount:                      0.5
                    },
         validKeys = _.keys(defaults),
-        spec = _.extend(defaults, _.pick(options || {}, validKeys));
+        spec = _.extend(defaults, _.pick(options, validKeys));
     this.valueTypeCount += 1;
     return spec;
   }
@@ -545,17 +532,14 @@ export default class Factory {
   /**
    * @param options.value The value for the annotation.
    */
-  annotation(options, annotationType) {
+  annotation(options = {}, annotationType = {}) {
     var defaults = { annotationTypeId: null,
                      stringValue:      null,
                      numberValue:      null,
                      selectedValues:   []
                    },
         validKeys = _.keys(defaults),
-        annotation = _.extend(defaults, _.pick(options || {}, validKeys));
-
-    options = options || {};
-    annotationType = annotationType || {};
+        annotation = _.extend(defaults, _.pick(options, validKeys));
 
     if (annotationType.id) {
       annotation.annotationTypeId = annotationType.id;
@@ -634,7 +618,7 @@ export default class Factory {
   /**
    * This is a value object, so it does not have the common fields.
    */
-  location(options) {
+  location(options = {}) {
     var defaults = { id:             this.domainEntityNameNext(this.ENTITY_NAME_LOCATION()),
                      name:           this.stringNext(),
                      street:         faker.address.streetAddress(),
@@ -645,7 +629,7 @@ export default class Factory {
                      countryIsoCode: faker.address.country()
                    },
         validKeys = _.keys(defaults),
-        at = _.extend(defaults, _.pick(options || {}, validKeys));
+        at = _.extend(defaults, _.pick(options, validKeys));
     this.valueTypeCount += 1;
     return at;
   }
@@ -661,9 +645,7 @@ export default class Factory {
     });
   }
 
-  pagedResult(entities, options) {
-    options = options || {};
-
+  pagedResult(entities, { maxPages: maxPages = 4} = {}) {
     return {
       items:    entities,
       page:     1,
@@ -671,7 +653,7 @@ export default class Factory {
       total:    entities.length,
       limit:    5,
       next:     2,
-      maxPages: options.maxPages || 4
+      maxPages: maxPages
     };
   }
 
@@ -686,7 +668,7 @@ export default class Factory {
     return { allEntities: false, entityData: [] };
   }
 
-  membershipBase(options) {
+  membershipBase(options = {}) {
     var defaults =  { id:           this.domainEntityNameNext(this.ENTITY_NAME_MEMBERSHIP_BASE()),
                       name:         this.stringNext(),
                       description:  faker.lorem.sentences(4),
@@ -694,7 +676,7 @@ export default class Factory {
                       centreData:   this.membershipEntitySet()
                     },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        m = _.extend({}, defaults, this.commonFields(), _.pick(options || {}, validKeys));
+        m = _.extend({}, defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_MEMBERSHIP_BASE(), m);
     return m;
   }
@@ -703,10 +685,10 @@ export default class Factory {
     return this.defaultEntity(this.ENTITY_NAME_MEMBERSHIP_BASE(), this.membershipBase);
   }
 
-  membership(options) {
+  membership(options = {}) {
     var defaults =  { userData: [] },
         validKeys = this.commonFieldNames.concat(_.keys(defaults)),
-        m = _.extend(defaults, this.membershipBase(options), _.pick(options || {}, validKeys));
+        m = _.extend(defaults, this.membershipBase(options), _.pick(options, validKeys));
     this.updateDefaultEntity(this.ENTITY_NAME_MEMBERSHIP(), m);
     return m;
   }

@@ -13,7 +13,7 @@ describe('unpackedShipmentViewComponent', function() {
     angular.mock.inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin, TestUtils) {
       var self = this;
 
-      _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin.prototype);
+      _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',

@@ -22,7 +22,7 @@ xdescribe('SpecimenGroup', function() {
                                  _SpecimenGroup_,
                                  _Factory_,
                                  ServerReplyMixin) {
-      _.extend(this, ServerReplyMixin.prototype);
+      _.extend(this, ServerReplyMixin);
       httpBackend   = $httpBackend;
       funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;

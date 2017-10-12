@@ -6,6 +6,11 @@
 import _ from 'lodash';
 import angular from 'angular';
 
+/**
+ * This is a mixin that can be added UserContext object of a Jasmine test suite.
+ *
+ * @return {object} Object containing the functions that will be mixed in.
+ */
 /* @ngInject */
 export default function ComponentTestSuiteMixin(TestSuiteMixin, $rootScope, $compile) {
 

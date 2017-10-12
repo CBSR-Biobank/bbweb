@@ -84,7 +84,7 @@ describe('Membership', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(MebershipSpecCommon, ServerReplyMixin) {
-      _.extend(this, new SuiteMixinFactory(MebershipSpecCommon).prototype, ServerReplyMixin.prototype);
+      _.extend(this, new SuiteMixinFactory(MebershipSpecCommon).prototype, ServerReplyMixin);
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',

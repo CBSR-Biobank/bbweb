@@ -18,7 +18,7 @@ describe('Participant', function() {
                                  AnnotationsEntityTestSuiteMixin) {
       _.extend(this,
                EntityTestSuite,
-               ServerReplyMixin.prototype,
+               ServerReplyMixin,
                AnnotationsEntityTestSuiteMixin.prototype);
 
       this.injectDependencies('$q',

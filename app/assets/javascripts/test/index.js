@@ -12,6 +12,7 @@ import DirectiveTestSuiteMixin         from './DirectiveTestSuiteMixin';
 import EntityTestSuite                 from './EntityTestSuite';
 import Factory                         from './Factory';
 import ModalTestSuiteMixin             from './ModalTestSuiteMixin';
+import ServerReplyMixin                from '../../../assets/javascripts/test/ServerReplyMixin';
 import ShippingComponentTestSuiteMixin from './ShippingComponentTestSuiteMixin';
 import TestSuiteMixin                  from './TestSuiteMixin';
 import TestUtils                       from './TestUtils';
@@ -26,9 +27,8 @@ const TestModule = angular.module('biobank.test', [])
       .service('ModalTestSuiteMixin',             ModalTestSuiteMixin)
       .service('ShippingComponentTestSuiteMixin', ShippingComponentTestSuiteMixin)
       .service('EntityTestSuite',                 EntityTestSuite)
+      .service('ServerReplyMixin',                ServerReplyMixin)
 
-      .factory('ServerReplyMixin',
-               require('../../../assets/javascripts/test/ServerReplyMixin'))
       .factory('AnnotationsEntityTestSuiteMixin',
                require('../../../assets/javascripts/test/AnnotationsEntityTestSuiteMixin'))
       .factory('MebershipSpecCommon',

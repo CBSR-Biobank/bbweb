@@ -17,7 +17,7 @@ xdescribe('ProcessingDto', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ServerReplyMixin, TestUtils) {
-      _.extend(this, ServerReplyMixin.prototype);
+      _.extend(this, ServerReplyMixin);
 
       httpBackend   = this.$injector.get('$httpBackend');
       ProcessingDto = this.$injector.get('ProcessingDto');

@@ -11,7 +11,7 @@ describe('unpackedShipmentExtraComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin.prototype);
+      _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',

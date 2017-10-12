@@ -20,7 +20,7 @@ xdescribe('ProcessingType', function() {
                                  _ProcessingType_,
                                  _Factory_,
                                  ServerReplyMixin) {
-      _.extend(this, ServerReplyMixin.prototype);
+      _.extend(this, ServerReplyMixin);
     httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
       Factory        = _Factory_;

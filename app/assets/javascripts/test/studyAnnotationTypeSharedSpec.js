@@ -34,7 +34,7 @@ export default function studyAnnotationTypeSharedSpec(context) {
                                    _AnnotationValueType_,
                                    _AnnotationMaxValueCount_,
                                    ServerReplyMixin) {
-        _.extend(this, ServerReplyMixin.prototype);
+        _.extend(this, ServerReplyMixin);
         httpBackend                  = $httpBackend;
         funutils                     = _funutils_;
         AnnotationValueType          = _AnnotationValueType_;
@@ -264,8 +264,7 @@ export default function studyAnnotationTypeSharedSpec(context) {
                       { id: annotationType.id, expectedVersion: annotationType.version });
     }
 
-    function replyAnnotationType(annotationType, newValues) {
-      newValues = newValues || {};
+    function replyAnnotationType(annotationType, newValues = {}) {
       return createAnnotationTypeFn(_.extend({},
                                              annotationType,
                                              newValues,

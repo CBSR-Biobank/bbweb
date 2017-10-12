@@ -128,7 +128,6 @@ describe('Annotation', function() {
       }).toThrowError(/invalid object to create from/);
     });
 
-
     it('can create annotation with empty value', function() {
       var self = this;
 
@@ -140,7 +139,7 @@ describe('Annotation', function() {
         annotationTypeOptions.required = true;
 
         annotationType = self.createAnnotationType(annotationTypeOptions);
-        jsonAnnotation = self.Factory.annotation(null, annotationType);
+        jsonAnnotation = self.Factory.annotation(undefined, annotationType);
         annotation = self.annotationFactory.create(jsonAnnotation, annotationType);
         expect(annotation.getDisplayValue()).toBeFalsy();
       });
@@ -293,17 +292,16 @@ describe('Annotation', function() {
     });
 
     it('returns FALSE if the annotation is required and has no value', function() {
-      var self = this;
-      self.getAnnotationTypeOptionsForAll().forEach((annotationTypeOptions) => {
+      this.getAnnotationTypeOptionsForAll().forEach((annotationTypeOptions) => {
         var annotationType,
             serverAnnotation,
             annotation;
 
         annotationTypeOptions.required = true;
 
-        annotationType = self.createAnnotationType(annotationTypeOptions);
-        serverAnnotation = self.Factory.annotation(null, annotationType);
-        annotation = self.annotationFactory.create(serverAnnotation, annotationType, true);
+        annotationType = this.createAnnotationType(annotationTypeOptions);
+        serverAnnotation = this.Factory.annotation(undefined, annotationType);
+        annotation = this.annotationFactory.create(serverAnnotation, annotationType, true);
         expect(annotation.isValueValid()).toBe(false);
       });
 

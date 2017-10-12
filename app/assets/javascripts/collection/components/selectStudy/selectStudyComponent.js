@@ -110,7 +110,7 @@ define(function (require) {
       updateStudies();
     }
 
-    function studyGlyphicon(study) {
+    function studyGlyphicon() {
       return '<i class="glyphicon ' + vm.icon + '"></i>';
     }
 
