@@ -27,18 +27,20 @@ export default class Factory {
               ShipmentState,
               ShipmentItemState) {
 
-    this.AnnotationValueType = AnnotationValueType;
-    this.AnnotationMaxValueCount = AnnotationMaxValueCount;
-    this.AnatomicalSourceType = AnatomicalSourceType;
-    this.PreservationTemperatureType = PreservationTemperatureType;
-    this.PreservationType = PreservationType;
-    this.SpecimenType = SpecimenType;
-    this.StudyState = StudyState;
-    this.CentreState = CentreState;
-    this.UserState = UserState;
-    this.SpecimenState = SpecimenState;
-    this.ShipmentState = ShipmentState;
-    this.ShipmentItemState = ShipmentItemState;
+    Object.assign(this, {
+      AnnotationValueType,
+      AnnotationMaxValueCount,
+      AnatomicalSourceType,
+      PreservationTemperatureType,
+      PreservationType,
+      SpecimenType,
+      StudyState,
+      CentreState,
+      UserState,
+      SpecimenState,
+      ShipmentState,
+      ShipmentItemState
+    });
 
     this.defaultEntities = {};
     this.entityCount = 0;

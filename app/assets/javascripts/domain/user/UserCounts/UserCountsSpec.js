@@ -13,8 +13,8 @@ describe('UserCounts', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite, ServerReplyMixin) {
-      _.extend(this, EntityTestSuite, ServerReplyMixin);
+    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
+      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
       this.injectDependencies('UserCounts', '$httpBackend');
     });
   });

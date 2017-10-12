@@ -14,8 +14,8 @@ describe('CollectionEventType', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite, ServerReplyMixin) {
-      _.extend(this, EntityTestSuite, ServerReplyMixin);
+    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
+      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',
@@ -68,7 +68,7 @@ describe('CollectionEventType', function() {
 
       function url() {
         const args = [ 'studies/cetypes' ].concat(_.toArray(arguments));
-        return EntityTestSuite.url.apply(null, args);
+        return EntityTestSuiteMixin.url.apply(null, args);
       }
     });
   });

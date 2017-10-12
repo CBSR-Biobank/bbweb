@@ -13,13 +13,11 @@ describe('Participant', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite,
-                                 ServerReplyMixin,
-                                 AnnotationsEntityTestSuiteMixin) {
+    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin,
+                                 ServerReplyMixin) {
       _.extend(this,
-               EntityTestSuite,
-               ServerReplyMixin,
-               AnnotationsEntityTestSuiteMixin.prototype);
+               AnnotationsEntityTestSuiteMixin,
+               ServerReplyMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',

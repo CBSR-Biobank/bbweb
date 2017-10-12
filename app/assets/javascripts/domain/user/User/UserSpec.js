@@ -10,8 +10,8 @@ describe('User', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite, ServerReplyMixin) {
-      _.extend(this, EntityTestSuite, ServerReplyMixin);
+    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
+      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               'User',
@@ -41,7 +41,7 @@ describe('User', function() {
 
       function url() {
         const args = [ 'users' ].concat(_.toArray(arguments));
-        return EntityTestSuite.url.apply(null, args);
+        return EntityTestSuiteMixin.url.apply(null, args);
       }
     });
   });

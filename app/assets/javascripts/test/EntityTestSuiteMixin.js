@@ -10,7 +10,7 @@ import _ from 'lodash';
  * @return {object} Object containing the functions that will be mixed in.
  */
 /* @ngInject */
-export default function EntityTestSuite($httpBackend, TestSuiteMixin) {
+export default function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
 
   return _.extend(
     {

@@ -2,80 +2,73 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
-  'use strict';
 
-  AnnotationsEntityTestSuiteMixinFactory.$inject = [
-    'AnnotationType',
-    'AnnotationValueType',
-    'TextAnnotation',
-    'DateTimeAnnotation',
-    'NumberAnnotation',
-    'SingleSelectAnnotation',
-    'MultipleSelectAnnotation',
-    'Factory'
-  ];
+import _ from 'lodash';
 
-  /**
-   * A mixin for test suites for domain entities.
-   */
-  function AnnotationsEntityTestSuiteMixinFactory(AnnotationType,
-                                                  AnnotationValueType,
-                                                  TextAnnotation,
-                                                  DateTimeAnnotation,
-                                                  NumberAnnotation,
-                                                  SingleSelectAnnotation,
-                                                  MultipleSelectAnnotation,
-                                                  factory) {
+/**
+ * A mixin for test suites for annotation domain entities.
+ */
+/* @ngInject */
+export default function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
+                                                        AnnotationType,
+                                                        AnnotationValueType,
+                                                        TextAnnotation,
+                                                        DateTimeAnnotation,
+                                                        NumberAnnotation,
+                                                        SingleSelectAnnotation,
+                                                        MultipleSelectAnnotation,
+                                                        Factory) {
 
-    function AnnotationsEntityTestSuiteMixin() {}
+  return _.extend(
+    {
+      jsonAnnotationData: jsonAnnotationData,
+      validateAnnotationClass: validateAnnotationClass
+    },
+    EntityTestSuiteMixin
+  );
 
-    AnnotationsEntityTestSuiteMixin.prototype.jsonAnnotationData = function () {
-      var annotationTypes = factory.allAnnotationTypes();
 
-      return annotationTypes.map((annotationType) => {
-        var value = factory.valueForAnnotation(annotationType);
-        var annotation = factory.annotation(value, annotationType);
+  function jsonAnnotationData() {
+    var annotationTypes = Factory.allAnnotationTypes();
 
-        return {
-          annotationType: annotationType,
-          annotation:     annotation
-        };
-      });
-    };
+    return annotationTypes.map((annotationType) => {
+      var value = Factory.valueForAnnotation(annotationType);
+      var annotation = Factory.annotation(value, annotationType);
 
-    /**
-     * @param {AnnotationType} annotationType the AnnotationType this annotion is based on.
-     *
-     * @param {Annotation} the annotation.
-     */
-    AnnotationsEntityTestSuiteMixin.prototype.validateAnnotationClass = function (annotationType,
-                                                                                  annotation) {
-      switch (annotationType.valueType) {
-      case AnnotationValueType.TEXT:
-        expect(annotation).toEqual(jasmine.any(TextAnnotation));
-        break;
-      case AnnotationValueType.DATE_TIME:
-        expect(annotation).toEqual(jasmine.any(DateTimeAnnotation));
-        break;
-      case AnnotationValueType.NUMBER:
-        expect(annotation).toEqual(jasmine.any(NumberAnnotation));
-        break;
-      case AnnotationValueType.SELECT:
-        if (annotationType.isSingleSelect()) {
-          expect(annotation).toEqual(jasmine.any(SingleSelectAnnotation));
-        } else {
-          expect(annotation).toEqual(jasmine.any(MultipleSelectAnnotation));
-        }
-        break;
-
-      default:
-        fail('invalid annotation value type: ' + annotationType.valueType);
-      }
-    };
-
-    return AnnotationsEntityTestSuiteMixin;
+      return {
+        annotationType: annotationType,
+        annotation:     annotation
+      };
+    });
   }
 
-  return AnnotationsEntityTestSuiteMixinFactory;
-});
+  /**
+   * @param {AnnotationType} annotationType the AnnotationType this annotion is based on.
+   *
+   * @param {Annotation} the annotation.
+   */
+  function validateAnnotationClass(annotationType, annotation) {
+    switch (annotationType.valueType) {
+    case AnnotationValueType.TEXT:
+      expect(annotation).toEqual(jasmine.any(TextAnnotation));
+      break;
+    case AnnotationValueType.DATE_TIME:
+      expect(annotation).toEqual(jasmine.any(DateTimeAnnotation));
+      break;
+    case AnnotationValueType.NUMBER:
+      expect(annotation).toEqual(jasmine.any(NumberAnnotation));
+      break;
+    case AnnotationValueType.SELECT:
+      if (annotationType.isSingleSelect()) {
+        expect(annotation).toEqual(jasmine.any(SingleSelectAnnotation));
+      } else {
+        expect(annotation).toEqual(jasmine.any(MultipleSelectAnnotation));
+      }
+      break;
+
+    default:
+      fail('invalid annotation value type: ' + annotationType.valueType);
+    }
+  }
+
+}

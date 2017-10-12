@@ -4,23 +4,20 @@
  */
 /* global angular */
 
-import _ from 'lodash';
-
 describe('ssSpecimensPagedTableComponent', function() {
 
-  function SuiteMixinFactory(ComponentTestSuiteMixin) {
+  function SuiteMixin(ComponentTestSuiteMixin) {
 
-    function SuiteMixin() {
-      ComponentTestSuiteMixin.call(this);
-    }
+    return Object.assign({},
+                         ComponentTestSuiteMixin,
+                         {
+                           createTableState: createTableState,
+                           addTableController: addTableController
+                         });
 
-    SuiteMixin.prototype = Object.create(ComponentTestSuiteMixin);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-
-    SuiteMixin.prototype.createTableState = function (searchPredicatObject,
-                                                      sortPredicate,
-                                                      sortOrderReverse) {
+    function createTableState(searchPredicatObject,
+                              sortPredicate,
+                              sortOrderReverse) {
       var result = {
         sort: {
           predicate: sortPredicate,
@@ -33,22 +30,21 @@ describe('ssSpecimensPagedTableComponent', function() {
         result.search = { predicateObject: searchPredicatObject };
       }
       return result;
-    };
+    }
 
-    SuiteMixin.prototype.addTableController = function (searchPredicatObject, sortPredicate) {
+    function addTableController(searchPredicatObject, sortPredicate) {
       this.controller.tableController = {
         tableState: jasmine.createSpy()
           .and.returnValue(this.createTableState(searchPredicatObject, sortPredicate))
       };
-    };
+    }
 
-    return SuiteMixin;
   }
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, new SuiteMixinFactory(ComponentTestSuiteMixin).prototype);
+      Object.assign(this, SuiteMixin(ComponentTestSuiteMixin));
 
       this.injectDependencies('$q',
                               '$rootScope',

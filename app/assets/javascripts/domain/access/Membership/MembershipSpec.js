@@ -9,82 +9,90 @@ import membershipCommonBehaviour from '../../../test/membershipCommonBehaviourSp
 
 describe('Membership', function() {
 
-  function SuiteMixinFactory(MebershipSpecCommon) {
+  function SuiteMixin(MebershipSpecCommon, ServerReplyMixin) {
 
-    function SuiteMixin() {
-      MebershipSpecCommon.call(this);
+    return _.extend({},
+                    MebershipSpecCommon,
+                    ServerReplyMixin,
+                    {
+                      jsonObj: jsonObj,
+                      jsonObjWithEntities: jsonObjWithEntities,
+                      membershipFromConstructor: membershipFromConstructor,
+                      membershipFromJson: membershipFromJson,
+                      membershipFromJsonAsync: membershipFromJsonAsync,
+                      jsonMembershipWithAllStudies: jsonMembershipWithAllStudies,
+                      jsonMembershipWithStudy: jsonMembershipWithStudy,
+                      jsonMembershipWithAllCentres: jsonMembershipWithAllCentres,
+                      jsonMembershipWithCentre: jsonMembershipWithCentre,
+                      jsonMembershipWithEntities: jsonMembershipWithEntities,
+                      fixtures: fixtures
+                    });
+
+    function jsonObj() {
+      return this.Factory.membership();
     }
 
-    SuiteMixin.prototype = Object.create(MebershipSpecCommon.prototype);
-    SuiteMixin.prototype.constructor = SuiteMixin;
-
-    SuiteMixin.prototype.jsonObj = function () {
-      return this.Factory.membership();
-    };
-
-    SuiteMixin.prototype.jsonObjWithEntities = function (studyEntityData, centreEntityData) {
+    function jsonObjWithEntities(studyEntityData, centreEntityData) {
       return _.extend(
-        MebershipSpecCommon.prototype.jsonObjWithEntities.call(this, studyEntityData, centreEntityData),
+        MebershipSpecCommon.jsonObjWithEntities.call(this, studyEntityData, centreEntityData),
         { userData: [] });
-    };
+    }
 
-    SuiteMixin.prototype.membershipFromConstructor = function () {
+    function membershipFromConstructor() {
       return new this.Membership();
-    };
+    }
 
-    SuiteMixin.prototype.membershipFromJson = function (json) {
+    function membershipFromJson(json) {
       return this.Membership.create(json);
-    };
+    }
 
-    SuiteMixin.prototype.membershipFromJsonAsync = function (json) {
+    function membershipFromJsonAsync(json) {
       return this.Membership.asyncCreate(json);
-    };
+    }
 
-    SuiteMixin.prototype.jsonMembershipWithAllStudies = function () {
+    function jsonMembershipWithAllStudies() {
       var json = this.Factory.membership();
       json.studyData.allEntities = true;
       return json;
-    };
+    }
 
-    SuiteMixin.prototype.jsonMembershipWithStudy = function (id, name) {
+    function jsonMembershipWithStudy(id, name) {
       var json = this.Factory.membership();
       json.studyData.entityData = [{ id: id, name: name}];
       return json;
-    };
+    }
 
-    SuiteMixin.prototype.jsonMembershipWithAllCentres = function () {
+    function jsonMembershipWithAllCentres() {
       var json = this.Factory.membership();
       json.centreData.allEntities = true;
       return json;
-    };
+    }
 
-    SuiteMixin.prototype.jsonMembershipWithCentre = function (id, name) {
+    function jsonMembershipWithCentre(id, name) {
       var json = this.Factory.membership();
       json.centreData.entityData = [{ id: id, name: name}];
       return json;
-    };
+    }
 
-    SuiteMixin.prototype.jsonMembershipWithEntities = function () {
+    function jsonMembershipWithEntities() {
       var entityData = [ this.jsonEntityData() ];
       return this.jsonObjWithEntities(entityData, entityData);
-    };
+    }
 
-    SuiteMixin.prototype.fixtures = function (options) {
+    function fixtures(options) {
       var jsonMembership = this.Factory.membership(options),
           membership     = this.Membership.create(jsonMembership);
       return {
         jsonMembership: jsonMembership,
         membership:     membership
       };
-    };
-
-    return SuiteMixin;
+    }
   }
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(MebershipSpecCommon, ServerReplyMixin) {
-      _.extend(this, new SuiteMixinFactory(MebershipSpecCommon).prototype, ServerReplyMixin);
+      _.extend(this, SuiteMixin(MebershipSpecCommon, ServerReplyMixin));
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',
@@ -108,7 +116,7 @@ describe('Membership', function() {
 
       function url() {
         const args = [ 'access/memberships' ].concat(_.toArray(arguments));
-        return MebershipSpecCommon.prototype.url.apply(null, args);
+        return MebershipSpecCommon.url.apply(null, args);
       }
     });
   });
@@ -188,10 +196,10 @@ describe('Membership', function() {
 
     it('can use options', function() {
       var optionList = [
-            { filter: 'name::test' },
-            { page: 2 },
-            { limit: 10 }
-          ],
+        { filter: 'name::test' },
+        { page: 2 },
+        { limit: 10 }
+      ],
           memberships = [ this.Factory.membership() ],
           reply = this.Factory.pagedResult(memberships);
 

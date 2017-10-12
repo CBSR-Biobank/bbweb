@@ -12,8 +12,8 @@ describe('Annotation', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite, TestUtils) {
-      _.extend(this, EntityTestSuite);
+    angular.mock.inject(function(EntityTestSuiteMixin, TestUtils) {
+      _.extend(this, EntityTestSuiteMixin);
       this.injectDependencies('Study',
                               'AnnotationType',
                               'annotationFactory',

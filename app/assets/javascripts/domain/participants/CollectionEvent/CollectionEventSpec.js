@@ -13,14 +13,12 @@ describe('CollectionEvent', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite,
+    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin,
                                  ServerReplyMixin,
-                                 AnnotationsEntityTestSuiteMixin,
                                  TestUtils) {
       _.extend(this,
-               EntityTestSuite,
-               ServerReplyMixin,
-               AnnotationsEntityTestSuiteMixin.prototype);
+               AnnotationsEntityTestSuiteMixin,
+               ServerReplyMixin);
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',
@@ -78,7 +76,7 @@ describe('CollectionEvent', function() {
 
       function url() {
         const args = [ 'participants/cevents' ].concat(_.toArray(arguments));
-        return EntityTestSuite.url.apply(null, args);
+        return AnnotationsEntityTestSuiteMixin.url.apply(null, args);
       }
     });
   });

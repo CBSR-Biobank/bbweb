@@ -12,14 +12,12 @@ describe('Specimen', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite,
+    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin,
                                  ServerReplyMixin,
-                                 AnnotationsEntityTestSuiteMixin,
                                  TestUtils) {
       _.extend(this,
-               EntityTestSuite,
-               ServerReplyMixin,
-               AnnotationsEntityTestSuiteMixin.prototype);
+               AnnotationsEntityTestSuiteMixin,
+               ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$rootScope',
@@ -49,7 +47,7 @@ describe('Specimen', function() {
 
       function url() {
         const args = [ 'participants/cevents/spcs' ].concat(_.toArray(arguments));
-        return EntityTestSuite.url.apply(null, args);
+        return AnnotationsEntityTestSuiteMixin.url.apply(null, args);
       }
     });
   });
