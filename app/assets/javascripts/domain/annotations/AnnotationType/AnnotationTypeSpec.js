@@ -12,13 +12,12 @@ describe('AnnotationType', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin, testDomainEntities) {
+    angular.mock.inject(function(TestSuiteMixin) {
       _.extend(this, TestSuiteMixin);
       this.injectDependencies('AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
                               'factory');
-      testDomainEntities.extend();
     });
   });
 
@@ -48,17 +47,6 @@ describe('AnnotationType', function() {
     expect(annotationType.valueType).toBeEmptyString();
     expect(annotationType.maxValueCount).toBeNull();
     expect(annotationType.options).toBeEmptyArray();
-  });
-
-  it('can be created from valid JSON', function () {
-    var self = this,
-        annotationTypeJson = self.factory.annotationType({
-          valueType: self.AnnotationValueType.SELECT,
-          options: ['opt1', 'opt2']
-        }),
-        annotationType = self.AnnotationType.create(annotationTypeJson);
-
-    annotationType.compareToJsonEntity(annotationTypeJson);
   });
 
   it('create fails for invalid JSON', function () {

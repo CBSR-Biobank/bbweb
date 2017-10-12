@@ -11,8 +11,7 @@ describe('Study', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite,
-                                 ServerReplyMixin,
-                                 testDomainEntities) {
+                                 ServerReplyMixin) {
       _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
@@ -24,7 +23,6 @@ describe('Study', function() {
 
       this.testUtils.addCustomMatchers();
       this.jsonStudy = this.factory.study();
-      testDomainEntities.extend();
 
       // used by promise tests
       this.expectStudy = (entity) => {
@@ -125,7 +123,6 @@ describe('Study', function() {
           testStudy = (pagedResult) => {
             expect(pagedResult.items).toBeArrayOfSize(1);
             expect(pagedResult.items[0]).toEqual(jasmine.any(this.Study));
-            pagedResult.items[0].compareToJsonEntity(studies[0]);
           };
 
       this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));

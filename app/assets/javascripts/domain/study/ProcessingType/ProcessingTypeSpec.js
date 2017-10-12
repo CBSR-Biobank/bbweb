@@ -19,13 +19,11 @@ xdescribe('ProcessingType', function() {
     angular.mock.inject(function($httpBackend,
                                  _ProcessingType_,
                                  _factory_,
-                                 ServerReplyMixin,
-                                 testDomainEntities) {
+                                 ServerReplyMixin) {
       _.extend(this, ServerReplyMixin.prototype);
     httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
       factory        = _factory_;
-      testDomainEntities.extend();
     });
   });
 
@@ -84,61 +82,20 @@ xdescribe('ProcessingType', function() {
       .toEqual(new Error('invalid object from server: must be a map, has the correct keys'));
   });
 
-  it('has valid values when creating from server response', function() {
-    var entities = createEntities();
-    entities.processingType = ProcessingType.create(entities.serverPt);
-    entities.processingType.compareToJsonEntity(entities.serverPt);
+  it('can retrieve a processing type', function() {
+    fail('needs implementation');
   });
 
-  it('can retrieve a processing type', function(done) {
-    var entities = createEntities();
-    httpBackend.whenGET(uri(entities.study.id) + '?procTypeId=' + entities.serverPt.id)
-      .respond(this.reply(entities.serverPt));
-
-    ProcessingType.get(entities.study.id, entities.serverPt.id).then(function(pt) {
-      pt.compareToJsonEntity(entities.serverPt);
-      done();
-    });
-    httpBackend.flush();
-  });
-
-  it('can list processing types', function(done) {
-    var entities = createEntities();
-    httpBackend.whenGET(uri(entities.study.id)).respond(this.reply([ entities.serverPt ]));
-    ProcessingType.list(entities.study.id).then(function(list) {
-      list.forEach((pt) => {
-        pt.compareToJsonEntity(entities.serverPt);
-      });
-      done();
-    });
-    httpBackend.flush();
+  it('can list processing types', function() {
+    fail('needs implementation');
   });
 
   it('can add a processing type', function() {
-    var entities = createEntities({ noPtId: true }),
-        cmd = processingTypeToAddCommand(entities.processingType);
-
-    httpBackend.expectPOST(uri(entities.study.id), cmd)
-      .respond(this.reply(entities.serverPt));
-
-    entities.processingType.addOrUpdate().then(function(pt) {
-      pt.compareToJsonEntity(entities.serverPt);
-    });
-    httpBackend.flush();
+    fail('needs implementation');
   });
 
-  it('can update a processing type', function(done) {
-    var entities = createEntities();
-
-    var cmd = processingTypeToUpdateCommand(entities.processingType);
-    httpBackend.expectPUT(uri(entities.study.id, entities.processingType.id), cmd)
-      .respond(this.reply(entities.serverPt));
-
-    entities.processingType.addOrUpdate().then(function(pt) {
-      pt.compareToJsonEntity(entities.serverPt);
-      done();
-    });
-    httpBackend.flush();
+  it('can update a processing type', function() {
+    fail('needs implementation');
   });
 
   it('should remove a processing type', function() {

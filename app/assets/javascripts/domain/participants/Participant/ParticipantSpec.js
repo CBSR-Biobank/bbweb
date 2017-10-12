@@ -15,8 +15,7 @@ describe('Participant', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin,
-                                 AnnotationsEntityTestSuiteMixin,
-                                 testDomainEntities) {
+                                 AnnotationsEntityTestSuiteMixin) {
       _.extend(this,
                EntityTestSuite.prototype,
                ServerReplyMixin.prototype,
@@ -40,8 +39,6 @@ describe('Participant', function() {
                               'testUtils');
 
       this.testUtils.addCustomMatchers();
-
-      testDomainEntities.extend();
 
       this.getParticipantEntities = (isNew) => {
         var jsonAnnotationTypes = this.factory.allAnnotationTypes(),
@@ -128,7 +125,6 @@ describe('Participant', function() {
           annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
 
       self.validateAnnotationClass(annotationType, annotation);
-      annotation.compareToJsonEntity(jsonAnnotation);
       expect(annotation.required).toBe(annotationType.required);
     });
   });
@@ -200,15 +196,6 @@ describe('Participant', function() {
       }).toThrowError(/bad annotation type/);
     });
 
-    it('has valid values when creating from a server response', function() {
-      var study = this.factory.study(),
-          jsonParticipant = this.factory.participant(study);
-
-      // TODO: add annotations to the server response
-      var participant = this.Participant.create(jsonParticipant);
-      participant.compareToJsonEntity(jsonParticipant);
-    });
-
     it('fails when creating async from an object with invalid keys', function() {
       var serverObj = { tmp: 1 },
           catchTriggered = false;
@@ -233,7 +220,6 @@ describe('Participant', function() {
 
     this.Participant.get(study.id, participant.id).then((reply) => {
       expect(reply).toEqual(jasmine.any(this.Participant));
-      reply.compareToJsonEntity(participant);
     });
     this.$httpBackend.flush();
   });
@@ -247,7 +233,6 @@ describe('Participant', function() {
 
     this.Participant.getByUniqueId(study.id, participant.uniqueId).then((reply) => {
       expect(reply).toEqual(jasmine.any(this.Participant));
-      reply.compareToJsonEntity(participant);
     });
     this.$httpBackend.flush();
   });

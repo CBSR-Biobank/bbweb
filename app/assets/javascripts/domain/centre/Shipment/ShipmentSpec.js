@@ -15,7 +15,7 @@ describe('Shipment domain object:', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function (ServerReplyMixin, EntityTestSuite, testDomainEntities) {
+    angular.mock.inject(function (ServerReplyMixin, EntityTestSuite) {
       _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
@@ -27,9 +27,6 @@ describe('Shipment domain object:', function() {
                               'funutils',
                               'testUtils',
                               'factory');
-
-      testDomainEntities.extend();
-
       // used by promise tests
       this.expectShipment = (entity) => {
         expect(entity).toEqual(jasmine.any(this.Shipment));
@@ -103,7 +100,6 @@ describe('Shipment domain object:', function() {
       var shipment = this.factory.shipment(),
           checkReply = (reply) => {
             expect(reply).toEqual(jasmine.any(this.Shipment));
-            reply.compareToJsonEntity(shipment);
           };
 
       this.$httpBackend.whenGET(this.url(shipment.id)).respond(this.reply(shipment));
@@ -153,7 +149,6 @@ describe('Shipment domain object:', function() {
             expect(pagedResult.items).toBeArrayOfSize(shipments.length);
             pagedResult.items.forEach((item) => {
               expect(item).toEqual(jasmine.any(this.Shipment));
-              item.compareToJsonEntity(shipment);
             });
           };
 

@@ -14,8 +14,7 @@ describe('CentreName', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite,
-                                 ServerReplyMixin,
-                                 testDomainEntities) {
+                                 ServerReplyMixin) {
       _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
@@ -24,9 +23,6 @@ describe('CentreName', function() {
                               'CentreName',
                               'CentreState',
                               'factory');
-
-      testDomainEntities.extend();
-
       // used by promise tests
       this.expectCentre = (entity) => {
         expect(entity).toEqual(jasmine.any(this.CentreName));

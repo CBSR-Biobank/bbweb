@@ -12,8 +12,7 @@ describe('StudyName', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite,
-                                 ServerReplyMixin,
-                                 testDomainEntities) {
+                                 ServerReplyMixin) {
       _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
@@ -25,7 +24,6 @@ describe('StudyName', function() {
 
       //this.testUtils.addCustomMatchers();
       this.jsonStudyName = this.factory.studyNameDto();
-      testDomainEntities.extend();
 
       // used by promise tests
       this.expectStudy = (entity) => {

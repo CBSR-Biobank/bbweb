@@ -16,8 +16,7 @@ describe('CollectionEvent', function() {
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin,
                                  AnnotationsEntityTestSuiteMixin,
-                                 testUtils,
-                                 testDomainEntities) {
+                                 testUtils) {
       _.extend(this,
                EntityTestSuite.prototype,
                ServerReplyMixin.prototype,
@@ -40,7 +39,6 @@ describe('CollectionEvent', function() {
 
       this.jsonStudy = this.factory.study();
       this.jsonCet = this.factory.collectionEventType();
-      testDomainEntities.extend();
 
       this.getCollectionEventEntities = (isNew) => {
         var jsonAnnotationTypes = this.factory.allAnnotationTypes(),
@@ -133,7 +131,6 @@ describe('CollectionEvent', function() {
       var annotation = _.find(collectionEvent.annotations, { annotationTypeId: annotationType.id }),
           jsonAnnotation = _.find(jsonAnnotations, { annotationTypeId: annotationType.id});
       this.validateAnnotationClass(annotationType, annotation);
-      annotation.compareToJsonEntity(jsonAnnotation);
       expect(annotation.required).toBe(annotationType.required);
     });
   });
@@ -223,15 +220,6 @@ describe('CollectionEvent', function() {
         .toThrowError(/invalid annotation from server/);
     });
 
-    it('has valid values when creating from a server response', function() {
-      var annotationData  = this.jsonAnnotationData(),
-          annotationTypes = _.map(annotationData, 'annotationType'),
-          jsonCet         = this.factory.collectionEventType({ annotationTypes: annotationTypes }),
-          jsonCevent      = this.factory.collectionEvent({ collectionEventType: jsonCet }),
-          collectionEvent = this.CollectionEvent.create(jsonCevent);
-      collectionEvent.compareToJsonEntity(jsonCevent);
-    });
-
     it('fails when creating async from an object with invalid keys', function() {
       var serverObj = { tmp: 1 },
           catchTriggered = false;
@@ -274,7 +262,6 @@ describe('CollectionEvent', function() {
 
       this.CollectionEvent.get(this.collectionEvent.id).then((reply) => {
         expect(reply).toEqual(jasmine.any(this.CollectionEvent));
-        reply.compareToJsonEntity(this.collectionEvent);
       });
       this.$httpBackend.flush();
     });
@@ -317,7 +304,6 @@ describe('CollectionEvent', function() {
           expect(obj).toEqual(jasmine.any(this.CollectionEvent));
           serverEntity = _.find(collectionEvents, { id: obj.id });
           expect(serverEntity).toBeDefined();
-          obj.compareToJsonEntity(serverEntity);
         });
       });
       this.$httpBackend.flush();
@@ -384,7 +370,6 @@ describe('CollectionEvent', function() {
                                             entities.annotationTypes)
         .then((reply) => {
           expect(reply).toEqual(jasmine.any(this.CollectionEvent));
-          reply.compareToJsonEntity(jsonCevent);
         });
       this.$httpBackend.flush();
     });

@@ -10,8 +10,7 @@ describe('EntitySet', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite,
-                                 testDomainEntities) {
+    angular.mock.inject(function(EntityTestSuite) {
       _.extend(this, EntityTestSuite.prototype);
 
       this.injectDependencies('$rootScope',
@@ -20,7 +19,6 @@ describe('EntitySet', function() {
                               'testUtils');
 
       this.testUtils.addCustomMatchers();
-      testDomainEntities.extend();
 
       this.jsonObj = () => ({
         allEntities: false,

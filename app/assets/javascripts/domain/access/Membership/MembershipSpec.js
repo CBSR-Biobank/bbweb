@@ -83,7 +83,7 @@ describe('Membership', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(MebershipSpecCommon, ServerReplyMixin, testDomainEntities) {
+    angular.mock.inject(function(MebershipSpecCommon, ServerReplyMixin) {
       _.extend(this, new SuiteMixinFactory(MebershipSpecCommon).prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$rootScope',
@@ -96,7 +96,6 @@ describe('Membership', function() {
                               'testUtils');
 
       this.testUtils.addCustomMatchers();
-      testDomainEntities.extend();
 
       // used by promise tests
       this.expectMembership = (entity) => {

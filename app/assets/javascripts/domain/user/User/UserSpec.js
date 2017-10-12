@@ -10,15 +10,13 @@ describe('User', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite, ServerReplyMixin, testDomainEntities) {
+    angular.mock.inject(function(EntityTestSuite, ServerReplyMixin) {
       _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
                               'User',
                               'UserState',
                               'factory');
-
-      testDomainEntities.extend();
 
       // used by promise tests
       this.expectUser = (entity) => {
@@ -174,7 +172,6 @@ describe('User', function() {
     this.$httpBackend.whenGET(this.url(user.id)).respond(this.reply(user));
     this.User.get(user.id).then((reply) => {
       expect(reply).toEqual(jasmine.any(this.User));
-      reply.compareToJsonEntity(user);
     });
     this.$httpBackend.flush();
   });

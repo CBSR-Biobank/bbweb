@@ -10,7 +10,7 @@ describe('Centre', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function (ServerReplyMixin, EntityTestSuite, testDomainEntities) {
+    angular.mock.inject(function (ServerReplyMixin, EntityTestSuite) {
       _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
@@ -21,7 +21,6 @@ describe('Centre', function() {
                               'funutils',
                               'testUtils',
                               'factory');
-      testDomainEntities.extend();
 
       // used by promise tests
       this.expectCentre = (entity) => {
@@ -119,7 +118,6 @@ describe('Centre', function() {
     var centre = this.factory.centre(),
         checkReply= (reply) => {
           expect(reply).toEqual(jasmine.any(this.Centre));
-          reply.compareToJsonEntity(centre);
         };
 
     this.$httpBackend.whenGET(this.url(centre.id)).respond(this.reply(centre));
@@ -171,7 +169,6 @@ describe('Centre', function() {
           expect(pagedResult.items).toBeArrayOfSize(centres.length);
           pagedResult.items.forEach((item) => {
             expect(item).toEqual(jasmine.any(this.Centre));
-            item.compareToJsonEntity(centres[0]);
           });
         };
 

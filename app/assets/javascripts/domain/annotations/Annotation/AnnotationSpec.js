@@ -12,7 +12,7 @@ describe('Annotation', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite, testUtils, testDomainEntities) {
+    angular.mock.inject(function(EntityTestSuite, testUtils) {
       _.extend(this, EntityTestSuite.prototype);
       this.injectDependencies('Study',
                               'AnnotationType',
@@ -24,7 +24,6 @@ describe('Annotation', function() {
                               'factory');
 
       testUtils.addCustomMatchers();
-      testDomainEntities.extend();
 
       this.createAnnotationType = (options) => {
         options = options || {};
@@ -229,12 +228,6 @@ describe('Annotation', function() {
           };
       expect(function () { self.annotationFactory.create(jsonAnnotation, annotationType); })
         .toThrowError(/invalid annotation from server/);
-    });
-
-    it('has valid values when created from server response', function() {
-      this.getAnnotationAndTypeForAllValueTypes().forEach((entities) => {
-        entities.annotation.compareToJsonEntity(entities.serverAnnotation);
-      });
     });
 
   });

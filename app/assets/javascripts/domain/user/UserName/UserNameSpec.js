@@ -12,8 +12,7 @@ describe('UserName', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite,
-                                 ServerReplyMixin,
-                                 testDomainEntities) {
+                                 ServerReplyMixin) {
 
       _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
@@ -26,7 +25,6 @@ describe('UserName', function() {
 
       //this.testUtils.addCustomMatchers();
       this.jsonUserName = this.factory.userNameDto();
-      testDomainEntities.extend();
 
       this.expectUser = (entity) => {
         expect(entity).toEqual(jasmine.any(this.UserName));

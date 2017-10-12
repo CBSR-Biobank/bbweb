@@ -15,8 +15,7 @@ describe('Specimen', function() {
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin,
                                  AnnotationsEntityTestSuiteMixin,
-                                 testUtils,
-                                 testDomainEntities) {
+                                 testUtils) {
       _.extend(this,
                EntityTestSuite.prototype,
                ServerReplyMixin.prototype,
@@ -32,8 +31,6 @@ describe('Specimen', function() {
                               'testUtils');
 
       testUtils.addCustomMatchers();
-      testDomainEntities.extend();
-
       this.jsonSpecimen = this.factory.specimen();
 
       // used by promise tests
@@ -91,14 +88,6 @@ describe('Specimen', function() {
     }).toThrowError(/invalid object from server/);
   });
 
-  it('has valid values when creating from a server response', function() {
-    var jsonSpecimen = this.factory.specimen();
-
-    // TODO: add annotations to the server response
-    var specimen = this.Specimen.create(jsonSpecimen);
-    specimen.compareToJsonEntity(jsonSpecimen);
-  });
-
   it('fails when creating async from an object with invalid keys', function() {
     var serverObj = { tmp: 1 },
         catchTriggered = false;
@@ -120,7 +109,6 @@ describe('Specimen', function() {
 
       this.Specimen.get(jsonSpecimen.id).then((reply) => {
         expect(reply).toEqual(jasmine.any(this.Specimen));
-        reply.compareToJsonEntity(jsonSpecimen);
       });
       this.$httpBackend.flush();
     });
@@ -143,7 +131,6 @@ describe('Specimen', function() {
 
       this.Specimen.getByInventoryId(jsonSpecimen.inventoryId).then((reply) => {
         expect(reply).toEqual(jasmine.any(this.Specimen));
-        reply.compareToJsonEntity(jsonSpecimen);
       });
       this.$httpBackend.flush();
     });

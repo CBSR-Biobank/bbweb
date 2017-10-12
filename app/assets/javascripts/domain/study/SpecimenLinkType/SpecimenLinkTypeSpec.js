@@ -17,14 +17,13 @@ xdescribe('SpecimenLinkType', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(ServerReplyMixin, testUtils, testDomainEntities) {
+    angular.mock.inject(function(ServerReplyMixin, testUtils) {
       _.extend(this, ServerReplyMixin.prototype);
       httpBackend      = this.$injector.get('$httpBackend');
       funutils         = this.$injector.get('funutils');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
       factory          = this.$injector.get('factory');
       testUtils.addCustomMatchers();
-      testDomainEntities.extend();
     });
   });
 
@@ -103,62 +102,16 @@ xdescribe('SpecimenLinkType', function() {
       .toEqual(new Error('invalid object from server: bad annotation type data'));
   });
 
-  it('has valid values when creating from server response', function() {
-    var entities = entitiesWithLinkedSpecimenLinkType();
-    entities.slt.compareToJsonEntity(entities.sltFromServer);
+  it('can retrieve a specimen link type', function() {
+    fail('needs implementation');
   });
 
-  it('can retrieve a specimen link type', function(done) {
-    var entities = entitiesWithLinkedSpecimenLinkType();
-
-    httpBackend.whenGET('/studies/' +
-                        entities.processingType.id +
-                        '/sltypes?slTypeId=' +
-                        entities.sltFromServer.id)
-      .respond(this.reply(entities.sltFromServer));
-
-    SpecimenLinkType.get(entities.processingType.id, entities.sltFromServer.id).then(function(slt) {
-      slt.compareToJsonEntity(entities.sltFromServer);
-      done();
-    });
-    httpBackend.flush();
-  });
-
-  it('can list specimen link types', function(done) {
-    var entities = entitiesWithLinkedSpecimenLinkType();
-
-    httpBackend.whenGET('/studies/' + entities.processingType.id + '/sltypes')
-      .respond(this.reply([ entities.sltFromServer ]));
-
-    SpecimenLinkType.list(entities.processingType.id).then(function(list) {
-      list.forEach((slt) => {
-        slt.compareToJsonEntity(entities.sltFromServer);
-      });
-      done();
-    });
-    httpBackend.flush();
+  it('can list specimen link types', function() {
+    fail('needs implementation');
   });
 
   it('can add a specimen link type', function() {
-    var entities = createEntities(), slt, cmd;
-
-    entities.sltFromServer = factory.specimenLinkType(
-      entities.processingType, {
-        inputGroup: entities.specimenGroups[0],
-        outputGroup: entities.specimenGroups[1],
-        annotationTypes: entities.annotationTypes
-      });
-
-    slt = new SpecimenLinkType(_.omit(entities.sltFromServer, 'id'));
-    cmd = sltToAddCommand(slt);
-
-    httpBackend.expectPOST('/studies/' + entities.processingType.id + '/sltypes', cmd)
-      .respond(this.reply(entities.sltFromServer));
-
-    slt.addOrUpdate().then(function(reply) {
-      reply.compareToJsonEntity(entities.sltFromServer);
-    });
-    httpBackend.flush();
+    fail('needs implementation');
   });
 
   it('can update a specimen link type without annotation types', function() {
@@ -280,16 +233,7 @@ xdescribe('SpecimenLinkType', function() {
   }
 
   function updateSltSharedBehaviour(slt, sltFromServer, processingTypeId) {
-    /*jshint validthis:true */
-    var cmd = sltToUpdateCommand(slt);
-
-    httpBackend.expectPUT('/studies/' + processingTypeId + '/sltypes/' + slt.id, cmd)
-      .respond(this.reply(sltFromServer));
-
-    slt.addOrUpdate().then(function(reply) {
-      reply.compareToJsonEntity(sltFromServer);
-    });
-    httpBackend.flush();
+    fail('needs implementation');
   }
 
 });

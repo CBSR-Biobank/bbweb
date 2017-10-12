@@ -21,14 +21,12 @@ xdescribe('SpecimenGroup', function() {
                                  _funutils_,
                                  _SpecimenGroup_,
                                  _factory_,
-                                 ServerReplyMixin,
-                                 testDomainEntities) {
+                                 ServerReplyMixin) {
       _.extend(this, ServerReplyMixin.prototype);
       httpBackend   = $httpBackend;
       funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;
       factory       = _factory_;
-      testDomainEntities.extend();
     });
   });
 
@@ -91,60 +89,20 @@ xdescribe('SpecimenGroup', function() {
       .toEqual(new Error('invalid object from server: must be a map, has the correct keys'));
   });
 
-  it('has valid values when creating from server response', function() {
-    var entities = createEntities();
-    entities.specimenGroup = SpecimenGroup.create(entities.serverSg);
-    entities.specimenGroup.compareToJsonEntity(entities.serverSg);
+  it('can retrieve a specimen group', function() {
+    fail('needs implementation');
   });
 
-  it('can retrieve a specimen group', function(done) {
-    var entities = createEntities();
-    httpBackend.whenGET(uri(entities.study.id) + '?sgId=' + entities.serverSg.id)
-      .respond(this.reply(entities.serverSg));
-
-    SpecimenGroup.get(entities.study.id, entities.serverSg.id).then(function(sg) {
-      sg.compareToJsonEntity(entities.serverSg);
-      done();
-    });
-    httpBackend.flush();
-  });
-
-  it('can list specimen groups', function(done) {
-    var entities = createEntities();
-    httpBackend.whenGET(uri(entities.study.id)).respond(this.reply([ entities.serverSg ]));
-    SpecimenGroup.list(entities.study.id).then(function(list) {
-      list.forEach((sg) => {
-        sg.compareToJsonEntity(entities.serverSg);
-      });
-      done();
-    });
-    httpBackend.flush();
+  it('can list specimen groups', function() {
+    fail('needs implementation');
   });
 
   it('can add a specimen group', function() {
-    var entities = createEntities({ noSgId: true }),
-        cmd = specimenGroupToAddCommand(entities.specimenGroup);
-
-    httpBackend.expectPOST(uri(entities.study.id), cmd)
-      .respond(this.reply(entities.serverSg));
-
-    entities.specimenGroup.addOrUpdate().then(function(sg) {
-      sg.compareToJsonEntity(entities.serverSg);
-    });
-    httpBackend.flush();
+    fail('needs implementation');
   });
 
   it('can update a specimen group', function() {
-    var entities = createEntities();
-
-    var cmd = specimenGroupToUpdateCommand(entities.specimenGroup);
-    httpBackend.expectPUT(uri(entities.study.id, entities.specimenGroup.id), cmd)
-      .respond(this.reply(entities.serverSg));
-
-    entities.specimenGroup.addOrUpdate().then(function(sg) {
-      sg.compareToJsonEntity(entities.serverSg);
-    });
-    httpBackend.flush();
+    fail('needs implementation');
   });
 
   it('should remove a specimen group', function() {

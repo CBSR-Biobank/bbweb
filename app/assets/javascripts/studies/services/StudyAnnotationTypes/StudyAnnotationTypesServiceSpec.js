@@ -23,7 +23,6 @@ xdescribe('service: studyAnnotationTypesService', function () {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function ($httpBackend,
                                   factory,
-                                  testDomainEntities,
                                   CollectionEventAnnotationType,
                                   ceventAnnotationTypesService) {
       context.httpBackend                 = $httpBackend;
@@ -34,7 +33,6 @@ xdescribe('service: studyAnnotationTypesService', function () {
 
       //context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: false });
       context.serverAnnotationType = factory.studyAnnotationType(context.study);
-      testDomainEntities.extend();
     });
 
   });
@@ -53,7 +51,6 @@ xdescribe('service: spcLinkAnnotationTypesService', function () {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function ($httpBackend,
                                   factory,
-                                  testDomainEntities,
                                   SpecimenLinkAnnotationType,
                                   spcLinkAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
@@ -64,7 +61,6 @@ xdescribe('service: spcLinkAnnotationTypesService', function () {
 
       //context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: false });
       context.serverAnnotationType = factory.studyAnnotationType(context.study);
-      testDomainEntities.extend();
     });
   });
 
@@ -82,7 +78,6 @@ xdescribe('service: participantAnnotationTypesService', function () {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function ($httpBackend,
                                   factory,
-                                  testDomainEntities,
                                   ParticipantAnnotationType,
                                   participantAnnotationTypesService) {
       context.httpBackend            = $httpBackend;
@@ -92,7 +87,6 @@ xdescribe('service: participantAnnotationTypesService', function () {
       context.annotationTypeUriPart       = 'pannottypes';
 
       context.serverAnnotationType = factory.studyAnnotationType(context.study, { required: true });
-      testDomainEntities.extend();
     });
   });
 

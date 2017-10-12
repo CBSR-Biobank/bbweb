@@ -14,8 +14,8 @@ describe('CollectionEventType', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(EntityTestSuite, ServerReplyMixin, testDomainEntities) {
-      _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype, testDomainEntities.prototype);
+    angular.mock.inject(function(EntityTestSuite, ServerReplyMixin) {
+      _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',
@@ -28,7 +28,6 @@ describe('CollectionEventType', function() {
       this.jsonStudy = this.factory.defaultStudy();
 
       this.testUtils.addCustomMatchers();
-      testDomainEntities.extend();
       CollectionEventType = this.CollectionEventType;
 
       // used by promise tests
@@ -114,12 +113,6 @@ describe('CollectionEventType', function() {
 
     expect(() => { CollectionEventType.create(badJsonCet); })
       .toThrowError(/annotationTypes.*Missing required property/);
-  });
-
-  it('has valid values when creating from server response', function() {
-    var jsonCet = this.factory.collectionEventType(this.jsonStudy),
-        ceventType = CollectionEventType.create(jsonCet);
-    ceventType.compareToJsonEntity(jsonCet);
   });
 
   it('can retrieve a collection event type', function() {
