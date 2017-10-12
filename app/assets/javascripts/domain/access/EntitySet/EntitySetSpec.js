@@ -11,7 +11,7 @@ describe('EntitySet', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite) {
-      _.extend(this, EntityTestSuite.prototype);
+      _.extend(this, EntityTestSuite);
 
       this.injectDependencies('$rootScope',
                               'EntitySet',

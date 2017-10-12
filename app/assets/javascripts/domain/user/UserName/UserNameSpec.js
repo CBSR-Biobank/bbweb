@@ -14,7 +14,7 @@ describe('UserName', function() {
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin) {
 
-      _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
+      _.extend(this, EntityTestSuite, ServerReplyMixin.prototype);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
@@ -36,7 +36,7 @@ describe('UserName', function() {
 
       function url() {
         const args = [ 'users/names' ].concat(_.toArray(arguments));
-        return EntityTestSuite.prototype.url.apply(null, args);
+        return EntityTestSuite.url.apply(null, args);
       }
     });
   });

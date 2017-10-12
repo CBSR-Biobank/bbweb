@@ -12,7 +12,7 @@ describe('Study', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin) {
-      _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
+      _.extend(this, EntityTestSuite, ServerReplyMixin.prototype);
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
                               'Study',
@@ -35,7 +35,7 @@ describe('Study', function() {
 
       function url() {
         const args = [ 'studies' ].concat(_.toArray(arguments));
-        return EntityTestSuite.prototype.url.apply(null, args);
+        return EntityTestSuite.url.apply(null, args);
       }
     });
   });

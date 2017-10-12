@@ -18,7 +18,7 @@ describe('CollectionEvent', function() {
                                  AnnotationsEntityTestSuiteMixin,
                                  TestUtils) {
       _.extend(this,
-               EntityTestSuite.prototype,
+               EntityTestSuite,
                ServerReplyMixin.prototype,
                AnnotationsEntityTestSuiteMixin.prototype);
 
@@ -78,7 +78,7 @@ describe('CollectionEvent', function() {
 
       function url() {
         const args = [ 'participants/cevents' ].concat(_.toArray(arguments));
-        return EntityTestSuite.prototype.url.apply(null, args);
+        return EntityTestSuite.url.apply(null, args);
       }
     });
   });

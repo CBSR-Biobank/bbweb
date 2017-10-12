@@ -17,7 +17,7 @@ describe('Participant', function() {
                                  ServerReplyMixin,
                                  AnnotationsEntityTestSuiteMixin) {
       _.extend(this,
-               EntityTestSuite.prototype,
+               EntityTestSuite,
                ServerReplyMixin.prototype,
                AnnotationsEntityTestSuiteMixin.prototype);
 

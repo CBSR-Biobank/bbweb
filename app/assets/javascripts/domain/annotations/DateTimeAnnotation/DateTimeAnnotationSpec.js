@@ -18,7 +18,7 @@ describe('DateTimeAnnotation', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite) {
-      _.extend(this, EntityTestSuite.prototype);
+      _.extend(this, EntityTestSuite);
       this.injectDependencies('DateTimeAnnotation',
                               'AnnotationType',
                               'AnnotationValueType',

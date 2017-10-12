@@ -17,7 +17,7 @@ define(function (require) {
       EntityTestSuite.call(this);
     }
 
-    MebershipSpecCommon.prototype = Object.create(EntityTestSuite.prototype);
+    MebershipSpecCommon.prototype = Object.create(EntityTestSuite);
     MebershipSpecCommon.prototype.constructor = MebershipSpecCommon;
 
     MebershipSpecCommon.prototype.jsonObj = function () {

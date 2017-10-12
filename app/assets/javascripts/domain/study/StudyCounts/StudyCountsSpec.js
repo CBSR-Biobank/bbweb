@@ -15,7 +15,7 @@ describe('StudyCounts', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(EntityTestSuite,
                                  ServerReplyMixin) {
-      _.extend(this, EntityTestSuite.prototype, ServerReplyMixin.prototype);
+      _.extend(this, EntityTestSuite, ServerReplyMixin.prototype);
       this.injectDependencies('StudyCounts', '$httpBackend');
     });
   });
