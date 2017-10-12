@@ -5,7 +5,7 @@
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 
-import sharedSpec from '../../../test/studyAnnotationTypeSharedSpec';
+import sharedSpec from '../../../test/behaviours/studyAnnotationTypeSharedSpec';
 
 xdescribe('SpecimenLinkAnnotationType', function() {
 

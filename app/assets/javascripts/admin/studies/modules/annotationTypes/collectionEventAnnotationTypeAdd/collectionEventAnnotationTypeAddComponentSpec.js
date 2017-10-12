@@ -4,7 +4,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import annotationTypeAddComponentSharedSpec from '../../../../../test/annotationTypeAddComponentSharedSpec';
+import annotationTypeAddComponentSharedSpec from '../../../../../test/behaviours/annotationTypeAddComponentSharedSpec.js';
 
 describe('Component: collectionEventAnnotationTypeAdd', function() {
 

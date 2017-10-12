@@ -5,7 +5,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import sharedBehaviour from '../../../test/shipmentSpecimensControllerSharedBehaviour';
+import sharedBehaviour from '../../../test/behaviours/shipmentSpecimensControllerSharedBehaviour';
 
 describe('shipmentSpecimensViewComponent', function() {
 

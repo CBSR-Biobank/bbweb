@@ -5,7 +5,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import sharedBehaviour from '../../../test/entityNameSharedBehaviour';
+import sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour';
 
 describe('UserName', function() {
 

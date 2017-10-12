@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import faker  from 'faker';
-import sharedBehaviour from '../../../test/annotationUpdateSharedBehaviour';
+import sharedBehaviour from '../../../test/behaviours/annotationUpdateSharedBehaviour';
 
 describe('Component: ceventView', function() {
 

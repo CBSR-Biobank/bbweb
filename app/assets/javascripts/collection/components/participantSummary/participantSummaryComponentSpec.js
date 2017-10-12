@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import annotationUpdateSharedBehaviour from '../../../test/annotationUpdateSharedBehaviour';
+import annotationUpdateSharedBehaviour from '../../../test/behaviours/annotationUpdateSharedBehaviour';
 import faker  from 'faker';
 
 describe('Component: participantSummary', function() {

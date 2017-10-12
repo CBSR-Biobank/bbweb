@@ -4,7 +4,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import sharedSpec from '../../../../../test/annotationTypeAddComponentSharedSpec';
+import sharedSpec from '../../../../../test/behaviours/annotationTypeAddComponentSharedSpec';
 
 describe('Component: participantAnnotationTypeAdd', function() {
 

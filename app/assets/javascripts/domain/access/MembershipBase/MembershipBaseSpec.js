@@ -5,7 +5,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import membershipCommonBehaviour from '../../../test/membershipCommonBehaviourSpec';
+import membershipCommonBehaviour from '../../../test/behaviours/membershipCommonBehaviourSpec';
 
 describe('MembershipBase', function() {
 

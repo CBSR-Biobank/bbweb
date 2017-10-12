@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import filtersSharedBehaviour from '../../../test/filtersSharedBehaviour';
+import filtersSharedBehaviour from '../../../test/behaviours/filtersSharedBehaviour';
 
 describe('Component: nameFilter', function() {
 

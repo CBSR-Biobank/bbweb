@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import faker from 'faker';
-import sharedBehaviour from '../../../../test/locationUpdateSharedBehaviourSpec';
+import sharedBehaviour from '../../../../test/behaviours/locationUpdateSharedBehaviourSpec';
 
 describe('Component: centreLocationView', function() {
 

@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import annotationsSharedSpec from '../../../test/entityWithAnnotationsSharedSpec';
+import annotationsSharedSpec from '../../../test/behaviours/entityWithAnnotationsSharedSpec';
 
 describe('Participant', function() {
 
