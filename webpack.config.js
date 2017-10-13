@@ -22,7 +22,10 @@ const config = {
         enforce: 'pre',
         test: /\.js$/,
         exclude: /node_modules/,
-        loader: 'eslint-loader'
+        loader: 'eslint-loader',
+        options: {
+          formatter: require('eslint/lib/formatters/unix')
+        }
       },
       {
         test: /\.js$/,
