@@ -37,13 +37,16 @@ class Controller extends PagedListController {
           },
           5);
 
-    this.User                  = User;
-    this.UserState             = UserState;
-    this.userStateLabelService = userStateLabelService;
-    this.UserCounts            = UserCounts;
-    this.EmailFilter           = EmailFilter;
-    this.NameFilter            = NameFilter;
-    this.StateFilter           = StateFilter;
+    Object.assign(this,
+                  {
+                    User,
+                    UserState,
+                    userStateLabelService,
+                    UserCounts,
+                    EmailFilter,
+                    NameFilter,
+                    StateFilter
+                  });
 
     this.stateLabelFuncs = {};
     _.values(UserState).forEach((state) => {

@@ -20,18 +20,21 @@ class MembershipViewController {
               CentreName) {
     'ngInject';
 
-    this.$state = $state;
-    this.notificationsService = notificationsService;
-    this.domainNotificationService = domainNotificationService;
-    this.gettextCatalog = gettextCatalog;
-    this.breadcrumbService = breadcrumbService;
-    this.usersService = usersService;
-    this.modalInput = modalInput;
-    this.asyncInputModal = asyncInputModal;
-    this.EntityInfo = EntityInfo;
-    this.UserName = UserName;
-    this.StudyName = StudyName;
-    this.CentreName = CentreName;
+    Object.assign(this,
+                  {
+                    $state,
+                    notificationsService,
+                    domainNotificationService,
+                    gettextCatalog,
+                    breadcrumbService,
+                    usersService,
+                    modalInput,
+                    asyncInputModal,
+                    EntityInfo,
+                    UserName,
+                    StudyName,
+                    CentreName
+                  });
 
     this.onUserLabelSelected   = this.userLabelSelected.bind(this);
     this.onStudyLabelSelected  = this.studyLabelSelected.bind(this);
@@ -52,10 +55,10 @@ class MembershipViewController {
     ];
 
     this.noStudiesMembership = (!this.membership.studyData.allEntities &&
-                              (this.membership.studyData.entityData.length <= 0));
+                                (this.membership.studyData.entityData.length <= 0));
 
     this.noCentresMembership = (!this.membership.centreData.allEntities &&
-                              (this.membership.centreData.entityData.length <= 0));
+                                (this.membership.centreData.entityData.length <= 0));
 
     this.userNameLabels   = this.userNamesToLabels();
     this.studyNameLabels  = this.studyNamesToLabels();
@@ -88,10 +91,10 @@ class MembershipViewController {
       promiseFn,
       this.gettextCatalog.getString('Remove membership'),
       this.gettextCatalog.getString('Are you sure you want to remove the membership named <b>{{name}}</b>?',
-                               { name: this.membership.name }),
+                                    { name: this.membership.name }),
       this.gettextCatalog.getString('Remove failed'),
       this.gettextCatalog.getString('Membership with name {{name}} cannot be removed',
-                               { name: this.membership.name }));
+                                    { name: this.membership.name }));
 
     function promiseFn() {
       return this.membership.remove().then(() => {
@@ -115,23 +118,23 @@ class MembershipViewController {
                          this.membership.name,
                          { required: true, minLength: 2 }).result
       .then((name) => {
-          this.membership.updateName(name)
-            .then(this.postUpdate(this.gettextCatalog.getString('Name changed successfully.'),
-                                  this.gettextCatalog.getString('Change successful')))
-            .catch(this.notificationsService.updateError);
+        this.membership.updateName(name)
+          .then(this.postUpdate(this.gettextCatalog.getString('Name changed successfully.'),
+                                this.gettextCatalog.getString('Change successful')))
+          .catch(this.notificationsService.updateError);
       })
       .catch(angular.noop);
   }
 
   editDescription() {
     this.modalInput.textArea(this.gettextCatalog.getString('Membership description'),
-                        this.gettextCatalog.getString('Description'),
-                        this.membership.description).result
+                             this.gettextCatalog.getString('Description'),
+                             this.membership.description).result
       .then((description) => {
-          this.membership.updateDescription(description)
-            .then(this.postUpdate(this.gettextCatalog.getString('Description changed successfully.'),
-                                  this.gettextCatalog.getString('Change successful')))
-            .catch(this.notificationsService.updateError);
+        this.membership.updateDescription(description)
+          .then(this.postUpdate(this.gettextCatalog.getString('Description changed successfully.'),
+                                this.gettextCatalog.getString('Change successful')))
+          .catch(this.notificationsService.updateError);
       })
       .catch(angular.noop);
   }

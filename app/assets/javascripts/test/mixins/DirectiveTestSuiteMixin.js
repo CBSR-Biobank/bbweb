@@ -3,8 +3,6 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash';
-
 /**
  * This is a mixin that can be added UserContext object of a Jasmine test suite.
  *
@@ -13,11 +11,7 @@ import _ from 'lodash';
 /* @ngInject */
 export default function DirectiveTestSuiteMixin(ComponentTestSuiteMixin) {
 
-  return _.extend({},
-                  ComponentTestSuiteMixin,
-                  {
-                    createController: createController
-                  });
+  return Object.assign({}, ComponentTestSuiteMixin, { createController: createController });
 
   function createController(htmlElement, scopeVars) {
     ComponentTestSuiteMixin.createController.call(this, htmlElement, scopeVars, undefined);

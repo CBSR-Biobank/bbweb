@@ -15,11 +15,13 @@ class ShipmentsTableController {
               timeService) {
     'ngInject';
 
-    this.$state = $state;
-    this.Shipment = Shipment;
-    this.ShipmentState = ShipmentState;
-    this.SHIPMENT_TYPES = SHIPMENT_TYPES;
-    this.timeService = timeService;
+    Object.assign(this, {
+      $state,
+      Shipment,
+      ShipmentState,
+      SHIPMENT_TYPES,
+      timeService
+    });
 
     this.onGetTableData = this.getTableData.bind(this);
   }

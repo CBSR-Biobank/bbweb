@@ -2,6 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
+
 import _ from 'lodash';
 
 /**
@@ -12,11 +13,7 @@ import _ from 'lodash';
 /* @ngInject */
 export default function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
 
-  return _.extend(
-    {
-      updateEntity: updateEntity
-    },
-    TestSuiteMixin);
+  return Object.assign({ updateEntity: updateEntity }, TestSuiteMixin);
 
   /**
    * Used to test updating an attribute on an entity.
@@ -59,7 +56,7 @@ export default function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
 
     appendExpectedVersion = _.isBoolean(appendExpectedVersion) ? appendExpectedVersion : true;
     if (appendExpectedVersion) {
-      _.extend(reqJson, { expectedVersion: 0 });
+      Object.assign(reqJson, { expectedVersion: 0 });
     }
     $httpBackend.expectPOST(url, reqJson).respond(201, { status: 'success', data: reply });
 

@@ -3,20 +3,11 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-/*
- * Controller for this component.
- */
-class Controller {
-  constructor($controller) {
-    'ngInject';
-    $controller('NameAndStateFiltersController', { vm: this });
-  }
-
-}
+import NameAndStateFiltersController from '../../controllers/NameAndStateFiltersController';
 
 const component = {
   template: require('./nameAndStateFilters.html'),
-  controller: Controller,
+  controller: NameAndStateFiltersController,
   controllerAs: 'vm',
   bindings: {
     stateData:            '<',

@@ -3,8 +3,6 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash';
-
 /**
  * A mixin for test suites for annotation domain entities.
  */
@@ -19,7 +17,7 @@ export default function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
                                                         MultipleSelectAnnotation,
                                                         Factory) {
 
-  return _.extend(
+  return Object.assign(
     {
       jsonAnnotationData: jsonAnnotationData,
       validateAnnotationClass: validateAnnotationClass

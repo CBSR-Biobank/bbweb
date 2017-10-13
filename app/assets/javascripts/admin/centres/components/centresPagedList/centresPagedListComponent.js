@@ -36,13 +36,16 @@ class Controller extends PagedListController {
           },
           5);
 
-    this.$q                      = $q;
-    this.Centre                  = Centre;
-    this.CentreState             = CentreState;
-    this.CentreCounts            = CentreCounts;
-    this.NameFilter              = NameFilter;
-    this.StateFilter             = StateFilter;
-    this.centreStateLabelService = centreStateLabelService;
+    Object.assign(this,
+                  {
+                    $q,
+                    Centre,
+                    CentreState,
+                    CentreCounts,
+                    NameFilter,
+                    StateFilter,
+                    centreStateLabelService
+                  });
 
     this.stateLabelFuncs = {};
     _.values(this.CentreState).forEach((state) => {

@@ -23,9 +23,12 @@ class Controller extends PagedListController {
           { nameFilter: new NameFilter() },
           5);
 
-    this.$scope = $scope;
-    this.Membership = Membership;
-    this.NameFilter = NameFilter;
+    Object.assign(this,
+                  {
+                    $scope,
+                    Membership,
+                    NameFilter
+                  });
   }
 
   $onInit() {

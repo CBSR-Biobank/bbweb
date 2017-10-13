@@ -36,12 +36,15 @@ class Controller extends PagedListController {
           },
           5);
 
-    this.Study                  = Study;
-    this.StudyState             = StudyState;
-    this.StudyCounts            = StudyCounts;
-    this.NameFilter             = NameFilter;
-    this.StateFilter            = StateFilter;
-    this.studyStateLabelService = studyStateLabelService;
+    Object.assign(this,
+                  {
+                    Study,
+                    StudyState,
+                    StudyCounts,
+                    NameFilter,
+                    StateFilter,
+                    studyStateLabelService
+                  });
 
     this.stateLabelFuncs = {};
     _.values(this.StudyState).forEach((state) => {

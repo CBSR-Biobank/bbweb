@@ -2,13 +2,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-import _ from 'lodash';
+
 import angular from 'angular';
 
 /* @ngInject */
 export default function ModalTestSuiteMixinFactory($rootScope, $animate, $document, TestSuiteMixin) {
 
-  return _.extend(
+  return Object.assign(
     {
       modalElementFind: modalElementFind,
       flush: flush,

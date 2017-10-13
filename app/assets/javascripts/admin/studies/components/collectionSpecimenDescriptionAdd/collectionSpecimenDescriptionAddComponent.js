@@ -20,14 +20,17 @@ class Controller {
               PreservationType,
               PreservationTemperatureType,
               SpecimenType) {
-    this.$state                      = $state;
-    this.gettextCatalog              = gettextCatalog;
-    this.domainNotificationService   = domainNotificationService;
-    this.notificationsService        = notificationsService;
-    this.AnatomicalSourceType        = AnatomicalSourceType;
-    this.PreservationType            = PreservationType;
-    this.PreservationTemperatureType = PreservationTemperatureType;
-    this.SpecimenType                = SpecimenType;
+    Object.assign(this,
+                  {
+                    $state,
+                    gettextCatalog,
+                    domainNotificationService,
+                    notificationsService,
+                    AnatomicalSourceType,
+                    PreservationType,
+                    PreservationTemperatureType,
+                    SpecimenType
+                  });
   }
 
   $onInit() {

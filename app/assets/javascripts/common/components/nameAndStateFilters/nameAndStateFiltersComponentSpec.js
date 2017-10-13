@@ -15,22 +15,21 @@ describe('nameAndStateFiltersComponent', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
-
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
+
       this.createController = (bindings) => {
-        var self = this,
-            defaultBindings = {},
+        var defaultBindings = {},
             actualBindings = {};
 
-        self.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
-        self.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
-        self.filtersCleared = jasmine.createSpy().and.returnValue(null);
+        this.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        this.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        this.filtersCleared = jasmine.createSpy().and.returnValue(null);
 
         defaultBindings = {
           stateData:            [ 'enabled', 'disbled' ],
-          onNameFilterUpdated:  self.nameFilterUpdated,
-          onStateFilterUpdated: self.stateFilterUpdated,
-          onFiltersCleared:     self.filtersCleared
+          onNameFilterUpdated:  this.nameFilterUpdated,
+          onStateFilterUpdated: this.stateFilterUpdated,
+          onFiltersCleared:     this.filtersCleared
         };
 
         _.extend(actualBindings, defaultBindings, bindings);

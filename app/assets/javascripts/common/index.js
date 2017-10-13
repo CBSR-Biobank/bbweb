@@ -13,6 +13,8 @@ import angular                from 'angular';
 import breadcrumbs            from './components/breadcrumbs/breadcrumbsComponent';
 import languageService        from './services/language/languageService';
 import nameAndStateFilters    from './components/nameAndStateFilters/nameAndStateFiltersComponent';
+import nameEmailStateFilters  from './components/nameEmailStateFilters/nameEmailStateFiltersComponent';
+import nameFilter             from './components/nameFilter/nameFilterComponent';
 import timeago                from './filters/timeagoFilter';
 
 const CommonModule = angular.module('biobank.common', [ ModalInputModule, AnnotationsInputModule ])
@@ -25,9 +27,9 @@ const CommonModule = angular.module('biobank.common', [ ModalInputModule, Annota
       .component('debouncedTextInput',      require('./components/debouncedTextInput/debouncedTextInputComponent'))
       .component('labelsInput',             require('./components/labelsInput/labelsInputComponent'))
       .component('labelsList',              require('./components/labelsList/labelsListComponent'))
-      .component('nameFilter',              require('./components/nameFilter/nameFilterComponent'))
+      .component('nameFilter',              nameFilter)
       .component('nameAndStateFilters',     nameAndStateFilters)
-      .component('nameEmailStateFilters',   require('./components/nameEmailStateFilters/nameEmailStateFiltersComponent'))
+      .component('nameEmailStateFilters',   nameEmailStateFilters)
       .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))
       .component('statusLine',              require('./components/statusLine/statusLineComponent'))
 

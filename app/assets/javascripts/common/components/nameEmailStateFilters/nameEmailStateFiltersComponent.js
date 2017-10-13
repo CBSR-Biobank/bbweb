@@ -2,53 +2,40 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  var component = {
-    template: require('./nameEmailStateFilters.html'),
-    controller: NameAndStateFiltersController,
-    controllerAs: 'vm',
-    bindings: {
-      stateData:            '<',
-      selectedState:        '@',
-      onNameFilterUpdated:  '&',
-      onEmailFilterUpdated: '&',
-      onStateFilterUpdated: '&',
-      onFiltersCleared:     '&'
-    }
-  };
+import NameAndStateFiltersController from '../../controllers/NameAndStateFiltersController';
 
-  NameAndStateFiltersController.$inject = ['$controller'];
+/*
+ * Controller for this component.
+ */
+class Controller extends NameAndStateFiltersController {
 
-  /*
-   * Controller for this component.
-   */
-  function NameAndStateFiltersController($controller) {
-    var vm = this;
-    vm.$onInit = onInit;
-
-    //--
-
-    function onInit() {
-      // initialize this controller's base class
-      $controller('NameAndStateFiltersController', { vm: vm });
-
-      vm.emailFilter = '';
-      vm.emailFilterUpdated = emailFilterUpdated;
-      vm.superClearFilters = vm.clearFilters;
-      vm.clearFilters = clearFilters;
-    }
-
-    function emailFilterUpdated() {
-      vm.onEmailFilterUpdated()(vm.emailFilter);
-    }
-
-    function clearFilters() {
-      vm.emailFilter = '';
-      vm.superClearFilters();
-    }
+  $onInit() {
+    this.emailFilter = '';
   }
 
-  return component;
-});
+  emailFilterUpdated() {
+    this.onEmailFilterUpdated()(this.emailFilter);
+  }
+
+  clearFilters() {
+    super.clearFilters();
+    this.emailFilter = '';
+  }
+}
+
+const component = {
+  template: require('./nameEmailStateFilters.html'),
+  controller: Controller,
+  controllerAs: 'vm',
+  bindings: {
+    stateData:            '<',
+    selectedState:        '@',
+    onNameFilterUpdated:  '&',
+    onEmailFilterUpdated: '&',
+    onStateFilterUpdated: '&',
+    onFiltersCleared:     '&'
+  }
+};
+
+export default component;

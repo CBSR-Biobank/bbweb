@@ -2,33 +2,22 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  var component = {
-    template: require('./nameFilter.html'),
-    controller: Controller,
-    controllerAs: 'vm',
-    bindings: {
-      onNameFilterUpdated:  '&',
-      onFiltersCleared:     '&'
-    }
-  };
+import NameAndStateFiltersController from '../../controllers/NameAndStateFiltersController';
 
-  Controller.$inject = ['$controller'];
+/*
+ * Controller for this component.
+ */
+class Controller extends NameAndStateFiltersController {}
 
-  /*
-   * Controller for this component.
-   */
-  function Controller($controller) {
-    var vm = this;
-    vm.$onInit = onInit;
-
-    function onInit() {
-      // initialize this controller's base class
-      $controller('NameAndStateFiltersController', { vm: vm });
-    }
+const component = {
+  template: require('./nameFilter.html'),
+  controller: Controller,
+  controllerAs: 'vm',
+  bindings: {
+    onNameFilterUpdated:  '&',
+    onFiltersCleared:     '&'
   }
+};
 
-  return component;
-});
+export default component;

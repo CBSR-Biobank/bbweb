@@ -9,45 +9,44 @@
 import _ from 'lodash';
 import filtersSharedBehaviour from '../../../test/behaviours/filtersSharedBehaviour';
 
-describe('nameAndStateFiltersComponent', function() {
+describe('nameEmailStateFiltersComponent', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
-
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
+
       this.createController = (bindings) => {
-        var self = this,
-            defaultBindings = {},
+        var defaultBindings = {},
             actualBindings = {};
 
-        self.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
-        self.emailFilterUpdated = jasmine.createSpy().and.returnValue(null);
-        self.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
-        self.filtersCleared = jasmine.createSpy().and.returnValue(null);
+        this.nameFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        this.emailFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        this.stateFilterUpdated = jasmine.createSpy().and.returnValue(null);
+        this.filtersCleared = jasmine.createSpy().and.returnValue(null);
 
         defaultBindings = {
           stateData:            [ 'enabled', 'disbled' ],
           selectedState:        'all',
-          onNameFilterUpdated:  self.nameFilterUpdated,
-          onEmailFilterUpdated: self.emailFilterUpdated,
-          onStateFilterUpdated: self.stateFilterUpdated,
-          onFiltersCleared:     self.filtersCleared
+          onNameFilterUpdated:  this.nameFilterUpdated,
+          onEmailFilterUpdated: this.emailFilterUpdated,
+          onStateFilterUpdated: this.stateFilterUpdated,
+          onFiltersCleared:     this.filtersCleared
         };
 
-        _.extend(actualBindings, defaultBindings, bindings);
+        Object.assign(actualBindings, defaultBindings, bindings);
 
         ComponentTestSuiteMixin.createController.call(
           this,
-            `<name-email-state-filters
-                state-data="vm.stateData"
-                selected-state="${actualBindings.selectedState}"
-                on-name-filter-updated="vm.onNameFilterUpdated"
-                on-email-filter-updated="vm.onEmailFilterUpdated"
-                on-state-filter-updated="vm.onStateFilterUpdated"
-                on-filters-cleared="vm.onFiltersCleared">
-            </name-email-state-filters>`,
+          `<name-email-state-filters
+             state-data="vm.stateData"
+             selected-state="${actualBindings.selectedState}"
+             on-name-filter-updated="vm.onNameFilterUpdated"
+             on-email-filter-updated="vm.onEmailFilterUpdated"
+             on-state-filter-updated="vm.onStateFilterUpdated"
+             on-filters-cleared="vm.onFiltersCleared">
+           </name-email-state-filters>`,
           actualBindings,
           'nameEmailStateFilters');
       };

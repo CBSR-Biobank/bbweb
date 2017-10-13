@@ -3,7 +3,6 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash';
 import angular from 'angular';
 
 /**
@@ -14,7 +13,7 @@ import angular from 'angular';
 /* @ngInject */
 export default function ComponentTestSuiteMixin(TestSuiteMixin, $rootScope, $compile) {
 
-  return _.extend(
+  return Object.assign(
     {
       createScope: createScope,
       createController: createController

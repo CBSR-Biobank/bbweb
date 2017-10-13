@@ -3,8 +3,6 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash';
-
 /* @ngInject */
 export default function ShippingComponentTestSuiteMixinFactory($q,
                                                                ComponentTestSuiteMixin,
@@ -13,7 +11,7 @@ export default function ShippingComponentTestSuiteMixinFactory($q,
                                                                Factory) {
 
 
-  return _.extend(
+  return Object.assign(
     {
       createShipment: createShipment,
       createShipmentWithSpecimens: createShipmentWithSpecimens,
