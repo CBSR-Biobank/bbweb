@@ -13,12 +13,7 @@ import angular from 'angular';
 /* @ngInject */
 export default function ComponentTestSuiteMixin(TestSuiteMixin, $rootScope, $compile) {
 
-  return Object.assign(
-    {
-      createScope: createScope,
-      createController: createController
-    },
-    TestSuiteMixin);
+  return Object.assign({ createScope, createController }, TestSuiteMixin);
 
   function createScope(scopeVars) {
     var scope = $rootScope.$new();

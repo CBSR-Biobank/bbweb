@@ -11,7 +11,7 @@
 /* @ngInject */
 export default function DirectiveTestSuiteMixin(ComponentTestSuiteMixin) {
 
-  return Object.assign({}, ComponentTestSuiteMixin, { createController: createController });
+  return Object.assign({}, ComponentTestSuiteMixin, { createController });
 
   function createController(htmlElement, scopeVars) {
     ComponentTestSuiteMixin.createController.call(this, htmlElement, scopeVars, undefined);

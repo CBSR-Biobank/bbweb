@@ -8,16 +8,7 @@ import angular from 'angular';
 /* @ngInject */
 export default function ModalTestSuiteMixinFactory($rootScope, $animate, $document, TestSuiteMixin) {
 
-  return Object.assign(
-    {
-      modalElementFind: modalElementFind,
-      flush: flush,
-      dismiss: dismiss,
-      addModalMatchers: addModalMatchers
-    },
-    TestSuiteMixin
-  );
-
+  return Object.assign({ modalElementFind, flush, dismiss, addModalMatchers }, TestSuiteMixin);
 
   function modalElementFind () {
     return $document.find('body > div.modal');

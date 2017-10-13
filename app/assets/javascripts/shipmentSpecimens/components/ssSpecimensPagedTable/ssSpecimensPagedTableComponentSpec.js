@@ -8,12 +8,7 @@ describe('ssSpecimensPagedTableComponent', function() {
 
   function SuiteMixin(ComponentTestSuiteMixin) {
 
-    return Object.assign({},
-                         ComponentTestSuiteMixin,
-                         {
-                           createTableState: createTableState,
-                           addTableController: addTableController
-                         });
+    return Object.assign({}, ComponentTestSuiteMixin, { createTableState, addTableController });
 
     function createTableState(searchPredicatObject,
                               sortPredicate,

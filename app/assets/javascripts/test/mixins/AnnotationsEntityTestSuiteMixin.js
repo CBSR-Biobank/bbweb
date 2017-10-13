@@ -17,14 +17,7 @@ export default function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
                                                         MultipleSelectAnnotation,
                                                         Factory) {
 
-  return Object.assign(
-    {
-      jsonAnnotationData: jsonAnnotationData,
-      validateAnnotationClass: validateAnnotationClass
-    },
-    EntityTestSuiteMixin
-  );
-
+  return Object.assign({ jsonAnnotationData, validateAnnotationClass }, EntityTestSuiteMixin);
 
   function jsonAnnotationData() {
     var annotationTypes = Factory.allAnnotationTypes();

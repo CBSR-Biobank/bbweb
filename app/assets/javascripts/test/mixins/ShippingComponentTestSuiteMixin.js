@@ -13,10 +13,10 @@ export default function ShippingComponentTestSuiteMixinFactory($q,
 
   return Object.assign(
     {
-      createShipment: createShipment,
-      createShipmentWithSpecimens: createShipmentWithSpecimens,
-      createGetShipmentSpy: createGetShipmentSpy,
-      createShipmentSpecimensListSpy: createShipmentSpecimensListSpy
+      createShipment,
+      createShipmentWithSpecimens,
+      createGetShipmentSpy,
+      createShipmentSpecimensListSpy
     },
     ComponentTestSuiteMixin);
 
