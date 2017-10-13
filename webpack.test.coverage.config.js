@@ -1,7 +1,6 @@
 /* global module */
 
 const path         = require('path'),
-      webpack      = require('webpack'),
       commonConfig = require('./webpack.config'),
       _            = require('lodash');
 

@@ -28,22 +28,36 @@ const config = {
       },
       {
         test: /\.css$/,
-        loader: 'style-loader!css-loader'
+        use: [
+          { loader: 'style-loader' },
+          {
+            loader: 'css-loader',
+            options: { sourceMap: true }
+          }
+        ]
       },
       {
         test: /\.less$/,
         use: [
-          // creates style nodes from JS strings
           { loader: 'style-loader' },
-          // translates CSS into CommonJS
-          { loader: 'css-loader' },
-          // compiles Less to CSS
-          { loader: 'less-loader' }
+          {
+            loader: 'css-loader',
+            options: { sourceMap: true }
+          },
+          {
+            loader: 'less-loader',
+            options: { sourceMap: true }
+          }
         ]
       },
       {
         test: /\.html$/,
-        loader: 'html-loader'
+        use: [ {
+          loader: 'html-loader',
+          options: {
+            minimize: true
+          }
+        }]
       },
       {
         test: /\.(png|jpg|jpeg|gif|svg|eot|woff|woff2|ttf)$/,
