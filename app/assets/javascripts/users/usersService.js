@@ -2,23 +2,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function(require) {
+define(function() {
   'use strict';
-
-  const _ = require('lodash');
-
-  usersServiceFactory.$inject = [
-    '$q',
-    '$cookies',
-    '$log',
-    'biobankApi',
-    'User',
-    'UrlService'
-  ];
 
   /**
    * Communicates with the server to get user related information and perform user related commands.
    */
+  /* @ngInject */
   function usersServiceFactory($q,
                                $cookies,
                                $log,

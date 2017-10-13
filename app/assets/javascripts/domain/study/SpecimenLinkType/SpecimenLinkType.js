@@ -127,7 +127,7 @@ define(['lodash'], function(_) {
     };
 
     // FIXME: fix the unused parameter
-    SpecimenLinkType.prototype.addOrUpdate = function (annotationTypes) {
+    SpecimenLinkType.prototype.addOrUpdate = function () {
       var self = this,
           cmd = _.extend(_.pick(this,
                                 'processingTypeId',

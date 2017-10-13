@@ -2,16 +2,17 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_){
+define(function(){
   'use strict';
-
-  PanelFactory.$inject = ['$window', '$state'];
 
   /**
    * Common functions for panels.
    *
    * Stores the panel's open / closed state in local storage.
+   *
+   * @return {domain.common.Panel} A Panel object.
    */
+  /* @ngInject */
   function PanelFactory($window, $state) {
 
     function Panel(panelId, addStateName) {

@@ -9,6 +9,8 @@ define(function () {
 
   /**
    * Restricts input to a postiive floating point number.
+   *
+   * @return {object} An AngularJS directive.
    */
   function posititveFloatDirective() {
     var directive = {
@@ -32,7 +34,8 @@ define(function () {
         ctrl.$setValidity('positiveFloat', false);
         return undefined;
       });
-    }  }
+    }
+  }
 
   return posititveFloatDirective;
 });

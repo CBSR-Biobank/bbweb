@@ -5,14 +5,8 @@
 define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
-  studyAnnotationTypesServiceFactory.$inject = [
-    'biobankApi',
-    'domainNotificationService'
-  ];
-
-  function studyAnnotationTypesServiceFactory(biobankApi,
-                                         domainNotificationService,
-                                         ParticipantAnnotationType) {
+  /* @ngInject */
+  function studyAnnotationTypesServiceFactory(biobankApi) {
 
     /**
      * Service to access study annotation types.

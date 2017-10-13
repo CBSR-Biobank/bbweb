@@ -2,18 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function(require) {
+define(function() {
   'use strict';
 
-  //var _ = require('lodash');
-
-  EntityInfoFactory.$inject = [
-    '$q',
-    '$log',
-    'DomainEntity',
-    'DomainError'
-  ];
-
+  /* @ngInject */
   function EntityInfoFactory($q,
                              $log,
                              DomainEntity,

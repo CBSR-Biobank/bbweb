@@ -5,8 +5,6 @@
 define(function (require) {
   'use strict';
 
-  var _ = require('lodash');
-
   /*
    * A progress tracker that gives visual feedback to the user when a number of steps need to be completed in
    * a certain order.
@@ -20,8 +18,6 @@ define(function (require) {
       current: '<'
     }
   };
-
-  ProgressTrackerController.$inject = [];
 
   function ProgressTrackerController() {
     var vm = this;

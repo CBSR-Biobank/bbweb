@@ -20,16 +20,10 @@ define(function (require) {
     }
   };
 
-  SpecimenViewController.$inject = [
-    '$state',
-    'gettextCatalog',
-    'breadcrumbService',
-    'specimenStateLabelService'
-  ];
-
   /*
    * Displays the details for a single specimen and also allows the user to update certain fields.
    */
+  /* @ngInject */
   function SpecimenViewController($state, gettextCatalog, breadcrumbService, specimenStateLabelService) {
     var vm = this;
     vm.$onInit = onInit;

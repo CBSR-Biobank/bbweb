@@ -40,7 +40,6 @@ const CommonModule = angular.module('biobank.common', [ ModalInputModule, Annota
       .directive('smartFloat',              require('./directives/smartFloat/smartFloatDirective'))
       .directive('str2integer',             require('./directives/str2integer/str2integerDirective'))
       .directive('updateRemoveButtons',     require('./directives/updateRemoveButtons/updateRemoveButtonsDirective'))
-      .directive('pageSelect',              require('./directives/pageSelectDirective'))
       .directive('positiveFloat',           require('./directives/positiveFloat/positiveFloatDirective'))
       .directive('naturalNumber',           require('./directives/naturalNumber/naturalNumberDirective'))
       .directive('truncateToggle',          require('./directives/truncateToggle/truncateToggleDirective'))

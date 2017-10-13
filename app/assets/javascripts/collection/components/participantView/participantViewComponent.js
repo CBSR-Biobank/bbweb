@@ -5,8 +5,6 @@
 define(function (require) {
   'use strict';
 
-  var _ = require('lodash');
-
   var component = {
     template: require('./participantView.html'),
     controller: ParticipantViewController,
@@ -17,17 +15,10 @@ define(function (require) {
     }
   };
 
-  ParticipantViewController.$inject = [
-    '$window',
-    '$scope',
-    '$state',
-    'gettextCatalog',
-    'breadcrumbService'
-  ];
-
   /*
    * Controller for this component.
    */
+  /* @ngInject */
   function ParticipantViewController($window,
                                      $scope,
                                      $state,

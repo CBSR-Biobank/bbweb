@@ -6,9 +6,9 @@
  */
 import StudiesModule        from '../../studies';
 import angular              from 'angular';
-import membershipsPagedList from './components/membershipsPagedList/membershipsPagedListComponent';
 import membershipView       from './components/membershipView/membershipViewComponent';
-import usersPagedList       from './components/usersPagedList/usersPagedListComponent';
+import membershipsPagedList from './components/membershipsPagedList/membershipsPagedListComponent';
+ import usersPagedList       from './components/usersPagedList/usersPagedListComponent';
 
 const AdminUsersModule = angular.module('biobank.admin.users', [ StudiesModule ])
       .config(require('./states'))

@@ -87,7 +87,7 @@ define(['angular', 'lodash'], function(angular, _) {
     };
 
     /** @protected */
-    ConcurrencySafeEntity.prototype.asyncCreate = function (obj) {
+    ConcurrencySafeEntity.prototype.asyncCreate = function (obj) { // eslint-disable-line no-unused-vars
       var deferred = $q.defer();
       deferred.reject('the subclass should override this method');
       return deferred.promise;

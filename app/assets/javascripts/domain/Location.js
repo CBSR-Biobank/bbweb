@@ -2,15 +2,14 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
+define(function() {
   'use strict';
-
-  LocationFactory.$inject = [ 'DomainEntity', 'DomainError' ];
 
   /**
    *
    */
-  function LocationFactory(DomainEntity, DomainError) {
+  /* @ngInject */
+  function LocationFactory($log, DomainEntity, DomainError) {
 
     /**
      * Location is a value object.
@@ -68,7 +67,7 @@ define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
       var validation = Location.isValid(obj);
 
       if (!validation.valid) {
-        console.error('invalid object from server: ' + validation.message);
+        $log.error('invalid object from server: ' + validation.message);
         throw new DomainError('invalid object from server: ' + validation.message);
       }
       return new Location(obj);

@@ -7,18 +7,7 @@ define(function (require) {
 
   var _ = require('lodash');
 
-  ShipmentSpecimenFactory.$inject = [
-    '$q',
-    '$log',
-    'DomainEntity',
-    'ConcurrencySafeEntity',
-    'DomainError',
-    'ShipmentItemState',
-    'Specimen',
-    'biobankApi',
-    'centreLocationInfoSchema'
-  ];
-
+  /* @ngInject */
   function ShipmentSpecimenFactory($q,
                                    $log,
                                    DomainEntity,
@@ -26,8 +15,7 @@ define(function (require) {
                                    DomainError,
                                    ShipmentItemState,
                                    Specimen,
-                                   biobankApi,
-                                   centreLocationInfoSchema) {
+                                   biobankApi) {
 
     /**
      * Use this contructor to create new Shipment Specimens to be persited on the server. Use [create()]{@link

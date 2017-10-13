@@ -2,14 +2,13 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular'], function(angular) {
+define(function() {
   'use strict';
-
-  specimenGroupsServiceFactory.$inject = ['biobankApi'];
 
   /**
    * Service to access specimen groups.
    */
+  /* @ngInject */
   function specimenGroupsServiceFactory(biobankApi) {
     var service = {
       anatomicalSourceTypes:   anatomicalSourceTypes,

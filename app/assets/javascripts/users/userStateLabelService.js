@@ -2,14 +2,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
+define(function () {
   'use strict';
-
-  userStateLabelService.$inject = [
-    'labelService',
-    'UserState',
-    'gettextCatalog'
-  ];
 
   /**
    * An AngularJS service that converts a UserState to a i18n string that can
@@ -21,9 +15,10 @@ define(function (require) {
    *
    * @return {Service} The AngularJS service.
    */
+  /* @ngInject */
   function userStateLabelService(labelService,
-                                     UserState,
-                                     gettextCatalog) {
+                                 UserState,
+                                 gettextCatalog) {
     var labels = {};
 
     labels[UserState.REGISTERED] = function () { return gettextCatalog.getString('Registered'); };

@@ -71,7 +71,7 @@ define(['lodash'], function(_) {
       });
     };
 
-    ProcessingType.prototype.addOrUpdate = function (annotationTypes) {
+    ProcessingType.prototype.addOrUpdate = function () {
       var self = this,
           cmd = _.extend(_.pick(self,
                                 'studyId',

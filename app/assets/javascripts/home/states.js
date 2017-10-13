@@ -4,13 +4,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular'], function(angular) {
+define(function() {
   'use strict';
 
-  config.$inject = [ '$stateProvider' ];
-
+  /* @ngInject */
   function config($stateProvider) {
-
     $stateProvider
       .state('home', {
         url: '/',

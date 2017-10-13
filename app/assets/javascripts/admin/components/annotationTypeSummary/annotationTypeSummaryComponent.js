@@ -17,11 +17,7 @@ define(function () {
     }
   };
 
-  AnnotationTypeSummaryController.$inject = [
-    'gettextCatalog'
-  ];
-
-  function AnnotationTypeSummaryController(gettextCatalog) {
+  function AnnotationTypeSummaryController() {
     var vm = this;
     vm.$onInit = onInit;
 

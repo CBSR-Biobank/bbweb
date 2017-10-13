@@ -16,21 +16,10 @@ define(function (require) {
     }
   };
 
-  UserProfileController.$inject = [
-    '$state',
-    'gettextCatalog',
-    'modalService',
-    'modalInput',
-    'notificationsService',
-    'usersService',
-    'User',
-    'breadcrumbService',
-    'userStateLabelService'
-  ];
-
   /*
    * Controller for this component.
    */
+  /* @ngInject */
   function UserProfileController($state,
                                  gettextCatalog,
                                  modalService,

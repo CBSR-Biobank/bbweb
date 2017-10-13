@@ -2,23 +2,17 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
+define(function () {
   'use strict';
-
-  annotationUpdateService.$inject = [
-    'modalInput',
-    'DateTimeAnnotation',
-    'MultipleSelectAnnotation',
-    'NumberAnnotation',
-    'SingleSelectAnnotation',
-    'TextAnnotation'
-  ];
 
   /**
    * Used to update the value of an annotation.
    *
    * A modal is presented the user where the value can be changed.
+   *
+   * @return {domain.annotations.Annotation} The annotation with the new value.
    */
+  /* @ngInject */
   function annotationUpdateService(modalInput,
                                    DateTimeAnnotation,
                                    MultipleSelectAnnotation,
@@ -35,7 +29,9 @@ define(['lodash'], function (_) {
     //-------
 
     function update(annotation, title) {
-      title = title || 'Update ' + annotation.annotationType.name;
+      if (!title) {
+        title = 'Update ' + annotation.annotationType.name;
+      }
 
       if (annotation instanceof DateTimeAnnotation) {
         return modalInput.dateTime(title,

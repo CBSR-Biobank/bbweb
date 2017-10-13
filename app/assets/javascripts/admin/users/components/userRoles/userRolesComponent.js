@@ -17,12 +17,11 @@ define(function () {
     }
   };
 
-   UserRolesController.$inject = ['breadcrumbService', 'gettextCatalog'];
-
   /*
    * Controller for this component.
    */
-   function UserRolesController(breadcrumbService, gettextCatalog) {
+  /* @ngInject */
+  function UserRolesController(breadcrumbService) {
     var vm = this;
     vm.$onInit = onInit;
 

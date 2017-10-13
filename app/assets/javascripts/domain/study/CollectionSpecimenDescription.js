@@ -2,15 +2,14 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash', 'tv4'], function(_, tv4) {
+define(function() {
   'use strict';
-
-  CollectionSpecimenDescriptionFactory.$inject = [ 'DomainEntity', 'DomainError' ];
 
   /**
    *
    */
-  function CollectionSpecimenDescriptionFactory(DomainEntity, DomainError) {
+  /* @ngInject */
+  function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
 
 
     /**
@@ -141,7 +140,7 @@ define(['lodash', 'tv4'], function(_, tv4) {
       var validation = CollectionSpecimenDescription.isValid(obj);
 
       if (!validation.valid) {
-        console.error('invalid object from server: ' + validation.message);
+        $log.error('invalid object from server: ' + validation.message);
         throw new DomainError('invalid object from server: ' + validation.message);
       }
       return new CollectionSpecimenDescription(obj);

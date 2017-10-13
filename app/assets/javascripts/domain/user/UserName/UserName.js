@@ -2,22 +2,15 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function() {
+define(function(require) {
   'use strict';
 
-  UserNameFactory.$inject = [
-    '$q',
-    '$log',
-    'biobankApi',
-    'EntityName',
-    'DomainEntity',
-    'DomainError',
-    'UserState'
-  ];
+  const _ = require('lodash');
 
   /*
    * Angular factory for Users.
    */
+  /* @ngInject */
   function UserNameFactory($q,
                             $log,
                             biobankApi,

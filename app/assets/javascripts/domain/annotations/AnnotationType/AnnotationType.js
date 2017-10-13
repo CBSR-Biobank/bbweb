@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'lodash', 'tv4'], function(angular, _, tv4) {
+define(['angular', 'lodash'], function(angular, _) {
   'use strict';
 
   AnnotationTypeFactory.$inject = [

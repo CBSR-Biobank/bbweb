@@ -2,15 +2,16 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['angular', 'jquery'], function (angular, $) {
+define(['angular'], function (angular) {
   'use strict';
-
-  biobankApiService.$inject = ['$http', '$q', '$log', 'AppConfig' ];
 
   /**
    * Makes a request to the Biobank server REST API. All REST responses from the server have a similar
    * response JSON object. This service returns the 'data' field if the call was successful.
+   *
+   * @return {object} An AngularJS service.
    */
+  /* @ngInject */
   function biobankApiService($http, $q, $log, AppConfig) {
     var service = {
       get:  get,

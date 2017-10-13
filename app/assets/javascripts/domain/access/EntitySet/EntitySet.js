@@ -90,7 +90,7 @@ define(function(require) {
       });
     };
 
-    EntitySet.prototype.getEntityIds = function (name) {
+    EntitySet.prototype.getEntityIds = function () {
       return this.entityData.map(function (entityInfo) {
         return entityInfo.id;
       });
