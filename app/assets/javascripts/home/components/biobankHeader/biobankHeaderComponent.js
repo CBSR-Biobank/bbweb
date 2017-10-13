@@ -31,6 +31,7 @@ define(function () {
                                    usersService) {
     var vm = this;
     vm.$onInit = onInit;
+    this.navCollapsed = true;
 
     //--
 
