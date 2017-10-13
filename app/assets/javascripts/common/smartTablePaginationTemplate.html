@@ -17,7 +17,7 @@
     <li class="pagination-page"
         ng-disabled="page == currentPage"
         ng-repeat="page in pages"
-        ng-class="{active: currentPage == page}" }">
+        ng-class="{active: currentPage == page}">
       <a href ng-click="selectPage(page)">{{page}}</a>
     </li>
     <li ng-class="pagination-page"
