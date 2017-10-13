@@ -13,7 +13,21 @@ import _ from 'lodash';
 /* @ngInject */
 export default function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
 
-  return Object.assign({ updateEntity: updateEntity }, TestSuiteMixin);
+  return Object.assign({ updateEntity, invalidFieldsTest, missingFieldsTest }, TestSuiteMixin);
+
+  function invalidFieldsTest(invalidFields, objCreateFun, entityCreateFun) {
+    invalidFields.forEach((invalidField) => {
+      const obj = objCreateFun(invalidField);
+      expect(() => entityCreateFun(obj)).toThrowError(/Invalid type/);
+      });
+  }
+
+  function missingFieldsTest(missingFields, objCreateFun, entityCreateFun) {
+    missingFields.forEach((missingField) => {
+      const obj = objCreateFun(missingField);
+      expect(() => entityCreateFun(obj)).toThrowError(/Missing required property/);
+    });
+  }
 
   /**
    * Used to test updating an attribute on an entity.
