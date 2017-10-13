@@ -12,15 +12,12 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
   var scope,
       controller,
       createEntities,
-      createController,
-      factory;
+      createController;
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function (TestSuiteMixin, TestUtils) {
       _.extend(this, TestSuiteMixin);
-
-      factory = this.$injector.get('Factory');
 
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
@@ -34,7 +31,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
         SpecimenLinkAnnotationType = injector.get('SpecimenLinkAnnotationType'),
         AnnotationValueType        = injector.get('AnnotationValueType'),
         SpecimenLinkType           = injector.get('SpecimenLinkType'),
-        factory               = injector.get('Factory');
+        Factory                    = injector.get('Factory');
 
     return create;
 
@@ -48,11 +45,11 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
         studyHasAnnotationTypes: true
       };
 
-      entities.study = new Study(factory.study());
-      entities.processingTypes = _.range(2).map(() => ProcessingType.create(factory.processingType(entities.study)));
+      entities.study = new Study(Factory.study());
+      entities.processingTypes = _.range(2).map(() => ProcessingType.create(Factory.processingType(entities.study)));
 
       if (options.studyHasSpecimenGroups) {
-        entities.specimenGroups = _.range(2).map(() => factory.specimenGroup(entities.study));
+        entities.specimenGroups = _.range(2).map(() => Factory.specimenGroup(entities.study));
       } else {
         entities.specimenGroups = [];
       }
@@ -60,7 +57,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
       if (options.studyHasAnnotationTypes) {
         entities.annotationTypes = _.values(AnnotationValueType)
           .map((valueType) => new SpecimenLinkAnnotationType(
-            factory.annotationType({ valueType: valueType })
+            Factory.annotationType({ valueType: valueType })
           ));
         entities.annotationTypeIdsInUse = [entities.annotationTypes[0]];
       } else {
@@ -68,7 +65,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
       }
 
       entities.specimenLinkTypes = _.map(_.range(2), function () {
-        var slt = new SpecimenLinkType(factory.processingType(entities.study));
+        var slt = new SpecimenLinkType(Factory.processingType(entities.study));
         if (options.studyHasSpecimenGroups) {
           slt.studySpecimenGroups(entities.specimenGroups);
         }
@@ -199,8 +196,8 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
     statuses.forEach((status) => {
       entities.study.status = status;
 
-      expect(function () { controller.update(entities.specimenLinkTypes[0]); }).
-        toThrow(new Error('study is not disabled'));
+      expect(function () { controller.update(entities.specimenLinkTypes[0]); })
+        .toThrow(new Error('study is not disabled'));
     });
   });
 
@@ -229,8 +226,8 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
     statuses.forEach((status) => {
       entities.study.status = status;
 
-      expect(function () { controller.remove(entities.specimenLinkTypes[0]); }).
-        toThrow(new Error('study is not disabled'));
+      expect(function () { controller.remove(entities.specimenLinkTypes[0]); })
+        .toThrow(new Error('study is not disabled'));
     });
   });
 

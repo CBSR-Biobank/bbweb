@@ -8,24 +8,24 @@
 
 xdescribe('SpecimenGroupViewer', function() {
 
-  var SpecimenGroupViewer, Factory, centre;
+  var SpecimenGroupViewer, Factory, TestUtils;
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(_SpecimenGroupViewer_,
+                                 _TestUtils_,
                                  _Factory_) {
       SpecimenGroupViewer = _SpecimenGroupViewer_;
       Factory   = _Factory_;
-
-      centre = Factory.centre();
+      TestUtils = _TestUtils_;
     });
   });
 
-  it('should open a modal when created', inject(function (TestUtils) {
+  it('should open a modal when created', function () {
     var modal = this.$injector.get('$uibModal'),
         study,
         specimenGroup,
-        viewer;
+        viewer;                                 // eslint-disable-line no-unused-vars
 
     spyOn(modal, 'open').and.callFake(function () {
       return TestUtils.fakeModal();
@@ -37,11 +37,14 @@ xdescribe('SpecimenGroupViewer', function() {
     viewer = new SpecimenGroupViewer(specimenGroup);
 
     expect(modal.open).toHaveBeenCalled();
-  }));
+  });
 
   it('should display valid attributes', function() {
-    var EntityViewer = this.$injector.get('EntityViewer');
-    var attributes, study, specimenGroup, viewer;
+    var EntityViewer = this.$injector.get('EntityViewer'),
+        attributes,
+        study,
+        specimenGroup,
+        viewer;                                 // eslint-disable-line no-unused-vars
 
     spyOn(EntityViewer.prototype, 'addAttribute').and.callFake(function (label, value) {
       attributes.push({label: label, value: value});

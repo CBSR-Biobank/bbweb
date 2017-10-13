@@ -123,13 +123,13 @@ describe('Component: ceventView', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.controllerUpdateFuncName = 'editTimeCompleted';
       context.modalInputFuncName       = 'dateTime';
       context.ceventUpdateFuncName     = 'updateTimeCompleted';
       context.collectionEvent          = this.collectionEvent;
       context.newValue                 = faker.date.recent(10);
-    }));
+    });
 
     sharedUpdateBehaviour(context);
 
@@ -139,14 +139,14 @@ describe('Component: ceventView', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.entity                   = this.CollectionEvent;
       context.entityUpdateFuncName     = 'addAnnotation';
-    }));
+    });
 
     describe('updates to a text annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT),
             study = new this.Study(this.Factory.defaultStudy());
@@ -161,7 +161,7 @@ describe('Component: ceventView', function() {
         function createController() {
           return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
         }
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -169,7 +169,7 @@ describe('Component: ceventView', function() {
 
     describe('updates to a date time annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             newValue = faker.date.recent(10),
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME),
@@ -185,7 +185,7 @@ describe('Component: ceventView', function() {
         function createController() {
           return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
         }
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -193,7 +193,7 @@ describe('Component: ceventView', function() {
 
     describe('updates to a number annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER),
             study = new this.Study(this.Factory.defaultStudy());
@@ -208,7 +208,7 @@ describe('Component: ceventView', function() {
         function createController() {
           return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
         }
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -216,7 +216,7 @@ describe('Component: ceventView', function() {
 
     describe('updates to a single select annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                                  this.AnnotationMaxValueCount.SELECT_SINGLE),
@@ -232,7 +232,7 @@ describe('Component: ceventView', function() {
         function createController() {
           return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
         }
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -240,7 +240,7 @@ describe('Component: ceventView', function() {
 
     describe('updates to a multiple select annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
                                                                  this.AnnotationMaxValueCount.SELECT_MULTIPLE),
@@ -256,7 +256,7 @@ describe('Component: ceventView', function() {
         function createController() {
           return self.createController(study, [ collectionEvent.collectionEventType ], collectionEvent);
         }
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -268,7 +268,7 @@ describe('Component: ceventView', function() {
 
     describe('(shared) tests', function() {
 
-      beforeEach(inject(function() {
+      beforeEach(function() {
         this.injectDependencies('CollectionEvent',
                                 'modalInput',
                                 'notificationsService');
@@ -278,7 +278,7 @@ describe('Component: ceventView', function() {
 
         this.study = new this.Study(this.Factory.defaultStudy());
 
-      }));
+      });
 
 
       it('on update should invoke the update method on entity', function() {

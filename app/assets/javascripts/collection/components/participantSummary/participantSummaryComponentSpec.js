@@ -89,7 +89,7 @@ describe('Component: participantSummary', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       var self = this;
 
       context.createController           = createController;
@@ -102,7 +102,7 @@ describe('Component: participantSummary', function() {
       function createController() {
         return self.createController(self.study, self.participant);
       }
-    }));
+    });
 
     sharedUpdateBehaviour(context);
 
@@ -112,14 +112,14 @@ describe('Component: participantSummary', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.entity                   = this.Participant;
       context.entityUpdateFuncName     = 'addAnnotation';
-    }));
+    });
 
     describe('updates to a text annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             participant = self.participantWithAnnotation(self.AnnotationValueType.TEXT);
 
@@ -132,7 +132,7 @@ describe('Component: participantSummary', function() {
         function createController() {
           return self.createController(self.study, participant);
         }
-      }));
+      });
 
       annotationUpdateSharedBehaviour(context);
 
@@ -140,7 +140,7 @@ describe('Component: participantSummary', function() {
 
     describe('updates to a date time annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             participant = self.participantWithAnnotation(self.AnnotationValueType.DATE_TIME);
 
@@ -153,7 +153,7 @@ describe('Component: participantSummary', function() {
         function createController() {
           return self.createController(self.study, participant);
         }
-      }));
+      });
 
       annotationUpdateSharedBehaviour(context);
 
@@ -161,7 +161,7 @@ describe('Component: participantSummary', function() {
 
     describe('updates to a number annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             participant = self.participantWithAnnotation(self.AnnotationValueType.NUMBER);
 
@@ -174,7 +174,7 @@ describe('Component: participantSummary', function() {
         function createController() {
           return self.createController(self.study, participant);
         }
-      }));
+      });
 
       annotationUpdateSharedBehaviour(context);
 
@@ -182,7 +182,7 @@ describe('Component: participantSummary', function() {
 
     describe('updates to a single select annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
                                                          self.AnnotationMaxValueCount.SELECT_SINGLE);
@@ -196,7 +196,7 @@ describe('Component: participantSummary', function() {
         function createController() {
           return self.createController(self.study, participant);
         }
-      }));
+      });
 
       annotationUpdateSharedBehaviour(context);
 
@@ -204,7 +204,7 @@ describe('Component: participantSummary', function() {
 
     describe('updates to a multiple select annotation', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         var self = this,
             participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
                                                          self.AnnotationMaxValueCount.SELECT_MULTIPLE);
@@ -218,7 +218,7 @@ describe('Component: participantSummary', function() {
         function createController() {
           return self.createController(self.study, participant);
         }
-      }));
+      });
 
       annotationUpdateSharedBehaviour(context);
 
@@ -230,9 +230,9 @@ describe('Component: participantSummary', function() {
 
     describe('(shared) tests', function() {
 
-      beforeEach(inject(function() {
+      beforeEach(function() {
         this.injectDependencies('Participant', 'modalInput', 'notificationsService');
-      }));
+      });
 
 
       it('on update should invoke the update method on entity', function() {

@@ -6,6 +6,8 @@
  */
 /* global angular */
 
+import _ from 'lodash';
+
 xdescribe('Controller: SpecimenGroupEditCtrl', function() {
 
   beforeEach(() => {

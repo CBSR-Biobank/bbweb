@@ -21,7 +21,6 @@ export default function studyAnnotationTypeSharedSpec(context) {
         AnnotationValueType,
         AnnotationMaxValueCount,
         createAnnotationTypeFn,
-        annotationTypesService,
         annotationTypeUriPart,
         objRequiredKeys,
         createServerAnnotationTypeFn,
@@ -41,7 +40,6 @@ export default function studyAnnotationTypeSharedSpec(context) {
         AnnotationMaxValueCount      = _AnnotationMaxValueCount_;
         AnnotationTypeType           = context.annotationTypeType;
         createAnnotationTypeFn       = context.createAnnotationTypeFn;
-        annotationTypesService       = context.annotationTypesService;
         annotationTypeUriPart        = context.annotationTypeUriPart;
         objRequiredKeys              = context.objRequiredKeys;
         createServerAnnotationTypeFn = context.createServerAnnotationTypeFn;

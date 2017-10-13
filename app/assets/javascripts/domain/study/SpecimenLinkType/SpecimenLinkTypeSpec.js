@@ -11,7 +11,6 @@ import _ from 'lodash';
 xdescribe('SpecimenLinkType', function() {
 
   var httpBackend,
-      funutils,
       SpecimenLinkType,
       factory;
 
@@ -20,7 +19,6 @@ xdescribe('SpecimenLinkType', function() {
     angular.mock.inject(function(ServerReplyMixin, TestUtils) {
       _.extend(this, ServerReplyMixin);
       httpBackend      = this.$injector.get('$httpBackend');
-      funutils         = this.$injector.get('funutils');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
       factory          = this.$injector.get('Factory');
       TestUtils.addCustomMatchers();
@@ -209,30 +207,30 @@ xdescribe('SpecimenLinkType', function() {
        expect(slt.getAnnotationTypeDataAsString()).toBeEmptyString();
      });
 
-  function sltToAddCommand(slt) {
-    var cmd =  _.extend(_.pick(slt,
-                               'processingTypeId',
-                               'expectedInputChange',
-                               'expectedOutputChange',
-                               'inputCount',
-                               'outputCount',
-                               'inputGroupId',
-                               'outputGroupId'),
-                        funutils.pickOptional(slt,
-                                              'inputContainerTypeId',
-                                              'outputContainerTypeId'));
-    cmd.annotationTypeData = slt.getAnnotationTypeData();
-    return cmd;
-  }
+  // function sltToAddCommand(slt) {
+  //   var cmd =  _.extend(_.pick(slt,
+  //                              'processingTypeId',
+  //                              'expectedInputChange',
+  //                              'expectedOutputChange',
+  //                              'inputCount',
+  //                              'outputCount',
+  //                              'inputGroupId',
+  //                              'outputGroupId'),
+  //                       funutils.pickOptional(slt,
+  //                                             'inputContainerTypeId',
+  //                                             'outputContainerTypeId'));
+  //   cmd.annotationTypeData = slt.getAnnotationTypeData();
+  //   return cmd;
+  // }
 
-  function sltToUpdateCommand(ceventType) {
-    return _.extend(sltToAddCommand(ceventType), {
-      id: ceventType.id,
-      expectedVersion: ceventType.version
-    });
-  }
+  // function sltToUpdateCommand(ceventType) {
+  //   return _.extend(sltToAddCommand(ceventType), {
+  //     id: ceventType.id,
+  //     expectedVersion: ceventType.version
+  //   });
+  // }
 
-  function updateSltSharedBehaviour(slt, sltFromServer, processingTypeId) {
+  function updateSltSharedBehaviour(/* slt, sltFromServer, processingTypeId */) {
     fail('needs implementation');
   }
 

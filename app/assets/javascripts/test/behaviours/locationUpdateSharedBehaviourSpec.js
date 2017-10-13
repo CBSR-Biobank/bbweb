@@ -14,9 +14,9 @@ define(function() {
 
     describe('(shared)', function() {
 
-      beforeEach(inject(function() {
+      beforeEach(function() {
         this.injectDependencies('$q', 'modalInput', 'notificationsService');
-      }));
+      });
 
       it('on update should invoke the update method on entity', function() {
         var modalInputDeferred = this.$q.defer();

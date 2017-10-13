@@ -18,7 +18,7 @@ xdescribe('Controller: ProcessingTypeEditCtrl', function() {
       ProcessingType,
       domainNotificationService,
       notificationsService,
-      factory;
+      Factory;
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
@@ -37,9 +37,9 @@ xdescribe('Controller: ProcessingTypeEditCtrl', function() {
       state                      = $state;
       Study                      = _Study_;
       ProcessingType             = _ProcessingType_;
-      domainNotificationService        = _domainNotificationService_;
+      domainNotificationService  = _domainNotificationService_;
       notificationsService       = _notificationsService_;
-      Factory               = _Factory_;
+      Factory                    = _Factory_;
     });
   });
 
@@ -48,12 +48,12 @@ xdescribe('Controller: ProcessingTypeEditCtrl', function() {
 
     options = options || {};
 
-    study = new Study(factory.study());
+    study = new Study(Factory.study());
 
     if (options.noPtId) {
-      serverPt = _.omit(factory.processingType(study), 'id');
+      serverPt = _.omit(Factory.processingType(study), 'id');
     } else {
-      serverPt = factory.processingType(study);
+      serverPt = Factory.processingType(study);
     }
 
     processingType = new ProcessingType(serverPt);

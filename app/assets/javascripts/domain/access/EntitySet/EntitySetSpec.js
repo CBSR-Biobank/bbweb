@@ -82,11 +82,11 @@ describe('EntitySet', function() {
     it('can create from JSON', function() {
       var json = this.jsonObj();
       this.EntitySet.asyncCreate(json)
-        .then(function (entitySet) {
+        .then((entitySet) => {
           expect(entitySet.allEntities).toBe(json.allEntities);
           expect(entitySet.entityData).toContainAll(json.entityData);
         })
-        .catch(function (err) {
+        .catch(() => {
           fail('should not invoked');
         });
       this.$rootScope.$digest();

@@ -6,11 +6,9 @@
  */
 /* global angular */
 
-import _ from 'lodash';
-
 xdescribe('Service: specimenGroupsService', function() {
 
-  var specimenGroupsService, httpBackend, factory;
+  var specimenGroupsService, httpBackend, Factory;
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
@@ -33,7 +31,7 @@ xdescribe('Service: specimenGroupsService', function() {
   }
 
   function getValueType(uri, serviceFn) {
-    var studyId = factory.stringNext();
+    var studyId = Factory.stringNext();
 
     httpBackend.whenGET('/studies/' + uri).respond({
       status: 'success',
@@ -46,8 +44,8 @@ xdescribe('Service: specimenGroupsService', function() {
   }
 
   it('should retrieve specimen groups in use', function() {
-    var studyId = factory.stringNext(),
-        specimenGroupId = factory.stringNext();
+    var studyId = Factory.stringNext(),
+        specimenGroupId = Factory.stringNext();
 
     httpBackend.whenGET(uri(studyId) + '/inuse').respond({
       status: 'success',

@@ -37,11 +37,10 @@ describe('MultipleSelectAnnotation', function() {
         }),
         annotationType = new self.AnnotationType(jsonAnnotationType),
         jsonAnnotation = self.Factory.annotation({ selectedValues: [ this.Factory.stringNext() ] },
-                                                 jsonAnnotationType),
-        annotation;
+                                                 jsonAnnotationType);
 
     expect(function () {
-      annotation = self.annotationFactory.create(jsonAnnotation, annotationType);
+      self.annotationFactory.create(jsonAnnotation, annotationType);
     }).toThrowError('invalid selected values in object from server');
   });
 

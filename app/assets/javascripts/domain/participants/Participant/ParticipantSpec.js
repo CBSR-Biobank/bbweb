@@ -122,6 +122,7 @@ describe('Participant', function() {
                                   { annotationTypeId: annotation.annotationTypeId }),
           annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
 
+      expect(jsonAnnotation).toBeDefined();
       self.validateAnnotationClass(annotationType, annotation);
       expect(annotation.required).toBe(annotationType.required);
     });

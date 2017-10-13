@@ -22,14 +22,14 @@ define(function() {
 
     describe('(shared) tests', function() {
 
-      beforeEach(inject(function() {
+      beforeEach(function() {
         this.injectDependencies('$q',
                                 '$state',
                                 'AnnotationType',
                                 'Factory');
 
         spyOn(this.$state, 'go').and.returnValue('ok');
-      }));
+      });
 
       it('should change to correct state on submit', function() {
         var annotType = new this.AnnotationType(this.Factory.annotationType());

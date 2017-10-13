@@ -24,9 +24,9 @@ describe('Service: domainNotificationService', function() {
 
   describe('updateErrorModal', function () {
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when('OK'));
-    }));
+    });
 
     it('opens a modal when error is a version mismatch error', function() {
       var domainEntityName = 'entity',
@@ -63,9 +63,9 @@ describe('Service: domainNotificationService', function() {
 
   describe('removeEntity', function () {
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       this.remove = jasmine.createSpy('remove').and.returnValue(this.$q.when(true));
-    }));
+    });
 
     it('remove works when user confirms the removal', function(done) {
       var header = 'header',

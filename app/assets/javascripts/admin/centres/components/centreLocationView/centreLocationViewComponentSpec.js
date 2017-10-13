@@ -69,20 +69,20 @@ describe('Component: centreLocationView', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.entity                   = this.centre;
       context.entityUpdateFuncName     = 'updateLocation';
       context.createController         = this.createController;
       context.location                 = this.centre.locations[0];
-    }));
+    });
 
     describe('updates to location name', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         context.controllerUpdateFuncName = 'editName';
         context.modalInputFuncName       = 'text';
         context.newValue                 = faker.random.word();
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -90,11 +90,11 @@ describe('Component: centreLocationView', function() {
 
     describe('updates to location street', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         context.controllerUpdateFuncName = 'editStreet';
         context.modalInputFuncName       = 'text';
         context.newValue                 = faker.random.word();
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -102,11 +102,11 @@ describe('Component: centreLocationView', function() {
 
     describe('updates to location city', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         context.controllerUpdateFuncName = 'editCity';
         context.modalInputFuncName       = 'text';
         context.newValue                 = faker.random.word();
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -114,11 +114,11 @@ describe('Component: centreLocationView', function() {
 
     describe('updates to location province', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         context.controllerUpdateFuncName = 'editProvince';
         context.modalInputFuncName       = 'text';
         context.newValue                 = faker.random.word();
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -126,11 +126,11 @@ describe('Component: centreLocationView', function() {
 
     describe('updates to location postal code', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         context.controllerUpdateFuncName = 'editPostalCode';
         context.modalInputFuncName       = 'text';
         context.newValue                 = faker.random.word();
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -138,11 +138,11 @@ describe('Component: centreLocationView', function() {
 
     describe('updates to location PO box number', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         context.controllerUpdateFuncName = 'editPoBoxNumber';
         context.modalInputFuncName       = 'text';
         context.newValue                 = faker.random.word();
-      }));
+      });
 
       sharedBehaviour(context);
 
@@ -150,11 +150,11 @@ describe('Component: centreLocationView', function() {
 
     describe('updates to location country ISO code', function () {
 
-      beforeEach(inject(function () {
+      beforeEach(function () {
         context.controllerUpdateFuncName = 'editCountryIsoCode';
         context.modalInputFuncName       = 'text';
         context.newValue                 = faker.random.word();
-      }));
+      });
 
       sharedBehaviour(context);
 

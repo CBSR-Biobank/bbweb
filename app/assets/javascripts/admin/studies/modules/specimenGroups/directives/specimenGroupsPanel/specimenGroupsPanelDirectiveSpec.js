@@ -121,8 +121,8 @@ xdescribe('Directive: specimenGroupsPanelDirective', function() {
     statuses.forEach((status) => {
       entities.study.status = status;
 
-      expect(function () { controller.update(entities.specimenGroups[0]); }).
-        toThrow(new Error('study is not disabled'));
+      expect(function () { controller.update(entities.specimenGroups[0]); })
+        .toThrow(new Error('study is not disabled'));
     });
   });
 
@@ -159,8 +159,8 @@ xdescribe('Directive: specimenGroupsPanelDirective', function() {
     statuses.forEach((status) => {
       entities.study.status = status;
 
-      expect(function () { controller.remove(entities.specimenGroups[0]); }).
-        toThrow(new Error('study is not disabled'));
+      expect(function () { controller.remove(entities.specimenGroups[0]); })
+        .toThrow(new Error('study is not disabled'));
     });
   });
 

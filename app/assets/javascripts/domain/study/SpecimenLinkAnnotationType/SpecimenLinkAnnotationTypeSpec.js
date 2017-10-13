@@ -5,19 +5,19 @@
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 
+import angular from 'angular';
 import sharedSpec from '../../../test/behaviours/studyAnnotationTypeSharedSpec';
 
 xdescribe('SpecimenLinkAnnotationType', function() {
 
-  var context = {}, SpecimenLinkAnnotationType, factory;
+  var context = {}, SpecimenLinkAnnotationType, Factory;
   var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];
 
-  beforeEach(mocks.module('biobankApp', 'biobank.test'));
+  beforeEach(angular.mock.module('biobankApp', 'biobank.test'));
 
-  beforeEach(inject(function(_SpecimenLinkAnnotationType_,
-                             factory) {
+  beforeEach(angular.mock.inject(function(_SpecimenLinkAnnotationType_, _Factory_) {
     SpecimenLinkAnnotationType = _SpecimenLinkAnnotationType_;
-    factory = factory;
+    Factory = _Factory_;
 
     context.annotationTypeType            = SpecimenLinkAnnotationType;
     context.createAnnotationTypeFn        = createAnnotationType;
@@ -29,9 +29,9 @@ xdescribe('SpecimenLinkAnnotationType', function() {
   }));
 
   function createServerAnnotationType(options) {
-    var study = factory.study();
+    var study = Factory.study();
     options = options || {};
-    return factory.studyAnnotationType(study, options);
+    return Factory.studyAnnotationType(study, options);
   }
 
   function createAnnotationType(obj) {

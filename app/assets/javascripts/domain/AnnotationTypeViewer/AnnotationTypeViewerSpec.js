@@ -43,8 +43,8 @@ describe('AnnotationTypeViewer', function() {
     this.annotatationTypeOptions.forEach((options) => {
       // jshint unused:false
       var annotationType = new self.AnnotationType(self.Factory.annotationType(options)),
-          viewer = new self.AnnotationTypeViewer(annotationType);
-      count++;
+          viewer = new self.AnnotationTypeViewer(annotationType);  // eslint-disable-line no-unused-vars
+      count += 1;
       expect(self.$uibModal.open.calls.count()).toBe(count);
     });
   });
@@ -71,7 +71,9 @@ describe('AnnotationTypeViewer', function() {
     });
 
     self.annotatationTypeOptions.forEach((options) => {
-      var annotationType, viewer, numAttributesExpected = 4;
+      var annotationType,
+          viewer,                        // eslint-disable-line no-unused-vars
+          numAttributesExpected = 4;
 
       attributes = [];
 

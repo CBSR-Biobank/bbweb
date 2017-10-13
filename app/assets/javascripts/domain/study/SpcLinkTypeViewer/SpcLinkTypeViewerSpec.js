@@ -6,22 +6,20 @@
  */
 /* global angular */
 
-import _ from 'lodash';
-
 xdescribe('SpcLinkTypeViewer', function() {
 
-  var SpcLinkTypeViewer, SpecimenLinkType, factory, centre;
+  var SpcLinkTypeViewer, SpecimenLinkType, Factory, TestUtils;
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function(_SpcLinkTypeViewer_,
                                  _SpecimenLinkType_,
-                                 factory) {
+                                 _TestUtils_,
+                                 _Factory_) {
       SpcLinkTypeViewer = _SpcLinkTypeViewer_;
-      SpecimenLinkType       = _SpecimenLinkType_;
-      factory   = factory;
-
-      centre = factory.centre();
+      SpecimenLinkType  = _SpecimenLinkType_;
+      Factory           = _Factory_;
+      TestUtils         = _TestUtils_;
     });
   });
 
@@ -33,17 +31,17 @@ xdescribe('SpcLinkTypeViewer', function() {
         baseSpcLinkType,
         slt;
 
-    study = factory.study();
-    processingType = factory.processingType(study);
+    study = Factory.study();
+    processingType = Factory.processingType(study);
     specimenGroups = [
-      factory.specimenGroup(study),
-      factory.specimenGroup(study),
+      Factory.specimenGroup(study),
+      Factory.specimenGroup(study),
     ];
     annotationTypes = [
-      factory.studyAnnotationType(study),
-      factory.studyAnnotationType(study)
+      Factory.studyAnnotationType(study),
+      Factory.studyAnnotationType(study)
     ];
-    baseSpcLinkType = factory.specimenLinkType(processingType, {
+    baseSpcLinkType = Factory.specimenLinkType(processingType, {
       inputGroup: specimenGroups[0],
       outputGroup: specimenGroups[1],
       annotationTypes: annotationTypes
@@ -62,10 +60,10 @@ xdescribe('SpcLinkTypeViewer', function() {
     };
   }
 
-  it('should open a modal when created', inject(function (TestUtils) {
+  it('should open a modal when created', function () {
     var modal = this.$injector.get('$uibModal'),
         entities = createEntities(),
-        viewer;
+        viewer;                                 // eslint-disable-line no-unused-vars
 
     spyOn(modal, 'open').and.callFake(function () {
       return TestUtils.fakeModal();
@@ -74,13 +72,13 @@ xdescribe('SpcLinkTypeViewer', function() {
     // jshint unused:false
     viewer = new SpcLinkTypeViewer(entities.slt, entities.processingType);
     expect(modal.open).toHaveBeenCalled();
-  }));
+  });
 
   it('should display valid attributes', function() {
     var EntityViewer = this.$injector.get('EntityViewer'),
         entities = createEntities(),
         attributes,
-        viewer;
+        viewer;                                 // eslint-disable-line no-unused-vars
 
     spyOn(EntityViewer.prototype, 'addAttribute').and.callFake(function (label, value) {
       attributes.push({label: label, value: value});

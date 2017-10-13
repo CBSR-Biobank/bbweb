@@ -24,9 +24,9 @@ define(function() {
 
     describe('(shared) tests', function() {
 
-      beforeEach(inject(function() {
+      beforeEach(function() {
         this.injectDependencies('AnnotationType', 'Factory');
-      }));
+      });
 
       it('on update should invoke the update method on entity', function() {
         spyOn(context.entity.prototype, context.updateAnnotationTypeFuncName)

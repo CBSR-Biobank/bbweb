@@ -30,8 +30,9 @@ describe('StudyViewer', function() {
     spyOn(modal, 'open').and.returnValue(this.TestUtils.fakeModal());
 
     // jshint unused:false
-    var study = this.Factory.study();
-    var viewer = new this.StudyViewer(study);
+    var study = this.Factory.study(),
+        viewer = new this.StudyViewer(study);        // eslint-disable-line no-unused-vars
+
 
     expect(modal.open).toHaveBeenCalled();
   });
@@ -39,7 +40,7 @@ describe('StudyViewer', function() {
   it('should display valid attributes', function() {
     var attributes = [],
         study = this.Factory.study(),
-        viewer;
+        viewer;                                 // eslint-disable-line no-unused-vars
 
     this.EntityViewer.prototype.addAttribute = jasmine.createSpy()
       .and.callFake((label, value) => {

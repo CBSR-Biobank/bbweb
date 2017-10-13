@@ -18,12 +18,10 @@ xdescribe('ProcessingType', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function($httpBackend,
                                  _ProcessingType_,
-                                 _Factory_,
                                  ServerReplyMixin) {
       _.extend(this, ServerReplyMixin);
-    httpBackend    = $httpBackend;
+      httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
-      Factory        = _Factory_;
     });
   });
 
@@ -123,19 +121,19 @@ xdescribe('ProcessingType', function() {
     expect(entities.processingType.studyId).toBe(entities.study.id);
   });
 
-  function processingTypeToAddCommand(processingType) {
-    return {
-      studyId:     processingType.studyId,
-      name:        processingType.name,
-      description: processingType.description,
-      enabled:     processingType.enabled
-    };
-  }
+  // function processingTypeToAddCommand(processingType) {
+  //   return {
+  //     studyId:     processingType.studyId,
+  //     name:        processingType.name,
+  //     description: processingType.description,
+  //     enabled:     processingType.enabled
+  //   };
+  // }
 
-  function processingTypeToUpdateCommand(processingType) {
-    return _.extend(processingTypeToAddCommand(processingType), {
-      id: processingType.id,
-      expectedVersion: processingType.version
-    });
-  }
+  // function processingTypeToUpdateCommand(processingType) {
+  //   return _.extend(processingTypeToAddCommand(processingType), {
+  //     id: processingType.id,
+  //     expectedVersion: processingType.version
+  //   });
+  // }
 });

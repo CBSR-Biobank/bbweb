@@ -128,6 +128,7 @@ describe('CollectionEvent', function() {
     ceventType.annotationTypes.forEach((annotationType) => {
       var annotation = _.find(collectionEvent.annotations, { annotationTypeId: annotationType.id }),
           jsonAnnotation = _.find(jsonAnnotations, { annotationTypeId: annotationType.id});
+      expect(jsonAnnotation).toBeDefined();
       this.validateAnnotationClass(annotationType, annotation);
       expect(annotation.required).toBe(annotationType.required);
     });

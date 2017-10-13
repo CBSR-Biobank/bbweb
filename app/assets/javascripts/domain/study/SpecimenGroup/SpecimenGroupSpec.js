@@ -11,9 +11,8 @@ import _ from 'lodash';
 xdescribe('SpecimenGroup', function() {
 
   var httpBackend,
-      funutils,
       SpecimenGroup,
-      factory;
+      Factory;
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
@@ -24,7 +23,6 @@ xdescribe('SpecimenGroup', function() {
                                  ServerReplyMixin) {
       _.extend(this, ServerReplyMixin);
       httpBackend   = $httpBackend;
-      funutils      = _funutils_;
       SpecimenGroup = _SpecimenGroup_;
       Factory       = _Factory_;
     });
@@ -52,8 +50,8 @@ xdescribe('SpecimenGroup', function() {
   }
 
   function createEntities(options) {
-    var study = factory.study(),
-        serverSg = factory.specimenGroup(study),
+    var study = Factory.study(),
+        serverSg = Factory.specimenGroup(study),
         specimenGroup;
 
     options = options || {};
@@ -130,22 +128,22 @@ xdescribe('SpecimenGroup', function() {
     expect(entities.specimenGroup.studyId).toBe(entities.study.id);
   });
 
-  function specimenGroupToAddCommand(specimenGroup) {
-    return _.extend(_.pick(specimenGroup,
-                           'studyId',
-                           'name',
-                           'units',
-                           'anatomicalSourceType',
-                           'preservationType',
-                           'preservationTemperatureType',
-                           'specimenType'),
-                    funutils.pickOptional(specimenGroup, 'description'));
-  }
+  // function specimenGroupToAddCommand(specimenGroup) {
+  //   return _.extend(_.pick(specimenGroup,
+  //                          'studyId',
+  //                          'name',
+  //                          'units',
+  //                          'anatomicalSourceType',
+  //                          'preservationType',
+  //                          'preservationTemperatureType',
+  //                          'specimenType'),
+  //                   funutils.pickOptional(specimenGroup, 'description'));
+  // }
 
-  function specimenGroupToUpdateCommand(specimenGroup) {
-    return _.extend(specimenGroupToAddCommand(specimenGroup), {
-      id: specimenGroup.id,
-      expectedVersion: specimenGroup.version
-    });
-  }
+  // function specimenGroupToUpdateCommand(specimenGroup) {
+  //   return _.extend(specimenGroupToAddCommand(specimenGroup), {
+  //     id: specimenGroup.id,
+  //     expectedVersion: specimenGroup.version
+  //   });
+  // }
 });

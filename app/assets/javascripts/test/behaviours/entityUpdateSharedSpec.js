@@ -2,7 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
+define(function() {
   'use strict';
 
   /**
@@ -27,14 +27,12 @@ define(['lodash'], function(_) {
 
     describe('update functions', function () {
 
-      beforeEach(inject(function () {
-        var self = this;
-
-        self.injectDependencies('$q', 'modalInput');
-        self.deferred = self.$q.defer();
-        spyOn(self.modalInput, context.modalInputFuncName)
-          .and.returnValue({ result: self.deferred.promise });
-      }));
+      beforeEach(function () {
+        this.injectDependencies('$q', 'modalInput');
+        this.deferred = this.$q.defer();
+        spyOn(this.modalInput, context.modalInputFuncName)
+          .and.returnValue({ result: this.deferred.promise });
+      });
 
       it('context should be valid', function() {
         expect(context.entity.prototype[context.updateFuncName]).toBeFunction();

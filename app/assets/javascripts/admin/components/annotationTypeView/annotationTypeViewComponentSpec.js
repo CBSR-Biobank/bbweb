@@ -23,6 +23,7 @@ describe('annotationTypeViewDirective', function() {
                               'AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
+                              'annotationTypeUpdateModal',
                               'modalInput',
                               'notificationsService',
                               'Factory');
@@ -79,10 +80,10 @@ describe('annotationTypeViewDirective', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.controllerFuncName = 'editName';
       context.modalInputFuncName = 'text';
-    }));
+    });
 
     sharedUpdateBehaviour(context);
 
@@ -92,10 +93,10 @@ describe('annotationTypeViewDirective', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.controllerFuncName = 'editRequired';
       context.modalInputFuncName = 'boolean';
-    }));
+    });
 
     sharedUpdateBehaviour(context);
 
@@ -105,10 +106,10 @@ describe('annotationTypeViewDirective', function() {
 
     var context = {};
 
-    beforeEach(inject(function () {
+    beforeEach(function () {
       context.controllerFuncName = 'editDescription';
       context.modalInputFuncName = 'textArea';
-    }));
+    });
 
     sharedUpdateBehaviour(context);
 
@@ -116,7 +117,7 @@ describe('annotationTypeViewDirective', function() {
 
   describe('updates to selections', function () {
 
-    it('can edit selections on a single select', inject(function (annotationTypeUpdateModal) {
+    it('can edit selections on a single select', function () {
       var annotationType = new this.AnnotationType(
         this.Factory.annotationType({
           valueType:     this.AnnotationValueType.SELECT,
@@ -124,13 +125,14 @@ describe('annotationTypeViewDirective', function() {
           options:       [ 'option1', 'option2' ],
           required:      true
         }));
-      spyOn(annotationTypeUpdateModal, 'openModal').and.returnValue({ result: this.$q.when([]) });
+      this.annotationTypeUpdateModal.openModal = jasmine.createSpy()
+        .and.returnValue({ result: this.$q.when([]) });
 
       this.createController({ study: undefined, annotationType: annotationType });
       this.controller.editSelectionOptions();
       this.scope.$digest();
-      expect(annotationTypeUpdateModal.openModal).toHaveBeenCalled();
-    }));
+      expect(this.annotationTypeUpdateModal.openModal).toHaveBeenCalled();
+    });
 
     it('an exception is thrown for annotation types that are not select', function () {
       var self = this,

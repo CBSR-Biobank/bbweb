@@ -43,9 +43,9 @@ define(function () {
 
     describe('(shared)', function() {
 
-      beforeEach(inject(function() {
+      beforeEach(function() {
         this.injectDependencies('modalInput', 'notificationsService');
-      }));
+      });
 
       it('on update should invoke the update method on entity', function() {
         spyOn(this.modalInput, context.modalInputFuncName)
