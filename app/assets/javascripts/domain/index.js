@@ -31,11 +31,11 @@ const DomainModule = angular.module('biobank.domain', [])
       .constant('AnnotationValueType',                require('./AnnotationValueType/AnnotationValueType'))
       .constant('SpecimenType',                       require('./study/SpecimenType/SpecimenType'))
 
-      .factory('EntityInfo',                          require('./access/EntityInfo'))
+      .factory('EntityInfo',                          require('./access/EntityInfo/EntityInfo'))
       .factory('EntitySet',                           require('./access/EntitySet/EntitySet'))
       .factory('MembershipBase',                      require('./access/MembershipBase/MembershipBase'))
       .factory('Membership',                          require('./access/Membership/Membership'))
-      .factory('UserMembership',                      require('./access/UserMembership'))
+      .factory('UserMembership',                      require('./access/UserMembership/UserMembership'))
 
       .factory('AnnotationType',                      require('./annotations/AnnotationType/AnnotationType'))
       .factory('HasAnnotations',                      require('./annotations/HasAnnotations'))

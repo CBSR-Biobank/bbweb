@@ -136,6 +136,12 @@ describe('EntitySet', function() {
       expect(entitySet.isMemberOf(name)).toBeTrue();
     });
 
+    it('returns true if set is for all entities', function() {
+      var entitySet = this.EntitySet.create({ allEntities: true, entityData: [] });
+      expect(entitySet.allEntities).toBeTrue();
+      expect(entitySet.isMemberOf(this.Factory.stringNext())).toBeTrue();
+    });
+
     it('returns false for a name not in the set', function() {
       var id        = this.Factory.stringNext(),
           name      = this.Factory.stringNext(),

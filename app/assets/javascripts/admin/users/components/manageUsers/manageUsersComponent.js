@@ -12,17 +12,11 @@ define(function () {
     }
   };
 
-  Controller.$inject = [
-    'breadcrumbService',
-    'usersService',
-    'UserCounts'
-   ];
-
   /*
    * Controller for this component.
    */
+  /* @ngInclude */
   function Controller(breadcrumbService,
-                      usersService,
                       UserCounts) {
     var vm = this;
     vm.$onInit = onInit;

@@ -14,7 +14,7 @@ describe('labelsInputComponent', function() {
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test')
     angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin)
+      Object.assign(this, ComponentTestSuiteMixin)
 
       this.injectDependencies('Factory')
 

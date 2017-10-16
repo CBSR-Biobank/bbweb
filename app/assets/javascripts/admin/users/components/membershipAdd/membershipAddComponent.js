@@ -1,184 +1,156 @@
 /**
  * This component allows a user to add a new {@link domain.users.Membership|Membership} to the system.
  */
-define(function (require) {
-  'use strict';
+import _ from 'lodash'
 
-  var _ = require('lodash');
+/*
+ *
+ */
+class Controller {
 
-  var component = {
-    template: require('./membershipAdd.html'),
-    controller: MembershipAddController,
-    controllerAs: 'vm',
-    bindings: {
-    }
-  };
-
-  MembershipAddController.$inject = [
-    '$scope',
-    '$state',
-    'notificationsService',
-    'domainNotificationService',
-    'Membership',
-    'breadcrumbService',
-    'gettextCatalog',
-    'EntityInfo',
-    'UserName',
-    'StudyName',
-    'CentreName'
-  ];
-
-  /*
-   *
-   */
-  function MembershipAddController($scope,
-                                   $state,
-                                   notificationsService,
-                                   domainNotificationService,
-                                   Membership,
-                                   breadcrumbService,
-                                   gettextCatalog,
-                                   EntityInfo,
-                                   UserName,
-                                   StudyName,
-                                   CentreName) {
-    var vm = this,
-        returnState = 'home.admin.users.memberships';
-
-    vm.$onInit = onInit;
-
-    //--
-
-    function onInit() {
-      vm.breadcrumbs = [
-        breadcrumbService.forState('home'),
-        breadcrumbService.forState('home.admin'),
-        breadcrumbService.forState('home.admin.users'),
-        breadcrumbService.forState('home.admin.users.memberships'),
-        breadcrumbService.forState('home.admin.users.memberships.add')
-      ];
-
-      vm.membership = new Membership();
-      vm.submit = submit;
-      vm.cancel = cancel;
-
-      vm.getUserNames = getUserNames;
-      vm.userSelected = userSelected;
-      vm.removeUser   = removeUser;
-
-      vm.getStudyNames = getStudyNames;
-      vm.studySelected = studySelected;
-      vm.removeStudy   = removeStudy;
-
-      vm.getCentreNames = getCentreNames;
-      vm.centreSelected = centreSelected;
-      vm.removeCentre   = removeCentre;
-
-      // taken from here:
-      // https://stackoverflow.com/questions/22436501/simple-angularjs-form-is-undefined-in-scope
-      $scope.$watch('membershipForm', function () {
-        $scope.membershipForm.$setValidity('studyOrCentreRequired', false);
-      });
-    }
-
-    function getUserNames(viewValue) {
-      var omitUserNames = vm.membership.userData.map(function (entityInfo) {
-        return UserName.create(_.pick(entityInfo, ['id', 'name']));
-      });
-      return UserName.list({ filter: 'name:like:' + viewValue}, omitUserNames)
-        .then(function (nameObjs) {
-          var labelData = nameObjs.map(function (nameObj) {
-            return { label: nameObj.name, obj: nameObj};
-          });
-          return labelData;
-        });
-    }
-
-    function userSelected(selection) {
-      vm.membership.userData.push(selection);
-    }
-
-    function removeUser(userTag) {
-      _.remove(vm.membership.userData, function (userData) {
-        return userData.name === userTag.name;
-      });
-    }
-
-    function getStudyNames(viewValue) {
-      var omitStudyNames = vm.membership.studyData.entityData.map(function (entityInfo) {
-        return StudyName.create(_.pick(entityInfo, ['id', 'name']));
-      });
-      return StudyName.list({ filter: 'name:like:' + viewValue}, omitStudyNames)
-        .then(function (names) {
-          return names.map(function (name) {
-            return { label: name.name, obj: new EntityInfo({ id: name.id, name: name.name }) };
-          });
-        });
-    }
-
-    function studySelected(selection) {
-      vm.membership.studyData.entityData.push(selection);
-      $scope.membershipForm.$setValidity('studyOrCentreRequired', true);
-    }
-
-    function removeStudy(studyTag) {
-      _.remove(vm.membership.studyData.entityData, function (studyData) {
-        return studyData.name === studyTag.name;
-      });
-      setValidity();
-    }
-
-    function getCentreNames(viewValue) {
-      var omitCentreNames = vm.membership.centreData.entityData.map(function (entityInfo) {
-        return StudyName.create(_.pick(entityInfo, ['id', 'name']));
-      });
-      return CentreName.list({ filter: 'name:like:' + viewValue}, omitCentreNames)
-        .then(function (names) {
-          return names.map(function (name) {
-            return { label: name.name, obj: new EntityInfo({ id: name.id, name: name.name }) };
-          });
-        });
-    }
-
-    function centreSelected(selection) {
-      vm.membership.centreData.entityData.push(selection);
-      $scope.membershipForm.$setValidity('studyOrCentreRequired', true);
-    }
-
-    function removeCentre(centreTag) {
-      _.remove(vm.membership.centreData.entityData, function (centreData) {
-        return centreData.name === centreTag.name;
-      });
-      setValidity();
-    }
-
-    function setValidity() {
-      if (vm.membership.studyData.allEntities || vm.membership.centreData.allEntities) { return; }
-
-      if ((vm.membership.studyData.entityData.length <= 0) &&
-          (vm.membership.centreData.entityData.length <= 0)) {
-        $scope.membershipForm.$setValidity('studyOrCentreRequired', false);
-      }
-    }
-
-    function submit() {
-      vm.membership.add().then(onSubmitSuccess).catch(onSubmitError);
-    }
-
-    function onSubmitSuccess() {
-      notificationsService.submitSuccess();
-      $state.go(returnState, {}, { reload: true });
-    }
-
-    function onSubmitError(error) {
-      domainNotificationService.updateErrorModal(error, gettextCatalog.getString('centre'));
-    }
-
-    function cancel() {
-      $state.go(returnState);
-    }
-
+  constructor($scope,
+              $state,
+              notificationsService,
+              domainNotificationService,
+              Membership,
+              breadcrumbService,
+              gettextCatalog,
+              EntityInfo,
+              UserName,
+              StudyName,
+              CentreName) {
+    'ngInject'
+    Object.assign(this, {
+      $scope,
+      $state,
+      notificationsService,
+      domainNotificationService,
+      Membership,
+      breadcrumbService,
+      gettextCatalog,
+      EntityInfo,
+      UserName,
+      StudyName,
+      CentreName
+    })
+    this.returnState = 'home.admin.users.memberships'
   }
 
-  return component;
-});
+  $onInit() {
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.users'),
+      this.breadcrumbService.forState('home.admin.users.memberships'),
+      this.breadcrumbService.forState('home.admin.users.memberships.add')
+    ]
+
+    this.membership = new this.Membership()
+
+    // taken from here:
+    // https://stackoverflow.com/questions/22436501/simple-angularjs-form-is-undefined-in-scope
+    this.$scope.$watch('membershipForm', () => {
+      this.$scope.membershipForm.$setValidity('studyOrCentreRequired', false)
+    })
+  }
+
+  getUserNames(viewValue) {
+    var omitUserNames = this.membership.userData
+        .map(entityInfo =>  this.UserName.create(_.pick(entityInfo, ['id', 'name'])))
+    return this.UserName.list({ filter: 'name:like:' + viewValue}, omitUserNames)
+      .then(nameObjs =>
+            nameObjs.map((nameObj) => ({
+              label: nameObj.name,
+              obj: nameObj
+            })))
+  }
+
+  userSelected(selection) {
+    this.membership.userData.push(selection)
+  }
+
+  removeUser(userTag) {
+    _.remove(this.membership.userData,
+             userData =>  userData.name === userTag.name)
+  }
+
+  getStudyNames(viewValue) {
+    var omitStudyNames = this.membership.studyData.entityData
+        .map(entityInfo =>  this.StudyName.create(_.pick(entityInfo, ['id', 'name'])))
+    return this.StudyName.list({ filter: 'name:like:' + viewValue}, omitStudyNames)
+      .then(names =>
+            names.map(name => ({
+              label: name.name,
+              obj: new this.EntityInfo({ id: name.id, name: name.name })
+            })))
+  }
+
+  studySelected(selection) {
+    this.membership.studyData.entityData.push(selection)
+    this.$scope.membershipForm.$setValidity('studyOrCentreRequired', true)
+  }
+
+  removeStudy(studyTag) {
+    _.remove(this.membership.studyData.entityData,
+             studyData => studyData.name === studyTag.name)
+    this.setValidity()
+  }
+
+  getCentreNames(viewValue) {
+    var omitCentreNames = this.membership.centreData.entityData
+        .map(entityInfo => this.CentreName.create(_.pick(entityInfo, ['id', 'name'])))
+
+    return this.CentreName.list({ filter: 'name:like:' + viewValue}, omitCentreNames)
+      .then(names =>
+            names.map(name => ({
+              label: name.name,
+              obj:   new this.EntityInfo({ id: name.id, name: name.name })
+            })))
+  }
+
+  centreSelected(selection) {
+    this.membership.centreData.entityData.push(selection)
+    this.$scope.membershipForm.$setValidity('studyOrCentreRequired', true)
+  }
+
+  removeCentre(centreTag) {
+    _.remove(this.membership.centreData.entityData,
+             centreData => centreData.name === centreTag.name)
+    this.setValidity()
+  }
+
+  setValidity() {
+    if (this.membership.studyData.allEntities || this.membership.centreData.allEntities) { return }
+
+    if ((this.membership.studyData.entityData.length <= 0) &&
+        (this.membership.centreData.entityData.length <= 0)) {
+      this.$scope.membershipForm.$setValidity('studyOrCentreRequired', false)
+    }
+  }
+
+  submit() {
+    this.membership.add()
+      .then(() => {
+        this.notificationsService.submitSuccess()
+        this.$state.go(this.returnState, {}, { reload: true })
+      })
+      .catch((error) => {
+        this.domainNotificationService.updateErrorModal(error, this.gettextCatalog.getString('centre'))
+      })
+  }
+
+  cancel() {
+    this.$state.go(this.returnState)
+  }
+
+}
+
+const COMPONENT = {
+  template: require('./membershipAdd.html'),
+  controller: Controller,
+  controllerAs: 'vm',
+  bindings: {
+  }
+}
+
+export default COMPONENT

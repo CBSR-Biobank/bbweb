@@ -13,7 +13,14 @@ import _ from 'lodash';
 /* @ngInject */
 export default function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
 
-  return Object.assign({ updateEntity, invalidFieldsTest, missingFieldsTest }, TestSuiteMixin);
+  return Object.assign(
+    {
+      updateEntity,
+      invalidFieldsTest,
+      missingFieldsTest,
+      missingFieldsTestAsync
+    },
+    TestSuiteMixin);
 
   function invalidFieldsTest(invalidFields, objCreateFun, entityCreateFun) {
     invalidFields.forEach((invalidField) => {
@@ -26,6 +33,19 @@ export default function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
     missingFields.forEach((missingField) => {
       const obj = objCreateFun(missingField);
       expect(() => entityCreateFun(obj)).toThrowError(/Missing required property/);
+    });
+  }
+
+  function missingFieldsTestAsync(missingFields, objCreateFun, entityCreateFun) {
+    missingFields.forEach((missingField) => {
+      const obj = objCreateFun(missingField)
+      entityCreateFun(obj)
+        .then(() => {
+          fail('should not invoked')
+        })
+        .catch((err) => {
+          expect(err.message).toContain(':Missing required property:')
+        })
     });
   }
 

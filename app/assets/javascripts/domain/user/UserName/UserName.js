@@ -62,8 +62,8 @@ define(function(require) {
       return EntityName.create(UserName, obj);
     };
 
-    UserName.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
-      const args = [ 'users/names' ].concat(_.toArray(arguments));
+    UserName.url = function (...paths) {
+      const args = [ 'users/names' ].concat(paths);
       return DomainEntity.url.apply(null, args);
     };
 

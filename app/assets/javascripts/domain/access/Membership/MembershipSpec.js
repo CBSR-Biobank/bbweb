@@ -15,18 +15,19 @@ describe('Membership', function() {
                     MebershipSpecCommon,
                     ServerReplyMixin,
                     {
-                      jsonObj: jsonObj,
-                      jsonObjWithEntities: jsonObjWithEntities,
-                      membershipFromConstructor: membershipFromConstructor,
-                      membershipFromJson: membershipFromJson,
-                      membershipFromJsonAsync: membershipFromJsonAsync,
-                      jsonMembershipWithAllStudies: jsonMembershipWithAllStudies,
-                      jsonMembershipWithStudy: jsonMembershipWithStudy,
-                      jsonMembershipWithAllCentres: jsonMembershipWithAllCentres,
-                      jsonMembershipWithCentre: jsonMembershipWithCentre,
-                      jsonMembershipWithEntities: jsonMembershipWithEntities,
-                      fixtures: fixtures
-                    });
+                      jsonObj,
+                      jsonObjWithEntities,
+                      membershipFromConstructor,
+                      membershipFromJson,
+                      membershipFromJsonAsync,
+                      jsonMembershipWithAllStudies,
+                      jsonMembershipWithStudy,
+                      jsonMembershipWithAllCentres,
+                      jsonMembershipWithCentre,
+                      jsonMembershipWithEntities,
+                      fixtures
+                    }
+                   );
 
     function jsonObj() {
       return this.Factory.membership();

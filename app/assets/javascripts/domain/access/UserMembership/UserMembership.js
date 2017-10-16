@@ -68,7 +68,7 @@ define(function () {
      * a user within asynchronous code.
      */
     UserMembership.create = function (obj) {
-      var validation = MembershipBase.isValid(obj);
+      var validation = UserMembership.isValid(obj);
       if (!validation.valid) {
         $log.error(validation.message);
         throw new DomainError(validation.message);

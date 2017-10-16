@@ -45,8 +45,8 @@ define(function(require) {
       return { valid: true, message: null };
     };
 
-    DomainEntity.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
-      return UrlService.url.apply(UrlService, _.toArray(arguments));
+    DomainEntity.url = function (...paths) {
+      return UrlService.url.apply(UrlService, paths);
     };
 
     return DomainEntity;
