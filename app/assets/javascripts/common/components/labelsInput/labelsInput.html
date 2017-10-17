@@ -11,9 +11,9 @@
              ng-model="vm.value"
              ng-model-options="{ debounce: 250 }"
              placeholder="{{vm.placeholder}}"
-             uib-typeahead="value.obj as value.label for value in vm.getValues()($viewValue)"
+             uib-typeahead="value.obj as value.label for value in vm.getValues($viewValue)"
              typeahead-loading="loadingValue"
-             typeahead-on-select="vm.valueSelected($item)"
+             typeahead-on-select="vm.tagSelected($item)"
              typeahead-no-results="noValueResults"/>
       <i ng-show="loadingValue" class="glyphicon glyphicon-refresh"></i>
       <div ng-show="noValueResults">
@@ -28,7 +28,7 @@
           <a class="label"
              ng-class="vm.labelClass"
              ng-repeat="tag in vm.tags"
-             ng-click="vm.removeTag(tag)"
+             ng-click="vm.tagRemoved(tag)"
              style="margin-right: 2px; margin-bottom: 2px; display: inline-block;"
              uib-tooltip="{{'Remove'|translate}}">
             {{tag.label}} <i class="glyphicon glyphicon-remove-sign"></i>

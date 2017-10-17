@@ -8,28 +8,21 @@
 
 import AnnotationsInputModule from './annotationsInput/annotationsInputModule';
 import ModalInputModule       from './modalInput/modalInputModule';
-import UrlService             from './services/url/UrlService';
 import angular                from 'angular';
-import breadcrumbs            from './components/breadcrumbs/breadcrumbsComponent';
-import languageService        from './services/language/languageService';
-import nameAndStateFilters    from './components/nameAndStateFilters/nameAndStateFiltersComponent';
-import nameEmailStateFilters  from './components/nameEmailStateFilters/nameEmailStateFiltersComponent';
-import nameFilter             from './components/nameFilter/nameFilterComponent';
-import timeago                from './filters/timeagoFilter';
 
 const CommonModule = angular.module('biobank.common', [ ModalInputModule, AnnotationsInputModule ])
       .controller('TabbedPageController',          require('./controllers/TabbedPageController'))
       .controller('NameAndStateFiltersController', require('./controllers/NameAndStateFiltersController'))
 
-      .component('breadcrumbs',             breadcrumbs)
+      .component('breadcrumbs',             require('./components/breadcrumbs/breadcrumbsComponent').default)
       .component('collapsiblePanel',        require('./components/collapsiblePanel/collapsiblePanelComponent'))
       .component('dateTimePicker',          require('./components/dateTimePicker/dateTimePickerComponent'))
       .component('debouncedTextInput',      require('./components/debouncedTextInput/debouncedTextInputComponent'))
-      .component('labelsInput',             require('./components/labelsInput/labelsInputComponent'))
+      .component('labelsInput',             require('./components/labelsInput/labelsInputComponent').default)
       .component('labelsList',              require('./components/labelsList/labelsListComponent'))
-      .component('nameFilter',              nameFilter)
-      .component('nameAndStateFilters',     nameAndStateFilters)
-      .component('nameEmailStateFilters',   nameEmailStateFilters)
+      .component('nameFilter',              require('./components/nameFilter/nameFilterComponent').default)
+      .component('nameAndStateFilters',     require('./components/nameAndStateFilters/nameAndStateFiltersComponent').default)
+      .component('nameEmailStateFilters',   require('./components/nameEmailStateFilters/nameEmailStateFiltersComponent').default)
       .component('progressTracker',         require('./components/progressTracker/progressTrackerComponent'))
       .component('statusLine',              require('./components/statusLine/statusLineComponent'))
 
@@ -46,7 +39,7 @@ const CommonModule = angular.module('biobank.common', [ ModalInputModule, Annota
 
       .filter('localTime',                  require('./filters/localTimeFilter'))
       .filter('nl2br',                      require('./filters/nl2brFilter'))
-      .filter('timeago',                    timeago)
+      .filter('timeago',                    require('./filters/timeagoFilter').default)
       .filter('truncate',                   require('./filters/truncateFilter'))
       .filter('yesNo',                      require('./filters/yesNoFilter'))
 
@@ -62,18 +55,17 @@ const CommonModule = angular.module('biobank.common', [ ModalInputModule, Annota
       .service('timeService',               require('./services/time/timeService'))
       .service('validationService',         require('./services/validationService'))
       .service('domainNotificationService', require('./services/domainNotification/domainNotificationService') )
-      .service('languageService',           languageService)
+      .service('languageService',           require('./services/language/languageService').default)
       .service('labelService',              require('./services/labelService'))
-      .service('UrlService',                UrlService)
+      .service('UrlService',                require('./services/url/UrlService').default)
 
       .factory('BbwebError',                require('./BbwebError'))
       .run(loadTemplates)
       .name;
 
-loadTemplates.$inject = ['$templateCache'];
+/* @ngInject */
 function loadTemplates($templateCache) {
   $templateCache.put('smartTablePaginationTemplate.html', require('./smartTablePaginationTemplate.html'));
 }
-
 
 export default CommonModule;
