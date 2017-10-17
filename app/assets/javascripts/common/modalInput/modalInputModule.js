@@ -29,12 +29,11 @@ const modalTypes = [
  */
 const ModalInputModule = 'biobank.modalinput';
 
-const Module = angular.module(ModalInputModule, [])
-  .service('modalInput', modalInputService);
-
+const Module = angular.module(ModalInputModule, []).service('modalInput', modalInputService);
 init();
 
 export default ModalInputModule;
+
 /*
  * Creates the required directives.
  */
@@ -55,8 +54,6 @@ function modalInputDirectiveGenerator(type) {
     return directive;
   };
 }
-
-modalInputService.$inject = ['$uibModal'];
 
 /**
  * Presents a modal to the user where a value for an entity can be updated.
@@ -82,6 +79,7 @@ modalInputService.$inject = ['$uibModal'];
  *
  * @return {uibModalInstance} The instance of the modal that was opened. This is a ui-bootstrap class.
  */
+/* @ngInject */
 function modalInputService($uibModal) {
   var service = {};
 

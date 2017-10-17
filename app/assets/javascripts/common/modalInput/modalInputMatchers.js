@@ -29,7 +29,7 @@ export default function modalInputMatcher () {
         compare: function(actual) {
           var element = actual.find('form').find('input'),
               pass = (element.length === 1) && (element.attr('focus-me') === 'true'),
-              message = `Expected input element ${angular.mock.dump(element)} be valid`;
+              message = 'Expected input element to be focused';
 
           return { pass: pass, message: message };
         }

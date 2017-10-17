@@ -21,7 +21,7 @@ xdescribe('modalInputModule', function() {
     'biobank.test',
     function($exceptionHandlerProvider) {
       $exceptionHandlerProvider.mode('log');
-    }
+     }
   ));
 
   beforeEach(() => {
@@ -33,24 +33,31 @@ xdescribe('modalInputModule', function() {
                               '$exceptionHandler',
                               '$animate',
                               '$document',
+                              '$timeout',
                               'modalInput',
                               'Factory');
 
 
       this.addModalMatchers();
       modalInputMatchers();
-      this.label = this.Factory.stringNext();
       this.title = this.Factory.stringNext();
+      this.label = this.Factory.stringNext();
 
-      this.openModal = (modalInputFunc, defaultValue, title, label, options) => {
-        title = title || this.Factory.stringNext();
-        label = label || this.Factory.stringNext();
-        this.modal = modalInputFunc(title, label, defaultValue, options);
-        this.modal.result.then(function () {}, function () {});
-        this.$rootScope.$digest();
-        this.modalElement = this.modalElementFind();
-        this.scope = this.modalElement.scope();
-      };
+      this.openModal =
+        (modalInputFunc,
+         defaultValue,
+         title = this.title,
+         label = this.label,
+         options) => {
+           this.modal = modalInputFunc(title, label, defaultValue, options);
+           this.modal.result
+             .then(angular.noop)
+             .catch(angular.noop);
+           this.$rootScope.$digest();
+           this.$animate.flush();
+           this.modalElement = this.modalElementFind();
+           this.scope = this.modalElement.scope();
+         };
     });
   });
 
@@ -333,7 +340,8 @@ xdescribe('modalInputModule', function() {
       inputs = this.modalElement.find('form').find('input');
       expect(inputs.attr('focus-me')).toBe('true');
 
-      inputs.forEach((input) => {
+      _.range(inputs.length).forEach((index) => {
+        const input = inputs.eq(index);
         expect(angular.element(input).attr('type')).toBe('password');
       });
 
@@ -451,8 +459,8 @@ xdescribe('modalInputModule', function() {
       expect(this.modalElement).not.toHaveHelpBlocks();
 
       optionElements = this.modalElement.find('form').find('option');
-      optionElements.forEach((optElement) => {
-        var text = angular.element(optElement).text();
+      _.range(optionElements.length).forEach((index) => {
+        const text = angular.element(optionElements.eq(index)).text();
         if (text !== '-- make a selection --') {
           expect(self.options).toContain(text);
         }
@@ -491,52 +499,51 @@ xdescribe('modalInputModule', function() {
   describe('select multiple modal', function() {
 
     beforeEach(function () {
+      expect(this.$document).toHaveModalsOpen(0);
       this.options = _.range(3).map(() => faker.random.word());
       this.defaultValue = [ this.options[0] ];
     });
 
     it('has valid elements and scope', function() {
-      var self = this,
-          labelElements;
+      var labelElements;
 
-      self.openModal(self.modalInput.selectMultiple,
-                     self.defaultValue,
-                     self.title,
-                     self.label,
-                     { selectOptions: self.options });
+      this.openModal(this.modalInput.selectMultiple,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     { selectOptions: this.options });
 
-      expect(self.$document).toHaveModalsOpen(1);
+      expect(this.$document).toHaveModalsOpen(1);
 
-      expect(this.modalElement).toHaveModalTitle(self.title);
-      expect(this.modalElement).toHaveLabelStartWith(self.label);
+      expect(this.modalElement).toHaveModalTitle(this.title);
+      expect(this.modalElement).toHaveLabelStartWith(this.label);
       expect(this.modalElement).toHaveInputs(this.options.length);
 
       labelElements = this.modalElement.find('form').find('label');
-      labelElements.forEach((element, index) => {
+      _.range(labelElements.length).forEach((index) => {
         if (index === 0) { return; } // skip the first label since it's for the group
-        expect(self.options).toContain(angular.element(element).text().trim());
+        const element = labelElements.eq(index);
+        expect(this.options).toContain(angular.element(element).text().trim());
       });
 
       this.dismiss(this.modal, 'closed in test');
-      expect(self.$document).toHaveModalsOpen(0);
+      expect(this.$document).toHaveModalsOpen(0);
     });
 
     it('form is invalid if a value is required and nothing selected', function() {
-      var self = this;
-
-      self.openModal(self.modalInput.selectMultiple,
-                     self.defaultValue,
-                     self.title,
-                     self.label,
+      this.openModal(this.modalInput.selectMultiple,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
                      {
                        required: true,
-                       selectOptions: self.options
+                       selectOptions: this.options
                      });
 
-      expect(self.$document).toHaveModalsOpen(1);
+      expect(this.$document).toHaveModalsOpen(1);
 
-      expect(this.modalElement).toHaveModalTitle(self.title);
-      expect(this.modalElement).toHaveLabelStartWith(self.label);
+      expect(this.modalElement).toHaveModalTitle(this.title);
+      expect(this.modalElement).toHaveLabelStartWith(this.label);
       expect(this.modalElement).toHaveInputs(this.options.length);
 
       this.scope.vm.value.forEach((value) => {
@@ -552,25 +559,22 @@ xdescribe('modalInputModule', function() {
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
-      expect(self.$document).toHaveModalsOpen(0);
+      expect(this.$document).toHaveModalsOpen(0);
     });
 
     it('has a help block when required', function() {
-      var self = this;
-
-      self.openModal(self.modalInput.selectMultiple,
+      this.openModal(this.modalInput.selectMultiple,
                      [],
-                     self.title,
-                     self.label,
+                     this.title,
+                     this.label,
                      {
                        required: true,
-                       selectOptions: self.options
+                       selectOptions: this.options
                      });
 
       expect(this.modalElement).toHaveHelpBlocks();
-
       this.dismiss(this.modal, 'closed in test');
-      expect(self.$document).toHaveModalsOpen(0);
+      expect(this.$document).toHaveModalsOpen(0);
     });
 
     it('throws an exception if select options are not provided ', function() {
@@ -592,12 +596,11 @@ xdescribe('modalInputModule', function() {
   describe('text modal', function() {
 
     beforeEach(function () {
+      expect(this.$document).toHaveModalsOpen(0);
       this.defaultValue = this.Factory.stringNext();
     });
 
     it('has valid elements and scope', function() {
-      expect(this.$document).toHaveModalsOpen(0);
-
       this.openModal(this.modalInput.text,
                      this.defaultValue,
                      this.title,
@@ -659,11 +662,7 @@ xdescribe('modalInputModule', function() {
       this.scope.vm.okPressed();
       this.$rootScope.$digest();
 
-      this.$animate.flush();
-      this.$rootScope.$digest();
-      this.$animate.flush();
-      this.$rootScope.$digest();
-
+      this.flush();
       expect(this.$document).toHaveModalsOpen(0);
     });
 
@@ -677,11 +676,7 @@ xdescribe('modalInputModule', function() {
       this.scope.vm.closePressed();
       this.$rootScope.$digest();
 
-      this.$animate.flush();
-      this.$rootScope.$digest();
-      this.$animate.flush();
-      this.$rootScope.$digest();
-
+      this.flush();
       expect(this.$document).toHaveModalsOpen(0);
     });
 
@@ -690,6 +685,7 @@ xdescribe('modalInputModule', function() {
   describe('textArea modal', function() {
 
     beforeEach(function () {
+      expect(this.$document).toHaveModalsOpen(0);
       this.defaultValue = faker.lorem.sentences(4);
     });
 
@@ -731,6 +727,7 @@ xdescribe('modalInputModule', function() {
   describe('url modal', function() {
 
     beforeEach(function () {
+      expect(this.$document).toHaveModalsOpen(0);
       this.defaultValue = faker.image.imageUrl();
     });
 

@@ -128,8 +128,8 @@ function httpInterceptorConfig($httpProvider) {
 
   //---
 
-  httpInterceptor.$inject = ['$q', '$timeout', '$injector'];
-  function httpInterceptor($q, $timeout, $injector) {
+  httpInterceptor.$inject = ['$q', '$injector'];
+  function httpInterceptor($q, $injector) {
     return { 'responseError': responseError };
 
     //--
