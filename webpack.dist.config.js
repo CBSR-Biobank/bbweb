@@ -33,7 +33,11 @@ config.plugins = config.plugins.concat([
     }
   }),
   new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-  new webpack.NoEmitOnErrorsPlugin()
+  new webpack.NoEmitOnErrorsPlugin(),
+  new webpack.SourceMapDevToolPlugin({
+    filename: 'js/[name].bundle.js.map',
+    exclude: ['js/vendor.bundle.js']
+  })
 ]);
 
 module.exports = config;
