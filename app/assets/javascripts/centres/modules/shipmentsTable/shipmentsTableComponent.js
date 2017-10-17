@@ -146,7 +146,7 @@ class ShipmentsTableController {
  *
  * @param {domain.centres.ShipmentTypes} shipmentTypes - the type of shipments to display.
  */
-var COMPONENT = {
+const COMPONENT = {
   template: require('./shipmentsTable.html'),
   controller: ShipmentsTableController,
   controllerAs: 'vm',

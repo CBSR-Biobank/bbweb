@@ -14,8 +14,6 @@ describe('shipmentsTableComponent', function() {
       _.extend(this, ShippingComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
                               '$state',
                               'Centre',
                               'Shipment',
@@ -24,22 +22,23 @@ describe('shipmentsTableComponent', function() {
                               'Factory');
 
       this.centre = new this.Centre(this.Factory.centre());
-      this.createController = (centre, shipmentTypes, statesToDisplay) => {
-        shipmentTypes = shipmentTypes || this.SHIPMENT_TYPES.INCOMING;
-        statesToDisplay = statesToDisplay || [];
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
-          `<shipments-table
-             centre="vm.centre"
-             shipment-types="${shipmentTypes}"
-             states-to-display="vm.statesToDisplay">
-           </shipments-table>`,
-          {
-            centre: centre,
-            statesToDisplay: statesToDisplay
-          },
-          'shipmentsTable');
-      };
+      this.createController =
+        (centre,
+         shipmentTypes = this.SHIPMENT_TYPES.INCOMING,
+         statesToDisplay = []) => {
+           ShippingComponentTestSuiteMixin.createController.call(
+             this,
+             `<shipments-table
+                 centre="vm.centre"
+                 shipment-types="${shipmentTypes}"
+                 states-to-display="vm.statesToDisplay">
+              </shipments-table>`,
+             {
+               centre: centre,
+               statesToDisplay: statesToDisplay
+             },
+             'shipmentsTable');
+         };
 
       this.createTableState = (searchPredicatObject, sortPredicate, sortOrderReverse) => {
         var result = {
