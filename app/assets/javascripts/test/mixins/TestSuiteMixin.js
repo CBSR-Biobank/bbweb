@@ -7,8 +7,6 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash';
-
 /**
  * This is a mixin that can be added UserContext object of a Jasmine test suite.
  *
@@ -18,16 +16,16 @@ import _ from 'lodash';
 export default function TestSuiteMixin($injector, UrlService) {
 
   return {
-    injectDependencies:    injectDependencies,
-    capitalizeFirstLetter: capitalizeFirstLetter,
-    url:                   url
+    injectDependencies,
+    capitalizeFirstLetter,
+    url
   };
 
   //--
 
   // cannot use arrow function since "arguments" is used
-  function injectDependencies(/* dep1, dep2, ..., depn */) {
-    Array.from(arguments).forEach((dependency) => {
+  function injectDependencies(...dependencies) {
+    dependencies.forEach((dependency) => {
       this[dependency] = $injector.get(dependency);
     });
   }
@@ -36,8 +34,8 @@ export default function TestSuiteMixin($injector, UrlService) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
-  function url() {
-    return UrlService.url.apply(UrlService, _.toArray(arguments));
+  function url(...paths) {
+    return UrlService.url.apply(UrlService, paths);
   }
 
 }

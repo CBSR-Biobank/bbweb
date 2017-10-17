@@ -6,29 +6,37 @@
 import angular from 'angular';
 
 /* @ngInject */
-export default function ModalTestSuiteMixinFactory($rootScope, $animate, $document, TestSuiteMixin) {
+export default function ModalTestSuiteMixinFactory($animate, $rootScope, TestSuiteMixin) {
 
-  return Object.assign({ modalElementFind, flush, dismiss, addModalMatchers }, TestSuiteMixin);
+  return Object.assign({ modalElementFind, close, dismiss, flush, addModalMatchers }, TestSuiteMixin);
 
   function modalElementFind () {
-    return $document.find('body > div.modal');
+    return this.$document.find('body > div.modal');
   }
 
-  function flush () {
-    $animate.flush();
-    $rootScope.$digest();
-    $animate.flush();
-    $rootScope.$digest();
-  }
-
-  function dismiss (modal = this.modal, reason, noFlush) {
-    var closed;
-    closed = modal.dismiss(reason);
+  function close(modal = this.modal, reason, noFlush) {
+    const closed = modal.close(reason);
     $rootScope.$digest();
     if (!noFlush) {
-      this.flush();
+      flush.call(this);
     }
     return closed;
+  }
+
+  function dismiss(modal = this.modal, reason, noFlush) {
+    const closed = modal.dismiss(reason);
+    $rootScope.$digest();
+    if (!noFlush) {
+      flush.call(this);
+    }
+    return closed;
+  }
+
+  function flush() {
+    $animate.flush();
+    $rootScope.$digest();
+    $animate.flush();
+    $rootScope.$digest();
   }
 
   /**

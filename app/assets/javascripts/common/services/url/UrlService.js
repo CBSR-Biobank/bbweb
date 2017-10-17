@@ -3,8 +3,6 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash';
-
 export default class UrlService {
 
   constructor(AppConfig) {
@@ -16,8 +14,8 @@ export default class UrlService {
    *
    * @return {string} The URL.
    */
-  url(/* baseUrl, pathItem1, pathItem2, ... pathItemN */) {
-    const args = [ this.AppConfig.restApiUrlPrefix ].concat(_.toArray(arguments));
+  url(...paths) {
+    const args = [ this.AppConfig.restApiUrlPrefix ].concat(paths);
     if (args.length <= 0) {
       throw new Error('no arguments specified');
     }
