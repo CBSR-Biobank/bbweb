@@ -4,6 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
+/* global PRODUCTION */
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'angular-toastr/dist/angular-toastr.min.css';
@@ -81,7 +82,7 @@ const biobankApp = angular.module('biobankApp',
 
 export default biobankApp;
 
-configToastr.$inject = ['toastrConfig'];
+/* @ngInject */
 function configToastr(toastrConfig) {
   angular.extend(toastrConfig, {
     positionClass: 'toast-bottom-right'
@@ -89,14 +90,15 @@ function configToastr(toastrConfig) {
 
 }
 
-uiRouterTrace.$inject = ['$trace'];
-
+/* @ngInject */
 function uiRouterTrace($trace) {
-  $trace.enable('TRANSITION');
+  if (!PRODUCTION) {
+    $trace.enable('TRANSITION');
+  }
 }
 
-uiRouterIsAuthorized.$inject = ['$transitions'];
 
+/* @ngInject */
 function uiRouterIsAuthorized($transitions) {
   $transitions.onStart({ to: 'home.admin.**' },      checkIsAuthenticated);
   $transitions.onStart({ to: 'home.collection.**' }, checkIsAuthenticated);
@@ -117,30 +119,9 @@ function uiRouterIsAuthorized($transitions) {
   }
 }
 
-loggingConfig.$inject = ['$logProvider'];
+/* @ngInject */
 function loggingConfig($logProvider) {
-  $logProvider.debugEnabled(true);
-}
-
-httpInterceptorConfig.$inject = ['$httpProvider'];
-function httpInterceptorConfig($httpProvider) {
-  $httpProvider.interceptors.push(httpInterceptor);
-
-  //---
-
-  httpInterceptor.$inject = ['$q', '$injector'];
-  function httpInterceptor($q, $injector) {
-    return { 'responseError': responseError };
-
-    //--
-
-    function responseError(rejection) {
-      if (rejection.status === 401) {
-        $injector.get('usersService').sessionTimeout();
-        $injector.get('$state').go('home.users.login', {}, { reload: true });
-        $injector.get('$log').info('your session has timed out');
-      }
-      return $q.reject(rejection);
-    }
+  if (!PRODUCTION) {
+    $logProvider.debugEnabled(true);
   }
 }

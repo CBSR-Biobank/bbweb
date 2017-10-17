@@ -106,6 +106,9 @@ const config = {
     new webpack.optimize.CommonsChunkPlugin({
       name: 'manifest',
       minChunks: Infinity
+    }),
+    new webpack.DefinePlugin({
+      PRODUCTION: JSON.stringify(false)
     })
   ],
 

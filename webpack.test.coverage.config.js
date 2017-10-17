@@ -1,6 +1,7 @@
 /* global module */
 
 const path         = require('path'),
+      webpack      = require('webpack'),
       commonConfig = require('./webpack.config'),
       _            = require('lodash');
 
@@ -21,6 +22,10 @@ config.module.rules = config.module.rules
     exclude: /(test|Spec.js$)/
   }]);
 
-config.plugins = [];
+config.plugins = [
+  new webpack.DefinePlugin({
+      PRODUCTION: JSON.stringify(false)
+  })
+];
 
 module.exports = config;

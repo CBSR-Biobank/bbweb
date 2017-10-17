@@ -9,6 +9,9 @@ const config = _.cloneDeep(commonConfig);
 config.devtool = 'cheap-module-eval-source-map';
 
 config.plugins = [
+  new webpack.DefinePlugin({
+      PRODUCTION: JSON.stringify(false)
+  }),
   // Adds webpack HMR support. It act's like livereload,
   // reloading page after webpack rebuilt modules.
   // It also updates stylesheets and inline assets without page reloading.
