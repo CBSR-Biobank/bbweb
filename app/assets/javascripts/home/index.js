@@ -8,14 +8,13 @@
  */
 
 import angular from 'angular';
-import homeComponent from './components/home/homeComponent';
 
-const HomeModule = angular.module('biobank.home', [])
-      .config(require('./states'))
-      .component('about',         require('./components/about/aboutComponent'))
-      .component('biobankFooter', require('./components/biobankFooter/biobankFooterComponent'))
-      .component('biobankHeader', require('./components/biobankHeader/biobankHeaderComponent'))
-      .component('home',          homeComponent)
-      .name;
+const ngModule = angular.module('biobank.home', [])
 
-export default HomeModule;
+const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
+
+context.keys().forEach(key => {
+  context(key).default(ngModule)
+})
+
+export default ngModule.name

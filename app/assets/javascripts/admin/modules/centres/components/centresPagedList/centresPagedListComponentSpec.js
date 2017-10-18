@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import sharedBehaviour from '../../../../test/behaviours/EntityPagedListSharedBehaviourSpec';
+import sharedBehaviour from '../../../../../test/behaviours/EntityPagedListSharedBehaviourSpec';
 
 describe('centresPagedListComponent', function() {
 
@@ -30,7 +30,7 @@ describe('centresPagedListComponent', function() {
       this.createController = () => {
         ComponentTestSuiteMixin.createController.call(
           this,
-          '<centres-paged-list></centres-paged-list',
+          '<centres-paged-list></centres-paged-list>',
           undefined,
           'centresPagedList');
       };

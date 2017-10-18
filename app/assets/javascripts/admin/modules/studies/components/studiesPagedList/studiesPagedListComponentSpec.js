@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import sharedBehaviour from '../../../../test/behaviours/EntityPagedListSharedBehaviourSpec';
+import sharedBehaviour from '../../../../../test/behaviours/EntityPagedListSharedBehaviourSpec';
 
 describe('Component: studiesPagedList', function() {
 

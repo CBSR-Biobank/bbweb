@@ -2,7 +2,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-import PagedListController from '../../../../common/controllers/PagedListController';
+
+import { PagedListController } from '../../../../../common/controllers/PagedListController';
 import _ from 'lodash';
 
 /*
@@ -35,6 +36,11 @@ class Controller extends PagedListController {
             emailFilter: new EmailFilter(),
             stateFilter: new StateFilter(true, stateData, 'all')
           },
+          [
+            { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') },
+            { id: 'email', labelFunc: () => gettextCatalog.getString('Email') },
+            { id: 'state', labelFunc: () => gettextCatalog.getString('State')  }
+          ],
           5);
 
     Object.assign(this,
@@ -52,12 +58,6 @@ class Controller extends PagedListController {
     _.values(UserState).forEach((state) => {
       this.stateLabelFuncs[state] = userStateLabelService.stateToLabelFunc(state);
     });
-
-    this.sortFieldData = [
-      { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') },
-      { id: 'email', labelFunc: () => gettextCatalog.getString('Email') },
-      { id: 'state', labelFunc: () => gettextCatalog.getString('State')  }
-    ];
   }
 
   $onInit() {
@@ -110,4 +110,4 @@ const component = {
   }
 };
 
-export default component;
+export default ngModule => ngModule.component('usersPagedList', component)

@@ -2,6 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
+
 import _ from 'lodash';
 
 var returnState = 'home.admin.studies.study.collection.ceventType';
@@ -65,4 +66,4 @@ const component = {
   }
 };
 
-export default component;
+export default ngModule => ngModule.component('collectionSpecimenDescriptionAdd', component)

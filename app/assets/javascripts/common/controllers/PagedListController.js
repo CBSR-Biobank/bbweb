@@ -2,7 +2,9 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
+
 import _ from 'lodash';
+import angular from 'angular'
 
 /**
  * Base class for controllers that display items in a paged fashion.
@@ -30,22 +32,25 @@ import _ from 'lodash';
  *
  * @return {object} The base class object.
  */
-export default class PagedListController {
+class PagedListController {
 
-  constructor($log, $state, gettextCatalog, filters, limit) {
-    this.$log           = $log;
-    this.$state         = $state;
-    this.gettextCatalog = gettextCatalog;
-    this.filters        = filters;
-    this.limit          = limit;
+  constructor($log,
+              $state,
+              gettextCatalog,
+              filters,
+              sortFieldData,
+              limit) {
+    Object.assign(this, {
+      $log,
+      $state,
+      gettextCatalog,
+      filters,
+      sortFieldData,
+      limit
+    })
 
     this.pagedResult   = { total: 0 };
     this.selectedState = 'all';
-
-    this.sortFieldData         = [
-      { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') },
-      { id: 'state', labelFunc: () => gettextCatalog.getString('State') }
-    ];
 
     this.pagerOptions = {
       filter: '',
@@ -139,3 +144,9 @@ export default class PagedListController {
   }
 
 }
+
+export { PagedListController }
+
+// this controller does not need to be included in AngularJS since it is imported by the controllers that
+// extend it
+export default () => angular.noop

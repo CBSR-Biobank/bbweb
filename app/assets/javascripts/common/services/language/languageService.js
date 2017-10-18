@@ -2,11 +2,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-export default class LanguageService {
+class LanguageService {
 
   constructor($window, gettextCatalog) {
-    this.$window = $window;
-    this.gettextCatalog = gettextCatalog;
+    'ngInject'
+    Object.assign(this, { $window, gettextCatalog });
   }
 
   initLanguage(options) {
@@ -31,4 +31,4 @@ export default class LanguageService {
   }
 }
 
-LanguageService.$inject = ['$window', 'gettextCatalog'];
+export default ngModule => ngModule.service('languageService', LanguageService)

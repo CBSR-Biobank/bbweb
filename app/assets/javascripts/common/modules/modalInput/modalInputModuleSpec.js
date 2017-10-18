@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import faker  from 'faker';
-import modalInputMatchers from './modalInputMatchers';
+import modalInputMatchers from '../../../test/matchers/modalInputMatchers';
 import moment from 'moment';
 
 xdescribe('modalInputModule', function() {

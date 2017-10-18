@@ -3,7 +3,7 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-export default class UrlService {
+class UrlService {
 
   constructor(AppConfig) {
     this.AppConfig = AppConfig;
@@ -23,4 +23,4 @@ export default class UrlService {
   }
 }
 
-UrlService.$inject = ['AppConfig'];
+export default ngModule => ngModule.service('UrlService', UrlService)

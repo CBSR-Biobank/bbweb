@@ -3,7 +3,7 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-const _ = require('lodash')
+import _ from 'lodash'
 
 const DefaultLabel = 'label-info'
 
@@ -98,4 +98,4 @@ const COMPONENT = {
 }
 
 
-export default COMPONENT;
+export default ngModule => ngModule.component('labelsInput', COMPONENT)

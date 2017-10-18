@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import entityUpdateSharedSpec from '../../../../test/behaviours/entityUpdateSharedSpec';
+import entityUpdateSharedSpec from '../../../../../test/behaviours/entityUpdateSharedSpec';
 
 describe('Component: studySummary', function() {
 

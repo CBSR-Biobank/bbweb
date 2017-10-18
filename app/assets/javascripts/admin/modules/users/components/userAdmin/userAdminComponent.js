@@ -2,50 +2,42 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  var component = {
-    template: require('./userAdmin.html'),
-    controller: UserAdminController,
-    controllerAs: 'vm'
-  };
+var component = {
+  template: require('./userAdmin.html'),
+  controller: UserAdminController,
+  controllerAs: 'vm'
+};
 
-  UserAdminController.$inject = [
-    'usersService',
-    'UserCounts',
-    'breadcrumbService'
-  ];
+/*
+ * Shows a table of users.
+ */
+/* @ngInject */
+function UserAdminController(usersService, UserCounts, breadcrumbService) {
+  var vm = this;
+  vm.$onInit = onInit;
 
-  /*
-   * Shows a table of users.
-   */
-  function UserAdminController(usersService, UserCounts, breadcrumbService) {
-    var vm = this;
-    vm.$onInit = onInit;
+  //--
 
-    //--
+  function onInit() {
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.users')
+    ];
 
-    function onInit() {
-      vm.breadcrumbs = [
-        breadcrumbService.forState('home'),
-        breadcrumbService.forState('home.admin'),
-        breadcrumbService.forState('home.admin.users')
-      ];
+    vm.haveUsers = false;
 
-      vm.haveUsers = false;
-
-      usersService.requestCurrentUser()
-        .then(function (user) {
-          vm.user = user;
-          return UserCounts.get();
-        })
-        .then(function (counts) {
-          vm.userCounts = counts;
-          vm.haveUsers  = (vm.userCounts.total > 0);
-        });
-    }
+    usersService.requestCurrentUser()
+      .then(function (user) {
+        vm.user = user;
+        return UserCounts.get();
+      })
+      .then(function (counts) {
+        vm.userCounts = counts;
+        vm.haveUsers  = (vm.userCounts.total > 0);
+      });
   }
+}
 
-  return component;
-});
+export default ngModule => ngModule.component('userAdmin', component)

@@ -9,7 +9,7 @@
  * @return {object} Object containing the functions that will be mixed in.
  */
 /* @ngInject */
-export default function DirectiveTestSuiteMixin(ComponentTestSuiteMixin) {
+function DirectiveTestSuiteMixin(ComponentTestSuiteMixin) {
 
   return Object.assign({}, ComponentTestSuiteMixin, { createController });
 
@@ -19,3 +19,4 @@ export default function DirectiveTestSuiteMixin(ComponentTestSuiteMixin) {
   }
 
 }
+export default ngModule => ngModule.service('DirectiveTestSuiteMixin', DirectiveTestSuiteMixin)

@@ -5,11 +5,12 @@
  */
 import angular from 'angular';
 
-const ShipmentSpecimensModule = angular.module('biobank.shipmentSpecimens', [])
-  .component('ssSpecimensPagedTable',
-             require('./components/ssSpecimensPagedTable/ssSpecimensPagedTableComponent'))
-  .component('specimenTableAction',
-             require('./components/specimenTableAction/specimenTableActionComponent'))
-  .name;
+const ngModule = angular.module('biobank.shipmentSpecimens', [])
 
-export default ShipmentSpecimensModule;
+const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
+
+context.keys().forEach(key => {
+  context(key).default(ngModule)
+})
+
+export default ngModule.name

@@ -2,57 +2,50 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
-  'use strict';
 
-  HasAnnotationTypesFactory.$inject = [
-    '$q',
-    'biobankApi',
-    'AnnotationType',
-    'DomainError'
-  ];
+import _ from 'lodash';
+
+/**
+ * Maintains an array of annotation types.
+ *
+ * This is a mixin.
+ */
+/* @ngInject */
+function HasAnnotationTypesFactory($q,
+                                   biobankApi,
+                                   AnnotationType,
+                                   DomainError) {
+
+  function HasAnnotationTypes() {}
+
+  HasAnnotationTypes.prototype.validAnnotationTypes = function (annotationTypes) {
+    var result;
+
+    if (_.isUndefined(annotationTypes) || (annotationTypes.length <= 0)) {
+      // there are no annotation types, nothing to validate
+      return true;
+    }
+    result = _.find(annotationTypes, function (annotType) {
+      return !AnnotationType.valid(annotType);
+    });
+
+    return _.isUndefined(result);
+  };
 
   /**
-   * Maintains an array of annotation types.
-   *
-   * This is a mixin.
+   * The entity that includes this mixin needs to implement 'asyncCreate'.
    */
-  function HasAnnotationTypesFactory($q,
-                                     biobankApi,
-                                     AnnotationType,
-                                     DomainError) {
+  HasAnnotationTypes.prototype.removeAnnotationType = function (annotationType, url) {
+    var self = this,
+        found = _.find(self.annotationTypes,  { id: annotationType.id });
 
-    function HasAnnotationTypes() {}
+    if (!found) {
+      return $q.reject(new DomainError('annotation type with ID not present: ' + annotationType.id));
+    }
+    return biobankApi.del(url).then( self.asyncCreate);
+  };
 
-    HasAnnotationTypes.prototype.validAnnotationTypes = function (annotationTypes) {
-      var result;
+  return HasAnnotationTypes;
+}
 
-      if (_.isUndefined(annotationTypes) || (annotationTypes.length <= 0)) {
-        // there are no annotation types, nothing to validate
-        return true;
-      }
-      result = _.find(annotationTypes, function (annotType) {
-        return !AnnotationType.valid(annotType);
-      });
-
-      return _.isUndefined(result);
-    };
-
-    /**
-     * The entity that includes this mixin needs to implement 'asyncCreate'.
-     */
-    HasAnnotationTypes.prototype.removeAnnotationType = function (annotationType, url) {
-      var self = this,
-          found = _.find(self.annotationTypes,  { id: annotationType.id });
-
-      if (!found) {
-        return $q.reject(new DomainError('annotation type with ID not present: ' + annotationType.id));
-      }
-      return biobankApi.del(url).then( self.asyncCreate);
-    };
-
-    return HasAnnotationTypes;
-  }
-
-  return HasAnnotationTypesFactory;
-});
+export default ngModule => ngModule.factory('HasAnnotationTypes', HasAnnotationTypesFactory)

@@ -3,7 +3,7 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-export default class AppConfigProvider {
+class AppConfigProvider {
 
     // initial / default config
   constructor() {
@@ -24,3 +24,5 @@ export default class AppConfigProvider {
   }
 
 }
+
+export default ngModule => ngModule.provider('AppConfig', AppConfigProvider)

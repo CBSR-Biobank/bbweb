@@ -1,6 +1,7 @@
 /**
  * This component allows a user to add a new {@link domain.users.Membership|Membership} to the system.
  */
+
 import _ from 'lodash'
 
 /*
@@ -153,4 +154,4 @@ const COMPONENT = {
   }
 }
 
-export default COMPONENT
+export default ngModule => ngModule.component('membershipAddComponent', COMPONENT)

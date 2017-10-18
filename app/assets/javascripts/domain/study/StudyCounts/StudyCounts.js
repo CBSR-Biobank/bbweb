@@ -2,41 +2,39 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
-  'use strict';
 
-  StudyCountsFactory.$inject = ['biobankApi'];
+import _ from 'lodash'
 
-  /**
-   *
-   */
-  function StudyCountsFactory(biobankApi) {
+/**
+ *
+ */
+/* @ngInject */
+function StudyCountsFactory(biobankApi) {
 
-    function StudyCounts(options) {
-      var defaults = {
-        total:    0,
-        disabled: 0,
-        enabled:  0,
-        retired:  0
-      };
-
-      options = options || {};
-      _.extend(this, defaults, _.pick(options, _.keys(defaults)));
-    }
-
-    StudyCounts.get = function () {
-      return biobankApi.get('/api/studies/counts').then(function (response) {
-        return new StudyCounts({
-          total:    response.total,
-          disabled: response.disabledCount,
-          enabled:  response.enabledCount,
-          retired:  response.retiredCount
-        });
-      });
+  function StudyCounts(options) {
+    var defaults = {
+      total:    0,
+      disabled: 0,
+      enabled:  0,
+      retired:  0
     };
 
-    return StudyCounts;
+    options = options || {};
+    _.extend(this, defaults, _.pick(options, _.keys(defaults)));
   }
 
-  return StudyCountsFactory;
-});
+  StudyCounts.get = function () {
+    return biobankApi.get('/api/studies/counts').then(function (response) {
+      return new StudyCounts({
+        total:    response.total,
+        disabled: response.disabledCount,
+        enabled:  response.enabledCount,
+        retired:  response.retiredCount
+      });
+    });
+  };
+
+  return StudyCounts;
+}
+
+export default ngModule => ngModule.factory('StudyCounts', StudyCountsFactory)

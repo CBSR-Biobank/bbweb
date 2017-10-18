@@ -9,10 +9,10 @@ import membershipCommonBehaviour from '../../../test/behaviours/membershipCommon
 
 describe('UserMembership', function() {
 
-  function SuiteMixin(MebershipSpecCommon, ServerReplyMixin) {
+  function SuiteMixin(MembershipSpecCommon, ServerReplyMixin) {
 
     return _.extend({},
-                    MebershipSpecCommon,
+                    MembershipSpecCommon,
                     ServerReplyMixin,
                     {
                       jsonObj,
@@ -84,8 +84,8 @@ describe('UserMembership', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(MebershipSpecCommon, ServerReplyMixin) {
-      _.extend(this, SuiteMixin(MebershipSpecCommon, ServerReplyMixin));
+    angular.mock.inject(function(MembershipSpecCommon, ServerReplyMixin) {
+      _.extend(this, SuiteMixin(MembershipSpecCommon, ServerReplyMixin));
 
       this.injectDependencies('$rootScope',
                               'UserMembership',

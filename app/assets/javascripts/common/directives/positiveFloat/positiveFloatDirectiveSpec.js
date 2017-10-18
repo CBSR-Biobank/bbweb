@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 
-describe('Directive: validAmount', function() {
+describe('Directive: positiveFloat', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');

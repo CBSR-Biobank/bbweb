@@ -27,12 +27,11 @@ const modalTypes = [
  * Creates a module with one service and multiple directives to allow the user to modify an entity value
  * while in a modal.
  */
-const ModalInputModule = 'biobank.modalinput';
 
-const Module = angular.module(ModalInputModule, []).service('modalInput', modalInputService);
+const ngModule = angular.module('biobank.modalinput', []).service('modalInput', modalInputService);
 init();
 
-export default ModalInputModule;
+export default ngModule.name;
 
 /*
  * Creates the required directives.
@@ -41,7 +40,7 @@ function init() {
   modalTypes.forEach((type) => {
     var name = 'modalInput' + _.upperFirst(type);
     var directive = modalInputDirectiveGenerator(type);
-    Module.directive(name, directive);
+    ngModule.directive(name, directive);
   });
 }
 

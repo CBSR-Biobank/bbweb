@@ -2,94 +2,83 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
-  'use strict';
 
-  ProcessingDtoFactory.$inject = [
-    'funutils',
-    'validationService',
-    'biobankApi',
-    'ProcessingType',
-    'SpecimenLinkType',
-    'SpecimenLinkAnnotationType',
-    'SpecimenGroup'
+import _ from 'lodash'
+
+/* @ngInject */
+function ProcessingDtoFactory(funutils,
+                              validationService,
+                              biobankApi,
+                              ProcessingType,
+                              SpecimenLinkType,
+                              SpecimenLinkAnnotationType,
+                              SpecimenGroup) {
+
+  var requiredKeys = [
+    'processingTypes',
+    'specimenLinkTypes',
+    'specimenLinkAnnotationTypes',
+    'specimenLinkAnnotationTypeIdsInUse',
+    'specimenGroups'
   ];
 
-  function ProcessingDtoFactory(funutils,
-                                validationService,
-                                biobankApi,
-                                ProcessingType,
-                                SpecimenLinkType,
-                                SpecimenLinkAnnotationType,
-                                SpecimenGroup) {
+  var validateObj = funutils.partial(
+    validationService.condition1(
+      validationService.validator('must be a map', _.isObject),
+      validationService.validator('has the correct keys',
+                                  validationService.hasKeys.apply(null, requiredKeys))),
+    _.identity);
 
-    var requiredKeys = [
-      'processingTypes',
-      'specimenLinkTypes',
-      'specimenLinkAnnotationTypes',
-      'specimenLinkAnnotationTypeIdsInUse',
-      'specimenGroups'
-    ];
+  /**
+   * An object that contains a list of all the processingTypes, specimenLinkTypes,
+   * specimenLinkAnnotationTypes, and specimenGroups for a study.
+   */
+  function ProcessingDto(obj) {
+    var self = this,
+        defaults = {
+          processingTypes:                    [],
+          specimenLinkTypes:                  [],
+          specimenLinkAnnotationTypes:        [],
+          specimenGroups:                     [],
+          specimenLinkAnnotationTypeIdsInUse: []
+        };
 
-    var validateObj = funutils.partial(
-      validationService.condition1(
-        validationService.validator('must be a map', _.isObject),
-        validationService.validator('has the correct keys',
-                                    validationService.hasKeys.apply(null, requiredKeys))),
-      _.identity);
+    obj = obj || {};
+    _.extend(this, defaults, _.pick(obj, 'specimenLinkAnnotationTypeIdsInUse'));
 
-    /**
-     * An object that contains a list of all the processingTypes, specimenLinkTypes,
-     * specimenLinkAnnotationTypes, and specimenGroups for a study.
-     */
-    function ProcessingDto(obj) {
-      var self = this,
-          defaults = {
-            processingTypes:                    [],
-            specimenLinkTypes:                  [],
-            specimenLinkAnnotationTypes:        [],
-            specimenGroups:                     [],
-            specimenLinkAnnotationTypeIdsInUse: []
-          };
+    self.processingTypes = obj.processingTypes.map((serverPt) => new ProcessingType(serverPt));
 
-      obj = obj || {};
-      _.extend(this, defaults, _.pick(obj, 'specimenLinkAnnotationTypeIdsInUse'));
+    self.specimenLinkTypes = obj.specimenLinkTypes
+      .map((serverSlt) => new SpecimenLinkType(serverSlt, {
+        studySpecimenGroups:  obj.specimenGroups,
+        studyAnnotationTypes: obj.specimenLinkAnnotationTypes
+      }));
 
-      self.processingTypes = obj.processingTypes.map((serverPt) => new ProcessingType(serverPt));
+    self.specimenLinkAnnotationTypes = obj.specimenLinkAnnotationTypes
+      .map((serverAt) => new SpecimenLinkAnnotationType(serverAt));
 
-      self.specimenLinkTypes = obj.specimenLinkTypes
-        .map((serverSlt) => new SpecimenLinkType(serverSlt, {
-          studySpecimenGroups:  obj.specimenGroups,
-          studyAnnotationTypes: obj.specimenLinkAnnotationTypes
-        }));
-
-      self.specimenLinkAnnotationTypes = obj.specimenLinkAnnotationTypes
-        .map((serverAt) => new SpecimenLinkAnnotationType(serverAt));
-
-      self.specimenGroups = obj.specimenGroups.map((serverSg) => new SpecimenGroup(serverSg));
-    }
-
-    /**
-     * Used by promise code, so it must return an error rather than throw one.
-     */
-    ProcessingDto.create = function (obj) {
-      var validation = validateObj(obj);
-      if (!_.isObject(validation)) {
-        return new Error('invalid object from server: ' + validation);
-      }
-      return new ProcessingDto(obj);
-    };
-
-    ProcessingDto.get = function(studyId) {
-      return biobankApi.get('/studies/' + studyId + '/dto/processing')
-        .then(function(reply) {
-          return ProcessingDto.create(reply);
-        });
-    };
-
-    return ProcessingDto;
+    self.specimenGroups = obj.specimenGroups.map((serverSg) => new SpecimenGroup(serverSg));
   }
 
-  return ProcessingDtoFactory;
+  /**
+   * Used by promise code, so it must return an error rather than throw one.
+   */
+  ProcessingDto.create = function (obj) {
+    var validation = validateObj(obj);
+    if (!_.isObject(validation)) {
+      return new Error('invalid object from server: ' + validation);
+    }
+    return new ProcessingDto(obj);
+  };
 
-});
+  ProcessingDto.get = function(studyId) {
+    return biobankApi.get('/studies/' + studyId + '/dto/processing')
+      .then(function(reply) {
+        return ProcessingDto.create(reply);
+      });
+  };
+
+  return ProcessingDto;
+}
+
+export default ngModule => ngModule.factory('ProcessingDto', ProcessingDtoFactory)

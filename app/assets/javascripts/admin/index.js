@@ -2,43 +2,22 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import AdminCentresModule from './centres';
-import AdminStudiesModule from './studies';
-import AdminUsersModule   from './users';
-import CentresModule      from '../centres';
-import CommonModule       from '../common';
-import angular            from 'angular';
-import states             from './states';
+import CentresModule from '../centres';
+import CommonModule  from '../common';
+import angular       from 'angular';
 
-const AdminModule = angular.module('biobank.admin',
-                                   [
-                                     CommonModule,
-                                     CentresModule,
-                                     AdminCentresModule,
-                                     AdminStudiesModule,
-                                     AdminUsersModule
-                                   ])
-      .config(states)
+const loadModules = require.context('./modules', true, /[\\\/]index\.js$/)
 
-      .controller('AnnotationTypeAddController', require('./controllers/AnnotationTypeAddController'))
+const moduleNames = []
+loadModules.keys().forEach((key) => {
+  moduleNames.push(loadModules(key).default)
+})
 
-      .component('annotationTypeSummary', require('./components/annotationTypeSummary/annotationTypeSummaryComponent'))
-      .component('biobankAdmin',          require('./components/biobankAdmin/biobankAdminComponent'))
-      .component('locationAdd',           require('./components/locationAdd/locationAddComponent'))
-      .component('annotationTypeAdd',     require('./components/annotationTypeAdd/annotationTypeAddComponent'))
-      .component('annotationTypeView',    require('./components/annotationTypeView/annotationTypeViewComponent'))
+const ngModule = angular.module('biobank.admin', [ CommonModule, CentresModule ].concat(moduleNames))
+const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 
-      .service('adminService',               require('./services/adminService/adminService'))
-      .service('annotationTypeUpdateModal',
-               require('./services/annotationTypeUpdateModal/annotationTypeUpdateModalService'))
+context.keys().forEach(key => {
+  context(key).default(ngModule)
+})
 
-      .factory('AnnotationTypeModals',   require('./services/AnnotationTypeModals'))
-      .factory('ParticipantAnnotationTypeModals',
-               require('./services/studies/ParticipantAnnotationTypeModals'))
-      .factory('CollectionEventAnnotationTypeModals',
-               require('./services/studies/CollectionEventAnnotationTypeModals'))
-      .factory('SpecimenLinkAnnotationTypeModals',
-               require('./services/studies/SpecimenLinkAnnotationTypeModals'))
-      .name;
-
-export default AdminModule;
+export default ngModule.name

@@ -3,7 +3,7 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-import NameAndStateFiltersController from '../../controllers/NameAndStateFiltersController';
+import { NameAndStateFiltersController } from '../../controllers/NameAndStateFiltersController';
 
 const component = {
   template: require('./nameAndStateFilters.html'),
@@ -17,4 +17,4 @@ const component = {
   }
 };
 
-export default component;
+export default ngModule => ngModule.component('nameAndStateFilters', component)

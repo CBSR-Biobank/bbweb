@@ -2,6 +2,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
+
 import moment from 'moment';
 
 /**
@@ -10,7 +11,7 @@ import moment from 'moment';
  * @return {AngularJSFilter} the factory function for this filter.
  */
 /* @ngInject */
-export default function timeagoFilterFactory(gettextCatalog) {
+function timeagoFilterFactory(gettextCatalog) {
   return timeago;
 
   /*
@@ -24,3 +25,5 @@ export default function timeagoFilterFactory(gettextCatalog) {
   }
 
 }
+
+export default ngModule => ngModule.filter('timeago', timeagoFilterFactory)

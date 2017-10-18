@@ -9,10 +9,10 @@ import membershipCommonBehaviour from '../../../test/behaviours/membershipCommon
 
 describe('Membership', function() {
 
-  function SuiteMixin(MebershipSpecCommon, ServerReplyMixin) {
+  function SuiteMixin(MembershipSpecCommon, ServerReplyMixin) {
 
     return _.extend({},
-                    MebershipSpecCommon,
+                    MembershipSpecCommon,
                     ServerReplyMixin,
                     {
                       jsonObj,
@@ -35,7 +35,7 @@ describe('Membership', function() {
 
     function jsonObjWithEntities(studyEntityData, centreEntityData) {
       return _.extend(
-        MebershipSpecCommon.jsonObjWithEntities.call(this, studyEntityData, centreEntityData),
+        MembershipSpecCommon.jsonObjWithEntities.call(this, studyEntityData, centreEntityData),
         { userData: [] });
     }
 
@@ -92,8 +92,8 @@ describe('Membership', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(MebershipSpecCommon, ServerReplyMixin) {
-      _.extend(this, SuiteMixin(MebershipSpecCommon, ServerReplyMixin));
+    angular.mock.inject(function(MembershipSpecCommon, ServerReplyMixin) {
+      _.extend(this, SuiteMixin(MembershipSpecCommon, ServerReplyMixin));
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',
@@ -117,7 +117,7 @@ describe('Membership', function() {
 
       function url() {
         const args = [ 'access/memberships' ].concat(_.toArray(arguments));
-        return MebershipSpecCommon.url.apply(null, args);
+        return MembershipSpecCommon.url.apply(null, args);
       }
     });
   });

@@ -2,97 +2,87 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function (_) {
-  'use strict';
 
-  HasAnnotationsFactory.$inject = [
-    '$q',
-    'biobankApi',
-    'ConcurrencySafeEntity',
-    'DomainError',
-    'Annotation',
-    'AnnotationType',
-    'annotationFactory'
-  ];
+import _ from 'lodash';
+
+/**
+ * Mixin for entities that have annotations.
+ *
+ * Maintains an array of annotations.
+ */
+/* @ngInject */
+function HasAnnotationsFactory($q,
+                               biobankApi,
+                               ConcurrencySafeEntity,
+                               DomainError,
+                               Annotation,
+                               AnnotationType,
+                               annotationFactory) {
+
+  function HasAnnotations() {}
+
+  HasAnnotations.prototype.addAnnotation = function (annotation, url) {
+    return ConcurrencySafeEntity.prototype.update.call(this,
+                                                       url,
+                                                       annotation.getServerAnnotation());
+  };
 
   /**
-   * Mixin for entities that have annotations.
-   *
-   * Maintains an array of annotations.
+   * The entity that includes this mixin needs to implement 'asyncCreate'.
    */
-  function HasAnnotationsFactory($q,
-                                 biobankApi,
-                                 ConcurrencySafeEntity,
-                                 DomainError,
-                                 Annotation,
-                                 AnnotationType,
-                                 annotationFactory) {
+  HasAnnotations.prototype.removeAnnotation = function (annotation, url) {
+    var found = _.find(this.annotations,  { annotationTypeId: annotation.annotationTypeId });
 
-    function HasAnnotations() {}
+    if (!found) {
+      return $q.reject('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
+    }
+    return biobankApi.del(url).then(this.asyncCreate);
+  };
 
-    HasAnnotations.prototype.addAnnotation = function (annotation, url) {
-      return ConcurrencySafeEntity.prototype.update.call(this,
-                                                         url,
-                                                         annotation.getServerAnnotation());
-    };
+  HasAnnotations.prototype.setAnnotationTypes = function (annotationTypes) {
+    var differentIds;
 
-    /**
-     * The entity that includes this mixin needs to implement 'asyncCreate'.
-     */
-    HasAnnotations.prototype.removeAnnotation = function (annotation, url) {
-      var found = _.find(this.annotations,  { annotationTypeId: annotation.annotationTypeId });
+    annotationTypes = annotationTypes || [];
+    this.annotations = this.annotations || [];
 
-      if (!found) {
-        return $q.reject('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
-      }
-      return biobankApi.del(url).then(this.asyncCreate);
-    };
+    // make sure the annotations ids match up with the corresponding annotation types
+    differentIds = _.difference(_.map(this.annotations, 'annotationTypeId'),
+                                _.map(annotationTypes, 'id'));
 
-    HasAnnotations.prototype.setAnnotationTypes = function (annotationTypes) {
-      var differentIds;
+    if (differentIds.length > 0) {
+      throw new DomainError('annotation types not found: ' + differentIds);
+    }
 
-      annotationTypes = annotationTypes || [];
-      this.annotations = this.annotations || [];
+    this.annotations = annotationTypes.map((annotationType) => {
+      var jsonAnnotationMaybe = _.find(this.annotations, { annotationTypeId: annotationType.id });
 
-      // make sure the annotations ids match up with the corresponding annotation types
-      differentIds = _.difference(_.map(this.annotations, 'annotationTypeId'),
-                                  _.map(annotationTypes, 'id'));
-
-      if (differentIds.length > 0) {
-        throw new DomainError('annotation types not found: ' + differentIds);
+      if ((jsonAnnotationMaybe instanceof Annotation) &&
+          (jsonAnnotationMaybe.annotationType) &&
+          (jsonAnnotationMaybe.annotationType instanceof AnnotationType)) {
+        // annotation was already converted to Annotation or sub class
+        return jsonAnnotationMaybe;
       }
 
-      this.annotations = annotationTypes.map((annotationType) => {
-        var jsonAnnotationMaybe = _.find(this.annotations, { annotationTypeId: annotationType.id });
+      // undefined is valid input
+      return annotationFactory.create(jsonAnnotationMaybe, annotationType);
+    });
+  };
 
-        if ((jsonAnnotationMaybe instanceof Annotation) &&
-            (jsonAnnotationMaybe.annotationType) &&
-            (jsonAnnotationMaybe.annotationType instanceof AnnotationType)) {
-          // annotation was already converted to Annotation or sub class
-          return jsonAnnotationMaybe;
-        }
+  HasAnnotations.prototype.validAnnotations = function (annotations) {
+    var result;
 
-        // undefined is valid input
-        return annotationFactory.create(jsonAnnotationMaybe, annotationType);
-      });
-    };
+    if (_.isUndefined(annotations) || (annotations.length <= 0)) {
+      // there are no annotation types, nothing to validate
+      return true;
+    }
+    result = _.find(annotations, function (annot) {
+      return !Annotation.isValid(annot);
+    });
 
-    HasAnnotations.prototype.validAnnotations = function (annotations) {
-      var result;
+    return _.isUndefined(result);
+  };
 
-      if (_.isUndefined(annotations) || (annotations.length <= 0)) {
-        // there are no annotation types, nothing to validate
-        return true;
-      }
-      result = _.find(annotations, function (annot) {
-        return !Annotation.isValid(annot);
-      });
+  return HasAnnotations;
+}
 
-      return _.isUndefined(result);
-    };
-
-    return HasAnnotations;
-  }
-
-  return HasAnnotationsFactory;
-});
+export default ngModule => ngModule.factory('HasAnnotations', HasAnnotationsFactory)

@@ -4,9 +4,8 @@
  */
 import _ from 'lodash';
 
-
 /* @ngInject */
-export default function MebershipSpecCommon(EntityTestSuiteMixin, Factory) {
+function MembershipSpecCommon(EntityTestSuiteMixin, Factory) {
 
   return _.extend({},
                   EntityTestSuiteMixin,
@@ -82,3 +81,5 @@ export default function MebershipSpecCommon(EntityTestSuiteMixin, Factory) {
   }
 
 }
+
+export default ngModule => ngModule.service('MembershipSpecCommon', MembershipSpecCommon)

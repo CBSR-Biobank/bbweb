@@ -6,7 +6,7 @@
 /*
  * Controller base class used by nameAndStateFiltersComponent and nameEmailStateFiltersComponent.
  */
-export default class NameAndStateFiltersController {
+class NameAndStateFiltersController { // eslint-disable-line no-unused-vars
 
   constructor() {
     this.nameFilter = '';
@@ -28,3 +28,8 @@ export default class NameAndStateFiltersController {
     this.onFiltersCleared()();
   }
 }
+
+// this controller does not need to be included in AngularJS since it is imported by the controllers that
+// extend it
+export { NameAndStateFiltersController }
+export default () => {}

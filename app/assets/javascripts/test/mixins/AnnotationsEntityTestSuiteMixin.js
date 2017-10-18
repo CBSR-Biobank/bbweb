@@ -7,15 +7,15 @@
  * A mixin for test suites for annotation domain entities.
  */
 /* @ngInject */
-export default function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
-                                                        AnnotationType,
-                                                        AnnotationValueType,
-                                                        TextAnnotation,
-                                                        DateTimeAnnotation,
-                                                        NumberAnnotation,
-                                                        SingleSelectAnnotation,
-                                                        MultipleSelectAnnotation,
-                                                        Factory) {
+function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
+                                         AnnotationType,
+                                         AnnotationValueType,
+                                         TextAnnotation,
+                                         DateTimeAnnotation,
+                                         NumberAnnotation,
+                                         SingleSelectAnnotation,
+                                         MultipleSelectAnnotation,
+                                         Factory) {
 
   return Object.assign({ jsonAnnotationData, validateAnnotationClass }, EntityTestSuiteMixin);
 
@@ -63,3 +63,5 @@ export default function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
   }
 
 }
+
+export default ngModule => ngModule.service('AnnotationsEntityTestSuiteMixin', AnnotationsEntityTestSuiteMixin)

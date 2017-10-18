@@ -8,7 +8,7 @@ import faker  from 'faker';
 /**
  *
  */
-export default class TestUtils {
+class TestUtils {
 
   randomBoolean() {
     return faker.random.number() === 1;
@@ -60,3 +60,5 @@ export default class TestUtils {
   }
 
 }
+
+export default ngModule => ngModule.service('TestUtils', TestUtils)

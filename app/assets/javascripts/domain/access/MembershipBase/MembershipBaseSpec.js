@@ -11,8 +11,8 @@ describe('MembershipBase', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test');
-    angular.mock.inject(function(MebershipSpecCommon) {
-      _.extend(this, MebershipSpecCommon);
+    angular.mock.inject(function(MembershipSpecCommon) {
+      _.extend(this, MembershipSpecCommon);
 
       this.injectDependencies('$rootScope',
                               'MembershipBase',

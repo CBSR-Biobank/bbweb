@@ -14,8 +14,6 @@ describe('Component: about', function() {
     angular.mock.module('biobankApp', 'biobank.test');
     angular.mock.inject(function (ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
-      this.injectDependencies('$rootScope', '$compile');
-
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(
           this,
@@ -28,5 +26,6 @@ describe('Component: about', function() {
   it('has valid scope', function() {
     this.createController();
     expect(this.controller).toBeDefined();
+    expect(this.controller.breadcrumbs).toBeDefined();
   });
 });

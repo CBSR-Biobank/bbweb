@@ -2,25 +2,19 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
-
-  var component = {
-    template: '',
-    controller: BiobankFooterCompnent,
-    controllerAs: 'vm',
-    bindings: {
-    }
-  };
-
-  //BiobankFooterCompnent.$inject = [];
-
-  /*
-   * Controller for this component.
-   */
-  function BiobankFooterCompnent() {
-
+var component = {
+  template: '',
+  controller: BiobankFooterCompnent,
+  controllerAs: 'vm',
+  bindings: {
   }
+};
 
-  return component;
-});
+/*
+ * Controller for this component.
+ */
+function BiobankFooterCompnent() {
+
+}
+
+export default ngModule => ngModule.component('biobankFooter', component)

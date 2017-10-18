@@ -11,7 +11,7 @@ import _ from 'lodash';
  * @return {object} Object containing the functions that will be mixed in.
  */
 /* @ngInject */
-export default function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
+function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
 
   return Object.assign(
     {
@@ -103,3 +103,5 @@ export default function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
   }
 
 }
+
+export default ngModule => ngModule.service('EntityTestSuiteMixin', EntityTestSuiteMixin)

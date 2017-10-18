@@ -2,25 +2,20 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  var component = {
-    template: require('./passwordSent.html'),
-    controller: PasswordSentController,
-    controllerAs: 'vm',
-    bindings: {
-      email: '<'
-    }
-  };
-
-  //PasswordSentController.$inject = [];
-
-  /*
-   * Controller for this component.
-   */
-  function PasswordSentController() {
+const  COMPONENT = {
+  template: require('./passwordSent.html'),
+  controller: PasswordSentController,
+  controllerAs: 'vm',
+  bindings: {
+    email: '<'
   }
+};
 
-  return component;
-});
+/*
+ * Controller for this component.
+ */
+function PasswordSentController() {
+}
+
+export default ngModule => ngModule.component('passwordSent', COMPONENT)

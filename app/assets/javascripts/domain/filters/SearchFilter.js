@@ -1,49 +1,45 @@
 /**
  *
  */
-define(function () {
-  'use strict';
 
-  SearchFilterFactory.$inject = [];
+/* @ngInject */
+function SearchFilterFactory() {
 
-  function SearchFilterFactory() {
+  /**
+   * SearchFilter's aid in using the search API provided by the Biobank REST API.
+   */
+  function SearchFilter(name) {
 
     /**
-     * SearchFilter's aid in using the search API provided by the Biobank REST API.
+     * A short identifying name.
+     *
+     * @name domain.SearchFilter#name
+     * @type {string}
      */
-    function SearchFilter(name) {
+    this.name = name;
 
-      /**
-       * A short identifying name.
-       *
-       * @name domain.SearchFilter#name
-       * @type {string}
-       */
-      this.name = name;
-
-      /**
-       * A short identifying name that is unique.
-       *
-       * @name domain.SearchFilter#value
-       * @type {string}
-       */
-      this.value = '';
-    }
-
-    SearchFilter.prototype.setValue = function (value) {
-      this.value = value;
-    };
-
-    SearchFilter.prototype.getValue = function () {
-      return this.value;
-    };
-
-    SearchFilter.prototype.clearValue = function () {
-      this.setValue('');
-    };
-
-    return SearchFilter;
+    /**
+     * A short identifying name that is unique.
+     *
+     * @name domain.SearchFilter#value
+     * @type {string}
+     */
+    this.value = '';
   }
 
-  return SearchFilterFactory;
-});
+  SearchFilter.prototype.setValue = function (value) {
+    this.value = value;
+  };
+
+  SearchFilter.prototype.getValue = function () {
+    return this.value;
+  };
+
+  SearchFilter.prototype.clearValue = function () {
+    this.setValue('');
+  };
+
+  return SearchFilter;
+}
+
+export default ngModule => ngModule.factory('SearchFilter', SearchFilterFactory)

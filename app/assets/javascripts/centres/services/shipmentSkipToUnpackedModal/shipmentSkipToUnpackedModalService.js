@@ -2,75 +2,70 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
 
-  shipmentSkipToUnpackedModalService.$inject = [
-    '$uibModal'
-  ];
+/**
+ * Opens a modal that allows the user to select a centre location.
+ */
+/* @ngInject */
+function shipmentSkipToUnpackedModalService($uibModal) {
+  var service = {
+    open: openModal
+  };
+  return service;
 
-  /**
-   * Opens a modal that allows the user to select a centre location.
-   */
-  function shipmentSkipToUnpackedModalService($uibModal) {
-    var service = {
-      open: openModal
-    };
-    return service;
+  //-------
 
-    //-------
+  function openModal() {
+    var modal;
 
-    function openModal() {
-      var modal;
+    modal = $uibModal.open({
+      template: require('./shipmentSkipToUnpackedModal.html'),
+      controller: ModalController,
+      controllerAs: 'vm',
+      backdrop: true,
+      keyboard: true,
+      modalFade: true
+    });
 
-      modal = $uibModal.open({
-        template: require('./shipmentSkipToUnpackedModal.html'),
-        controller: ModalController,
-        controllerAs: 'vm',
-        backdrop: true,
-        keyboard: true,
-        modalFade: true
-      });
+    ModalController.$inject = [
+      '$uibModalInstance'
+    ];
 
-      ModalController.$inject = [
-        '$uibModalInstance'
-      ];
+    return modal;
 
-      return modal;
+    //--
 
-      //--
+    function ModalController($uibModalInstance) {
+      var vm = this;
 
-      function ModalController($uibModalInstance) {
-        var vm = this;
+      vm.timeReceived       = new Date();
+      vm.timeUnpacked       = new Date();
+      vm.timeReceivedOnEdit = timeReceivedOnEdit;
+      vm.timeUnpackedOnEdit = timeUnpackedOnEdit;
+      vm.okPressed          = okPressed;
+      vm.cancelPressed      = cancelPressed;
 
-        vm.timeReceived       = new Date();
-        vm.timeUnpacked       = new Date();
-        vm.timeReceivedOnEdit = timeReceivedOnEdit;
-        vm.timeUnpackedOnEdit = timeUnpackedOnEdit;
-        vm.okPressed          = okPressed;
-        vm.cancelPressed      = cancelPressed;
+      //---
 
-        //---
+      function timeReceivedOnEdit(datetime) {
+        vm.timeReceived = datetime;
+      }
 
-        function timeReceivedOnEdit(datetime) {
-          vm.timeReceived = datetime;
-        }
+      function timeUnpackedOnEdit(datetime) {
+        vm.timeUnpacked = datetime;
+      }
 
-        function timeUnpackedOnEdit(datetime) {
-          vm.timeUnpacked = datetime;
-        }
+      function okPressed() {
+        $uibModalInstance.close({ timeReceived: vm.timeReceived, timeUnpacked: vm.timeUnpacked });
+      }
 
-        function okPressed() {
-          $uibModalInstance.close({ timeReceived: vm.timeReceived, timeUnpacked: vm.timeUnpacked });
-        }
-
-        function cancelPressed() {
-          $uibModalInstance.dismiss('cancel');
-        }
+      function cancelPressed() {
+        $uibModalInstance.dismiss('cancel');
       }
     }
-
   }
 
-  return shipmentSkipToUnpackedModalService;
-});
+}
+
+export default ngModule => ngModule.service('shipmentSkipToUnpackedModalService',
+                                           shipmentSkipToUnpackedModalService)

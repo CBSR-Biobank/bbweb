@@ -8,7 +8,7 @@
  *
  * @return {object} Object containing the functions that will be mixed in.
  */
-export default function ServerReplyMixinFactory () {
+function ServerReplyMixin () {
 
   return {
     reply: reply,
@@ -24,3 +24,6 @@ export default function ServerReplyMixinFactory () {
   }
 
 }
+
+
+export default ngModule => ngModule.service('ServerReplyMixin', ServerReplyMixin)

@@ -2,39 +2,35 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
-  'use strict';
 
-  CentreCountsFactory.$inject = ['biobankApi'];
+import _ from 'lodash';
 
-  /**
-   *
-   */
-  function CentreCountsFactory(biobankApi) {
+/**
+ *
+ */
+/* @ngInject */
+function CentreCountsFactory(biobankApi) {
 
-    function CentreCounts(options) {
-      var defaults = {
-        total:    0,
-        disabled: 0,
-        enabled:  0
-      };
-
-      options = options || {};
-      _.extend(this, defaults, _.pick(options, _.keys(defaults)));
-    }
-
-    CentreCounts.get = function () {
-      return biobankApi.get('/api/centres/counts').then(function (response) {
-        return new CentreCounts({
-          total:    response.total,
-          disabled: response.disabledCount,
-          enabled:  response.enabledCount
-        });
-      });
+  function CentreCounts(options = {}) {
+    var defaults = {
+      total:    0,
+      disabled: 0,
+      enabled:  0
     };
 
-    return CentreCounts;
+    Object.assign(this, defaults, _.pick(options, Object.keys(defaults)));
   }
 
-  return CentreCountsFactory;
-});
+  CentreCounts.get = function () {
+    return biobankApi.get('/api/centres/counts')
+      .then(response => new CentreCounts({
+        total:    response.total,
+        disabled: response.disabledCount,
+        enabled:  response.enabledCount
+      }))
+  };
+
+  return CentreCounts;
+}
+
+export default ngModule => ngModule.factory('CentreCounts', CentreCountsFactory)

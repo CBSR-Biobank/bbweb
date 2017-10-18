@@ -12,7 +12,7 @@ import moment from 'moment';
  * This has to be an AngularJS service so that it's dependencies from the real application
  * can be injected (i.e. AnnotationValueType).
  */
-export default class Factory {
+class Factory {
 
   constructor(AnnotationValueType,
               AnnotationMaxValueCount,
@@ -26,6 +26,8 @@ export default class Factory {
               SpecimenState,
               ShipmentState,
               ShipmentItemState) {
+
+    'ngInject';
 
     Object.assign(this, {
       AnnotationValueType,
@@ -704,3 +706,5 @@ export default class Factory {
   }
 
 }
+
+export default ngModule => ngModule.service('Factory', Factory)

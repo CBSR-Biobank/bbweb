@@ -2,34 +2,20 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
-
-  var component = {
-    template: require('./specimenTableAction.html'),
-    controller: SpecimenTableActionDirective,
-    controllerAs: 'vm',
-    bindings: {
-      action:            '<',
-      onActionSelected:  '&'
-    }
-  };
-
-  //SpecimenTableActionDirective.$inject = [];
-
-  /*
-   * Controller for this component.
-   */
-  function SpecimenTableActionDirective() {
-    var vm = this;
-    vm.$onInit = onInit;
-
-    //---
-    function onInit() {
-
-    }
-
+const component = {
+  template: require('./specimenTableAction.html'),
+  controller: SpecimenTableActionDirective,
+  controllerAs: 'vm',
+  bindings: {
+    action:            '<',
+    onActionSelected:  '&'
   }
+};
 
-  return component;
-});
+/*
+ * Controller for this component.
+ */
+function SpecimenTableActionDirective() {
+}
+
+export default ngModule => ngModule.component('specimenTableAction', component)

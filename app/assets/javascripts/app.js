@@ -9,20 +9,17 @@
 import 'bootstrap/dist/css/bootstrap.css';
 import 'angular-toastr/dist/angular-toastr.min.css';
 import '../stylesheets/main.less';
-import '../stylesheets/breadcrumbs.less';
-import '../stylesheets/progress-tracker.less';
-import '../stylesheets/labels-list.less';
 
 // app modules
-import AdminModule             from './admin';
-import AppConfig               from './AppConfig';
-import CentresModule           from './centres';
-import CollectionModule        from './collection';
-import DomainModule            from './domain';
-import HomeModule              from './home';
-import ShipmentSpecimensModule from './shipmentSpecimens';
-import StudiesModule           from './studies';
-import UsersModule             from './users';
+// import AdminModule             from './admin';
+// import AppConfig               from './AppConfig';
+// import CentresModule           from './centres';
+// import CollectionModule        from './collection';
+// import DomainModule            from './domain';
+// import HomeModule              from './home';
+// import ShipmentSpecimensModule from './shipmentSpecimens';
+// import StudiesModule           from './studies';
+// import UsersModule             from './users';
 
 // node modules
 import angular           from 'angular';
@@ -37,50 +34,45 @@ import angularUiRouter   from '@uirouter/angularjs';
 import uiBootstrap       from 'angular-ui-bootstrap';
 import uiDatetimePicker  from 'bootstrap-ui-datetime-picker';
 
-const biobankApp = angular.module('biobankApp',
-                                  [
-                                    // node modules
-                                    angularAnimate,
-                                    angularCookies,
-                                    angularGettext,
-                                    angularMessages,
-                                    angularSanitize,
-                                    angularSmartTable,
-                                    angularToastr,
-                                    angularUiRouter,
-                                    uiBootstrap,
-                                    uiDatetimePicker,
+// app modules
+const loadModules = require.context('./', true, /^\.[\\\/][a-zA-Z]+[\\\/]index\.js$/)
+const moduleNames = []
 
-                                    // app modules
-                                    AdminModule,
-                                    CentresModule,
-                                    CollectionModule,
-                                    DomainModule,
-                                    HomeModule,
-                                    ShipmentSpecimensModule,
-                                    StudiesModule,
-                                    UsersModule
-                                  ])
+loadModules.keys().forEach((key) => {
+  moduleNames.push(loadModules(key).default)
+})
+
+const appModule = angular.module('biobankApp',
+                                 [
+                                   // node modules
+                                   angularAnimate,
+                                   angularCookies,
+                                   angularGettext,
+                                   angularMessages,
+                                   angularSanitize,
+                                   angularSmartTable,
+                                   angularToastr,
+                                   angularUiRouter,
+                                   uiBootstrap,
+                                   uiDatetimePicker
+                                 ].concat(moduleNames))
       .run(['languageService', function (languageService) {
         languageService.initLanguage({ debug: true });
       }])
 
       .run(uiRouterTrace) // For tracing state transitions
       .run(uiRouterIsAuthorized) // For authorization checks
-      .provider('AppConfig', AppConfig)
-// see http://blog.thoughtram.io/angularjs/2014/12/22/exploring-angular-1.3-disabling-debug-info.html
-//
-// app.config(['$compileProvider', function ($compileProvider) {
-//   $compileProvider.debugInfoEnabled(false);
-// }]);
-
-//.config(exceptionConfig)
-//.config(httpInterceptorConfig)
       .config(loggingConfig)
-      .config(configToastr)
-      .name;
+      .config(configToastr);
 
-export default biobankApp;
+// top level AngularJS elements
+const context = require.context('./', false, /^((?!(app|test)).)*\.js$/)
+
+context.keys().forEach(key => {
+  context(key).default(appModule)
+})
+
+export default appModule.name;
 
 /* @ngInject */
 function configToastr(toastrConfig) {
@@ -96,7 +88,6 @@ function uiRouterTrace($trace) {
     $trace.enable('TRANSITION');
   }
 }
-
 
 /* @ngInject */
 function uiRouterIsAuthorized($transitions) {

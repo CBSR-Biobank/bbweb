@@ -4,12 +4,11 @@
  */
 
 /* @ngInject */
-export default function ShippingComponentTestSuiteMixinFactory($q,
-                                                               ComponentTestSuiteMixin,
-                                                               Shipment,
-                                                               ShipmentSpecimen,
-                                                               Factory) {
-
+function ShippingComponentTestSuiteMixin($q,
+                                         ComponentTestSuiteMixin,
+                                         Shipment,
+                                         ShipmentSpecimen,
+                                         Factory) {
 
   return Object.assign(
     {
@@ -42,3 +41,5 @@ export default function ShippingComponentTestSuiteMixinFactory($q,
   }
 
 }
+
+export default ngModule => ngModule.service('ShippingComponentTestSuiteMixin', ShippingComponentTestSuiteMixin)

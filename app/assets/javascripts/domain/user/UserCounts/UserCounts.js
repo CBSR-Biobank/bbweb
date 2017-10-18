@@ -2,41 +2,39 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(['lodash'], function(_) {
-  'use strict';
 
-  UserCountsFactory.$inject = ['biobankApi'];
+import _ from 'lodash'
 
-  /**
-   *
-   */
-  function UserCountsFactory(biobankApi) {
+/**
+ *
+ */
+/* @ngInject */
+function UserCountsFactory(biobankApi) {
 
-    function UserCounts(options) {
-      var defaults = {
-        total:      0,
-        registered: 0,
-        active:     0,
-        locked:     0
-      };
-
-      options = options || {};
-      _.extend(this, defaults, _.pick(options, _.keys(defaults)));
-    }
-
-    UserCounts.get = function () {
-      return biobankApi.get('/api/users/counts').then(function (response) {
-        return new UserCounts({
-          total:      response.total,
-          registered: response.registeredCount,
-          active:     response.activeCount,
-          locked:     response.lockedCount
-        });
-      });
+  function UserCounts(options) {
+    var defaults = {
+      total:      0,
+      registered: 0,
+      active:     0,
+      locked:     0
     };
 
-    return UserCounts;
+    options = options || {};
+    _.extend(this, defaults, _.pick(options, _.keys(defaults)));
   }
 
-  return UserCountsFactory;
-});
+  UserCounts.get = function () {
+    return biobankApi.get('/api/users/counts').then(function (response) {
+      return new UserCounts({
+        total:      response.total,
+        registered: response.registeredCount,
+        active:     response.activeCount,
+        locked:     response.lockedCount
+      });
+    });
+  };
+
+  return UserCounts;
+}
+
+export default ngModule => ngModule.factory('UserCounts', UserCountsFactory)

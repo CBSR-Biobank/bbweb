@@ -2,73 +2,63 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  var component = {
-    template: require('./studyAdd.html'),
-    controller: StudyAddController,
-    controllerAs: 'vm',
-    bindings: {
-      study: '<'
-    }
-  };
+var component = {
+  template: require('./studyAdd.html'),
+  controller: StudyAddController,
+  controllerAs: 'vm',
+  bindings: {
+    study: '<'
+  }
+};
 
-  var returnState = 'home.admin.studies';
+const returnState = 'home.admin.studies';
 
-  StudyAddController.$inject = [
-    '$state',
-    'gettextCatalog',
-    'notificationsService',
-    'domainNotificationService',
-    'breadcrumbService'
-  ];
+/*
+ * Controller for this component.
+ */
+/* @ngInject */
+function StudyAddController($state,
+                            gettextCatalog,
+                            notificationsService,
+                            domainNotificationService,
+                            breadcrumbService) {
 
-  /*
-   * Controller for this component.
-   */
-  function StudyAddController($state,
-                              gettextCatalog,
-                              notificationsService,
-                              domainNotificationService,
-                              breadcrumbService) {
+  var vm = this;
+  vm.$onInit = onInit;
 
-    var vm = this;
-    vm.$onInit = onInit;
+  //--
 
-    //--
+  function onInit() {
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.studies'),
+      breadcrumbService.forState('home.admin.studies.add')
+    ];
 
-    function onInit() {
-      vm.breadcrumbs = [
-        breadcrumbService.forState('home'),
-        breadcrumbService.forState('home.admin'),
-        breadcrumbService.forState('home.admin.studies'),
-        breadcrumbService.forState('home.admin.studies.add')
-      ];
+    vm.submit = submit;
+    vm.cancel = cancel;
+  }
 
-      vm.submit = submit;
-      vm.cancel = cancel;
-    }
+  function submit(study) {
+    study.add()
+      .then(submitSuccess)
+      .catch(submitError);
 
-    function submit(study) {
-      study.add()
-        .then(submitSuccess)
-        .catch(submitError);
-
-      function submitSuccess() {
-        notificationsService.submitSuccess();
-        $state.go(returnState, {}, { reload: true });
-      }
-
-      function submitError(error) {
-        domainNotificationService.updateErrorModal(error, gettextCatalog.getString('study'));
-      }
+    function submitSuccess() {
+      notificationsService.submitSuccess();
+      $state.go(returnState, {}, { reload: true });
     }
 
-    function cancel() {
-      $state.go(returnState);
+    function submitError(error) {
+      domainNotificationService.updateErrorModal(error, gettextCatalog.getString('study'));
     }
   }
 
-  return component;
-});
+  function cancel() {
+    $state.go(returnState);
+  }
+}
+
+export default ngModule => ngModule.component('studyAdd', component)

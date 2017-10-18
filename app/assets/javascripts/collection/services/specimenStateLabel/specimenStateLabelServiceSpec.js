@@ -5,7 +5,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import sharedBehaviour from '../../test/behaviours/labelServiceSharedBehaviour';
+import sharedBehaviour from '../../../test/behaviours/labelServiceSharedBehaviour';
 
 describe('specimenStateLabelService', function() {
 

@@ -2,37 +2,33 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
-  var component = {
-    template: require('./studiesAdmin.html'),
-    controller: StudiesAdminController,
-    controllerAs: 'vm',
-    bindings: {
-    }
-  };
+var component = {
+  template: require('./studiesAdmin.html'),
+  controller: StudiesAdminController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
 
-  StudiesAdminController.$inject = ['breadcrumbService'];
+/*
+ * Controller for this component.
+ */
+/* @ngInject */
+function StudiesAdminController(breadcrumbService) {
+  var vm = this;
+  vm.$onInit = onInit;
 
-  /*
-   * Controller for this component.
-   */
-  function StudiesAdminController(breadcrumbService) {
-    var vm = this;
-    vm.$onInit = onInit;
+  //--
 
-    //--
-
-    function onInit() {
-      vm.breadcrumbs = [
-        breadcrumbService.forState('home'),
-        breadcrumbService.forState('home.admin'),
-        breadcrumbService.forState('home.admin.studies')
-      ];
-    }
-
+  function onInit() {
+    vm.breadcrumbs = [
+      breadcrumbService.forState('home'),
+      breadcrumbService.forState('home.admin'),
+      breadcrumbService.forState('home.admin.studies')
+    ];
   }
 
-  return component;
-});
+}
+
+export default ngModule => ngModule.component('studiesAdmin', component)

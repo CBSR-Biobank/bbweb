@@ -284,4 +284,4 @@ var component = {
   }
 };
 
-export default component;
+export default ngModule => ngModule.component('membershipView', component)

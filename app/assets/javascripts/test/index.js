@@ -7,31 +7,21 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import AnnotationsEntityTestSuiteMixin  from './mixins/AnnotationsEntityTestSuiteMixin';
-import ComponentTestSuiteMixin          from './mixins/ComponentTestSuiteMixin';
-import DirectiveTestSuiteMixin          from './mixins/DirectiveTestSuiteMixin';
-import EntityTestSuiteMixin             from './mixins/EntityTestSuiteMixin';
-import Factory                          from './Factory';
-import MebershipSpecCommon              from './mixins/MembershipSpecCommon';
-import ModalTestSuiteMixin              from './mixins/ModalTestSuiteMixin';
-import ServerReplyMixin                 from './mixins/ServerReplyMixin';
-import ShippingComponentTestSuiteMixin  from './mixins/ShippingComponentTestSuiteMixin';
-import TestSuiteMixin                   from './mixins/TestSuiteMixin';
-import TestUtils                        from './TestUtils';
-import angular                          from 'angular';
+import angular from 'angular';
 
-const TestModule = angular.module('biobank.test', [])
-      .service('Factory',                         Factory)
-      .service('TestUtils',                       TestUtils)
-      .service('TestSuiteMixin',                  TestSuiteMixin)
-      .service('AnnotationsEntityTestSuiteMixin', AnnotationsEntityTestSuiteMixin)
-      .service('ComponentTestSuiteMixin',         ComponentTestSuiteMixin)
-      .service('DirectiveTestSuiteMixin',         DirectiveTestSuiteMixin)
-      .service('ModalTestSuiteMixin',             ModalTestSuiteMixin)
-      .service('ShippingComponentTestSuiteMixin', ShippingComponentTestSuiteMixin)
-      .service('EntityTestSuiteMixin',            EntityTestSuiteMixin)
-      .service('ServerReplyMixin',                ServerReplyMixin)
-      .service('MebershipSpecCommon',             MebershipSpecCommon)
-      .name;
+const ngModule = angular.module('biobank.test', [])
 
-export default TestModule;
+const contextList = [
+  require.context('./mixins', true, /\.js$/),
+  require.context('./services', true, /\.js$/)
+]
+
+contextList
+  .reduce((deps, context) => (
+    deps.concat(context.keys().map(context))
+  ), [])
+  .forEach(dep => {
+    dep.default(ngModule)
+  })
+
+export default ngModule.name

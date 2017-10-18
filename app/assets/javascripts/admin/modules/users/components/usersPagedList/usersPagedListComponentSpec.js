@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import sharedBehaviour from '../../../../test/behaviours/EntityPagedListSharedBehaviourSpec';
+import sharedBehaviour from '../../../../../test/behaviours/EntityPagedListSharedBehaviourSpec';
 
 describe('usersPagedListComponent', function() {
 
@@ -16,8 +16,6 @@ describe('usersPagedListComponent', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
                               'User',
                               'UserCounts',
                               'UserState',

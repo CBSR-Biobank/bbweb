@@ -6,9 +6,7 @@
 class HomeController {
 
   constructor($rootScope, usersService, breadcrumbService) {
-    this.$rootScope = $rootScope;
-    this.usersService = usersService;
-    this.breadcrumbService = breadcrumbService;
+    Object.assign(this, { $rootScope, usersService, breadcrumbService })
   }
 
   $onInit() {
@@ -34,8 +32,6 @@ class HomeController {
 
 }
 
-HomeController.$inject = [ '$rootScope', 'usersService', 'breadcrumbService' ];
-
 const component = {
   template: require('./home.html'),
   controller: HomeController,
@@ -44,4 +40,4 @@ const component = {
   }
 };
 
-export default component;
+export default ngModule => ngModule.component('home', component)

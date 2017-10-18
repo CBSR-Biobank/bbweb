@@ -17,14 +17,11 @@ const annotations = [
  * Creates a module with one main directives and child directives.
  */
 
-const AnnotationsInputModule = 'biobank.annotationsInput';
-
-const Module = angular.module(AnnotationsInputModule, []);
-
-Module.directive('annotationsInput', annotationsInputDirective);
+const ngModule = angular.module('biobank.annotationsInput', [])
+      .directive('annotationsInput', annotationsInputDirective);
 init();
 
-export default AnnotationsInputModule;
+export default ngModule.name;
 
 /**
  * Creates the child directives.
@@ -33,7 +30,7 @@ function init() {
   annotations.forEach((annotation) => {
     var name = annotation + 'Annotation',
         directive = directiveGenerator(name);
-    Module.directive(name, directive);
+    ngModule.directive(name, directive);
   });
 }
 

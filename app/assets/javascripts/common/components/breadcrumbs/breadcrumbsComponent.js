@@ -1,9 +1,10 @@
+/**
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2017 Canadian BioSample Repository (CBSR)
 
+ */
 class BreadcrumbsController {
-
 }
-
-//BreadcrumbsController.$inject = [];
 
 /**
  *
@@ -17,4 +18,4 @@ const component = {
   }
 };
 
-export default component;
+export default ngModule => ngModule.component('breadcrumbs', component)

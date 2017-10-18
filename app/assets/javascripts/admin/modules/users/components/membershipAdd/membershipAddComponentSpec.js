@@ -6,7 +6,7 @@
 
 import _ from 'lodash'
 
-fdescribe('membershipAddComponent', function() {
+describe('membershipAddComponent', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test')

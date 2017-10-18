@@ -2,47 +2,42 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function() {
-  'use strict';
 
-  TextAnnotationFactory.$inject = ['Annotation'];
+/* @ngInject */
+function TextAnnotationFactory(Annotation) {
 
-  function TextAnnotationFactory(Annotation) {
+  /**
+   * Please use annotationFactory.create to create annotation objects.
+   */
+  function TextAnnotation(obj = {}, annotationType) {
+    Annotation.call(this, obj, annotationType);
 
-    /**
-     * Please use annotationFactory.create to create annotation objects.
-     */
-    function TextAnnotation(obj, annotationType) {
-      obj = obj || {};
-      Annotation.call(this, obj, annotationType);
-
-      if (obj.stringValue) {
-        this.value = obj.stringValue;
-      }
-      this.valueType = 'Text';
+    if (obj.stringValue) {
+      this.value = obj.stringValue;
     }
-
-    TextAnnotation.prototype = Object.create(Annotation.prototype);
-    TextAnnotation.prototype.constructor = TextAnnotation;
-
-    TextAnnotation.prototype.getValue = function () {
-      return this.value;
-    };
-
-    TextAnnotation.prototype.getDisplayValue = function () {
-      return this.value;
-    };
-
-    TextAnnotation.prototype.getServerAnnotation = function () {
-      return {
-        annotationTypeId: this.getAnnotationTypeId(),
-        stringValue:      this.value || '',
-        selectedValues:   []
-      };
-    };
-
-    return TextAnnotation;
+    this.valueType = 'Text';
   }
 
-  return TextAnnotationFactory;
-});
+  TextAnnotation.prototype = Object.create(Annotation.prototype);
+  TextAnnotation.prototype.constructor = TextAnnotation;
+
+  TextAnnotation.prototype.getValue = function () {
+    return this.value;
+  };
+
+  TextAnnotation.prototype.getDisplayValue = function () {
+    return this.value;
+  };
+
+  TextAnnotation.prototype.getServerAnnotation = function () {
+    return {
+      annotationTypeId: this.getAnnotationTypeId(),
+      stringValue:      this.value || '',
+      selectedValues:   []
+    };
+  };
+
+  return TextAnnotation;
+}
+
+export default ngModule => ngModule.factory('TextAnnotation', TextAnnotationFactory)

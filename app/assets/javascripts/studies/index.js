@@ -6,13 +6,18 @@
  */
 import angular from 'angular';
 
-const StudiesModule = angular.module('biobank.studies', [])
-  .factory('StudyAnnotationTypesService',       require('./services/StudyAnnotationTypes/StudyAnnotationTypesService'))
+const ngModule = angular.module('biobank.studies', [])
 
-  .service('annotationValueTypeLabelService',   require('./services/annotationValueTypeLabelService'))
-  .service('specimenGroupsService',             require('./services/specimenGroupsService/specimenGroupsService'))
-  .service('spcLinkAnnotationTypesService',     require('./services/spcLinkAnnotationTypesService'))
-  .service('studyStateLabelService',            require('./services/studyStateLabelService'))
-  .name;
+const contextList = [
+  require.context('./services',   true, /^(.(?!Spec))*\.js$/)
+]
 
-export default StudiesModule;
+contextList
+  .reduce((deps, context) => (
+    deps.concat(context.keys().map(context))
+  ), [])
+  .forEach(dep => {
+    dep.default(ngModule)
+  })
+
+export default ngModule.name

@@ -132,7 +132,7 @@ describe('ssSpecimensPagedTableComponent', function() {
     expect(onGetSpecimens).toHaveBeenCalled();
   });
 
-  it('invoking $onChanges reloads table data', function() {
+  it('when an action is selected, the callback is invoked', function() {
     var refreshTable = 0,
         actions = [{
           id:    'remove',

@@ -11,7 +11,7 @@ import angular from 'angular';
  * @return {object} Object containing the functions that will be mixed in.
  */
 /* @ngInject */
-export default function ComponentTestSuiteMixin(TestSuiteMixin, $rootScope, $compile) {
+function ComponentTestSuiteMixin(TestSuiteMixin, $rootScope, $compile) {
 
   return Object.assign({ createScope, createController }, TestSuiteMixin);
 
@@ -34,3 +34,5 @@ export default function ComponentTestSuiteMixin(TestSuiteMixin, $rootScope, $com
   }
 
 }
+
+export default ngModule => ngModule.service('ComponentTestSuiteMixin', ComponentTestSuiteMixin)

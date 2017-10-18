@@ -2,61 +2,53 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
 
-  var _ = require('lodash');
+import _ from 'lodash'
 
-  TabbedPageController.$inject = [
-    'vm',
-    '$scope',
-    '$state',
-  ];
+/**
+ * Controller base class for components that display tabbed pages.
+ *
+ * Controller members:
+ *
+ * @param {Object} vm - the controller's 'this' value.
+ *
+ * @param {object} vm.tabs - the tab objects that contain the tab information.
+ *
+ * @param {int} vm.active - the index of the tab selected by the user.
+ *
+ * @param {function|undefined} vm.activeTabUpdate - If defined, this function is invoked when a user selects
+ * a tab.
+ *
+ * @param {object} $scope - the scope object this controller inherits from.
+ *
+ * @param {object} $state - the UI Router state object.
+ *
+ * @returns {object} an object of this type.
+ */
+/* @ngInject */
+function TabbedPageController(vm, $scope, $state) {
+  $scope.$on('tabbed-page-update', activeTabUpdate);
 
-  /**
-   * Controller base class for components that display tabbed pages.
+  //---
+
+  /*
+   * Updates the selected tab.
    *
-   * Controller members:
-   *
-   * @param {Object} vm - the controller's 'this' value.
-   *
-   * @param {object} vm.tabs - the tab objects that contain the tab information.
-   *
-   * @param {int} vm.active - the index of the tab selected by the user.
-   *
-   * @param {function|undefined} vm.activeTabUpdate - If defined, this function is invoked when a user selects
-   * a tab.
-   *
-   * @param {object} $scope - the scope object this controller inherits from.
-   *
-   * @param {object} $state - the UI Router state object.
-   *
-   * @returns {object} an object of this type.
+   * This function is called when event 'tabbed-page-update' is emitted by child scopes.
    */
-  function TabbedPageController(vm, $scope, $state) {
-    $scope.$on('tabbed-page-update', activeTabUpdate);
-
-    //---
-
-    /*
-     * Updates the selected tab.
-     *
-     * This function is called when event 'tabbed-page-update' is emitted by child scopes.
-     */
-    function activeTabUpdate(event, tabName) {
-      event.stopPropagation();
-      vm.tabs.forEach((tab, index) => {
-        tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
-        if (tab.active) {
-          vm.active = index;
-        }
-      });
-      if (!_.isNil(vm.activeTabUpdate)) {
-        vm.activeTabUpdate(event, tabName);
+  function activeTabUpdate(event, tabName) {
+    event.stopPropagation();
+    vm.tabs.forEach((tab, index) => {
+      tab.active = ($state.current.name.indexOf(tab.sref) >= 0);
+      if (tab.active) {
+        vm.active = index;
       }
+    });
+    if (!_.isNil(vm.activeTabUpdate)) {
+      vm.activeTabUpdate(event, tabName);
     }
-
   }
 
-  return TabbedPageController;
-});
+}
+
+export default ngModule => ngModule.controller('TabbedPageController', TabbedPageController)

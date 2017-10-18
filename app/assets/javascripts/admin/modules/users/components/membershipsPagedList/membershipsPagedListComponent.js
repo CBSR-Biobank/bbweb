@@ -2,8 +2,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-import PagedListController from '../../../../common/controllers/PagedListController';
 
+import { PagedListController } from '../../../../../common/controllers/PagedListController';
 
 /*
  * Controller for this component.
@@ -21,14 +21,14 @@ class Controller extends PagedListController {
           $state,
           gettextCatalog,
           { nameFilter: new NameFilter() },
+          [ { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') } ],
           5);
 
-    Object.assign(this,
-                  {
-                    $scope,
-                    Membership,
-                    NameFilter
-                  });
+    Object.assign(this, {
+      $scope,
+      Membership,
+      NameFilter
+    });
   }
 
   $onInit() {
@@ -59,4 +59,4 @@ const component = {
   }
 };
 
-export default component;
+export default ngModule => ngModule.component('membershipsPagedList', component)

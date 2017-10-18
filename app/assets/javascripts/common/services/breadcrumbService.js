@@ -1,63 +1,58 @@
 /**
  *
  */
-define(function (require) {
-  'use strict';
 
-  var _ = require('lodash');
+import _ from 'lodash'
 
-  breadcrumbService.$inject = ['gettextCatalog'];
+/*
+ * Used for creating breadcrumbs.
+ *
+ * The reason for returning a function that calls gettextCatalog.getString is so that prompts
+ * displayed in the client are updated correctly when the user changes the language.
+ */
+/* @ngInject */
+function breadcrumbService(gettextCatalog) {
+  var addLabelFunc = () =>  gettextCatalog.getString('Add'),
+      breadcrumbStateToDisplayFunc = {
+        'home':                                 () => gettextCatalog.getString('Home'),
+        'home.about':                           () => gettextCatalog.getString('About'),
+        'home.contact':                         () => gettextCatalog.getString('Contact'),
+        'home.admin':                           () => gettextCatalog.getString('Administration'),
+        'home.admin.studies':                   () => gettextCatalog.getString('Studies'),
+        'home.admin.centres':                   () => gettextCatalog.getString('Centres'),
+        'home.admin.users':                     () => gettextCatalog.getString('Users'),
+        'home.admin.users.manage':              () => gettextCatalog.getString('Manage users'),
+        'home.admin.users.roles':               () => gettextCatalog.getString('Roles'),
+        'home.admin.users.memberships':         () => gettextCatalog.getString('Memberships'),
+        'home.collection':                      () => gettextCatalog.getString('Collection'),
+        'home.shipping':                        () => gettextCatalog.getString('Shipping'),
+        'home.shipping.add':                    () => gettextCatalog.getString('Add shipment'),
+        'home.collection.study.participantAdd': () => gettextCatalog.getString('Add participant'),
+        'home.admin.centres.add':               addLabelFunc,
+        'home.admin.studies.add':               addLabelFunc,
+        'home.admin.users.memberships.add':     addLabelFunc
+      };
 
-  /*
-   * Used for creating breadcrumbs.
-   *
-   * The reason for returning a function that calls gettextCatalog.getString is so that prompts
-   * displayed in the client are updated correctly when the user changes the language.
-   */
-  function breadcrumbService(gettextCatalog) {
-    var addLabelFunc = function () { return gettextCatalog.getString('Add'); },
-    breadcrumbStateToDisplayFunc = {
-      'home':                              function () { return gettextCatalog.getString('Home'); },
-      'home.about':                        function () { return gettextCatalog.getString('About'); },
-      'home.admin':                        function () { return gettextCatalog.getString('Administration'); },
-      'home.admin.studies':                function () { return gettextCatalog.getString('Studies'); },
-      'home.admin.studies.add':            addLabelFunc,
-      'home.admin.centres':                function () { return gettextCatalog.getString('Centres'); },
-      'home.admin.centres.add':            addLabelFunc,
-      'home.admin.users':                  function () { return gettextCatalog.getString('Users'); },
-      'home.admin.users.manage':           function () { return gettextCatalog.getString('Manage users'); },
-      'home.admin.users.roles':            function () { return gettextCatalog.getString('Roles'); },
-      'home.admin.users.memberships':      function () { return gettextCatalog.getString('Memberships'); },
-      'home.admin.users.memberships.add':  addLabelFunc,
-      'home.collection':                   function () { return gettextCatalog.getString('Collection'); },
-      'home.collection.study.participantAdd': function () {
-        return gettextCatalog.getString('Add participant');
-      },
-      'home.shipping':      function () { return gettextCatalog.getString('Shipping'); },
-      'home.shipping.add':  function () { return gettextCatalog.getString('Add shipment'); }
-    };
+  var service = {
+    forState:         forState,
+    forStateWithFunc: forStateWithFunc
+  };
+  return service;
 
-    var service = {
-      forState:         forState,
-      forStateWithFunc: forStateWithFunc
-    };
-    return service;
+  //-------
 
-    //-------
-
-    function forState(stateName) {
-      var displayNameFunc = breadcrumbStateToDisplayFunc[stateName];
-      if (_.isUndefined(displayNameFunc)) {
-        throw new Error('display name function is undefined for state: ' + stateName);
-      }
-      return { route: stateName, displayNameFn: displayNameFunc };
+  function forState(stateName) {
+    var displayNameFunc = breadcrumbStateToDisplayFunc[stateName];
+    if (_.isUndefined(displayNameFunc)) {
+      throw new Error('display name function is undefined for state: ' + stateName);
     }
-
-    function forStateWithFunc(stateName, displayNameFunc) {
-      return { route: stateName, displayNameFn: displayNameFunc };
-    }
-
+    return { route: stateName, displayNameFn: displayNameFunc };
   }
 
-  return breadcrumbService;
-});
+  function forStateWithFunc(stateName, displayNameFunc) {
+    return { route: stateName, displayNameFn: displayNameFunc };
+  }
+
+}
+
+export default ngModule => ngModule.service('breadcrumbService', breadcrumbService)

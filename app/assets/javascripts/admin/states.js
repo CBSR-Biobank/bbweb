@@ -4,22 +4,18 @@
  *
  * Configures routes for the administration module.
  */
-define(function () {
-  'use strict';
 
-  config.$inject = ['$stateProvider'];
+/* @ngInject */
+function config($stateProvider) {
 
-  function config($stateProvider) {
+  $stateProvider.state('home.admin', {
+    // this state is checked for an authorized user, see uiRouterIsAuthorized() in app.js
+    url: 'admin',
+    views: {
+      'main@': 'biobankAdmin'
+    }
+  });
 
-    $stateProvider.state('home.admin', {
-        // this state is checked for an authorized user, see uiRouterIsAuthorized() in app.js
-      url: 'admin',
-      views: {
-        'main@': 'biobankAdmin'
-      }
-    });
+}
 
-  }
-
-  return config;
-});
+export default ngModule => ngModule.config(config)

@@ -2,8 +2,6 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
-define(function () {
-  'use strict';
 
   /**
    * Describes how a {@link domain.participants.Specimen Specimen} should be preserved/stored by describing
@@ -14,7 +12,7 @@ define(function () {
    * @memberOf domain
    * @see domain.PreservationType
    */
-  var PreservationTemperatureType = {
+const PreservationTemperatureType = {
     PLUS_4_CELCIUS:    '4 C',
     MINUS_20_CELCIUS:  '-20 C',
     MINUS_80_CELCIUS:  '-80 C',
@@ -22,5 +20,4 @@ define(function () {
     ROOM_TEMPERATURE:  'Room Temperature'
   };
 
-  return PreservationTemperatureType;
-});
+export default ngModule => ngModule.constant('PreservationTemperatureType', PreservationTemperatureType)

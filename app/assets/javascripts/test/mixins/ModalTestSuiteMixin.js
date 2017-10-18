@@ -6,7 +6,7 @@
 import angular from 'angular';
 
 /* @ngInject */
-export default function ModalTestSuiteMixinFactory($animate, $rootScope, TestSuiteMixin) {
+function ModalTestSuiteMixin($animate, $rootScope, TestSuiteMixin) {
 
   return Object.assign({ modalElementFind, close, dismiss, flush, addModalMatchers }, TestSuiteMixin);
 
@@ -81,3 +81,5 @@ export default function ModalTestSuiteMixinFactory($animate, $rootScope, TestSui
   }
 
 }
+
+export default ngModule => ngModule.service('ModalTestSuiteMixin', ModalTestSuiteMixin)

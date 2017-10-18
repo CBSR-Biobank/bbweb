@@ -4,9 +4,14 @@
  */
 import angular from 'angular';
 
-const ShipmentsTableModule = angular.module('biobank.shipmentsTableModule', [])
-      .constant('SHIPMENT_TYPES',  require('./shipmentTypes'))
-      .component('shipmentsTable', require('./shipmentsTableComponent').default)
-      .name;
+const ngModule = angular.module('biobank.shipmentsTableModule', [])
 
-export default ShipmentsTableModule;
+const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
+
+//console.log(context.keys())
+
+context.keys().forEach(key => {
+  context(key).default(ngModule)
+})
+
+export default ngModule.name

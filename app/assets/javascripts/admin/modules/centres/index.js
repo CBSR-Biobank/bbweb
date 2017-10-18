@@ -1,25 +1,20 @@
 /**
- * Study module.
+ * Centres module.
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import UsersModule from '../../users';
-import angular     from 'angular';
-import centresPagedList from './components/centresPagedList/centresPagedListComponent';
+import UsersModule from '../../../users';
+import angular from 'angular';
 
-const AdminCentresModule = angular.module('biobank.admin.centres', [ UsersModule ])
-      .component('centresPagedList',   centresPagedList)
-      .component('centreAdd',          require('./components/centreAdd/centreAddComponent'))
-      .component('centreLocationAdd',  require('./components/centreLocationAdd/centreLocationAddComponent'))
-      .component('centreLocationView', require('./components/centreLocationView/centreLocationViewComponent'))
-      .component('centreSummary',      require('./components/centreSummary/centreSummaryComponent'))
-      .component('centreView',         require('./components/centreView/centreViewComponent'))
-      .component('centresAdmin',       require('./components/centresAdmin/centresAdminComponent'))
-      .component('centreStudiesPanel', require('./components/centreStudiesPanel/centreStudiesPanelComponent'))
-      .component('locationsPanel',     require('./components/locationsPanel/locationsPanelComponent'))
+const ngModule = angular.module('biobank.admin.centres', [ UsersModule ])
 
-      .config(require('./states'))
-      .name;
+const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 
-export default AdminCentresModule;
+//console.log(context.keys())
+
+context.keys().forEach(key => {
+  context(key).default(ngModule)
+})
+
+export default ngModule.name

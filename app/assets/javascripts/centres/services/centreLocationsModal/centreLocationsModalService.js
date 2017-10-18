@@ -2,83 +2,76 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
 
-  var _ = require('lodash');
+import _ from 'lodash'
 
-  centreLocationsModalService.$inject = [
-    '$uibModal',
-    'Centre'
-  ];
+/*
+ * Opens a modal that allows the user to select a centre location.
+ */
+/* @ngInject */
+function centreLocationsModalService($uibModal,
+                                     Centre) {
+  var service = {
+    open: openModal
+  };
+  return service;
 
-  /*
-   * Opens a modal that allows the user to select a centre location.
-   */
-  function centreLocationsModalService($uibModal,
-                                       Centre) {
-    var service = {
-      open: openModal
-    };
-    return service;
+  //-------
 
-    //-------
+  function openModal(heading, label, placeholder, value, locationInfosToOmit) {
+    var modal,
+        locationIdsToOmit =  _.map(locationInfosToOmit, 'locationId');
 
-    function openModal(heading, label, placeholder, value, locationInfosToOmit) {
-      var modal,
-          locationIdsToOmit =  _.map(locationInfosToOmit, 'locationId');
+    ModalController.$inject = [];
 
-      ModalController.$inject = [];
+    modal = $uibModal.open({
+      template: require('./centreLocationsModal.html'),
+      controller: ModalController,
+      controllerAs: 'vm',
+      backdrop: true,
+      keyboard: true,
+      modalFade: true
+    });
 
-      modal = $uibModal.open({
-        template: require('./centreLocationsModal.html'),
-        controller: ModalController,
-        controllerAs: 'vm',
-        backdrop: true,
-        keyboard: true,
-        modalFade: true
-      });
+    return modal;
 
-      return modal;
+    //--
+
+    function ModalController() {
+      var vm = this;
+
+      vm.heading               = heading;
+      vm.label                 = label;
+      vm.placeholder           = placeholder;
+      vm.locationInfo          = value;
+      vm.centreLocations       = undefined;
+
+      vm.okPressed             = okPressed;
+      vm.closePressed          = closePressed;
+      vm.getCentreLocationInfo = getCentreLocationInfo;
 
       //--
 
-      function ModalController() {
-        var vm = this;
+      function okPressed() {
+        modal.close(vm.locationInfo);
+      }
 
-        vm.heading               = heading;
-        vm.label                 = label;
-        vm.placeholder           = placeholder;
-        vm.locationInfo          = value;
-        vm.centreLocations       = undefined;
+      function closePressed() {
+        modal.dismiss('cancel');
+      }
 
-        vm.okPressed             = okPressed;
-        vm.closePressed          = closePressed;
-        vm.getCentreLocationInfo = getCentreLocationInfo;
-
-        //--
-
-        function okPressed() {
-          modal.close(vm.locationInfo);
-        }
-
-        function closePressed() {
-          modal.dismiss('cancel');
-        }
-
-        function getCentreLocationInfo(filter) {
-          return Centre.locationsSearch(filter)
-            .then(function (locations) {
-              _.remove(locations, function (location) {
-                return _.includes(locationIdsToOmit, location.locationId);
-              });
-              return locations;
+      function getCentreLocationInfo(filter) {
+        return Centre.locationsSearch(filter)
+          .then(function (locations) {
+            _.remove(locations, function (location) {
+              return _.includes(locationIdsToOmit, location.locationId);
             });
-        }
+            return locations;
+          });
       }
     }
-
   }
 
-  return centreLocationsModalService;
-});
+}
+
+export default ngModule => ngModule.service('centreLocationsModalService', centreLocationsModalService)

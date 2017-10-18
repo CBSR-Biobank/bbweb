@@ -13,7 +13,7 @@
  * @return {object} Object containing the functions that will be mixed in.
  */
 /* @ngInject */
-export default function TestSuiteMixin($injector, UrlService) {
+function TestSuiteMixin($injector, UrlService) {
 
   return {
     injectDependencies,
@@ -39,3 +39,5 @@ export default function TestSuiteMixin($injector, UrlService) {
   }
 
 }
+
+export default ngModule => ngModule.service('TestSuiteMixin', TestSuiteMixin)
