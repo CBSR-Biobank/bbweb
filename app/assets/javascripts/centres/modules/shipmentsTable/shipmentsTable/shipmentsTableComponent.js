@@ -156,4 +156,4 @@ const COMPONENT = {
   }
 };
 
-export default COMPONENT;
+export default ngModule => ngModule.component('shipmentsTableComponent',  COMPONENT)
