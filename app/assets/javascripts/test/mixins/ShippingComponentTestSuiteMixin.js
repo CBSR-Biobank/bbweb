@@ -19,12 +19,8 @@ function ShippingComponentTestSuiteMixin($q,
     },
     ComponentTestSuiteMixin);
 
-  function createShipment(state) {
-    var options = {};
-    if (state) {
-      options.state = state;
-    }
-    return new Shipment(Factory.shipment(options));
+  function createShipment(options = {}) {
+    return Shipment.create(Factory.shipment(options));
   }
 
   function createShipmentWithSpecimens(specimenCount) {

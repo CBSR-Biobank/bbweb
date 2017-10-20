@@ -11,7 +11,7 @@ import _ from 'lodash'
 /* @ngInject */
 function UserCountsFactory(biobankApi) {
 
-  function UserCounts(options) {
+  function UserCounts(options = {}) {
     var defaults = {
       total:      0,
       registered: 0,
@@ -19,7 +19,6 @@ function UserCountsFactory(biobankApi) {
       locked:     0
     };
 
-    options = options || {};
     _.extend(this, defaults, _.pick(options, _.keys(defaults)));
   }
 

@@ -10,28 +10,30 @@
  *
  * @param {domain.centres.Shipment} vm.shipment - the shipment to retrieve specimens for.
  */
-/* @ngInject */
-function ShipmentSpecimenController(vm,
-                                    $q,
-                                    ShipmentSpecimen) {
-  vm.getSpecimens = getSpecimens;
+class ShipmentSpecimensController {
 
-  //---
+  constructor($q, ShipmentSpecimen) {
+    Object.assign(this, { $q, ShipmentSpecimen })
+  }
 
   /**
    * Returns the specimens to associated with the shipment.
    *
    * Needs to return a promise.
    */
-  function getSpecimens(options) {
-    if (!vm.shipment) { return $q.when({}); }
+  getSpecimens(options) {
+    if (!this.shipment) { return this.$q.when({}); }
 
-    return ShipmentSpecimen.list(vm.shipment.id, options)
-      .then(function (paginatedResult) {
-        return { items: paginatedResult.items, maxPages: paginatedResult.maxPages };
-      });
+    return this.ShipmentSpecimen.list(this.shipment.id, options)
+      .then(paginatedResult => ({
+        items:    paginatedResult.items,
+        maxPages: paginatedResult.maxPages
+      }));
   }
 
 }
 
-export default ngModule => ngModule.controller('ShipmentSpecimensController', ShipmentSpecimenController)
+// this controller does not need to be included in AngularJS since it is imported by the controllers that
+// extend it, see ShipmentSpecimensController for example.
+export { ShipmentSpecimensController }
+export default () => {}

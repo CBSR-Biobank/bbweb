@@ -184,7 +184,7 @@ describe('shipmentViewSentComponent', function() {
 
   });
 
-  describe('when tagging as lost', function() {
+  describe('when tagging as lost, ', function() {
 
     beforeEach(function() {
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));

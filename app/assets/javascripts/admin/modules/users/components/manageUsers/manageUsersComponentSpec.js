@@ -31,15 +31,13 @@ describe('manageUsersComponent', function() {
 
       this.createUserCounts =
         (registered = faker.random.number(),
-         active = faker.random.number(),
-         locked = faker.random.number()) => {
-        return new this.UserCounts({
-          total:      registered + active + locked,
-          registered: registered,
-          active:     active,
-          locked:     locked
-        })
-      }
+         active     = faker.random.number(),
+         locked     = faker.random.number()) => new this.UserCounts({
+           total:      registered + active + locked,
+           registered: registered,
+           active:     active,
+           locked:     locked
+         })
     })
   })
 

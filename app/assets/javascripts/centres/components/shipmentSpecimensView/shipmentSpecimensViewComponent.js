@@ -3,9 +3,20 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-var component = {
+import { ShipmentSpecimensController } from '../../controllers/ShipmentSpecimensController'
+
+class Controller extends ShipmentSpecimensController {
+
+  constructor($q, ShipmentSpecimen) {
+    'ngInject'
+    super($q, ShipmentSpecimen)
+  }
+
+}
+
+const component = {
   template: require('./shipmentSpecimensView.html'),
-  controller: ShipmentSpecimensViewController,
+  controller: Controller,
   controllerAs: 'vm',
   bindings: {
     shipment:      '<',
@@ -13,24 +24,5 @@ var component = {
     showItemState: '<'
   }
 };
-
-/* @ngInject */
-function ShipmentSpecimensViewController($q,
-                                         $controller,
-                                         ShipmentSpecimen) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //--
-
-  function onInit() {
-    $controller('ShipmentSpecimensController',
-                {
-                  vm:               vm,
-                  $q:               $q,
-                  ShipmentSpecimen: ShipmentSpecimen
-                });
-  }
-}
 
 export default ngModule => ngModule.component('shipmentSpecimensView', component)

@@ -15,8 +15,6 @@ describe('shipmentSpecimensAddComponent', function() {
       _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
                               '$state',
                               'Shipment',
                               'ShipmentSpecimen',
@@ -24,14 +22,11 @@ describe('shipmentSpecimensAddComponent', function() {
                               'modalService',
                               'Factory');
 
-      this.createController = (shipment, readOnly) => {
+      this.createController = (shipment, readOnly = false) => {
         ShippingComponentTestSuiteMixin.createController.call(
           this,
           '<shipment-specimens-add shipment="vm.shipment" read-only="vm.readOnly"></shipment-specimens-add>',
-          {
-            shipment: shipment,
-            readOnly: readOnly
-          },
+          { shipment, readOnly },
           'shipmentSpecimensAdd');
       };
     });
@@ -57,8 +52,8 @@ describe('shipmentSpecimensAddComponent', function() {
       var shipment = this.createShipment(),
           refreshCount;
 
-      spyOn(this.Shipment.prototype, 'addSpecimens').and.returnValue(this.$q.when(shipment));
-      spyOn(this.notificationsService, 'success').and.returnValue(null);
+      this.Shipment.prototype.addSpecimens = jasmine.createSpy().and.returnValue(this.$q.when(shipment));
+      this.notificationsService.success = jasmine.createSpy().and.returnValue(null);
 
       this.createController(shipment);
       this.controller.inventoryIds = this.Factory.stringNext();
@@ -152,7 +147,7 @@ describe('shipmentSpecimensAddComponent', function() {
 
   });
 
-  describe('(shared)', function() {
+  describe('common behaviour', function() {
 
     sharedBehaviour();
 
