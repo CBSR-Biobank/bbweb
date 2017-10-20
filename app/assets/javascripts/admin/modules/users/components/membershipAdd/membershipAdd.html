@@ -46,31 +46,55 @@
                 placeholder="{{'enter a user\'s name or partial name'|translate}}"
                 labels-placeholder="{{'No users added yet'|translate}}"
                 no-results-found="{{'No matching users found'|translate}}"
-                on-get-values="vm.getUserNames"
-                on-tag-selected="vm.userSelected"
-                on-tag-removed="vm.removeUser"
+                on-get-values="vm.getUserNames()"
+                on-tag-selected="vm.userSelected()"
+                on-tag-removed="vm.removeUser()"
                 no-labels-error-message="{{'At least one user is required'|translate}}"
                 required="true">
   </labels-input>
 
   <!-- STUDIES -->
-  <labels-input label="{{'Add a study'|translate}}"
+  <div class="form-group">
+    <label for="description" class="col-md-2 form-control-label" translate>Studies</label>
+    <div class="col-md-10">
+      <input type="checkbox"
+             ng-model="vm.allStudiesMembership"
+             ng-true-value="true"
+             ng-false-value="false"
+             ng-click="vm.allStudiesChanged()" />
+      <span translate>All studies</span>: {{vm.allStudiesMembership | yesNo}}
+    </div>
+  </div>
+  <labels-input label="{{'Add studies'|translate}}"
                 placeholder="{{'enter a study\'s name or partial name'|translate}}"
-                labels-placeholder="{{'No studies added yet (optional)'|translate}}"
+                labels-placeholder="{{'No studies added yet'|translate}}"
                 no-results-found="{{'No matching studies found'|translate}}"
-                on-get-values="vm.getStudyNames"
-                on-tag-selected="vm.studySelected"
-                on-tag-removed="vm.removeStudy">
+                on-get-values="vm.getStudyNames()"
+                on-tag-selected="vm.studySelected()"
+                on-tag-removed="vm.removeStudy()"
+                ng-if="!vm.allStudiesMembership">
   </labels-input>
 
   <!-- CENTRES -->
-  <labels-input label="{{'Add a centre'|translate}}"
+  <div class="form-group">
+    <label for="description" class="col-md-2 form-control-label" translate>Centres</label>
+    <div class="col-md-10">
+      <input type="checkbox"
+             ng-model="vm.allCentresMembership"
+             ng-true-value="true"
+             ng-false-value="false"
+             ng-click="vm.allCentresChanged()" />
+      <span translate>All centres</span>: {{vm.allCentresMembership | yesNo}}
+    </div>
+  </div>
+  <labels-input label="{{'Add centres'|translate}}"
                 placeholder="{{'enter a centre\'s name or partial name'|translate}}"
-                labels-placeholder="{{'No centres added yet (optional)'|translate}}"
+                labels-placeholder="{{'No centres added yet'|translate}}"
                 no-results-found="{{'No matching centres found'|translate}}"
-                on-get-values="vm.getCentreNames"
-                on-tag-selected="vm.centreSelected"
-                on-tag-removed="vm.removeCentre">
+                on-get-values="vm.getCentreNames()"
+                on-tag-selected="vm.centreSelected()"
+                on-tag-removed="vm.removeCentre()"
+                ng-if="!vm.allCentresMembership">
   </labels-input>
 
   <div class="col-md-offset-2 col-md-10 has-error"
@@ -90,3 +114,6 @@
     </div>
   </div>
 </form>
+<div class="row">
+  <div class="col-xs-12"><pre>-Title-: {{vm.$scope.membershipForm | json}}</pre></div>
+</div>

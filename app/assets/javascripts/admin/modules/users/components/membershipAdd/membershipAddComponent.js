@@ -16,6 +16,7 @@ class Controller {
               Membership,
               breadcrumbService,
               gettextCatalog,
+              EntityName,
               EntityInfo,
               UserName,
               StudyName,
@@ -29,6 +30,7 @@ class Controller {
       Membership,
       breadcrumbService,
       gettextCatalog,
+      EntityName,
       EntityInfo,
       UserName,
       StudyName,
@@ -47,86 +49,127 @@ class Controller {
     ]
 
     this.membership = new this.Membership()
+    this.membership.studyData.allEntities = true
+    this.membership.centreData.allEntities = true
+    this.allStudiesMembership = true;
+    this.allCentresMembership = true;
 
     // taken from here:
     // https://stackoverflow.com/questions/22436501/simple-angularjs-form-is-undefined-in-scope
     this.$scope.$watch('membershipForm', () => {
-      this.$scope.membershipForm.$setValidity('studyOrCentreRequired', false)
+      this.$scope.membershipForm.$setValidity('studyOrCentreRequired', true)
     })
   }
 
-  getUserNames(viewValue) {
-    var omitUserNames = this.membership.userData
-        .map(entityInfo =>  this.UserName.create(_.pick(entityInfo, ['id', 'name'])))
-    return this.UserName.list({ filter: 'name:like:' + viewValue}, omitUserNames)
-      .then(nameObjs =>
-            nameObjs.map((nameObj) => ({
-              label: nameObj.name,
-              obj: nameObj
-            })))
+  getUserNames() {
+    return (viewValue) => {
+      const omitUserNames = this.membership.userData.map(info => this.entityInfoToUserName(info))
+      return this.UserName.list({ filter: 'name:like:' + viewValue}, omitUserNames)
+        .then(nameObjs => nameObjs.map(nameObj => ({
+          label: nameObj.name,
+          obj: nameObj
+        })))
+    }
   }
 
-  userSelected(selection) {
-    this.membership.userData.push(selection)
+  userSelected() {
+    return (selection) => {
+      this.membership.userData.push(this.entityNameToEntityInfo(selection))
+    }
   }
 
-  removeUser(userTag) {
-    _.remove(this.membership.userData,
-             userData =>  userData.name === userTag.name)
+  removeUser() {
+    return (userTag) => {
+      _.remove(this.membership.userData,
+               userData =>  userData.name === userTag.name)
+    }
   }
 
-  getStudyNames(viewValue) {
-    var omitStudyNames = this.membership.studyData.entityData
-        .map(entityInfo =>  this.StudyName.create(_.pick(entityInfo, ['id', 'name'])))
-    return this.StudyName.list({ filter: 'name:like:' + viewValue}, omitStudyNames)
-      .then(names =>
-            names.map(name => ({
-              label: name.name,
-              obj: new this.EntityInfo({ id: name.id, name: name.name })
-            })))
+  getStudyNames() {
+    return (viewValue) => {
+      const omitStudyNames = this.membership.studyData.entityData
+            .map(info =>  this.entityInfoToStudyName(info))
+      return this.StudyName.list({ filter: 'name:like:' + viewValue}, omitStudyNames)
+        .then(namesObjs =>
+              namesObjs.map(nameObj => ({
+                label: nameObj.name,
+                obj:   nameObj
+              })))
+    }
   }
 
-  studySelected(selection) {
-    this.membership.studyData.entityData.push(selection)
-    this.$scope.membershipForm.$setValidity('studyOrCentreRequired', true)
+  studySelected() {
+    return (selection) => {
+      this.membership.studyData.allEntities = false
+      this.membership.studyData.entityData.push(this.entityNameToEntityInfo(selection))
+      this.setValidity()
+    }
   }
 
-  removeStudy(studyTag) {
-    _.remove(this.membership.studyData.entityData,
-             studyData => studyData.name === studyTag.name)
+  removeStudy() {
+    return (studyTag) => {
+      _.remove(this.membership.studyData.entityData,
+               studyData => studyData.name === studyTag.name)
+      this.setValidity()
+    }
+  }
+
+  allStudiesChanged() {
+    this.membership.studyData.allEntities = this.allStudiesMembership !== undefined
+    if (!this.membership.studyData.allEntities) {
+      this.membership.studyData.entityData = []
+    }
     this.setValidity()
   }
 
-  getCentreNames(viewValue) {
-    var omitCentreNames = this.membership.centreData.entityData
-        .map(entityInfo => this.CentreName.create(_.pick(entityInfo, ['id', 'name'])))
+  getCentreNames() {
+    return (viewValue) => {
+      const omitCentreNames = this.membership.centreData.entityData
+            .map(info => this.entityInfoToCentreName(info))
 
-    return this.CentreName.list({ filter: 'name:like:' + viewValue}, omitCentreNames)
-      .then(names =>
-            names.map(name => ({
-              label: name.name,
-              obj:   new this.EntityInfo({ id: name.id, name: name.name })
-            })))
+      return this.CentreName.list({ filter: 'name:like:' + viewValue}, omitCentreNames)
+        .then(nameObjs =>
+              nameObjs.map(nameObj => ({
+                label: nameObj.name,
+                obj:   nameObj
+              })))
+    }
   }
 
-  centreSelected(selection) {
-    this.membership.centreData.entityData.push(selection)
-    this.$scope.membershipForm.$setValidity('studyOrCentreRequired', true)
+  centreSelected() {
+    return (selection) => {
+      this.membership.centreData.allEntities = false
+      this.membership.centreData.entityData.push(this.entityNameToEntityInfo(selection))
+      this.setValidity()
+    }
   }
 
-  removeCentre(centreTag) {
-    _.remove(this.membership.centreData.entityData,
-             centreData => centreData.name === centreTag.name)
+  removeCentre() {
+    return (centreTag) => {
+      _.remove(this.membership.centreData.entityData,
+               centreData => centreData.name === centreTag.name)
+      this.setValidity()
+    }
+  }
+
+  allCentresChanged() {
+    this.membership.centreData.allEntities = this.allCentresMembership !== undefined
+    if (!this.membership.centreData.allEntities) {
+      this.membership.centreData.entityData = []
+    }
     this.setValidity()
   }
 
   setValidity() {
-    if (this.membership.studyData.allEntities || this.membership.centreData.allEntities) { return }
-
-    if ((this.membership.studyData.entityData.length <= 0) &&
-        (this.membership.centreData.entityData.length <= 0)) {
-      this.$scope.membershipForm.$setValidity('studyOrCentreRequired', false)
+    if (this.membership.studyData.allEntities || this.membership.centreData.allEntities) {
+      this.$scope.membershipForm.$setValidity('studyOrCentreRequired', true)
+      return
     }
+
+    const valid = ((this.membership.studyData.entityData.length > 0) ||
+                   (this.membership.centreData.entityData.length > 0))
+
+    this.$scope.membershipForm.$setValidity('studyOrCentreRequired', valid)
   }
 
   submit() {
@@ -142,6 +185,22 @@ class Controller {
 
   cancel() {
     this.$state.go(this.returnState)
+  }
+
+  entityNameToEntityInfo(name)  {
+    return this.EntityInfo.create(_.pick(name, 'id', 'name'))
+  }
+
+  entityInfoToUserName(name)  {
+    return this.UserName.create(Object.assign(_.pick(name, 'id', 'name'), { state: '' }))
+  }
+
+  entityInfoToStudyName(name)  {
+    return this.StudyName.create(Object.assign(_.pick(name, 'id', 'name'), { state: '' }))
+  }
+
+  entityInfoToCentreName(name)  {
+    return this.CentreName.create(Object.assign(_.pick(name, 'id', 'name'), { state: '' }))
   }
 
 }

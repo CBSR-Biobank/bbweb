@@ -57,7 +57,12 @@ function StudyNameFactory($q,
    * a study within asynchronous code.
    */
   StudyName.create = function (obj) {
-    return EntityName.create(StudyName, obj);
+    var validation = EntityName.isValid(obj);
+    if (!validation.valid) {
+      $log.error(validation.message);
+      throw new DomainError(validation.message);
+    }
+    return new StudyName(obj);
   };
 
   StudyName.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
@@ -91,7 +96,7 @@ function StudyNameFactory($q,
    *          domain.studies.Study}.
    */
   StudyName.list = function (options, omit) {
-    return EntityName.list(StudyName.url(), options, StudyName.create, omit);
+    return EntityName.list(StudyName.url(), options, StudyName, omit);
   };
 
   /**

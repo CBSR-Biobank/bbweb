@@ -32,7 +32,7 @@ function EntityNameFactory($q,
 
     /**
      * The unique ID that identifies an object of this type.
-     * @name domain.ConcurrencySafeEntity#id
+     * @name domain.EntitNamey#id
      * @type string
      * @protected
      */
@@ -41,7 +41,7 @@ function EntityNameFactory($q,
     /**
      * A short identifying name.
      *
-     * @name domain.studies.Study#name
+     * @name domain.EntityName#name
      * @type {string}
      */
     this.name = null;
@@ -56,7 +56,7 @@ function EntityNameFactory($q,
    * Used for validating plain objects.
    */
   EntityName.SCHEMA = {
-    'id': 'StudyName',
+    'id': 'EntityName',
     'type': 'object',
     'properties': {
       'id':    { 'type': 'string' },
@@ -67,7 +67,7 @@ function EntityNameFactory($q,
   };
 
   /**
-   * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.studies.Study|Study}.
+   * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.EntityName|EntityName}.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
@@ -79,15 +79,15 @@ function EntityNameFactory($q,
   };
 
   /**
-   * Creates a StudyName, but first it validates <code>obj</code> to ensure that it has a valid schema.
+   * Creates a EntityName, but first it validates <code>obj</code> to ensure that it has a valid schema.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    *
-   * @returns {domain.studies.Study} A study created from the given object.
+   * @returns {domain.studies.Entity} A entity created from the given object.
    *
-   * @see {@link domain.studies.StudyName.asyncCreate|asyncCreate()} when you need to create
-   * a study within asynchronous code.
+   * @see {@link domain.studies.EntityName.asyncCreate|asyncCreate()} when you need to create
+   * a entity within asynchronous code.
    */
   EntityName.create = function (Constructor, obj) {
     var validation = EntityName.isValid(obj);
@@ -105,7 +105,7 @@ function EntityNameFactory($q,
    *
    * @param {object} options - The options to use to list studies.
    *
-   * @param {string} [options.filter] The filter to use on study names. Default is empty string.
+   * @param {string} [options.filter] The filter to use on entity names. Default is empty string.
    *
    * @param {string} [options.sort=name] Studies can be sorted by <code>name</code> or by
    *        <code>state</code>. Values other than these two yield an error. Use a minus sign prefix to sort
@@ -117,7 +117,7 @@ function EntityNameFactory($q,
    * @returns {Promise<Array<objects>} A promise containing an array of objcts. The objects are created by
    * calling {@link createFunc}.
    */
-  EntityName.list = function (url, options, createFunc, omit) {
+  EntityName.list = function (url, options, constructor, omit) {
     var params,
         validKeys = [
           'filter',
@@ -135,15 +135,21 @@ function EntityNameFactory($q,
 
     function createFromReply(items) {
       var deferred = $q.defer();
-
       try {
-        var names = items.map(function (obj) { return createFunc(obj); }),
-            difference = _.differenceWith(names, omit, function (name, omitName) {
-              return name.id === omitName.id;
-            });
+        const names = items.map((obj) => {
+          const validation = EntityName.isValid(obj);
+          if (!validation.valid) {
+            throw new DomainError(validation.message);
+          }
+          return new constructor(obj);
+        });
+
+        const difference = _.differenceWith(names, omit, function (name, omitName) {
+          return name.id === omitName.id;
+        });
         deferred.resolve(difference);
       } catch (e) {
-        deferred.reject('invalid study names from server');
+        deferred.reject('invalid entity names from server');
       }
       return deferred.promise;
     }

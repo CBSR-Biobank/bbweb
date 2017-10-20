@@ -57,7 +57,12 @@ function CentreNameFactory($q,
    * a Centre within asynchronous code.
    */
   CentreName.create = function (obj) {
-    return EntityName.create(CentreName, obj);
+    var validation = EntityName.isValid(obj);
+    if (!validation.valid) {
+      $log.error(validation.message);
+      throw new DomainError(validation.message);
+    }
+    return new CentreName(obj);
   };
 
   CentreName.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
@@ -91,7 +96,7 @@ function CentreNameFactory($q,
    *          domain.centres.Centre}.
    */
   CentreName.list = function (options, omit) {
-    return EntityName.list(CentreName.url(), options, CentreName.create, omit);
+    return EntityName.list(CentreName.url(), options, CentreName, omit);
   };
 
   /**

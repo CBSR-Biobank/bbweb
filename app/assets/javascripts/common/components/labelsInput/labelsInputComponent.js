@@ -24,7 +24,7 @@ class Controller {
   }
 
   getValues(viewValue) {
-    this.onGetValues()(viewValue);
+    return this.onGetValues()(viewValue);
   }
 
   tagSelected(value) {

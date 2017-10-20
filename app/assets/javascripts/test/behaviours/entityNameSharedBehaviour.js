@@ -33,10 +33,10 @@ define(function (require) {
 
     it('fails when creating from an invalid object', function() {
       this.EntityName.SCHEMA.required.forEach(function (field) {
-        var badStudyJson = _.omit(context.factoryFunc(), field);
+        var badEntityJson = _.omit(context.factoryFunc(), field);
 
         expect(function () {
-          context.createFunc(badStudyJson);
+          context.createFunc(badEntityJson);
         }).toThrowError(/Missing required property/);
       });
     });
@@ -72,8 +72,8 @@ define(function (require) {
 
         function testEntity(reply) {
           expect(reply).toBeArrayOfSize(names.length);
-          reply.forEach((study) => {
-            expect(study).toEqual(jasmine.any(context.constructor));
+          reply.forEach((entity) => {
+            expect(entity).toEqual(jasmine.any(context.constructor));
           });
         }
       });
@@ -93,7 +93,7 @@ define(function (require) {
         this.$httpBackend.flush();
       });
 
-      it('fails when an invalid study is returned', function() {
+      it('fails when an invalid entity is returned', function() {
         var names = [ _.omit(context.factoryFunc(), 'name') ];
 
         this.$httpBackend.whenGET(context.restApiUrl).respond(this.reply(names));

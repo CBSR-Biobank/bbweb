@@ -55,7 +55,12 @@ function UserNameFactory($q,
    * a User within asynchronous code.
    */
   UserName.create = function (obj) {
-    return EntityName.create(UserName, obj);
+    var validation = EntityName.isValid(obj);
+    if (!validation.valid) {
+      $log.error(validation.message);
+      throw new DomainError(validation.message);
+    }
+    return new UserName(obj);
   };
 
   UserName.url = function (...paths) {
@@ -89,7 +94,7 @@ function UserNameFactory($q,
    *          domain.users.User}.
    */
   UserName.list = function (options, omit) {
-    return EntityName.list(UserName.url(), options, UserName.create, omit);
+    return EntityName.list(UserName.url(), options, UserName, omit);
   };
 
   /**
