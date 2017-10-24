@@ -10,17 +10,19 @@ function MembershipSpecCommon(EntityTestSuiteMixin, Factory) {
   return _.extend({},
                   EntityTestSuiteMixin,
                   {
-                    jsonObj:                      jsonObj,
-                    jsonObjWithEntities:          jsonObjWithEntities,
-                    jsonEntityData:               jsonEntityData,
-                    membershipFromConstructor:    membershipFromConstructor,
-                    membershipFromJson:           membershipFromJson,
-                    membershipFromJsonAsync:      membershipFromJsonAsync,
-                    jsonMembershipWithStudy:      jsonMembershipWithStudy,
-                    jsonMembershipWithAllStudies: jsonMembershipWithAllStudies,
-                    jsonMembershipWithCentre:     jsonMembershipWithCentre,
-                    jsonMembershipWithAllCentres: jsonMembershipWithAllCentres,
-                    jsonMembershipWithEntities:   jsonMembershipWithEntities
+                    jsonObj,
+                    jsonObjWithEntities,
+                    jsonEntityData,
+                    membershipFromConstructor,
+                    membershipFromJson,
+                    membershipFromJsonAsync,
+                    jsonMembershipWithStudy,
+                    jsonMembershipWithAllStudies,
+                    jsonMembershipWithCentre,
+                    jsonMembershipWithAllCentres,
+                    jsonMembershipWithEntities,
+                    entityInfoFrom,
+                    entityNameFrom
                   });
 
   function jsonObj() {
@@ -78,6 +80,14 @@ function MembershipSpecCommon(EntityTestSuiteMixin, Factory) {
   function jsonMembershipWithEntities() {
     var entityData = [ Factory.membershipEntityData() ];
     return this.jsonObjWithEntities(entityData, entityData);
+  }
+
+  function entityInfoFrom(entity) {
+    return _.pick(entity, 'id', 'name');
+  }
+
+  function entityNameFrom(entity) {
+    return _.pick(entity, 'id', 'name', 'state');
   }
 
 }

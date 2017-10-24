@@ -6,11 +6,13 @@ const webpack = require('webpack'),
 
 const config = _.cloneDeep(commonConfig);
 
-config.devtool = 'cheap-module-eval-source-map';
+// see http://cheng.logdown.com/posts/2016/03/25/679045
+config.devtool = 'eval-source-map';
 
 config.plugins = [
   new webpack.DefinePlugin({
-      PRODUCTION: JSON.stringify(false)
+    PRODUCTION: JSON.stringify(false),
+    DEVELOPMENT: JSON.stringify(false)
   }),
   // Adds webpack HMR support. It act's like livereload,
   // reloading page after webpack rebuilt modules.

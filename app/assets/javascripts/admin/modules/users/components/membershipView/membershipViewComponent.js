@@ -87,6 +87,13 @@ class MembershipViewController {
   }
 
   remove() {
+    const promiseFn =
+          () => this.membership.remove()
+          .then(() => {
+            this.notificationsService.success(this.gettextCatalog.getString('Membership removed'));
+            this.$state.go('home.admin.users.memberships', {}, { reload: true });
+          })
+
     this.domainNotificationService.removeEntity(
       promiseFn,
       this.gettextCatalog.getString('Remove membership'),
@@ -95,18 +102,10 @@ class MembershipViewController {
       this.gettextCatalog.getString('Remove failed'),
       this.gettextCatalog.getString('Membership with name {{name}} cannot be removed',
                                     { name: this.membership.name }));
-
-    function promiseFn() {
-      return this.membership.remove().then(() => {
-        this.notificationsService.success(this.gettextCatalog.getString('Membership removed'));
-        this.$state.go('home.admin.users.memberships', {}, { reload: true });
-      });
-    }
   }
 
-  postUpdate(message, title, timeout) {
-    timeout = timeout || 1500;
-    return function (membership) {
+  postUpdate(message, title, timeout = 1500) {
+    return (membership) => {
       this.membership = membership;
       this.notificationsService.success(message, title, timeout);
     };
@@ -139,16 +138,18 @@ class MembershipViewController {
       .catch(angular.noop);
   }
 
-  addUser() {
-    const getResults = (viewValue) =>
-          this.UserName.list({ filter: 'name:like:' + viewValue}, this.membership.userData)
-          .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
+  getMatchingUserNames() {
+    return (viewValue) =>
+      this.UserName.list({ filter: 'name:like:' + viewValue}, this.membership.userData)
+      .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
+  }
 
+  addUser() {
     this.asyncInputModal.open(this.gettextCatalog.getString('Add user to membership'),
                               this.gettextCatalog.getString('User'),
                               this.gettextCatalog.getString('enter a user\'s name or partial name'),
                               this.gettextCatalog.getString('No matching users found'),
-                              getResults).result
+                              this.getMatchingUserNames()).result
       .then((modalValue) => {
         this.membership.addUser(modalValue.obj.id).then((membership) => {
           this.membership = membership;
@@ -180,18 +181,19 @@ class MembershipViewController {
         { name: userName.name }));
   }
 
+  getMatchingStudyNames() {
+    return (viewValue) =>
+      this.StudyName.list({ filter: 'name:like:' + viewValue}, this.membership.studyData.entityData)
+      .then((nameObjs) =>
+            nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
+  }
 
   addStudy() {
-    const getResults = (viewValue) =>
-          this.StudyName.list({ filter: 'name:like:' + viewValue}, this.membership.studyData.entityData)
-          .then((nameObjs) =>
-                nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
-
     this.asyncInputModal.open(this.gettextCatalog.getString('Add study to membership'),
                               this.gettextCatalog.getString('Study'),
                               this.gettextCatalog.getString('enter a study\'s name or partial name'),
                               this.gettextCatalog.getString('No matching studys found'),
-                              getResults).result
+                              this.getMatchingStudyNames()).result
       .then((modalValue) => {
         this.membership.addStudy(modalValue.obj.id).then((membership) => {
           this.membership = membership;
@@ -222,16 +224,19 @@ class MembershipViewController {
         { name: studyName.name }));
   }
 
-  addCentre() {
-    const getResults = (viewValue) =>
-          this.CentreName.list({ filter: 'name:like:' + viewValue}, this.membership.centreData.entityData)
-          .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
+  getMatchingCentreNames() {
+    return (viewValue) =>
+      this.CentreName.list({ filter: 'name:like:' + viewValue}, this.membership.centreData.entityData)
+      .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
 
+  }
+
+  addCentre() {
     this.asyncInputModal.open(this.gettextCatalog.getString('Add centre to membership'),
                               this.gettextCatalog.getString('Centre'),
                               this.gettextCatalog.getString('enter a centre\'s name or partial name'),
                               this.gettextCatalog.getString('No matching centres found'),
-                              getResults).result
+                              this.getMatchingCentreNames()).result
       .then((modalValue) => {
         this.membership.addCentre(modalValue.obj.id).then((membership) => {
           this.membership = membership;

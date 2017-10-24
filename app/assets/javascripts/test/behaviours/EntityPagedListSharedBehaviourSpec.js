@@ -28,6 +28,13 @@ export default function sharedBehaviour(context) {
       expect(this.controller.pageChanged).toBeFunction();
       expect(this.controller.sortFieldSelected).toBeFunction();
       expect(this.controller.filtersCleared).toBeFunction();
+
+      expect(this.controller.sortFieldData).not.toBeEmptyArray();
+      this.controller.sortFieldData.forEach((sortField) => {
+        expect(sortField.id).toBeString()
+        expect(sortField.labelFunc).toBeFunction()
+        expect(sortField.labelFunc()).toBeString()
+      })
     });
 
     describe('for filters', function() {
@@ -47,14 +54,14 @@ export default function sharedBehaviour(context) {
       });
 
       it('updates items when name state filter is updated', function() {
-        var spyArgs;
+        if (!context.validFilters.includes('stateFilter')) { return; }
 
         context.createController(0);
 
         this.controller.updateSearchFilter('stateFilter')(context.stateFilterValue);
         this.scope.$digest();
 
-        spyArgs = context.getEntitiesLastCallArgs();
+        const spyArgs = context.getEntitiesLastCallArgs();
         expect(spyArgs).toBeArray();
         expect(spyArgs[0]).toBeObject();
         expect(spyArgs[0].filter).toEqual('state::' + context.stateFilterValue);
@@ -102,6 +109,8 @@ export default function sharedBehaviour(context) {
     });
 
     it('has valid display state when there are no entities for criteria', function() {
+      if (!context.validFilters.includes('stateFilter')) { return; }
+
       context.createController(0);
 
       this.controller.updateSearchFilter('stateFilter')(context.stateFilterValue);
@@ -111,6 +120,8 @@ export default function sharedBehaviour(context) {
     });
 
     it('has valid display state when there are entities for criteria', function() {
+      if (!context.validFilters.includes('stateFilter')) { return; }
+
       context.createController(1);
       this.controller.updateSearchFilter('stateFilter')(context.stateFilterValue);
       this.scope.$digest();
@@ -129,7 +140,10 @@ export default function sharedBehaviour(context) {
       this.controller.filtersCleared();
       this.scope.$digest();
       expect(this.controller.filters.nameFilter.getValue()).toBeEmptyString();
-      expect(this.controller.filters.stateFilter.getValue()).toBeEmptyString();
+
+      if (context.validFilters.includes('stateFilter')) {
+        expect(this.controller.filters.stateFilter.getValue()).toBeEmptyString();
+      }
     });
 
   });

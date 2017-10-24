@@ -108,7 +108,8 @@ const config = {
       minChunks: Infinity
     }),
     new webpack.DefinePlugin({
-      PRODUCTION: JSON.stringify(false)
+      PRODUCTION: JSON.stringify(false),
+      DEVELOPMENT: JSON.stringify(false)
     })
   ],
 

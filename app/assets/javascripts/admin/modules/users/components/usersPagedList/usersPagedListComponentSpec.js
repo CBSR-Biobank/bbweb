@@ -87,6 +87,7 @@ describe('usersPagedListComponent', function() {
       context.getEntitiesLastCallArgs = () => this.User.list.calls.mostRecent().args;
 
       context.stateFilterValue = this.UserState.ACTIVE;
+      context.validFilters = [ 'nameFilter', 'stateFilter', 'emailFilter' ]
       context.sortFieldIds = ['name', 'email', 'state'];
       context.defaultSortFiled = 'name';
     });

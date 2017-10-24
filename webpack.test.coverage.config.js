@@ -23,7 +23,8 @@ config.module.rules = config.module.rules
 
 config.plugins = [
   new webpack.DefinePlugin({
-      PRODUCTION: JSON.stringify(false)
+    PRODUCTION: JSON.stringify(false),
+    DEVELOPMENT: JSON.stringify(false)
   })
 ];
 

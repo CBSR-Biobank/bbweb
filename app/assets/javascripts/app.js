@@ -4,7 +4,7 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-/* global PRODUCTION */
+/* global PRODUCTION, DEVELOPMENT */
 
 import 'bootstrap/dist/css/bootstrap.css';
 import 'angular-toastr/dist/angular-toastr.min.css';
@@ -84,7 +84,7 @@ function configToastr(toastrConfig) {
 
 /* @ngInject */
 function uiRouterTrace($trace) {
-  if (!PRODUCTION) {
+  if (DEVELOPMENT) {
     $trace.enable('TRANSITION');
   }
 }

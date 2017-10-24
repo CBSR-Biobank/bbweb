@@ -213,4 +213,4 @@ const COMPONENT = {
   }
 }
 
-export default ngModule => ngModule.component('membershipAddComponent', COMPONENT)
+export default ngModule => ngModule.component('membershipAdd', COMPONENT)

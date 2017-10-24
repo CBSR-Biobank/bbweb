@@ -26,6 +26,9 @@ function TestSuiteMixin($injector, UrlService) {
   // cannot use arrow function since "arguments" is used
   function injectDependencies(...dependencies) {
     dependencies.forEach((dependency) => {
+      if (dependency.trim() === '') {
+        throw new Error('invalid dependency, cannot inject')
+      }
       this[dependency] = $injector.get(dependency);
     });
   }

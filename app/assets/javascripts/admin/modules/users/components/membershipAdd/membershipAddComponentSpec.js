@@ -4,14 +4,12 @@
  */
 /* global angular */
 
-import _ from 'lodash'
-
 describe('membershipAddComponent', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test')
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
-      Object.assign(this, ComponentTestSuiteMixin)
+    angular.mock.inject(function(ComponentTestSuiteMixin, MembershipSpecCommon) {
+      Object.assign(this, ComponentTestSuiteMixin, MembershipSpecCommon)
 
       this.injectDependencies('$q',
                               '$state',
@@ -25,15 +23,12 @@ describe('membershipAddComponent', function() {
                               'Factory')
 
       this.createController = () => {
-
         ComponentTestSuiteMixin.createController.call(
           this,
           '<membership-add></membership-add>',
           undefined,
           'membershipAdd')
       }
-
-      this.entityInfoFrom = (entity) => _.pick(entity, 'id', 'name')
     })
   })
 

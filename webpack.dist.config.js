@@ -15,6 +15,7 @@ config.plugins = config.plugins.concat([
 
   new webpack.DefinePlugin({
     PRODUCTION: JSON.stringify(true),
+    DEVELOPMENT: JSON.stringify(false),
     'process.env': {
       'NODE_ENV': JSON.stringify('production')
     }
