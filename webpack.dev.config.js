@@ -9,6 +9,7 @@ config.devtool = 'inline-source-map';
 config.plugins = config.plugins.concat([
   new webpack.DefinePlugin({
     DEVELOPMENT: JSON.stringify(true),
+    PRODUCTION:  JSON.stringify(false),
     'process.env': {
       'NODE_ENV': JSON.stringify('development')
     }

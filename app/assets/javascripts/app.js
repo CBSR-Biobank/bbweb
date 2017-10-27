@@ -10,17 +10,6 @@ import 'bootstrap/dist/css/bootstrap.css';
 import 'angular-toastr/dist/angular-toastr.min.css';
 import '../stylesheets/main.less';
 
-// app modules
-// import AdminModule             from './admin';
-// import AppConfig               from './AppConfig';
-// import CentresModule           from './centres';
-// import CollectionModule        from './collection';
-// import DomainModule            from './domain';
-// import HomeModule              from './home';
-// import ShipmentSpecimensModule from './shipmentSpecimens';
-// import StudiesModule           from './studies';
-// import UsersModule             from './users';
-
 // node modules
 import angular           from 'angular';
 import angularAnimate    from 'angular-animate';
@@ -34,8 +23,8 @@ import angularUiRouter   from '@uirouter/angularjs';
 import uiBootstrap       from 'angular-ui-bootstrap';
 import uiDatetimePicker  from 'bootstrap-ui-datetime-picker';
 
-// app modules
-const loadModules = require.context('./', true, /^\.[\\\/][a-zA-Z]+[\\\/]index\.js$/)
+// app modules - the regular expression picks up top level modules only and excludes the "test" module
+const loadModules = require.context('./', true, /^\.[\\\/](?:(?!test)[a-zA-Z])*[\\\/]index\.js$/)
 const moduleNames = []
 
 loadModules.keys().forEach((key) => {
