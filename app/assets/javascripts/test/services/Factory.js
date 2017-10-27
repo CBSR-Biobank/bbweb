@@ -6,6 +6,26 @@ import _ from 'lodash';
 import faker  from 'faker';
 import moment from 'moment';
 
+const ENTITY_NAME_PROCESSING_TYPE       = Symbol('processingType'),
+      ENTITY_NAME_SPECIMEN_LINK_TYPE    = Symbol('specimenLinkType'),
+      ENTITY_NAME_COLLECTION_EVENT_TYPE = Symbol('collectionEventType'),
+      ENTITY_NAME_SPECIMEN_GROUP        = Symbol('specimenGroup'),
+      ENTITY_NAME_ANNOTATION_TYPE       = Symbol('annotationType'),
+      ENTITY_NAME_STUDY                 = Symbol('study'),
+      ENTITY_NAME_PARTICIPANT           = Symbol('participant'),
+      ENTITY_NAME_COLLECTION_EVENT      = Symbol('collectionEvent'),
+      ENTITY_NAME_SPECIMEN              = Symbol('specimen'),
+      ENTITY_NAME_CENTRE                = Symbol('centre'),
+      ENTITY_NAME_LOCATION              = Symbol('location'),
+      ENTITY_NAME_SHIPMENT              = Symbol('shipment'),
+      ENTITY_NAME_SHIPMENT_SPECIMEN     = Symbol('shipmentSpecimen'),
+      ENTITY_NAME_USER                  = Symbol('user'),
+      ENTITY_NAME_MEMBERSHIP_BASE       = Symbol('membershipBase'),
+      ENTITY_NAME_MEMBERSHIP            = Symbol('membership')
+
+
+const defaultEntities = new Map();
+
 /*
  * Generates JSON domain entities as if returned by the server.
  *
@@ -44,33 +64,8 @@ class Factory {
       ShipmentItemState
     });
 
-    this.defaultEntities = {};
-    this.entityCount = 0;
-    this.valueTypeCount = 0;
     this.commonFieldNames = Object.keys(this.commonFields());
   }
-
-  ENTITY_NAME_PROCESSING_TYPE()       { return 'processingType'; }
-  ENTITY_NAME_SPECIMEN_LINK_TYPE()    { return 'specimenLinkType'; }
-  ENTITY_NAME_COLLECTION_EVENT_TYPE() { return 'collectionEventType'; }
-  ENTITY_NAME_SPECIMEN_GROUP()        { return 'specimenGroup'; }
-  ENTITY_NAME_ANNOTATION_TYPE()       { return 'annotationType'; }
-  ENTITY_NAME_STUDY()                 { return 'study'; }
-  ENTITY_NAME_ANNOTATION()            { return 'annotation'; }
-
-  ENTITY_NAME_PARTICIPANT()           { return 'participant'; }
-  ENTITY_NAME_COLLECTION_EVENT()      { return 'collectionEvent'; }
-  ENTITY_NAME_SPECIMEN()              { return 'specimen'; }
-
-  ENTITY_NAME_CENTRE()                { return 'centre'; }
-  ENTITY_NAME_LOCATION()              { return 'location'; }
-  ENTITY_NAME_SHIPMENT()              { return 'shipment'; }
-  ENTITY_NAME_SHIPMENT_SPECIMEN()     { return 'shipmentSpecimen'; }
-
-  ENTITY_NAME_USER()                  { return 'user'; }
-
-  ENTITY_NAME_MEMBERSHIP_BASE()       { return 'membershipBase'; }
-  ENTITY_NAME_MEMBERSHIP()            { return 'membership'; }
 
   commonFields() {
     return {
@@ -93,15 +88,20 @@ class Factory {
   }
 
   updateDefaultEntity(entityName, entity) {
-    this.defaultEntities[entityName] = entity;
-    this.entityCount += 1;
+    defaultEntities.set(entityName, entity);
   }
 
   defaultEntity(entityName, createFunc) {
-    if (_.isUndefined(this.defaultEntities[entityName])) {
-      createFunc.call(this);
+    const entity = defaultEntities.get(entityName)
+    if (!_.isUndefined(entity)) {
+      return entity;
     }
-    return this.defaultEntities[entityName];
+    createFunc.call(this);
+    const newEntity = defaultEntities.get(entityName)
+    if (_.isUndefined(newEntity)) {
+      throw new Error('entity not created: ' + entityName)
+    }
+    return newEntity;
   }
 
   /**
@@ -110,14 +110,14 @@ class Factory {
    *
    * @param domainEntityType the name of the domain entity type. Eg: 'study', 'centre', 'user', etc.
    */
-  domainEntityNameNext(domainEntityType = 'string') {
-    return _.uniqueId(domainEntityType + '_');
+  domainEntityNameNext(domainEntityType = Symbol('string')) {
+    return _.uniqueId(domainEntityType.toString + '_');
   }
 
   specimenLinkType(options = {}) {
     const processingType = this.defaultProcessingType(),
         defaults = {
-          id:                    this.domainEntityNameNext(this.ENTITY_NAME_SPECIMEN_LINK_TYPE()),
+          id:                    this.domainEntityNameNext(ENTITY_NAME_SPECIMEN_LINK_TYPE),
           processingTypeId:      processingType.id,
           expectedInputChange:   faker.random.number({precision: 0.5}),
           expectedOutputChange:  faker.random.number({precision: 0.5}),
@@ -129,33 +129,33 @@ class Factory {
           outputContainerTypeId: null
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        slt = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
+        slt = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
 
-    this.updateDefaultEntity(this.ENTITY_NAME_SPECIMEN_LINK_TYPE(), slt);
+    this.updateDefaultEntity(ENTITY_NAME_SPECIMEN_LINK_TYPE, slt);
     return slt;
   }
 
   defaultSpecimenLinkType() {
-    return this.defaultEntity(this.ENTITY_NAME_SPECIMEN_LINK_TYPE(), this.specimenLinkType);
+    return this.defaultEntity(ENTITY_NAME_SPECIMEN_LINK_TYPE, this.specimenLinkType);
   }
 
   processingType(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
-          id:          this.domainEntityNameNext(this.ENTITY_NAME_PROCESSING_TYPE()),
+          id:          this.domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE),
           studyId:     study.id,
           name:        this.stringNext(),
           description: faker.lorem.sentences(4),
           enabled:     false
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        pt = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_PROCESSING_TYPE(), pt);
+        pt = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_PROCESSING_TYPE, pt);
     return pt;
   }
 
   defaultProcessingType() {
-    return this.defaultEntity(this.ENTITY_NAME_PROCESSING_TYPE(), this.processingType);
+    return this.defaultEntity(ENTITY_NAME_PROCESSING_TYPE, this.processingType);
   }
 
   /**
@@ -164,7 +164,7 @@ class Factory {
   collectionEventType(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
-          id:                   this.domainEntityNameNext(this.ENTITY_NAME_COLLECTION_EVENT_TYPE()),
+          id:                   this.domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
           studyId:              study.id,
           name:                 this.stringNext(),
           description:          faker.lorem.sentences(4),
@@ -173,13 +173,13 @@ class Factory {
           recurring:            false
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        cet = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_COLLECTION_EVENT_TYPE(), cet);
+        cet = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_COLLECTION_EVENT_TYPE, cet);
     return cet;
   }
 
   defaultCollectionEventType() {
-    return this.defaultEntity(this.ENTITY_NAME_COLLECTION_EVENT_TYPE(), this.collectionEventType);
+    return this.defaultEntity(ENTITY_NAME_COLLECTION_EVENT_TYPE, this.collectionEventType);
   }
 
   randomAnatomicalSourceType() {
@@ -201,7 +201,7 @@ class Factory {
   specimenGroup(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
-          id:                          this.domainEntityNameNext(this.ENTITY_NAME_SPECIMEN_GROUP()),
+          id:                          this.domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
           studyId:                     study.id,
           name:                        this.stringNext(),
           description:                 faker.lorem.sentences(4),
@@ -212,30 +212,30 @@ class Factory {
           specimenType:                this.randomSpecimenType()
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        sg = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_SPECIMEN_GROUP(), sg);
+        sg = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_SPECIMEN_GROUP, sg);
     return sg;
   }
 
   defaultSpecimenGroup() {
-    return this.defaultEntity(this.ENTITY_NAME_SPECIMEN_GROUP(), this.specimenGroup);
+    return this.defaultEntity(ENTITY_NAME_SPECIMEN_GROUP, this.specimenGroup);
   }
 
   study(options = {}) {
-    var defaults =  { id:              this.domainEntityNameNext(this.ENTITY_NAME_STUDY()),
+    var defaults =  { id:              this.domainEntityNameNext(ENTITY_NAME_STUDY),
                       name:            this.stringNext(),
                       description:     faker.lorem.sentences(4),
                       annotationTypes: [],
                       state:           this.StudyState.DISABLED
                     },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        s = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_STUDY(), s);
+        s = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_STUDY, s);
     return s;
   }
 
   defaultStudy() {
-    return this.defaultEntity(this.ENTITY_NAME_STUDY(), this.study);
+    return this.defaultEntity(ENTITY_NAME_STUDY, this.study);
   }
 
   entityNameDto(createFunc, options = {}) {
@@ -263,15 +263,15 @@ class Factory {
   participant(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
-          id:          this.domainEntityNameNext(this.ENTITY_NAME_PARTICIPANT()),
+          id:          this.domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
           studyId:     study.id,
-          uniqueId:    this.domainEntityNameNext(this.ENTITY_NAME_PARTICIPANT()),
+          uniqueId:    this.domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
           annotations: []
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         p;
 
-    p = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
+    p = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
 
     if (!options.annotations) {
       // assign annotation types
@@ -282,19 +282,19 @@ class Factory {
       }
     }
 
-    this.updateDefaultEntity(this.ENTITY_NAME_PARTICIPANT(), p);
+    this.updateDefaultEntity(ENTITY_NAME_PARTICIPANT, p);
     return p;
   }
 
   defaultParticipant() {
-    return this.defaultEntity(this.ENTITY_NAME_PARTICIPANT(), this.participant);
+    return this.defaultEntity(ENTITY_NAME_PARTICIPANT, this.participant);
   }
 
   collectionEvent(options = {}) {
     var participant = this.defaultParticipant(),
         collectionEventType = this.defaultCollectionEventType(),
         defaults = {
-          id:                    this.domainEntityNameNext(this.ENTITY_NAME_COLLECTION_EVENT()),
+          id:                    this.domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT),
           participantId:         participant.id,
           collectionEventType:   collectionEventType,
           collectionEventTypeId: collectionEventType.id,
@@ -305,7 +305,7 @@ class Factory {
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         ce;
 
-    ce = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
+    ce = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
 
     if (!options.annotations) {
       // assign annotation types
@@ -316,12 +316,12 @@ class Factory {
       }
     }
 
-    this.updateDefaultEntity(this.ENTITY_NAME_COLLECTION_EVENT(), ce);
+    this.updateDefaultEntity(ENTITY_NAME_COLLECTION_EVENT, ce);
     return ce;
   }
 
   defaultCollectionEvent() {
-    return this.defaultEntity(this.ENTITY_NAME_COLLECTION_EVENT(), this.collectionEvent);
+    return this.defaultEntity(ENTITY_NAME_COLLECTION_EVENT, this.collectionEvent);
   }
 
   centreLocationInfo(centre) {
@@ -351,8 +351,8 @@ class Factory {
     var ceventType = this.collectionEventType({ specimenDescriptions: [ this.collectionSpecimenDescription() ] }),
         ctr = this.centre({ locations: [ this.location() ]}),
         defaults = {
-          id:                    this.domainEntityNameNext(this.ENTITY_NAME_SPECIMEN()),
-          inventoryId:           this.domainEntityNameNext(this.ENTITY_NAME_SPECIMEN()),
+          id:                    this.domainEntityNameNext(ENTITY_NAME_SPECIMEN),
+          inventoryId:           this.domainEntityNameNext(ENTITY_NAME_SPECIMEN),
           specimenDescriptionId: null,
           originLocationInfo:    null,
           locationInfo:          null,
@@ -372,17 +372,17 @@ class Factory {
       defaults.locationInfo = defaults.originLocationInfo;
     }
 
-    spc = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_SPECIMEN(), spc);
+    spc = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_SPECIMEN, spc);
     return spc;
   }
 
   defaultSpecimen() {
-    return this.defaultEntity(this.ENTITY_NAME_SPECIMEN(), this.specimen);
+    return this.defaultEntity(ENTITY_NAME_SPECIMEN, this.specimen);
   }
 
   centre(options = {}) {
-    var defaults = { id:          this.domainEntityNameNext(this.ENTITY_NAME_CENTRE()),
+    var defaults = { id:          this.domainEntityNameNext(ENTITY_NAME_CENTRE),
                      name:        this.stringNext(),
                      description: this.stringNext(),
                      state:       this.CentreState.DISABLED,
@@ -390,13 +390,13 @@ class Factory {
                      locations:   []
                    },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        c = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_CENTRE(), c);
+        c = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_CENTRE, c);
     return c;
   }
 
   defaultCentre() {
-    return this.defaultEntity(this.ENTITY_NAME_CENTRE(), this.centre);
+    return this.defaultEntity(ENTITY_NAME_CENTRE, this.centre);
   }
 
   shipment(options = {}) {
@@ -408,7 +408,7 @@ class Factory {
           name: ctr.name + ': ' + loc.name
         },
         defaults = {
-          id:               this.domainEntityNameNext(this.ENTITY_NAME_SHIPMENT()),
+          id:               this.domainEntityNameNext(ENTITY_NAME_SHIPMENT),
           state:            this.ShipmentState.CREATED,
           courierName:      this.stringNext(),
           trackingNumber:   this.stringNext(),
@@ -417,35 +417,35 @@ class Factory {
           specimenCount:    0
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        s = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_SHIPMENT(), s);
+        s = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_SHIPMENT, s);
     return s;
   }
 
   defaultShipment() {
-    return this.defaultEntity(this.ENTITY_NAME_SHIPMENT(), this.shipment);
+    return this.defaultEntity(ENTITY_NAME_SHIPMENT, this.shipment);
   }
 
   shipmentSpecimen(options = {}) {
     var shipment = this.defaultShipment(),
         specimen = this.defaultSpecimen(),
-        defaults = { id:           this.domainEntityNameNext(this.ENTITY_NAME_SHIPMENT()),
+        defaults = { id:           this.domainEntityNameNext(ENTITY_NAME_SHIPMENT),
                      state:        this.ShipmentItemState.PRESENT,
                      shipmentId:   shipment.id,
                      specimen:     specimen
                    },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        ss = _.extend(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_SHIPMENT_SPECIMEN(), ss);
+        ss = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_SHIPMENT_SPECIMEN, ss);
     return ss;
   }
 
   defaultShipmentSpecimen() {
-    return this.defaultEntity(this.ENTITY_NAME_SHIPMENT_SPECIMEN(), this.shipment);
+    return this.defaultEntity(ENTITY_NAME_SHIPMENT_SPECIMEN, this.shipment);
   }
 
   user(options =  { membership: {} }) {
-    var defaults = { id:         this.domainEntityNameNext(this.ENTITY_NAME_USER()),
+    var defaults = { id:         this.domainEntityNameNext(ENTITY_NAME_USER),
                      name:       this.stringNext(),
                      email:      this.stringNext(),
                      avatarUrl:  null,
@@ -457,13 +457,13 @@ class Factory {
         u;
 
     membership = this.userMembership(options.membership);
-    u = _.extend(defaults, this.commonFields(), _.pick(options, validKeys), { membership: membership });
-    this.updateDefaultEntity(this.ENTITY_NAME_USER(), u);
+    u = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys), { membership: membership });
+    this.updateDefaultEntity(ENTITY_NAME_USER, u);
     return u;
   }
 
   defaultUser() {
-    return this.defaultEntity(this.ENTITY_NAME_USER(), this.user);
+    return this.defaultEntity(ENTITY_NAME_USER, this.user);
   }
 
   /**
@@ -474,7 +474,7 @@ class Factory {
    * multiple selection.
    */
   annotationType(options = {}) {
-    var defaults = { id:            this.domainEntityNameNext(this.ENTITY_NAME_ANNOTATION_TYPE()),
+    var defaults = { id:            this.domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE),
                      name:          this.stringNext(),
                      description:   null,
                      valueType:     this.AnnotationValueType.TEXT,
@@ -495,12 +495,11 @@ class Factory {
       }
 
       if (_.isUndefined(options.options)) {
-        options.options = _.range(2).map(() => this.domainEntityNameNext(this.ENTITY_NAME_ANNOTATION_TYPE()));
+        options.options = _.range(2).map(() => this.domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE));
       }
     }
 
-    at = _.extend(defaults, _.pick(options, validKeys));
-    this.valueTypeCount += 1;
+    at = Object.assign(defaults, _.pick(options, validKeys));
     return at;
   }
 
@@ -516,7 +515,7 @@ class Factory {
   }
 
   collectionSpecimenDescription(options = {}) {
-    var defaults = { id:                          this.domainEntityNameNext(this.ENTITY_NAME_SPECIMEN_GROUP()),
+    var defaults = { id:                          this.domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
                      name:                        this.stringNext(),
                      description:                 faker.lorem.sentences(4),
                      units:                       'mL',
@@ -528,8 +527,7 @@ class Factory {
                      amount:                      0.5
                    },
         validKeys = Object.keys(defaults),
-        spec = _.extend(defaults, _.pick(options, validKeys));
-    this.valueTypeCount += 1;
+        spec = Object.assign(defaults, _.pick(options, validKeys));
     return spec;
   }
 
@@ -543,7 +541,7 @@ class Factory {
                      selectedValues:   []
                    },
         validKeys = Object.keys(defaults),
-        annotation = _.extend(defaults, _.pick(options, validKeys));
+        annotation = Object.assign(defaults, _.pick(options, validKeys));
 
     if (annotationType.id) {
       annotation.annotationTypeId = annotationType.id;
@@ -623,7 +621,7 @@ class Factory {
    * This is a value object, so it does not have the common fields.
    */
   location(options = {}) {
-    var defaults = { id:             this.domainEntityNameNext(this.ENTITY_NAME_LOCATION()),
+    var defaults = { id:             this.domainEntityNameNext(ENTITY_NAME_LOCATION),
                      name:           this.stringNext(),
                      street:         faker.address.streetAddress(),
                      city:           faker.address.city(),
@@ -633,8 +631,7 @@ class Factory {
                      countryIsoCode: faker.address.country()
                    },
         validKeys = Object.keys(defaults),
-        at = _.extend(defaults, _.pick(options, validKeys));
-    this.valueTypeCount += 1;
+        at = Object.assign(defaults, _.pick(options, validKeys));
     return at;
   }
 
@@ -674,7 +671,7 @@ class Factory {
 
   membershipBaseDefaults() {
     return {
-      id:           this.domainEntityNameNext(this.ENTITY_NAME_MEMBERSHIP_BASE()),
+      id:           this.domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE),
       name:         this.stringNext(),
       description:  faker.lorem.sentences(4),
       studyData:    this.membershipEntitySet(),
@@ -684,25 +681,25 @@ class Factory {
 
   membershipBase(options = {}) {
     var validKeys = this.commonFieldNames.concat(Object.keys(this.membershipBaseDefaults())),
-        m = _.extend(this.membershipBaseDefaults(), this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_MEMBERSHIP_BASE(), m);
+        m = Object.assign(this.membershipBaseDefaults(), this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_MEMBERSHIP_BASE, m);
     return m;
   }
 
   defaultMembershipBase() {
-    return this.defaultEntity(this.ENTITY_NAME_MEMBERSHIP_BASE(), this.membershipBase);
+    return this.defaultEntity(ENTITY_NAME_MEMBERSHIP_BASE, this.membershipBase);
   }
 
   membership(options = {}) {
     var defaults =  { userData: [] },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults), Object.keys(this.membershipBaseDefaults())),
-        m = _.extend({}, defaults, this.membershipBase(options), _.pick(options, validKeys));
-    this.updateDefaultEntity(this.ENTITY_NAME_MEMBERSHIP(), m);
+        m = Object.assign({}, defaults, this.membershipBase(options), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_MEMBERSHIP, m);
     return m;
   }
 
   defaultMembership() {
-    return this.defaultEntity(this.ENTITY_NAME_MEMBERSHIP(), this.membership);
+    return this.defaultEntity(ENTITY_NAME_MEMBERSHIP, this.membership);
   }
 
   userMembership(options) {

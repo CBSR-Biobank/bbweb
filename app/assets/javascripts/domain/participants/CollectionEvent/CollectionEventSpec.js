@@ -184,8 +184,7 @@ describe('CollectionEvent', function() {
         ceventType;
 
     serverCollectionEvent = this.Factory.collectionEvent({
-      collectionEventTypeId: this.Factory.domainEntityNameNext(
-        this.Factory.ENTITY_NAME_COLLECTION_EVENT_TYPE())
+      collectionEventTypeId: this.Factory.stringNext()
     });
     ceventType = this.CollectionEventType.create(
       this.Factory.collectionEventType(this.jsonStudy));
