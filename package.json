@@ -82,6 +82,6 @@
     "test-single-run": "karma start karma.conf.js --single-run",
     "test-watch": "karma start karma.conf.js --reporters dots --auto-watch --no-single-run",
     "test-coverage": "TEST_MODE=coverage karma start karma.conf.js",
-    "test-in-chrome": "CHROME_BIN=/usr/bin/google-chrome karma start --browsers Chrome_with_debugging --reporters dots --auto-watch --no-single-run --log-level debug karma.conf.js"
+    "test-in-chrome": "CHROME_BIN=/usr/bin/google-chrome karma start --browsers Chrome_with_debugging --reporters dots --log-level debug karma.conf.js"
   }
 }

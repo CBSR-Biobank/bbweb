@@ -7,7 +7,8 @@ const path         = require('path'),
 
 const config = _.cloneDeep(commonConfig);
 
-config.devtool = 'cheap-module-eval-source-map';
+// see http://cheng.logdown.com/posts/2016/03/25/679045
+config.devtool = 'eval-source-map';
 
 config.module.rules = config.module.rules
   .concat([{
@@ -18,7 +19,7 @@ config.module.rules = config.module.rules
       options: { esModules: true }
     },
     include: path.resolve('app/assets/javascripts'),
-    exclude: /(test|Spec.js)$/
+    exclude: /(?:[\\\/]test[\\\/]|Spec\.js)/
   }]);
 
 config.plugins = [

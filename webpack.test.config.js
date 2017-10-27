@@ -1,8 +1,8 @@
 /* global module */
 
-const webpack = require('webpack'),
-      commonConfig  = require('./webpack.config'),
-      _       = require('lodash');
+const webpack      = require('webpack'),
+      commonConfig = require('./webpack.config'),
+      _            = require('lodash');
 
 const config = _.cloneDeep(commonConfig);
 
@@ -11,7 +11,7 @@ config.devtool = 'eval-source-map';
 
 config.plugins = [
   new webpack.DefinePlugin({
-    PRODUCTION: JSON.stringify(false),
+    PRODUCTION:  JSON.stringify(false),
     DEVELOPMENT: JSON.stringify(false)
   }),
   // Adds webpack HMR support. It act's like livereload,
