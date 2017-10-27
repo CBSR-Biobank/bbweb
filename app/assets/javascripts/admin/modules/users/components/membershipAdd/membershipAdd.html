@@ -42,7 +42,7 @@
   </div>
 
   <!-- USERS -->
-  <labels-input label="{{'Add a user'|translate}}"
+  <tags-input label="{{'Add a user'|translate}}"
                 placeholder="{{'enter a user\'s name or partial name'|translate}}"
                 labels-placeholder="{{'No users added yet'|translate}}"
                 no-results-found="{{'No matching users found'|translate}}"
@@ -51,7 +51,7 @@
                 on-tag-removed="vm.removeUser()"
                 no-labels-error-message="{{'At least one user is required'|translate}}"
                 required="true">
-  </labels-input>
+  </tags-input>
 
   <!-- STUDIES -->
   <div class="form-group">
@@ -65,7 +65,7 @@
       <span translate>All studies</span>: {{vm.allStudiesMembership | yesNo}}
     </div>
   </div>
-  <labels-input label="{{'Add studies'|translate}}"
+  <tags-input label="{{'Add studies'|translate}}"
                 placeholder="{{'enter a study\'s name or partial name'|translate}}"
                 labels-placeholder="{{'No studies added yet'|translate}}"
                 no-results-found="{{'No matching studies found'|translate}}"
@@ -73,7 +73,7 @@
                 on-tag-selected="vm.studySelected()"
                 on-tag-removed="vm.removeStudy()"
                 ng-if="!vm.allStudiesMembership">
-  </labels-input>
+  </tags-input>
 
   <!-- CENTRES -->
   <div class="form-group">
@@ -87,7 +87,7 @@
       <span translate>All centres</span>: {{vm.allCentresMembership | yesNo}}
     </div>
   </div>
-  <labels-input label="{{'Add centres'|translate}}"
+  <tags-input label="{{'Add centres'|translate}}"
                 placeholder="{{'enter a centre\'s name or partial name'|translate}}"
                 labels-placeholder="{{'No centres added yet'|translate}}"
                 no-results-found="{{'No matching centres found'|translate}}"
@@ -95,7 +95,7 @@
                 on-tag-selected="vm.centreSelected()"
                 on-tag-removed="vm.removeCentre()"
                 ng-if="!vm.allCentresMembership">
-  </labels-input>
+  </tags-input>
 
   <div class="col-md-offset-2 col-md-10 has-error"
        ng-messages="membershipForm.$error"
@@ -114,6 +114,3 @@
     </div>
   </div>
 </form>
-<div class="row">
-  <div class="col-xs-12"><pre>-Title-: {{vm.$scope.membershipForm | json}}</pre></div>
-</div>

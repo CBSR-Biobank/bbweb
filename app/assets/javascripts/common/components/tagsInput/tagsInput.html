@@ -1,12 +1,12 @@
-<ng-form name="labelsForm">
+<ng-form name="tagsForm">
   <div class="form-group"
-       ng-class="{ 'has-error' : labelsForm.labelsInput.$invalid && !labelsForm.labelsInput.$pristine }">
+       ng-class="{ 'has-error' : tagsForm.tagsInput.$invalid && !tagsForm.tagsInput.$pristine }">
 
     <!-- INPUT -->
     <label for="users" class="col-md-2 form-control-label" translate>{{vm.label}}</label>
     <div class="col-md-10">
       <input type="text"
-             name="labelsInput"
+             name="tagsInput"
              class="form-control"
              ng-model="vm.value"
              ng-model-options="{ debounce: 250 }"
@@ -23,7 +23,7 @@
 
     <!-- WHEN TAGS PRESENT -->
     <div class="col-md-offset-2 col-md-10" ng-if="vm.tags.length > 0">
-      <div class="labels-list">
+      <div class="tags-list">
         <h4 style="margin: 0px 0px 0px 0px;">
           <a class="label"
              ng-class="vm.labelClass"
@@ -42,14 +42,14 @@
       <input type="text"
              class="form-control"
              ng-disabled="true"
-             placeholder="{{vm.labelsPlaceholder}}">
+             placeholder="{{vm.tagsPlaceholder}}">
     </div>
 
     <div class="col-md-offset-2 col-md-10"
-         ng-messages="labelsForm.labelsInput.$error"
-         ng-if="labelsForm.labelsInput.$dirty"
+         ng-messages="tagsForm.tagsInput.$error"
+         ng-if="tagsForm.tagsInput.$dirty"
          role="alert">
-      <div ng-message="labelsEntered" class="help-block">{{vm.noLabelsErrorMessage}}</div>
+      <div ng-message="tagsEntered" class="help-block">{{vm.noTagsErrorMessage}}</div>
     </div>
   </div>
 </ng-form>

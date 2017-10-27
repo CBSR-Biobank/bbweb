@@ -159,26 +159,29 @@ class MembershipViewController {
       .catch(angular.noop);
   }
 
+  // this method is invoked by a child component, so a callback function is returned
   // called to remove a user from the membership
-  userLabelSelected(userName) {
-    const promiseFn = () =>
-          this.membership.removeUser(userName.id).then((membership) => {
-            this.notificationsService.success(this.gettextCatalog.getString(
-              'User {{name}} removed',
-              { name: userName.name }));
-            this.updateMembership(membership);
-          });
+  userLabelSelected() {
+    return (userName) => {
+      const promiseFn = () =>
+            this.membership.removeUser(userName.id).then((membership) => {
+              this.notificationsService.success(this.gettextCatalog.getString(
+                'User {{name}} removed',
+                { name: userName.name }));
+              this.updateMembership(membership);
+            });
 
-    this.domainNotificationService.removeEntity(
-      promiseFn,
-      this.gettextCatalog.getString('Remove user from membership'),
-      this.gettextCatalog.getString(
-        'Are you sure you want to remove the user named <strong>{{name}}</strong> from this membership?',
-        { name: userName.name }),
-      this.gettextCatalog.getString('Remove failed'),
-      this.gettextCatalog.getString(
-        'User named {{name}} cannot be removed',
-        { name: userName.name }));
+      this.domainNotificationService.removeEntity(
+        promiseFn,
+        this.gettextCatalog.getString('Remove user from membership'),
+        this.gettextCatalog.getString(
+          'Are you sure you want to remove the user named <strong>{{name}}</strong> from this membership?',
+          { name: userName.name }),
+        this.gettextCatalog.getString('Remove failed'),
+        this.gettextCatalog.getString(
+          'User named {{name}} cannot be removed',
+          { name: userName.name }));
+    }
   }
 
   getMatchingStudyNames() {

@@ -1,10 +1,10 @@
 <h4 style="margin: 0px 0px 0px 0px;">
   <a class="label"
-     ng-class="vm.labelClass"
-     ng-repeat="labelInfo in vm.labelData"
-     ng-click="vm.removeLabel(labelInfo)"
-     uib-tooltip="{{labelInfo.tooltip}}"
+     ng-class="vm.tagClass"
+     ng-repeat="tagInfo in vm.tagData"
+     ng-click="vm.tagSelected(tagInfo)"
+     uib-tooltip="{{tagInfo.tooltip}}"
      style="margin-right: 2px; margin-bottom: 2px; display: inline-block;">
-    {{labelInfo.label}} <i class="glyphicon glyphicon-remove-sign" ng-if="vm.onLabelSelected()"></i>
+    {{tagInfo.label}} <i class="glyphicon glyphicon-remove-sign" ng-if="vm.onTagSelected"></i>
   </a>
 </h4>

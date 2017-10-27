@@ -32,7 +32,7 @@ class Controller {
     this.tags.push(value)
     this.onTagSelected()(value.obj)
     if (this.required) {
-      this.$scope.labelsForm.labelsInput.$setValidity('labelsEntered', true)
+      this.$scope.tagsForm.tagsInput.$setValidity('tagsEntered', true)
     }
   }
 
@@ -47,7 +47,7 @@ class Controller {
     this.onTagRemoved()(tagToRemove.obj)
 
     if (this.required && (this.tags.length <= 0)) {
-      this.$scope.labelsForm.labelsInput.$setValidity('labelsEntered', false)
+      this.$scope.tagsForm.tagsInput.$setValidity('tagsEntered', false)
     }
   }
 
@@ -64,7 +64,7 @@ class Controller {
  *
  * @param {string} noResultsFound - the text to display when onGetValues() returns null.
  *
- * @param {string} noLabelsErrorMessage - the error text to display when this tags are required and the user
+ * @param {string} noTagsErrorMessage - the error text to display when this tags are required and the user
  *        has removed all the tags.
  *
  * @param {function} onGetValues - the function to call that returns a list of available tag values. This
@@ -81,21 +81,21 @@ class Controller {
  *        the object selected (see onGetValues).
  */
 const COMPONENT = {
-  template: require('./labelsInput.html'),
+  template: require('./tagsInput.html'),
   controller: Controller,
   controllerAs: 'vm',
   bindings: {
-    label:                '@',
-    placeholder:          '@',
-    labelsPlaceholder:    '@',
-    noResultsFound:       '@',
-    noLabelsErrorMessage: '@',
-    onGetValues:          '&',
-    onTagSelected:        '&',
-    onTagRemoved:         '&',
-    required:             '<'
+    label:              '@',
+    placeholder:        '@',
+    tagsPlaceholder:    '@',
+    noResultsFound:     '@',
+    noTagsErrorMessage: '@',
+    onGetValues:        '&',
+    onTagSelected:      '&',
+    onTagRemoved:       '&',
+    required:           '<'
   }
 }
 
 
-export default ngModule => ngModule.component('labelsInput', COMPONENT)
+export default ngModule => ngModule.component('tagsInput', COMPONENT)

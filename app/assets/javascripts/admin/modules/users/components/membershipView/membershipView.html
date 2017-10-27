@@ -63,9 +63,9 @@
           <strong translate>Users:</strong>
         </div>
         <div class="col-md-8">
-          <labels-list label-data="vm.userNameLabels"
-                       on-label-selected="vm.onUserLabelSelected">
-          </labels-list>
+          <tags-list tag-data="vm.userNameLabels"
+                     on-tag-selected="vm.userLabelSelected()">
+          </tags-list>
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
@@ -88,9 +88,9 @@
           <translate>All studies</translate>
         </div>
         <div class="col-md-8" ng-if="!vm.membership.studyData.allEntities">
-          <labels-list label-data="vm.studyNameLabels"
-                       on-label-selected="vm.onStudyLabelSelected">
-          </labels-list>
+          <tags-list tag-data="vm.studyNameLabels"
+                       on-tag-selected="vm.onStudyLabelSelected">
+          </tags-list>
         </div>
         <div class="col-md-8" ng-if="vm.noStudiesMembership">
           <translate>None</translate>
@@ -116,9 +116,9 @@
           <translate>All centres</translate>
         </div>
         <div class="col-md-8" ng-if="!vm.membership.centreData.allEntities">
-          <labels-list label-data="vm.centreNameLabels"
-                       on-label-selected="vm.onCentreLabelSelected">
-          </labels-list>
+          <tags-list tag-data="vm.centreNameLabels"
+                     on-tag-selected="vm.onCentreLabelSelected">
+          </tags-list>
         </div>
         <div class="col-md-8" ng-if="vm.noCentresMembership">
           <translate>None</translate>

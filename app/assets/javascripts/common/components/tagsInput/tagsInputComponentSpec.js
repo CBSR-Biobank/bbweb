@@ -9,7 +9,7 @@
 import _ from 'lodash'
 import faker from 'faker'
 
-describe('labelsInputComponent', function() {
+describe('tagsInputComponent', function() {
 
   beforeEach(() => {
     angular.mock.module('biobankApp', 'biobank.test')
@@ -21,9 +21,9 @@ describe('labelsInputComponent', function() {
       this.createController =
         (label,
          placeholder,
-         labelsPlaceholder,
+         tagsPlaceholder,
          noResultsFound,
-         noLabelsErrorMessage,
+         noTagsErrorMessage,
          onGetValues,
          onTagSelected,
          onTagRemoved,
@@ -31,24 +31,24 @@ describe('labelsInputComponent', function() {
            ComponentTestSuiteMixin.createController.call(
              this,
              `<form name="testForm">
-                 <labels-input label="${label}"
-                               placeholder="${placeholder}"
-                               labels-placeholder="${labelsPlaceholder}"
-                               no-results-found="${noResultsFound}"
-                               no-labels-error-message="${noLabelsErrorMessage}"
-                               on-get-values="vm.onGetValues"
-                               on-tag-selected="vm.onTagSelected"
-                               on-tag-removed="vm.onTagRemoved"
-                               required="${required ? 'true' : 'false'}">
-                 </labels-input>
+                 <tags-input label="${label}"
+                             placeholder="${placeholder}"
+                             tags-placeholder="${tagsPlaceholder}"
+                             no-results-found="${noResultsFound}"
+                             no-tags-error-message="${noTagsErrorMessage}"
+                             on-get-values="vm.onGetValues"
+                             on-tag-selected="vm.onTagSelected"
+                             on-tag-removed="vm.onTagRemoved"
+                             required="${required ? 'true' : 'false'}">
+                 </tags-input>
               </form>`,
              {
                onGetValues,
                onTagSelected,
                onTagRemoved
              },
-             'labelsInput')
-           this.controller = this.element.find('labels-input').controller('labelsInput')
+             'tagsInput')
+           this.controller = this.element.find('tags-input').controller('tagsInput')
          }
 
       this.getTags = (numTags) => _.range(numTags).map(() => {
@@ -59,20 +59,20 @@ describe('labelsInputComponent', function() {
   })
 
   it('has valid scope', function() {
-    const label                = this.Factory.stringNext(),
-          placeholder          = this.Factory.stringNext(),
-          labelsPlaceholder    = this.Factory.stringNext(),
-          noResultsFound       = this.Factory.stringNext(),
-          noLabelsErrorMessage = this.Factory.stringNext(),
-          onGetValues          = jasmine.createSpy().and.returnValue(faker.lorem.word(3)),
-          onTagSelected        = jasmine.createSpy().and.returnValue(null),
-          onTagRemoved         = jasmine.createSpy().and.returnValue(null),
-          required             = true
+    const label              = this.Factory.stringNext(),
+          placeholder        = this.Factory.stringNext(),
+          tagsPlaceholder    = this.Factory.stringNext(),
+          noResultsFound     = this.Factory.stringNext(),
+          noTagsErrorMessage = this.Factory.stringNext(),
+          onGetValues        = jasmine.createSpy().and.returnValue(faker.lorem.word(3)),
+          onTagSelected      = jasmine.createSpy().and.returnValue(null),
+          onTagRemoved       = jasmine.createSpy().and.returnValue(null),
+          required           = true
     this.createController(label,
                           placeholder,
-                          labelsPlaceholder,
+                          tagsPlaceholder,
                           noResultsFound,
-                          noLabelsErrorMessage,
+                          noTagsErrorMessage,
                           onGetValues,
                           onTagSelected,
                           onTagRemoved,
@@ -80,9 +80,9 @@ describe('labelsInputComponent', function() {
 
     expect(this.controller.label).toBe(label)
     expect(this.controller.placeholder).toBe(placeholder)
-    expect(this.controller.labelsPlaceholder).toBe(labelsPlaceholder)
+    expect(this.controller.tagsPlaceholder).toBe(tagsPlaceholder)
     expect(this.controller.noResultsFound).toBe(noResultsFound)
-    expect(this.controller.noLabelsErrorMessage).toBe(noLabelsErrorMessage)
+    expect(this.controller.noTagsErrorMessage).toBe(noTagsErrorMessage)
     expect(this.controller.onGetValues).toBeFunction()
     expect(this.controller.onTagSelected).toBeFunction()
     expect(this.controller.onTagRemoved).toBeFunction()
@@ -156,7 +156,7 @@ describe('labelsInputComponent', function() {
 
     this.controller.tagSelected(selectedTag)
     this.scope.$digest()
-    expect(this.scope.testForm.labelsForm.labelsInput.$invalid).toBeFalse()
+    expect(this.scope.testForm.tagsForm.tagsInput.$invalid).toBeFalse()
   })
 
   it('form is invalid when all tags are removed', function() {
@@ -182,7 +182,7 @@ describe('labelsInputComponent', function() {
 
     this.controller.tagRemoved(tagToRemove)
     this.scope.$digest()
-    expect(this.scope.testForm.labelsForm.labelsInput.$invalid).toBeTrue()
+    expect(this.scope.testForm.tagsForm.tagsInput.$invalid).toBeTrue()
   })
 
   it('exception is thrown when an invalid tag is removed', function() {
