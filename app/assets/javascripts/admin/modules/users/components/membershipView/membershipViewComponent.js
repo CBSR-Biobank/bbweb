@@ -206,25 +206,29 @@ class MembershipViewController {
       .catch(angular.noop);
   }
 
-  studyLabelSelected(studyName) {
-    const promiseFn = () =>
-          this.membership.removeStudy(studyName.id).then((membership) => {
-            this.notificationsService.success(this.gettextCatalog.getString(
-              'Study {{name}} removed',
-              { name: studyName.name }));
-            this.updateMembership(membership);
-          });
+  // this method is invoked by a child component, so a callback function is returned
+  // called to remove a user from the membership
+  studyLabelSelected() {
+    return (studyName) => {
+      const promiseFn = () =>
+            this.membership.removeStudy(studyName.id).then((membership) => {
+              this.notificationsService.success(this.gettextCatalog.getString(
+                'Study {{name}} removed',
+                { name: studyName.name }));
+              this.updateMembership(membership);
+            });
 
-    this.domainNotificationService.removeEntity(
-      promiseFn,
-      this.gettextCatalog.getString('Remove study from membership'),
-      this.gettextCatalog.getString(
-        'Are you sure you want to remove the study named <strong>{{name}}</strong> from this membership?',
-        { name: studyName.name }),
-      this.gettextCatalog.getString('Remove failed'),
-      this.gettextCatalog.getString(
-        'Study named {{name}} cannot be removed',
-        { name: studyName.name }));
+      this.domainNotificationService.removeEntity(
+        promiseFn,
+        this.gettextCatalog.getString('Remove study from membership'),
+        this.gettextCatalog.getString(
+          'Are you sure you want to remove the study named <strong>{{name}}</strong> from this membership?',
+          { name: studyName.name }),
+        this.gettextCatalog.getString('Remove failed'),
+        this.gettextCatalog.getString(
+          'Study named {{name}} cannot be removed',
+          { name: studyName.name }));
+    }
   }
 
   getMatchingCentreNames() {
@@ -249,25 +253,29 @@ class MembershipViewController {
       .catch(angular.noop);
   }
 
-  centreLabelSelected(centreName) {
-    const promiseFn = () =>
-          this.membership.removeCentre(centreName.id).then((membership) => {
-            this.notificationsService.success(this.gettextCatalog.getString(
-              'Centre {{name}} removed',
-              { name: centreName.name }));
-            this.updateMembership(membership);
-          });
+  // this method is invoked by a child component, so a callback function is returned
+  // called to remove a user from the membership
+  centreLabelSelected() {
+    return (centreName) => {
+      const promiseFn = () =>
+            this.membership.removeCentre(centreName.id).then((membership) => {
+              this.notificationsService.success(this.gettextCatalog.getString(
+                'Centre {{name}} removed',
+                { name: centreName.name }));
+              this.updateMembership(membership);
+            });
 
-    this.domainNotificationService.removeEntity(
-      promiseFn,
-      this.gettextCatalog.getString('Remove centre from membership'),
-      this.gettextCatalog.getString(
-        'Are you sure you want to remove the centre named <strong>{{name}}</strong> from this membership?',
-        { name: centreName.name }),
-      this.gettextCatalog.getString('Remove failed'),
-      this.gettextCatalog.getString(
-        'Centre named {{name}} cannot be removed',
-        { name: centreName.name }));
+      this.domainNotificationService.removeEntity(
+        promiseFn,
+        this.gettextCatalog.getString('Remove centre from membership'),
+        this.gettextCatalog.getString(
+          'Are you sure you want to remove the centre named <strong>{{name}}</strong> from this membership?',
+          { name: centreName.name }),
+        this.gettextCatalog.getString('Remove failed'),
+        this.gettextCatalog.getString(
+          'Centre named {{name}} cannot be removed',
+          { name: centreName.name }));
+    }
   }
 
   back() {
