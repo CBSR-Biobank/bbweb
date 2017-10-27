@@ -50,6 +50,8 @@ xdescribe('modalInputModule', function() {
          label = this.label,
          options) => {
            this.modal = modalInputFunc(title, label, defaultValue, options);
+           this.modal.opened.catch(angular.noop);
+           this.modal.result.catch(angular.noop);
            this.modal.result
              .then(angular.noop)
              .catch(angular.noop);
@@ -59,6 +61,15 @@ xdescribe('modalInputModule', function() {
            this.scope = this.modalElement.scope();
          };
     });
+  });
+
+  afterEach(function () {
+    this.modalElement.remove();
+    const body = this.$document.find('body');
+    body.find('div.modal').remove();
+    body.find('div.modal-backdrop').remove();
+    body.removeClass('modal-open');
+    this.$document.off('keydown');
   });
 
   describe('boolean modal', function () {

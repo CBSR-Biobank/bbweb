@@ -42,7 +42,6 @@ describe('shipmentViewComponent', function() {
     Object.keys(headerByState).forEach((state) => {
       shipment = this.createShipment({ state: state })
       this.createController(shipment)
-      console.log(`"${state}", "${headerByState[state]}", "${this.controller.pageHeader}"`)
       expect(this.controller.pageHeader).toBe(headerByState[state])
     })
   })
