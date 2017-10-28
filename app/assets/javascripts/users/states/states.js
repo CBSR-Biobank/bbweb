@@ -10,19 +10,19 @@ function config($stateProvider) {
   $stateProvider
     .state('home.users', {
       abstract: true,
-      url: '^/users',
+      url: 'users',
       views: {
         'main@': 'uiView'
       }
     })
     .state('home.users.login', {
-      url: '^/login',
+      url: 'login',
       views: {
         'main@': 'login'
       }
     })
     .state('home.users.forgot', {
-      url: '^/forgot',
+      url: 'forgot',
       resolve: {
       },
       views: {
@@ -30,13 +30,13 @@ function config($stateProvider) {
       }
     })
     .state('home.users.forgot.passwordSent', {
-      url: '^/passwordSent/{email}',
+      url: 'passwordSent/{email}',
       views: {
         'main@': 'passwordSent'
       }
     })
     .state('home.users.register', {
-      url: '^/register',
+      url: 'register',
       views: {
         'main@': 'registerUser'
       }

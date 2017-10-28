@@ -92,16 +92,14 @@ class Factory {
   }
 
   defaultEntity(entityName, createFunc) {
-    const entity = defaultEntities.get(entityName)
-    if (!_.isUndefined(entity)) {
-      return entity;
+    if (defaultEntities.has(entityName)) {
+      return defaultEntities.get(entityName);
     }
     createFunc.call(this);
-    const newEntity = defaultEntities.get(entityName)
-    if (_.isUndefined(newEntity)) {
+    if (!defaultEntities.has(entityName)) {
       throw new Error('entity not created: ' + entityName)
     }
-    return newEntity;
+    return defaultEntities.get(entityName)
   }
 
   /**

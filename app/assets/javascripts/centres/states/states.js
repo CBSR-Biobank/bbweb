@@ -20,8 +20,12 @@ function config($stateProvider) {
       abstract: true,
       url: '/centres/{centreId}',
       resolve: {
-        centre: ['Centre', '$transition$', function (Centre, $transition$) {
-          return Centre.get($transition$.params().centreId);
+        centre: ['Centre', '$transition$', '$state', function (Centre, $transition$, $state) {
+          return Centre.get($transition$.params().centreId)
+            .catch(() => {
+              console.log('here');
+              $state.go('404', null, { location: false });
+            })
         }]
       },
       views: {
@@ -126,9 +130,7 @@ function config($stateProvider) {
   /* @ngInject */
   function resolveShipment(Shipment, $transition$, $state) {
     return Shipment.get($transition$.params().shipmentId)
-      .catch(function () {
-        $state.go('404', null, { location: false });
-      });
+      .catch(() => $state.go('404', null, { location: false }));
   }
 
 }
