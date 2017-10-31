@@ -7,6 +7,7 @@
 import _      from 'lodash';
 import faker  from 'faker';
 import moment from 'moment';
+import ngModule from '../../index'
 
 /**
  * Test suite for shipment domain entity.
@@ -14,7 +15,7 @@ import moment from 'moment';
 describe('Shipment domain object:', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (ServerReplyMixin, EntityTestSuiteMixin) {
       _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
 
@@ -24,7 +25,6 @@ describe('Shipment domain object:', function() {
                               'ShipmentSpecimen',
                               'ShipmentState',
                               'Specimen',
-                              'funutils',
                               'TestUtils',
                               'Factory');
       // used by promise tests

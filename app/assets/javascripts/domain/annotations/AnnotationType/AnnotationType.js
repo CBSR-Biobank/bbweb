@@ -8,12 +8,10 @@
  */
 /* @ngInject */
 function AnnotationTypeFactory($log,
-                               validationService,
                                DomainEntity,
                                DomainError,
                                AnnotationValueType,
-                               AnnotationMaxValueCount,
-                               annotationValueTypeLabelService) {
+                               AnnotationMaxValueCount) {
 
   function AnnotationType(obj) {
     // FIXME: jsdoc for this classes members is needed
@@ -55,13 +53,6 @@ function AnnotationTypeFactory($log,
       throw new DomainError('invalid object from server: ' + validation.error);
     }
     return new AnnotationType(obj);
-  };
-
-  /**
-   * @returns {function} a function that returns a string that can be displayed to the user
-   */
-  AnnotationType.prototype.getValueTypeLabelFunc = function () {
-    return annotationValueTypeLabelService.valueTypeToLabelFunc(this.valueType, this.isSingleSelect());
   };
 
   AnnotationType.prototype.isValueTypeText = function () {

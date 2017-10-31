@@ -8,12 +8,13 @@
 
 import _ from 'lodash';
 import faker from 'faker';
+import ngModule from '../../index'
 import sharedBehaviour from '../../../../../test/behaviours/locationUpdateSharedBehaviourSpec';
 
 describe('Component: centreLocationView', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
 

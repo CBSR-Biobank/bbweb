@@ -7,13 +7,14 @@
 
 import angular from 'angular';
 import sharedSpec from '../../../test/behaviours/studyAnnotationTypeSharedSpec';
+import ngModule from '../../index'
 
 xdescribe('SpecimenLinkAnnotationType', function() {
 
   var context = {}, SpecimenLinkAnnotationType, Factory;
   var requiredKeys = ['id', 'studyId', 'name', 'valueType', 'options'];
 
-  beforeEach(angular.mock.module('biobankApp', 'biobank.test'));
+  beforeEach(angular.mock.module(ngModule, 'biobank.test'));
 
   beforeEach(angular.mock.inject(function(_SpecimenLinkAnnotationType_, _Factory_) {
     SpecimenLinkAnnotationType = _SpecimenLinkAnnotationType_;

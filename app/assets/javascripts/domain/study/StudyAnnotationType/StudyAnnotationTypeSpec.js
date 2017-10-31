@@ -6,11 +6,13 @@
  */
 /* global angular */
 
+import ngModule from '../../index'
+
 describe('StudyAnnotationType', function () {
   var StudyAnnotationType;
 
     beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(_StudyAnnotationType_) {
       StudyAnnotationType = _StudyAnnotationType_;
     });

@@ -8,11 +8,12 @@
 
 import _ from 'lodash';
 import faker from 'faker';
+import ngModule from '../../index'
 
 describe('UserCounts', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
       _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
       this.injectDependencies('UserCounts', '$httpBackend');

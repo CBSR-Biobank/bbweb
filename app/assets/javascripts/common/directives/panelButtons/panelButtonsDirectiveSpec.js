@@ -7,6 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 /**
  * TODO: not sure how to test open / closed state of the panel since it is a ui-bootstrap panel.
@@ -14,7 +15,7 @@ import _ from 'lodash';
 describe('Directive: panelButtons', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (DirectiveTestSuiteMixin) {
       _.extend(this, DirectiveTestSuiteMixin);
 

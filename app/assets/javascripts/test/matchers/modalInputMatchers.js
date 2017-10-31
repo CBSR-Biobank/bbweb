@@ -41,7 +41,7 @@ export default function modalInputMatcher () {
           var pass, message, element = actual.find('form').find('input');
           expected = expected || 0;
           pass = (element.length === expected);
-          message = `Expected "${angular.mock.dump(element)}" %s have ${expected} input elements`;
+          message = `Expected "${angular.mock.dump(element)}" ${pass ? 'not to' : 'to'} have ${expected} input elements`;
           return { pass: pass, message: message };
         }
       };

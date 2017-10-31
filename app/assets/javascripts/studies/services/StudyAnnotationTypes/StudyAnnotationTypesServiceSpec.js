@@ -11,6 +11,7 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 /*
  * Suite for ceventAnnotationTypesService
@@ -20,7 +21,7 @@ xdescribe('service: studyAnnotationTypesService', function () {
   var context = {};
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function ($httpBackend,
                                   factory,
                                   CollectionEventAnnotationType,
@@ -48,7 +49,7 @@ xdescribe('service: spcLinkAnnotationTypesService', function () {
   var context = {};
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function ($httpBackend,
                                   factory,
                                   SpecimenLinkAnnotationType,
@@ -75,7 +76,7 @@ xdescribe('service: participantAnnotationTypesService', function () {
   var context = {};
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function ($httpBackend,
                                   factory,
                                   ParticipantAnnotationType,

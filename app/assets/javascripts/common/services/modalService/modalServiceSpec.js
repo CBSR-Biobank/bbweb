@@ -7,11 +7,12 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 describe('modalService', function() {
 
   beforeEach(() => {
-    angular.mock.module('ngAnimateMock', 'biobankApp', 'biobank.test');
+    angular.mock.module('ngAnimateMock', ngModule, 'biobank.test');
     angular.mock.inject(function(ModalTestSuiteMixin) {
       _.extend(this, ModalTestSuiteMixin);
 

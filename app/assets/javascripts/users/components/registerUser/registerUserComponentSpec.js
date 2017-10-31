@@ -7,11 +7,12 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 describe('Component: registerUser', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(TestSuiteMixin, ServerReplyMixin) {
       _.extend(this, TestSuiteMixin, ServerReplyMixin);
       this.injectDependencies('$rootScope',

@@ -4,12 +4,13 @@
 /* global angular */
 
 import _ from 'lodash';
-import annotationTypeAddComponentSharedSpec from '../../../../../test/behaviours/annotationTypeAddComponentSharedSpec.js';
+import annotationTypeAddComponentSharedSpec from '../../../../../test/behaviours/annotationTypeAddComponentSharedSpec';
+import ngModule from '../../index'
 
 describe('Component: collectionEventAnnotationTypeAdd', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$rootScope',

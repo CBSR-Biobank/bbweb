@@ -6,6 +6,7 @@
 
 import _ from 'lodash';
 import membershipCommonBehaviour from '../../../test/behaviours/membershipCommonBehaviourSpec';
+import ngModule from '../../index'
 
 describe('UserMembership', function() {
 
@@ -83,7 +84,7 @@ describe('UserMembership', function() {
   }
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(MembershipSpecCommon, ServerReplyMixin) {
       _.extend(this, SuiteMixin(MembershipSpecCommon, ServerReplyMixin));
 
@@ -97,7 +98,7 @@ describe('UserMembership', function() {
     });
   });
 
-  describe('base class shared behaviour', function() {
+  describe('shared behaviour', function() {
     var context = {};
 
     beforeEach(function() {

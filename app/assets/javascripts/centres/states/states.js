@@ -22,10 +22,7 @@ function config($stateProvider) {
       resolve: {
         centre: ['Centre', '$transition$', '$state', function (Centre, $transition$, $state) {
           return Centre.get($transition$.params().centreId)
-            .catch(() => {
-              console.log('here');
-              $state.go('404', null, { location: false });
-            })
+            .catch(() => $state.go('404', null, { location: false }))
         }]
       },
       views: {

@@ -7,9 +7,16 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import angular from 'angular';
+import CommonModule    from '../common'
+import UsersModule     from '../users'
+import angular         from 'angular'
+import angularUiRouter from '@uirouter/angularjs'
 
-const ngModule = angular.module('biobank.home', [])
+const ngModule = angular.module('biobank.home', [
+  CommonModule,
+  UsersModule,
+  angularUiRouter
+])
 
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 

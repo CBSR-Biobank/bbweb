@@ -7,11 +7,12 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 describe('Component: centreStudiesPanel', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin, TestUtils) {
       _.extend(this, ComponentTestSuiteMixin);
 
@@ -126,17 +127,6 @@ describe('Component: centreStudiesPanel', function() {
       }).toThrowError(/An application error occurred/);
     });
 
-  });
-
-  it('study viewer is displayed', function() {
-    var entities = this.createEntities();
-
-    this.createController(entities);
-    spyOn(this.EntityViewer.prototype, 'showModal').and.returnValue(this.$q.when('ok'));
-    spyOn(this.Study, 'get').and.returnValue(this.$q.when(entities.studies[0]));
-    this.controller.information(entities.studies[0].id);
-    this.scope.$digest();
-    expect(this.EntityViewer.prototype.showModal).toHaveBeenCalled();
   });
 
   it('study is removed', function() {

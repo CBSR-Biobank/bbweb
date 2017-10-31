@@ -9,12 +9,9 @@ import _ from 'lodash'
  *
  */
 /* @ngInject */
-function StudyAnnotationTypeFactory(funutils,
-                                    biobankApi,
+function StudyAnnotationTypeFactory(biobankApi,
                                     AnnotationValueType,
                                     DomainError,
-                                    validationService,
-                                    studyAnnotationTypeValidation,
                                     AnnotationType) {
 
   function StudyAnnotationType(obj) {

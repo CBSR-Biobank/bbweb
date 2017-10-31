@@ -6,11 +6,12 @@
 
 import _ from 'lodash';
 import membershipCommonBehaviour from '../../../test/behaviours/membershipCommonBehaviourSpec';
+import ngModule from '../../index'
 
 describe('MembershipBase', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(MembershipSpecCommon) {
       _.extend(this, MembershipSpecCommon);
 

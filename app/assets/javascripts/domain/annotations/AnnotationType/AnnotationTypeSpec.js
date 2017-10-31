@@ -7,11 +7,12 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 describe('AnnotationType', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(TestSuiteMixin) {
       _.extend(this, TestSuiteMixin);
       this.injectDependencies('AnnotationType',
@@ -188,55 +189,6 @@ describe('AnnotationType', function() {
     annotationType.removeOption(0);
     expect(annotationType.options).toBeArrayOfSize(options.length - 1);
     expect(annotationType.options[0]).toContain(options[1]);
-  });
-
-  describe('getValueTypeLabelFunc', function() {
-
-    it('returns valid type for value type TEXT', function() {
-      var annotationType = new this.AnnotationType(this.Factory.annotationType(
-        { valueType: this.AnnotationValueType.TEXT }));
-      expect(annotationType.getValueTypeLabelFunc()().toLowerCase()).toBe(this.AnnotationValueType.TEXT);
-    });
-
-    it('returns valid type for value type NUMBER', function() {
-      var annotationType = new this.AnnotationType(this.Factory.annotationType(
-        { valueType: this.AnnotationValueType.NUMBER }));
-      expect(annotationType.getValueTypeLabelFunc()().toLowerCase()).toBe(this.AnnotationValueType.NUMBER);
-    });
-
-    it('returns valid type for value type DATE_TIME', function() {
-      var annotationType = new this.AnnotationType(this.Factory.annotationType(
-        { valueType: this.AnnotationValueType.DATE_TIME }));
-      expect(annotationType.getValueTypeLabelFunc()()).toBe('Date and time');
-    });
-
-    it('returns valid type for value type SINGLE SELECT', function() {
-      var annotationType = new this.AnnotationType(this.Factory.annotationType(
-        {
-          valueType: this.AnnotationValueType.SELECT,
-          maxValueCount: this.AnnotationMaxValueCount.SELECT_SINGLE
-        }));
-      expect(annotationType.getValueTypeLabelFunc()()).toBe('Single Select');
-    });
-
-    it('returns valid type for value type MULTIPLE SELECT', function() {
-      var annotationType = new this.AnnotationType(this.Factory.annotationType(
-        {
-          valueType: this.AnnotationValueType.SELECT,
-          maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE
-        }));
-      expect(annotationType.getValueTypeLabelFunc()()).toBe('Multiple Select');
-    });
-
-    it('throws exception for invalid value type', function() {
-      var self = this,
-          annotationType = new self.AnnotationType(self.Factory.annotationType(
-            { valueType: self.Factory.stringNext() }));
-      expect(function () {
-        annotationType.getValueTypeLabelFunc()();
-      }).toThrowError(/no such label/);
-    });
-
   });
 
   describe('calling valueTypeChanged', function() {

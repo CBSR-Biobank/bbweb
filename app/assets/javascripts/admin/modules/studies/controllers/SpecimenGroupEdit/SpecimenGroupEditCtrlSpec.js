@@ -11,7 +11,7 @@ import _ from 'lodash';
 xdescribe('Controller: SpecimenGroupEditCtrl', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
   });
 
   describe('for collection event types', function() {

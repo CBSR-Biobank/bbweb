@@ -8,11 +8,12 @@
 
 import _ from 'lodash';
 import filtersSharedBehaviour from '../../../test/behaviours/filtersSharedBehaviour';
+import ngModule from '../../index'
 
 describe('nameEmailStateFiltersComponent', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');

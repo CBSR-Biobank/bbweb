@@ -15,7 +15,7 @@ xdescribe('Directive: processingTypesPanelDirective', function() {
       createController;
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (TestSuiteMixin, TestUtils) {
       _.extend(this, TestSuiteMixin);
 

@@ -7,6 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 /*
  * AnnotationSpec.js has test cases for all types of annotations.
@@ -16,7 +17,7 @@ import _ from 'lodash';
 describe('MultipleSelectAnnotation', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(EntityTestSuiteMixin) {
       _.extend(this, EntityTestSuiteMixin);
       this.injectDependencies('annotationFactory',
@@ -28,19 +29,18 @@ describe('MultipleSelectAnnotation', function() {
   });
 
   it('cannot be created with invalid selected values', function() {
-    var self = this,
-        jsonAnnotationType = self.Factory.annotationType({
-          valueType:     self.AnnotationValueType.SELECT,
-          maxValueCount: self.AnnotationMaxValueCount.SELECT_MULTIPLE,
+    var jsonAnnotationType = this.Factory.annotationType({
+          valueType:     this.AnnotationValueType.SELECT,
+          maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE,
           options:       [ 'option1', 'option2' ],
           required:      true
         }),
-        annotationType = new self.AnnotationType(jsonAnnotationType),
-        jsonAnnotation = self.Factory.annotation({ selectedValues: [ this.Factory.stringNext() ] },
+        annotationType = new this.AnnotationType(jsonAnnotationType),
+        jsonAnnotation = this.Factory.annotation({ selectedValues: [ this.Factory.stringNext() ] },
                                                  jsonAnnotationType);
 
-    expect(function () {
-      self.annotationFactory.create(jsonAnnotation, annotationType);
+    expect(() => {
+      this.annotationFactory.create(jsonAnnotation, annotationType);
     }).toThrowError('invalid selected values in object from server');
   });
 

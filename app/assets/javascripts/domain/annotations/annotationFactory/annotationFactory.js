@@ -6,8 +6,7 @@
 import _ from 'lodash';
 
 /* @ngInject */
-function AnnotationFactory(funutils,
-                           Annotation,
+function AnnotationFactory(Annotation,
                            AnnotationValueType,
                            DateTimeAnnotation,
                            MultipleSelectAnnotation,

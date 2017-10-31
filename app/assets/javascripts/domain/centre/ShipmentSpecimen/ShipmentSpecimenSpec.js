@@ -5,11 +5,12 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 describe('ShipmentSpecimen domain object:', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (ServerReplyMixin, EntityTestSuiteMixin) {
       _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
 
@@ -17,7 +18,6 @@ describe('ShipmentSpecimen domain object:', function() {
                               '$httpParamSerializer',
                               'ShipmentSpecimen',
                               'ShipmentItemState',
-                              'funutils',
                               'TestUtils',
                               'UrlService',
                               'Factory');

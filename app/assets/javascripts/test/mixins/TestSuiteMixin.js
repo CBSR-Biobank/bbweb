@@ -13,7 +13,7 @@
  * @return {object} Object containing the functions that will be mixed in.
  */
 /* @ngInject */
-function TestSuiteMixin($injector, UrlService) {
+function TestSuiteMixin($injector) {
 
   return {
     injectDependencies,
@@ -38,8 +38,11 @@ function TestSuiteMixin($injector, UrlService) {
   }
 
   function url(...paths) {
-    return UrlService.url.apply(UrlService, paths);
-  }
+    if (paths.length <= 0) {
+      throw new Error('no arguments specified');
+    }
+    return [ '/api' ].concat(paths).join('/');
+ }
 
 }
 

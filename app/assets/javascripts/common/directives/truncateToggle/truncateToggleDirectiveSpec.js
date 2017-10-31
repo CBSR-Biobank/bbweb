@@ -7,12 +7,13 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 describe('Directive: truncateToggle', function() {
   var textEmptyWarning = 'text not entered yet.';
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (DirectiveTestSuiteMixin) {
       _.extend(this, DirectiveTestSuiteMixin);
       this.injectDependencies('$rootScope', '$compile', '$filter', 'gettextCatalog');

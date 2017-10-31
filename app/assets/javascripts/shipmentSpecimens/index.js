@@ -3,9 +3,14 @@
  *
  * @author Nelson Loyola <loyola@ualberta.ca * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import angular from 'angular';
+import DomainModule    from '../domain'
+import angular         from 'angular';
+import angularUiRouter from '@uirouter/angularjs'
 
-const ngModule = angular.module('biobank.shipmentSpecimens', [])
+const ngModule = angular.module('biobank.shipmentSpecimens', [
+  DomainModule,
+  angularUiRouter
+])
 
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 

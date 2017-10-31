@@ -5,12 +5,13 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 import sharedBehaviour from '../../../test/behaviours/shipmentSpecimensControllerSharedBehaviour';
 
 describe('shipmentSpecimensViewComponent', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(ShippingComponentTestSuiteMixin) {
       _.extend(this, ShippingComponentTestSuiteMixin);
 

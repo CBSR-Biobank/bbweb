@@ -7,6 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 xdescribe('ProcessingDto', function() {
   var httpBackend,
@@ -15,7 +16,7 @@ xdescribe('ProcessingDto', function() {
       factory;
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(ServerReplyMixin, TestUtils) {
       _.extend(this, ServerReplyMixin);
 

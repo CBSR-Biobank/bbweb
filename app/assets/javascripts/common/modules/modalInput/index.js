@@ -2,8 +2,10 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import _       from 'lodash';
-import angular from 'angular';
+import DomainModule from '../../../domain'
+import _           from 'lodash';
+import angular     from 'angular';
+import uiBootstrap from 'angular-ui-bootstrap'
 
 /**
  * The functions this service provides.
@@ -28,7 +30,8 @@ const modalTypes = [
  * while in a modal.
  */
 
-const ngModule = angular.module('biobank.modalinput', []).service('modalInput', modalInputService);
+const ngModule = angular.module('biobank.modalinput', [ uiBootstrap, DomainModule ])
+ngModule.service('modalInput', modalInputService);
 init();
 
 export default ngModule.name;

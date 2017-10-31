@@ -5,10 +5,14 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import CommonModule from '../common'
-import angular      from 'angular'
+import CommonModule   from '../common'
+import angular        from 'angular'
+import angularCookies from 'angular-cookies'
 
-const ngModule = angular.module('biobank.users', [ CommonModule ])
+const ngModule = angular.module('biobank.users', [
+  angularCookies,
+  CommonModule
+])
 
 const context = require.context('./', true, /^(.(?!index|Spec))*\.js$/)
 

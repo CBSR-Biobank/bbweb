@@ -7,6 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 xdescribe('Directive: spcLinkTypesPanelDirective', function() {
   var scope,
@@ -15,7 +16,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
       createController;
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (TestSuiteMixin, TestUtils) {
       _.extend(this, TestSuiteMixin);
 

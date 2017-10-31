@@ -8,11 +8,12 @@
 
 import _ from 'lodash';
 import annotationsSharedSpec from '../../../test/behaviours/entityWithAnnotationsSharedSpec';
+import ngModule from '../../index'
 
 describe('Participant', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(AnnotationsEntityTestSuiteMixin,
                                  ServerReplyMixin) {
       _.extend(this,

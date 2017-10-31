@@ -7,6 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 xdescribe('Controller: SpcLinkTypeEditCtrl', function() {
   var createEntities,
@@ -15,7 +16,7 @@ xdescribe('Controller: SpcLinkTypeEditCtrl', function() {
       factory;
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(TestUtils) {
       createEntities   = setupEntities(this.$injector);
       createController = setupController(this.$injector);

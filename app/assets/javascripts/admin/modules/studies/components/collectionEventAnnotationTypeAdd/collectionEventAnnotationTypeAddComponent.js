@@ -5,7 +5,7 @@
 
 var component = {
   template: require('./collectionEventAnnotationTypeAdd.html'),
-  controller: CollectionEventAnnotationTypeAddController,
+  controller: Controller,
   controllerAs: 'vm',
   bindings: {
     study:               '<',
@@ -17,10 +17,10 @@ var component = {
  * Controller for this component.
  */
 /* @ngInject */
-function CollectionEventAnnotationTypeAddController($controller,
-                                                    $state,
-                                                    notificationsService,
-                                                    domainNotificationService) {
+function Controller($controller,
+                    $state,
+                    notificationsService,
+                    domainNotificationService) {
   var vm = this;
   vm.$onInit = onInit;
 

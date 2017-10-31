@@ -4,10 +4,21 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import StudiesModule from '../../../studies';
-import angular       from 'angular';
 
-const ngModule = angular.module('biobank.admin.users', [ StudiesModule ])
+import CommonModule    from '../../../common'
+import StudiesModule   from '../../../studies'
+import UsersModule     from '../../../users'
+import angular         from 'angular'
+import angularGettext  from 'angular-gettext'
+import angularUiRouter from '@uirouter/angularjs'
+
+const ngModule = angular.module('biobank.admin.users', [
+  angularGettext,
+  angularUiRouter,
+  CommonModule,
+  StudiesModule,
+  UsersModule
+])
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 
 context.keys().forEach(key => {

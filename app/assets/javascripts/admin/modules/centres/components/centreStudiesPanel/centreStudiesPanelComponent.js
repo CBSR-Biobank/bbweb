@@ -27,7 +27,6 @@ function CentreStudiesPanelController($scope,
                                       Panel,
                                       Study,
                                       StudyName,
-                                      StudyViewer,
                                       studyStateLabelService,
                                       modalService) {
 
@@ -73,9 +72,7 @@ function CentreStudiesPanelController($scope,
   }
 
   function information(studyId) {
-    return Study.get(studyId).then(function (study) {
-      return new StudyViewer(study);
-    });
+    console.log('FIXME', studyId)
   }
 
   function remove(study) {

@@ -4,10 +4,12 @@
  */
 /* global angular */
 
+import ngModule from '../../index'
+
 describe('membershipAddComponent', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test')
+    angular.mock.module(ngModule, 'biobank.test')
     angular.mock.inject(function(ComponentTestSuiteMixin, MembershipSpecCommon) {
       Object.assign(this, ComponentTestSuiteMixin, MembershipSpecCommon)
 

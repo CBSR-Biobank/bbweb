@@ -6,7 +6,12 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import angular from 'angular';
+import DomainModule    from '../domain'
+import angular         from 'angular';
+import angularGettext  from 'angular-gettext'
+import angularSanitize from 'angular-sanitize'
+import angularToastr   from 'angular-toastr'
+import angularUiRouter from '@uirouter/angularjs'
 
 const loadModules = require.context('./modules', true, /[\\\/]index\.js$/)
 
@@ -15,7 +20,13 @@ loadModules.keys().forEach((key) => {
   moduleNames.push(loadModules(key).default)
 })
 
-const ngModule = angular.module('biobank.common', moduleNames)
+const ngModule = angular.module('biobank.common', [
+  angularGettext,
+  angularSanitize,
+  angularToastr,
+  angularUiRouter,
+  DomainModule
+].concat(moduleNames))
 
 ngModule.run(loadTemplates)
 

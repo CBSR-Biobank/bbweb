@@ -4,10 +4,12 @@
  */
 /* global angular */
 
+import ngModule from '../index'
+
 describe('states', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test')
+    angular.mock.module(ngModule, 'biobank.test')
     angular.mock.inject(function(StateTestSuiteMixin) {
       Object.assign(this, StateTestSuiteMixin)
 

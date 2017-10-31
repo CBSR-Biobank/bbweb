@@ -4,6 +4,8 @@
  */
 /* global angular */
 
+import ngModule from '../../index'
+
 describe('ssSpecimensPagedTableComponent', function() {
 
   function SuiteMixin(ComponentTestSuiteMixin) {
@@ -37,7 +39,7 @@ describe('ssSpecimensPagedTableComponent', function() {
   }
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       Object.assign(this, SuiteMixin(ComponentTestSuiteMixin));
 

@@ -7,10 +7,11 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 describe('Directive: updateRemoveButtons', function() {
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (DirectiveTestSuiteMixin, TestUtils) {
       _.extend(this, DirectiveTestSuiteMixin);
 

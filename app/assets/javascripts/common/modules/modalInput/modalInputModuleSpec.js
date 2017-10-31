@@ -6,18 +6,19 @@
  */
 /* global angular */
 
-import _ from 'lodash';
-import faker  from 'faker';
+import _                  from 'lodash';
+import faker              from 'faker';
 import modalInputMatchers from '../../../test/matchers/modalInputMatchers';
-import moment from 'moment';
+import moment             from 'moment';
+import ngModule           from '../../index'  // need filters from common module for this test suite
 
-xdescribe('modalInputModule', function() {
+describe('modalInputModule', function() {
 
   angular.mock.module.sharedInjector();
 
   beforeAll(angular.mock.module(
     'ngAnimateMock',
-    'biobankApp',
+    ngModule,
     'biobank.test',
     function($exceptionHandlerProvider) {
       $exceptionHandlerProvider.mode('log');
@@ -64,7 +65,6 @@ xdescribe('modalInputModule', function() {
   });
 
   afterEach(function () {
-    this.modalElement.remove();
     const body = this.$document.find('body');
     body.find('div.modal').remove();
     body.find('div.modal-backdrop').remove();
@@ -262,6 +262,7 @@ xdescribe('modalInputModule', function() {
                      this.defaultValue,
                      this.title,
                      this.label);
+      expect(this.$document).toHaveModalsOpen(1);
       this.scope.form.value.$setViewValue('-1');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
@@ -346,7 +347,7 @@ xdescribe('modalInputModule', function() {
       expect(this.modalElement).toHaveModalTitle(this.title);
       expect(this.modalElement).toHaveInputs(3);
       expect(this.modalElement).toHaveValuesInControllerScope({ value: { } });
-      expect(this.modalElement).not.toHaveHelpBlocks();
+      expect(this.modalElement).toHaveHelpBlocks();
 
       inputs = this.modalElement.find('form').find('input');
       expect(inputs.attr('focus-me')).toBe('true');

@@ -4,7 +4,16 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import angular from 'angular';
+
+import CommonModule    from '../common'
+import DomainModule    from '../domain'
+import HomeModule      from '../home'
+import angular         from 'angular'
+import angularGettext  from 'angular-gettext'
+import angularSanitize from 'angular-sanitize'
+import angularToastr   from 'angular-toastr'
+import angularUiRouter from '@uirouter/angularjs'
+import uiBootstrap     from 'angular-ui-bootstrap'
 
 const loadModules = require.context('./modules', true, /[\\\/]index\.js$/)
 const moduleNames = []
@@ -13,7 +22,17 @@ loadModules.keys().forEach((key) => {
   moduleNames.push(loadModules(key).default)
 })
 
-const ngModule = angular.module('biobank.centres', moduleNames)
+const ngModule = angular.module(
+  'biobank.centres', [
+    angularGettext,
+    angularSanitize,
+    angularToastr,
+    angularUiRouter,
+    uiBootstrap,
+    CommonModule,
+    DomainModule,
+    HomeModule
+  ].concat(moduleNames))
 
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 

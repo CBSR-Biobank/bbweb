@@ -6,12 +6,14 @@
  */
 /* global angular */
 
+import ngModule from '../../index'
+
 xdescribe('Service: specimenGroupsService', function() {
 
   var specimenGroupsService, httpBackend, Factory;
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function ($httpBackend,
                                   _specimenGroupsService_,
                                   _Factory_) {

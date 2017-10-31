@@ -8,11 +8,12 @@
 
 import _ from 'lodash';
 import entityUpdateSharedSpec from '../../../../../test/behaviours/entityUpdateSharedSpec';
+import ngModule from '../../index'
 
 describe('Component: studySummary', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       var specimenDescription, ceventType;
 

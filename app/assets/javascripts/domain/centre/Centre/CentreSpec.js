@@ -5,11 +5,12 @@
 /* global angular */
 
 import _ from 'lodash';
+import ngModule from '../../index'
 
 describe('Centre', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (ServerReplyMixin, EntityTestSuiteMixin) {
       _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
 
@@ -18,7 +19,6 @@ describe('Centre', function() {
                               'Centre',
                               'CentreState',
                               'Location',
-                              'funutils',
                               'TestUtils',
                               'Factory');
 

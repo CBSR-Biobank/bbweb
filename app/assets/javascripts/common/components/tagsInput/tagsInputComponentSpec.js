@@ -8,11 +8,12 @@
 
 import _ from 'lodash'
 import faker from 'faker'
+import ngModule from '../../index'
 
 describe('tagsInputComponent', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test')
+    angular.mock.module(ngModule, 'biobank.test')
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       Object.assign(this, ComponentTestSuiteMixin)
 

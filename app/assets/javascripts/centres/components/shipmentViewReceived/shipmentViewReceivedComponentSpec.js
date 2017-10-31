@@ -6,11 +6,12 @@
 
 import _ from 'lodash';
 import moment from 'moment';
+import ngModule from '../../index'
 
 describe('shipmentViewReceivedComponent', function() {
 
   beforeEach(() => {
-    angular.mock.module('biobankApp', 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(ShippingComponentTestSuiteMixin, TestUtils) {
       _.extend(this, ShippingComponentTestSuiteMixin);
 

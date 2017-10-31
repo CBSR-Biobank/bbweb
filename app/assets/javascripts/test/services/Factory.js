@@ -6,7 +6,8 @@ import _ from 'lodash';
 import faker  from 'faker';
 import moment from 'moment';
 
-const ENTITY_NAME_PROCESSING_TYPE       = Symbol('processingType'),
+const STRING_SYMBOL                     = Symbol('string'),
+      ENTITY_NAME_PROCESSING_TYPE       = Symbol('processingType'),
       ENTITY_NAME_SPECIMEN_LINK_TYPE    = Symbol('specimenLinkType'),
       ENTITY_NAME_COLLECTION_EVENT_TYPE = Symbol('collectionEventType'),
       ENTITY_NAME_SPECIMEN_GROUP        = Symbol('specimenGroup'),
@@ -108,8 +109,8 @@ class Factory {
    *
    * @param domainEntityType the name of the domain entity type. Eg: 'study', 'centre', 'user', etc.
    */
-  domainEntityNameNext(domainEntityType = Symbol('string')) {
-    return _.uniqueId(domainEntityType.toString + '_');
+  domainEntityNameNext(domainEntityType = STRING_SYMBOL) {
+    return _.uniqueId(domainEntityType.toString() + '_');
   }
 
   specimenLinkType(options = {}) {

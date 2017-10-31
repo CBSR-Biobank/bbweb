@@ -6,9 +6,11 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-import angular from 'angular';
 
-const ngModule = angular.module('biobank.domain', [])
+import BaseModule   from '../base'
+import angular      from 'angular';
+
+const ngModule = angular.module('biobank.domain', [ BaseModule ])
 
 const context = require.context('./', true, /^(.(?!index\.|Spec\.))*js$/)
 
