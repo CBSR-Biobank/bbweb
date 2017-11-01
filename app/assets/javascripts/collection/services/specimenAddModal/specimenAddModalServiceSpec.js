@@ -229,8 +229,7 @@ describe('Service: specimenAddModal', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
-    // FIXME: these tests fail after webpack transition was done
-    xdescribe('for inventoryIdUpdated', function() {
+    describe('for inventoryIdUpdated', function() {
 
       beforeEach(function() {
         this.openModal();
@@ -254,7 +253,7 @@ describe('Service: specimenAddModal', function() {
       });
 
       it('validity is assigned correctly for a an inventory id already in the system', function() {
-        var specimen = new this.Specimen(this.Factory.specimen());
+        var specimen = new this.Specimen.create(this.Factory.specimen());
 
         this.Specimen.getByInventoryId =
           jasmine.createSpy('getByInventoryId').and.returnValue(this.$q.when(specimen));
@@ -275,7 +274,10 @@ describe('Service: specimenAddModal', function() {
         this.scope.vm.inventoryId = undefined;
         this.scope.vm.inventoryIdUpdated();
         expect(this.scope.form.inventoryId.$setValidity.calls.allArgs())
-          .toEqual([ [ 'inventoryIdEntered', true ], [ 'inventoryIdTaken', true ] ]);
+          .toEqual([
+            [ 'inventoryIdEntered', true ],
+            [ 'inventoryIdTaken', true ]
+          ]);
       });
 
     });
