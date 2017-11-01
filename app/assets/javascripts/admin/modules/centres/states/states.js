@@ -48,21 +48,15 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.centres.centre.locations.locationAdd', {
-      url: '/location/add',
+      url: '/add',
       views: {
         'main@': 'centreLocationAdd'
       }
     })
     .state('home.admin.centres.centre.locations.locationView', {
-      url: '/location/view/:locationId',
+      url: '/view/:locationId',
       resolve: {
-        location: [
-          '$transition$',
-          'centre',
-          function ($transition$, centre) {
-            return _.find(centre.locations, { id: $transition$.params().locationId });
-          }
-        ]
+        location: resolveLocation
       },
       views: {
         'main@': 'centreLocationView'
@@ -70,17 +64,30 @@ function config($stateProvider) {
     })
     .state('home.admin.centres.centre.studies', {
       url: '/studies',
-      resolve: {
-        centre: resolveCentre
-      },
       views: {
         'centreDetails': 'centreStudiesPanel'
       }
     });
 
-  resolveCentre.$inject = ['$transition$', 'Centre'];
-  function resolveCentre($transition$, Centre) {
-    return Centre.get($transition$.params().centreId);
+  /* @ngInject */
+  function resolveCentre($state, $log, $transition$, Centre) {
+    const id = $transition$.params().locationId
+    return Centre.get(id)
+      .catch(() => {
+        $log.error(`centre ID not found: centreId/${id}`)
+        $state.go('404', null, { location: false })
+      })
+  }
+
+  /* @ngInject */
+  function resolveLocation($state, $log, $transition$, centre) {
+    const id     = $transition$.params().locationId,
+          result = _.find(centre.locations, { id });
+    if (!result) {
+      $log.error(`location ID not found in centre: centreId/${centre.id}, locationId/${id}`)
+      $state.go('404', null, { location: false })
+    }
+    return result;
   }
 
 }

@@ -4,9 +4,9 @@
  */
 /* global angular */
 
-import ngModule from '../index'
+import ngModule from '../../app'  // the whole appliction has to be loaded for these states
 
-describe('states', function() {
+describe('centre states', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test', function ($qProvider) {
@@ -39,7 +39,7 @@ describe('states', function() {
       context.childState = 'incoming'
     });
 
-    shippingCentreCommonBehaviour(context)
+    shippingCentreSharedBehaviour(context)
   })
 
   describe('when navigating to `/shipping/centres/{centreId}/outgoing`', function () {
@@ -49,7 +49,7 @@ describe('states', function() {
       context.childState = 'outgoing'
     });
 
-    shippingCentreCommonBehaviour(context)
+    shippingCentreSharedBehaviour(context)
   })
 
   describe('when navigating to `/shipping/centres/{centreId}/completed`', function () {
@@ -59,7 +59,7 @@ describe('states', function() {
       context.childState = 'completed'
     });
 
-    shippingCentreCommonBehaviour(context)
+    shippingCentreSharedBehaviour(context)
   })
 
   it('when navigating to `/shipping/add`', function() {
@@ -99,35 +99,35 @@ describe('states', function() {
 
   })
 
-  describe('when navigating to `home.shipping.shipment.unpack` child states', function() {
+  fdescribe('for `home.shipping.shipment.unpack` child states', function() {
 
     beforeEach(function() {
       this.Shipment.get = jasmine.createSpy().and.returnValue(this.$q.when({ test: 'test'}))
     });
 
-    it('when navigating to `/shipping/{shipmentId}/unpack/information`', function() {
+    it('navigating to `/shipping/{shipmentId}/unpack/information` goes to valid state', function() {
       this.gotoUrl('/shipping/shipment-id-1/unpack/information')
       expect(this.$state.current.name).toBe('home.shipping.shipment.unpack.info')
     })
 
-    it('when navigating to `/shipping/{shipmentId}/unpack/received`', function() {
+    it('navigating to `/shipping/{shipmentId}/unpack/received` goes to valid state', function() {
       this.gotoUrl('/shipping/shipment-id-1/unpack/received')
       expect(this.$state.current.name).toBe('home.shipping.shipment.unpack.received')
     })
 
-    it('when navigating to `/shipping/{shipmentId}/unpack/missing`', function() {
+    it('navigating to `/shipping/{shipmentId}/unpack/missing` goes to valid state', function() {
       this.gotoUrl('/shipping/shipment-id-1/unpack/missing')
       expect(this.$state.current.name).toBe('home.shipping.shipment.unpack.missing')
     })
 
-    it('when navigating to `/shipping/{shipmentId}/unpack/extra`', function() {
+    it('navigating to `/shipping/{shipmentId}/unpack/extra` goes to valid state', function() {
       this.gotoUrl('/shipping/shipment-id-1/unpack/extra')
       expect(this.$state.current.name).toBe('home.shipping.shipment.unpack.extra')
     })
 
   })
 
-  function shippingCentreCommonBehaviour(context) {
+  function shippingCentreSharedBehaviour(context) {
 
     describe('(shared)', function() {
 

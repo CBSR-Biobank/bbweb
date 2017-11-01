@@ -20,10 +20,7 @@ function config($stateProvider) {
       abstract: true,
       url: '/centres/{centreId}',
       resolve: {
-        centre: ['Centre', '$transition$', '$state', function (Centre, $transition$, $state) {
-          return Centre.get($transition$.params().centreId)
-            .catch(() => $state.go('404', null, { location: false }))
-        }]
+        centre: resolveCentre
       },
       views: {
         'main@': 'centreShipments'
@@ -125,9 +122,23 @@ function config($stateProvider) {
     });
 
   /* @ngInject */
-  function resolveShipment(Shipment, $transition$, $state) {
-    return Shipment.get($transition$.params().shipmentId)
-      .catch(() => $state.go('404', null, { location: false }));
+  function resolveCentre($state, $log, $transition$, Centre) {
+    const id = $transition$.params().locationId
+    return Centre.get(id)
+      .catch(() => {
+        $log.error(`centre ID not found: centreId/${id}`)
+        $state.go('404', null, { location: false })
+      })
+  }
+
+  /* @ngInject */
+  function resolveShipment(Shipment, $log, $transition$, $state) {
+    const id = $transition$.params().shipmentId
+    return Shipment.get(id)
+      .catch(() => {
+        $log.error(`shipment ID not found: shipmentId/${id}`)
+        $state.go('404', null, { location: false })
+      });
   }
 
 }
