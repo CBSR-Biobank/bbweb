@@ -27,8 +27,20 @@ function config($stateProvider) {
       }
     })
     .state('404', {
-      template: '<div>error</div>'
+      url: 'resourceNotFound/{errMessage}',
+      resolve: {
+        errMessage: resolveErrMessage
+      },
+      views: {
+        'main@': 'resourceNotFound'
+      }
     });
+
+  /* @ngInject */
+  function resolveErrMessage($transition$) {
+    return $transition$.params().errMessage
+  }
+
 }
 
 export default ngModule => ngModule.config(config)

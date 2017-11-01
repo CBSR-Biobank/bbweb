@@ -52,7 +52,7 @@ define(function () {
           .and.returnValue({ result: this.$q.when(context.newValue) });
         spyOn(context.entity.prototype, context.entityUpdateFuncName)
           .and.returnValue(this.$q.when(context.entityInstance));
-        spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
+        this.notificationsService.success = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
 
         context.createController.call(this);
         this.controller[context.controllerUpdateFuncName](context.annotation);

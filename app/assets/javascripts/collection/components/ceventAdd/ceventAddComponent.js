@@ -3,99 +3,102 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
+/*
+ * Controller for this component.
+ */
+class CeventAddController {
+
+  constructor($state,
+              gettextCatalog,
+              notificationsService,
+              domainNotificationService,
+              timeService,
+              CollectionEventType,
+              CollectionEvent,
+              breadcrumbService) {
+    'ngInject'
+    Object.assign(this, {
+      $state,
+      gettextCatalog,
+      notificationsService,
+      domainNotificationService,
+      timeService,
+      CollectionEventType,
+      CollectionEvent,
+      breadcrumbService
+    })
+  }
+
+  $onInit() {
+    this.CollectionEventType.get(this.collectionEventTypeId)
+      .then((collectionEventType) => {
+        this.collectionEventType = collectionEventType;
+        this.configureBreadcrumbs();
+
+        this.collectionEvent = new this.CollectionEvent({ participantId: this.participant.id },
+                                                        this.collectionEventType);
+
+        this.title = this.gettextCatalog.getString(
+          'Participant {{id}}: Add collection event', { id: this.participant.uniqueId });
+        this.timeCompleted = new Date();
+      })
+  }
+
+  configureBreadcrumbs() {
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.collection'),
+      this.breadcrumbService.forStateWithFunc('home.collection.study', () => this.study.name),
+      this.breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents',
+        () => this.gettextCatalog.getString('Participant {{uniqueId}}',
+                                           { uniqueId: this.participant.uniqueId })),
+      this.breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents.add',
+        () => this.gettextCatalog.getString('Event type: {{type}}',
+                                           { type: this.collectionEventType.name }))
+    ];
+  }
+
+  submit() {
+    this.collectionEvent.timeCompleted = this.timeService.dateAndTimeToUtcString(this.timeCompleted);
+    this.collectionEvent.add()
+      .then(cevent => {
+        this.notificationsService.submitSuccess();
+        this.$state.go('home.collection.study.participant.cevents.details',
+                       { collectionEventId: cevent.id },
+                       { reload: true });
+      })
+      .catch(error => {
+        this.domainNotificationService.updateErrorModal(error, this.gettextCatalog.getString('collectionEvent'))
+          .catch(() => {
+            this.$state.go('home.collection.study.participant', { participantId: this.participant.id });
+          });
+      });
+  }
+
+  cancel() {
+    this.$state.go('home.collection.study.participant.cevents');
+  }
+
+  dateTimeOnEdit(datetime) {
+    this.timeCompleted = datetime;
+  }
+}
+
 
 /**
  * Used to add a collection event.
  */
-var component = {
+const component = {
   template: require('./ceventAdd.html'),
   controller: CeventAddController,
   controllerAs: 'vm',
   bindings: {
-    study:               '<',
-    participant:         '<',
-    collectionEventType: '<'
+    study:                 '<',
+    participant:           '<',
+    collectionEventTypeId: '@'
   }
 };
-
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function CeventAddController($state,
-                             gettextCatalog,
-                             notificationsService,
-                             domainNotificationService,
-                             timeService,
-                             CollectionEvent,
-                             breadcrumbService) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //--
-
-  function onInit() {
-    vm.collectionEvent = new CollectionEvent({ participantId: vm.participant.id },
-                                             vm.collectionEventType);
-
-    vm.title = gettextCatalog.getString(
-      'Participant {{id}}: Add collection event', { id: vm.participant.uniqueId });
-    vm.timeCompleted = new Date();
-
-    vm.submit = submit;
-    vm.cancel = cancel;
-    vm.dateTimeOnEdit = dateTimeOnEdit;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-      breadcrumbService.forStateWithFunc('home.collection.study', function () {
-        return vm.study.name;
-      }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents',
-        function () {
-          return gettextCatalog.getString('Participant {{uniqueId}}',
-                                          { uniqueId: vm.participant.uniqueId });
-        }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents.add',
-        function () {
-          return gettextCatalog.getString('Event type: {{type}}',
-                                          { type: vm.collectionEventType.name });
-        })
-    ];
-
-  }
-
-  function submit() {
-    vm.collectionEvent.timeCompleted = timeService.dateAndTimeToUtcString(vm.timeCompleted);
-    vm.collectionEvent.add()
-      .then(submitSuccess)
-      .catch(submitError);
-
-    function submitSuccess(cevent) {
-      notificationsService.submitSuccess();
-      $state.go('home.collection.study.participant.cevents.details',
-                { collectionEventId: cevent.id },
-                { reload: true });
-    }
-
-    function submitError(error) {
-      domainNotificationService.updateErrorModal(error, gettextCatalog.getString('collectionEvent'))
-        .catch(function () {
-          $state.go('home.collection.study.participant', { participantId: vm.participant.id });
-        });
-    }
-  }
-
-  function cancel() {
-    $state.go('home.collection.study.participant.cevents');
-  }
-
-  function dateTimeOnEdit(datetime) {
-    vm.timeCompleted = datetime;
-  }
-}
 
 export default ngModule => ngModule.component('ceventAdd', component)

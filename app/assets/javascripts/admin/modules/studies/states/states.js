@@ -205,35 +205,18 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.studies.study.participants.annotationTypeView', {
-      url: '/annottype/view/{annotationTypeId}',
+      url: '/annottype/{annotationTypeId}',
       resolve: {
-        annotationType: [
-          'study',
-          '$transition$',
-          function (study, $transition$) {
-            var annotationType = _.find(study.annotationTypes, { id: $transition$.params().annotationTypeId });
-            if (_.isUndefined(annotationType)) {
-              throw new Error('could not find annotation type: ' + $transition$.params().annotationTypeId);
-            }
-            return annotationType;
-          }
-        ]
+        annotationType: resolveParticipantAnnotationType
       },
       views: {
         'main@': 'participantAnnotationTypeView'
       }
     })
     .state('home.admin.studies.study.collection.ceventType', {
-      url: '/event/{ceventTypeId}',
+      url: '/events/{ceventTypeId}',
       resolve: {
-        collectionEventType: [
-          '$transition$',
-          'study',
-          'CollectionEventType',
-          function ($transition$, study, CollectionEventType) {
-            return CollectionEventType.get(study.id, $transition$.params().ceventTypeId);
-          }
-        ]
+        collectionEventType: resolveCollectionEventType
       },
       views: {
         'ceventTypeDetails': 'ceventTypeView'
@@ -246,13 +229,13 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.studies.study.collection.ceventType.annotationTypeAdd', {
-      url: '/annottype/add',
+      url: '/annottypes/add',
       views: {
         'main@': 'collectionEventAnnotationTypeAdd'
       }
     })
     .state('home.admin.studies.study.collection.ceventType.annotationTypeView', {
-      url: '/annottype/view/{annotationTypeId}',
+      url: '/annottypes/{annotationTypeId}',
       resolve: {
         annotationType: resolveAnnotationType
       },
@@ -261,13 +244,13 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.studies.study.collection.ceventType.specimenDescriptionAdd', {
-      url: '/spcspec/add',
+      url: '/spcdescs/add',
       views: {
         'main@': 'collectionSpecimenDescriptionAdd'
       }
     })
     .state('home.admin.studies.study.collection.ceventType.specimenDescriptionView', {
-      url: '/spcspec/view/{specimenDescriptionId}',
+      url: '/spcdescs/{specimenDescriptionId}',
       resolve: {
         specimenDescription: resolveSpcimenDescription
       },
@@ -277,31 +260,42 @@ function config($stateProvider) {
     });
 
   /* @ngInject */
-  function resolveStudy($transition$, Study) {
-    if ($transition$.params().studyId) {
-      return Study.get($transition$.params().studyId);
-    }
-    throw new Error('state parameter studyId is invalid');
+  function resolveStudy($transition$, Study, resourceErrorService) {
+    const id = $transition$.params().studyId
+    return Study.get($transition$.params().studyId)
+      .catch(resourceErrorService.goto404(`study ID not found: ${id}`))
   }
 
   /* @ngInject */
-  function resolveAnnotationType(collectionEventType, $transition$) {
-    var annotationType = _.find(collectionEventType.annotationTypes,
-                                { id: $transition$.params().annotationTypeId });
-    if (_.isUndefined(annotationType)) {
-      throw new Error('could not find annotation type: ' + $transition$.params().annotationTypeId);
-    }
-    return annotationType;
+  function resolveParticipantAnnotationType($q, $transition$, study, resourceErrorService) {
+    const id = $transition$.params().annotationTypeId,
+          annotationType = _.find(study.annotationTypes, { id }),
+          result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type ID')
+    return result.catch(resourceErrorService.goto404(`invalid participant annotation type ID: ${id}`))
   }
 
   /* @ngInject */
-  function resolveSpcimenDescription(collectionEventType, $transition$) {
-    var specimenDescription = _.find(collectionEventType.specimenDescriptions,
-                                     { id: $transition$.params().specimenDescriptionId });
-    if (_.isUndefined(specimenDescription)) {
-      throw new Error('could not find specimen spec: ' + $transition$.params().specimenDescriptionId);
-    }
-    return specimenDescription;
+  function resolveCollectionEventType($transition$, study, CollectionEventType, resourceErrorService) {
+    const id = $transition$.params().ceventTypeId
+    return CollectionEventType.get(study.id, id)
+      .catch(resourceErrorService.goto404(
+        `collection event type ID not found: studyId/${study.id}, ceventTypeId/${id}`))
+  }
+
+  /* @ngInject */
+  function resolveAnnotationType($q, $transition$, collectionEventType, resourceErrorService) {
+    const id = $transition$.params().annotationTypeId,
+          annotationType = _.find(collectionEventType.annotationTypes, { id  }),
+          result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type ID')
+    return result.catch(resourceErrorService.goto404(`invalid event-type annotation-type ID: ${id}`))
+  }
+
+  /* @ngInject */
+  function resolveSpcimenDescription($q, $transition$, collectionEventType, resourceErrorService) {
+    const id = $transition$.params().specimenDescriptionId,
+          spcDescription = _.find(collectionEventType.specimenDescriptions, { id }),
+          result = spcDescription ? $q.when(spcDescription) : $q.reject('invalid specimen-description ID')
+    return result.catch(resourceErrorService.goto404(`invalid event-type specimen-description ID: ${id}`))
   }
 
 }

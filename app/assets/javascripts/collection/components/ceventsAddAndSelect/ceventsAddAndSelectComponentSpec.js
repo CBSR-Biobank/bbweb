@@ -77,13 +77,6 @@ describe('ceventsAddAndSelectDirective', function() {
 
   describe('creating controller', function () {
 
-    it('throws an exception when no collection event types are avaiable', function() {
-      var self = this;
-      self.collectionEventTypes = [];
-      expect(function () { self.createController(); })
-        .toThrowError(/no collection event types defined for this study/);
-    });
-
     it('throws an exception when collection event does not match any collection event types', function() {
       this.collectionEvent.collectionEventTypeId = this.Factory.stringNext();
       this.createController(this.participant, [ this.Factory.collectionEventType()]);

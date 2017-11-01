@@ -122,23 +122,17 @@ function config($stateProvider) {
     });
 
   /* @ngInject */
-  function resolveCentre($state, $log, $transition$, Centre) {
+  function resolveCentre($transition$, resourceErrorService, Centre) {
     const id = $transition$.params().locationId
     return Centre.get(id)
-      .catch(() => {
-        $log.error(`centre ID not found: centreId/${id}`)
-        $state.go('404', null, { location: false })
-      })
+      .catch(resourceErrorService.goto404(`centre ID not found: centreId/${id}`))
   }
 
   /* @ngInject */
-  function resolveShipment(Shipment, $log, $transition$, $state) {
+  function resolveShipment(Shipment, $transition$, resourceErrorService) {
     const id = $transition$.params().shipmentId
     return Shipment.get(id)
-      .catch(() => {
-        $log.error(`shipment ID not found: shipmentId/${id}`)
-        $state.go('404', null, { location: false })
-      });
+      .catch(resourceErrorService.goto404(`shipment ID not found: shipmentId/${id}`))
   }
 
 }

@@ -33,23 +33,17 @@ describe('Component: ceventList', function() {
       this.collectionEventTypes = [ new this.CollectionEventType(this.jsonCeventType) ];
       this.collectionEvent      = new this.CollectionEvent(this.jsonCevent);
 
+      this.CollectionEventType.list = jasmine.createSpy()
+        .and.returnValue(this.$q.when(this.Factory.pagedResult(this.collectionEventTypes)));
+
       this.CollectionEvent.list = jasmine.createSpy()
         .and.returnValue(this.$q.when(this.Factory.pagedResult([ this.collectionEvent ])));
 
-      this.createController = (participant, collectionEventTypes) => {
-        participant = participant || this.participant;
-        collectionEventTypes = collectionEventTypes || this.collectionEventTypes;
-
+      this.createController = (participant = this.participant) => {
         ComponentTestSuiteMixin.createController.call(
           this,
-          `<cevents-list
-             participant="vm.participant"
-             collection-event-types="vm.collectionEventTypes">
-           </cevents-list>`,
-          {
-            participant:          participant,
-            collectionEventTypes: collectionEventTypes
-          },
+          '<cevents-list participant="vm.participant"> </cevents-list>',
+          { participant },
           'ceventsList');
       };
     });
@@ -62,11 +56,11 @@ describe('Component: ceventList', function() {
     expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
   });
 
-  it('component creattion throws an error if there are no collection event types', function() {
-    var self = this;
-
-    expect(function () {
-      self.createController(self.participant, []);
+  it('component creation throws an error if there are no collection event types', function() {
+    this.CollectionEventType.list =
+      jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult([])));
+    expect(() => {
+      this.createController(self.participant, []);
     }).toThrowError(/no collection event types defined for this study/);
   });
 

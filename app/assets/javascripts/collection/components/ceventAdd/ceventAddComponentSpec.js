@@ -37,20 +37,21 @@ describe('Component: ceventAdd', function() {
       this.collectionEventType = new this.CollectionEventType(this.jsonCeventType);
       this.collectionEvent     = new this.CollectionEvent(this.jsonCevent);
 
-      this.createController = () =>
+      this.createController = (collectionEventType = this.collectionEventType) => {
+        this.CollectionEventType.get =
+          jasmine.createSpy().and.returnValue(this.$q.when(this.$q.when(collectionEventType)))
         ComponentTestSuiteMixin.createController.call(
           this,
-          `<cevent-add
-            study="vm.study"
-            participant="vm.participant"
-            collection-event-type="vm.collectionEventType">
-          </cevent-add>`,
+          `<cevent-add study="vm.study"
+                       participant="vm.participant"
+                       collection-event-type-id="${collectionEventType.id}">
+           </cevent-add>`,
           {
-            study:               this.study,
-            participant:         this.participant,
-            collectionEventType: this.collectionEventType
+            study:       this.study,
+            participant: this.participant
           },
           'ceventAdd');
+      }
     });
   });
 

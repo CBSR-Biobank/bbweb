@@ -99,7 +99,7 @@ describe('centre states', function() {
 
   })
 
-  fdescribe('for `home.shipping.shipment.unpack` child states', function() {
+  describe('for `home.shipping.shipment.unpack` child states', function() {
 
     beforeEach(function() {
       this.Shipment.get = jasmine.createSpy().and.returnValue(this.$q.when({ test: 'test'}))

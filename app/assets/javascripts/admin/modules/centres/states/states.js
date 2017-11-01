@@ -70,24 +70,18 @@ function config($stateProvider) {
     });
 
   /* @ngInject */
-  function resolveCentre($state, $log, $transition$, Centre) {
+  function resolveCentre($transition$, resourceErrorService, Centre) {
     const id = $transition$.params().locationId
     return Centre.get(id)
-      .catch(() => {
-        $log.error(`centre ID not found: centreId/${id}`)
-        $state.go('404', null, { location: false })
-      })
+      .catch(resourceErrorService.goto404(`centre ID not found: ${id}`))
   }
 
   /* @ngInject */
-  function resolveLocation($state, $log, $transition$, centre) {
-    const id     = $transition$.params().locationId,
-          result = _.find(centre.locations, { id });
-    if (!result) {
-      $log.error(`location ID not found in centre: centreId/${centre.id}, locationId/${id}`)
-      $state.go('404', null, { location: false })
-    }
-    return result;
+  function resolveLocation($q, $transition$, resourceErrorService, centre) {
+    const id       = $transition$.params().locationId,
+          location = _.find(centre.locations, { id }),
+          result   = location ? $q.when(location) : $q.reject('invalid location ID')
+    return result.catch(resourceErrorService.goto404(`invalid location ID: ${id}`))
   }
 
 }

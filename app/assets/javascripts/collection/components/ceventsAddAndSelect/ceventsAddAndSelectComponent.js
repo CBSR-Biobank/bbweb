@@ -24,13 +24,11 @@ function CeventsAddAndSelectDirective($state, CollectionEvent) {
   var vm = this;
   vm.$onInit = onInit;
 
+  vm.collectionEventTypes = [];
+
   //--
 
   function onInit() {
-    if (vm.collectionEventTypes.length <= 0) {
-      throw new Error('no collection event types defined for this study');
-    }
-
     vm.displayStates = {
       NO_RESULTS: 0,
       HAVE_RESULTS: 1,
