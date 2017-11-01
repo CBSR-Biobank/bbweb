@@ -6,6 +6,8 @@
  */
 /* global angular */
 
+const ngModule = 'FIXME'
+
 xdescribe('SpcLinkTypeViewer', function() {
 
   var SpcLinkTypeViewer, SpecimenLinkType, Factory, TestUtils;

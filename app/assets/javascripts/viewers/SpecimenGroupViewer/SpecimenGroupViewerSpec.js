@@ -6,6 +6,8 @@
  */
 /* global angular */
 
+const ngModule = 'FIXME'
+
 xdescribe('SpecimenGroupViewer', function() {
 
   var SpecimenGroupViewer, Factory, TestUtils;

@@ -7,7 +7,8 @@
 
 import angular from 'angular';
 import sharedSpec from '../../../test/behaviours/studyAnnotationTypeSharedSpec';
-import ngModule from '../../index'
+
+const ngModule = 'FIXME'
 
 xdescribe('SpecimenLinkAnnotationType', function() {
 

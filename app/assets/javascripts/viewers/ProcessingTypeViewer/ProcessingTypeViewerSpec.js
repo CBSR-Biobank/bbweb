@@ -8,6 +8,8 @@
 
 import _ from 'lodash';
 
+const ngModule = 'FIXME'
+
 xdescribe('ProcessingTypeViewer', function() {
 
   var ProcessingTypeViewer, Factory, TestUtils;
