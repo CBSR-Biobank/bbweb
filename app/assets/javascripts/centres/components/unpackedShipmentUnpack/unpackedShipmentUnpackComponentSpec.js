@@ -40,7 +40,7 @@ describe('unpackedShipmentUnpackComponent', function() {
     expect(this.controller.actions).toBeNonEmptyArray();
   });
 
-  it('emits event when created', function() {
+  it('emits `tabbed-page-update` event when created', function() {
     var shipment = this.createShipment(),
         eventEmitted = false;
 

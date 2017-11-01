@@ -6,13 +6,11 @@
  * This service provides a single function which opens a modal.
  */
 /* @ngInject */
-function asyncInputModalService($uibModal) {
-  var service = {
-    open: openModal
-  };
-  return service;
+class AsyncInputModalService {
 
-  //-------
+  constructor($uibModal) {
+    Object.assign(this, { $uibModal })
+  }
 
   /**
    * A modal that allows the user to select a value returned by the server.
@@ -30,56 +28,54 @@ function asyncInputModalService($uibModal) {
    *
    * @return {uibModalInstance} The instance of the modal that was opened. This is a ui-bootstrap class.
    */
-  function openModal(heading,
-                     label,
-                     placeholder,
-                     noResultsMessage,
-                     getResults) {
-    var modal = $uibModal.open({
+  open(heading,
+       label,
+       placeholder,
+       noResultsMessage,
+       getResults) {
+
+    class ModalController {
+
+      constructor() {
+        Object.assign(this, {
+          heading,
+          label,
+          placeholder,
+          noResultsMessage
+        })
+
+        this.value = undefined;
+      }
+
+       okPressed() {
+        modal.close(this.value);
+      }
+
+       closePressed() {
+        modal.dismiss('cancel');
+      }
+
+       getValues(viewValue) {
+        return getResults(viewValue);
+      }
+
+       valueSelected(item) {
+        this.value = item;
+      }
+    }
+
+    var modal = this.$uibModal.open({
       template: require('./asyncInputModal.html'),
       controller: ModalController,
       controllerAs: 'vm',
       backdrop: true,
-      keyboard: true,
+      keyboard: false,
       modalFade: true
     });
 
     return modal;
 
-    //--
-
-    function ModalController() {
-      var vm = this;
-
-      vm.value            = undefined;
-      vm.heading          = heading;
-      vm.label            = label;
-      vm.placeholder      = placeholder;
-      vm.noResultsMessage = noResultsMessage;
-      vm.okPressed        = okPressed;
-      vm.closePressed     = closePressed;
-      vm.getValues        = getValues;
-      vm.valueSelected    = valueSelected;
-
-      //--
-
-      function okPressed() {
-        modal.close(vm.value);
-      }
-
-      function closePressed() {
-        modal.dismiss('cancel');
-      }
-
-      function getValues(viewValue) {
-        return getResults(viewValue);
-      }
-
-      function valueSelected(item) {
-        vm.value = item;
-      }
-    }
   }
 }
 
-export default ngModule => ngModule.service('asyncInputModal', asyncInputModalService)
+export default ngModule => ngModule.service('asyncInputModal', AsyncInputModalService)

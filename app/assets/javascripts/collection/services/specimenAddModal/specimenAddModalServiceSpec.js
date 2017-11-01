@@ -33,7 +33,7 @@ describe('Service: specimenAddModal', function() {
         specimenDescriptions = specimenDescriptions || [];
         defaultDatetime = defaultDatetime || new Date();
         this.modal = this.specimenAddModal.open(centreLocations, specimenDescriptions, defaultDatetime);
-        this.modal.result.then(function () {}, function () {});
+        this.modal.result.then(angular.noop, angular.noop);
         this.$rootScope.$digest();
         this.modalElement = this.modalElementFind();
         this.scope = this.modalElement.scope();

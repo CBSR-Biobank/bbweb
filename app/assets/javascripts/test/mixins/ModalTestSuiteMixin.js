@@ -6,12 +6,12 @@
 import angular from 'angular';
 
 /* @ngInject */
-function ModalTestSuiteMixin($animate, $rootScope, TestSuiteMixin) {
+function ModalTestSuiteMixin($rootScope, $document, $animate, TestSuiteMixin) {
 
   return Object.assign({ modalElementFind, close, dismiss, flush, addModalMatchers }, TestSuiteMixin);
 
   function modalElementFind () {
-    return this.$document.find('body > div.modal');
+    return $document.find('body > div.modal');
   }
 
   function close(modal = this.modal, reason, noFlush) {
