@@ -35,7 +35,7 @@
     "commander": "^2.11.0",
     "console-table": "^0.1.2",
     "css-loader": "^0.28.7",
-    "eslint": "^4.9.0",
+    "eslint": "^4.10.0",
     "eslint-loader": "^1.9.0",
     "eslint-plugin-jasmine": "^2.9.1",
     "eslint-plugin-requirejs": "^3.1.1",
@@ -65,7 +65,7 @@
     "webpack": "^3.8.1",
     "webpack-bundle-analyzer": "^2.9.0",
     "webpack-dev-middleware": "^1.12.0",
-    "webpack-dev-server": "^2.9.3",
+    "webpack-dev-server": "^2.9.4",
     "webpack-visualizer-plugin": "^0.1.11"
   },
   "scripts": {
