@@ -108,7 +108,7 @@ function KarmaConf(config) {
   if ((process.env.TEST_MODE !== undefined) && (process.env.TEST_MODE === 'coverage')) {
     bbwebTestConfig.webpack = webpackTestCoverageConfig;
     bbwebTestConfig.coverageIstanbulReporter = {
-      reports: [ 'html', 'text-summary' ],
+      reports: [ 'lcov', 'text-summary' ],
       fixWebpackSourcePaths: true
     };
     bbwebTestConfig.reporters = bbwebTestConfig.reporters.concat('coverage-istanbul');

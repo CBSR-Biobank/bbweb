@@ -2,44 +2,37 @@
 sudo: required
 dist: trusty
 
-language: scala
+matrix:
+  include:
+    - language: scala
+      jdk: oraclejdk8
+      scala: 2.12.4
+      before_cache:
+        # Cleanup the cached directories to avoid unnecessary cache updates
+        - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+        - find $HOME/.sbt        -name "*.lock"               -print -delete
+      cache:
+        directories:
+          - $HOME/.ivy2/cache
+          - $HOME/.sbt/boot/
+      script:
+        - cp conf/logback-test.xml.template conf/logback-test.xml
+        - sbt ++$TRAVIS_SCALA_VERSION test:compile
+        - sbt ++$TRAVIS_SCALA_VERSION clean coverage "testOnly -- -l PersistenceTest"
+      after_success:
+        - sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
 
-# These directories are cached to S3 at the end of the build
-cache:
-  directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot/
-    - node_modules
-
-# These directories are cached to S3 at the end of the build
-cache:
-  directories:
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt/boot/
-
-before_cache:
-  # Cleanup the cached directories to avoid unnecessary cache updates
-  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
-  - find $HOME/.sbt        -name "*.lock"               -print -delete
-
-scala:
-  - 2.12.2
-
-node_js:
-  - "6.11.1"
-
-jdk:
-  - oraclejdk8
-
-script:
-  - cp conf/logback-test.xml.template conf/logback-test.xml
-  - sbt ++$TRAVIS_SCALA_VERSION test:compile
-  - sbt ++$TRAVIS_SCALA_VERSION clean coverage "testOnly -- -l PersistenceTest"
-  - npm install
-  - node_modules/karma/bin/karma start
-
-after_success:
-  - sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
+    - language: node_js
+      node_js:
+        - 6
+      cache:
+        directories:
+          - node_modules
+      script:
+        - npm install
+        - npm run test-coverage
+      after_success:
+        - cat coverage/lcov.info | node_modules/coveralls/bin/coveralls.js
 
 branches:
   only:
