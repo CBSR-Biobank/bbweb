@@ -119,7 +119,7 @@ function config($stateProvider) {
   /* @ngInject */
   function resolveCollectionEventType($transition$, resourceErrorService, study, CollectionEventType) {
     const id = $transition$.params().eventTypeId;
-    CollectionEventType.get(study.id, id)
+    return CollectionEventType.get(study.id, id)
       .catch(resourceErrorService.goto404(`collectionEventType ID not found: ${id}`))
   }
 

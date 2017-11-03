@@ -8,9 +8,9 @@ final case class FilterAndSortQuery(filter: FilterString, sort: SortString)
 object FilterAndSortQuery {
 
   def create(rawQueryString: String): ControllerValidation[FilterAndSortQuery] = {
-    QueryStringParser(rawQueryString).
-      toSuccessNel(s"could not parse query string: $rawQueryString").
-      map(createFromExpressions)
+    QueryStringParser(rawQueryString)
+      .toSuccessNel(s"could not parse query string: $rawQueryString")
+      .map(createFromExpressions)
   }
 
   def createFromExpressions(expressions: QueryStringExpressions): FilterAndSortQuery = {

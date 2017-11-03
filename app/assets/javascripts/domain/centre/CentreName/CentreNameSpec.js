@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour';
+import sharedBehaviour from '../../../test/behaviours/entityNameAndStateSharedBehaviour';
 
 describe('CentreName', function() {
 
@@ -20,21 +20,12 @@ describe('CentreName', function() {
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
-                              'EntityName',
+                              'EntityNameAndState',
                               'CentreName',
                               'CentreState',
                               'Factory');
-      // used by promise tests
-      this.expectCentre = (entity) => {
-        expect(entity).toEqual(jasmine.any(this.CentreName));
-      };
-
-      this.url = url;
-
-      //---
-
-      function url() {
-        const args = [ 'centres/names' ].concat(_.toArray(arguments));
+      this.url = (...paths) => {
+        const args = [ 'centres/names' ].concat(paths);
         return EntityTestSuiteMixin.url.apply(null, args);
       }
     });
@@ -53,7 +44,7 @@ describe('CentreName', function() {
       context.constructor = this.CentreName;
       context.createFunc  = this.CentreName.create;
       context.restApiUrl  = this.url();
-      context.factoryFunc = this.Factory.userNameDto.bind(this.Factory);
+      context.factoryFunc = () => this.Factory.centreNameDto();
       context.listFunc    = this.CentreName.list;
     });
 

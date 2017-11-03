@@ -9,11 +9,11 @@ import _ from 'lodash'
  * Angular factory for Studies.
  */
 /* @ngInject */
-function EntityNameFactory($q,
-                           $log,
-                           biobankApi,
-                           DomainEntity,
-                           DomainError) {
+function EntityNameAndStateFactory($q,
+                                   $log,
+                                   biobankApi,
+                                   DomainEntity,
+                                   DomainError) {
 
   /**
    * @classdesc A base class for domain entity name objects. A name object is a triplet of: ID, name, and
@@ -28,7 +28,7 @@ function EntityNameFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-  function EntityName(obj) {
+  function EntityNameAndState(obj) {
 
     /**
      * The unique ID that identifies an object of this type.
@@ -41,55 +41,56 @@ function EntityNameFactory($q,
     /**
      * A short identifying name.
      *
-     * @name domain.EntityName#name
+     * @name domain.EntityNameAndState#name
      * @type {string}
      */
     this.name = null;
 
-    DomainEntity.call(this, EntityName.SCHEMA, obj);
+    DomainEntity.call(this, EntityNameAndState.SCHEMA, obj);
   }
 
-  EntityName.prototype = Object.create(DomainEntity.prototype);
-  EntityName.prototype.constructor = EntityName;
+  EntityNameAndState.prototype = Object.create(DomainEntity.prototype);
+  EntityNameAndState.prototype.constructor = EntityNameAndState;
 
   /**
    * Used for validating plain objects.
    */
-  EntityName.SCHEMA = {
-    'id': 'EntityName',
+  EntityNameAndState.SCHEMA = {
+    'id': 'EntityNameAndState',
     'type': 'object',
     'properties': {
-      'id':   { 'type': 'string' },
-      'name': { 'type': 'string' }
+      'id':    { 'type': 'string' },
+      'name':  { 'type': 'string' },
+      'state': { 'type': 'string' }
     },
-    'required': [ 'id', 'name' ]
+    'required': [ 'id', 'name', 'state' ]
   };
 
   /**
-   * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.EntityName|EntityName}.
+   * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.EntityNameAndState|EntityNameAndState}.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    *
    * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
    */
-  EntityName.isValid = function (obj) {
-    return DomainEntity.isValid(EntityName.SCHEMA, [], obj);
+  EntityNameAndState.isValid = function (obj) {
+    return DomainEntity.isValid(EntityNameAndState.SCHEMA, [], obj);
   };
 
   /**
-   * Creates a EntityName, but first it validates <code>obj</code> to ensure that it has a valid schema.
+   * Creates a EntityNameAndState, but first it validates <code>obj</code> to ensure that it has a valid schema.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    *
    * @returns {domain.studies.Entity} A entity created from the given object.
    *
-   * @see {@link domain.studies.EntityName.asyncCreate|asyncCreate()} when you need to create
+   * @see {@link domain.studies.EntityNameAndState.asyncCreate|asyncCreate()} when you need to create
    * a entity within asynchronous code.
    */
-  EntityName.create = function (Constructor, obj) {
-    var validation = EntityName.isValid(obj);
+  EntityNameAndState.create = function (Constructor, obj) {
+    var validation = EntityNameAndState.isValid(obj);
     if (!validation.valid) {
       $log.error(validation.message);
       throw new DomainError(validation.message);
@@ -98,7 +99,7 @@ function EntityNameFactory($q,
   };
 
   /**
-   * Used to list EntityNames.
+   * Used to list EntityNamesAndState.
    *
    * <p>Uses a REST API to retrieve a list of objects. See below for more details.</p>
    *
@@ -110,13 +111,13 @@ function EntityNameFactory($q,
    *        <code>state</code>. Values other than these two yield an error. Use a minus sign prefix to sort
    *        in descending order.
    *
-   * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+   * @param {Array<domain.EntityNameAndState>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
    * @returns {Promise<Array<objects>} A promise containing an array of objcts. The objects are created by
    * calling {@link createFunc}.
    */
-  EntityName.list = function (url, options, constructor, omit) {
+  EntityNameAndState.list = function (url, options, constructor, omit) {
     var params,
         validKeys = [
           'filter',
@@ -136,7 +137,7 @@ function EntityNameFactory($q,
       var deferred = $q.defer();
       try {
         const names = items.map((obj) => {
-          const validation = EntityName.isValid(obj);
+          const validation = EntityNameAndState.isValid(obj);
           if (!validation.valid) {
             throw new DomainError(validation.message);
           }
@@ -154,7 +155,7 @@ function EntityNameFactory($q,
     }
   };
 
-  return EntityName;
+  return EntityNameAndState;
 }
 
-export default ngModule => ngModule.factory('EntityName', EntityNameFactory)
+export default ngModule => ngModule.factory('EntityNameAndState', EntityNameAndStateFactory)

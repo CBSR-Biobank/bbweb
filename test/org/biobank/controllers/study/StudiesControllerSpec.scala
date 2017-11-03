@@ -1091,7 +1091,9 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri("names") + "?order=asc")
-                              (json \ "status").as[String] must include ("success")
+
+        (json \ "status").as[String] must include ("success")
+
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size studies.size.toLong
 
@@ -1108,7 +1110,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studies.map(study => studyRepository.put(study))
 
         val json = makeRequest(GET, uri("names") + "?filter=name::ABC")
-                              (json \ "status").as[String] must include ("success")
+
+        (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
         jsonList must have size 1
 

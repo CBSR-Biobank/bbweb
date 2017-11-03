@@ -5,6 +5,56 @@
 
 import _ from 'lodash'
 
+/*
+ * Displays the details for a single specimen and also allows the user to update certain fields.
+ */
+/* @ngInject */
+class SpecimenViewController {
+  constructor($state,
+              gettextCatalog,
+              breadcrumbService,
+              specimenStateLabelService) {
+    Object.assign(this, {
+      $state,
+      gettextCatalog,
+      breadcrumbService,
+      specimenStateLabelService
+    })
+  }
+
+  $onInit() {
+    this.specimenDescription = _.find(this.collectionEventType.specimenDescriptions,
+                                      { id: this.specimen.specimenDescriptionId });
+
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.collection'),
+      this.breadcrumbService.forStateWithFunc('home.collection.study', () => this.study.name),
+      this.breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents',
+        () => this.gettextCatalog.getString('Participant {{uniqueId}}',
+                                           { uniqueId: this.participant.uniqueId })),
+      this.breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents.details',
+        () => this.gettextCatalog.getString('Visit # {{vnumber}}',
+                                           { vnumber: this.collectionEvent.visitNumber })),
+      this.breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents.details.specimen',
+        () => this.specimen.inventoryId)
+    ];
+
+    this.stateLabelFunc  = this.specimenStateLabelService.stateToLabelFunc(this.specimen.state);
+  }
+
+  editParticipant() {
+    console.log(this.participant);
+  }
+
+  back() {
+    this.$state.go('^');
+  }
+}
+
 var component = {
   template: require('./specimenView.html'),
   controller: SpecimenViewController,
@@ -17,57 +67,5 @@ var component = {
     specimen:            '<'
   }
 };
-
-/*
- * Displays the details for a single specimen and also allows the user to update certain fields.
- */
-/* @ngInject */
-function SpecimenViewController($state, gettextCatalog, breadcrumbService, specimenStateLabelService) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //--
-
-  function onInit() {
-    vm.specimenDescription = _.find(vm.collectionEventType.specimenDescriptions,
-                                    { id: vm.specimen.specimenDescriptionId });
-
-    vm.editParticipant = editParticipant;
-    vm.back            = back;
-
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study',
-        function () { return vm.study.name; }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents',
-        function () {
-          return gettextCatalog.getString('Participant {{uniqueId}}',
-                                          { uniqueId: vm.participant.uniqueId });
-        }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents.details',
-        function () {
-          return gettextCatalog.getString('Visit # {{vnumber}}',
-                                          { vnumber: vm.collectionEvent.visitNumber });
-        }),
-      breadcrumbService.forStateWithFunc(
-        'home.collection.study.participant.cevents.details.specimen',
-        function () { return vm.specimen.inventoryId; })
-    ];
-
-    vm.stateLabelFunc  = specimenStateLabelService.stateToLabelFunc(vm.specimen.state);
-  }
-
-  function editParticipant() {
-    console.log(vm.participant);
-  }
-
-  function back() {
-    $state.go('^');
-  }
-}
 
 export default ngModule => ngModule.component('specimenView', component)

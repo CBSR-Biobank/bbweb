@@ -14,19 +14,16 @@ define(function (require) {
    *
    * @param {function} context.createFunc The static function that creates the entity name.
    *
-   * @param {function} context.restApiUrl A function that returns the URL used to retrieve the entities from
-   *        the server.
+   * @param {string} context.restApiUrl The URL for the REST API.
    *
    * @param {function} context.factoryFunc The function in factory.js that creates a plain object of the
    * entity to test.
    *
    * @param {function} context.listFunc The static function that invokes the REST API to list the entities.
-   *        This function has one parameter: the options object that specifies the query parameters to use
-   *        with the URL.
    *
    * @return {null} nothing
    */
-  function entityNameSharedBehaviour(context) {
+  function entityNameAndStateSharedBehaviour(context) {
 
     it('constructor with no parameters has default values', function() {
       var entityName = new context.constructor();
@@ -35,7 +32,7 @@ define(function (require) {
     });
 
     it('fails when creating from an invalid object', function() {
-      this.EntityName.SCHEMA.required.forEach(function (field) {
+      this.EntityNameAndState.SCHEMA.required.forEach(function (field) {
         var badEntityJson = _.omit(context.factoryFunc(), field);
 
         expect(function () {
@@ -49,7 +46,7 @@ define(function (require) {
       it('can retrieve entity names', function() {
         var names = [ context.factoryFunc() ];
 
-        this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
+        this.$httpBackend.whenGET(context.restApiUrl).respond(this.reply(names));
         context.listFunc().then(testEntity).catch(failTest);
         this.$httpBackend.flush();
 
@@ -60,24 +57,25 @@ define(function (require) {
       });
 
       it('can use options', function() {
-        const names = [ context.factoryFunc() ],
-              testEntity = (reply) => {
-                expect(reply).toBeArrayOfSize(names.length);
-                reply.forEach((entity) => {
-                  expect(entity).toEqual(jasmine.any(context.constructor));
-                });
-              },
-              optionList = [
-                { filter: 'name::test' },
-                { sort: 'name' }
-              ];
+        var optionList = [
+          { filter: 'name::test' },
+          { sort: 'state' }
+        ],
+            names = [ context.factoryFunc() ];
 
         optionList.forEach((options) => {
-          var url = context.restApiUrl() + '?' + this.$httpParamSerializer(options, true);
+          var url = context.restApiUrl + '?' + this.$httpParamSerializer(options, true);
           this.$httpBackend.whenGET(url).respond(this.reply(names));
           context.listFunc(options).then(testEntity).catch(failTest);
           this.$httpBackend.flush();
         });
+
+        function testEntity(reply) {
+          expect(reply).toBeArrayOfSize(names.length);
+          reply.forEach((entity) => {
+            expect(entity).toEqual(jasmine.any(context.constructor));
+          });
+        }
       });
 
       it('listing omits empty options', function() {
@@ -86,11 +84,11 @@ define(function (require) {
             testEntity = (reply) => {
               expect(reply).toBeArrayOfSize(names.length);
               reply.forEach((entity) => {
-                expect(entity).toEqual(jasmine.any(this.EntityName));
+                expect(entity).toEqual(jasmine.any(this.EntityNameAndState));
               });
             };
 
-        this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
+        this.$httpBackend.whenGET(context.restApiUrl).respond(this.reply(names));
         context.listFunc(options).then(testEntity).catch(failTest);
         this.$httpBackend.flush();
       });
@@ -98,7 +96,7 @@ define(function (require) {
       it('fails when an invalid entity is returned', function() {
         var names = [ _.omit(context.factoryFunc(), 'name') ];
 
-        this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
+        this.$httpBackend.whenGET(context.restApiUrl).respond(this.reply(names));
         context.listFunc().then(listFail).catch(shouldFail);
         this.$httpBackend.flush();
 
@@ -120,6 +118,6 @@ define(function (require) {
 
   }
 
-  return entityNameSharedBehaviour;
+  return entityNameAndStateSharedBehaviour;
 
 });

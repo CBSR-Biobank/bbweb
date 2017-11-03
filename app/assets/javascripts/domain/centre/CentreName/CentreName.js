@@ -12,7 +12,7 @@ import _ from 'lodash';
 function CentreNameFactory($q,
                            $log,
                            biobankApi,
-                           EntityName,
+                           EntityNameAndState,
                            DomainEntity,
                            DomainError,
                            CentreState) {
@@ -39,10 +39,10 @@ function CentreNameFactory($q,
      */
     this.state = CentreState.DISABLED;
 
-    EntityName.call(this, obj);
+    EntityNameAndState.call(this, obj);
   }
 
-  CentreName.prototype = Object.create(EntityName.prototype);
+  CentreName.prototype = Object.create(EntityNameAndState.prototype);
   CentreName.prototype.constructor = CentreName;
 
   /**
@@ -57,7 +57,7 @@ function CentreNameFactory($q,
    * a Centre within asynchronous code.
    */
   CentreName.create = function (obj) {
-    var validation = EntityName.isValid(obj);
+    var validation = EntityNameAndState.isValid(obj);
     if (!validation.valid) {
       $log.error(validation.message);
       throw new DomainError(validation.message);
@@ -89,14 +89,14 @@ function CentreNameFactory($q,
    * @param {int} [options.limit=10] The total number of centres to return per page. The maximum page size
    *        is 10. If a value larger than 10 is used then the response is an error.
    *
-   * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+   * @param {Array<domain.EntityNameAndState>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
    * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
    *          domain.centres.Centre}.
    */
   CentreName.list = function (options, omit) {
-    return EntityName.list(CentreName.url(), options, CentreName, omit);
+    return EntityNameAndState.list(CentreName.url(), options, CentreName, omit);
   };
 
   /**

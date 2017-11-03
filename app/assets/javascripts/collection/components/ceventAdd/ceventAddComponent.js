@@ -10,6 +10,7 @@ class CeventAddController {
 
   constructor($state,
               gettextCatalog,
+              modalService,
               notificationsService,
               domainNotificationService,
               timeService,
@@ -20,6 +21,7 @@ class CeventAddController {
     Object.assign(this, {
       $state,
       gettextCatalog,
+      modalService,
       notificationsService,
       domainNotificationService,
       timeService,
@@ -30,18 +32,12 @@ class CeventAddController {
   }
 
   $onInit() {
-    this.CollectionEventType.get(this.collectionEventTypeId)
-      .then((collectionEventType) => {
-        this.collectionEventType = collectionEventType;
-        this.configureBreadcrumbs();
-
-        this.collectionEvent = new this.CollectionEvent({ participantId: this.participant.id },
-                                                        this.collectionEventType);
-
-        this.title = this.gettextCatalog.getString(
-          'Participant {{id}}: Add collection event', { id: this.participant.uniqueId });
-        this.timeCompleted = new Date();
-      })
+    this.configureBreadcrumbs();
+    this.collectionEvent = new this.CollectionEvent({ participantId: this.participant.id },
+                                                    this.collectionEventType);
+    this.title = this.gettextCatalog.getString('Participant {{id}}: Add collection event',
+                                               { id: this.participant.uniqueId });
+    this.timeCompleted = new Date();
   }
 
   configureBreadcrumbs() {
@@ -66,14 +62,29 @@ class CeventAddController {
       .then(cevent => {
         this.notificationsService.submitSuccess();
         this.$state.go('home.collection.study.participant.cevents.details',
-                       { collectionEventId: cevent.id },
+                       {
+                         eventTypeId: cevent.collectionEventTypeId,
+                         eventId:     cevent.id
+                       },
                        { reload: true });
       })
       .catch(error => {
-        this.domainNotificationService.updateErrorModal(error, this.gettextCatalog.getString('collectionEvent'))
-          .catch(() => {
-            this.$state.go('home.collection.study.participant', { participantId: this.participant.id });
-          });
+        const entityName = this.gettextCatalog.getString('Event')
+        if (error.message
+            .match(/EntityCriteriaError: a collection event with this visit number already exists/)) {
+
+          this.modalService.modalOk(
+            this.gettextCatalog.getString('Visit number error'),
+            this.gettextCatalog.getString(
+              `An event with visit # <b>{{visitNumber}}</b> already exists.
+               Please use another visit number.`,
+              { visitNumber: this.collectionEvent.visitNumber }))
+        } else {
+          this.domainNotificationService.updateErrorModal(error, entityName)
+            .catch(() => {
+              this.$state.go('home.collection.study.participant', { participantId: this.participant.id });
+            });
+        }
       });
   }
 
@@ -95,9 +106,9 @@ const component = {
   controller: CeventAddController,
   controllerAs: 'vm',
   bindings: {
-    study:                 '<',
-    participant:           '<',
-    collectionEventTypeId: '@'
+    study:               '<',
+    participant:         '<',
+    collectionEventType: '<'
   }
 };
 

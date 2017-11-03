@@ -27,6 +27,16 @@ const STRING_SYMBOL                     = Symbol('string'),
 
 const defaultEntities = new Map();
 
+function entityNameDto(createFunc, options = {}) {
+  const c = createFunc(_.pick(options, ['id', 'name']));
+  return _.pick(c, ['id', 'name']);
+}
+
+function entityNameAndStateDto(createFunc, options = {}) {
+  const c = createFunc(_.pick(options, ['id', 'name', 'state']));
+  return _.pick(c, ['id', 'name', 'state']);
+}
+
 /*
  * Generates JSON domain entities as if returned by the server.
  *
@@ -39,7 +49,7 @@ class Factory {
               AnnotationMaxValueCount,
               AnatomicalSourceType,
               PreservationTemperatureType,
-               PreservationType,
+              PreservationType,
               SpecimenType,
               StudyState,
               CentreState,
@@ -115,20 +125,20 @@ class Factory {
 
   specimenLinkType(options = {}) {
     const processingType = this.defaultProcessingType(),
-        defaults = {
-          id:                    this.domainEntityNameNext(ENTITY_NAME_SPECIMEN_LINK_TYPE),
-          processingTypeId:      processingType.id,
-          expectedInputChange:   faker.random.number({precision: 0.5}),
-          expectedOutputChange:  faker.random.number({precision: 0.5}),
-          inputGroupId:          null,
-          outputGroupId:         null,
-          inputCount:            faker.random.number(5) + 1,
-          outputCount:           faker.random.number(5) + 1,
-          inputContainerTypeId:  null,
-          outputContainerTypeId: null
-        },
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        slt = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+          defaults = {
+            id:                    this.domainEntityNameNext(ENTITY_NAME_SPECIMEN_LINK_TYPE),
+            processingTypeId:      processingType.id,
+            expectedInputChange:   faker.random.number({precision: 0.5}),
+            expectedOutputChange:  faker.random.number({precision: 0.5}),
+            inputGroupId:          null,
+            outputGroupId:         null,
+            inputCount:            faker.random.number(5) + 1,
+            outputCount:           faker.random.number(5) + 1,
+            inputContainerTypeId:  null,
+            outputContainerTypeId: null
+          },
+          validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
+          slt = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
 
     this.updateDefaultEntity(ENTITY_NAME_SPECIMEN_LINK_TYPE, slt);
     return slt;
@@ -237,22 +247,20 @@ class Factory {
     return this.defaultEntity(ENTITY_NAME_STUDY, this.study);
   }
 
-  entityNameDto(createFunc, options = {}) {
-    var c;
-    c = createFunc.call(this, _.pick(options, ['id', 'name', 'state']));
-    return _.pick(c, ['id', 'name', 'state']);
+  collectionEventTypeNameDto(options = {}) {
+    return entityNameDto(this.collectionEventType.bind(this), options)
   }
 
   studyNameDto(options) {
-    return this.entityNameDto(this.study, options);
+    return entityNameAndStateDto(this.study.bind(this), options);
   }
 
   centreNameDto(options) {
-    return this.entityNameDto(this.centre, options);
+    return entityNameAndStateDto(this.centre.bind(this), options);
   }
 
   userNameDto(options) {
-    return this.entityNameDto(this.user, options);
+    return entityNameAndStateDto(this.user.bind(this), options);
   }
 
   /**

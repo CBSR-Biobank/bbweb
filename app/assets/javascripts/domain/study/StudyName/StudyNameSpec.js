@@ -6,19 +6,18 @@
 
 import _ from 'lodash';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour';
+import sharedBehaviour from '../../../test/behaviours/entityNameAndStateSharedBehaviour';
 
 describe('StudyName', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin,
-                                 ServerReplyMixin) {
+    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
       _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
-                              'EntityName',
+                              'EntityNameAndState',
                               'StudyName',
                               'StudyState',
                               'Factory');

@@ -41,15 +41,17 @@ class CeventViewController {
   //--
 
   $onInit() {
-    this.panelOpen = true;
+    this.panelOpen = true
+    // need to initialize annotations on collection event in the case they have not been assigned
+    this.collectionEvent.setCollectionEventType(this.collectionEventType)
   }
 
   postUpdate(message, title, timeout) {
     return (cevent) => {
-      this.collectionEvent = cevent;
-      this.collectionEvent.setCollectionEventType(this.collectionEventType);
-      this.notificationsService.success(message, title, timeout);
-    };
+      this.collectionEvent = cevent
+      this.collectionEvent.setCollectionEventType(this.collectionEventType)
+      this.notificationsService.success(message, title, timeout)
+    }
   }
 
   editTimeCompleted() {
@@ -60,13 +62,13 @@ class CeventViewController {
       .result.then(timeCompleted => {
         this.collectionEvent.updateTimeCompleted(this.timeService.dateAndTimeToUtcString(timeCompleted))
           .then(cevent => {
-            this.$scope.$emit('collection-event-updated', cevent);
+            this.$scope.$emit('collection-event-updated', cevent)
             this.postUpdate(this.gettextCatalog.getString('Time completed updated successfully.'),
                             this.gettextCatalog.getString('Change successful'),
-                            1500)(cevent);
+                            1500)(cevent)
           })
-          .catch(this.notificationsService.updateError);
-      });
+          .catch(this.notificationsService.updateError)
+      })
   }
 
   editAnnotation(annotation) {
@@ -76,12 +78,12 @@ class CeventViewController {
           .then(this.postUpdate(this.gettextCatalog.getString('Annotation updated successfully.'),
                                 this.gettextCatalog.getString('Change successful'),
                                 1500))
-          .catch(this.notificationsService.updateError);
-      });
+          .catch(this.notificationsService.updateError)
+      })
   }
 
   panelButtonClicked() {
-    this.panelOpen = !this.panelOpen;
+    this.panelOpen = !this.panelOpen
   }
 
   remove() {
@@ -90,13 +92,13 @@ class CeventViewController {
         if (pagedResult.items.length > 0) {
           this.modalService.modalOk(
             this.gettextCatalog.getString('Cannot remove collection event'),
-            this.gettextCatalog.getString('This collection event has specimens. Please remove the specimens first.'));
+            this.gettextCatalog.getString('This collection event has specimens. Please remove the specimens first.'))
         } else {
           const promiseFn = () => this.collectionEvent.remove()
                 .then(() => {
-                  this.notificationsService.success(this.gettextCatalog.getString('Collection event removed'));
-                  this.$state.go('home.collection.study.participant.cevents', {}, { reload: true });
-                });
+                  this.notificationsService.success(this.gettextCatalog.getString('Collection event removed'))
+                  this.$state.go('home.collection.study.participant.cevents', {}, { reload: true })
+                })
 
           this.domainNotificationService.removeEntity(
             promiseFn,
@@ -108,14 +110,14 @@ class CeventViewController {
             this.gettextCatalog.getString('Remove failed'),
             this.gettextCatalog.getString(
               'Collection event with visit number {{visitNumber}} cannot be removed',
-              { visitNumber: this.collectionEvent.visitNumber}));
+              { visitNumber: this.collectionEvent.visitNumber}))
         }
-      });
+      })
   }
 
   getAnnotationUpdateButtonTitle(annotation) {
     /// label is a name assigned by the user for an annotation type
-    return this.gettextCatalog.getString('Update {{label}}', { label: annotation.getLabel() });
+    return this.gettextCatalog.getString('Update {{label}}', { label: annotation.getLabel() })
   }
 
 }
@@ -126,9 +128,10 @@ var component = {
   controllerAs: 'vm',
   bindings: {
     study:               '<',
+    participant:         '<',
     collectionEventType: '<',
     collectionEvent:     '<'
   }
-};
+}
 
 export default ngModule => ngModule.component('ceventView', component)

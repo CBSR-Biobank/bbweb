@@ -10,7 +10,7 @@
 function UserNameFactory($q,
                          $log,
                          biobankApi,
-                         EntityName,
+                         EntityNameAndState,
                          DomainEntity,
                          DomainError,
                          UserState) {
@@ -22,7 +22,7 @@ function UserNameFactory($q,
    *
    * @class
    * @memberOf domain.users
-   * @extends domain.EntityName
+   * @extends domain.EntityNameAndState
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
@@ -37,10 +37,10 @@ function UserNameFactory($q,
      */
     this.state = UserState.DISABLED;
 
-    EntityName.call(this, obj);
+    EntityNameAndState.call(this, obj);
   }
 
-  UserName.prototype = Object.create(EntityName.prototype);
+  UserName.prototype = Object.create(EntityNameAndState.prototype);
   UserName.prototype.constructor = UserName;
 
   /**
@@ -55,7 +55,7 @@ function UserNameFactory($q,
    * a User within asynchronous code.
    */
   UserName.create = function (obj) {
-    var validation = EntityName.isValid(obj);
+    var validation = EntityNameAndState.isValid(obj);
     if (!validation.valid) {
       $log.error(validation.message);
       throw new DomainError(validation.message);
@@ -87,14 +87,14 @@ function UserNameFactory($q,
    * @param {int} [options.limit=10] The total number of users to return per page. The maximum page size
    *        is 10. If a value larger than 10 is used then the response is an error.
    *
-   * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+   * @param {Array<domain.EntityNameAndState>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
    * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
    *          domain.users.User}.
    */
   UserName.list = function (options, omit) {
-    return EntityName.list(UserName.url(), options, UserName, omit);
+    return EntityNameAndState.list(UserName.url(), options, UserName, omit);
   };
 
   /**

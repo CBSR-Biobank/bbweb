@@ -12,7 +12,7 @@ import _ from 'lodash'
 function StudyNameFactory($q,
                           $log,
                           biobankApi,
-                          EntityName,
+                          EntityNameAndState,
                           DomainEntity,
                           DomainError,
                           StudyState) {
@@ -39,10 +39,10 @@ function StudyNameFactory($q,
      */
     this.state = StudyState.DISABLED;
 
-    EntityName.call(this, obj);
+    EntityNameAndState.call(this, obj);
   }
 
-  StudyName.prototype = Object.create(EntityName.prototype);
+  StudyName.prototype = Object.create(EntityNameAndState.prototype);
   StudyName.prototype.constructor = StudyName;
 
   /**
@@ -57,7 +57,7 @@ function StudyNameFactory($q,
    * a study within asynchronous code.
    */
   StudyName.create = function (obj) {
-    var validation = EntityName.isValid(obj);
+    var validation = EntityNameAndState.isValid(obj);
     if (!validation.valid) {
       $log.error(validation.message);
       throw new DomainError(validation.message);
@@ -89,14 +89,14 @@ function StudyNameFactory($q,
    * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size
    *        is 10. If a value larger than 10 is used then the response is an error.
    *
-   * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+   * @param {Array<domain.EntityNameAndState>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
    * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
    *          domain.studies.Study}.
    */
   StudyName.list = function (options, omit) {
-    return EntityName.list(StudyName.url(), options, StudyName, omit);
+    return EntityNameAndState.list(StudyName.url(), options, StudyName, omit);
   };
 
   /**

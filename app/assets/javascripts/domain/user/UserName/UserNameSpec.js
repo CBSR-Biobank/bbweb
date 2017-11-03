@@ -6,7 +6,7 @@
 
 import _ from 'lodash';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour';
+import sharedBehaviour from '../../../test/behaviours/entityNameAndStateSharedBehaviour';
 
 describe('UserName', function() {
 
@@ -19,7 +19,7 @@ describe('UserName', function() {
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
-                              'EntityName',
+                              'EntityNameAndState',
                               'UserName',
                               'UserState',
                               'Factory');

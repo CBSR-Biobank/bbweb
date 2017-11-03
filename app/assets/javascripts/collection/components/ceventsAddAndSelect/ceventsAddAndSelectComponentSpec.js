@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import ngModule from '../../index'
 
-describe('ceventsAddAndSelectDirective', function() {
+describe('Component: ceventsAddAndSelect', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -144,8 +144,10 @@ describe('ceventsAddAndSelectDirective', function() {
     this.controller.eventInformation(this.collectionEvent);
     this.scope.$digest();
     expect(this.$state.go).toHaveBeenCalledWith(
-      'home.collection.study.participant.cevents.details',
-      { collectionEventId: this.collectionEvent.id });
+      'home.collection.study.participant.cevents.details', {
+        eventTypeId: this.collectionEvent.collectionEventTypeId,
+        eventId:     this.collectionEvent.id
+      });
   });
 
   describe('for updating visit number filter', function() {

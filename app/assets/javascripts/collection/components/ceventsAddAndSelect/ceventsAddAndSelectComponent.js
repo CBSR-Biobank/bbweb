@@ -20,7 +20,7 @@ var component = {
  * Controller for this component.
  */
 /* @ngInject */
-function CeventsAddAndSelectDirective($state, CollectionEvent) {
+function CeventsAddAndSelectDirective($state, BbwebError, CollectionEvent) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -110,8 +110,10 @@ function CeventsAddAndSelectDirective($state, CollectionEvent) {
   }
 
   function eventInformation(cevent) {
-    $state.go('home.collection.study.participant.cevents.details',
-              { collectionEventId: cevent.id });
+    $state.go('home.collection.study.participant.cevents.details', {
+      eventTypeId: cevent.collectionEventTypeId,
+      eventId:     cevent.id
+    });
   }
 
   function visitFilterUpdated() {

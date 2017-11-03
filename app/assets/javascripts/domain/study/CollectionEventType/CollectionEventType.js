@@ -218,7 +218,7 @@ function CollectionEventTypeFactory($q,
    */
   CollectionEventType.get = function(studyId, id) {
     return biobankApi.get(CollectionEventType.url(studyId, id))
-      .then((reply) => CollectionEventType.prototype.asyncCreate(reply));
+      .then(reply => CollectionEventType.asyncCreate(reply));
   };
 
   /**

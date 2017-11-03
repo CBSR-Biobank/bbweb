@@ -33,7 +33,7 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
       validationReply(ceventType)
     }
 
-  def list(studyId: StudyId): Action[Unit] =
+  def list(studyId: StudyId): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {
@@ -49,7 +49,24 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
         }
       )
     }
+  }
 
+  // returns all the names of the collection events in a list of NameDto.
+  def listNames(studyId: StudyId): Action[Unit] = {
+    action.async(parse.empty) { implicit request =>
+      validationReply(
+        Future {
+          for {
+            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
+            names <- service.getNames(request.authInfo.userId,
+                                      studyId,
+                                      filterAndSort.filter,
+                                      filterAndSort.sort)
+          } yield names
+        }
+      )
+    }
+  }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>

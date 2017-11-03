@@ -10,7 +10,6 @@ import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study._
 import org.biobank.domain.user.UserId
 import org.biobank.dto._
-import org.biobank.dto.{ ProcessingDto }
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.ProcessingTypeEvents._
@@ -310,8 +309,8 @@ class StudiesServiceImpl @Inject()(
         QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
       }
       sortFunc <- {
-        Study.sort2Compare.get(sortExpressions(0).name).
-          toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
+        Study.sort2Compare.get(sortExpressions(0).name)
+          .toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
       }
     } yield {
       val result = studies.toSeq.sortWith(sortFunc)

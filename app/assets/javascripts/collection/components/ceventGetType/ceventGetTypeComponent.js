@@ -3,39 +3,46 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
+/*
+ * Controller for this component.
+ */
+/* @ngInject */
+class CeventGetTypeController {
+  constructor($state,
+              CollectionEventTypeName,
+              CollectionEvent,
+              gettextCatalog) {
+    'ngInject'
+    Object.assign(this, {
+      $state,
+      CollectionEventTypeName,
+      CollectionEvent,
+      gettextCatalog
+    })
+  }
+
+  //--
+
+  $onInit() {
+    this.title = this.gettextCatalog.getString('Participant {{id}}: Add collection event',
+                                               { id: this.participant.uniqueId })
+    this.CollectionEventTypeName.list(this.study.id).then((reply) => {
+      this.collectionEventTypeNames = reply
+    })
+  }
+
+  updateCollectionEventType() {
+    this.$state.go('home.collection.study.participant.cevents.add.details', { eventTypeId: this.eventTypeId })
+  }
+}
+
 var component = {
   template: require('./ceventGetType.html'),
   controller: CeventGetTypeController,
   controllerAs: 'vm',
   bindings: {
-    study:                '<',
-    participant:          '<',
-    collectionEventTypes: '<'
-  }
-};
-
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function CeventGetTypeController($state, CollectionEvent, gettextCatalog) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //--
-
-  function onInit() {
-    vm.title = gettextCatalog.getString('Participant {{id}}: Add collection event',
-                                        { id: vm.participant.uniqueId });
-    vm.collectionEvent = new CollectionEvent();
-    vm.updateCollectionEventType = updateCollectionEventType;
-  }
-
-  function updateCollectionEventType() {
-    if (vm.collectionEvent.collectionEventTypeId) {
-      $state.go('home.collection.study.participant.cevents.add.details',
-                { collectionEventTypeId: vm.collectionEvent.collectionEventTypeId });
-    }
+    study:       '<',
+    participant: '<'
   }
 }
 
