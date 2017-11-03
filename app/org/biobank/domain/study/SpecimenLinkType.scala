@@ -1,5 +1,6 @@
 package org.biobank.domain.study
 
+import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
@@ -114,18 +115,18 @@ final case class SpecimenLinkType(processingTypeId:      ProcessingTypeId,
 object SpecimenLinkType extends SpecimenLinkTypeValidations {
   //import org.biobank.domain.CommonValidations._
 
-  def create(processingTypeId:      ProcessingTypeId,
-             id:                    SpecimenLinkTypeId,
-             version:               Long,
-             expectedInputChange:   BigDecimal,
-             expectedOutputChange:  BigDecimal,
-             inputCount:            Int,
-             outputCount:           Int,
-             inputGroupId:          SpecimenGroupId,
-             outputGroupId:         SpecimenGroupId,
-             inputContainerTypeId:  Option[ContainerTypeId],
-             outputContainerTypeId: Option[ContainerTypeId],
-             annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
+  @silent def create(processingTypeId:      ProcessingTypeId,
+                     id:                    SpecimenLinkTypeId,
+                     version:               Long,
+                     expectedInputChange:   BigDecimal,
+                     expectedOutputChange:  BigDecimal,
+                     inputCount:            Int,
+                     outputCount:           Int,
+                     inputGroupId:          SpecimenGroupId,
+                     outputGroupId:         SpecimenGroupId,
+                     inputContainerTypeId:  Option[ContainerTypeId],
+                     outputContainerTypeId: Option[ContainerTypeId],
+                     annotationTypeData:    List[SpecimenLinkTypeAnnotationTypeData])
       : DomainValidation[SpecimenLinkType] = {
 
     /** The validation code below validates 13 items and to create a SpecimenLinkType only

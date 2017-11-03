@@ -204,7 +204,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
   private def updatePasswordCmdToEvent(cmd:  UpdateUserPasswordCmd,
                                        user: ActiveUser): ServiceValidation[UserEvent] = {
     if (passwordHasher.valid(user.password, user.salt, cmd.currentPassword)) {
-      val passwordInfo = encryptPassword(user, cmd.newPassword)
+      val passwordInfo = encryptPassword(cmd.newPassword)
       user.withPassword(passwordInfo.password, passwordInfo.salt).map { user =>
         UserEvent(user.id.id).update(
           _.time                                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
@@ -242,7 +242,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
           case u => InvalidStatus(s"user for password reset is not active: $cmd").failureNel[ActiveUser]
         }
       }
-      passwordInfo <- encryptPassword(activeUser, plainPassword).successNel[String]
+      passwordInfo <- encryptPassword(plainPassword).successNel[String]
       updatedUser  <- activeUser.withPassword(passwordInfo.password, passwordInfo.salt)
     } yield {
       emailService.passwordResetEmail(updatedUser.email, plainPassword)
@@ -535,7 +535,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
     }
   }
 
-  private def encryptPassword(user: ActiveUser, newPlainPassword: String): PasswordInfo = {
+  private def encryptPassword(newPlainPassword: String): PasswordInfo = {
     val newSalt = passwordHasher.generateSalt
     val newPwd = passwordHasher.encrypt(newPlainPassword, newSalt)
     PasswordInfo(newPwd, newSalt)

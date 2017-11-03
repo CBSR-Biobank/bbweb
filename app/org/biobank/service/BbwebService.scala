@@ -2,6 +2,7 @@ package org.biobank.service
 
 import akka.actor.ActorRef
 import akka.util.Timeout
+import com.github.ghik.silencer.silent
 import org.biobank.domain.access.PermissionId
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.centre.CentreId
@@ -21,7 +22,7 @@ trait BbwebServiceImpl {
 
   val processor: ActorRef
 
-  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit] = {
+  @silent def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit] = {
     (processor ! "snap").successNel[String]
   }
 

@@ -2,6 +2,7 @@ package org.biobank.service.participants
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -142,9 +143,9 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
       _.added.annotations := cmd.annotations.map { annotationToEvent(_) })
   }
 
-  private def updateUniqueIdCmdToEvent(cmd:         UpdateParticipantUniqueIdCmd,
-                                       study:       Study,
-                                       participant: Participant): ServiceValidation[ParticipantEvent] = {
+  @silent private def updateUniqueIdCmdToEvent(cmd:         UpdateParticipantUniqueIdCmd,
+                                               study:       Study,
+                                               participant: Participant): ServiceValidation[ParticipantEvent] = {
     for {
       uniqueIdAvailable  <- uniqueIdAvailable(cmd.uniqueId, participant.id)
       updatedParticipant <- participant.withUniqueId(cmd.uniqueId)

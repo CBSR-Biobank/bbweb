@@ -2,6 +2,7 @@ package org.biobank.service.participants
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
@@ -159,25 +160,25 @@ class SpecimensProcessor @Inject() (
         })
   }
 
-  private def moveCmdToEvent(cmd: MoveSpecimensCmd): ServiceValidation[SpecimenEvent] = {
+  @silent private def moveCmdToEvent(cmd: MoveSpecimensCmd): ServiceValidation[SpecimenEvent] = {
     ???
   }
 
-  private def assignPositionCmdToEvent(cmd: SpecimenAssignPositionCmd,
-                                        cevent:   CollectionEvent,
-                                        specimen: Specimen): ServiceValidation[SpecimenEvent] = {
+  @silent private def assignPositionCmdToEvent(cmd: SpecimenAssignPositionCmd,
+                                               cevent:   CollectionEvent,
+                                               specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     ???
   }
 
-  private def removeAmountCmdToEvent(cmd: SpecimenRemoveAmountCmd,
-                                      cevent:   CollectionEvent,
-                                      specimen: Specimen): ServiceValidation[SpecimenEvent] = {
+  @silent private def removeAmountCmdToEvent(cmd: SpecimenRemoveAmountCmd,
+                                             cevent:   CollectionEvent,
+                                             specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     ???
   }
 
-  private def updateUsableCmdToEvent(cmd: SpecimenUpdateUsableCmd,
-                                      cevent:   CollectionEvent,
-                                      specimen: Specimen): ServiceValidation[SpecimenEvent] = {
+  @silent private def updateUsableCmdToEvent(cmd: SpecimenUpdateUsableCmd,
+                                             cevent:   CollectionEvent,
+                                             specimen: Specimen): ServiceValidation[SpecimenEvent] = {
     ???
   }
 
@@ -227,19 +228,19 @@ class SpecimensProcessor @Inject() (
     }
   }
 
-  private def applyMovedEvent(event: SpecimenEvent): Unit = {
+  @silent private def applyMovedEvent(event: SpecimenEvent): Unit = {
     ???
   }
 
-  private def applyPositionAssignedEvent(event: SpecimenEvent): Unit = {
+  @silent private def applyPositionAssignedEvent(event: SpecimenEvent): Unit = {
     ???
   }
 
-  private def applyAmountRemovedEvent(event: SpecimenEvent): Unit = {
+  @silent private def applyAmountRemovedEvent(event: SpecimenEvent): Unit = {
     ???
   }
 
-  private def applyUsableUpdatedEvent(event: SpecimenEvent): Unit = {
+  @silent private def applyUsableUpdatedEvent(event: SpecimenEvent): Unit = {
     ???
   }
 

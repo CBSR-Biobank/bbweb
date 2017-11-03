@@ -3,6 +3,7 @@ package org.biobank.service.centres
 import akka.actor._
 import akka.event.{Logging, LoggingAdapter}
 import akka.persistence.{RecoveryCompleted, SnapshotOffer, SaveSnapshotSuccess, SaveSnapshotFailure}
+import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -429,7 +430,7 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
     }
   }
 
-  private def removeCmdToEvent(cmd: ShipmentRemoveCmd, shipment: CreatedShipment)
+  @silent private def removeCmdToEvent(cmd: ShipmentRemoveCmd, shipment: CreatedShipment)
       : ServiceValidation[ShipmentEvent] = {
     val shipmentId = ShipmentId(cmd.id)
     for {
@@ -509,7 +510,8 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
       _.removed.shipmentSpecimenId := cmd.shipmentSpecimenId)
   }
 
-  private def updateSpecimenContainerCmdToEvent(cmd: ShipmentSpecimenUpdateContainerCmd, shipment: Shipment)
+  @silent private def updateSpecimenContainerCmdToEvent(cmd:      ShipmentSpecimenUpdateContainerCmd,
+                                                        shipment: Shipment)
       : ServiceValidation[ShipmentSpecimenEvent] = {
     // FIXME: validate that shipmentContainerId is a container in the repository
     //

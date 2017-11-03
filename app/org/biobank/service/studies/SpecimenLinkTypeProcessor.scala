@@ -2,6 +2,7 @@ package org.biobank.service.studies
 
 import akka.actor._
 import akka.persistence.SnapshotOffer
+import com.github.ghik.silencer.silent
 import org.biobank.domain.study.{ProcessingTypeId, ProcessingTypeRepository, SpecimenLinkType, SpecimenLinkTypeId, SpecimenLinkTypeRepository, SpecimenGroupRepository }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
@@ -73,8 +74,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
 
   }
 
-  private def processAddSpecimenLinkTypeCmd
-    (cmd: AddSpecimenLinkTypeCmd): Unit = {
+  @silent private def processAddSpecimenLinkTypeCmd(cmd: AddSpecimenLinkTypeCmd): Unit = {
     ???
     // val processingTypeId = ProcessingTypeId(cmd.processingTypeId)
     // val id = specimenLinkTypeRepository.nextIdentity
@@ -118,7 +118,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     // process(event){ applySpecimenLinkTypeAddedEvent(_) }
   }
 
-  private def processUpdateSpecimenLinkTypeCmd(cmd: UpdateSpecimenLinkTypeCmd): Unit = {
+  @silent private def processUpdateSpecimenLinkTypeCmd(cmd: UpdateSpecimenLinkTypeCmd): Unit = {
     ???
     // val v = update(cmd) { slt =>
     //   for {
@@ -175,9 +175,8 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     process(v) { applySpecimenLinkTypeRemovedEvent(_) }
   }
 
-  private def update
-    (cmd: SpecimenLinkTypeModifyCommand)
-    (fn: SpecimenLinkType => ServiceValidation[StudyEventOld])
+  private def update(cmd: SpecimenLinkTypeModifyCommand)
+                    (fn: SpecimenLinkType => ServiceValidation[StudyEventOld])
       : ServiceValidation[StudyEventOld] = {
     for {
       processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
@@ -189,7 +188,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     } yield event
   }
 
-  private def applySpecimenLinkTypeAddedEvent(event: StudyEventOld) : Unit = {
+  @silent private def applySpecimenLinkTypeAddedEvent(event: StudyEventOld) : Unit = {
     ???
     // if (event.eventType.isSpecimenLinkTypeAdded) {
     //   val addedEvent = event.getSpecimenLinkTypeAdded
@@ -216,7 +215,7 @@ class SpecimenLinkTypeProcessor @javax.inject.Inject() (
     // }
   }
 
-  private def applySpecimenLinkTypeUpdatedEvent(event: StudyEventOld) : Unit = {
+  @silent private def applySpecimenLinkTypeUpdatedEvent(event: StudyEventOld) : Unit = {
     ???
     // if (event.eventType.isSpecimenLinkTypeUpdated) {
     //   val updatedEvent = event.getSpecimenLinkTypeUpdated

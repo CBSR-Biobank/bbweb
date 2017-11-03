@@ -72,7 +72,7 @@ class UserSpec extends DomainSpec {
 
       val user = factory.createRegisteredUser.copy(email = email, password = password)
       createFrom(user) mustSucceed { user =>
-        user.authenticate(email, password) mustSucceed { authenticatedUser =>
+        user.authenticate(password) mustSucceed { authenticatedUser =>
           authenticatedUser mustBe(user)
           ()
         }
@@ -267,7 +267,7 @@ class UserSpec extends DomainSpec {
 
       val user = factory.createRegisteredUser.copy(email = email, password = password)
       createFrom(user) mustSucceed { user =>
-        user.authenticate(email, badPassword) mustFail "authentication failure"
+        user.authenticate(badPassword) mustFail "authentication failure"
       }
     }
 

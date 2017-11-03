@@ -263,7 +263,6 @@ object UsableSpecimen
              locationId,
              containerId,
              positionId,
-             timeCreated,
              amount)
       .map(_ => UsableSpecimen(id,
                                inventoryId,
@@ -287,7 +286,6 @@ object UsableSpecimen
                locationId:            LocationId,
                containerId:           Option[ContainerId],
                positionId:            Option[ContainerSchemaPositionId],
-               timeCreated:           OffsetDateTime,
                amount:                BigDecimal)
       : DomainValidation[Boolean] = {
     (validateId(id) |@|

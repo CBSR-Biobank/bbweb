@@ -4,7 +4,7 @@ val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 
 version := conf.getString("app.version")
 
-val akkaVer = "2.5.4"
+val akkaVer = "2.5.6"
 val angularVer = "1.6.5"
 
 name := "bbweb"
@@ -25,7 +25,7 @@ packageSummary in Linux := "Biorepository application for tracking biospecimens.
 
 packageDescription := "Biorepository application for tracking biospecimens."
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.3")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.4")
 
 scalacOptions in Compile ++= Seq(
     "-target:jvm-1.8",
@@ -42,7 +42,7 @@ scalacOptions in Compile ++= Seq(
     "-Ywarn-dead-code",
     "-Ywarn-inaccessible",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused:-params",
+    "-Ywarn-unused:params",
     "-Ywarn-unused-import",
     "-Ywarn-value-discard" // Warn when non-Unit expression results are unused
   )
@@ -78,6 +78,8 @@ testOptions in Test := Nil
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
 
+addCompilerPlugin("com.github.ghik" %% "silencer-plugin" % "0.5")
+
 resolvers ++= Seq(
     Classpaths.sbtPluginReleases,
     "Typesafe repository" at "https://repo.typesafe.com/typesafe/releases/",
@@ -91,29 +93,30 @@ libraryDependencies ++= Seq(
     ehcache,
     filters,
     "org.scala-stm"               %% "scala-stm"                           % "0.8",
-    "com.typesafe.play"           %% "play-json"                           % "2.6.3",
+    "com.typesafe.play"           %% "play-json"                           % "2.6.7",
     ( "com.typesafe.akka"         %% "akka-persistence"                    % akkaVer   % "compile"  )
       .excludeAll(ExclusionRule(organization="com.google.protobuf")),
     "com.typesafe.akka"           %% "akka-persistence-query"              % akkaVer   % "compile",
     "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
-    ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "2.5.2.0" % "compile"  )
+    ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "3.0.1" % "compile"  )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
-    "mysql"                       % "mysql-connector-java"                 % "6.0.6",
-    "org.scalaz"                  %% "scalaz-core"                         % "7.2.15"  % "compile",
+    "mysql"                       % "mysql-connector-java"                 % "8.0.8-dmr",
+    "org.scalaz"                  %% "scalaz-core"                         % "7.2.16"  % "compile",
     "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
     "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.1",
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
     "com.typesafe.play"           %% "play-mailer"                         % "6.0.1",
     "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.1",
     "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.7.2",
+    "com.github.ghik"             %% "silencer-lib"                        % "0.5"  % "compile",
     // Testing
     ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.5.1.1"  % "test" )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
-    "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.1"   % "test",
+    "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.2"   % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
     "org.codehaus.janino"         %  "janino"                              % "3.0.7"   % "test",
-    "org.mockito"                 %  "mockito-core"                        % "2.8.47"  % "test"
+    "org.mockito"                 %  "mockito-core"                        % "2.11.0"  % "test"
   )
 
 routesGenerator := InjectedRoutesGenerator

@@ -66,29 +66,17 @@ object Location {
              postalCode:     String,
              poBoxNumber:    Option[String],
              countryIsoCode: String): DomainValidation[Location] = {
-    validate(name, street, city, province, postalCode, poBoxNumber,countryIsoCode).map { _ =>
+    validate(name).map { _ =>
       val id = LocationId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
       Location(id, name, street, city, province, postalCode, poBoxNumber, countryIsoCode)
     }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  def validate(name:           String,
-               street:         String,
-               city:           String,
-               province:       String,
-               postalCode:     String,
-               poBoxNumber:    Option[String],
-               countryIsoCode: String): DomainValidation[Boolean] =
+  def validate(name: String): DomainValidation[Boolean] =
     validateString(name, NameRequired).map { _ => true }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(location: Location): DomainValidation[Boolean] =
-    validate(location.name,
-             location.street,
-             location.city,
-             location.province,
-             location.postalCode,
-             location.poBoxNumber,
-             location.countryIsoCode)
+    validate(location.name)
 }

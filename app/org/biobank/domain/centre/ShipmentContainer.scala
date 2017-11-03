@@ -48,24 +48,20 @@ object ShipmentContainer {
              shipmentId:   ShipmentId,
              containerId:  ContainerId,
              state:        ShipmentItemState): DomainValidation[ShipmentContainer] = {
-    validate(id,
-             version,
-             shipmentId,
-             containerId,
-             state).map(_ => ShipmentContainer(id,
-                                               version,
-                                               OffsetDateTime.now,
-                                               None,
-                                               shipmentId,
-                                               containerId,
-                                               state))
+    validate(id, version, shipmentId, containerId)
+      .map(_ => ShipmentContainer(id,
+                                  version,
+                                  OffsetDateTime.now,
+                                  None,
+                                  shipmentId,
+                                  containerId,
+                                  state))
   }
 
   def validate(id:          ShipmentContainerId,
                version:     Long,
                shipmentId:  ShipmentId,
-               containerId: ContainerId,
-               state:       ShipmentItemState): DomainValidation[Boolean] = {
+               containerId: ContainerId): DomainValidation[Boolean] = {
     (validateId(id) |@|
        validateVersion(version) |@|
        validateId(shipmentId, ShipmentIdRequired) |@|

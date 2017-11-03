@@ -56,7 +56,7 @@ sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasUn
   /**
    * Authenticate a user.
    */
-  def authenticate(email: String, password: String): DomainValidation[User] = {
+  def authenticate(password: String): DomainValidation[User] = {
     if (this.password == password) this.successNel[String]
     else DomainError("authentication failure").failureNel[User]
   }

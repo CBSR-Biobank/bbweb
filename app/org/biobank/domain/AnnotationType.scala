@@ -84,8 +84,7 @@ trait AnnotationTypeValidations {
                description:   Option[String],
                valueType:     AnnotationValueType,
                maxValueCount: Option[Int],
-               options:       Seq[String],
-               required:      Boolean)
+               options:       Seq[String])
       : DomainValidation[Boolean] = {
     (validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
@@ -102,8 +101,7 @@ trait AnnotationTypeValidations {
              annotationType.description,
              annotationType.valueType,
              annotationType.maxValueCount,
-             annotationType.options,
-             annotationType.required)
+             annotationType.options)
   }
 
   def validateMaxValueCount(option: Option[Int]): DomainValidation[Option[Int]] = {

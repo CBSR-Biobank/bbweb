@@ -3,6 +3,7 @@ package org.biobank.service.access
 import akka.actor._
 import akka.event.{Logging, LoggingAdapter}
 import akka.persistence.{RecoveryCompleted, SnapshotOffer, SaveSnapshotSuccess, SaveSnapshotFailure}
+import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -164,7 +165,8 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
   }
 
   // userId is assumed to be valid, it should have been validated by the service
-  private def addUserToRoleCmdToEvent(cmd: AddUserToRoleCmd, role: Role): ServiceValidation[AccessEvent] = {
+  @silent private def addUserToRoleCmdToEvent(cmd: AddUserToRoleCmd, role: Role)
+      : ServiceValidation[AccessEvent] = {
     accessItemRepository.getRole(AccessItemId(cmd.roleId)).map { role =>
       AccessEvent(cmd.sessionUserId).update(
         _.time             := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),

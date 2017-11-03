@@ -1,5 +1,6 @@
 package org.biobank.domain.study
 
+import com.github.ghik.silencer.silent
 import org.biobank.ValidationKey
 import org.biobank.domain.IdentifiedValueObject
 import org.biobank.domain.AnatomicalSourceType._
@@ -97,30 +98,20 @@ trait SpecimenSpecValidations {
     * new then this value should be 0L.
     */
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  def validate(name:                        String,
-               description:                 Option[String],
-               units:                       String,
-               anatomicalSourceType:        AnatomicalSourceType,
-               preservationType:            PreservationType,
-               preservationTemperatureType: PreservationTemperatureType,
-               specimenType:                SpecimenType)
+  def validate(name:        String,
+               description: Option[String],
+               units:       String)
       : DomainValidation[Boolean] =  {
     (validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
        validateString(units, UnitsRequired)) {
-      case (_, _, _) => true
+      case _ => true
     }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   def validate(specimenDesc: SpecimenDescription): DomainValidation[Boolean] =  {
-    validate(specimenDesc.name,
-             specimenDesc.description,
-             specimenDesc.units,
-             specimenDesc.anatomicalSourceType,
-             specimenDesc.preservationType,
-             specimenDesc.preservationTemperatureType,
-             specimenDesc.specimenType)
+    validate(specimenDesc.name, specimenDesc.description, specimenDesc.units)
   }
 
 }
@@ -180,7 +171,7 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  def validate(name:                        String,
+  @silent def validate(name:                        String,
                description:                 Option[String],
                units:                       String,
                anatomicalSourceType:        AnatomicalSourceType,
@@ -190,16 +181,10 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
                maxCount:                    Int,
                amount:                      BigDecimal)
       : DomainValidation[Boolean] = {
-    (validate(name,
-              description,
-              units,
-              anatomicalSourceType,
-              preservationType,
-              preservationTemperatureType,
-              specimenType) |@|
-        validatePositiveNumber(maxCount, MaxCountInvalid) |@|
+    (validate(name, description, units) |@|
+       validatePositiveNumber(maxCount, MaxCountInvalid) |@|
        validatePositiveNumber(amount, AmountInvalid)) {
-      case (_, _, _) => true
+      case _ => true
     }
   }
 

@@ -2,6 +2,7 @@ package org.biobank.service.participants
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
+import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -165,10 +166,10 @@ class CollectionEventsProcessor @Inject() (
       _.added.annotations     := cmd.annotations.map { annotationToEvent(_) })
   }
 
-  private def updateVisitNumberCmdToEvent(cmd:                 UpdateCollectionEventVisitNumberCmd,
-                                          participant:         Participant,
-                                          collectionEventType: CollectionEventType,
-                                          cevent:              CollectionEvent)
+  @silent private def updateVisitNumberCmdToEvent(cmd:                 UpdateCollectionEventVisitNumberCmd,
+                                                  participant:         Participant,
+                                                  collectionEventType: CollectionEventType,
+                                                  cevent:              CollectionEvent)
       : ServiceValidation[CollectionEventEvent] = {
     for {
       visitNumberAvailable <- visitNumberAvailable(participant.id, cmd.visitNumber, cevent.id)
@@ -182,10 +183,10 @@ class CollectionEventsProcessor @Inject() (
       _.visitNumberUpdated.visitNumber := updatedCevent.visitNumber)
   }
 
-  private def updateTimeCompletedCmdToEvent(cmd:                 UpdateCollectionEventTimeCompletedCmd,
-                                            participant:         Participant,
-                                            collectionEventType: CollectionEventType,
-                                            cevent:              CollectionEvent)
+  @silent private def updateTimeCompletedCmdToEvent(cmd:                 UpdateCollectionEventTimeCompletedCmd,
+                                                    participant:         Participant,
+                                                    collectionEventType: CollectionEventType,
+                                                    cevent:              CollectionEvent)
       : ServiceValidation[CollectionEventEvent] = {
     cevent.withTimeCompleted(cmd.timeCompleted).map { updatedCevent =>
       CollectionEventEvent(updatedCevent.id.id).update(
@@ -249,10 +250,10 @@ class CollectionEventsProcessor @Inject() (
       _.annotationRemoved.annotationTypeId := cmd.annotationTypeId)
   }
 
-  private def removeCmdToEvent(cmd:                 RemoveCollectionEventCmd,
-                               participant:         Participant,
-                               collectionEventType: CollectionEventType,
-                               cevent:              CollectionEvent)
+  @silent private def removeCmdToEvent(cmd:                 RemoveCollectionEventCmd,
+                                       participant:         Participant,
+                                       collectionEventType: CollectionEventType,
+                                       cevent:              CollectionEvent)
       : ServiceValidation[CollectionEventEvent] = {
     CollectionEventEvent(cevent.id.id).update(
       _.participantId         := participant.id.id,

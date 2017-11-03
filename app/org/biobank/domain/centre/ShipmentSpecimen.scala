@@ -61,8 +61,8 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
   import org.biobank.domain.CommonValidations._
 
   def withShipmentContainer(id: Option[ShipmentContainerId]): DomainValidation[ShipmentSpecimen] = {
-    validateId(shipmentContainerId, ShipmentContainerIdInvalid) map { _ =>
-      copy(shipmentContainerId = shipmentContainerId,
+    validateId(id, ShipmentContainerIdInvalid) map { _ =>
+      copy(shipmentContainerId = id,
            version             = version + 1,
            timeModified        = Some(OffsetDateTime.now))
     }
@@ -169,27 +169,21 @@ object ShipmentSpecimen extends ShipmentSpecimenValidations {
              specimenId:          SpecimenId,
              state:               ShipmentItemState,
              shipmentContainerId: Option[ShipmentContainerId]): DomainValidation[ShipmentSpecimen] = {
-    validate(id,
-             version,
-             shipmentId,
-             specimenId,
-             state,
-             shipmentContainerId).map(_ =>
-      ShipmentSpecimen(id,
-                       version,
-                       OffsetDateTime.now,
-                       None,
-                       shipmentId,
-                       specimenId,
-                       state,
-                       shipmentContainerId))
+    validate(id, version, shipmentId, specimenId, shipmentContainerId)
+      .map(_ => ShipmentSpecimen(id,
+                                 version,
+                                 OffsetDateTime.now,
+                                 None,
+                                 shipmentId,
+                                 specimenId,
+                                 state,
+                                 shipmentContainerId))
   }
 
   def validate(id:                  ShipmentSpecimenId,
                version:             Long,
                shipmentId:          ShipmentId,
                specimenId:          SpecimenId,
-               state:               ShipmentItemState,
                shipmentContainerId: Option[ShipmentContainerId]): DomainValidation[Boolean] = {
     (validateId(id) |@|
        validateVersion(version) |@|
