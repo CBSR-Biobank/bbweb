@@ -255,7 +255,8 @@ function StudyFactory($q,
    */
   Study.prototype.add = function () {
     var json = _.pick(this, 'name', 'description');
-    return biobankApi.post(Study.url(), json).then(function(reply) {
+    // calling function Study.url with ean empty string appends a trailing slash
+    return biobankApi.post(Study.url(''), json).then(function(reply) {
       return Study.asyncCreate(reply);
     });
   };

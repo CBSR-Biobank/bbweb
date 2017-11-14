@@ -34,22 +34,19 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       .foreach(addToRepository)
   }
 
-  private def uri(): String = "/api/studies/"
+  private def uri(paths: String*): String = {
+    if (paths.isEmpty) "/api/studies"
+    else "/api/studies/" + paths.mkString("/")
+  }
 
-  private def uri(path: String): String = uri + s"$path"
+  private def urlName(study: Study)        = uri("name", study.id.id)
+  private def urlDescription(study: Study) = uri("description", study.id.id)
+  private def urlDisable(study: Study)     = uri("disable", study.id.id)
+  private def urlEnable(study: Study)      = uri("enable", study.id.id)
+  private def urlRetire(study: Study)      = uri("retire", study.id.id)
+  private def urlUnretire(study: Study)    = uri("unretire", study.id.id)
 
-  private def uri(study: Study): String = uri + s"${study.id.id}"
-
-  private def uri(study: Study, path: String): String = uri(path) + s"/${study.id.id}"
-
-  private def urlName(study: Study)        = uri(study, "name")
-  private def urlDescription(study: Study) = uri(study, "description")
-  private def urlDisable(study: Study)     = uri(study, "disable")
-  private def urlEnable(study: Study)      = uri(study, "enable")
-  private def urlRetire(study: Study)      = uri(study, "retire")
-  private def urlUnretire(study: Study)    = uri(study, "unretire")
-
-  private def urlAddAnnotationType(study: Study) = uri(study, "pannottype")
+  private def urlAddAnnotationType(study: Study) = uri("pannottype", study.id.id)
 
   private def urlUpdateAnnotationType(annotType: AnnotationType) =
       (study: Study) => urlAddAnnotationType(study) + s"/${annotType.id}"
@@ -68,7 +65,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   private def checkInvalidStudyId(jsonField: JsObject, urlFunc: Study => String): Unit = {
-    val invalidStudy = factory.createDisabledStudy.copy(id = StudyId(nameGenerator.next[Study]))
+    val invalidStudy = factory.createDisabledStudy
     val cmdJson = Json.obj("expectedVersion" -> 0L) ++ jsonField
     val json = makeRequest(POST, urlFunc(invalidStudy), NOT_FOUND, cmdJson)
 
@@ -396,7 +393,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("read a study") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
-        val json = makeRequest(GET, uri(study))
+        val json = makeRequest(GET, uri(study.id.id))
         compareObj((json \ "data").get, study)
       }
 
@@ -413,12 +410,12 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     describe("POST /api/studies") {
 
-      it("add a study") {
+      it("111 add a study") {
         val study = factory.createDisabledStudy
         val cmdJson = Json.obj(
             "name" -> study.name,
             "description" -> study.description)
-        val json = makeRequest(POST, uri, json = cmdJson)
+        val json = makeRequest(POST, uri(""), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -446,7 +443,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val json = makeRequest(POST,
-                               uri,
+                               uri(""),
                                BAD_REQUEST,
                                Json.obj("name"        -> study.name,
                                         "description" -> study.description))
@@ -458,7 +455,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("not add add a new study with a name less than 2 characters") {
         val json = makeRequest(POST,
-                               uri,
+                               uri(""),
                                BAD_REQUEST,
                                Json.obj("name" -> "a"))
 
@@ -478,7 +475,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version),
                                "name"            -> newName)
-        val json = makeRequest(POST, uri(study, "name"), json = cmdJson)
+        val json = makeRequest(POST, uri("name", study.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -508,7 +505,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         }
 
         val json = makeRequest(POST,
-                               uri(studies(0), "name"),
+                               uri("name", studies(0).id.id),
                                BAD_REQUEST,
                                Json.obj(
                                  "expectedVersion" -> Some(studies(0).version),
@@ -524,7 +521,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val json = makeRequest(POST,
-                               uri(study, "name"),
+                               uri("name", study.id.id),
                                BAD_REQUEST,
                                Json.obj("expectedVersion" -> Some(study.version),
                                         "name"            -> "a"))
@@ -559,7 +556,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         val cmdJson = Json.obj("expectedVersion" -> study.version,
                                "description"     -> newDescription)
-        val json = makeRequest(POST, uri(study, "description"), json = cmdJson)
+        val json = makeRequest(POST, uri("description", study.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -614,7 +611,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             "valueType"       -> annotType.valueType,
             "options"         -> annotType.options,
             "required"        -> annotType.required)
-        val json = makeRequest(POST, uri(study, "pannottype"), json = cmdJson)
+        val json = makeRequest(POST, uri("pannottype", study.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -684,7 +681,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             "valueType"        -> updatedAnnotType.valueType,
             "options"          -> updatedAnnotType.options,
             "required"         -> updatedAnnotType.required)
-        val json = makeRequest(POST, uri(study, "pannottype") + s"/${annotType.id}", json = cmdJson)
+        val json = makeRequest(POST, uri("pannottype", study.id.id, annotType.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -746,8 +743,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy.copy(annotationTypes = Set(annotationType))
         studyRepository.put(study)
 
-        val json = makeRequest(
-            DELETE, uri(study, "pannottype") + s"/${study.version}/${annotationType.id}")
+        val json = makeRequest(DELETE, uri("pannottype", study.id.id, s"${study.version}/${annotationType.id}"))
 
         (json \ "status").as[String] must include ("success")
 
@@ -776,7 +772,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val json = makeRequest(DELETE,
-                               uri(study, "pannottype") + s"/$badVersion/${annotationType.id}",
+                               uri("pannottype", study.id.id, s"${badVersion}/${annotationType.id}"),
                                BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
@@ -787,7 +783,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail when removing annotation type and study ID does not exist") {
         val studyId = nameGenerator.next[Study]
 
-        val json = makeRequest(DELETE, uri + s"pannottype/$studyId/0/xyz", NOT_FOUND)
+        val json = makeRequest(DELETE, uri(s"pannottype/$studyId/0/xyz"), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -801,7 +797,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val json = makeRequest(DELETE,
-                               uri(study, "pannottype") + s"/${study.version}/$badUniqueId",
+                               uri("pannottype", study.id.id, s"${study.version}/$badUniqueId"),
                                NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
@@ -818,7 +814,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
           studyRepository.put(study)
 
           val json = makeRequest(DELETE,
-                                 uri(study, "pannottype") + s"/${study.version}/${annotationType.id}",
+                                 uri("pannottype", study.id.id, s"${study.version}/${annotationType.id}"),
                                  BAD_REQUEST)
 
           (json \ "status").as[String] must include ("error")
@@ -841,7 +837,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         collectionEventTypeRepository.put(cet)
 
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri(study, "enable"), json = cmdJson)
+        val json = makeRequest(POST, uri("enable", study.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -872,7 +868,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         collectionEventTypeRepository.put(cet)
 
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri(study, "enable"), BAD_REQUEST, cmdJson)
+        val json = makeRequest(POST, uri("enable", study.id.id), BAD_REQUEST, cmdJson)
 
         (json \ "status").as[String] must include ("error")
 
@@ -884,7 +880,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri(study, "enable"), BAD_REQUEST, cmdJson)
+        val json = makeRequest(POST, uri("enable", study.id.id), BAD_REQUEST, cmdJson)
 
         (json \ "status").as[String] must include ("error")
 
@@ -895,7 +891,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
 
-        val json = makeRequest(POST, uri(study, "enable"), NOT_FOUND, json = cmdJson)
+        val json = makeRequest(POST, uri("enable", study.id.id), NOT_FOUND, json = cmdJson)
 
         (json \ "status").as[String] must include ("error")
 
@@ -918,7 +914,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri(study, "disable"), json = cmdJson)
+        val json = makeRequest(POST, uri("disable", study.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -957,7 +953,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri(study, "retire"), json = cmdJson)
+        val json = makeRequest(POST, uri("retire", study.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -996,7 +992,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri(study, "unretire"), json = cmdJson)
+        val json = makeRequest(POST, uri("unretire", study.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
 

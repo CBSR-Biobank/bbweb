@@ -105,7 +105,7 @@ function CeventsAddAndSelectDirective($state, BbwebError, CollectionEvent) {
       $state.go('home.collection.study.participant.cevents.add');
     } else {
       $state.go('home.collection.study.participant.cevents.add.details',
-                { collectionEventTypeId: vm.collectionEventTypes[0].id });
+                { eventTypeId: vm.collectionEventTypes[0].id });
     }
   }
 

@@ -40,10 +40,10 @@
       <ss-specimens-paged-table default-sort-field="inventoryId"
                                 refresh="vm.refreshTable"
                                 show-item-state="true"
-                                on-get-specimens="vm.getExtraSpecimens"
+                                on-get-specimens="vm.getExtraSpecimens.bind(vm)"
                                 no-specimens-message="{{'No extra specimens in shipment'|translate}}"
                                 actions="vm.actions"
-                                on-action-selected="vm.tableActionSelected">
+                                on-action-selected="vm.tableActionSelected.bind(vm)">
       </ss-specimens-paged-table>
     </collapsible-panel>
   </div>

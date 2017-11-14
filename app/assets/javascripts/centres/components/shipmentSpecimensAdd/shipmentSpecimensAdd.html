@@ -53,10 +53,10 @@
   <div id="collapseSpecimens" class="panel-collapse collapse in" aria-expanded="true">
     <ss-specimens-paged-table default-sort-field="inventoryId"
                               refresh="vm.refreshSpecimensTable"
-                              on-get-specimens="vm.getSpecimens"
+                              on-get-specimens="vm.getSpecimens.bind(vm)"
                               no-specimens-message="{{'No specimens added yet.'|translate}}"
                               actions="vm.actions"
-                              on-action-selected="vm.removeShipmentSpecimen">
+                              on-action-selected="vm.removeShipmentSpecimen.bind(vm)">
     </ss-specimens-paged-table>
   </div>
 </div>

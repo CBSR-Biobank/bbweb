@@ -302,7 +302,8 @@ function CentreFactory($q,
    */
   Centre.prototype.add = function () {
     var json = { name: this.name, description: this.description };
-    return biobankApi.post(Centre.url(), json).then(function(reply) {
+    // calling function Centre.url with ean empty string appends a trailing slash
+    return biobankApi.post(Centre.url(''), json).then(function(reply) {
       return Centre.asyncCreate(reply);
     });
   };

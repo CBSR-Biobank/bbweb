@@ -22,7 +22,9 @@ class ShipmentSpecimensController {
    * Needs to return a promise.
    */
   getSpecimens(options) {
-    if (!this.shipment) { return this.$q.when({}); }
+    if (!this.shipment) {
+      return this.$q.when({});
+    }
 
     return this.ShipmentSpecimen.list(this.shipment.id, options)
       .then(paginatedResult => ({

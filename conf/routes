@@ -4,7 +4,6 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-# Home page
 ->      /api/studies/cetypes                    org.biobank.controllers.study.CeventTypesRouter
 ->      /api/studies/proctypes                  org.biobank.controllers.study.ProcessingTypesRouter
 ->      /api/studies/proctypes/sltypes          org.biobank.controllers.study.SpecimenLinkTypesRouter
@@ -18,5 +17,6 @@
 ->      /api/access                             org.biobank.controllers.access.AccessRouter
 ->      /api/dtos                               org.biobank.controllers.ApplicationRouter
 
+# Home page
 GET     /                                       controllers.Assets.at(path="/public", file="index.html")
 GET     /assets/*file                           controllers.Assets.at(path="/public", file)

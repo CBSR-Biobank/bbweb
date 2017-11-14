@@ -59,7 +59,7 @@ abstract class ControllerFixture
     with GuiceOneServerPerTest
     with OneBrowserPerTest
     with HtmlUnitFactory
-    with BeforeAndAfterEach
+    with BeforeAndAfter
     with MustMatchers
     with OptionValues
     with BbwebFakeApplication {

@@ -123,7 +123,7 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveCentre($transition$, resourceErrorService, Centre) {
-    const id = $transition$.params().locationId
+    const id = $transition$.params().centreId
     return Centre.get(id)
       .catch(resourceErrorService.goto404(`centre ID not found: centreId/${id}`))
   }

@@ -301,7 +301,8 @@ function ShipmentFactory($q,
                  fromLocationId: this.fromLocationInfo.locationId,
                  toLocationId:   this.toLocationInfo.locationId
                };
-    return biobankApi.post(Shipment.url(), json).then(function(reply) {
+    // calling function Shipment.url with ean empty string appends a trailing slash
+    return biobankApi.post(Shipment.url(''), json).then(function(reply) {
       return Shipment.asyncCreate(reply);
     });
   };

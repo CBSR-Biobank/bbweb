@@ -59,14 +59,13 @@ describe('ssSpecimensPagedTableComponent', function() {
          onActionSelected) => {
            ComponentTestSuiteMixin.createController.call(
              this,
-             `<ss-specimens-paged-table
-                default-sort-field="${defaultSortField}"
-                refresh="vm.refresh"
-                show-item-state="vm.showItemState"
-                on-get-specimens="vm.onGetSpecimens"
-                no-specimens-message="${noSpecimensMessage}"
-                actions="vm.actions"
-                on-action-selected="vm.onActionSelected">
+             `<ss-specimens-paged-table default-sort-field="${defaultSortField}"
+                                        refresh="vm.refresh"
+                                        show-item-state="vm.showItemState"
+                                        on-get-specimens="vm.onGetSpecimens"
+                                        no-specimens-message="${noSpecimensMessage}"
+                                        actions="vm.actions"
+                                        on-action-selected="vm.onActionSelected">
               </ss-specimens-paged-table>`,
              {
                refresh:          refresh,
