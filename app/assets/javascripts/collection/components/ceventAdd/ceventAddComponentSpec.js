@@ -21,6 +21,7 @@ describe('Component: ceventAdd', function() {
                               '$compile',
                               '$state',
                               'domainNotificationService',
+                              'modalService',
                               'Study',
                               'Participant',
                               'CollectionEvent',
@@ -44,11 +45,12 @@ describe('Component: ceventAdd', function() {
           this,
           `<cevent-add study="vm.study"
                        participant="vm.participant"
-                       collection-event-type-id="${collectionEventType.id}">
+                       collection-event-type="vm.collectionEventType">
            </cevent-add>`,
           {
-            study:       this.study,
-            participant: this.participant
+            study:               this.study,
+            participant:         this.participant,
+            collectionEventType: collectionEventType
           },
           'ceventAdd');
       }
@@ -80,38 +82,45 @@ describe('Component: ceventAdd', function() {
 
     expect(this.$state.go).toHaveBeenCalledWith(
       'home.collection.study.participant.cevents.details',
-      { collectionEventId: this.collectionEvent.id },
+      {
+        eventTypeId: this.collectionEvent.collectionEventTypeId,
+        eventId:     this.collectionEvent.id
+      },
       { reload: true });
   });
 
   describe('on submit failure', function() {
 
-    it('displays an error modal', function() {
+    it('displays an error modal for invalid visit number', function() {
       this.createController();
-      spyOn(this.CollectionEvent.prototype, 'add')
-        .and.returnValue(this.$q.reject('simulated update failure'));
-      spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('ok'));
+      this.CollectionEvent.prototype.add = jasmine.createSpy()
+        .and.returnValue(this.$q.reject({
+          message: 'EntityCriteriaError: a collection event with this visit number already exists'
+        }));
+      this.modalService.modalOk = jasmine.createSpy().and.returnValue(this.$q.when('ok'));
 
       this.controller.submit();
       this.scope.$digest();
 
-      expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();
+      expect(this.modalService.modalOk).toHaveBeenCalled();
     });
 
-    it('changes state when Cancel button pressed on error modal', function() {
-      this.createController();
-      spyOn(this.CollectionEvent.prototype, 'add')
-        .and.returnValue(this.$q.reject('simulated update failure'));
-      spyOn(this.domainNotificationService, 'updateErrorModal')
-        .and.returnValue(this.$q.reject('cancel button pressed'));
-      spyOn(this.$state, 'go').and.returnValue('ok');
+    it('when error is not an invalid visit #, changes state when Cancel button pressed on error modal',
+        function() {
+          this.createController();
 
-      this.controller.submit();
-      this.scope.$digest();
+          this.CollectionEvent.prototype.add = jasmine.createSpy()
+            .and.returnValue(this.$q.reject({ message: 'simulated update failure' }));
+          this.domainNotificationService.updateErrorModal = jasmine.createSpy()
+            .and.returnValue(this.$q.reject('cancel button pressed'));
+          this.$state.go = jasmine.createSpy().and.returnValue(null);
 
-      expect(this.$state.go).toHaveBeenCalledWith(
+          this.controller.submit();
+          this.scope.$digest();
+
+          expect(this.$state.go).toHaveBeenCalledWith(
         'home.collection.study.participant', { participantId: this.participant.id });
-    });
+        });
 
   });
 

@@ -23,6 +23,7 @@ describe('Component: ceventGetType', function() {
                               'Study',
                               'Participant',
                               'CollectionEventType',
+                              'CollectionEventTypeName',
                               'Factory');
 
       this.jsonCeventTypes = _.range(2).map(() => this.Factory.collectionEventType());
@@ -31,6 +32,14 @@ describe('Component: ceventGetType', function() {
 
       this.collectionEventTypes =
         this.jsonCeventTypes.map((jsonCeventType) => this.CollectionEventType.create(jsonCeventType));
+
+      this.eventTypeNames = this.jsonCeventTypes.map((eventType) => ({
+        id:   eventType.id,
+        name: eventType.name
+      }));
+
+      this.CollectionEventTypeName.list =
+        jasmine.createSpy().and.returnValue(this.$q.when(this.eventTypeNames));
 
       this.participant = new this.Participant(this.jsonParticipant);
       this.study       = new this.Study(this.jsonStudy);
@@ -42,15 +51,12 @@ describe('Component: ceventGetType', function() {
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(
           this,
-          `<cevent-get-type
-             study="vm.study"
-             participant="vm.participant"
-             collection-event-types="vm.collectionEventTypes">
+          `<cevent-get-type study="vm.study"
+                            participant="vm.participant">
            </cevent-get-type>`,
           {
-            study:                this.study,
-            participant:          this.participant,
-            collectionEventTypes: this.collectionEventTypes
+            study:       this.study,
+            participant: this.participant
           },
           'ceventGetType');
     });
@@ -61,11 +67,14 @@ describe('Component: ceventGetType', function() {
 
     expect(this.controller.study).toBe(this.study);
     expect(this.controller.participant).toBe(this.participant);
-    expect(this.controller.collectionEventTypes).toContainAll(this.collectionEventTypes);
+
+    expect(this.controller.collectionEventTypeNames).toBeArrayOfSize(this.collectionEventTypes.length);
+    [ 'id', 'name' ].forEach(attr => {
+      expect(_.map(this.controller.collectionEventTypeNames, attr))
+        .toContainAll(_.map(this.eventTypeNames, attr));
+    })
 
     expect(this.controller.title).toBeDefined();
-    expect(this.controller.collectionEvent).toBeDefined();
-
     expect(this.controller.updateCollectionEventType).toBeFunction();
   });
 
@@ -75,22 +84,12 @@ describe('Component: ceventGetType', function() {
       var ceventTypeId = this.collectionEventTypes[0].id;
 
       this.createController();
-      this.controller.collectionEvent.collectionEventTypeId = ceventTypeId;
+      this.controller.eventTypeId = ceventTypeId;
       this.controller.updateCollectionEventType();
       this.scope.$digest();
 
       expect(this.$state.go).toHaveBeenCalledWith(
-        'home.collection.study.participant.cevents.add.details',
-        { collectionEventTypeId: ceventTypeId });
-    });
-
-    it('does nothing when selection is not valid', function() {
-      this.createController();
-      this.controller.collectionEvent.collectionEventTypeId = undefined;
-      this.controller.updateCollectionEventType();
-      this.scope.$digest();
-
-      expect(this.$state.go).not.toHaveBeenCalled();
+        'home.collection.study.participant.cevents.add.details', { eventTypeId: ceventTypeId });
     });
 
   });

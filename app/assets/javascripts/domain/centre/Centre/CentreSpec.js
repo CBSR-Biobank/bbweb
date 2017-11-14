@@ -218,7 +218,7 @@ describe('Centre', function() {
     }
   });
 
-  it('can add a centre', function() {
+ it('can add a centre', function() {
     var jsonCentre = this.Factory.centre(),
         centre = new this.Centre(_.omit(jsonCentre, 'id')),
         json = _.pick(centre, 'name', 'description'),
@@ -226,7 +226,7 @@ describe('Centre', function() {
           expect(replyCentre).toEqual(jasmine.any(this.Centre));
         };
 
-    this.$httpBackend.expectPOST(this.url(), json).respond(this.reply(jsonCentre));
+    this.$httpBackend.expectPOST(this.url(''), json).respond(this.reply(jsonCentre));
     centre.add().then(checkReply).catch(failTest);
     this.$httpBackend.flush();
   });

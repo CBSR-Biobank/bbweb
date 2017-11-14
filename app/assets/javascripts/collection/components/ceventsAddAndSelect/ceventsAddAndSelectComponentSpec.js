@@ -115,9 +115,8 @@ describe('Component: ceventsAddAndSelect', function() {
       this.createController();
       this.controller.add();
       this.scope.$digest();
-      expect(this.$state.go).toHaveBeenCalledWith(
-        'home.collection.study.participant.cevents.add.details',
-        { collectionEventTypeId: this.collectionEventTypes[0].id });
+      expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add.details',
+                                                  { eventTypeId: this.collectionEventTypes[0].id });
     });
 
     it('to correct state when there is more than one collection event type defined', function() {

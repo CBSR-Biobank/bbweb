@@ -194,7 +194,7 @@ describe('Study', function() {
     var study = new this.Study(_.omit(this.jsonStudy, 'id')),
         json = _.pick(study, 'name', 'description');
 
-    this.$httpBackend.expectPOST(this.url(), json).respond(this.reply(this.jsonStudy));
+    this.$httpBackend.expectPOST(this.url(''), json).respond(this.reply(this.jsonStudy));
     study.add().then(this.expectStudy.bind(this)).catch(failTest);
     this.$httpBackend.flush();
   });

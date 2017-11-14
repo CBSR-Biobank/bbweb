@@ -219,7 +219,7 @@ describe('Shipment domain object:', function() {
             expect(replyShipment).toEqual(jasmine.any(this.Shipment));
           };
 
-      this.$httpBackend.expectPOST(this.url(), json).respond(this.reply(jsonShipment));
+      this.$httpBackend.expectPOST(this.url(''), json).respond(this.reply(jsonShipment));
       shipment.add().then(checkReply).catch(failTest);
       this.$httpBackend.flush();
     });

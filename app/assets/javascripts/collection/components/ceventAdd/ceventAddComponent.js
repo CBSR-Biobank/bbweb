@@ -32,12 +32,12 @@ class CeventAddController {
   }
 
   $onInit() {
-    this.configureBreadcrumbs();
     this.collectionEvent = new this.CollectionEvent({ participantId: this.participant.id },
                                                     this.collectionEventType);
     this.title = this.gettextCatalog.getString('Participant {{id}}: Add collection event',
                                                { id: this.participant.uniqueId });
     this.timeCompleted = new Date();
+    this.configureBreadcrumbs();
   }
 
   configureBreadcrumbs() {
