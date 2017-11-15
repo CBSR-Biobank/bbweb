@@ -6,99 +6,94 @@
 /**
  * Communicates with the server to get user related information and perform user related commands.
  */
-/* @ngInject */
-function usersServiceFactory($q,
-                             $cookies,
-                             $log,
-                             biobankApi,
-                             User,
-                             UrlService) {
-  var currentUser;
+class usersService {
 
-  var service = {
-    getCurrentUser,
-    retrieveCurrentUser,
-    requestCurrentUser,
-    login,
-    logout,
-    isAuthenticated,
-    sessionTimeout,
-    passwordReset
-  };
-
-  init();
-  return service;
-
-  //-------
+  constructor($q,
+              $cookies,
+              $log,
+              biobankApi,
+              User,
+              UrlService) {
+    Object.assign(this, {
+      $q,
+      $cookies,
+      $log,
+      biobankApi,
+      User,
+      UrlService
+    })
+    this.currentUser = undefined;
+    this.init();
+  }
 
   /* If the token is assigned, check that the token is still valid on the server */
-  function init() {
-    var token = $cookies.get('XSRF-TOKEN');
+  init() {
+    var token = this.$cookies.get('XSRF-TOKEN');
 
     if (!token) { return; }
 
-    biobankApi.get(UrlService.url('users/authenticate'))
+    this.biobankApi.get(this.UrlService.url('users/authenticate'))
       .then((user) => {
-        currentUser = User.create(user);
-        $log.info('Welcome back, ' + currentUser.name);
+        this.currentUser = this.User.create(user);
+        this.$log.info('Welcome back, ' + this.currentUser.name);
       })
       .catch(() => {
         /* the token is no longer valid */
-        $log.info('Token no longer valid, please log in.');
-        currentUser = undefined;
-        $cookies.remove('XSRF-TOKEN');
+        this.$log.info('Token no longer valid, please log in.');
+        this.currentUser = undefined;
+        this.$cookies.remove('XSRF-TOKEN');
       });
   }
 
-  function retrieveCurrentUser() {
-    return biobankApi.get(UrlService.url('users/authenticate'))
+  retrieveCurrentUser() {
+    return this.biobankApi.get(this.UrlService.url('users/authenticate'))
       .then((user) => {
-        currentUser = User.create(user);
-        return currentUser;
+        this.currentUser = this.User.create(user);
+        return this.currentUser;
       });
   }
 
-  function requestCurrentUser() {
-    if (isAuthenticated()) {
-      return $q.when(currentUser);
+  requestCurrentUser() {
+    if (this.isAuthenticated()) {
+      return this.$q.when(this.currentUser);
     }
-    return retrieveCurrentUser();
+    return this.retrieveCurrentUser();
   }
 
-  function getCurrentUser() {
-    return currentUser;
+  getCurrentUser() {
+    return this.currentUser;
   }
 
-  function isAuthenticated() {
-    return !!currentUser;
+  isAuthenticated() {
+    return !!this.currentUser;
   }
 
-  function login(credentials) {
-    return biobankApi.post(UrlService.url('users/login'), credentials)
+  login(credentials) {
+    return this.biobankApi.post(this.UrlService.url('users/login'), credentials)
       .then((user) => {
-        currentUser = User.create(user);
-        $log.info('Welcome ' + currentUser.name);
-        return currentUser;
+        this.currentUser = this.User.create(user);
+        this.$log.info('Welcome ' + this.currentUser.name);
+        return this.currentUser;
       });
   }
 
-  function logout() {
-    return biobankApi.post(UrlService.url('users/logout')).then(() => {
-      $log.info('Good bye');
-      $cookies.remove('XSRF-TOKEN');
-      currentUser = undefined;
+  logout() {
+    return this.biobankApi.post(this.UrlService.url('users/logout')).then(() => {
+      this.$log.info('Good bye');
+      this.$cookies.remove('XSRF-TOKEN');
+      this.currentUser = undefined;
     });
   }
 
-  function sessionTimeout() {
-    $cookies.remove('XSRF-TOKEN');
-    currentUser = undefined;
+  sessionTimeout() {
+    this.$cookies.remove('XSRF-TOKEN');
+    this.currentUser = undefined;
   }
 
-  function passwordReset(email) {
-    return biobankApi.post(UrlService.url('users/passreset'), { email: email });
+  passwordReset(email) {
+    return this.biobankApi.post(this.UrlService.url('users/passreset'), { email: email });
   }
 
 }
 
-export default ngModule => ngModule.service('usersService', usersServiceFactory)
+export default ngModule => ngModule.service('usersService', usersService)
