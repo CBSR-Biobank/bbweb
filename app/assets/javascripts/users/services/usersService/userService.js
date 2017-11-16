@@ -6,7 +6,7 @@
 /**
  * Communicates with the server to get user related information and perform user related commands.
  */
-class usersService {
+class userService {
 
   constructor($q,
               $cookies,
@@ -50,6 +50,11 @@ class usersService {
       .then((user) => {
         this.currentUser = this.User.create(user);
         return this.currentUser;
+      })
+      .catch(err => {
+        if (err.status === 401) {
+          this.currentUser = undefined;
+        }
       });
   }
 
@@ -96,4 +101,4 @@ class usersService {
 
 }
 
-export default ngModule => ngModule.service('usersService', usersService)
+export default ngModule => ngModule.service('userService', userService)

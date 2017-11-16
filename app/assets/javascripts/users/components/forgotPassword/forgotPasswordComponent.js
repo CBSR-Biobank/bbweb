@@ -15,7 +15,7 @@ const COMPONENT = {
 /* @ngInject */
 function ForgotPasswordController($state,
                                   gettextCatalog,
-                                  usersService,
+                                  userService,
                                   modalService) {
   var vm = this;
   vm.$onInit = onInit;
@@ -50,7 +50,7 @@ function ForgotPasswordController($state,
 
   function submit(email) {
     vm.email = email;
-    usersService.passwordReset(email).then(pwdResetSuccess).catch(pwdResetFailure);
+    userService.passwordReset(email).then(pwdResetSuccess).catch(pwdResetFailure);
   }
 }
 

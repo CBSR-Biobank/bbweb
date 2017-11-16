@@ -2,7 +2,7 @@
   <debounced-text-input label="Name filter"
                         name="nameFilter"
                         value="vm.nameFilter"
-                        on-value-changed="vm.nameFilterUpdated">
+                        on-value-changed="vm.nameFilterUpdated.bind(vm)">
   </debounced-text-input>
   <div class="form-group">
     <label class="small" translate>Email filter:</label>

@@ -1,6 +1,6 @@
 <div class="voffset-bottom-3">
-  <name-filter on-name-filter-updated="vm.updateSearchFilter('nameFilter')"
-               on-filters-cleared="vm.onFiltersCleared">
+  <name-filter on-name-filter-updated="vm.updateSearchFilter('nameFilter').bind(vm)"
+               on-filters-cleared="vm.onFiltersCleared.bind(vm)">
   </name-filter>
 </div>
 

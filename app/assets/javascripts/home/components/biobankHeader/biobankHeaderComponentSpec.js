@@ -20,7 +20,7 @@ describe('Component: biobankHeader', function() {
                               '$compile',
                               '$state',
                               'User',
-                              'usersService',
+                              'userService',
                               'Factory');
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(
@@ -43,13 +43,13 @@ describe('Component: biobankHeader', function() {
     this.createController();
     expect(this.controller.user).toBeUndefined();
 
-    spyOn(this.usersService, 'getCurrentUser').and.returnValue(jsonUser);
+    spyOn(this.userService, 'getCurrentUser').and.returnValue(jsonUser);
     this.scope.$digest();
     expect(this.controller.user).toEqual(jsonUser);
   });
 
   it('changes to correct state on logout', function() {
-    spyOn(this.usersService, 'logout').and.returnValue(this.$q.when(true));
+    spyOn(this.userService, 'logout').and.returnValue(this.$q.when(true));
     spyOn(this.$state, 'go').and.returnValue(true);
 
     this.createController();
@@ -63,7 +63,7 @@ describe('Component: biobankHeader', function() {
     spyOn(this.$state, 'go').and.returnValue(true);
 
     this.createController();
-    spyOn(this.usersService, 'logout').and.returnValue(this.$q.reject('simulated logout failure'));
+    spyOn(this.userService, 'logout').and.returnValue(this.$q.reject('simulated logout failure'));
     this.controller.logout();
     this.scope.$digest();
 

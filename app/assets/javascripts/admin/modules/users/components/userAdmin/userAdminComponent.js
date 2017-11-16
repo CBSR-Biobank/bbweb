@@ -13,7 +13,7 @@ var component = {
  * Shows a table of users.
  */
 /* @ngInject */
-function UserAdminController(usersService, UserCounts, breadcrumbService) {
+function UserAdminController(userService, UserCounts, breadcrumbService, resourceErrorService) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -28,15 +28,17 @@ function UserAdminController(usersService, UserCounts, breadcrumbService) {
 
     vm.haveUsers = false;
 
-    usersService.requestCurrentUser()
-      .then(function (user) {
+    // request the user to determine if they have the right permissions to be on this page
+    userService.requestCurrentUser()
+      .then((user) => {
         vm.user = user;
         return UserCounts.get();
       })
-      .then(function (counts) {
+      .then((counts) => {
         vm.userCounts = counts;
         vm.haveUsers  = (vm.userCounts.total > 0);
-      });
+      })
+      .catch(resourceErrorService.checkUnauthorized());
   }
 }
 

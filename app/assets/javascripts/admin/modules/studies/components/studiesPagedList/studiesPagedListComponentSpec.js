@@ -25,6 +25,7 @@ describe('Component: studiesPagedList', function() {
                               'StudyState',
                               'NameFilter',
                               'StateFilter',
+                              'resourceErrorService',
                               '$state',
                               'Factory');
 
@@ -72,10 +73,12 @@ describe('Component: studiesPagedList', function() {
   });
 
   it('when study counts fails', function() {
+    const errFunc = jasmine.createSpy().and.returnValue(null);
+    this.resourceErrorService.checkUnauthorized = jasmine.createSpy().and.returnValue(errFunc);
     this.StudyCounts.get = jasmine.createSpy()
       .and.returnValue(this.$q.reject({ status: 400, message: 'testing'}));
     this.createController();
-    expect(this.controller.counts).toEqual({});
+    expect(errFunc).toHaveBeenCalled();
   });
 
   describe('studies', function () {

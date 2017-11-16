@@ -20,7 +20,8 @@ class Controller extends PagedListController {
               gettextCatalog,
               EmailFilter,
               NameFilter,
-              StateFilter) {
+              StateFilter,
+              resourceErrorService) {
     'ngInject';
 
     const stateData = _.values(UserState).map((state) => ({
@@ -51,7 +52,8 @@ class Controller extends PagedListController {
                     UserCounts,
                     EmailFilter,
                     NameFilter,
-                    StateFilter
+                    StateFilter,
+                    resourceErrorService
                   });
 
     this.stateLabelFuncs = {};
@@ -70,9 +72,7 @@ class Controller extends PagedListController {
         this.haveUsers  = (this.userCounts.total > 0);
         super.$onInit();
       })
-      .catch((error) => {
-        this.$log.error(error);
-      });
+      .catch(this.resourceErrorService.checkUnauthorized());
   }
 
   getItems(options) {

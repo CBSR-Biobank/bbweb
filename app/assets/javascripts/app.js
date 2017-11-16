@@ -85,10 +85,10 @@ function uiRouterIsAuthorized($transitions) {
   $transitions.onStart({ to: 'home.shipping.**' },   checkIsAuthenticated);
 
   function checkIsAuthenticated(transition) {
-    var usersService = transition.injector().get('usersService'),
+    var userService = transition.injector().get('userService'),
         $log = transition.injector().get('$log');
-    return usersService.requestCurrentUser()
-      .catch(function (error) {
+    return userService.requestCurrentUser()
+      .catch((error) => {
         // User isn't authenticated. Redirect to a new Target State
         if (error.status && (error.status === 401)) {
           return transition.router.stateService.target('home.users.login');

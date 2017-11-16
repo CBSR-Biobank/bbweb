@@ -19,7 +19,8 @@ class Controller extends PagedListController {
               gettextCatalog,
               NameFilter,
               StateFilter,
-              centreStateLabelService) {
+              centreStateLabelService,
+              resourceErrorService) {
     'ngInject';
 
     const stateData = _.values(CentreState).map((state) => ({
@@ -48,7 +49,8 @@ class Controller extends PagedListController {
                     CentreCounts,
                     NameFilter,
                     StateFilter,
-                    centreStateLabelService
+                    centreStateLabelService,
+                    resourceErrorService
                   });
 
     this.stateLabelFuncs = {};
@@ -65,9 +67,7 @@ class Controller extends PagedListController {
         this.counts = counts;
         super.$onInit();
       })
-      .catch((error) => {
-        this.$log.error(error);
-      });
+      .catch(this.resourceErrorService.checkUnauthorized());
   }
 
   getItems(options) {

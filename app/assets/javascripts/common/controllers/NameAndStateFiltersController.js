@@ -6,7 +6,7 @@
 /*
  * Controller base class used by nameAndStateFiltersComponent and nameEmailStateFiltersComponent.
  */
-class NameAndStateFiltersController { // eslint-disable-line no-unused-vars
+class NameAndStateFiltersController {
 
   constructor() {
     this.nameFilter = '';

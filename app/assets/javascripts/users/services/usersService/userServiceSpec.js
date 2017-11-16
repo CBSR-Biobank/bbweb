@@ -34,22 +34,22 @@ describe('Service: userService', function() {
   describe('service initialization', function () {
 
     /**
-     * usersService needs to be injected to the test so that the initialization code is executed
+     * userService needs to be injected to the test so that the initialization code is executed
      * when the test starts.
      */
     it('should allow a user to re-connect', function() {
-      var usersService;
+      var userService;
 
       this.$cookies.put('XSRF-TOKEN', this.Factory.stringNext());
       this.$httpBackend.expectGET(this.url('users/authenticate')).respond(this.reply(this.jsonUser));
 
-      usersService = this.$injector.get('usersService');
+      userService = this.$injector.get('userService');
       this.$httpBackend.flush();
-      expect(usersService.getCurrentUser()).toEqual(jasmine.any(this.User));
+      expect(userService.getCurrentUser()).toEqual(jasmine.any(this.User));
     });
 
     it('should not allow a user to re-connect when authentication fails', function() {
-      var usersService;
+      var userService;
 
       // 401 cause the http interceptor to intercept the request.
       //
@@ -61,24 +61,24 @@ describe('Service: userService', function() {
       this.$httpBackend.expectGET(this.url('users/authenticate'))
         .respond(401, this.errorReply('simulated auth failure'));
 
-      usersService = this.$injector.get('usersService');
+      userService = this.$injector.get('userService');
       this.$httpBackend.flush();
-      expect(usersService.getCurrentUser()).toBeUndefined();
+      expect(userService.getCurrentUser()).toBeUndefined();
     });
   });
 
   describe('service functions', function () {
 
     beforeEach(function() {
-      this.injectDependencies('usersService');
+      this.injectDependencies('userService');
     });
 
     it('should return the user that is logged in after a session timeout', function() {
       var self = this;
 
       this.$httpBackend.expectGET(this.url('users/authenticate')).respond(this.reply(this.jsonUser));
-      self.usersService.sessionTimeout();
-      self.usersService.requestCurrentUser().then(function (reply) {
+      self.userService.sessionTimeout();
+      self.userService.requestCurrentUser().then(function (reply) {
         expect(reply).toEqual(jasmine.any(self.User));
       });
       this.$httpBackend.flush();
@@ -93,7 +93,7 @@ describe('Service: userService', function() {
         };
         this.$httpBackend.expectPOST(this.url('users/login'), credentials).respond(this.reply(this.jsonUser));
 
-        this.usersService.login(credentials).then(function(reply) {
+        this.userService.login(credentials).then(function(reply) {
           expect(_.isEqual(reply, user));
         });
         this.$httpBackend.flush();
@@ -109,7 +109,7 @@ describe('Service: userService', function() {
             token = this.Factory.stringNext;
 
         doLogin.call(self, token, self.user);
-        self.usersService.requestCurrentUser().then(function (reply) {
+        self.userService.requestCurrentUser().then(function (reply) {
           expect(reply).toEqual(jasmine.any(self.User));
         });
       });
@@ -118,14 +118,14 @@ describe('Service: userService', function() {
 
     it('show allow a user to logout', function() {
       this.$httpBackend.expectPOST(this.url('users/logout')).respond(this.reply('success'));
-      this.usersService.logout();
+      this.userService.logout();
       this.$httpBackend.flush();
     });
 
     it('should allow changing a password', function() {
       this.$httpBackend.expectPOST(this.url('users/passreset'), {email: this.user.email})
         .respond(this.reply('success'));
-      this.usersService.passwordReset(this.user.email).then(function(reply) {
+      this.userService.passwordReset(this.user.email).then(function(reply) {
         expect(reply).toBe('success');
       });
       this.$httpBackend.flush();

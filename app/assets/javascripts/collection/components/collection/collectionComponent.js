@@ -15,7 +15,11 @@ var component = {
  * The studyCounts object has the following fields: disabled, enabled, and retired.
  */
 /* @ngInject */
-function CollectionController($state, gettextCatalog, Study, breadcrumbService) {
+function CollectionController($state,
+                              gettextCatalog,
+                              Study,
+                              breadcrumbService,
+                              resourceErrorService) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -35,11 +39,7 @@ function CollectionController($state, gettextCatalog, Study, breadcrumbService) 
       .then(function (reply) {
         vm.isCollectionAllowed = (reply.items.length > 0);
       })
-      .catch(function (error) {
-        if (error.status && (error.status === 401)) {
-          $state.go('home.users.login', {}, { reload: true });
-        }
-      });
+      .catch(resourceErrorService.checkUnauthorized());
   }
 
   // invoked by the SelectStudy directive

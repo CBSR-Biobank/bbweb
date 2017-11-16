@@ -19,7 +19,7 @@ function BiobankHeaderController($scope,
                                  $state,
                                  $log,
                                  languageService,
-                                 usersService) {
+                                 userService) {
   var vm = this;
   vm.$onInit = onInit;
   this.navCollapsed = true;
@@ -35,7 +35,7 @@ function BiobankHeaderController($scope,
     // Wrap the current user from the service in a watch expression to display the user's name in
     // the navigation bar
     $scope.$watch(function() {
-      var user = usersService.getCurrentUser();
+      var user = userService.getCurrentUser();
       return user;
     }, function(user) {
       vm.user = user;
@@ -43,7 +43,7 @@ function BiobankHeaderController($scope,
   }
 
   function logout() {
-    usersService.logout().then(goHome).catch(goHomeError);
+    userService.logout().then(goHome).catch(goHomeError);
 
     function goHome() {
       $state.go('home', {}, { reload: true });

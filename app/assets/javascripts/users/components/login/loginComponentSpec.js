@@ -20,7 +20,7 @@ describe('Component: login', function() {
                               '$compile',
                               '$q',
                               '$state',
-                              'usersService',
+                              'userService',
                               'modalService');
 
       this.createController = () => {
@@ -41,7 +41,7 @@ describe('Component: login', function() {
   });
 
   it('on initializaton, changes to home state if user is already logged in', function() {
-    spyOn(this.usersService, 'isAuthenticated').and.returnValue(true);
+    spyOn(this.userService, 'isAuthenticated').and.returnValue(true);
     spyOn(this.$state, 'go').and.returnValue(true);
 
     this.createController();
@@ -50,7 +50,7 @@ describe('Component: login', function() {
   });
 
   it('changes to home state on login attempt', function () {
-    spyOn(this.usersService, 'login').and.returnValue(this.$q.when(true));
+    spyOn(this.userService, 'login').and.returnValue(this.$q.when(true));
     spyOn(this.$state, 'go').and.returnValue(true);
 
     this.createController();
@@ -130,7 +130,7 @@ describe('Component: login', function() {
 
       it('for invalid email or password and OK', function () {
         this.createController();
-        spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
+        spyOn(this.userService, 'login').and.returnValue(this.$q.reject(context.loginError));
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
         this.controller.login({ email: 'test@test.com', password: 'secret-password' });
         this.scope.$digest();
@@ -141,7 +141,7 @@ describe('Component: login', function() {
 
       it('for invalid email or password and cancel pressed', function () {
         this.createController();
-        spyOn(this.usersService, 'login').and.returnValue(this.$q.reject(context.loginError));
+        spyOn(this.userService, 'login').and.returnValue(this.$q.reject(context.loginError));
         spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.reject('Cancel'));
         this.controller.login({ email: 'test@test.com', password: 'secret-password' });
         this.scope.$digest();

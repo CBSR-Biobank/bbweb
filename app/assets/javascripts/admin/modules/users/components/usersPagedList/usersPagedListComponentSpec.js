@@ -23,6 +23,7 @@ describe('usersPagedListComponent', function() {
                               'NameFilter',
                               'EmailFilter',
                               'StateFilter',
+                              'resourceErrorService',
                               '$state',
                               'Factory');
 
@@ -66,10 +67,12 @@ describe('usersPagedListComponent', function() {
   });
 
   it('when user counts fails', function() {
+    const errFunc = jasmine.createSpy().and.returnValue(null);
+    this.resourceErrorService.checkUnauthorized = jasmine.createSpy().and.returnValue(errFunc);
     this.UserCounts.get = jasmine.createSpy()
       .and.returnValue(this.$q.reject({ status: 400, message: 'testing'}));
     this.createController();
-    expect(this.controller.counts).toEqual({});
+    expect(errFunc).toHaveBeenCalled();
   });
 
   describe('users', function () {

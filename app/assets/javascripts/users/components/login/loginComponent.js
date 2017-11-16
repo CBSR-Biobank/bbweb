@@ -22,7 +22,7 @@ const COMPONENT = {
 /* @ngInject */
 function LoginController($state,
                          gettextCatalog,
-                         usersService,
+                         userService,
                          modalService) {
   var vm = this;
 
@@ -38,7 +38,7 @@ function LoginController($state,
 
     vm.login = login;
 
-    if (usersService.isAuthenticated()) {
+    if (userService.isAuthenticated()) {
       // user already logged in, send him to home page
       $state.go('home');
     }
@@ -53,7 +53,7 @@ function LoginController($state,
   }
 
   function login(credentials) {
-    usersService.login(credentials).then(goToHomeState).catch(loginFailure);
+    userService.login(credentials).then(goToHomeState).catch(loginFailure);
   }
 
   function loginFailure(error) {

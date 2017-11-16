@@ -5,8 +5,8 @@
 
 class HomeController {
 
-  constructor($rootScope, usersService, breadcrumbService) {
-    Object.assign(this, { $rootScope, usersService, breadcrumbService })
+  constructor($rootScope, userService, breadcrumbService) {
+    Object.assign(this, { $rootScope, userService, breadcrumbService })
   }
 
   $onInit() {
@@ -15,7 +15,7 @@ class HomeController {
     this.userIsAuthenticated = false;
     this.$rootScope.pageTitle = 'Biobank';
 
-    this.usersService.requestCurrentUser()
+    this.userService.requestCurrentUser()
       .then((user) => {
         this.user = user;
         this.userIsAuthenticated = true;

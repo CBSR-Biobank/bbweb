@@ -20,7 +20,7 @@ describe('Component: userAdminComponent', function() {
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              'usersService',
+                              'userService',
                               'User',
                               'UserCounts',
                               'Factory');
@@ -29,7 +29,7 @@ describe('Component: userAdminComponent', function() {
        * Have to create controller as a directive so that $onInit() is fired on the controller.
        */
       this.createController = (userCounts) => {
-        this.usersService.requestCurrentUser =
+        this.userService.requestCurrentUser =
           jasmine.createSpy().and.returnValue(this.$q.when(new this.User()));
         this.UserCounts.get = jasmine.createSpy().and.returnValue(this.$q.when(userCounts));
 

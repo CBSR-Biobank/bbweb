@@ -23,7 +23,7 @@ function UserProfileController($state,
                                modalService,
                                modalInput,
                                notificationsService,
-                               usersService,
+                               userService,
                                User,
                                breadcrumbService,
                                userStateLabelService) {

@@ -26,6 +26,7 @@ describe('centresPagedListComponent', function() {
                               'NameFilter',
                               'StateFilter',
                               '$state',
+                              'resourceErrorService',
                               'Factory');
 
       this.createController = () => {
@@ -71,12 +72,14 @@ describe('centresPagedListComponent', function() {
     expect(this.controller.getItemIcon).toBeFunction();
   });
 
-  it('when centre counts fails', function() {
+  it('when centre counts call fails', function() {
+    const errFunc = jasmine.createSpy().and.returnValue(null);
+    this.resourceErrorService.checkUnauthorized = jasmine.createSpy().and.returnValue(errFunc);
     this.CentreCounts.get = jasmine.createSpy()
-      .and.returnValue(this.$q.reject({ status: 400, message: 'testing'}));
+      .and.returnValue(this.$q.reject({ status: 401, message: 'testing'}));
     this.createController();
-    expect(this.controller.counts).toEqual({});
-  });
+    expect(errFunc).toHaveBeenCalled();
+  })
 
   describe('centres', function () {
 

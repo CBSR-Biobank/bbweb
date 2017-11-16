@@ -20,7 +20,7 @@ describe('Component: forgotPassword', function() {
                               '$compile',
                               '$q',
                               '$state',
-                              'usersService',
+                              'userService',
                               'modalService',
                               'notificationsService',
                               'Factory');
@@ -44,7 +44,7 @@ describe('Component: forgotPassword', function() {
   it('goes to correct state on submit', function() {
     var email = this.Factory.emailNext();
 
-    spyOn(this.usersService, 'passwordReset').and.returnValue(this.$q.when('OK'));
+    spyOn(this.userService, 'passwordReset').and.returnValue(this.$q.when('OK'));
     spyOn(this.$state, 'go').and.returnValue(null);
 
     this.createController();
@@ -60,7 +60,7 @@ describe('Component: forgotPassword', function() {
     spyOn(this.$state, 'go').and.returnValue(null);
 
     this.createController();
-    spyOn(this.usersService, 'passwordReset').and.returnValue(
+    spyOn(this.userService, 'passwordReset').and.returnValue(
       this.$q.reject({ status: 'error', message: 'email address not registered'}));
     this.controller.submit(email);
     this.scope.$digest();
@@ -74,7 +74,7 @@ describe('Component: forgotPassword', function() {
     spyOn(this.$state, 'go').and.returnValue(null);
 
     this.createController();
-    spyOn(this.usersService, 'passwordReset').and.returnValue(
+    spyOn(this.userService, 'passwordReset').and.returnValue(
       this.$q.reject({ status: 'error', message: 'xxxx'}));
     this.controller.submit(email);
     this.scope.$digest();
@@ -86,7 +86,7 @@ describe('Component: forgotPassword', function() {
 
     spyOn(this.$state, 'go').and.returnValue(null);
     this.createController();
-    spyOn(this.usersService, 'passwordReset').and.returnValue(
+    spyOn(this.userService, 'passwordReset').and.returnValue(
       this.$q.reject({ status: 'error', message: 'xxxx'}));
     spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.reject('Cancel'));
     this.controller.submit(email);

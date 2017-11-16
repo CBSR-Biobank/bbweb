@@ -20,7 +20,7 @@ describe('Component: biobankAdmin', function() {
                               '$q',
                               'User',
                               'adminService',
-                              'usersService',
+                              'userService',
                               'Factory');
       this.createController = () => {
         ComponentTestSuiteMixin.createController.call(
@@ -41,7 +41,7 @@ describe('Component: biobankAdmin', function() {
           users: 3
         };
 
-    this.usersService.requestCurrentUser =
+    this.userService.requestCurrentUser =
       jasmine.createSpy().and.returnValue(this.$q.when(user));
     spyOn(this.adminService, 'aggregateCounts').and.returnValue(this.$q.when(counts));
 

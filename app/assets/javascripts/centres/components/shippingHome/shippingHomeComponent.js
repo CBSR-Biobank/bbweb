@@ -19,7 +19,11 @@ var component = {
 };
 
 /* @ngInject */
-function ShippingHomeController($state, gettextCatalog, Centre, breadcrumbService) {
+function ShippingHomeController($state,
+                                gettextCatalog,
+                                Centre,
+                                breadcrumbService,
+                                resourceErrorService) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -38,6 +42,7 @@ function ShippingHomeController($state, gettextCatalog, Centre, breadcrumbServic
 
     return Centre.locationsSearch()
       .then(Centre.centreLocationToNames)
+      .catch(resourceErrorService.checkUnauthorized())
       .then(function (centreLocations) {
         vm.centreLocations = centreLocations;
         vm.hasValidCentres = (centreLocations.length > 1);

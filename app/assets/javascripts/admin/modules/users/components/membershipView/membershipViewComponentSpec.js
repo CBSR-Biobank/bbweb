@@ -21,7 +21,7 @@ describe('membershipViewComponent', function() {
                               'StudyName',
                               'CentreName',
                               'UserState',
-                              'usersService',
+                              'userService',
                               'domainNotificationService',
                               'modalService',
                               'asyncInputModal',
@@ -39,7 +39,7 @@ describe('membershipViewComponent', function() {
 
       this.createCurrentUserSpy = () => {
         const user = this.User.create(this.Factory.user())
-        this.usersService.getCurrentUser = jasmine.createSpy().and.returnValue(user)
+        this.userService.getCurrentUser = jasmine.createSpy().and.returnValue(user)
       }
     })
   })

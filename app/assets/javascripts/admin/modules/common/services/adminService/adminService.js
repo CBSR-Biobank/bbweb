@@ -4,7 +4,7 @@
  */
 
 /* @ngInject */
-function AdminService(UrlService, biobankApi) {
+function AdminService(UrlService, biobankApi, resourceErrorService) {
   var service = {
     aggregateCounts
   };
@@ -12,7 +12,8 @@ function AdminService(UrlService, biobankApi) {
 
   // FIXME: move this to the domain layer?
   function aggregateCounts() {
-    return biobankApi.get(UrlService.url('dtos/counts'));
+    return biobankApi.get(UrlService.url('dtos/counts'))
+      .catch(resourceErrorService.checkUnauthorized());
   }
 }
 

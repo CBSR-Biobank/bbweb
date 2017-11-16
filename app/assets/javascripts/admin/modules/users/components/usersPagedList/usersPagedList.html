@@ -1,11 +1,11 @@
 <div class="voffset-bottom-3">
   <name-email-state-filters
-     state-data="vm.filters['stateFilter'].allChoices()"
-     selected-state="all"
-     on-name-filter-updated="vm.updateSearchFilter('nameFilter')"
-     on-email-filter-updated="vm.updateSearchFilter('emailFilter')"
-     on-state-filter-updated="vm.updateSearchFilter('stateFilter')"
-     on-filters-cleared="vm.onFiltersCleared">
+    state-data="vm.filters['stateFilter'].allChoices()"
+    selected-state="all"
+    on-name-filter-updated="vm.updateSearchFilter('nameFilter').bind(vm)"
+    on-email-filter-updated="vm.updateSearchFilter('emailFilter').bind(vm)"
+    on-state-filter-updated="vm.updateSearchFilter('stateFilter').bind(vm)"
+    on-filters-cleared="vm.onFiltersCleared.bind(vm)">
   </name-email-state-filters>
 </div>
 

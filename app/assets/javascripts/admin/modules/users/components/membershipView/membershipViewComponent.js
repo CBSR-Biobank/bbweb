@@ -11,7 +11,7 @@ class MembershipViewController {
               domainNotificationService,
               gettextCatalog,
               breadcrumbService,
-              usersService,
+              userService,
               modalInput,
               asyncInputModal,
               EntityInfo,
@@ -27,7 +27,7 @@ class MembershipViewController {
                     domainNotificationService,
                     gettextCatalog,
                     breadcrumbService,
-                    usersService,
+                    userService,
                     modalInput,
                     asyncInputModal,
                     EntityInfo,
@@ -42,7 +42,7 @@ class MembershipViewController {
   }
 
   $onInit() {
-    this.userCanUpdate = this.usersService.getCurrentUser().hasRole('UserAdministrator');
+    this.userCanUpdate = this.userService.getCurrentUser().hasRole('UserAdministrator');
 
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),

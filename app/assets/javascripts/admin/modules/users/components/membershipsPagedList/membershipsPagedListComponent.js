@@ -15,7 +15,8 @@ class Controller extends PagedListController {
               $state,
               Membership,
               gettextCatalog,
-              NameFilter) {
+              NameFilter,
+              resourceErrorService) {
     'ngInject';
     super($log,
           $state,
@@ -24,11 +25,13 @@ class Controller extends PagedListController {
           [ { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') } ],
           5);
 
-    Object.assign(this, {
-      $scope,
-      Membership,
-      NameFilter
-    });
+    Object.assign(this,
+                  {
+                    $scope,
+                    Membership,
+                    NameFilter,
+                    resourceErrorService
+                  });
   }
 
   $onInit() {
@@ -37,7 +40,8 @@ class Controller extends PagedListController {
   }
 
   getItems(options) {
-    return this.Membership.list(options);
+    return this.Membership.list(options)
+      .catch(this.resourceErrorService.checkUnauthorized());
   }
 
   getItemIcon() {

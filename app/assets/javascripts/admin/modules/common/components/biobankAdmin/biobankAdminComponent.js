@@ -18,7 +18,7 @@ var component = {
  * Controller for this component.
  */
 /* @ngInject */
-function BiobankAdminController(adminService, usersService, User, breadcrumbService) {
+function BiobankAdminController(adminService, userService, User, breadcrumbService) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -32,7 +32,7 @@ function BiobankAdminController(adminService, usersService, User, breadcrumbServ
       breadcrumbService.forState('home.admin')
     ];
 
-    usersService.requestCurrentUser()
+    userService.requestCurrentUser()
       .then(function (user) {
         vm.user = user;
         return adminService.aggregateCounts();
