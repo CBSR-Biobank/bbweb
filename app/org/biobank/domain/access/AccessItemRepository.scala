@@ -1,8 +1,8 @@
 package org.biobank.domain.access
 
 import com.google.inject.ImplementedBy
-import javax.inject.Singleton
-import org.biobank.Global
+import javax.inject.{Inject, Singleton}
+import org.biobank.{Global, TestData}
 import org.biobank.domain._
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.access.RoleId._
@@ -25,7 +25,8 @@ trait AccessItemRepository extends ReadWriteRepository[AccessItemId, AccessItem]
 }
 
 @Singleton
-class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, AccessItem](v => v.id)
+class AccessItemRepositoryImpl @Inject() (val testData: TestData)
+    extends ReadWriteRepositoryRefImpl[AccessItemId, AccessItem](v => v.id)
     with AccessItemRepository {
 
   import org.biobank.CommonValidations._
@@ -41,6 +42,11 @@ class AccessItemRepositoryImpl extends ReadWriteRepositoryRefImpl[AccessItemId, 
     super.init()
     initPermissions
     initRoles
+    testData.testRoles.foreach { case (userId, roleId) =>
+      getRole(roleId).foreach { role =>
+        put(role.copy(userIds = role.userIds + userId))
+      }
+    }
   }
 
   override def getByKey(id: AccessItemId): DomainValidation[AccessItem] = {

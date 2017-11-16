@@ -4,6 +4,7 @@ import java.time.OffsetDateTime
 import javax.inject.{ Inject, Singleton }
 import org.biobank.domain._
 import org.biobank.domain.access._
+import org.biobank.domain.access.RoleId._
 import org.biobank.domain.centre._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
@@ -136,7 +137,6 @@ object TestData {
       ("Martine Bergeron", "martine.bergeron@crchum.qc.ca"),
       ("Isabelle Deneufbourg", "isabelle.deneufbourg@criucpq.ulaval.ca"),
       ("Colin Coros", "coros@ualberta.ca"),
-      ("Ray Vis", "rvis@ualberta.ca"),
       ("Suzanne Morissette", "suzanne.morissette.chum@ssss.gouv.qc.ca"),
       ("Francine Marsan", "francine.marsan.chum@ssss.gouv.qc.ca"),
       ("Jeanne Bjergo", "jeannebjergo@hcnw.com"),
@@ -161,6 +161,14 @@ object TestData {
         |orci quis. Magnis vestibulum dapibus leo consectetuer blandit, ac eget, porta tempor semper urna
         |tempor diam.
         |""".stripMargin
+
+  val accessUserData: List[Tuple2[String, String]] = List(
+      ("study-administrator", "Study Administrator"),
+      ("study-user",          "Study User"),
+      ("specimen-collector",  "Specimen Collector"),
+      ("shipping-admin",      "Shipping Admin"),
+      ("shipping-user",       "Shipping User")
+    )
 
   val EventTypeHashids: Hashids      = Hashids("test-data-cevent-types")
 }
@@ -315,6 +323,9 @@ class TestData @Inject() (config:         Configuration,
   private val loadShipmentTestData =
     (env.mode == Mode.Dev) && loadSpecimenTestData && config.get[Boolean]("application.testData.loadShipments")
 
+  private val loadAccessTestData =
+    (env.mode == Mode.Dev) && config.get[Boolean]("application.testData.loadAccessData")
+
   def testUsers(): List[User] = {
     if (!loadTestData) {
       List.empty[User]
@@ -326,40 +337,16 @@ class TestData @Inject() (config:         Configuration,
       val hashids = Hashids("test-data-users")
 
       userData.zipWithIndex.map { case((name, email), index) =>
-          ActiveUser(id           = UserId(hashids.encode(index.toLong)),
-                     version      = 0L,
-                     timeAdded    = Global.StartOfTime,
-                     timeModified = None,
-                     name         = name,
-                     email        = email,
-                     password     = passwordHasher.encrypt(plainPassword, salt),
-                     salt         = salt,
-                     avatarUrl    = None)
-        }
-    }
-  }
-
-  def testMemberships(): List[Membership] = {
-    if (!loadTestData) {
-      List.empty[Membership]
-    } else {
-      val hashids = Hashids("test-data-users")
-      val userIds = userData.zipWithIndex
-        .map { case((name, email), index) =>
-          UserId(hashids.encode(index.toLong))
-        }.toSet
-
-      List(
-        Membership(id           = MembershipId("test-data-all-studies-and-centres-membership"),
+        ActiveUser(id           = UserId(hashids.encode(index.toLong)),
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
-                   name         = "Test data - all studies and all centres",
-                   description  = None,
-                   userIds      = userIds,
-                   studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
-                   centreData   = MembershipEntitySet(true, Set.empty[CentreId]))
-      )
+                   name         = name,
+                   email        = email,
+                   password     = passwordHasher.encrypt(plainPassword, salt),
+                   salt         = salt,
+                   avatarUrl    = None)
+      }
     }
   }
 
@@ -370,49 +357,49 @@ class TestData @Inject() (config:         Configuration,
       log.debug("testCentres")
 
       centreData.map { case (name, description) =>
-          val locations =
-            if (name == "100-Calgary AB") {
-              Set(Location(id             = LocationId(s"${name}_id:Primary"),
-                           name           = "Primary",
-                           street         = "1403 29 St NW",
-                           city           = "Calgary",
-                           province       = "Alberta",
-                           postalCode     = "T2N 2T9",
-                           poBoxNumber    = None,
-                           countryIsoCode = "CA"))
-            } else if (name == "101-London ON") {
-              Set(Location(id             = LocationId(s"${name}_id:Primary"),
-                           name           = "Primary",
-                           street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
-                           city           = "London",
-                           province       = "Ontario",
-                           postalCode     = "N0L 1W0",
-                           poBoxNumber    = None,
-                           countryIsoCode = "CA"))
-            } else {
-              Set.empty[Location]
-            }
-
-          if ((name == "100-Calgary AB") || (name == "101-London ON")) {
-            EnabledCentre(id           = CentreId(s"${name}_id"),
-                          version      = 0L,
-                          timeAdded    = Global.StartOfTime,
-                          timeModified = None,
-                          name         = name,
-                          description  = Some(description),
-                          studyIds     = Set(BbpspTestData.BbpspStudyId),
-                          locations    = locations).asInstanceOf[Centre]
+        val locations =
+          if (name == "100-Calgary AB") {
+            Set(Location(id             = LocationId(s"${name}_id:Primary"),
+                         name           = "Primary",
+                         street         = "1403 29 St NW",
+                         city           = "Calgary",
+                         province       = "Alberta",
+                         postalCode     = "T2N 2T9",
+                         poBoxNumber    = None,
+                         countryIsoCode = "CA"))
+          } else if (name == "101-London ON") {
+            Set(Location(id             = LocationId(s"${name}_id:Primary"),
+                         name           = "Primary",
+                         street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
+                         city           = "London",
+                         province       = "Ontario",
+                         postalCode     = "N0L 1W0",
+                         poBoxNumber    = None,
+                         countryIsoCode = "CA"))
           } else {
-            DisabledCentre(id           = CentreId(s"${name}_id"),
-                           version      = 0L,
-                           timeAdded    = Global.StartOfTime,
-                           timeModified = None,
-                           name         = name,
-                           description  = Some(description),
-                           studyIds     = Set(BbpspTestData.BbpspStudyId),
-                           locations    = locations).asInstanceOf[Centre]
+            Set.empty[Location]
           }
+
+        if ((name == "100-Calgary AB") || (name == "101-London ON")) {
+          EnabledCentre(id           = CentreId(s"${name}_id"),
+                        version      = 0L,
+                        timeAdded    = Global.StartOfTime,
+                        timeModified = None,
+                        name         = name,
+                        description  = Some(description),
+                        studyIds     = Set(BbpspTestData.BbpspStudyId),
+                        locations    = locations).asInstanceOf[Centre]
+        } else {
+          DisabledCentre(id           = CentreId(s"${name}_id"),
+                         version      = 0L,
+                         timeAdded    = Global.StartOfTime,
+                         timeModified = None,
+                         name         = name,
+                         description  = Some(description),
+                         studyIds     = Set(BbpspTestData.BbpspStudyId),
+                         locations    = locations).asInstanceOf[Centre]
         }
+      }
     }
   }
 
@@ -577,12 +564,12 @@ class TestData @Inject() (config:         Configuration,
 
       specimens.zipWithIndex.map { case (specimen, index) =>
         val shipmentId =
-            if (specimen.locationId == fromLocationId) {
-              if (index < halfSpecimenCount) ShipmentId("test-shipment-created")
-              else ShipmentId("test-shipment-unpacked")
-            } else {
-              ShipmentId("test-shipment-packed")
-            }
+          if (specimen.locationId == fromLocationId) {
+            if (index < halfSpecimenCount) ShipmentId("test-shipment-created")
+            else ShipmentId("test-shipment-unpacked")
+          } else {
+            ShipmentId("test-shipment-packed")
+          }
 
         ShipmentSpecimen(id                  = ShipmentSpecimenId(specimen.id.id),
                          version             = 0L,
@@ -611,7 +598,7 @@ class TestData @Inject() (config:         Configuration,
                                          timeAdded    = Global.StartOfTime,
                                          timeModified = None,
                                          uniqueId     = f"P$index%05d",
-                                 annotations  = Set.empty[Annotation])
+                                         annotations  = Set.empty[Annotation])
           ParticipantData(participant, createCeventData(participant))
         }
         .toList
@@ -677,10 +664,70 @@ class TestData @Inject() (config:         Configuration,
     }
   }
 
+  /**
+   * This is only to demo the User Access / Permissions. It should be removed for production servers.
+   */
+  def accessUsers(): List[User] = {
+    if (loadAccessTestData) {
+      accessUserData.map { case (id, name) =>
+        ActiveUser(
+          id           = UserId(id),
+          version      = 0L,
+          timeAdded    = Global.StartOfTime,
+          timeModified = None,
+          name         = name,
+          email        = s"$id@admin.com",
+          password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
+          salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
+          avatarUrl    = None)
+      }
+    } else {
+      List.empty[User]
+    }
+  }
+
+  def testRoles(): List[Tuple2[UserId, RoleId]] = {
+    if (loadAccessTestData) {
+      List((UserId("study-administrator"), RoleId.StudyAdministrator),
+           (UserId("study-user"),          RoleId.StudyUser),
+           (UserId("specimen-collector"),  RoleId.SpecimenCollector),
+           (UserId("shipping-admin"),      RoleId.ShippingAdministrator),
+           (UserId("shipping-user"),       RoleId.ShippingUser))
+    } else {
+      List.empty[Tuple2[UserId, RoleId]]
+    }
+  }
+
+  def testMemberships(): List[Membership] = {
+    if (!loadAccessTestData) {
+      List.empty[Membership]
+    } else {
+      val studyUserIds = Set("study-administrator",
+                             "study-user",
+                             "specimen-collector",
+                             "shipping-admin",
+                             "shipping-user").map(UserId(_))
+
+      List(
+        Membership(id = MembershipId("all-studies-membership "),
+                   version      = 0L,
+                   timeAdded    = Global.StartOfTime,
+                   timeModified = None,
+                   name         = "All studies",
+                   description  = None,
+                   userIds      = studyUserIds,
+                   studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
+                   centreData   = MembershipEntitySet(false, Set.empty[CentreId]))
+      )
+    }
+  }
+
   log.debug(s"""|TEST DATA:
-                |  mode: ${env.mode}
-                |  loadTestData: $loadTestData,
+                |  mode:                 ${env.mode}
+                |  loadTestData:         $loadTestData,
                 |  loadSpecimenTestData: $loadSpecimenTestData,
-                |  loadShipmentTestData: $loadShipmentTestData""".stripMargin)
+                |  loadShipmentTestData: $loadShipmentTestData,
+                |  loadAccessTestData:   $loadAccessTestData""".stripMargin
+  )
 
 }

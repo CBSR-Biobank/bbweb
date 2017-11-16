@@ -5,12 +5,11 @@ import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import java.time.format.DateTimeFormatter
 import javax.inject._
-import org.biobank.Global
 import org.biobank.domain.{ConcurrencySafeEntity, HasUniqueName}
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.access.RoleId._
-import org.biobank.domain.user.{ActiveUser, User, UserId, UserRepository}
+import org.biobank.domain.user.{UserId, UserRepository}
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.centre.{CentreId, CentreRepository}
 import org.biobank.dto._
@@ -19,7 +18,7 @@ import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.event.AccessEvents._
 import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.{Environment, Mode}
+import play.api.Environment
 import scala.concurrent.Future
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -405,101 +404,6 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     )
   }
 
-  /**
-   * This is only to demo the User Access / Permissions. It should be removed for production servers.
-   */
-  private def createAccessUsers(): Unit = {
-    def addUserToRole(user: User, roleId: RoleId): Unit = {
-      accessItemRepository.getRole(roleId).foreach { role =>
-        accessItemRepository.put(role.copy(userIds = role.userIds + user.id))
-      }
-    }
-
-    if (environment.mode != Mode.Test) {
-      val studyAdmin = ActiveUser(
-          id           = UserId("study-administrator"),
-          version      = 0L,
-          timeAdded    = Global.StartOfTime,
-          timeModified = None,
-          name         = "Study Administrator",
-          email        = "study_admin@admin.com",
-          password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-          salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-          avatarUrl    = None)
-
-      val studyUser = ActiveUser(
-          id           = UserId("study-user"),
-          version      = 0L,
-          timeAdded    = Global.StartOfTime,
-          timeModified = None,
-          name         = "Study User",
-          email        = "study_user@admin.com",
-          password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-          salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-          avatarUrl    = None)
-
-      val specimenCollector = ActiveUser(
-          id           = UserId("specimen-collector"),
-          version      = 0L,
-          timeAdded    = Global.StartOfTime,
-          timeModified = None,
-          name         = "Specimen Collector",
-          email        = "specimen_collector@admin.com",
-          password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-          salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-          avatarUrl    = None)
-
-      val shippingAdmin = ActiveUser(
-          id           = UserId("shipping-admin"),
-          version      = 0L,
-          timeAdded    = Global.StartOfTime,
-          timeModified = None,
-          name         = "Shipping Admin",
-          email        = "shipping_admin@admin.com",
-          password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-          salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-          avatarUrl    = None)
-
-      val shippingUser = ActiveUser(
-          id           = UserId("shipping-user"),
-          version      = 0L,
-          timeAdded    = Global.StartOfTime,
-          timeModified = None,
-          name         = "Shipping User",
-          email        = "shipping_user@admin.com",
-          password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
-          salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",
-          avatarUrl    = None)
-
-      Set(studyAdmin, studyUser, specimenCollector, shippingAdmin, shippingUser)
-        .foreach(userRepository.put)
-
-      addUserToRole(studyAdmin, RoleId.StudyAdministrator)
-      addUserToRole(studyUser, RoleId.StudyUser)
-      addUserToRole(specimenCollector, RoleId.SpecimenCollector)
-      addUserToRole(shippingAdmin, RoleId.ShippingAdministrator)
-      addUserToRole(shippingUser, RoleId.ShippingUser)
-
-      val memberships = Set(
-          Membership(id = MembershipId("all-studies-membership"),
-                     version      = 0L,
-                     timeAdded    = Global.StartOfTime,
-                     timeModified = None,
-                     name         = "All studies",
-                     description  = None,
-                     userIds      = Set(studyAdmin.id,
-                                        studyUser.id,
-                                        specimenCollector.id,
-                                        shippingAdmin.id,
-                                        shippingUser.id),
-                     studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
-                     centreData   = MembershipEntitySet(false, Set.empty[CentreId]))
-        )
-
-      memberships.foreach(membershipRepository.put)
-    }
-  }
-
   private def membershipToDto(membership: Membership): ServiceValidation[MembershipDto] ={
     for {
       users <- {
@@ -539,6 +443,4 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
                     centreData   = centreEntitySet)
       }
   }
-
-  createAccessUsers
 }

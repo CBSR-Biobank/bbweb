@@ -1,8 +1,8 @@
 package org.biobank.domain.access
 
 import com.google.inject.ImplementedBy
-import javax.inject.Singleton
-import org.biobank.Global
+import javax.inject.{Inject, Singleton}
+import org.biobank.{Global, TestData}
 import org.biobank.domain._
 import org.biobank.domain.centre.CentreId
 import org.biobank.domain.study.StudyId
@@ -18,7 +18,7 @@ trait MembershipRepository extends ReadWriteRepository[MembershipId, Membership]
 }
 
 @Singleton
-class MembershipRepositoryImpl
+class MembershipRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[MembershipId, Membership](v => v.id)
     with MembershipRepository {
 
@@ -37,6 +37,8 @@ class MembershipRepositoryImpl
                    userIds      = Set(Global.DefaultUserId),
                    studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
                    centreData   = MembershipEntitySet(true, Set.empty[CentreId])))
+
+    testData.testMemberships.foreach(put)
   }
 
   def nextIdentity: MembershipId = new MembershipId(nextIdentityAsString)

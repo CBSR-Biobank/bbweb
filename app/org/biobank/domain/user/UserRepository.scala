@@ -1,8 +1,7 @@
 package org.biobank.domain.user
 
 import com.google.inject.ImplementedBy
-import javax.inject.Inject
-import javax.inject.Singleton
+import javax.inject.{Inject, Singleton}
 import org.biobank.{Global, TestData}
 import org.biobank.domain.{ DomainValidation, ReadWriteRepository, ReadWriteRepositoryRefImpl }
 import org.slf4j.{Logger, LoggerFactory}
@@ -44,6 +43,7 @@ class UserRepositoryImpl @Inject() (val config:   Configuration,
     super.init()
     createDefaultUser
     testData.testUsers.foreach(put)
+    testData.accessUsers.foreach(put)
   }
 
   def nextIdentity: UserId = new UserId(nextIdentityAsString)
