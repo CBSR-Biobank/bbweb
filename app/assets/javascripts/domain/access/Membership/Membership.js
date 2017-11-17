@@ -2,7 +2,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-var _ = require('lodash');
+
+import _ from 'lodash'
 
 /*
  * Angular factory for Users.
@@ -50,21 +51,24 @@ function MembershipFactory($q,
   Membership.prototype = Object.create(MembershipBase.prototype);
   Membership.prototype.constructor = Membership;
 
-  Membership.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
-    const args = [ 'access/memberships' ].concat(_.toArray(arguments));
-    return DomainEntity.url.apply(null, args);
+  Membership.url = function (...pathItems) {
+    return DomainEntity.url.apply(null, [ 'access/memberships' ].concat(pathItems));
   };
 
-  Membership.SCHEMA = _.extend(
-    _.clone(MembershipBase.SCHEMA),
+  Membership.SCHEMA = Object.assign(
+    {},
+    MembershipBase.SCHEMA,
     {
       'id': 'Membership',
       'type': 'object',
-      'properties': _.extend(
-        _.clone(MembershipBase.SCHEMA.properties),
-        { 'userData':  { 'type': 'array', 'items': { '$ref': 'EntityInfo' } } }),
-      'required': _.clone(MembershipBase.SCHEMA.required).concat('userData')
-    });
+      'properties': Object.assign(
+        {},
+        MembershipBase.SCHEMA.properties,
+        { 'userData':  { 'type': 'array', 'items': { '$ref': 'EntityInfo' } } }
+      ),
+      'required': MembershipBase.SCHEMA.required.slice().concat('userData')
+    }
+  );
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.access.Membership|Membership}.
@@ -89,10 +93,10 @@ function MembershipFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    *
-   * @returns {domain.access.Membership} A user created from the given object.
+   * @returns {domain.access.Membership} A Membership created from the given object.
    *
    * @see {@link domain.access.Membership.asyncCreate|asyncCreate()} when you need to create
-   * a user within asynchronous code.
+   * a membership within asynchronous code.
    */
   Membership.create = function (obj) {
     var validation = Membership.isValid(obj);
@@ -110,7 +114,7 @@ function MembershipFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    *
-   * @returns {Promise<domain.access.Membership>} A user wrapped in a promise.
+   * @returns {Promise<domain.access.Membership>} A Membership wrapped in a promise.
    *
    * @see {@link domain.access.Membership.create|create()} when not creating a Membership within
    * asynchronous code.
@@ -129,9 +133,9 @@ function MembershipFactory($q,
   /**
    * Retrieves a Membership from the server.
    *
-   * @param {string} id the ID of the user to retrieve.
+   * @param {string} id the ID of the membership to retrieve.
    *
-   * @returns {Promise<domain.access.Membership>} The user within a promise.
+   * @returns {Promise<domain.access.Membership>} The membership within a promise.
    */
   Membership.get = function(id) {
     return biobankApi.get(Membership.url(id)).then(Membership.asyncCreate);
@@ -142,22 +146,19 @@ function MembershipFactory($q,
    *
    * @param {object} options - The options to use.
    *
-   * @param {string} options.filter The filter expression to use on user to refine the list.
+   * @param {string} options.filter The filter expression to use on membership to refine the list.
    *
    * @param {int} options.page If the total results are longer than limit, then page selects which
-   * users should be returned. If an invalid value is used then the response is an error.
+   * memberships should be returned. If an invalid value is used then the response is an error.
    *
-   * @param {int} options.limit The total number of users to return per page. The maximum page size is
+   * @param {int} options.limit The total number of memberships to return per page. The maximum page size is
    * 10. If a value larger than 10 is used then the response is an error.
    *
    * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
    * domain.access.Membership}.
    */
   Membership.list = function(options) {
-    var validKeys = [ 'filter',
-                      'page',
-                      'limit'
-                    ],
+    var validKeys = [ 'filter', 'page', 'limit' ],
         params;
 
     options = options || {};
@@ -223,7 +224,7 @@ function MembershipFactory($q,
    *
    * @param {String} name - The new name to give this membership.
    *
-   * @returns {Promise<domain.access.Membership>} A promise containing the membershipo with the new name.
+   * @returns {Promise<domain.access.Membership>} A promise containing the membership with the new name.
    */
   Membership.prototype.updateName = function (name) {
     return this.update.call(this, Membership.url('name', this.id), { name: name });
@@ -244,7 +245,7 @@ function MembershipFactory($q,
   };
 
   Membership.prototype.addUser = function (id) {
-    return this.update.call(this, Membership.url('user', this.id), { userId: id });
+    return this.update(Membership.url('user', this.id), { userId: id });
   };
 
   Membership.prototype.removeUser = function (id) {

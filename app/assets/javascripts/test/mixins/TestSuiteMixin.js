@@ -41,7 +41,8 @@ function TestSuiteMixin($injector) {
     if (paths.length <= 0) {
       throw new Error('no arguments specified');
     }
-    return [ '/api' ].concat(paths).join('/');
+    const allpaths = [ '/api' ].concat(paths)
+    return allpaths.join('/');
  }
 
 }

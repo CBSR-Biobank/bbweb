@@ -4,9 +4,25 @@ import java.time.OffsetDateTime
 import org.biobank.domain.{EntityState, Location}
 import org.biobank.domain.access.RoleId._
 import org.biobank.domain.centre.Shipment
+import org.biobank.dto.access.UserMembershipDto
 import play.api.libs.json._
 
 package dto {
+
+  final case class EntityInfoDto(id: String, name: String)
+
+  object EntityInfoDto {
+
+    implicit val entityInfoDtoWriter: Writes[EntityInfoDto] = Json.writes[EntityInfoDto]
+  }
+
+  final case class EntitySetDto(allEntities: Boolean, entityData: Set[EntityInfoDto])
+
+  object EntitySetDto {
+
+    implicit val entitySetInfoDtoWriter: Writes[EntitySetDto] = Json.writes[EntitySetDto]
+
+  }
 
   final case class NameDto(id: String, name: String)
 
@@ -45,54 +61,6 @@ package dto {
   object AggregateCountsDto {
 
     implicit val aggregateCountsDtoWriter: Writes[AggregateCountsDto] = Json.writes[AggregateCountsDto]
-
-  }
-
-  final case class MembershipEntityInfoDto(id: String, name: String)
-
-  object MembershipEntityInfoDto {
-
-    implicit val membershipEntityInfoDtoWriter: Writes[MembershipEntityInfoDto] =
-      Json.writes[MembershipEntityInfoDto]
-  }
-
-  final case class MembershipEntitySetDto(allEntities: Boolean, entityData: Set[MembershipEntityInfoDto])
-
-  object MembershipEntitySetDto {
-
-    implicit val membershipEntitySetInfoDtoWriter: Writes[MembershipEntitySetDto] =
-      Json.writes[MembershipEntitySetDto]
-
-  }
-
-  final case class MembershipDto(id:           String,
-                                 version:      Long,
-                                 timeAdded:    String,
-                                 timeModified: Option[String],
-                                 name:         String,
-                                 description:  Option[String],
-                                 userData:     Set[MembershipEntityInfoDto],
-                                 studyData:    MembershipEntitySetDto,
-                                 centreData:   MembershipEntitySetDto)
-
-  object MembershipDto {
-
-    implicit val membershipDtoWriter: Writes[MembershipDto] = Json.writes[MembershipDto]
-
-  }
-
-  final case class UserMembershipDto(id:           String,
-                                     version:      Long,
-                                     timeAdded:    String,
-                                     timeModified: Option[String],
-                                     name:         String,
-                                     description:  Option[String],
-                                     studyData:    MembershipEntitySetDto,
-                                     centreData:   MembershipEntitySetDto)
-
-  object UserMembershipDto {
-
-    implicit val userMembershipDtoWriter: Writes[UserMembershipDto] = Json.writes[UserMembershipDto]
 
   }
 

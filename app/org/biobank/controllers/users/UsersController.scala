@@ -2,9 +2,12 @@ package org.biobank.controllers.users
 
 import org.biobank.infrastructure.command.Commands._
 import javax.inject.{Inject, Singleton}
+import org.biobank.dto._
+import org.biobank.domain.access.RoleId._
 import org.biobank.domain.user._
 import org.biobank.controllers._
 import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.service.access.AccessService
 import org.biobank.service.studies.StudiesService
 import org.biobank.service.users.UsersService
 import org.biobank.service.{AuthToken, PagedResults}
@@ -26,6 +29,7 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
                                  val env:            Environment,
                                  val cacheApi:       SyncCacheApi,
                                  val authToken:      AuthToken,
+                                 val accessService:  AccessService,
                                  val usersService:   UsersService,
                                  val studiesService: StudiesService)
                              (implicit val ec: ExecutionContext)
@@ -56,13 +60,13 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
       Future {
         // FIXME: what if user attempts multiple failed logins? lock the account after 3 attempts?
         // how long to lock the account?
-
         usersService.loginAllowed(credentials.email, credentials.password).fold(
           err => Unauthorized,
-          userDto => {
-            val token = authToken.newToken(UserId(userDto.id))
-            log.debug(s"user logged in: ${userDto.email}, token: $token")
-            Ok(userDto).withCookies(Cookie(AuthTokenCookieKey, token, None, path = "/", httpOnly = false))
+          user => {
+            val dto = userToDto(user, accessService.getUserRoles(user.id))
+            val token = authToken.newToken(user.id)
+            log.debug(s"user logged in: ${user.email}, token: $token")
+            Ok(dto).withCookies(Cookie(AuthTokenCookieKey, token, None, path = "/", httpOnly = false))
           }
         )
       }
@@ -116,10 +120,12 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            names         <- usersService.getUserNames(request.authInfo.userId,
-                                                        filterAndSort.filter,
-                                                        filterAndSort.sort)
-          } yield names
+            users         <- usersService.getUsers(request.authInfo.userId,
+                                                   filterAndSort.filter,
+                                                   filterAndSort.sort)
+          } yield {
+            users.map(user => NameAndStateDto(user.id.id, user.name, user.state.id))
+          }
         }
       )
     }
@@ -204,5 +210,18 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
 
   private def processCommand(cmd: UserCommand) = {
     validationReply(usersService.processCommand(cmd))
+  }
+
+  private def userToDto(user: User, roles: Set[RoleId]): UserDto = {
+    UserDto(id           = user.id.id,
+            version      = user.version,
+            timeAdded    = user.timeAdded,
+            timeModified = user.timeModified,
+            state        = user.state,
+            name         = user.name,
+            email        = user.email,
+            avatarUrl    = user.avatarUrl,
+            roles        = roles,
+            membership   = None)
   }
 }

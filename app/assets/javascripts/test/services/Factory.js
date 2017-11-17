@@ -22,10 +22,48 @@ const STRING_SYMBOL                     = Symbol('string'),
       ENTITY_NAME_SHIPMENT_SPECIMEN     = Symbol('shipmentSpecimen'),
       ENTITY_NAME_USER                  = Symbol('user'),
       ENTITY_NAME_MEMBERSHIP_BASE       = Symbol('membershipBase'),
-      ENTITY_NAME_MEMBERSHIP            = Symbol('membership')
+      ENTITY_NAME_MEMBERSHIP            = Symbol('membership'),
+      ENTITY_NAME_ACCESS_ITEM           = Symbol('accessItem'),
+      ENTITY_NAME_ROLE                  = Symbol('role'),
+      ENTITY_NAME_PERMISSION            = Symbol('permission')
 
 
 const defaultEntities = new Map();
+
+  /**
+   * Generates a unique name for a domain entity type. If domain entity type is undefined, then a unique
+   * string is generated.
+   *
+   * @param domainEntityType the name of the domain entity type. Eg: 'study', 'centre', 'user', etc.
+   */
+const domainEntityNameNext = function (domainEntityType = STRING_SYMBOL) {
+  return _.uniqueId(domainEntityType.toString() + '_');
+}
+
+const stringNext = function () {
+  return domainEntityNameNext();
+}
+
+const membershipBaseDefaults = function () {
+  return {
+    id:           domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE),
+    name:         stringNext(),
+    description:  faker.lorem.sentences(4),
+    studyData:    this.entitySet(),
+    centreData:   this.entitySet()
+  }
+}
+
+
+const accessItemDefaults = function () {
+  return {
+    id:           domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE),
+    name:         stringNext(),
+    description:  faker.lorem.sentences(4),
+    parentData:   [ this.entityInfo() ],
+    childData:    [ this.entityInfo() ]
+  }
+}
 
 function entityNameDto(createFunc, options = {}) {
   const c = createFunc(_.pick(options, ['id', 'name']));
@@ -87,7 +125,7 @@ class Factory {
   }
 
   stringNext() {
-    return this.domainEntityNameNext();
+    return domainEntityNameNext();
   }
 
   emailNext() {
@@ -113,20 +151,10 @@ class Factory {
     return defaultEntities.get(entityName)
   }
 
-  /**
-   * Generates a unique name for a domain entity type. If domain entity type is undefined, then a unique
-   * string is generated.
-   *
-   * @param domainEntityType the name of the domain entity type. Eg: 'study', 'centre', 'user', etc.
-   */
-  domainEntityNameNext(domainEntityType = STRING_SYMBOL) {
-    return _.uniqueId(domainEntityType.toString() + '_');
-  }
-
   specimenLinkType(options = {}) {
     const processingType = this.defaultProcessingType(),
           defaults = {
-            id:                    this.domainEntityNameNext(ENTITY_NAME_SPECIMEN_LINK_TYPE),
+            id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN_LINK_TYPE),
             processingTypeId:      processingType.id,
             expectedInputChange:   faker.random.number({precision: 0.5}),
             expectedOutputChange:  faker.random.number({precision: 0.5}),
@@ -151,7 +179,7 @@ class Factory {
   processingType(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
-          id:          this.domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE),
+          id:          domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE),
           studyId:     study.id,
           name:        this.stringNext(),
           description: faker.lorem.sentences(4),
@@ -173,7 +201,7 @@ class Factory {
   collectionEventType(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
-          id:                   this.domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
+          id:                   domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
           studyId:              study.id,
           name:                 this.stringNext(),
           description:          faker.lorem.sentences(4),
@@ -210,7 +238,7 @@ class Factory {
   specimenGroup(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
-          id:                          this.domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
+          id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
           studyId:                     study.id,
           name:                        this.stringNext(),
           description:                 faker.lorem.sentences(4),
@@ -231,7 +259,7 @@ class Factory {
   }
 
   study(options = {}) {
-    var defaults =  { id:              this.domainEntityNameNext(ENTITY_NAME_STUDY),
+    var defaults =  { id:              domainEntityNameNext(ENTITY_NAME_STUDY),
                       name:            this.stringNext(),
                       description:     faker.lorem.sentences(4),
                       annotationTypes: [],
@@ -270,9 +298,9 @@ class Factory {
   participant(options = {}) {
     var study = this.defaultStudy(),
         defaults = {
-          id:          this.domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
+          id:          domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
           studyId:     study.id,
-          uniqueId:    this.domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
+          uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
           annotations: []
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
@@ -301,7 +329,7 @@ class Factory {
     var participant = this.defaultParticipant(),
         collectionEventType = this.defaultCollectionEventType(),
         defaults = {
-          id:                    this.domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT),
+          id:                    domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT),
           participantId:         participant.id,
           collectionEventType:   collectionEventType,
           collectionEventTypeId: collectionEventType.id,
@@ -358,8 +386,8 @@ class Factory {
     var ceventType = this.collectionEventType({ specimenDescriptions: [ this.collectionSpecimenDescription() ] }),
         ctr = this.centre({ locations: [ this.location() ]}),
         defaults = {
-          id:                    this.domainEntityNameNext(ENTITY_NAME_SPECIMEN),
-          inventoryId:           this.domainEntityNameNext(ENTITY_NAME_SPECIMEN),
+          id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN),
+          inventoryId:           domainEntityNameNext(ENTITY_NAME_SPECIMEN),
           specimenDescriptionId: null,
           originLocationInfo:    null,
           locationInfo:          null,
@@ -389,7 +417,7 @@ class Factory {
   }
 
   centre(options = {}) {
-    var defaults = { id:          this.domainEntityNameNext(ENTITY_NAME_CENTRE),
+    var defaults = { id:          domainEntityNameNext(ENTITY_NAME_CENTRE),
                      name:        this.stringNext(),
                      description: this.stringNext(),
                      state:       this.CentreState.DISABLED,
@@ -415,7 +443,7 @@ class Factory {
           name: ctr.name + ': ' + loc.name
         },
         defaults = {
-          id:               this.domainEntityNameNext(ENTITY_NAME_SHIPMENT),
+          id:               domainEntityNameNext(ENTITY_NAME_SHIPMENT),
           state:            this.ShipmentState.CREATED,
           courierName:      this.stringNext(),
           trackingNumber:   this.stringNext(),
@@ -436,7 +464,7 @@ class Factory {
   shipmentSpecimen(options = {}) {
     var shipment = this.defaultShipment(),
         specimen = this.defaultSpecimen(),
-        defaults = { id:           this.domainEntityNameNext(ENTITY_NAME_SHIPMENT),
+        defaults = { id:           domainEntityNameNext(ENTITY_NAME_SHIPMENT),
                      state:        this.ShipmentItemState.PRESENT,
                      shipmentId:   shipment.id,
                      specimen:     specimen
@@ -452,7 +480,7 @@ class Factory {
   }
 
   user(options =  { membership: {} }) {
-    var defaults = { id:         this.domainEntityNameNext(ENTITY_NAME_USER),
+    var defaults = { id:         domainEntityNameNext(ENTITY_NAME_USER),
                      name:       this.stringNext(),
                      email:      this.stringNext(),
                      avatarUrl:  null,
@@ -481,7 +509,7 @@ class Factory {
    * multiple selection.
    */
   annotationType(options = {}) {
-    var defaults = { id:            this.domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE),
+    var defaults = { id:            domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE),
                      name:          this.stringNext(),
                      description:   null,
                      valueType:     this.AnnotationValueType.TEXT,
@@ -502,7 +530,7 @@ class Factory {
       }
 
       if (_.isUndefined(options.options)) {
-        options.options = _.range(2).map(() => this.domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE));
+        options.options = _.range(2).map(() => domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE));
       }
     }
 
@@ -522,7 +550,7 @@ class Factory {
   }
 
   collectionSpecimenDescription(options = {}) {
-    var defaults = { id:                          this.domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
+    var defaults = { id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
                      name:                        this.stringNext(),
                      description:                 faker.lorem.sentences(4),
                      units:                       'mL',
@@ -628,7 +656,7 @@ class Factory {
    * This is a value object, so it does not have the common fields.
    */
   location(options = {}) {
-    var defaults = { id:             this.domainEntityNameNext(ENTITY_NAME_LOCATION),
+    var defaults = { id:             domainEntityNameNext(ENTITY_NAME_LOCATION),
                      name:           this.stringNext(),
                      street:         faker.address.streetAddress(),
                      city:           faker.address.city(),
@@ -665,30 +693,21 @@ class Factory {
     };
   }
 
-  membershipEntityData() {
+  entityInfo() {
     return {
       id:   this.stringNext(),
       name: this.stringNext()
     };
   }
 
-  membershipEntitySet() {
+  entitySet() {
     return { allEntities: false, entityData: [] };
   }
 
-  membershipBaseDefaults() {
-    return {
-      id:           this.domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE),
-      name:         this.stringNext(),
-      description:  faker.lorem.sentences(4),
-      studyData:    this.membershipEntitySet(),
-      centreData:   this.membershipEntitySet()
-    };
-  }
-
   membershipBase(options = {}) {
-    var validKeys = this.commonFieldNames.concat(Object.keys(this.membershipBaseDefaults())),
-        m = Object.assign(this.membershipBaseDefaults(), this.commonFields(), _.pick(options, validKeys));
+    const defaults  = membershipBaseDefaults.call(this),
+          validKeys = Object.keys(defaults),
+          m         = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_MEMBERSHIP_BASE, m);
     return m;
   }
@@ -698,9 +717,9 @@ class Factory {
   }
 
   membership(options = {}) {
-    var defaults =  { userData: [] },
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults), Object.keys(this.membershipBaseDefaults())),
-        m = Object.assign({}, defaults, this.membershipBase(options), _.pick(options, validKeys));
+    const defaults  =  Object.assign({ userData: [] }, membershipBaseDefaults.call(this)),
+          validKeys = Object.keys(defaults),
+          m         = Object.assign({}, defaults, this.membershipBase(options), _.pick(options, validKeys))
     this.updateDefaultEntity(ENTITY_NAME_MEMBERSHIP, m);
     return m;
   }
@@ -711,6 +730,30 @@ class Factory {
 
   userMembership(options) {
     return this.membershipBase(options);
+  }
+
+  accessItem(options = {}) {
+    const defaults = accessItemDefaults.call(this),
+          validKeys = Object.keys(defaults),
+          item      = Object.assign({}, accessItemDefaults, this.commonFields(), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_ACCESS_ITEM, item);
+    return item;
+  }
+
+  role(options = {}) {
+    var defaults  = Object.assign({ userData: [ this.entityInfo() ] }, accessItemDefaults.call(this)),
+        validKeys = Object.keys(defaults),
+        role      = Object.assign({}, defaults, this.accessItem(options), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_ROLE, role);
+    return role;
+  }
+
+  permission(options = {}) {
+    var defaults   = accessItemDefaults.call(this),
+        validKeys  = Object.keys(defaults),
+        permission = Object.assign({}, defaults, this.accessItem(options), _.pick(options, validKeys));
+    this.updateDefaultEntity(ENTITY_NAME_PERMISSION, permission);
+    return permission;
   }
 
 }

@@ -112,12 +112,8 @@ describe('Membership', function() {
         expect(entity).toEqual(jasmine.any(this.Membership));
       };
 
-      this.url = url;
-
-      //---
-
-      function url() {
-        const args = [ 'access/memberships' ].concat(_.toArray(arguments));
+      this.url = (...pathItems) => {
+        const args = [ 'access/memberships' ].concat(pathItems);
         return MembershipSpecCommon.url.apply(null, args);
       }
     });
@@ -258,14 +254,14 @@ describe('Membership', function() {
   it('can add a membership', function() {
     var options =
         {
-          userData: [ this.Factory.membershipEntityData() ],
+          userData: [ this.Factory.entityInfo() ],
           studyData: {
             allEntities: false,
-            entityData: [ this.Factory.membershipEntityData() ]
+            entityData: [ this.Factory.entityInfo() ]
           },
           centreData: {
             allEntities: false,
-            entityData: [ this.Factory.membershipEntityData() ]
+            entityData: [ this.Factory.entityInfo() ]
           }
         },
         f       = this.fixtures(options),
@@ -289,7 +285,7 @@ describe('Membership', function() {
 
   describe('when removing a membership', function() {
 
-    it('should remove a membership', function() {
+    it('the membership should be removed', function() {
       var membership = this.Membership.create(this.Factory.membership()),
           url = this.url(membership.id, membership.version);
 
@@ -365,7 +361,7 @@ describe('Membership', function() {
   describe('when removing a user', function() {
 
     it('can remove a user', function() {
-      var f       = this.fixtures({ userData: [ this.Factory.membershipEntityData() ] }),
+      var f       = this.fixtures({ userData: [ this.Factory.entityInfo() ] }),
           userId  = f.jsonMembership.userData[0].id,
           url     = this.url('user', f.membership.id, f.membership.version, userId);
 

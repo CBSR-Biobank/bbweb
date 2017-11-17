@@ -38,7 +38,7 @@ function MembershipSpecCommon(EntityTestSuiteMixin, Factory) {
   }
 
   function jsonEntityData() {
-    return Factory.membershipEntityData();
+    return Factory.entityInfo();
   }
 
   function membershipFromConstructor() {
@@ -78,7 +78,7 @@ function MembershipSpecCommon(EntityTestSuiteMixin, Factory) {
   }
 
   function jsonMembershipWithEntities() {
-    var entityData = [ Factory.membershipEntityData() ];
+    var entityData = [ Factory.entityInfo() ];
     return this.jsonObjWithEntities(entityData, entityData);
   }
 

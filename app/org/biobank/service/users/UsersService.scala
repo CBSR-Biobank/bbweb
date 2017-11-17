@@ -3,7 +3,6 @@ package org.biobank.service.users
 import akka.actor.ActorRef
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
-import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.ValidationKey
 import org.biobank.domain.access.PermissionId
@@ -31,7 +30,7 @@ trait UsersService extends BbwebService {
    *
    * @param id the ID of the user to return.
    */
-  def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[UserDto]
+  def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[User]
 
   /**
    * Should not be used by the REST API since permissions are not checked.
@@ -49,11 +48,7 @@ trait UsersService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the users.
    */
-  def getUsers(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[UserDto]]
-
-  def getUserNames(requestUserId: UserId,
-                   filter:        FilterString,
-                   sort:          SortString): ServiceValidation[Seq[NameAndStateDto]]
+  def getUsers(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[User]]
 
   /**
    * Returns the counts of all users and also counts of users categorized by state.
@@ -67,7 +62,7 @@ trait UsersService extends BbwebService {
   /**
    * Permissions not checked since anyone can attempt a login.
    */
-  def loginAllowed(email: String, enteredPwd: String): ServiceValidation[UserDto]
+  def loginAllowed(email: String, enteredPwd: String): ServiceValidation[User]
 
   /**
    * Permissions not checked since anyone can register as a user.
@@ -104,15 +99,11 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[UserDto] = {
+  def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[User] = {
     for {
       hasPermission <- accessService.hasPermission(requestUserId, PermissionId.UserRead)
       user          <- userRepository.getByKey(id)
-      dto           <- {
-        if (hasPermission || (requestUserId == id)) userToDto(user, membershipToDto(user)).successNel[String]
-        else Unauthorized.failureNel[UserDto]
-      }
-    } yield dto
+    } yield user
   }
 
   def getUser(id: UserId): ServiceValidation[User] = {
@@ -122,37 +113,25 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
 
   def getUsers(requestUserId: UserId,
                filter:        FilterString,
-               sort:          SortString): ServiceValidation[Seq[UserDto]] = {
+               sort:          SortString): ServiceValidation[Seq[User]] = {
     whenPermitted(requestUserId, PermissionId.UserRead) { () =>
       val allUsers = userRepository.getValues.toSet
       val sortStr = if (sort.expression.isEmpty) new SortString("email")
                     else sort
-      val v = for {
-          users           <- UserFilter.filterUsers(allUsers, filter)
-          sortExpressions <- { QuerySortParser(sortStr).
-                                toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-          firstSort       <- { sortExpressions.headOption.
-                                toSuccessNel(ServiceError("at least one sort expression is required")) }
-          sortFunc        <- { User.sort2Compare.get(firstSort.name).
-                                toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-        } yield {
-          val result = users.toSeq.sortWith(sortFunc)
-          if (firstSort.order == AscendingOrder) result
-          else result.reverse
-        }
-
-      v.map { users =>
-        users
-          .map { user => userToDto(user, membershipToDto(user)) }
-        //.leftMap(err => InternalServerError.nel)
+      for {
+        users           <- UserFilter.filterUsers(allUsers, filter)
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { User.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = users.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
       }
     }
-  }
-
-  def getUserNames(requestUserId: UserId,
-                   filter:        FilterString,
-                   sort:          SortString): ServiceValidation[Seq[NameAndStateDto]] = {
-    getUsers(requestUserId, filter, sort).map(_.map(c => NameAndStateDto(c.id, c.name, c.state.id)))
   }
 
   def getCountsByStatus(requestUserId: UserId): ServiceValidation[UserCountsByStatus] = {
@@ -175,7 +154,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     }
   }
 
-  def loginAllowed(email: String, enteredPwd: String): ServiceValidation[UserDto] = {
+  def loginAllowed(email: String, enteredPwd: String): ServiceValidation[User] = {
     for {
       user <- userRepository.getByEmail(email)
       active <- user match {
@@ -186,7 +165,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
         if (passwordHasher.valid(user.password, user.salt, enteredPwd)) user.successNel[String]
         else InvalidPassword.failureNel[User]
       }
-    } yield userToDto(user, membershipToDto(user))
+    } yield user
   }
 
   def register(cmd: RegisterUserCmd): Future[ServiceValidation[User]] = {
@@ -226,49 +205,6 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
         Future.successful(Unauthorized.failureNel[User])
       }
     )
-  }
-
-  private def membershipToDto(user: User): ServiceValidation[UserMembershipDto] = {
-    for {
-      membership <- accessService.getUserMembership(user.id)
-      studies <- {
-        membership.studyData.ids
-          .map(studyRepository.getByKey)
-          .toList.sequenceU
-          .leftMap(err => InternalServerError.nel)
-      }
-      centres <- {
-        membership.centreData.ids
-          .map(centreRepository.getByKey)
-          .toList.sequenceU
-          .leftMap(err => InternalServerError.nel)
-      }
-    } yield {
-      val studyEntitySet  = accessService.entitySetDto(membership.studyData.allEntities, studies.toSet)
-      val centreEntitySet  = accessService.entitySetDto(membership.centreData.allEntities, centres.toSet)
-
-      UserMembershipDto(id           = membership.id.id,
-                        version      = membership.version,
-                        timeAdded    = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                        timeModified = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
-                        name         = membership.name,
-                        description  = membership.description,
-                        studyData    = studyEntitySet,
-                        centreData   = centreEntitySet)
-    }
-  }
-
-  private def userToDto(user: User, membership: ServiceValidation[UserMembershipDto]): UserDto = {
-    UserDto(id           = user.id.id,
-            version      = user.version,
-            timeAdded    = user.timeAdded,
-            timeModified = user.timeModified,
-            state        = user.state,
-            name         = user.name,
-            email        = user.email,
-            avatarUrl    = user.avatarUrl,
-            roles        = accessService.getUserRoles(user.id),
-            membership   = membership.toOption)
   }
 
 }
