@@ -3,10 +3,10 @@ package org.biobank.controllers.centres
 import java.time.OffsetDateTime
 import org.biobank.TestUtils
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.dto.{CentreLocationInfo}
 import org.biobank.domain.centre._
 import org.biobank.domain.participants._
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.biobank.service.centres.CentreLocationInfo
 import play.api.libs.json._
 import play.api.test.Helpers._
 

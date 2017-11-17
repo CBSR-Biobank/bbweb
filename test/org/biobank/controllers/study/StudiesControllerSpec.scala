@@ -410,7 +410,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     describe("POST /api/studies") {
 
-      it("111 add a study") {
+      it("add a study") {
         val study = factory.createDisabledStudy
         val cmdJson = Json.obj(
             "name" -> study.name,

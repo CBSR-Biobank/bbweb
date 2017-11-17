@@ -123,7 +123,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     else DomainError(s"shipment specimen is not in extra state").failureNel[Boolean]
   }
 
-  def createDto(specimenDto: SpecimenDto): ShipmentSpecimenDto =
+  def createDto(specimenDto: SpecimenDto): ShipmentSpecimenDto = {
     ShipmentSpecimenDto(id                  = this.id.id,
                         version             = this.version,
                         timeAdded           = this.timeAdded,
@@ -132,6 +132,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
                         shipmentContainerId = this.shipmentContainerId.map(id => id.id),
                         state               = this.state.toString,
                         specimen            = specimenDto)
+  }
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {

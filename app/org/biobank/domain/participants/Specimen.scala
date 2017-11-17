@@ -2,12 +2,13 @@ package org.biobank.domain.participants
 
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey
-import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
+import org.biobank.dto.SpecimenDto
 import org.biobank.domain._
 import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
 import org.biobank.domain.study.{CollectionSpecimenDescription, SpecimenDescriptionId, StudyValidations}
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
 import org.biobank.infrastructure.EnumUtils._
+import org.biobank.service.centres.CentreLocationInfo
 import play.api.libs.json._
 import scalaz.Scalaz._
 

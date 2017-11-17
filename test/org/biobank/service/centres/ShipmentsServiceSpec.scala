@@ -8,7 +8,7 @@ import org.biobank.domain.centre._
 import org.biobank.domain.study._
 import org.biobank.domain.participants._
 import org.biobank.domain.user._
-import org.biobank.service.{FilterString, SortString}
+import org.biobank.service.FilterString
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -340,8 +340,8 @@ class ShipmentsServiceSpec
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
           shipmentsService.getShipment(user.id, f.shipment.id)
-            .mustSucceed { dto =>
-              dto.id must be (f.shipment.id.id)
+            .mustSucceed { specimen =>
+              specimen.id must be (f.shipment.id)
             }
         }
       }
@@ -366,7 +366,7 @@ class ShipmentsServiceSpec
         val f = new UsersWithShipmentAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          shipmentsService.getShipments(user.id, new FilterString(""), new SortString(""))
+          shipmentsService.getShipments(user.id, new FilterString(""))
             .mustSucceed { result =>
               result must have size 1
             }
@@ -376,13 +376,13 @@ class ShipmentsServiceSpec
       it("users cannot access") {
         val f = new UsersWithShipmentAccessFixture
         info("no membership user")
-        shipmentsService.getShipments(f.noMembershipUser.id, new FilterString(""), new SortString(""))
+        shipmentsService.getShipments(f.noMembershipUser.id, new FilterString(""))
           .mustSucceed { result =>
             result must have size 0
           }
 
         info("no permission user")
-        shipmentsService.getShipments(f.noShippingPermissionUser.id, new FilterString(""), new SortString(""))
+        shipmentsService.getShipments(f.noShippingPermissionUser.id, new FilterString(""))
           .mustFail("Unauthorized")
       }
 
@@ -396,7 +396,7 @@ class ShipmentsServiceSpec
           info(label)
           shipmentsService.getShipmentSpecimen(user.id, f.shipment.id, shipmentSpecimen.id)
             .mustSucceed { reply =>
-              reply.id must be (shipmentSpecimen.id.id)
+              reply.id must be (shipmentSpecimen.id)
             }
         }
       }
@@ -421,8 +421,7 @@ class ShipmentsServiceSpec
           info(label)
           shipmentsService.getShipmentSpecimens(user.id,
                                                 f.shipment.id,
-                                                new FilterString(""),
-                                                new SortString(""))
+                                                new FilterString(""))
             .mustSucceed { reply =>
               reply must have size 1
             }
@@ -434,15 +433,13 @@ class ShipmentsServiceSpec
         info("no membership user")
         shipmentsService.getShipmentSpecimens(f.noMembershipUser.id,
                                               f.shipment.id,
-                                              new FilterString(""),
-                                              new SortString(""))
+                                              new FilterString(""))
           .mustFail("Unauthorized")
 
         info("no permission user")
         shipmentsService.getShipmentSpecimens(f.noShippingPermissionUser.id,
                                               f.shipment.id,
-                                              new FilterString(""),
-                                              new SortString(""))
+                                              new FilterString(""))
           .mustFail("Unauthorized")
       }
 
@@ -512,7 +509,7 @@ class ShipmentsServiceSpec
           forAll(updateCommandsTable(user.id, f.shipment)) { cmd =>
             shipmentRepository.put(f.shipment) // restore it to it's previous state
             shipmentsService.processCommand(cmd).futureValue mustSucceed { reply =>
-              reply.id must be (f.shipment.id.id)
+              reply.id must be (f.shipment.id)
             }
           }
         }
@@ -545,7 +542,7 @@ class ShipmentsServiceSpec
 
             addToRepository(shipment)
             shipmentsService.processCommand(cmd).futureValue mustSucceed { reply =>
-              reply.id must be (shipment.id.id)
+              reply.id must be (shipment.id)
             }
           }
         }
@@ -586,7 +583,7 @@ class ShipmentsServiceSpec
             }
 
             shipmentsService.processShipmentSpecimenCommand(cmd).futureValue mustSucceed { reply =>
-              reply.id must be (f.shipment.id.id)
+              reply.id must be (f.shipment.id)
             }
           }
         }

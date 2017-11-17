@@ -11,6 +11,7 @@ import org.biobank.domain.user._
 import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.scalatest._
+import org.biobank.service.centres.CentreLocationInfo
 //import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._
 

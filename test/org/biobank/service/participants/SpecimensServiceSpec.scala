@@ -119,8 +119,8 @@ class SpecimensServiceSpec
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
           specimensService.get(user.id, f.specimen.id)
-            .mustSucceed { dto =>
-              dto.id must be (f.specimen.id.id)
+            .mustSucceed { specimen =>
+              specimen.id must be (f.specimen.id)
             }
         }
       }
@@ -146,8 +146,8 @@ class SpecimensServiceSpec
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
           specimensService.getByInventoryId(user.id, f.specimen.inventoryId)
-            .mustSucceed { dto =>
-              dto.id must be (f.specimen.id.id)
+            .mustSucceed { specimen =>
+              specimen.id must be (f.specimen.id)
             }
         }
       }

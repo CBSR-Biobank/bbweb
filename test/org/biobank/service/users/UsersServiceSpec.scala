@@ -121,7 +121,7 @@ class UsersServiceSpec
       it("retrieve a user") {
         val f = usersFixture
         usersService.getUserIfAuthorized(f.adminUser.id, f.user.id) mustSucceed { u =>
-          u.id must be (f.user.id.id)
+          u.id must be (f.user.id)
         }
       }
 

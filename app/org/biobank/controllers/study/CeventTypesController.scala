@@ -3,6 +3,7 @@ package org.biobank.controllers.study
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.study.{StudyId, CollectionEventTypeId}
+import org.biobank.dto.NameDto
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.PagedResults
 import org.biobank.service.studies.CollectionEventTypeService
@@ -58,11 +59,13 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            names <- service.getNames(request.authInfo.userId,
-                                      studyId,
-                                      filterAndSort.filter,
-                                      filterAndSort.sort)
-          } yield names
+            ceventTypes   <- service.list(request.authInfo.userId,
+                                          studyId,
+                                          filterAndSort.filter,
+                                          filterAndSort.sort)
+          } yield {
+            ceventTypes.map(et => NameDto(et.id.id, et.name))
+          }
         }
       )
     }

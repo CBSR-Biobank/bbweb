@@ -1,12 +1,12 @@
 package org.biobank.controllers.study
 
 import java.time.OffsetDateTime
-import org.biobank.dto.NameDto
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.AnnotationType
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.study._
 import org.biobank.domain.study.{ CollectionEventType, Study }
+import org.biobank.dto.NameDto
 import org.biobank.fixture.ControllerFixture
 import org.biobank.fixture._
 import org.scalatest.prop.TableDrivenPropertyChecks._

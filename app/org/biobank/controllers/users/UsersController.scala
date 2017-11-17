@@ -76,10 +76,12 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
    * Retrieves the user associated with the token, if it is valid.
    */
   def authenticateUser(): Action[Unit] = action(parse.empty) { implicit request =>
-      usersService.getUserIfAuthorized(request.authInfo.userId, request.authInfo.userId).fold(
-        err  => Unauthorized,
-        user =>  Ok(user)
-      )
+      usersService.getUserIfAuthorized(request.authInfo.userId, request.authInfo.userId)
+        .map(user =>  userToDto(user, accessService.getUserRoles(user.id)))
+        .fold(
+          err  => Unauthorized,
+          dto =>  Ok(dto)
+        )
     }
 
   /**
@@ -108,7 +110,10 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             users      <- usersService.getUsers(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(users.size)
-            results    <- PagedResults.create(users, pagedQuery.page, pagedQuery.limit)
+            dtos       <- {
+              users.map(user => userToDto(user, accessService.getUserRoles(user.id))).successNel[String]
+            }
+            results    <- PagedResults.create(dtos, pagedQuery.page, pagedQuery.limit)
           } yield results
         }
       )
@@ -132,7 +137,9 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
 
   /** Retrieves the user for the given id as JSON */
   def user(id: UserId): Action[Unit] = action(parse.empty) { implicit request =>
-      validationReply(usersService.getUserIfAuthorized(request.authInfo.userId, id))
+      val v = usersService.getUserIfAuthorized(request.authInfo.userId, id)
+        .map(user =>  userToDto(user, accessService.getUserRoles(user.id)))
+      validationReply(v)
     }
 
   def registerUser(): Action[JsValue] =

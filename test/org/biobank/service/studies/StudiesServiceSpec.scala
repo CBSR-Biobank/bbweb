@@ -251,34 +251,6 @@ class StudiesServiceSpec
 
     }
 
-    describe("for listing study names") {
-
-      it("users can access") {
-        val f = new UsersWithStudyAccessFixture
-        forAll (f.usersCanReadTable) { (user, label) =>
-          info(label)
-          studiesService.getStudyNames(user.id, new FilterString(""), new SortString(""))
-            .mustSucceed { studies =>
-              studies must have length (1)
-            }
-        }
-      }
-
-      it("users cannot access") {
-        val f = new UsersWithStudyAccessFixture
-        info("no membership user")
-        studiesService.getStudyNames(f.noMembershipUser.id, new FilterString(""), new SortString(""))
-          .mustSucceed { studies =>
-            studies must have length (0)
-          }
-
-        info("no permission user")
-        studiesService.getStudyNames(f.nonStudyPermissionUser.id, new FilterString(""), new SortString(""))
-          .mustFail("Unauthorized")
-      }
-
-    }
-
     describe("for retrieving a study") {
 
       it("users can access") {

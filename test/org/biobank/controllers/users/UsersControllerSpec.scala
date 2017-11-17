@@ -876,7 +876,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         ()
       }
 
-      it("111 not allow mismatched tokens in request for an non asyncaction") {
+      it("not allow mismatched tokens in request for an non asyncaction") {
         val plainPassword = nameGenerator.next[String]
         val user = createActiveUserInRepository(plainPassword)
         val validToken = doLogin(user.email, plainPassword)

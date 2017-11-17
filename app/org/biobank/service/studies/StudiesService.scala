@@ -1,4 +1,4 @@
- package org.biobank.service.studies
+package org.biobank.service.studies
 
 import akka.actor._
 import akka.pattern.ask
@@ -9,14 +9,14 @@ import org.biobank.domain.centre.{Centre, CentreRepository}
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.study._
 import org.biobank.domain.user.UserId
-import org.biobank.dto._
+//import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.ProcessingTypeEvents._
 import org.biobank.infrastructure.event.StudyEvents._
 import org.biobank.service._
 import org.biobank.service.access.AccessService
-import org.biobank.service.centres.CentreServicePermissionChecks
+import org.biobank.service.centres.{CentreServicePermissionChecks, CentreLocation}
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent._
 import scalaz.Scalaz._
@@ -50,9 +50,6 @@ trait StudiesService extends BbwebService {
    */
   def getStudies(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]]
 
-  def getStudyNames(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[NameAndStateDto]]
-
   def getStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Study]
 
   def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]]
@@ -71,7 +68,7 @@ trait StudiesService extends BbwebService {
   def specimenLinkTypesForProcessingType(processingTypeId: ProcessingTypeId)
       : ServiceValidation[Set[SpecimenLinkType]]
 
-  def getProcessingDto(studyId: StudyId): ServiceValidation[ProcessingDto]
+  //def getProcessingDto(studyId: StudyId): ServiceValidation[ProcessingDto]
 
   def processCommand(cmd: StudyCommand): Future[ServiceValidation[Study]]
 
@@ -167,11 +164,6 @@ class StudiesServiceImpl @Inject()(
     }
   }
 
-  def getStudyNames(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[NameAndStateDto]] = {
-    getStudies(requestUserId, filter, sort).map(_.map(s => NameAndStateDto(s.id.id, s.name, s.state.id)))
-  }
-
   def getStudy(requestUserId: UserId, studyId: StudyId) : ServiceValidation[Study] = {
     whenPermittedAndIsMember(requestUserId,
                              PermissionId.StudyRead,
@@ -235,9 +227,9 @@ class StudiesServiceImpl @Inject()(
     }
   }
 
-  def getProcessingDto(studyId: StudyId): ServiceValidation[ProcessingDto] = {
-    "deprectated: annot type refactor".failureNel[ProcessingDto]
-  }
+  // def getProcessingDto(studyId: StudyId): ServiceValidation[ProcessingDto] = {
+  //   "deprectated: annot type refactor".failureNel[ProcessingDto]
+  // }
 
   private def withStudy[T](studyId: StudyId)(fn: Study => ServiceValidation[T])
       : ServiceValidation[T] = {

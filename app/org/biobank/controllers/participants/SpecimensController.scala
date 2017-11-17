@@ -31,12 +31,16 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
    */
   def get(id: SpecimenId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.get(request.authInfo.userId, id))
+      val v = service.get(request.authInfo.userId, id)
+        .flatMap { specimen => service.specimenToDto(specimen) }
+      validationReply(v)
     }
 
   def getByInventoryId(invId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.getByInventoryId(request.authInfo.userId, invId))
+      val v = service.getByInventoryId(request.authInfo.userId, invId)
+        .flatMap { specimen => service.specimenToDto(specimen) }
+      validationReply(v)
     }
 
   def list(ceventId: CollectionEventId): Action[Unit] =
@@ -44,10 +48,11 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
       validationReply(
         Future {
           for {
-            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            specimens  <- service.list(request.authInfo.userId, ceventId, pagedQuery.sort)
-            validPage  <- pagedQuery.validPage(specimens.size)
-            results    <- PagedResults.create(specimens, pagedQuery.page, pagedQuery.limit)
+            pagedQuery   <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+            specimens    <- service.list(request.authInfo.userId, ceventId, pagedQuery.sort)
+            validPage    <- pagedQuery.validPage(specimens.size)
+            specimenDtos <- specimens.map(s => service.specimenToDto(s)).toList.sequenceU
+            results      <- PagedResults.create(specimenDtos, pagedQuery.page, pagedQuery.limit)
           } yield results
         })
     }

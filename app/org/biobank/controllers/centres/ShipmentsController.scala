@@ -6,11 +6,13 @@ import play.api.libs.json._
 import play.api.{Environment, Logger}
 import play.api.mvc._
 import org.biobank.controllers._
-import org.biobank.domain.centre.{CentreId, ShipmentId, ShipmentSpecimenId}
-import org.biobank.dto.ShipmentDto
-import org.biobank.service.{FilterString, ServiceValidation, SortString}
-import org.biobank.service.centres.ShipmentsService
-import org.biobank.service.PagedResults
+import org.biobank.domain.centre.{CentreId, Shipment, ShipmentId, ShipmentSpecimen, ShipmentSpecimenId}
+import org.biobank.domain.user.UserId
+import org.biobank.dto.{ShipmentDto, ShipmentSpecimenDto}
+import org.biobank.infrastructure.AscendingOrder
+import org.biobank.service.{FilterString, ServiceValidation, SortString, PagedResults, QuerySortParser}
+import org.biobank.service.centres.{CentresService, ShipmentsService, CentreLocationInfo}
+import org.biobank.service.participants.SpecimensService
 
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
@@ -24,7 +26,9 @@ import scalaz.Validation.FlatMap._
 class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
                                      val action:           BbwebAction,
                                      val env:              Environment,
-                                     val shipmentsService: ShipmentsService)
+                                     val centresService:   CentresService,
+                                     val shipmentsService: ShipmentsService,
+                                     val specimensService: SpecimensService)
                                  (implicit val ec: ExecutionContext)
     extends CommandController(controllerComponents) {
 
@@ -39,7 +43,9 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
 
   def get(id: ShipmentId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(shipmentsService.getShipment(request.authInfo.userId, id))
+      val v = shipmentsService.getShipment(request.authInfo.userId, id)
+        .flatMap{ shipment => shipmentToDto(request.authInfo.userId, shipment) }
+      validationReply(v)
     }
 
   def list: Action[Unit] =
@@ -49,10 +55,25 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             shipments  <- shipmentsService.getShipments(request.authInfo.userId,
-                                                        pagedQuery.filter,
-                                                        pagedQuery.sort)
+                                                        pagedQuery.filter)
             validPage  <- pagedQuery.validPage(shipments.size)
-            results    <- PagedResults.create(shipments, pagedQuery.page, pagedQuery.limit)
+            sortExpressions <- {
+              val sortStr = if (pagedQuery.sort.expression.isEmpty) new SortString("courierName")
+                            else pagedQuery.sort
+              QuerySortParser(sortStr)
+                .toSuccessNel(ControllerError(s"could not parse sort expression: ${pagedQuery.sort}"))
+            }
+            sortFunc <- {
+              ShipmentDto.sort2Compare.get(sortExpressions(0).name).
+                toSuccessNel(ControllerError(s"invalid sort field: ${sortExpressions(0).name}"))
+            }
+            shipmentDtos <-shipments.map(s => shipmentToDto(request.authInfo.userId, s)).toList.sequenceU
+            results <- {
+              val results = shipmentDtos.sortWith(sortFunc)
+              val sortedResults = if (sortExpressions(0).order == AscendingOrder) results
+                                  else results.reverse
+              PagedResults.create(sortedResults, pagedQuery.page, pagedQuery.limit)
+            }
           } yield results
         }
       )
@@ -66,12 +87,27 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
             pagedQuery        <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             shipmentSpecimens <- shipmentsService.getShipmentSpecimens(request.authInfo.userId,
                                                                        shipmentId,
-                                                                       pagedQuery.filter,
-                                                                       pagedQuery.sort)
+                                                                       pagedQuery.filter)
             validPage         <- pagedQuery.validPage(shipmentSpecimens.size)
-            results           <- PagedResults.create(shipmentSpecimens,
-                                                     pagedQuery.page,
-                                                     pagedQuery.limit)
+            sortExpressions <- {
+              val sortStr = if (pagedQuery.sort.expression.isEmpty) new SortString("state")
+                            else pagedQuery.sort
+              QuerySortParser(sortStr)
+                .toSuccessNel(ControllerError(s"could not parse sort expression: ${pagedQuery.sort}"))
+            }
+            sortFunc          <- {
+              ShipmentSpecimenDto.sort2Compare.get(sortExpressions(0).name).
+                toSuccessNel(ControllerError(s"invalid sort field: ${sortExpressions(0).name}"))
+            }
+            ssDtos            <- {
+              shipmentSpecimens.map(ss => shipmentSpecimenToDto(request.authInfo.userId, ss)).toList.sequenceU
+            }
+            results           <- {
+              val results = ssDtos.sortWith(sortFunc)
+              val sortedResults = if (sortExpressions(0).order == AscendingOrder) results
+                                  else results.reverse
+              PagedResults.create(sortedResults, pagedQuery.page, pagedQuery.limit)
+            }
           } yield results
         }
       )
@@ -79,16 +115,20 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
 
   def canAddSpecimens(shipmentId: ShipmentId, specimenInventoryId: String): Action[Unit] =
     action(parse.empty) { request =>
-      validationReply(shipmentsService.shipmentCanAddSpecimen(request.authInfo.userId,
-                                                              shipmentId,
-                                                              specimenInventoryId))
+      val v = shipmentsService.shipmentCanAddSpecimen(request.authInfo.userId,
+                                                      shipmentId,
+                                                      specimenInventoryId)
+        .flatMap { specimen => specimensService.specimenToDto(specimen) }
+      validationReply(v)
     }
 
   def getSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(shipmentsService.getShipmentSpecimen(request.authInfo.userId,
-                                                           shipmentId,
-                                                           ShipmentSpecimenId(shipmentSpecimenId)))
+      val ss = shipmentsService.getShipmentSpecimen(request.authInfo.userId,
+                                                    shipmentId,
+                                                    ShipmentSpecimenId(shipmentSpecimenId))
+        .flatMap { specimen => shipmentSpecimenToDto(request.authInfo.userId, specimen) }
+      validationReply(ss)
     }
 
   def snapshot: Action[Unit] =
@@ -180,12 +220,47 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
     commandAction[ShipmentSpecimenExtraCmd](Json.obj("shipmentId" -> shipmentId))(processSpecimenCommand)
 
   private def processCommand(cmd: ShipmentCommand): Future[Result] = {
-    val future = shipmentsService.processCommand(cmd)
+    val future = shipmentsService.processCommand(cmd).map { validation =>
+        validation.flatMap(shipment => shipmentToDto(UserId(cmd.sessionUserId), shipment))
+      }
     validationReply(future)
   }
 
   private def processSpecimenCommand(cmd: ShipmentSpecimenCommand): Future[Result] = {
-    val future = shipmentsService.processShipmentSpecimenCommand(cmd)
+    val future = shipmentsService.processShipmentSpecimenCommand(cmd).map { validation =>
+        validation.flatMap(shipment => shipmentToDto(UserId(cmd.sessionUserId), shipment))
+      }
     validationReply(future)
+  }
+
+  private def shipmentToDto(requestUserId: UserId, shipment: Shipment): ServiceValidation[ShipmentDto] = {
+    for {
+      fromCentre       <- centresService.centreFromLocation(requestUserId, shipment.fromLocationId)
+      fromLocationName <- fromCentre.locationName(shipment.fromLocationId)
+      toCentre         <- centresService.centreFromLocation(requestUserId, shipment.toLocationId)
+      toLocationName   <- toCentre.locationName(shipment.toLocationId)
+      specimens        <- shipmentsService.getShipmentSpecimens(requestUserId,
+                                                                shipment.id,
+                                                                new FilterString(""))
+    } yield {
+      val fromLocationInfo = CentreLocationInfo(fromCentre.id.id,
+                                                shipment.fromLocationId.id,
+                                                fromLocationName)
+      val toLocationInfo = CentreLocationInfo(toCentre.id.id,
+                                              shipment.toLocationId.id,
+                                              toLocationName)
+
+      // TODO: update with container count when ready
+      ShipmentDto.create(shipment, fromLocationInfo, toLocationInfo, specimens.size, 0)
+    }
+  }
+
+  private def shipmentSpecimenToDto(requestUserId: UserId, shipmentSpecimen: ShipmentSpecimen)
+      : ServiceValidation[ShipmentSpecimenDto] = {
+    specimensService.get(requestUserId, shipmentSpecimen.specimenId).flatMap { specimen =>
+      specimensService.specimenToDto(specimen).map { specimenDto =>
+        shipmentSpecimen.createDto(specimenDto)
+      }
+    }
   }
 }

@@ -6,8 +6,8 @@ import org.biobank.domain.JsonHelper
 import org.biobank.domain.Location
 import org.biobank.domain.centre._
 import org.biobank.domain.study.Study
-import org.biobank.dto._
 import org.biobank.fixture.ControllerFixture
+import org.biobank.service.centres.CentreLocationInfo
 import play.api.libs.json._
 import play.api.test.Helpers._
 

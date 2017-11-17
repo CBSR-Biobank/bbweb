@@ -5,6 +5,7 @@ import org.biobank.domain.{EntityState, Location}
 import org.biobank.domain.access.RoleId._
 import org.biobank.domain.centre.Shipment
 import org.biobank.dto.access.UserMembershipDto
+import org.biobank.service.centres.CentreLocationInfo
 import play.api.libs.json._
 
 package dto {
@@ -79,58 +80,6 @@ package dto {
 
     implicit val userDtoWriter: Writes[UserDto] = Json.writes[UserDto]
 
-  }
-
-  final case class CentreLocation(centreId:     String,
-                                  locationId:   String,
-                                  centreName:   String,
-                                  locationName: String)
-
-  object CentreLocation {
-
-    implicit val centreLocationWriter: Writes[CentreLocation] = Json.writes[CentreLocation]
-
-  }
-
-  final case class CentreLocationInfo(centreId:   String,
-                                      locationId: String,
-                                      name:       String)
-
-  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  object CentreLocationInfo {
-
-    def apply(centreId: String,
-              locationId: String,
-              centreName: String,
-              locationName: String): CentreLocationInfo =
-      CentreLocationInfo(centreId, locationId, s"$centreName: $locationName")
-
-    implicit val centreLocationInfoWriter: Writes[CentreLocationInfo] = Json.writes[CentreLocationInfo]
-
-  }
-
-  final case class StudyCountsByStatus(total:         Long,
-                                       disabledCount: Long,
-                                       enabledCount:  Long,
-                                       retiredCount:  Long)
-
-  object StudyCountsByStatus {
-
-    implicit val studyCountsByStatusWriter: Writes[StudyCountsByStatus] = Json.writes[StudyCountsByStatus]
-  }
-
-  final case class CentreCountsByStatus(total: Long, disabledCount: Long, enabledCount: Long)
-
-  object CentreCountsByStatus {
-
-    implicit val centreCountsByStatusWriter: Writes[CentreCountsByStatus] = Json.writes[CentreCountsByStatus]
-  }
-
-  final case class UserCountsByStatus(total: Long, registeredCount: Long, activeCount: Long, lockedCount: Long)
-
-  object UserCountsByStatus {
-
-    implicit val userCountsByStatusWriter: Writes[UserCountsByStatus] = Json.writes[UserCountsByStatus]
   }
 
   final case class SpecimenDto(id:                       String,

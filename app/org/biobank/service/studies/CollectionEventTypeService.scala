@@ -8,7 +8,6 @@ import org.biobank.domain.access._
 import org.biobank.domain.study._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.user.UserId
-import org.biobank.dto.{ NameDto }
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
@@ -28,9 +27,6 @@ import scalaz.Validation.FlatMap._
  */
 @ImplementedBy(classOf[CollectionEventTypeServiceImpl])
 trait CollectionEventTypeService extends BbwebService {
-
-  def getNames(requestUserId: UserId, studyId: StudyId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[NameDto]]
 
   def collectionEventTypeWithId(requestUserId:         UserId,
                                 studyId:               StudyId,
@@ -69,32 +65,6 @@ class CollectionEventTypeServiceImpl @Inject()(
     with ServicePermissionChecks {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  def getNames(requestUserId: UserId, studyId: StudyId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[NameDto]] = {
-    whenPermittedAndIsMember(requestUserId,
-                             PermissionId.StudyRead,
-                             Some(studyId),
-                             None) { () =>
-      val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                    else sort
-      for {
-        eventTypes <- getEventTypes(studyId, filter)
-        sortExpressions <- {
-          QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
-        }
-        sortFunc <- {
-          CollectionEventType.sort2Compare.get(sortExpressions(0).name)
-            .toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
-        }
-      } yield  {
-        val result = eventTypes.toSeq.sortWith(sortFunc)
-        val seq = if (sortExpressions(0).order == AscendingOrder) result
-                  else result.reverse
-        seq.map(et => NameDto(et.id.id, et.name))
-      }
-    }
-  }
 
   def collectionEventTypeWithId(requestUserId:         UserId,
                                 studyId:               StudyId,

@@ -9,12 +9,13 @@ import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.user.UserId
-import org.biobank.dto.{CentreLocationInfo, SpecimenDto}
+import org.biobank.dto.SpecimenDto
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.service._
 import org.biobank.service.access.AccessService
+import org.biobank.service.centres.CentreLocationInfo
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent._
 import scalaz.Scalaz._
@@ -23,12 +24,14 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[SpecimensServiceImpl])
 trait SpecimensService extends BbwebService {
 
-  def get(requestUserId: UserId, id: SpecimenId): ServiceValidation[SpecimenDto]
+  def get(requestUserId: UserId, id: SpecimenId): ServiceValidation[Specimen]
 
-  def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[SpecimenDto]
+  def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[Specimen]
 
   def list(requestUserId: UserId, collectionEventId: CollectionEventId, sort: SortString)
-      : ServiceValidation[Seq[SpecimenDto]]
+      : ServiceValidation[Seq[Specimen]]
+
+  def specimenToDto(specimen: Specimen): ServiceValidation[SpecimenDto]
 
   def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]]
 
@@ -56,28 +59,28 @@ class SpecimensServiceImpl @Inject() (
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def get(requestUserId: UserId, id: SpecimenId): ServiceValidation[SpecimenDto] = {
+  def get(requestUserId: UserId, id: SpecimenId): ServiceValidation[Specimen] = {
     for {
       ceventSpecimen <- ceventSpecimenRepository.withSpecimenId(id)
       permitted      <- whenSpecimenPermitted(requestUserId,
                                               ceventSpecimen.ceventId)(_ => true.successNel[String])
       specimen       <- specimenRepository.getByKey(id)
-      dto            <- convertToDto(specimen)
-    } yield dto
+    } yield specimen
   }
 
-  def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[SpecimenDto] = {
+  def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[Specimen] = {
     for {
       specimen       <- specimenRepository.getByInventoryId(inventoryId)
       ceventSpecimen <- ceventSpecimenRepository.withSpecimenId(specimen.id)
-      permitted      <- whenSpecimenPermitted(requestUserId,
-                                              ceventSpecimen.ceventId)(_ => true.successNel[String])
-      dto            <- convertToDto(specimen)
-    } yield dto
+      permitted      <- {
+        whenSpecimenPermitted(requestUserId, ceventSpecimen.ceventId)(_ => true.successNel[String])
+      }
+    } yield specimen
   }
 
-  def list(requestUserId: UserId, collectionEventId: CollectionEventId, sort: SortString)
-      : ServiceValidation[Seq[SpecimenDto]] = {
+  def list(requestUserId:     UserId,
+           collectionEventId: CollectionEventId,
+           sort:              SortString): ServiceValidation[Seq[Specimen]] = {
 
     def getSpecimens(ceventId: CollectionEventId): ServiceValidation[List[Specimen]] = {
       val sortStr = if (sort.expression.isEmpty) new SortString("inventoryId")
@@ -102,7 +105,7 @@ class SpecimensServiceImpl @Inject() (
     for {
       cevent    <- collectionEventRepository.getByKey(collectionEventId)
       permitted <- whenSpecimenPermitted(requestUserId, cevent.id)(_ => true.successNel[String])
-      specimens <- getSpecimens(cevent.id).flatMap { specimens => specimens.map(convertToDto).sequenceU }
+      specimens <- getSpecimens(cevent.id)
     } yield specimens
   }
 
@@ -190,7 +193,7 @@ class SpecimensServiceImpl @Inject() (
     )
   }
 
-  private def convertToDto(specimen: Specimen): ServiceValidation[SpecimenDto] = {
+  def specimenToDto(specimen: Specimen): ServiceValidation[SpecimenDto] = {
     for {
       ceventSpecimen     <- ceventSpecimenRepository.withSpecimenId(specimen.id)
       cevent             <- collectionEventRepository.getByKey(ceventSpecimen.ceventId)

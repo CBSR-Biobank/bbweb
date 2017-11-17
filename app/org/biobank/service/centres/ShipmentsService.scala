@@ -10,12 +10,10 @@ import org.biobank.domain.access.PermissionId
 import org.biobank.domain.participants._
 import org.biobank.domain.study.CollectionEventTypeRepository
 import org.biobank.domain.user.UserId
-import org.biobank.dto.{CentreLocationInfo, ShipmentDto, ShipmentSpecimenDto, SpecimenDto}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.ShipmentEvents._
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
-import org.biobank.infrastructure.AscendingOrder
 import org.biobank.service.participants.SpecimensService
 import org.biobank.service._
 import org.biobank.service.access.AccessService
@@ -29,7 +27,7 @@ import scalaz._
 @ImplementedBy(classOf[ShipmentsServiceImpl])
 trait ShipmentsService extends BbwebService {
 
-  def getShipment(requestUserId: UserId, id: ShipmentId): ServiceValidation[ShipmentDto]
+  def getShipment(requestUserId: UserId, id: ShipmentId): ServiceValidation[Shipment]
 
   /**
    * Returns a set of shipments to or from a Centre. The shipments can be filtered and or sorted using
@@ -41,8 +39,7 @@ trait ShipmentsService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the shipments.
    */
-  def getShipments(requestUserId: UserId, filter: FilterString, sort: SortString):
-      ServiceValidation[List[ShipmentDto]]
+  def getShipments(requestUserId: UserId, filter: FilterString): ServiceValidation[Set[Shipment]]
 
   /**
    * Returns a set of shipment specimens. The entities can be filtered and or sorted using expressions.
@@ -56,22 +53,21 @@ trait ShipmentsService extends BbwebService {
    */
   def getShipmentSpecimens(requestUserId: UserId,
                            shipmentId:    ShipmentId,
-                           filter:        FilterString,
-                           sort:          SortString): ServiceValidation[Seq[ShipmentSpecimenDto]]
+                           filter:        FilterString): ServiceValidation[Set[ShipmentSpecimen]]
 
   def shipmentCanAddSpecimen(requestUserId: UserId, shipmentId: ShipmentId, shipmentSpecimenId: String)
-      : ServiceValidation[SpecimenDto]
+      : ServiceValidation[Specimen]
 
   def getShipmentSpecimen(requestUserId:      UserId,
                           shipmentId:         ShipmentId,
-                          shipmentSpecimenId: ShipmentSpecimenId): ServiceValidation[ShipmentSpecimenDto]
+                          shipmentSpecimenId: ShipmentSpecimenId): ServiceValidation[ShipmentSpecimen]
 
-  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]]
+  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[Shipment]]
 
   def removeShipment(cmd: ShipmentRemoveCmd): Future[ServiceValidation[Boolean]]
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand):
-      Future[ServiceValidation[ShipmentDto]]
+      Future[ServiceValidation[Shipment]]
 
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
@@ -100,50 +96,26 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getShipment(requestUserId: UserId, id: ShipmentId): ServiceValidation[ShipmentDto] = {
-    whenShipmentPermitted(requestUserId, id) { shipment =>
-      getShipmentDto(shipment)
-    }
+  def getShipment(requestUserId: UserId, id: ShipmentId): ServiceValidation[Shipment] = {
+    whenShipmentPermitted(requestUserId, id) { shipment => shipment.successNel[String] }
   }
 
   /**
-   * See:
-   *
-   * - http://stackoverflow.com/questions/17791933/filter-over-list-with-dynamic-filter-parameter
-   *
-   * - http://danielwestheide.com/blog/2013/01/23/the-neophytes-guide-to-scala-part-10-staying-dry-with-higher-order-functions.html
+   * Sorting should be done by controller since the DTO has additional fields to sort by.
    *
    */
-  def getShipments(requestUserId: UserId, filter: FilterString, sort: SortString):
-      ServiceValidation[List[ShipmentDto]] = {
+  def getShipments(requestUserId: UserId, filter: FilterString): ServiceValidation[Set[Shipment]] = {
     withPermittedShippingCentres(requestUserId) { centres =>
       val shipments = centres
         .map { centre => shipmentRepository.withCentre(centre.id) }
         .toList.sequenceU.toSet
 
-      val filteredShipments = shipmentFilter.filterShipments(shipments, filter)
-      val sortStr = if (sort.expression.isEmpty) new SortString("courierName")
-                    else sort
-
-      for {
-        sortExpressions <- {
-          QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
-        }
-        sortFunc <- {
-          ShipmentDto.sort2Compare.get(sortExpressions(0).name).
-            toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
-        }
-        shipments <- filteredShipments.flatMap(_.map(getShipmentDto).toList.sequenceU)
-      } yield {
-        val result = shipments.sortWith(sortFunc)
-        if (sortExpressions(0).order == AscendingOrder) result
-        else result.reverse
-      }
+      shipmentFilter.filterShipments(shipments, filter)
     }
   }
 
   def shipmentCanAddSpecimen(requestUserId: UserId, shipmentId: ShipmentId, specimenInventoryId: String)
-      : ServiceValidation[SpecimenDto] = {
+      : ServiceValidation[Specimen] = {
     whenShipmentPermitted(requestUserId, shipmentId) { shipment =>
       for {
         specimen     <- specimenRepository.getByInventoryId(specimenInventoryId)
@@ -155,67 +127,46 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
           }
         }
         canBeAdded   <- specimensNotPresentInShipment(specimen)
-        specimenDto  <- specimensService.get(requestUserId, specimen.id)
-      } yield specimenDto
+        specimen  <- specimensService.get(requestUserId, specimen.id)
+      } yield specimen
     }
   }
 
   def getShipmentSpecimen(requestUserId: UserId, shipmentId: ShipmentId, shipmentSpecimenId: ShipmentSpecimenId)
-      : ServiceValidation[ShipmentSpecimenDto] = {
+      : ServiceValidation[ShipmentSpecimen] = {
     whenShipmentPermitted(requestUserId, shipmentId) { shipment =>
-      for {
-        ss  <- shipmentSpecimenRepository.getByKey(shipmentSpecimenId)
-        dto <- getShipmentSpecimenDto(requestUserId, ss)
-      } yield dto
+      shipmentSpecimenRepository.getByKey(shipmentSpecimenId)
     }
   }
 
+  /**
+   * Sorting should be done by controller since the DTO has additional fields to sort by.
+   *
+   */
   def getShipmentSpecimens(requestUserId: UserId,
                            shipmentId:    ShipmentId,
-                           filter:        FilterString,
-                           sort:          SortString): ServiceValidation[List[ShipmentSpecimenDto]] = {
+                           filter:        FilterString): ServiceValidation[Set[ShipmentSpecimen]] = {
     whenShipmentPermitted(requestUserId, shipmentId) { shipment =>
       val shipmentSpecimens = shipmentSpecimenRepository.allForShipment(shipment.id)
-      val filteredShipmentSpecimens = ShipmentSpecimenFilter.filterShipmentSpecimens(shipmentSpecimens, filter)
-
-      val sortStr = if (sort.expression.isEmpty) new SortString("state")
-                    else sort
-      for {
-        sortExpressions <- {
-          QuerySortParser(sortStr).toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
-        }
-        sortFunc <- {
-          ShipmentSpecimenDto.sort2Compare.get(sortExpressions(0).name).
-            toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
-        }
-        shipmentSpecimenss <- {
-          filteredShipmentSpecimens.flatMap(
-            _.map(s => getShipmentSpecimenDto(requestUserId, s)).toList.sequenceU)
-        }
-      } yield {
-        val result = shipmentSpecimenss.sortWith(sortFunc)
-        if (sortExpressions(0).order == AscendingOrder) result
-        else result.reverse
-      }
+      ShipmentSpecimenFilter.filterShipmentSpecimens(shipmentSpecimens, filter)
     }
   }
 
-  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]] = {
+  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[Shipment]] = {
     val validCommand = cmd match {
         case c: ShipmentRemoveCmd =>
-          ServiceError(s"invalid service call: $cmd, use removeShipment").failureNel[ShipmentDto]
+          ServiceError(s"invalid service call: $cmd, use removeShipment").failureNel[Shipment]
         case c => c.successNel[String]
       }
 
     validCommand.fold(
-      err => Future.successful(err.failure[ShipmentDto]),
+      err => Future.successful(err.failure[Shipment]),
       _   => whenShipmentPermittedAsync(cmd) { () =>
         ask(processor, cmd).mapTo[ServiceValidation[ShipmentEvent]].map { validation =>
           for {
             event    <- validation
             shipment <- shipmentRepository.getByKey(ShipmentId(event.id))
-            dto      <- getShipmentDto(shipment)
-          } yield dto
+          } yield shipment
         }
       }
     )
@@ -230,14 +181,13 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
   }
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand)
-      : Future[ServiceValidation[ShipmentDto]] = {
+      : Future[ServiceValidation[Shipment]] = {
     whenShipmentPermittedAsync(cmd) { () =>
       ask(processor, cmd).mapTo[ServiceValidation[ShipmentSpecimenEvent]].map { validation =>
         for {
           event    <- validation
           shipment <- shipmentRepository.getByKey(ShipmentId(event.shipmentId))
-          dto      <- getShipmentDto(shipment)
-        } yield dto
+        } yield shipment
       }
     }
   }
@@ -336,32 +286,5 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       err    => Future.successful(err.failure[T]),
       member => whenPermittedAsync(sessionUserId, PermissionId.ShipmentUpdate)(block)
     )
-  }
-
-  private def getShipmentDto(shipment: Shipment): ServiceValidation[ShipmentDto] = {
-    for {
-      fromCentre       <- centreRepository.getByLocationId(shipment.fromLocationId)
-      fromLocationName <- fromCentre.locationName(shipment.fromLocationId)
-      toCentre         <- centreRepository.getByLocationId(shipment.toLocationId)
-      toLocationName   <- toCentre.locationName(shipment.toLocationId)
-    } yield {
-      val fromLocationInfo = CentreLocationInfo(fromCentre.id.id,
-                                                shipment.fromLocationId.id,
-                                                fromLocationName)
-      val toLocationInfo = CentreLocationInfo(toCentre.id.id,
-                                              shipment.toLocationId.id,
-                                              toLocationName)
-      val specimens = shipmentSpecimenRepository.allForShipment(shipment.id)
-
-      // TODO: update with container count when ready
-      ShipmentDto.create(shipment, fromLocationInfo, toLocationInfo, specimens.size, 0)
-    }
-  }
-
-  private def getShipmentSpecimenDto(requestUserId: UserId, shipmentSpecimen: ShipmentSpecimen)
-      : ServiceValidation[ShipmentSpecimenDto] = {
-    specimensService.get(requestUserId, shipmentSpecimen.specimenId).map { specimenDto =>
-      shipmentSpecimen.createDto(specimenDto)
-    }
   }
 }

@@ -2,8 +2,8 @@ package org.biobank.domain.participants
 
 import org.biobank.domain.Factory
 import org.biobank.domain.study.CollectionSpecimenDescription
-import org.biobank.dto.{CentreLocationInfo}
 import scala.language.reflectiveCalls
+import org.biobank.service.centres.CentreLocationInfo
 
 trait SpecimenSpecFixtures {
 

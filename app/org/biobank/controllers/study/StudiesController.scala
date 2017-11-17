@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers.{BbwebAction, FilterAndSortQuery, CommandController, PagedQuery}
 import org.biobank.domain._
 import org.biobank.domain.study._
+import org.biobank.dto.NameAndStateDto
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.service._
 import org.biobank.service.studies.StudiesService
@@ -70,10 +71,12 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            studyNames    <- service.getStudyNames(request.authInfo.userId,
-                                                   filterAndSort.filter,
-                                                   filterAndSort.sort)
-          } yield studyNames
+            studies       <- service.getStudies(request.authInfo.userId,
+                                                 filterAndSort.filter,
+                                                 filterAndSort.sort)
+          } yield {
+            studies.map(s => NameAndStateDto(s.id.id, s.name, s.state.id))
+          }
         }
       )
     }

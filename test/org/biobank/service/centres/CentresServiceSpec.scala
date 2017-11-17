@@ -199,34 +199,6 @@ class CentresServiceSpec
 
     }
 
-    describe("when getting centre names") {
-
-      it("users can access") {
-        val f = new UsersWithCentreAccessFixture
-        forAll (f.usersCanReadTable) { (user, label) =>
-          info(label)
-          centresService.getCentreNames(user.id, new FilterString(""), new SortString(""))
-            .mustSucceed { centres =>
-              centres must have length (1)
-            }
-        }
-      }
-
-      it("users cannot access") {
-        val f = new UsersWithCentreAccessFixture
-        info("no membership user")
-        centresService.getCentreNames(f.noMembershipUser.id, new FilterString(""), new SortString(""))
-          .mustSucceed { centres =>
-            centres must have length (0)
-          }
-
-        info("no permission user")
-        centresService.getCentreNames(f.noCentrePermissionUser.id, new FilterString(""), new SortString(""))
-          .mustFail("Unauthorized")
-      }
-
-    }
-
     describe("when getting a centre") {
 
       it("users can access") {
@@ -234,7 +206,7 @@ class CentresServiceSpec
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
           centresService.getCentre(user.id, f.centre.id) mustSucceed { result =>
-            result.id must be (f.centre.id.id)
+            result.id must be (f.centre.id)
           }
         }
       }
@@ -336,7 +308,7 @@ class CentresServiceSpec
 
             centreRepository.put(centre) // restore the centre to it's previous state
             centresService.processCommand(cmd).futureValue mustSucceed { s =>
-              s.id must be (centre.id.id)
+              s.id must be (centre.id)
             }
           }
         }
@@ -367,7 +339,7 @@ class CentresServiceSpec
                                           f.enabledCentre)) { cmd =>
             Set(f.disabledCentre, f.enabledCentre).foreach(addToRepository)
             centresService.processCommand(cmd).futureValue mustSucceed { c =>
-              c.id must be (cmd.id)
+              c.id.id must be (cmd.id)
             }
           }
         }
@@ -397,8 +369,8 @@ class CentresServiceSpec
           .mustSucceed { reply =>
             reply must have size (2)
             val centreIds = reply.map(c => c.id)
-            centreIds must contain (f.centre.id.id)
-            centreIds must contain (secondCentre.id.id)
+            centreIds must contain (f.centre.id)
+            centreIds must contain (secondCentre.id)
           }
       }
 
@@ -410,7 +382,7 @@ class CentresServiceSpec
         centresService.getCentres(f.centreOnlyAdminUser.id, new FilterString(""), new SortString(""))
           .mustSucceed { reply =>
             reply must have size (1)
-            reply.map(c => c.id) must contain (f.centre.id.id)
+            reply.map(c => c.id) must contain (f.centre.id)
           }
       }
 

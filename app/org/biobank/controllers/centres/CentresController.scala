@@ -1,11 +1,15 @@
 package org.biobank.controllers.centres
 
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.centre.CentreId
+import org.biobank.domain.centre.{ Centre, CentreId }
+import org.biobank.domain.user.UserId
+import org.biobank.dto._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.service._
 import org.biobank.service.centres.CentresService
+import org.biobank.service.studies.StudiesService
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.{ Environment, Logger }
@@ -19,9 +23,10 @@ import scalaz.Validation.FlatMap._
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
 class CentresController @Inject()(controllerComponents: ControllerComponents,
-                                  val action:  BbwebAction,
-                                  val env:     Environment,
-                                  val service: CentresService)
+                                  val action:           BbwebAction,
+                                  val env:              Environment,
+                                  val service:          CentresService,
+                                  val studiesService:   StudiesService)
                                (implicit val ec: ExecutionContext)
     extends CommandController(controllerComponents) {
 
@@ -42,7 +47,11 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             centres    <- service.getCentres(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(centres.size)
-            results    <- PagedResults.create(centres, pagedQuery.page, pagedQuery.limit)
+            dtos        <- {
+             centres.map(centre => centreToDto(request.authInfo.userId, centre))
+                .toList.sequenceU.map(_.toSeq)
+            }
+            results    <- PagedResults.create(dtos, pagedQuery.page, pagedQuery.limit)
           } yield results
         }
       )
@@ -54,10 +63,12 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            centreNames    <- service.getCentreNames(request.authInfo.userId,
-                                                     filterAndSort.filter,
-                                                     filterAndSort.sort)
-          } yield centreNames
+            centres       <- service.getCentres(request.authInfo.userId,
+                                                filterAndSort.filter,
+                                                filterAndSort.sort)
+          } yield {
+            centres.map(centre => NameAndStateDto(centre.id.id, centre.name, centre.state.id))
+          }
         }
       )
     }
@@ -69,7 +80,9 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
 
   def query(id: CentreId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.getCentre(request.authInfo.userId, id))
+      val reply = service.getCentre(request.authInfo.userId, id)
+        .flatMap(centre => centreToDto(request.authInfo.userId, centre))
+      validationReply(reply)
     }
 
   def snapshot: Action[Unit] =
@@ -113,8 +126,32 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
     commandAction[DisableCentreCmd](Json.obj("id" -> id))(processCommand)
 
   private def processCommand(cmd: CentreCommand): Future[Result] = {
-    val future = service.processCommand(cmd)
+    val future = service.processCommand(cmd).map { validation =>
+        validation.flatMap(centre => centreToDto(UserId(cmd.sessionUserId), centre))
+      }
     validationReply(future)
+  }
+
+  private def centreToDto(requestUserId: UserId, centre: Centre): ControllerValidation[CentreDto] = {
+    val v = centre.studyIds
+      .map { id =>
+        studiesService.getStudy(requestUserId, id).map { study =>
+          NameAndStateDto(study.id.id, study.name, study.state.id)
+        }
+      }
+      .toList.sequenceU
+
+    v.map { studyNames =>
+      CentreDto(id           = centre.id.id,
+                version      = centre.version,
+                timeAdded    = centre.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                timeModified = centre.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+                state        = centre.state.id,
+                name         = centre.name,
+                description  = centre.description,
+                studyNames   = studyNames.toSet,
+                locations    = centre.locations)
+    }
   }
 
 }

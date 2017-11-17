@@ -9,7 +9,6 @@ import org.biobank.domain.access.PermissionId
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.user._
-import org.biobank.dto._
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
@@ -100,10 +99,13 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[User] = {
-    for {
-      hasPermission <- accessService.hasPermission(requestUserId, PermissionId.UserRead)
-      user          <- userRepository.getByKey(id)
-    } yield user
+    accessService.hasPermission(requestUserId, PermissionId.UserRead).flatMap { permission =>
+      if (permission || (requestUserId == id)) {
+        userRepository.getByKey(id)
+      } else {
+        Unauthorized.failureNel[User]
+      }
+    }
   }
 
   def getUser(id: UserId): ServiceValidation[User] = {
@@ -136,7 +138,6 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
 
   def getCountsByStatus(requestUserId: UserId): ServiceValidation[UserCountsByStatus] = {
     whenPermitted(requestUserId, PermissionId.UserRead) { () =>
-      // FIXME should be replaced by DTO query to the database
       val users = userRepository.getValues
       UserCountsByStatus(
         total           = users.size.toLong,
