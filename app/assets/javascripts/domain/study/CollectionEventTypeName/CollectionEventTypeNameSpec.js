@@ -4,8 +4,8 @@
  */
 /* global angular */
 
+import * as sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour'
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour';
 
 describe('CollectionEventTypeName', function() {
 
@@ -31,8 +31,7 @@ describe('CollectionEventTypeName', function() {
     this.$httpBackend.verifyNoOutstandingRequest();
   });
 
-
-  describe('common behaviour', function() {
+  describe('create behaviour', function() {
 
     var context = {};
 
@@ -42,7 +41,7 @@ describe('CollectionEventTypeName', function() {
       context.constructor = this.CollectionEventTypeName;
       context.createFunc  = this.CollectionEventTypeName.create;
       context.restApiUrl  = (...paths) => this.url([eventType.studyId].concat(paths));
-      context.factoryFunc = () => {
+      context.jsonFactoryFunc = () => {
         const result = this.Factory.collectionEventTypeNameDto();
         eventType = this.Factory.defaultCollectionEventType();
         return result;
@@ -50,7 +49,28 @@ describe('CollectionEventTypeName', function() {
       context.listFunc = (options) => this.CollectionEventTypeName.list(eventType.studyId, options);
     });
 
-    sharedBehaviour(context);
+    sharedBehaviour.entityNameCreateSharedBehaviour(context)
+
+  });
+
+  describe('list behaviour', function() {
+
+    var context = {};
+
+    beforeEach(function() {
+      let eventType;
+
+      context.constructor = this.CollectionEventTypeName;
+      context.restApiUrl  = (...paths) => this.url([eventType.studyId].concat(paths));
+      context.jsonFactoryFunc = () => {
+        const result = this.Factory.collectionEventTypeNameDto();
+        eventType = this.Factory.defaultCollectionEventType();
+        return result;
+      }
+      context.listFunc = (options) => this.CollectionEventTypeName.list(eventType.studyId, options);
+    });
+
+    sharedBehaviour.entityNameListSharedBehaviour(context)
 
   });
 

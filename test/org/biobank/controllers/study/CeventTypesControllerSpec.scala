@@ -6,7 +6,6 @@ import org.biobank.domain.AnnotationType
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.study._
 import org.biobank.domain.study.{ CollectionEventType, Study }
-import org.biobank.dto.NameDto
 import org.biobank.fixture.ControllerFixture
 import org.biobank.fixture._
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -59,11 +58,6 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
              "recurring"            -> cet.recurring,
              "specimenDescriptions" -> cet.specimenDescriptions,
              "annotationTypes"      -> cet.annotationTypes)
-  }
-
-  private def compareNameDto(json: JsValue, eventType: CollectionEventType): Unit = {
-    compareObj(json, NameDto(eventType.id.id, eventType.name))
-    ()
   }
 
   def addOnNonDisabledStudy(study: Study) {

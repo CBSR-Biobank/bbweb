@@ -1,0 +1,55 @@
+syntax = "proto2";
+
+package org.biobank.infrastructure.event;
+
+message MembershipEvent {
+
+  message Added {
+    optional string name        = 1;
+    optional string description = 2;
+    repeated string userIds     = 3;
+    optional bool   allStudies  = 4;
+    repeated string studyIds    = 5;
+    optional bool   allCentres  = 6;
+    repeated string centreIds   = 7;
+  }
+
+  message WithVersion {
+    optional int64 version = 1;
+  }
+
+  message NameUpdated {
+    optional int64  version = 1;
+    optional string name    = 2;
+  }
+
+  message DescriptionUpdated {
+    optional int64  version     = 1;
+    optional string description = 2;
+  }
+
+  message WithId {
+    optional int64  version = 1;
+    optional string id      = 2;
+  }
+
+  required string id            = 1;
+  optional string sessionUserId = 2;
+  optional string time          = 3;
+
+  oneof event_type {
+    Added              added              = 4;
+    NameUpdated        nameUpdated        = 5;
+    DescriptionUpdated descriptionUpdated = 6;
+    WithId             userAdded          = 7;
+    WithVersion        allStudies         = 8;
+    WithVersion        allCentres         = 9;
+    WithId             studyAdded         = 10;
+    WithId             centreAdded        = 11;
+    WithId             userRemoved        = 12;
+    WithId             studyRemoved       = 13;
+    WithId             centreRemoved      = 14;
+    WithVersion        removed            = 15;
+  }
+
+}

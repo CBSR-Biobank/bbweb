@@ -18,7 +18,8 @@ function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
       updateEntity,
       invalidFieldsTest,
       missingFieldsTest,
-      missingFieldsTestAsync
+      missingFieldsTestAsync,
+      failTest
     },
     TestSuiteMixin);
 
@@ -100,6 +101,11 @@ function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
 
     entity[updateFuncName].apply(entity, updateParams).then(thenFunc).catch(catchFunc);
     $httpBackend.flush();
+  }
+
+  // used by promise tests
+  function failTest(error) {
+    expect(error).toBeUndefined();
   }
 
 }

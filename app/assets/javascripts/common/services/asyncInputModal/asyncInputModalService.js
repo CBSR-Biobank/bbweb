@@ -24,7 +24,7 @@ class AsyncInputModalService {
    * @param {string} noResultsMessage the message to display to the user if the input they provided does not
    *                 yield any results.
    *
-   * @param {function} getResults the function that is called to get the values from the server.
+   * @param {function} getResults the function that is called to get the matching values from the server.
    *
    * @return {uibModalInstance} The instance of the modal that was opened. This is a ui-bootstrap class.
    */
@@ -47,19 +47,19 @@ class AsyncInputModalService {
         this.value = undefined;
       }
 
-       okPressed() {
+      okPressed() {
         modal.close(this.value);
       }
 
-       closePressed() {
+      closePressed() {
         modal.dismiss('cancel');
       }
 
-       getValues(viewValue) {
+      getValues(viewValue) {
         return getResults(viewValue);
       }
 
-       valueSelected(item) {
+      valueSelected(item) {
         this.value = item;
       }
     }

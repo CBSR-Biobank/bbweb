@@ -22,123 +22,93 @@ object AccessCommands {
                                     expectedVersion: Long)
       extends RoleModifyCommand
 
-  trait MembershipCommand extends AccessCommand
+  // ROLES
 
-  trait MembershipModifyCommand extends AccessModifyCommand {
-    val membershipId: String
-    val expectedVersion: Long
-  }
+  trait RoleCommand extends AccessCommand
 
-  final case class AddMembershipCmd(sessionUserId: String,
-                                    name:          String,
-                                    description:   Option[String],
-                                    userIds:       List[String],
-                                    allStudies:    Boolean,
-                                    studyIds:      List[String],
-                                    allCentres:    Boolean,
-                                    centreIds:     List[String])
-      extends MembershipCommand
+  final case class AddRoleCmd(sessionUserId: String,
+                              name:          String,
+                              description:   Option[String],
+                              userIds:       List[String],
+                              parentIds:     List[String],
+                              childrenIds:   List[String])
+      extends RoleCommand
 
-  final case class MembershipUpdateDescriptionCmd(sessionUserId:   String,
-                                                  expectedVersion: Long,
-                                                  membershipId:    String,
-                                                  description:     Option[String])
-      extends MembershipModifyCommand
+  final case class RoleUpdateNameCmd(sessionUserId:   String,
+                                     expectedVersion: Long,
+                                     roleId:          String,
+                                     name:            String)
+      extends RoleModifyCommand
 
-  final case class MembershipUpdateNameCmd(sessionUserId:   String,
-                                           expectedVersion: Long,
-                                           membershipId:    String,
-                                           name:            String)
-      extends MembershipModifyCommand
-
-  final case class MembershipAddUserCmd(sessionUserId:   String,
-                                        expectedVersion: Long,
-                                        membershipId:    String,
-                                        userId:          String)
-      extends MembershipModifyCommand
-
-  final case class MembershipAllStudiesCmd(sessionUserId:   String,
-                                           expectedVersion: Long,
-                                           membershipId:    String)
-      extends MembershipModifyCommand
-
-  final case class MembershipAllCentresCmd(sessionUserId:   String,
-                                           expectedVersion: Long,
-                                           membershipId:    String)
-      extends MembershipModifyCommand
-
-  final case class MembershipAddStudyCmd(sessionUserId:   String,
-                                         expectedVersion: Long,
-                                         membershipId:    String,
-                                         studyId:         String)
-      extends MembershipModifyCommand
-
-  final case class MembershipAddCentreCmd(sessionUserId:   String,
-                                          expectedVersion: Long,
-                                          membershipId:    String,
-                                          centreId:          String)
-      extends MembershipModifyCommand
-
-  final case class MembershipRemoveUserCmd(sessionUserId:   String,
-                                           expectedVersion: Long,
-                                           membershipId:    String,
-                                           userId:          String)
-      extends MembershipModifyCommand
-
-  final case class MembershipRemoveStudyCmd(sessionUserId:   String,
+  final case class RoleUpdateDescriptionCmd(sessionUserId:   String,
                                             expectedVersion: Long,
-                                            membershipId:    String,
-                                            studyId:         String)
-      extends MembershipModifyCommand
+                                            roleId:          String,
+                                            description:     Option[String])
+      extends RoleModifyCommand
 
-  final case class MembershipRemoveCentreCmd(sessionUserId:   String,
-                                             expectedVersion: Long,
-                                             membershipId:    String,
-                                             centreId:        String)
-      extends MembershipModifyCommand
+  final case class RoleAddUserCmd(sessionUserId:   String,
+                                  expectedVersion: Long,
+                                  roleId:          String,
+                                  userId:          String)
+      extends RoleModifyCommand
 
-  final case class RemoveMembershipCmd(sessionUserId:   String,
+  final case class RoleAddParentCmd(sessionUserId:   String,
+                                    expectedVersion: Long,
+                                    roleId:          String,
+                                    parentRoleId:    String)
+      extends RoleModifyCommand
+
+  final case class RoleAddChildCmd(sessionUserId:   String,
+                                   expectedVersion: Long,
+                                   roleId:          String,
+                                   childRoleId:     String)
+      extends RoleModifyCommand
+
+  final case class RoleRemoveUserCmd(sessionUserId:   String,
+                                     expectedVersion: Long,
+                                     roleId:          String,
+                                     userId:          String)
+      extends RoleModifyCommand
+
+  final case class RoleRemoveParentCmd(sessionUserId:   String,
                                        expectedVersion: Long,
-                                       membershipId:    String)
-      extends MembershipModifyCommand
+                                       roleId:          String,
+                                       parentRoleId:    String)
+      extends RoleModifyCommand
+
+  final case class RoleRemoveChildCmd(sessionUserId:   String,
+                                       expectedVersion: Long,
+                                       roleId:          String,
+                                       childRoleId:     String)
+      extends RoleModifyCommand
+
+  final case class RemoveRoleCmd(sessionUserId:   String,
+                                 expectedVersion: Long,
+                                 roleId:          String)
+      extends RoleModifyCommand
 
   implicit val adduserToRoleCmdReads: Reads[AddUserToRoleCmd] =
     Json.reads[AddUserToRoleCmd]
 
-  implicit val addMembershipCmdReads: Reads[AddMembershipCmd] =
-    Json.reads[AddMembershipCmd]
+  implicit val addRoleCmdReads: Reads[AddRoleCmd] = Json.reads[AddRoleCmd]
 
-  implicit val membershipUpdateNameCmdReads: Reads[MembershipUpdateNameCmd] =
-    Json.reads[MembershipUpdateNameCmd]
+  implicit val roleUpdateNameCmdReads: Reads[RoleUpdateNameCmd] = Json.reads[RoleUpdateNameCmd]
 
-  implicit val membershipUpdateDescriptionCmdReads: Reads[MembershipUpdateDescriptionCmd] =
-    Json.reads[MembershipUpdateDescriptionCmd]
+  implicit val roleUpdateDescriptionCmdReads: Reads[RoleUpdateDescriptionCmd] =
+    Json.reads[RoleUpdateDescriptionCmd]
 
-  implicit val membershipAddUserCmdReads: Reads[MembershipAddUserCmd] =
-    Json.reads[MembershipAddUserCmd]
+  implicit val roleAddUserCmdReads: Reads[RoleAddUserCmd] = Json.reads[RoleAddUserCmd]
 
-  implicit val membershipAllStudiesCmdReads: Reads[MembershipAllStudiesCmd] =
-    Json.reads[MembershipAllStudiesCmd]
+  implicit val roleAddParentCmdReads: Reads[RoleAddParentCmd] = Json.reads[RoleAddParentCmd]
 
-  implicit val membershipAllCentresCmdReads: Reads[MembershipAllCentresCmd] =
-    Json.reads[MembershipAllCentresCmd]
+  implicit val roleAddChildCmdReads: Reads[RoleAddChildCmd] = Json.reads[RoleAddChildCmd]
 
-  implicit val membershipAddStudyCmdReads: Reads[MembershipAddStudyCmd] =
-    Json.reads[MembershipAddStudyCmd]
+  implicit val roleRemoveUserCmdReads: Reads[RoleRemoveUserCmd] = Json.reads[RoleRemoveUserCmd]
 
-  implicit val membershipAddCentreCmdReads: Reads[MembershipAddCentreCmd] =
-    Json.reads[MembershipAddCentreCmd]
+  implicit val roleRemoveParentCmdReads: Reads[RoleRemoveParentCmd] = Json.reads[RoleRemoveParentCmd]
 
-  implicit val membershipRemoveUserCmdReads: Reads[MembershipRemoveUserCmd] =
-    Json.reads[MembershipRemoveUserCmd]
+  implicit val roleRemoveChildCmdReads: Reads[RoleRemoveChildCmd] = Json.reads[RoleRemoveChildCmd]
 
-  implicit val membershipRemoveStudyCmdReads: Reads[MembershipRemoveStudyCmd] =
-    Json.reads[MembershipRemoveStudyCmd]
-
-  implicit val membershipRemoveCentreCmdReads: Reads[MembershipRemoveCentreCmd] =
-    Json.reads[MembershipRemoveCentreCmd]
-
-  implicit val removeMembershipCmdReads: Reads[RemoveMembershipCmd] =
-    Json.reads[RemoveMembershipCmd]
+  implicit val removeRoleCmdReads: Reads[RemoveRoleCmd] = Json.reads[RemoveRoleCmd]
 
 }

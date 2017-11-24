@@ -36,7 +36,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
 
   def nextIdentity: AccessItemId = new AccessItemId(nextIdentityAsString)
 
-  def accessItemNotFound(id: AccessItemId): IdNotFound = IdNotFound(s"accessItem id: $id")
+  def accessItemNotFound(id: AccessItemId): IdNotFound = IdNotFound(s"access item id: $id")
 
   override def init(): Unit = {
     super.init()
@@ -55,7 +55,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
 
   def getRole(id: AccessItemId): DomainValidation[Role] = {
     for {
-      accessItem <- getByKey(id)
+      accessItem <- getByKey(id).leftMap(err => EntityCriteriaNotFound{s"invalid role id: $id"}.nel)
       role <- {
         accessItem match {
           case role: Role => role.successNel[String]
@@ -122,6 +122,20 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
                                Set(RoleId.UserAdministrator)),
         createPermissionSimple(PermissionId.UserRead,
                                "User can view information for other users",
+                               Set(RoleId.UserAdministrator)),
+
+        // ROLE PERMISSIONS
+        createPermissionSimple(PermissionId.RoleRead,
+                               "User can view roles",
+                               Set(RoleId.UserAdministrator)),
+        createPermissionSimple(PermissionId.RoleCreate,
+                               "User can create roles",
+                               Set(RoleId.UserAdministrator)),
+        createPermissionSimple(PermissionId.RoleUpdate,
+                               "User can update roles",
+                               Set(RoleId.UserAdministrator)),
+        createPermissionSimple(PermissionId.RoleDelete,
+                               "User can remove a role",
                                Set(RoleId.UserAdministrator)),
 
         // MEMBERSHIP PERMISSIONS

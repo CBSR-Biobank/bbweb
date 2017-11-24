@@ -3,8 +3,6 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 /*
  * Angular factory for a Permission.
  */

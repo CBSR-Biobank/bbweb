@@ -109,7 +109,7 @@ function RoleFactory($q,
     }
 
     addParentRole(id) {
-      return this.update(Role.url('parent', this.id), { roleId: id });
+      return this.update(Role.url('parent', this.id), { parentRoleId: id });
     }
 
     removeParentRole(id) {
@@ -121,7 +121,7 @@ function RoleFactory($q,
     }
 
     addChildRole(id) {
-      return this.update(Role.url('child', this.id), { roleId: id });
+      return this.update(Role.url('child', this.id), { childRoleId: id });
     }
 
     removeChildRole(id) {

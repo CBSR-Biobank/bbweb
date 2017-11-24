@@ -14,7 +14,8 @@ package dto {
 
   object EntityInfoDto {
 
-    implicit val entityInfoDtoWriter: Writes[EntityInfoDto] = Json.writes[EntityInfoDto]
+    implicit val entityInfoDtoFormat: Format[EntityInfoDto] = Json.format[EntityInfoDto]
+
   }
 
   final case class EntitySetDto(allEntities: Boolean, entityData: Set[EntityInfoDto])

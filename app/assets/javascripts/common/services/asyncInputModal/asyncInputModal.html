@@ -22,12 +22,13 @@
                ng-model-options="{ debounce: 250 }"
                placeholder="{{vm.placeholder}}"
                uib-typeahead="value.obj as value.label for value in vm.getValues($viewValue)"
-               typeahead-loading="loadingValue"
+               typeahead-loading="vm.loadingValue"
                typeahead-on-select="vm.valueSelected($item)"
-               typeahead-no-results="noValueResults"
+               typeahead-no-results="vm.noValueResults"
+               focus-me="true"
                autocomplete="off"/>
-        <i ng-show="loadingValue" class="glyphicon glyphicon-refresh"></i>
-        <div ng-show="noValueResults">
+        <i ng-show="vm.loadingValue" class="glyphicon glyphicon-refresh"></i>
+        <div ng-show="vm.noValueResults">
           <i class="glyphicon glyphicon-remove"></i>{{vm.noResultsMessage}}
         </div>
       </div>

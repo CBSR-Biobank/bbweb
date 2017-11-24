@@ -2,124 +2,132 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
-define(function (require) {
-  'use strict';
 
-  const _ = require('lodash');
+import _ from 'lodash'
 
-  /**
-   * @param {object} context The context to use to test the behaviour. See below for required fields.
-   *
-   * @param {constructor} context.constructor The constructor function for the entity to test.
-   *
-   * @param {function} context.createFunc The static function that creates the entity name.
-   *
-   * @param {function} context.restApiUrl A function that returns the URL used to retrieve the entities from
-   *        the server.
-   *
-   * @param {function} context.factoryFunc The function in factory.js that creates a plain object of the
-   * entity to test.
-   *
-   * @param {function} context.listFunc The static function that invokes the REST API to list the entities.
-   *        This function has one parameter: the options object that specifies the query parameters to use
-   *        with the URL.
-   *
-   * @return {null} nothing
-   */
-  function entityNameSharedBehaviour(context) {
+/**
+ * @param {object} context The context to use to test the behaviour. See below for required fields.
+ *
+ * @param {constructor} context.constructor The constructor function for the entity to test.
+ *
+ * @param {function} context.createFunc The static function that creates the entity name.
+ *
+ * @param {function} context.restApiUrl A function that returns the URL used to retrieve the entities from
+ *        the server.
+ *
+ * @param {function} context.jsonFactoryFunc The function in factory.js that creates a plain object of the
+ * entity to test.
+ *
+ * @param {function} context.listFunc The static function that invokes the REST API to list the entities.
+ *        This function has one parameter: the options object that specifies the query parameters to use
+ *        with the URL.
+ *
+ * @return {null} nothing
+ */
+function entityNameCreateSharedBehaviour(context) {
 
-    it('constructor with no parameters has default values', function() {
-      var entityName = new context.constructor();
-      expect(entityName.id).toBeNull();
-      expect(entityName.name).toBeNull();
+  it('constructor with no parameters has default values', function() {
+    var entityName = new context.constructor();
+    expect(entityName.id).toBeNull();
+    expect(entityName.name).toBeNull();
+  });
+
+  it('fails when creating from an invalid object', function() {
+    this.EntityName.SCHEMA.required.forEach(function (field) {
+      var badEntityJson = _.omit(context.jsonFactoryFunc(), field);
+
+      expect(function () {
+        context.createFunc(badEntityJson);
+      }).toThrowError(/Missing required property/);
     });
+  });
 
-    it('fails when creating from an invalid object', function() {
-      this.EntityName.SCHEMA.required.forEach(function (field) {
-        var badEntityJson = _.omit(context.factoryFunc(), field);
+}
 
-        expect(function () {
-          context.createFunc(badEntityJson);
-        }).toThrowError(/Missing required property/);
-      });
+/**
+ * @param {object} context The context to use to test the behaviour. See below for required fields.
+ *
+ * @param {constructor} context.constructor The constructor function for the entity to test.
+ *
+ * @param {function} context.restApiUrl A function that returns the URL used to retrieve the entities from
+ *        the server.
+ *
+ * @param {function} context.jasonFactoryFunc The function in factory.js that creates a plain object of the
+ * entity to test.
+ *
+ * @param {function} context.listFunc The static function that invokes the REST API to list the entities.
+ *        This function has one parameter: the options object that specifies the query parameters to use
+ *        with the URL.
+ *
+ * @return {null} nothing
+ */
+function entityNameListSharedBehaviour(context) {
+
+  it('can retrieve entity names', function() {
+    var names = [ context.jsonFactoryFunc() ];
+
+    this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
+    context.listFunc().then(testEntity).catch(this.failTest);
+    this.$httpBackend.flush();
+
+    function testEntity(reply) {
+      expect(reply).toBeArrayOfSize(1);
+      expect(reply[0]).toEqual(jasmine.any(context.constructor));
+    }
+  });
+
+  it('can use options', function() {
+    const names = [ context.jsonFactoryFunc() ],
+          testEntity = (reply) => {
+            expect(reply).toBeArrayOfSize(names.length);
+            reply.forEach((entity) => {
+              expect(entity).toEqual(jasmine.any(context.constructor));
+            });
+          },
+          optionList = [
+            { filter: 'name::test' },
+            { sort: 'name' }
+          ];
+
+    optionList.forEach((options) => {
+      var url = context.restApiUrl() + '?' + this.$httpParamSerializer(options, true);
+      this.$httpBackend.whenGET(url).respond(this.reply(names));
+      context.listFunc(options).then(testEntity).catch(this.failTest);
+      this.$httpBackend.flush();
     });
+  });
 
-    describe('when listing names', function() {
+  it('listing omits empty options', function() {
+    var options = { filter: ''},
+        names = [ context.jsonFactoryFunc() ],
+        testEntity = (reply) => {
+          expect(reply).toBeArrayOfSize(names.length);
+          reply.forEach((entity) => {
+            expect(entity).toEqual(jasmine.any(context.constructor));
+          });
+        };
 
-      it('can retrieve entity names', function() {
-        var names = [ context.factoryFunc() ];
+    this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
+    context.listFunc(options).then(testEntity).catch(this.failTest);
+    this.$httpBackend.flush();
+  });
 
-        this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
-        context.listFunc().then(testEntity).catch(failTest);
-        this.$httpBackend.flush();
+  it('fails when an invalid entity is returned', function() {
+    var names = [ _.omit(context.jsonFactoryFunc(), 'name') ];
 
-        function testEntity(reply) {
-          expect(reply).toBeArrayOfSize(1);
-          expect(reply[0]).toEqual(jasmine.any(context.constructor));
-        }
-      });
+    this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
+    context.listFunc().then(listFail).catch(shouldFail);
+    this.$httpBackend.flush();
 
-      it('can use options', function() {
-        const names = [ context.factoryFunc() ],
-              testEntity = (reply) => {
-                expect(reply).toBeArrayOfSize(names.length);
-                reply.forEach((entity) => {
-                  expect(entity).toEqual(jasmine.any(context.constructor));
-                });
-              },
-              optionList = [
-                { filter: 'name::test' },
-                { sort: 'name' }
-              ];
-
-        optionList.forEach((options) => {
-          var url = context.restApiUrl() + '?' + this.$httpParamSerializer(options, true);
-          this.$httpBackend.whenGET(url).respond(this.reply(names));
-          context.listFunc(options).then(testEntity).catch(failTest);
-          this.$httpBackend.flush();
-        });
-      });
-
-      it('listing omits empty options', function() {
-        var options = { filter: ''},
-            names = [ context.factoryFunc() ],
-            testEntity = (reply) => {
-              expect(reply).toBeArrayOfSize(names.length);
-              reply.forEach((entity) => {
-                expect(entity).toEqual(jasmine.any(this.EntityName));
-              });
-            };
-
-        this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
-        context.listFunc(options).then(testEntity).catch(failTest);
-        this.$httpBackend.flush();
-      });
-
-      it('fails when an invalid entity is returned', function() {
-        var names = [ _.omit(context.factoryFunc(), 'name') ];
-
-        this.$httpBackend.whenGET(context.restApiUrl()).respond(this.reply(names));
-        context.listFunc().then(listFail).catch(shouldFail);
-        this.$httpBackend.flush();
-
-        function listFail() {
-          fail('function should not be called');
-        }
-
-        function shouldFail(error) {
-          expect(error).toMatch('invalid.*names from server');
-        }
-      });
-
-    });
-
-    // used by promise tests
-    function failTest(error) {
-      expect(error).toBeUndefined();
+    function listFail() {
+      fail('function should not be called');
     }
 
-  }
+    function shouldFail(error) {
+      expect(error).toMatch('invalid.*names from server');
+    }
+  });
 
-  return entityNameSharedBehaviour;
+}
 
-});
+export  { entityNameCreateSharedBehaviour, entityNameListSharedBehaviour }

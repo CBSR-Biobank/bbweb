@@ -1,14 +1,14 @@
 <breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
 <div class="page-header">
-  <h1><translate>Membership</translate>: {{vm.membership.name}}</h1>
+  <h1><translate>Role</translate>: {{vm.role.name}}</h1>
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
     <h3 class="panel-title">
-      {{vm.membership.name}}
+      {{vm.role.name}}
       <span class="pull-right">
         <button class="btn btn-xs btn-warning"
-                uib-tooltip="{{'Remove membership'|translate}}"
+                uib-tooltip="{{'Remove role'|translate}}"
                 ng-click="vm.remove()">
           Remove <i class="glyphicon glyphicon-remove"></i>
         </button>
@@ -24,7 +24,7 @@
           <strong translate>Name:</strong>
         </div>
         <div class="col-md-8">
-          {{vm.membership.name}}
+          {{vm.role.name}}
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
@@ -45,12 +45,12 @@
         </div>
         <div class="col-md-10">
           <truncate-toggle
-             text="vm.membership.description"
-             toggle-length="60"
-             text-empty-warning="{{'Description not entered yet.'|translate}}"
-             allow-edit="vm.userCanUpdate"
-             on-edit="vm.editDescription()"
-             tooltip="{{'Edit description'|translate}}">
+            text="vm.role.description"
+            toggle-length="60"
+            text-empty-warning="{{'Description not entered yet.'|translate}}"
+            allow-edit="vm.userCanUpdate"
+            on-edit="vm.editDescription()"
+            tooltip="{{'Edit description'|translate}}">
           </truncate-toggle>
         </div>
       </div>
@@ -62,10 +62,13 @@
         <div class="col-md-2">
           <strong translate>Users:</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-8" ng-if="vm.roleHasUsers">
           <tags-list tag-data="vm.userNameLabels"
                      on-tag-selected="vm.userLabelSelected.bind(vm)">
           </tags-list>
+        </div>
+        <div class="col-md-8" ng-if="!vm.roleHasUsers">
+          <translate>None</translate>
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
@@ -78,27 +81,24 @@
       </div>
     </li>
 
-    <!-- STUDIES -->
+    <!-- PARENT PERMISSIONS -->
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong translate>Studies:</strong>
+          <strong translate>Parent Roles:</strong>
         </div>
-        <div class="col-md-8" ng-if="vm.membership.studyData.allEntities">
-          <translate>All studies</translate>
-        </div>
-        <div class="col-md-8" ng-if="!vm.membership.studyData.allEntities">
-          <tags-list tag-data="vm.studyNameLabels"
-                       on-tag-selected="vm.studyLabelSelected.bind(vm)">
+        <div class="col-md-8" ng-if="vm.roleHasParentRoles">
+          <tags-list tag-data="vm.parentNameLabels"
+                     on-tag-selected="vm.parentRoleLabelSelected.bind(vm)">
           </tags-list>
         </div>
-        <div class="col-md-8" ng-if="vm.noStudiesMembership">
+        <div class="col-md-8" ng-if="!vm.roleHasParentRoles">
           <translate>None</translate>
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add a study'|translate}}"
-                  ng-click="vm.addStudy()"
+                  uib-tooltip="{{'Add a parent'|translate}}"
+                  ng-click="vm.addParentRole()"
                   ng-if="vm.userCanUpdate">
             <i class="glyphicon glyphicon-plus"></i>
           </button>
@@ -106,27 +106,24 @@
       </div>
     </li>
 
-    <!-- CENTRES -->
+    <!-- CHILD PERMISSIONS -->
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-2">
-          <strong translate>Centres:</strong>
+          <strong translate>Child Roles / Permissions:</strong>
         </div>
-        <div class="col-md-8" ng-if="vm.membership.centreData.allEntities">
-          <translate>All centres</translate>
-        </div>
-        <div class="col-md-8" ng-if="!vm.membership.centreData.allEntities">
-          <tags-list tag-data="vm.centreNameLabels"
-                     on-tag-selected="vm.centreLabelSelected.bind(vm)">
+        <div class="col-md-8" ng-if="vm.roleHasChildren">
+          <tags-list tag-data="vm.childNameLabels"
+                     on-tag-selected="vm.childRoleLabelSelected.bind(vm)">
           </tags-list>
         </div>
-        <div class="col-md-8" ng-if="vm.noCentresMembership">
+        <div class="col-md-8" ng-if="!vm.roleHasChildren">
           <translate>None</translate>
         </div>
         <div class="col-md-2">
           <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add a centre'|translate}}"
-                  ng-click="vm.addCentre()"
+                  uib-tooltip="{{'Add a child'|translate}}"
+                  ng-click="vm.addChildRole()"
                   ng-if="vm.userCanUpdate">
             <i class="glyphicon glyphicon-plus"></i>
           </button>
@@ -135,8 +132,8 @@
     </li>
 
   </ul>
-  <status-line time-added="vm.membership.timeAdded"
-               time-modified="vm.membership.timeModified">
+  <status-line time-added="vm.role.timeAdded"
+               time-modified="vm.role.timeModified">
   </status-line>
 </div>
 <div class="row">

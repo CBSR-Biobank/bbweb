@@ -25,6 +25,8 @@ object CommonValidations {
       override val toString: String = "InvalidNumberString"
     }
 
+  case object InvalidAccessItemId extends ValidationKey
+
   case object InvalidUserId extends ValidationKey
 
   case object InvalidStudyId extends ValidationKey

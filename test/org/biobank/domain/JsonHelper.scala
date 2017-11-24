@@ -351,6 +351,32 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "name").as[String] mustBe (dto.name)
   }
 
+  def compareObj(json: JsValue, role: Role) = {
+    compareEntity(json, role)
+
+    val jsonUserData = (json \ "userData").as[List[JsObject]]
+    jsonUserData must have length (role.userIds.size.toLong)
+    jsonUserData.foreach { jsUserInfo =>
+      val jsUserId = (jsUserInfo \ "id").as[String]
+      role.userIds must contain (UserId(jsUserId))
+    }
+
+    val jsonParentData = (json \ "parentData").as[List[JsObject]]
+    jsonParentData must have length (role.parentIds.size.toLong)
+    jsonParentData.foreach { jsParentInfo =>
+      val jsParentId = (jsParentInfo \ "id").as[String]
+      role.parentIds must contain (AccessItemId(jsParentId))
+    }
+
+    val jsonChildData = (json \ "childData").as[List[JsObject]]
+    jsonChildData must have length (role.childrenIds.size.toLong)
+    jsonChildData.foreach { jsChildInfo =>
+      val jsChildId = (jsChildInfo \ "id").as[String]
+      role.childrenIds must contain (AccessItemId(jsChildId))
+    }
+
+  }
+
   def compareObj(json: JsValue, membership: Membership) = {
     compareEntity(json, membership)
 
@@ -378,6 +404,18 @@ trait JsonHelper extends MustMatchers with OptionValues {
       val jsId = (jsCentreInfo \ "id").as[String]
       membership.centreData.ids must contain (CentreId(jsId))
     }
+  }
+
+  protected def compareNameDto[T <: ConcurrencySafeEntity[_] with HasName]
+    (json: JsValue, entity: T): Unit = {
+    compareObj(json, NameDto(entity.id.toString, entity.name))
+    ()
+  }
+
+  protected def compareNameAndStateDto[T <: ConcurrencySafeEntity[_] with HasName with HasState]
+    (json: JsValue, entity: T): Unit = {
+    compareObj(json, NameAndStateDto(entity.id.toString, entity.name, entity.state.id))
+    ()
   }
 
 }

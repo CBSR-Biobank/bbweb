@@ -4,21 +4,25 @@ import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain._
 import org.biobank.domain.access._
-import org.biobank.domain.centre._
-import org.biobank.domain.study._
 import org.biobank.domain.user._
+import org.biobank.dto.EntityInfoDto
 import org.biobank.fixture.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
+import org.scalatest.Inside
 
 /**
- * Tests the REST API for [[User]].
+ * Tests the roles and permissions REST API for [[User Access]].
+ *
+ * Tests for [[Membership]]s in AccessControllerMembershipSpec.scala.
  */
 class AccessControllerSpec
     extends ControllerFixture
+    with AccessControllerSpecCommon
     with JsonHelper
-    with UserFixtures {
+    with UserFixtures
+    with Inside {
   import org.biobank.TestUtils._
 
   class ActiveUserFixture {
@@ -27,69 +31,29 @@ class AccessControllerSpec
     addMembershipForUser(user)
   }
 
-  class MembershipFixture {
-    val user       = factory.createActiveUser
-    val study      = factory.createEnabledStudy
-    val centre     = factory.createEnabledCentre
-
-    private val _membership = factory.createMembership
-    private val studyData  = _membership.studyData.addEntity(study.id)
-    private val centreData = _membership.centreData.addEntity(centre.id)
-
-    val membership = _membership.copy(userIds    = Set(user.id),
-                                      studyData  = studyData,
-                                      centreData = centreData)
-
-    Set(user, study, centre, membership).foreach(addToRepository)
+  class RoleFixture {
+    val user = factory.createActiveUser
+    val role = factory.createRole.copy(userIds = Set(user.id))
+    Set(user).foreach(addToRepository)
   }
-
-  class MembershipFixtureAllStudies {
-    val user       = factory.createActiveUser
-
-    private val _membership = factory.createMembership
-    private val studyData  = _membership.studyData.hasAllEntities
-
-    val membership = _membership.copy(userIds   = Set(user.id),
-                                      studyData = studyData)
-
-    Set(user, membership).foreach(addToRepository)
-  }
-
-  class MembershipFixtureAllCentres {
-    val user       = factory.createActiveUser
-
-    private val _membership = factory.createMembership
-    private val centreData  = _membership.centreData.hasAllEntities
-
-    val membership = _membership.copy(userIds    = Set(user.id),
-                                      centreData = centreData)
-
-    Set(user, membership).foreach(addToRepository)
-  }
-
-  private def uri: String = "/api/access/"
-
-  //private def uri(item: AccessItem): String = uri + s"${item.id.id}"
-
-  private def uri(path: String): String = uri + s"$path"
 
   private def addMembershipForUser(user: User) = {
     val membership = factory.createMembership.copy(userIds = Set(user.id))
     membershipRepository.put(membership)
   }
 
-  describe("Users REST API") {
+  describe("Access REST API (roles and permissions)") {
 
     describe("GET /api/access/roles") {
 
       it("list the first page of roles") {
         val limit = 5
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-                uri       = uri("roles") + s"?limit=$limit",
-                offset    = 0,
-                total     = RoleId.maxId.toLong,
-                maybeNext = Some(2),
-                maybePrev = None)
+            uri       = uri("roles") + s"?limit=$limit",
+            offset    = 0,
+            total     = RoleId.maxId.toLong,
+            maybeNext = Some(2),
+            maybePrev = None)
         jsonItems must have size limit.toLong
         jsonItems
           .map { json => (json \ "name").as[String] }
@@ -105,9 +69,9 @@ class AccessControllerSpec
 
         (jsonItem \ "name").as[String] must be (RoleId.ShippingUser.toString)
 
-        (jsonItem \ "parentIds").as[Set[AccessItemId]].size must be > 0
+        (jsonItem \ "parentData").as[Set[EntityInfoDto]].size must be > 0
 
-        (jsonItem \ "childrenIds").as[Set[AccessItemId]].size must be > 0
+        (jsonItem \ "childData").as[Set[EntityInfoDto]].size must be > 0
       }
 
       it("list roles when sorted by name") {
@@ -128,9 +92,9 @@ class AccessControllerSpec
 
         (firstJsonItem \ "name").as[String] must be (name)
 
-        (firstJsonItem \ "parentIds").as[Set[AccessItemId]].size must be (0)
+        (firstJsonItem \ "parentData").as[Set[EntityInfoDto]].size must be (0)
 
-        (firstJsonItem \ "childrenIds").as[Set[AccessItemId]].size must be (0)
+        (firstJsonItem \ "childData").as[Set[EntityInfoDto]].size must be (0)
       }
 
       it("fail when using an invalid query parameters") {
@@ -139,299 +103,143 @@ class AccessControllerSpec
 
     }
 
-    describe("GET /api/access/roles/permissions/:roleId") {
+    describe("GET /api/access/roles/names") {
+      val createEntity = (name: String) => factory.createRole.copy(name = name)
+      val baseUrl = uri("roles", "names")
 
+      it should behave like accessItemNamesSharedBehaviour(createEntity, baseUrl)
     }
 
-    describe("GET /api/access/membership") {
+    describe("GET /api/access/items/names") {
+      val createEntity = (name: String) => factory.createPermission.copy(name = name)
+      val baseUrl = uri("items", "names")
 
-      val DefaultMembershipName = "All studies and all centres"
-
-      def compareObjs(jsonList: List[JsObject], memberships: List[Membership]) = {
-        val membershipsMap = memberships.map { membership => (membership.id, membership) }.toMap
-        jsonList.foreach { jsonObj =>
-          val jsonId = MembershipId((jsonObj \ "id").as[String])
-          compareObj(jsonObj, membershipsMap(jsonId))
-        }
-      }
-
-      def filterOutDefaultMembership(jsonList: List[JsObject]): List[JsObject] = {
-        jsonList.filter(json => (json \ "name").as[String] != "All studies and all centres")
-      }
-
-      def multipleItemsResultWithDefaultMembership(uri:         String,
-                                                   queryParams: Map[String, String] =  Map.empty,
-                                                   offset:      Long,
-                                                   total:       Long,
-                                                   maybeNext:   Option[Int],
-                                                   maybePrev:   Option[Int]) = {
-        val reply = PagedResultsSpec(this).multipleItemsResult(uri,
-                                                               queryParams,
-                                                               offset,
-                                                               total + 1, // +1 for the default membership
-                                                               maybeNext,
-                                                               maybePrev)
-        filterOutDefaultMembership(reply)
-      }
-
-      it("lists the default membership") {
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("memberships"))
-
-        (jsonItem \ "name").as[String] must be (DefaultMembershipName)
-      }
-
-      it("list multiple memberships") {
-        val memberships = (0 until 2).map(_ => factory.createMembership).toList
-        memberships.foreach(membershipRepository.put)
-
-        val jsonItems = multipleItemsResultWithDefaultMembership(uri       = uri("memberships"),
-                                                                 offset    = 0,
-                                                                 total     = memberships.size.toLong,
-                                                                 maybeNext = None,
-                                                                 maybePrev = None)
-        jsonItems must have size memberships.size.toLong
-        compareObjs(jsonItems, memberships)
-      }
-
-      it("list a single membership when filtered by name") {
-        val memberships = List(factory.createMembership.copy(name = "membership1"),
-                               factory.createMembership.copy(name = "membership2"))
-        val membership = memberships(0)
-        memberships.foreach(membershipRepository.put)
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri("memberships"), Map("filter" -> s"name::${membership.name}"))
-        compareObj(jsonItem, memberships(0))
-      }
-
-      it("list memberships sorted by name") {
-        val memberships = List(factory.createMembership.copy(name = "membership3"),
-                               factory.createMembership.copy(name = "membership2"),
-                               factory.createMembership.copy(name = "membership1"))
-        memberships.foreach(membershipRepository.put)
-
-        val sortExprs = Table("sort by", "name", "-name")
-        forAll(sortExprs) { sortExpr =>
-          val jsonItems = multipleItemsResultWithDefaultMembership(uri         = uri("memberships"),
-                                                                   queryParams = Map("sort" -> sortExpr),
-                                                                   offset      = 0,
-                                                                   total       = memberships.size.toLong,
-                                                                   maybeNext   = None,
-                                                                   maybePrev   = None)
-
-          jsonItems must have size memberships.size.toLong
-          if (sortExpr == sortExprs(0)) {
-            compareObj(jsonItems(0), memberships(2))
-            compareObj(jsonItems(1), memberships(1))
-            compareObj(jsonItems(2), memberships(0))
-          } else {
-            compareObj(jsonItems(0), memberships(0))
-            compareObj(jsonItems(1), memberships(1))
-            compareObj(jsonItems(2), memberships(2))
-          }
-        }
-      }
-
-      it("list a single membership when using paged query") {
-        val memberships = List(factory.createMembership.copy(name = "membership3"),
-                               factory.createMembership.copy(name = "membership2"),
-                               factory.createMembership.copy(name = "membership1"))
-        memberships.foreach(membershipRepository.put)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri("memberships"),
-            queryParams = Map("filter" -> "name:like:membership",
-                              "sort"   -> "name",
-                              "limit" -> "1"),
-            total       = memberships.size.toLong,
-            maybeNext   = Some(2))
-
-        compareObj(jsonItem, memberships(2))
-      }
-
-      it("fail when using an invalid query parameters") {
-        PagedResultsSpec(this).failWithInvalidParams(uri("memberships"))
-      }
-
+      it should behave like accessItemNamesSharedBehaviour(createEntity, baseUrl)
     }
 
-    describe("GET /api/access/membership/:membershipId") {
+    describe("POST /api/access/roles") {
 
-      it("returns a membership") {
-        val f = new MembershipFixture
-        val reply = makeRequest(GET, uri("memberships") + s"/${f.membership.id}")
+      def roleToAddJson(role: Role): JsValue =
+        Json.obj("name"        -> role.name,
+                 "description" -> role.description,
+                 "userIds"     -> role.userIds.map(_.toString),
+                 "parentIds"   -> role.parentIds.map(_.toString),
+                 "childrenIds" -> role.childrenIds.map(_.toString))
 
-        (reply \ "status").as[String] must be ("success")
 
-        val jsonObj = (reply \ "data").as[JsObject]
-        compareObj(jsonObj, f.membership)
-      }
+      it("can create a role") {
+        val f = new RoleFixture
+        val json = roleToAddJson(f.role)
 
-      it("fails for an invalid membership") {
-        val f = new MembershipFixture
-        membershipRepository.remove(f.membership)
-        val reply = makeRequest(GET, uri("memberships") + s"/${f.membership.id}", NOT_FOUND)
-
-        (reply \ "status").as[String] must be ("error")
-
-        (reply \ "message").as[String] must include regex("IdNotFound: membership id")
-      }
-
-    }
-
-    describe("POST /api/access/memberships") {
-
-      it("can create a membership") {
-        val f = new MembershipFixture
-        membershipRepository.remove(f.membership)
-        val json = Json.obj("name"        -> f.membership.name,
-                            "description" -> f.membership.description,
-                            "userIds"     -> f.membership.userIds.map(_.toString),
-                            "allStudies"  -> false,
-                            "studyIds"    -> f.membership.studyData.ids.map(_.toString),
-                            "allCentres"  -> false,
-                            "centreIds"   -> f.membership.centreData.ids.map(_.toString))
-
-        val reply = makeRequest(POST, uri("memberships"), json)
+        val reply = makeRequest(POST, uri("roles"), json)
 
         (reply \ "status").as[String] must include ("success")
 
         val jsonId = (reply \ "data" \ "id").as[String]
-        val membershipId = MembershipId(jsonId)
+        val itemId = AccessItemId(jsonId)
         jsonId.length must be > 0
 
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj((reply \ "data").as[JsObject], repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (0L)
-          )
-          repoMembership.userIds must contain (f.user.id)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, None)
+        accessItemRepository.getByKey(itemId) mustSucceed { item =>
+          inside(item) { case repoRole: Role =>
+            compareObj((reply \ "data").as[JsObject], repoRole)
+            repoRole must have (
+              'id             (itemId),
+              'version        (0L)
+            )
+            repoRole.userIds must contain (f.user.id)
+            checkTimeStamps(repoRole, OffsetDateTime.now, None)
+          }
         }
       }
 
-      it("fails when adding a second membership with a name that already exists") {
-        val f = new MembershipFixture
-        val json = Json.obj("name"       -> f.membership.name,
-                            "userIds"    -> f.membership.userIds.map(_.toString),
-                            "allStudies" -> false,
-                            "studyIds"   -> f.membership.studyData.ids.map(_.toString),
-                            "allCentres" -> false,
-                            "centreIds"  -> f.membership.centreData.ids.map(_.toString))
-
-        val reply = makeRequest(POST, uri("memberships"), BAD_REQUEST, json)
+      it("fails when adding a second role with a name that already exists") {
+        val f = new RoleFixture
+        val json = roleToAddJson(f.role)
+        accessItemRepository.put(f.role)
+        val reply = makeRequest(POST, uri("roles"), BAD_REQUEST, json)
 
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include regex("EntityCriteriaError: name already used:")
       }
 
-      it("attempt to create membership fails if no users are added") {
-        val f = new MembershipFixture
-        val json = Json.obj("name"       -> f.membership.name,
-                            "userIds"    -> List.empty[String],
-                            "allStudies" -> false,
-                            "studyIds"   -> f.membership.studyData.ids.map(_.toString),
-                            "allCentres" -> false,
-                            "centreIds"  -> f.membership.centreData.ids.map(_.toString))
-
-        val reply = makeRequest(POST, uri("memberships"), BAD_REQUEST, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex("userIds cannot be empty")
-      }
-
-      it("attempt to create membership fails if user does not exist") {
-        val f = new MembershipFixture
+      it("attempt to create role fails if user does not exist") {
+        val f = new RoleFixture
         userRepository.remove(f.user)
-        val json = Json.obj("name"       -> f.membership.name,
-                            "userIds"    -> f.membership.userIds.map(_.toString),
-                            "allStudies" -> false,
-                            "studyIds"   -> f.membership.studyData.ids.map(_.toString),
-                            "allCentres" -> false,
-                            "centreIds"  -> f.membership.centreData.ids.map(_.toString))
-
-        val reply = makeRequest(POST, uri("memberships"), NOT_FOUND, json)
+        val json = roleToAddJson(f.role)
+        val reply = makeRequest(POST, uri("roles"), NOT_FOUND, json)
 
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include regex("IdNotFound: user id")
       }
 
-      it("attempt to create membership fails if study does not exist") {
-        val f = new MembershipFixture
-        studyRepository.remove(f.study)
-        val json = Json.obj("name"       -> f.membership.name,
-                            "userIds"    -> f.membership.userIds.map(_.toString),
-                            "allStudies" -> false,
-                            "studyIds"   -> f.membership.studyData.ids.map(_.toString),
-                            "allCentres" -> false,
-                            "centreIds"  -> f.membership.centreData.ids.map(_.toString))
-
-        val reply = makeRequest(POST, uri("memberships"), NOT_FOUND, json)
+      it("attempt to create membership fails if parent does not exist") {
+        val f = new RoleFixture
+        val parentRole = factory.createRole
+        val role = f.role.copy(parentIds = Set(parentRole.id))
+        val json = roleToAddJson(role)
+        val reply = makeRequest(POST, uri("roles"), NOT_FOUND, json)
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include regex("IdNotFound: study id")
+        (reply \ "message").as[String] must include regex("EntityCriteriaNotFound: invalid role id")
       }
 
-      it("attempt to create membership fails if centre does not exist") {
-        val f = new MembershipFixture
-        centreRepository.remove(f.centre)
-        val json = Json.obj("name"       -> f.membership.name,
-                            "userIds"    -> f.membership.userIds.map(_.toString),
-                            "allStudies" -> false,
-                            "studyIds"   -> f.membership.studyData.ids.map(_.toString),
-                            "allCentres" -> false,
-                            "centreIds"  -> f.membership.centreData.ids.map(_.toString))
-
-        val reply = makeRequest(POST, uri("memberships"), NOT_FOUND, json)
+      it("attempt to create membership fails if child does not exist") {
+        val f = new RoleFixture
+        val childRole = factory.createRole
+        val role = f.role.copy(childrenIds = Set(childRole.id))
+        val json = roleToAddJson(role)
+        val reply = makeRequest(POST, uri("roles"), NOT_FOUND, json)
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include regex("IdNotFound: centre id")
+        (reply \ "message").as[String] must include regex("IdNotFound: access item id")
       }
 
     }
 
-    describe("POST /api/access/memberships/name/:membershipId") {
+    describe("POST /api/access/roles/name/:roleId") {
 
-      def updateNameJson(membership: Membership, name: String) = {
-        Json.obj("expectedVersion" -> membership.version, "name" -> name)
+      def updateNameJson(role: Role, name: String) = {
+        Json.obj("expectedVersion" -> role.version, "name" -> name)
       }
 
       it("can update the name") {
-        val f = new MembershipFixture
+        val f = new RoleFixture
         val newName = nameGenerator.next[String]
-        val json = updateNameJson(f.membership, newName)
+        val json = updateNameJson(f.role, newName)
 
-        val reply = makeRequest(POST, uri("memberships") + s"/name/${f.membership.id}", json)
+        accessItemRepository.put(f.role)
+        val reply = makeRequest(POST, uri("roles", "name", f.role.id.id), json)
 
         (reply \ "status").as[String] must include ("success")
 
         val jsonId = (reply \ "data" \ "id").as[String]
-        val membershipId = MembershipId(jsonId)
+        val itemId = AccessItemId(jsonId)
         jsonId.length must be > 0
 
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj((reply \ "data").as[JsObject], repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (f.membership.version + 1),
-            'name           (newName)
-          )
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+        accessItemRepository.getByKey(itemId) mustSucceed { item =>
+          inside(item) { case repoRole: Role =>
+            compareObj((reply \ "data").as[JsObject], repoRole)
+            repoRole must have (
+              'id             (itemId),
+              'version        (f.role.version + 1),
+              'name           (newName)
+            )
+            checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+          }
         }
       }
 
-      it("fails when updating to name already used by another membership") {
-        val f = new MembershipFixture
-        val membership = factory.createMembership
-        membershipRepository.put(membership)
-        val json = updateNameJson(f.membership, membership.name)
+      it("fails when updating to name already used by another role") {
+        val f = new RoleFixture
+        val role = factory.createRole
+        val json = updateNameJson(f.role, role.name)
 
-        val reply = makeRequest(POST, uri("memberships") + s"/name/${f.membership.id}", BAD_REQUEST, json)
+        Set(f.role, role).foreach(addToRepository)
+        val reply = makeRequest(POST, uri("roles", "name", f.role.id.id), BAD_REQUEST, json)
 
         (reply \ "status").as[String] must include ("error")
 
@@ -439,35 +247,37 @@ class AccessControllerSpec
       }
 
       it("fail when updating to something with less than 2 characters") {
-        val f = new MembershipFixture
-        val json = updateNameJson(f.membership, "a")
-        val reply = makeRequest(POST, uri("memberships") + s"/name/${f.membership.id}", BAD_REQUEST, json)
+        val f = new RoleFixture
+        val json = updateNameJson(f.role, "a")
+
+        accessItemRepository.put(f.role)
+        val reply = makeRequest(POST, uri("roles", "name", f.role.id.id), BAD_REQUEST, json)
 
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must startWith ("InvalidName")
       }
 
-      it("fail when updating and membership ID does not exist") {
-        val f = new MembershipFixture
-        membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/name/${f.membership.id}",
-                 updateNameJson(f.membership, nameGenerator.next[Membership]))
+      it("fail when updating and role ID does not exist") {
+        val f = new RoleFixture
+        notFound(uri("roles", "name", f.role.id.id),
+                 updateNameJson(f.role, nameGenerator.next[Role]))
       }
 
       it("fail when updating with invalid version") {
-        val f = new MembershipFixture
-        val json = updateNameJson(f.membership, nameGenerator.next[Membership]) ++
-          Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
-        hasInvalidVersion(uri("memberships") + s"/name/${f.membership.id}", json)
+        val f = new RoleFixture
+        val json = updateNameJson(f.role, nameGenerator.next[Role]) ++
+        Json.obj("expectedVersion" -> Some(f.role.version + 10L))
+        accessItemRepository.put(f.role)
+        hasInvalidVersion(uri("roles", "name", f.role.id.id), json)
       }
 
     }
 
-    describe("POST /api/access/memberships/description/:membershipId") {
+    describe("POST /api/access/roles/description/:roleId") {
 
-      def updateDescriptionJson(membership: Membership, description: Option[String]) = {
-        Json.obj("expectedVersion" -> membership.version) ++
+      def updateDescriptionJson(role: Role, description: Option[String]) = {
+        Json.obj("expectedVersion" -> role.version) ++
         JsObject(
           Seq[(String, JsValue)]() ++
             description.map("description" -> Json.toJson(_)))
@@ -476,649 +286,585 @@ class AccessControllerSpec
       it("update a description") {
         val descriptionValues = Table("descriptions", Some(nameGenerator.next[String]), None)
         forAll(descriptionValues) { newDescription =>
-          val f = new MembershipFixture
-          val json = updateDescriptionJson(f.membership, newDescription)
-          val reply = makeRequest(POST, uri("memberships") + s"/description/${f.membership.id}", json)
+          val f = new RoleFixture
+          val json = updateDescriptionJson(f.role, newDescription)
+
+          accessItemRepository.put(f.role)
+          val reply = makeRequest(POST, uri("roles", "description", f.role.id.id), json)
 
           (reply \ "status").as[String] must include ("success")
 
           val jsonId = (reply \ "data" \ "id").as[String]
-          val membershipId = MembershipId(jsonId)
+          val itemId = AccessItemId(jsonId)
           jsonId.length must be > 0
 
-          membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-            compareObj((reply \ "data").as[JsObject], repoMembership)
-            repoMembership must have (
-              'id             (membershipId),
-              'version        (f.membership.version + 1),
-              'description    (newDescription)
-            )
-            checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          accessItemRepository.getByKey(itemId) mustSucceed { item =>
+            inside(item) { case repoRole: Role =>
+              compareObj((reply \ "data").as[JsObject], repoRole)
+              repoRole must have (
+                'id             (itemId),
+                'version        (f.role.version + 1),
+                'description    (newDescription)
+              )
+              checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+            }
           }
         }
       }
 
-      it("fail when updating and membership ID does not exist") {
-        val f = new MembershipFixture
-        membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/description/${f.membership.id}",
-                 updateDescriptionJson(f.membership, Some(nameGenerator.next[Membership])))
+      it("fail when updating and role ID does not exist") {
+        val f = new RoleFixture
+        notFound(uri("roles", "description", f.role.id.id),
+                 updateDescriptionJson(f.role, Some(nameGenerator.next[Role])))
       }
 
       it("fail when updating with invalid version") {
-        val f = new MembershipFixture
-        val json = updateDescriptionJson(f.membership, Some(nameGenerator.next[Membership])) ++
-          Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
-        hasInvalidVersion(uri("memberships") + s"/description/${f.membership.id}", json)
+        val f = new RoleFixture
+        val json = updateDescriptionJson(f.role, Some(nameGenerator.next[Role])) ++
+        Json.obj("expectedVersion" -> Some(f.role.version + 10L))
+        accessItemRepository.put(f.role)
+        hasInvalidVersion(uri("roles") + s"/description/${f.role.id}", json)
       }
 
     }
 
-    describe("POST /api/access/memberships/user/:membershipId") {
+    describe("POST /api/access/roles/user/:roleId") {
 
-      def addUserJson(membership: Membership, user: User) = {
-        Json.obj("userId" -> user.id.id, "expectedVersion" -> membership.version)
+      def addUserJson(role: Role, user: User) = {
+        Json.obj("userId" -> user.id.id, "expectedVersion" -> role.version)
       }
 
       it("can add a user") {
-        val f = new MembershipFixture
+        val f = new RoleFixture
         val user = factory.createRegisteredUser
-        val json = addUserJson(f.membership, user)
+        val json = addUserJson(f.role, user)
 
-        userRepository.put(user)
-        val reply = makeRequest(POST, uri("memberships") + s"/user/${f.membership.id}", json)
+        Set(f.role, user).foreach(addToRepository)
+        val reply = makeRequest(POST, uri("roles", "user", f.role.id.id), json)
 
         (reply \ "status").as[String] must include ("success")
 
         val jsonId = (reply \ "data" \ "id").as[String]
-        val membershipId = MembershipId(jsonId)
+        val itemId = AccessItemId(jsonId)
         jsonId.length must be > 0
 
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj((reply \ "data").as[JsObject], repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (f.membership.version + 1)
-          )
-          repoMembership.userIds must contain (user.id)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+        accessItemRepository.getByKey(itemId) mustSucceed { item =>
+          inside(item) { case repoRole: Role =>
+            compareObj((reply \ "data").as[JsObject], repoRole)
+            repoRole must have (
+              'id             (itemId),
+              'version        (f.role.version + 1)
+            )
+            repoRole.userIds must contain (user.id)
+            checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+          }
         }
       }
 
       it("cannot add the same user more than once") {
-        val f = new MembershipFixture
-        val json = addUserJson(f.membership, f.user)
-        val reply = makeRequest(POST, uri("memberships") + s"/user/${f.membership.id}", BAD_REQUEST, json)
+        val f = new RoleFixture
+        val json = addUserJson(f.role, f.user)
+
+        accessItemRepository.put(f.role)
+        val reply = makeRequest(POST, uri("roles", "user", f.role.id.id), BAD_REQUEST, json)
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include ("user ID is already in membership")
+        (reply \ "message").as[String] must include ("user ID is already in role")
       }
 
       it("cannot add a user that does not exist") {
-        val f = new MembershipFixture
+        val f = new RoleFixture
         val user = factory.createRegisteredUser
-        val json = addUserJson(f.membership, user)
-        val reply = makeRequest(POST, uri("memberships") + s"/user/${f.membership.id}", NOT_FOUND, json)
+        val json = addUserJson(f.role, user)
+
+        accessItemRepository.put(f.role)
+        val reply = makeRequest(POST, uri("roles", "user", f.role.id.id), NOT_FOUND, json)
 
         (reply \ "status").as[String] must include ("error")
 
         (reply \ "message").as[String] must include ("IdNotFound: user id")
       }
 
-      it("fail when updating and membership ID does not exist") {
-        val f = new MembershipFixture
+      it("fail when updating and role ID does not exist") {
+        val f = new RoleFixture
         val user = factory.createRegisteredUser
-        val json = addUserJson(f.membership, user)
+        val json = addUserJson(f.role, user)
         userRepository.put(user)
-        membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/user/${f.membership.id}", json)
+        notFound(uri("roles", "user", f.role.id.id), json)
       }
 
       it("fail when updating with invalid version") {
-        val f = new MembershipFixture
+        val f = new RoleFixture
         val user = factory.createRegisteredUser
-        val json = addUserJson(f.membership, user) ++
-          Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
-        userRepository.put(user)
-        hasInvalidVersion(uri("memberships") + s"/user/${f.membership.id}", json)
+        val json = addUserJson(f.role, user) ++
+        Json.obj("expectedVersion" -> Some(f.role.version + 10L))
+        Set(f.role, user).foreach(addToRepository)
+        hasInvalidVersion(uri("roles", "user", f.role.id.id), json)
       }
 
     }
 
-    describe("POST /api/access/memberships/allStudies/:membershipId") {
+    describe("POST /api/access/roles/parent/:roleId") {
 
-      it("can assign a membership, for a single study, to be for all studies") {
-        val f = new MembershipFixture
+      def addParentRoleJson(role: Role, parentRole: Role) = {
+        Json.obj("parentRoleId" -> parentRole.id.id, "expectedVersion" -> role.version)
+      }
 
-        f.membership.centreData.allEntities must be (false)
-        f.membership.studyData.ids must not have size (0L)
+      it("can add a parent role") {
+        val f = new RoleFixture
+        val parentRole = factory.createRole
+        val json = addParentRoleJson(f.role, parentRole)
 
-        val json = Json.obj("expectedVersion" -> f.membership.version)
-        val reply = makeRequest(POST, uri("memberships") + s"/allStudies/${f.membership.id}", json)
+        Set(f.role, parentRole).foreach(addToRepository)
+        val reply = makeRequest(POST, uri("roles", "parent", f.role.id.id), json)
 
         (reply \ "status").as[String] must include ("success")
 
         val jsonId = (reply \ "data" \ "id").as[String]
-        val membershipId = MembershipId(jsonId)
+        val itemId = AccessItemId(jsonId)
         jsonId.length must be > 0
 
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj((reply \ "data").as[JsObject], repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (f.membership.version + 1)
-          )
-          repoMembership.studyData.allEntities must be (true)
-          repoMembership.studyData.ids must have size (0L)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+        accessItemRepository.getByKey(itemId) mustSucceed { item =>
+          inside(item) { case repoRole: Role =>
+            compareObj((reply \ "data").as[JsObject], repoRole)
+            repoRole must have (
+              'id             (itemId),
+              'version        (f.role.version + 1)
+            )
+            repoRole.parentIds must contain (parentRole.id)
+            checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+          }
         }
       }
 
-    }
+      it("cannot add self as a parent role") {
+        val f = new RoleFixture
+        val json = addParentRoleJson(f.role, f.role)
 
-    describe("POST /api/access/memberships/study/:membershipId") {
-
-      def addStudyJson(membership: Membership, study: Study) = {
-        Json.obj("studyId" -> study.id.id, "expectedVersion" -> membership.version)
-      }
-
-      def validateReply(json:         JsValue,
-                        membershipId: MembershipId,
-                        newVersion:   Long,
-                        studyId:      StudyId) {
-        val jsonId = (json \ "id").as[String]
-        jsonId must be (membershipId.id)
-
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj(json, repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (newVersion)
-          )
-          repoMembership.studyData.allEntities must be (false)
-          repoMembership.studyData.ids must contain (studyId)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
-        }
-      }
-
-      it("can add a study") {
-        val f = new MembershipFixture
-        val study = factory.createEnabledStudy
-        val json = addStudyJson(f.membership, study)
-
-        studyRepository.put(study)
-        val reply = makeRequest(POST, uri("memberships") + s"/study/${f.membership.id}", json)
-
-        (reply \ "status").as[String] must include ("success")
-
-        validateReply((reply \ "data").as[JsObject], f.membership.id, f.membership.version + 1, study.id)
-      }
-
-      it("an all studies membership can be modified to be for a single study") {
-        val f = new MembershipFixtureAllStudies
-        val study = factory.createEnabledStudy
-        val json = addStudyJson(f.membership, study)
-
-        studyRepository.put(study)
-        val reply = makeRequest(POST, uri("memberships") + s"/study/${f.membership.id}", json)
-
-        (reply \ "status").as[String] must include ("success")
-
-        validateReply((reply \ "data").as[JsObject], f.membership.id, f.membership.version + 1, study.id)
-      }
-
-      it("cannot add the same study more than once") {
-        val f = new MembershipFixture
-        val json = addStudyJson(f.membership, f.study)
-        val reply = makeRequest(POST, uri("memberships") + s"/study/${f.membership.id}", BAD_REQUEST, json)
+        Set(f.role).foreach(addToRepository)
+        val reply = makeRequest(POST, uri("roles", "parent", f.role.id.id), BAD_REQUEST, json)
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include ("study ID is already in membership")
+        (reply \ "message").as[String] must include ("parent ID cannot be self")
       }
 
-      it("cannot add a study that does not exist") {
-        val f = new MembershipFixture
-        val study = factory.createEnabledStudy
-        val json = addStudyJson(f.membership, study)
-        val reply = makeRequest(POST, uri("memberships") + s"/study/${f.membership.id}", NOT_FOUND, json)
+      it("cannot add the same parent role more than once") {
+        val f = new RoleFixture
+        val parentRole = factory.createRole
+        val role = f.role.copy(parentIds = Set(parentRole.id))
+        val json = addParentRoleJson(role, parentRole)
+
+        Set(role, parentRole).foreach(addToRepository)
+        val reply = makeRequest(POST, uri("roles", "parent", role.id.id), BAD_REQUEST, json)
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include ("IdNotFound: study id")
+        (reply \ "message").as[String] must include ("parent ID is already in role")
       }
 
-      it("fail when updating and membership ID does not exist") {
-        val f = new MembershipFixture
-        val study = factory.createEnabledStudy
-        val json = addStudyJson(f.membership, study)
-        studyRepository.put(study)
-        membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/study/${f.membership.id}", json)
+      it("cannot add a parent role that does not exist") {
+        val f = new RoleFixture
+        val parentRole = factory.createRole
+        val json = addParentRoleJson(f.role, parentRole)
+
+        Set(f.role).foreach(addToRepository)
+        val reply = makeRequest(POST, uri("roles", "parent", f.role.id.id), NOT_FOUND, json)
+
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include regex(s"IdNotFound: access item id.*${parentRole.id.id}")
+      }
+
+      it("fail when updating and role ID does not exist") {
+        val f = new RoleFixture
+        val parentRole = factory.createRole
+        val json = addParentRoleJson(f.role, parentRole)
+        accessItemRepository.put(parentRole)
+        notFound(uri("roles", "parent", f.role.id.id), json)
       }
 
       it("fail when updating with invalid version") {
-        val f = new MembershipFixture
-        val study = factory.createEnabledStudy
-        val json = addStudyJson(f.membership, study) ++
-          Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
-        studyRepository.put(study)
-        hasInvalidVersion(uri("memberships") + s"/study/${f.membership.id}", json)
+        val f = new RoleFixture
+        val parentRole = factory.createRole
+        val json = addParentRoleJson(f.role, parentRole) ++
+        Json.obj("expectedVersion" -> Some(f.role.version + 10L))
+        Set(f.role, parentRole).foreach(addToRepository)
+        hasInvalidVersion(uri("roles", "parent", f.role.id.id), json)
       }
 
     }
 
-    describe("POST /api/access/memberships/allCentres/:membershipId") {
+    describe("POST /api/access/roles/child/:roleId") {
 
-      it("can assign a membership, for a single centre, to be for all centres") {
-        val f = new MembershipFixture
+      def addChildJson(role: Role, child: AccessItem) = {
+        Json.obj("childRoleId" -> child.id.id, "expectedVersion" -> role.version)
+      }
 
-        f.membership.centreData.allEntities must be (false)
-        f.membership.centreData.ids must not have size (0L)
+      it("can add a child role or permission") {
+        val f = new RoleFixture
+        val children = Table("possible children",
+                             factory.createRole,
+                             factory.createPermission)
+        forAll(children) { child =>
+          info(s"child type: ${child.accessItemType.id}")
+          val json = addChildJson(f.role, child)
 
-        val json = Json.obj("expectedVersion" -> f.membership.version)
-        val reply = makeRequest(POST, uri("memberships") + s"/allCentres/${f.membership.id}", json)
+          Set(f.role, child).foreach(addToRepository)
+          val reply = makeRequest(POST, uri("roles", "child", f.role.id.id), json)
 
-        (reply \ "status").as[String] must include ("success")
+          (reply \ "status").as[String] must include ("success")
 
-        val jsonId = (reply \ "data" \ "id").as[String]
-        val membershipId = MembershipId(jsonId)
-        jsonId.length must be > 0
+          val jsonId = (reply \ "data" \ "id").as[String]
+          val itemId = AccessItemId(jsonId)
+          jsonId.length must be > 0
 
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj((reply \ "data").as[JsObject], repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (f.membership.version + 1)
-          )
-          repoMembership.centreData.allEntities must be (true)
-          repoMembership.centreData.ids must have size (0L)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          accessItemRepository.getByKey(itemId) mustSucceed { item =>
+            inside(item) { case repoRole: Role =>
+              compareObj((reply \ "data").as[JsObject], repoRole)
+              repoRole must have (
+                'id             (itemId),
+                'version        (f.role.version + 1)
+              )
+              repoRole.childrenIds must contain (child.id)
+              checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+            }
+          }
         }
       }
 
-    }
+      it("cannot add self as a parent role") {
+        val f = new RoleFixture
+        val json = addChildJson(f.role, f.role)
 
-    describe("POST /api/access/memberships/centre/:membershipId") {
+        Set(f.role).foreach(addToRepository)
+        val reply = makeRequest(POST, uri("roles", "child", f.role.id.id), BAD_REQUEST, json)
 
-      def addCentreJson(membership: Membership, centre: Centre) = {
-        Json.obj("centreId" -> centre.id.id, "expectedVersion" -> membership.version)
+        (reply \ "status").as[String] must include ("error")
+
+        (reply \ "message").as[String] must include ("child ID cannot be self")
       }
 
-      def validateReply(json:         JsValue,
-                        membershipId: MembershipId,
-                        newVersion:   Long,
-                        centreId:     CentreId) {
-        val jsonId = (json \ "id").as[String]
-        jsonId must be (membershipId.id)
+      it("cannot add the same child role more than once") {
+        val f = new RoleFixture
+        val children = Table("possible children",
+                             factory.createRole,
+                             factory.createPermission)
+        forAll(children) { child =>
+          info(s"child type: ${child.accessItemType.id}")
+          val role = f.role.copy(childrenIds = Set(child.id))
+          val json = addChildJson(role, child)
 
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj(json, repoMembership)
-          repoMembership must have (
-            'id      (membershipId),
-            'version (newVersion)
-          )
-          repoMembership.centreData.allEntities must be (false)
-          repoMembership.centreData.ids must contain (centreId)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          Set(role, child).foreach(addToRepository)
+          val reply = makeRequest(POST, uri("roles", "child", role.id.id), BAD_REQUEST, json)
+
+          (reply \ "status").as[String] must include ("error")
+
+          (reply \ "message").as[String] must include ("child ID is already in role")
         }
       }
 
-      it("can add a centre") {
-        val f = new MembershipFixture
-        val centre = factory.createEnabledCentre
-        val json = addCentreJson(f.membership, centre)
+      it("cannot add a child role that does not exist") {
+        val f = new RoleFixture
+        val child = factory.createRole
+        val json = addChildJson(f.role, child)
 
-        centreRepository.put(centre)
-        val reply = makeRequest(POST, uri("memberships") + s"/centre/${f.membership.id}", json)
-
-        (reply \ "status").as[String] must include ("success")
-
-        validateReply((reply \ "data").as[JsObject], f.membership.id, f.membership.version + 1, centre.id)
-      }
-
-      it("an all centres membership can be modified to be for a single centre") {
-        val f = new MembershipFixtureAllCentres
-        val centre = factory.createEnabledCentre
-        val json = addCentreJson(f.membership, centre)
-
-        centreRepository.put(centre)
-        val reply = makeRequest(POST, uri("memberships") + s"/centre/${f.membership.id}", json)
-
-        (reply \ "status").as[String] must include ("success")
-
-        validateReply((reply \ "data").as[JsObject], f.membership.id, f.membership.version + 1, centre.id)
-      }
-
-      it("cannot add the same centre more than once") {
-        val f = new MembershipFixture
-        val json = addCentreJson(f.membership, f.centre)
-        val reply = makeRequest(POST, uri("memberships") + s"/centre/${f.membership.id}", BAD_REQUEST, json)
+        Set(f.role).foreach(addToRepository)
+        val reply = makeRequest(POST, uri("roles", "child", f.role.id.id), NOT_FOUND, json)
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include ("centre ID is already in membership")
+        (reply \ "message").as[String] must include regex(s"IdNotFound: access item id.*${child.id.id}")
       }
 
-      it("cannot add a centre that does not exist") {
-        val f = new MembershipFixture
-        val centre = factory.createEnabledCentre
-        val json = addCentreJson(f.membership, centre)
-        val reply = makeRequest(POST, uri("memberships") + s"/centre/${f.membership.id}", NOT_FOUND, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("IdNotFound: centre id")
-      }
-
-      it("fail when updating and membership ID does not exist") {
-        val f = new MembershipFixture
-        val centre = factory.createEnabledCentre
-        val json = addCentreJson(f.membership, centre)
-        centreRepository.put(centre)
-        membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/centre/${f.membership.id}", json)
+      it("fail when updating and role ID does not exist") {
+        val f = new RoleFixture
+        val child = factory.createRole
+        val json = addChildJson(f.role, child)
+        accessItemRepository.put(child)
+        notFound(uri("roles", "child", f.role.id.id), json)
       }
 
       it("fail when updating with invalid version") {
-        val f = new MembershipFixture
-        val centre = factory.createEnabledCentre
-        val json = addCentreJson(f.membership, centre) ++
-          Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
-        centreRepository.put(centre)
-        hasInvalidVersion(uri("memberships") + s"/centre/${f.membership.id}", json)
+        val f = new RoleFixture
+        val child = factory.createRole
+        val json = addChildJson(f.role, child) ++
+        Json.obj("expectedVersion" -> Some(f.role.version + 10L))
+        Set(f.role, child).foreach(addToRepository)
+        hasInvalidVersion(uri("roles", "child", f.role.id.id), json)
       }
 
     }
 
-    describe("DELETE /api/access/memberships/user/:membershipId/:version/:userId") {
+  }
 
-      it("can remove a user") {
-        val f = new MembershipFixture
-        val url = uri("memberships") + s"/user/${f.membership.id}/${f.membership.version}/${f.user.id.id}"
+  describe("DELETE /api/access/roles/user/:roleId/:version/:userId") {
+
+    it("can remove a user") {
+      val f = new RoleFixture
+      val url = uri("roles", "user", f.role.id.id, f.role.version.toString, f.user.id.id)
+
+      addToRepository(f.role)
+      val reply = makeRequest(DELETE, url)
+
+      (reply \ "status").as[String] must include ("success")
+
+      val jsonId = (reply \ "data" \ "id").as[String]
+      val itemId = AccessItemId(jsonId)
+      jsonId.length must be > 0
+
+      accessItemRepository.getByKey(itemId) mustSucceed { item =>
+        inside(item) { case repoRole: Role =>
+          compareObj((reply \ "data").as[JsObject], repoRole)
+          repoRole must have (
+            'id             (itemId),
+            'version        (f.role.version + 1)
+          )
+          repoRole.userIds must not contain (f.user.id)
+          checkTimeStamps(repoRole, f.role.timeAdded, OffsetDateTime.now)
+        }
+      }
+    }
+
+    it("cannot remove a user not in the role") {
+      val f = new RoleFixture
+      val user = factory.createRegisteredUser
+      Set(f.role, user).map(addToRepository)
+      val url = uri("roles", "user", f.role.id.id, f.role.version.toString, user.id.id)
+      val reply = makeRequest(DELETE, url, BAD_REQUEST)
+
+      (reply \ "status").as[String] must include ("error")
+
+      (reply \ "message").as[String] must include ("user ID is not in role")
+    }
+
+    it("cannot remove a user that does not exist") {
+      val f = new RoleFixture
+      val user = factory.createRegisteredUser
+      Set(f.role).map(addToRepository)
+      val url = uri("roles", "user", f.role.id.id, f.role.version.toString, user.id.id)
+      val reply = makeRequest(DELETE, url, NOT_FOUND)
+
+      (reply \ "status").as[String] must include ("error")
+
+      (reply \ "message").as[String] must include ("IdNotFound: user id")
+    }
+
+    it("fail when removing and role ID does not exist") {
+      val f = new RoleFixture
+      val user = factory.createRegisteredUser
+      val url = uri("roles", "user", f.role.id.id, f.role.version.toString, user.id.id)
+      Set(user).map(addToRepository)
+      notFoundOnDelete(url)
+    }
+
+    it("fail when removing with invalid version") {
+      val f = new RoleFixture
+      val user = factory.createRegisteredUser
+      val url = uri("roles", "user", f.role.id.id, (f.role.version + 10L).toString, user.id.id)
+      Set(f.role, user).map(addToRepository)
+      hasInvalidVersionOnDelete(url)
+    }
+
+  }
+
+  describe("DELETE /api/access/roles/parent/:roleId/:version/:parentId") {
+
+    it("can remove a parent role") {
+      val f = new RoleFixture
+      val parentRole = factory.createRole
+      val role = f.role.copy(parentIds = Set(parentRole.id))
+      val url = uri("roles", "parent", role.id.id, role.version.toString, parentRole.id.id)
+
+      Set(role, parentRole).foreach(addToRepository)
+      val reply = makeRequest(DELETE, url)
+
+      (reply \ "status").as[String] must include ("success")
+
+      val jsonId = (reply \ "data" \ "id").as[String]
+      val itemId = AccessItemId(jsonId)
+      jsonId.length must be > 0
+
+      accessItemRepository.getByKey(itemId) mustSucceed { item =>
+        inside(item) { case repoRole: Role =>
+          compareObj((reply \ "data").as[JsObject], repoRole)
+          repoRole must have (
+            'id             (itemId),
+            'version        (role.version + 1)
+          )
+          repoRole.parentIds must not contain (parentRole.id)
+          checkTimeStamps(repoRole, role.timeAdded, OffsetDateTime.now)
+        }
+      }
+    }
+
+    it("cannot remove a parent role not in the role") {
+      val f = new RoleFixture
+      val parentRole = factory.createRole
+      Set(f.role, parentRole).map(addToRepository)
+      val url = uri("roles", "parent", f.role.id.id, f.role.version.toString, parentRole.id.id)
+      val reply = makeRequest(DELETE, url, BAD_REQUEST)
+
+      (reply \ "status").as[String] must include ("error")
+
+      (reply \ "message").as[String] must include ("parent ID not in role")
+    }
+
+    it("cannot remove a parent role that does not exist") {
+      val f = new RoleFixture
+      val parentRole = factory.createRole
+      Set(f.role).map(addToRepository)
+      val url = uri("roles", "parent", f.role.id.id, f.role.version.toString, parentRole.id.id)
+      val reply = makeRequest(DELETE, url, NOT_FOUND)
+
+      (reply \ "status").as[String] must include ("error")
+
+      (reply \ "message").as[String] must include ("IdNotFound: access item id")
+    }
+
+    it("fail when removing and role ID does not exist") {
+      val f = new RoleFixture
+      val parentRole = factory.createRole
+      val url = uri("roles", "parent", f.role.id.id, f.role.version.toString, parentRole.id.id)
+      Set(parentRole).map(addToRepository)
+      notFoundOnDelete(url)
+    }
+
+    it("fail when removing with invalid version") {
+      val f = new RoleFixture
+      val parentRole = factory.createRole
+      val url = uri("roles", "parent", f.role.id.id, (f.role.version + 10L).toString, parentRole.id.id)
+      Set(f.role, parentRole).map(addToRepository)
+      hasInvalidVersionOnDelete(url)
+    }
+
+  }
+
+  describe("DELETE /api/access/roles/child/:roleId/:version/:childId") {
+
+    it("can remove a child role") {
+      val f = new RoleFixture
+      val children = Table("possible children",
+                           factory.createRole,
+                           factory.createPermission)
+      forAll(children) { child =>
+        val role = f.role.copy(childrenIds = Set(child.id))
+        val url = uri("roles", "child", role.id.id, role.version.toString, child.id.id)
+
+        Set(role, child).foreach(addToRepository)
         val reply = makeRequest(DELETE, url)
 
         (reply \ "status").as[String] must include ("success")
 
         val jsonId = (reply \ "data" \ "id").as[String]
-        val membershipId = MembershipId(jsonId)
+        val itemId = AccessItemId(jsonId)
         jsonId.length must be > 0
 
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj((reply \ "data").as[JsObject], repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (f.membership.version + 1)
-          )
-          repoMembership.userIds must not contain (f.user.id)
-          checkTimeStamps(repoMembership, f.membership.timeAdded, OffsetDateTime.now)
+        accessItemRepository.getByKey(itemId) mustSucceed { item =>
+          inside(item) { case repoRole: Role =>
+            compareObj((reply \ "data").as[JsObject], repoRole)
+            repoRole must have (
+              'id             (itemId),
+              'version        (role.version + 1)
+            )
+            repoRole.childrenIds must not contain (child.id)
+            checkTimeStamps(repoRole, role.timeAdded, OffsetDateTime.now)
+          }
         }
       }
+    }
+  }
 
-      it("cannot remove a user not in the membership") {
-        val f = new MembershipFixture
-        val user = factory.createRegisteredUser
-        userRepository.put(user)
-        val url = uri("memberships") + s"/user/${f.membership.id}/${f.membership.version}/${user.id.id}"
-        val reply = makeRequest(DELETE, url, BAD_REQUEST)
+  describe("DELETE /api/access/roles/:roleId/:version") {
 
-        (reply \ "status").as[String] must include ("error")
+    it("can remove a role") {
+      val f = new RoleFixture
+      val url = uri("roles", f.role.id.id, f.role.version.toString)
 
-        (reply \ "message").as[String] must include ("user ID is not in membership")
-      }
+      accessItemRepository.put(f.role)
+      val reply = makeRequest(DELETE, url)
 
-      it("cannot remove a user that does not exist") {
-        val f = new MembershipFixture
-        val user = factory.createRegisteredUser
-        val url = uri("memberships") + s"/user/${f.membership.id}/${f.membership.version}/${user.id.id}"
-        val reply = makeRequest(DELETE, url, NOT_FOUND)
+      (reply \ "status").as[String] must include ("success")
 
-        (reply \ "status").as[String] must include ("error")
+      (reply \ "data").as[Boolean] must be (true)
 
-        (reply \ "message").as[String] must include ("IdNotFound: user id")
-      }
-
-      it("fail when removing and membership ID does not exist") {
-        val f = new MembershipFixture
-        val user = factory.createRegisteredUser
-        val url = uri("memberships") + s"/user/${f.membership.id}/${f.membership.version}/${user.id.id}"
-        userRepository.put(user)
-        membershipRepository.remove(f.membership)
-        notFoundOnDelete(url)
-      }
-
-      it("fail when removing with invalid version") {
-        val f = new MembershipFixture
-        val user = factory.createRegisteredUser
-        val url = uri("memberships") + s"/user/${f.membership.id}/${f.membership.version + 10L}/${user.id.id}"
-        userRepository.put(user)
-        hasInvalidVersionOnDelete(url)
-      }
-
+      accessItemRepository.getByKey(f.role.id) mustFail ("IdNotFound: access item id.*")
     }
 
-    describe("DELETE /api/access/memberships/study/:membershipId/:version/:studyId") {
-
-      it("can remove a study") {
-        val f = new MembershipFixture
-        val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version}/${f.study.id.id}"
-        val reply = makeRequest(DELETE, url)
-
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonId = (reply \ "data" \ "id").as[String]
-        val membershipId = MembershipId(jsonId)
-        jsonId.length must be > 0
-
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj((reply \ "data").as[JsObject], repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (f.membership.version + 1)
-          )
-          repoMembership.studyData.ids must not contain (f.study.id)
-          checkTimeStamps(repoMembership, f.membership.timeAdded, OffsetDateTime.now)
-        }
-      }
-
-      it("cannot remove a study not in the membership") {
-        val f = new MembershipFixture
-        val study = factory.createEnabledStudy
-        studyRepository.put(study)
-        val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version}/${study.id.id}"
-        val reply = makeRequest(DELETE, url, BAD_REQUEST)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("study ID is not in membership")
-      }
-
-      it("cannot remove a study in an all studies membership") {
-        val f = new MembershipFixtureAllStudies
-        val study = factory.createEnabledStudy
-        studyRepository.put(study)
-        val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version}/${study.id.id}"
-        val reply = makeRequest(DELETE, url, BAD_REQUEST)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("membership is for all studies, cannot remove:")
-      }
-
-      it("cannot add a study that does not exist") {
-        val f = new MembershipFixture
-        val study = factory.createEnabledStudy
-        val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version}/${study.id.id}"
-        val reply = makeRequest(DELETE, url, NOT_FOUND)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("IdNotFound: study id")
-      }
-
-      it("fail when removing and membership ID does not exist") {
-        val f = new MembershipFixture
-        val study = factory.createEnabledStudy
-        val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version}/${study.id.id}"
-        studyRepository.put(study)
-        membershipRepository.remove(f.membership)
-        notFoundOnDelete(url)
-      }
-
-      it("fail when removing with invalid version") {
-        val f = new MembershipFixture
-        val study = factory.createEnabledStudy
-        val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version + 10L}/${study.id.id}"
-        studyRepository.put(study)
-        hasInvalidVersionOnDelete(url)
-      }
-
+    it("cannot remove a role that does not exist") {
+      val f = new RoleFixture
+      val url = uri("roles", f.role.id.id, f.role.version.toString)
+      notFoundOnDelete(url)
     }
 
-    describe("DELETE /api/access/memberships/centre/:membershipId/:version/:centreId") {
-
-      it("can remove a centre") {
-        val f = new MembershipFixture
-        val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version}/${f.centre.id.id}"
-        val reply = makeRequest(DELETE, url)
-
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonId = (reply \ "data" \ "id").as[String]
-        val membershipId = MembershipId(jsonId)
-        jsonId.length must be > 0
-
-        membershipRepository.getByKey(membershipId) mustSucceed { repoMembership =>
-          compareObj((reply \ "data").as[JsObject], repoMembership)
-          repoMembership must have (
-            'id             (membershipId),
-            'version        (f.membership.version + 1)
-          )
-          repoMembership.centreData.ids must not contain (f.centre.id)
-          checkTimeStamps(repoMembership, f.membership.timeAdded, OffsetDateTime.now)
-        }
-      }
-
-      it("cannot remove a centre not in the membership") {
-        val f = new MembershipFixture
-        val centre = factory.createEnabledCentre
-        centreRepository.put(centre)
-        val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version}/${centre.id.id}"
-        val reply = makeRequest(DELETE, url, BAD_REQUEST)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("centre ID is not in membership")
-      }
-
-      it("cannot remove a centre in an all centres membership") {
-        val f = new MembershipFixtureAllCentres
-        val centre = factory.createEnabledCentre
-        centreRepository.put(centre)
-        val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version}/${centre.id.id}"
-        val reply = makeRequest(DELETE, url, BAD_REQUEST)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("membership is for all centres, cannot remove:")
-      }
-
-      it("cannot add a centre that does not exist") {
-        val f = new MembershipFixture
-        val centre = factory.createEnabledCentre
-        val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version}/${centre.id.id}"
-        val reply = makeRequest(DELETE, url, NOT_FOUND)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("IdNotFound: centre id")
-      }
-
-      it("fail when removing and membership ID does not exist") {
-        val f = new MembershipFixture
-        val centre = factory.createEnabledCentre
-        val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version}/${centre.id.id}"
-        centreRepository.put(centre)
-        membershipRepository.remove(f.membership)
-        notFoundOnDelete(url)
-      }
-
-      it("fail when removing with invalid version") {
-        val f = new MembershipFixture
-        val centre = factory.createEnabledCentre
-        val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version + 10L}/${centre.id.id}"
-        centreRepository.put(centre)
-        hasInvalidVersionOnDelete(url)
-      }
-
-    }
-
-    describe("DELETE /api/access/memberships/:membershipId/:version") {
-
-      it("can remove a membership") {
-        val f = new MembershipFixture
-        val url = uri("memberships") + s"/${f.membership.id}/${f.membership.version}"
-        val reply = makeRequest(DELETE, url)
-
-        (reply \ "status").as[String] must include ("success")
-
-        (reply \ "data").as[Boolean] must be (true)
-
-        membershipRepository.getByKey(f.membership.id) mustFail ("IdNotFound: membership id.*")
-      }
-
-      it("cannot remove a membership that does not exist") {
-        val f = new MembershipFixture
-        val url = uri("memberships") + s"/${f.membership.id}/${f.membership.version}"
-        membershipRepository.remove(f.membership)
-        notFoundOnDelete(url)
-      }
-
-      it("fail when removing with invalid version") {
-        val f = new MembershipFixture
-        val url = uri("memberships") + s"/${f.membership.id}/${f.membership.version + 10L}"
-        hasInvalidVersionOnDelete(url)
-      }
-
+    it("fail when removing with invalid version") {
+      val f = new RoleFixture
+      val url = uri("roles", f.role.id.id, (f.role.version + 10L).toString)
+      accessItemRepository.put(f.role)
+      hasInvalidVersionOnDelete(url)
     }
 
   }
 
-  def notFound(url: String, json: JsValue) = {
-    val reply = makeRequest(POST, url, NOT_FOUND, json)
-
-    (reply \ "status").as[String] must include ("error")
-
-    (reply \ "message").as[String] must include regex("IdNotFound.*membership")
+  private def notFound(url: String, json: JsValue): Unit = {
+    notFound(url, json, "EntityCriteriaNotFound: invalid role id")
   }
 
-  private def hasInvalidVersion(url: String, json: JsValue): Unit = {
-    val reply = makeRequest(POST, url, BAD_REQUEST, json)
-
-    (reply \ "status").as[String] must include ("error")
-
-    (reply \ "message").as[String] must include ("expected version doesn't match current version")
-
-    ()
+  private def notFoundOnDelete(url: String): Unit = {
+    notFoundOnDelete(url, "EntityCriteriaNotFound: invalid role id")
   }
 
-  def notFoundOnDelete(url: String) = {
-    val reply = makeRequest(DELETE, url, NOT_FOUND)
+  def accessItemNamesSharedBehaviour(createEntity: String => AccessItem,
+                                     baseUrl:      String) {
 
-    (reply \ "status").as[String] must include ("error")
+      it("list multiple item names in ascending order") {
+        val items = List(createEntity("ITEM2"),
+                         createEntity("ITEM1"))
+        items.foreach(addToRepository)
 
-    (reply \ "message").as[String] must include regex("IdNotFound.*membership")
-  }
+        val json = makeRequest(GET, baseUrl + "?filter=name:like:ITEM&order=asc")
 
-  private def hasInvalidVersionOnDelete(url: String): Unit = {
-    val reply = makeRequest(DELETE, url, BAD_REQUEST)
+        (json \ "status").as[String] must include ("success")
 
-    (reply \ "status").as[String] must include ("error")
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size items.size.toLong
 
-    (reply \ "message").as[String] must include ("expected version doesn't match current version")
+        compareNameDto(jsonList(0), items(1))
+        compareNameDto(jsonList(1), items(0))
+      }
 
-    ()
+      it("list single study when using a filter") {
+        val items = List(createEntity("ITEM2"),
+                         createEntity("ITEM1"))
+        items.foreach(addToRepository)
+
+        val json = makeRequest(GET, baseUrl + "?filter=name::ITEM1")
+
+        (json \ "status").as[String] must include ("success")
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size 1
+
+        compareNameDto(jsonList(0), items(1))
+      }
+
+      it("list nothing when using a name filter for name not in system") {
+        val json = makeRequest(GET, baseUrl + "?filter=name::abc123")
+
+        (json \ "status").as[String] must include ("success")
+
+        val jsonList = (json \ "data").as[List[JsObject]]
+        jsonList must have size 0
+      }
+
+      it("fail for invalid sort field") {
+        val json = makeRequest(GET, baseUrl + "?sort=xxxx", BAD_REQUEST)
+
+        (json \ "status").as[String] must include ("error")
+
+        (json \ "message").as[String] must include ("invalid sort field")
+      }
+
   }
 
 }

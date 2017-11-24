@@ -234,7 +234,7 @@ object Membership extends MembershipValidations {
     (validateId(id, InvalidMembershipId) |@|
        validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
-       userIds.map(validateId(_, InvalidStudyId)).toList.sequenceU |@|
+       userIds.map(validateId(_, InvalidUserId)).toList.sequenceU |@|
        studyIds.map(validateId(_, InvalidStudyId)).toList.sequenceU |@|
        centreIds.map(validateId(_, InvalidCentreId)).toList.sequenceU |@|
        checkAllStudies  |@|

@@ -13,6 +13,7 @@ class AkkaModule extends AbstractModule with AkkaGuiceSupport {
   def configure() = {
 
     bindActor[AccessProcessor]("accessProcessor")
+    bindActor[MembershipProcessor]("membershipProcessor")
     bindActor[UsersProcessor]("usersProcessor")
     bindActor[CentresProcessor]("centresProcessor")
     bindActor[ShipmentsProcessor]("shipmentsProcessor")

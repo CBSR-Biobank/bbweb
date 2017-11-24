@@ -100,7 +100,7 @@ function EntityNameFactory($q,
   /**
    * Used to list EntityNames.
    *
-   * <p>Uses a REST API to retrieve a list of objects. See below for more details.</p>
+   * <p>Uses a REST API to retrieve a list of entity names. See below for more details.</p>
    *
    * @param {object} options - The options to use to list studies.
    *
@@ -110,13 +110,15 @@ function EntityNameFactory($q,
    *        <code>state</code>. Values other than these two yield an error. Use a minus sign prefix to sort
    *        in descending order.
    *
+   * @param {function} createFunc The function called to create the desired entity name object.
+   *
    * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
    * @returns {Promise<Array<objects>} A promise containing an array of objcts. The objects are created by
    * calling {@link createFunc}.
    */
-  EntityName.list = function (url, options, constructor, omit) {
+  EntityName.list = function (url, options, createFunc, omit) {
     var params,
         validKeys = [
           'filter',
@@ -140,7 +142,7 @@ function EntityNameFactory($q,
           if (!validation.valid) {
             throw new DomainError(validation.message);
           }
-          return new constructor(obj);
+          return createFunc(obj);
         });
 
         const difference = _.differenceWith(names, omit, function (name, omitName) {
@@ -148,7 +150,7 @@ function EntityNameFactory($q,
         });
         deferred.resolve(difference);
       } catch (e) {
-        deferred.reject('invalid entity names from server');
+        deferred.reject('invalid entity names from server: ' + e.message);
       }
       return deferred.promise;
     }

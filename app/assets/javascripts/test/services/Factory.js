@@ -57,7 +57,7 @@ const membershipBaseDefaults = function () {
 
 const accessItemDefaults = function () {
   return {
-    id:           domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE),
+    id:           domainEntityNameNext(ENTITY_NAME_ACCESS_ITEM),
     name:         stringNext(),
     description:  faker.lorem.sentences(4),
     parentData:   [ this.entityInfo() ],
@@ -289,6 +289,14 @@ class Factory {
 
   userNameDto(options) {
     return entityNameAndStateDto(this.user.bind(this), options);
+  }
+
+  roleNameDto(options) {
+    return entityNameAndStateDto(this.role.bind(this), options);
+  }
+
+  permissionNameDto(options) {
+    return entityNameAndStateDto(this.permission.bind(this), options);
   }
 
   /**
@@ -748,12 +756,20 @@ class Factory {
     return role;
   }
 
+  defaultRole() {
+    return this.defaultEntity(ENTITY_NAME_ROLE, this.role);
+  }
+
   permission(options = {}) {
     var defaults   = accessItemDefaults.call(this),
         validKeys  = Object.keys(defaults),
         permission = Object.assign({}, defaults, this.accessItem(options), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_PERMISSION, permission);
     return permission;
+  }
+
+  defaultPermission() {
+    return this.defaultEntity(ENTITY_NAME_PERMISSION, this.permission);
   }
 
 }

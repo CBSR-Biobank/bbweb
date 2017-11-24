@@ -12,7 +12,9 @@ import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.centre.{CentreId, CentreRepository}
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.AccessCommands._
+import org.biobank.infrastructure.command.MembershipCommands._
 import org.biobank.infrastructure.event.AccessEvents._
+import org.biobank.infrastructure.event.MembershipEvents._
 import org.biobank.service._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.Environment
@@ -23,15 +25,19 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[AccessServiceImpl])
 trait AccessService extends BbwebService {
 
-  def getRole(requestUserId: UserId, roleId: RoleId): ServiceValidation[Role]
+  def getAccessItem(requestUserId: UserId, accessItemId: AccessItemId): ServiceValidation[AccessItem]
+
+  def getAccessItems(requestUserId: UserId,
+                     filter:        FilterString,
+                     sort:          SortString): ServiceValidation[Seq[AccessItem]]
+
+  def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[Role]
 
   def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]]
 
-  def getRolePermissions(requestUserId: UserId, roleId: RoleId): ServiceValidation[Set[AccessItemId]]
-
   def getUserRoles(userId: UserId): Set[RoleId]
 
-  def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]]
+  //def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]]
 
   def hasPermission(userId: UserId, permissionId: AccessItemId): ServiceValidation[Boolean]
 
@@ -52,20 +58,25 @@ trait AccessService extends BbwebService {
 
   def getUserMembership(userId: UserId): ServiceValidation[UserMembership]
 
-  def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Membership]]
+  def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[Role]]
 
-  def processRemoveMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Boolean]]
+  def processRemoveRoleCommand(cmd: RemoveRoleCmd): Future[ServiceValidation[Boolean]]
+
+  def processMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[Membership]]
+
+  def processRemoveMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[Boolean]]
 
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
-class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: ActorRef,
-                                   val accessItemRepository:                AccessItemRepository,
-                                   val membershipRepository:                MembershipRepository,
-                                   val userRepository:                      UserRepository,
-                                   val studyRepository:                     StudyRepository,
-                                   val centreRepository:                    CentreRepository,
-                                   val environment:                         Environment)
+class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:         ActorRef,
+                                   @Named("membershipProcessor") val membershipProcessor: ActorRef,
+                                   val accessItemRepository:                              AccessItemRepository,
+                                   val membershipRepository:                              MembershipRepository,
+                                   val userRepository:                                    UserRepository,
+                                   val studyRepository:                                   StudyRepository,
+                                   val centreRepository:                                  CentreRepository,
+                                   val environment:                                       Environment)
                                (implicit executionContext: BbwebExecutionContext)
     extends AccessService
     with BbwebServiceImpl {
@@ -79,12 +90,63 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     accessItemRepository.rolesForUser(userId).map(r => RoleId.withName(r.id.id))
   }
 
-  def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]] = {
-    for {
-      user <- Future { userRepository.getByKey(UserId(cmd.userId)) }
-      role <- processRoleCommand(cmd)
-    } yield role
+  def getAccessItems(requestUserId: UserId,
+                     filter:        FilterString,
+                     sort:          SortString): ServiceValidation[Seq[AccessItem]] = {
+    whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
+      val allItems = accessItemRepository.getValues.toSet
+      val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                    else sort
+      for {
+        items           <- AccessItemFilter.filterAccessItems(allItems, filter)
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = items.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
+      }
+    }
   }
+
+  def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[Role] = {
+    whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
+      accessItemRepository.getRole(roleId)
+    }
+  }
+
+  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString)
+    : ServiceValidation[Seq[Role]] = {
+    whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
+      val allRoles = accessItemRepository.getRoles
+      val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                    else sort
+      for {
+        roles           <- AccessItemFilter.filterRoles(allRoles, filter)
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = roles.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
+      }
+    }
+  }
+
+  // def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]] = {
+  //   for {
+  //     user <- Future { userRepository.getByKey(UserId(cmd.userId)) }
+  //     role <- processRoleCommand(cmd)
+  //   } yield role
+  // }
 
   def hasPermission(userId: UserId, permissionId: AccessItemId): ServiceValidation[Boolean] = {
     val v = userRepository.getByKey(userId).flatMap { _ =>
@@ -154,74 +216,101 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     membershipRepository.getUserMembership(userId)
   }
 
-  def getRole(requestUserId: UserId, roleId: RoleId): ServiceValidation[Role] = {
+  def getAccessItem(requestUserId: UserId, accessItemId: AccessItemId): ServiceValidation[AccessItem] = {
     whenPermitted(requestUserId, PermissionId.UserRead) { () =>
-      accessItemRepository.getRole(roleId)
-    }
-  }
-
-  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]] = {
-    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
-      val allRoles = accessItemRepository.getRoles
-      val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                    else sort
-      for {
-        roles           <- AccessItemFilter.filterRoles(allRoles, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-      } yield {
-        val result = roles.toSeq.sortWith(sortFunc)
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
-      }
-    }
-  }
-
-  def getRolePermissions(requestUserId: UserId, roleId: RoleId): ServiceValidation[Set[AccessItemId]] = {
-
-    def getPermissionsFromIds(accessItemIds: Set[AccessItemId]): Set[Permission] = {
-      accessItemIds
-        .map(accessItemRepository.getByKey)
-        .toList.sequenceU
-        .map { items =>
-          items.flatMap(getPermissions).toSet
-        }
-        .fold(
-          err => Set.empty[Permission],
-          s => s
-        )
-    }
-
-    def getPermissions(accessItem: AccessItem): Set[Permission] = {
-      accessItem match {
-        case permission: Permission => getPermissionsFromIds(permission.childrenIds) + permission
-        case role: Role             => getPermissionsFromIds(role.childrenIds)
-      }
-    }
-
-    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
-      accessItemRepository.getRole(roleId).map { role =>
-        getPermissions(role).map(_.id)
-      }
+      accessItemRepository.getByKey(accessItemId)
     }
   }
 
   def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[Role]] = {
+    val v = for {
+        validCommand <- {
+          cmd match {
+            // case c: RemoveRoleCmd =>
+            //   ServiceError(s"invalid service call: $cmd, use processRemoveRoleCommand")
+            //     .failureNel[Boolean]
+            case c => true.successNel[String]
+          }
+        }
+        validEntities <- {
+          cmd match {
+            case c: AddRoleCmd =>
+              for {
+                validUsers   <- c.userIds.map(id => userRepository.getByKey(UserId(id))).toList.sequenceU
+                validParents <- c.parentIds.map(id => accessItemRepository.getRole(AccessItemId(id))).toList.sequenceU
+                validChildren <- c.childrenIds.map(id => accessItemRepository.getByKey(AccessItemId(id))).toList.sequenceU
+              } yield true
+
+            case c: RoleAddUserCmd =>
+              userRepository.getByKey(UserId(c.userId)).map(_ => true)
+
+            case c: RoleAddParentCmd =>
+              accessItemRepository.getByKey(AccessItemId(c.parentRoleId)).map(_ => true)
+
+            case c: RoleAddChildCmd =>
+              accessItemRepository.getByKey(AccessItemId(c.childRoleId)).map(_ => true)
+
+            case c: RoleRemoveUserCmd =>
+              userRepository.getByKey(UserId(c.userId)).map(_ => true)
+
+            case c: RoleRemoveParentCmd =>
+              accessItemRepository.getByKey(AccessItemId(c.parentRoleId)).map(_ => true)
+
+            case c: RoleRemoveChildCmd =>
+              accessItemRepository.getByKey(AccessItemId(c.childRoleId)).map(_ => true)
+
+            case _ =>
+              true.successNel[String]
+          }
+        }
+        permitted <- {
+          val permissionId = cmd match {
+              case c: AddRoleCmd        => PermissionId.RoleCreate
+              case c: RoleModifyCommand => PermissionId.RoleUpdate
+            }
+          hasPermissionInternal(UserId(cmd.sessionUserId), permissionId)
+        }
+      } yield permitted
+
     log.debug(s"processRoleCommand: cmd: $cmd")
-    ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
-      for {
-        event <- validation
-        role  <- accessItemRepository.getRole(AccessItemId(event.getRole.getId))
-      } yield role
-    }
+    v.fold(
+      err => Future.successful(err.failure[Role]),
+      permitted => {
+        if (!permitted) {
+          Future.successful(Unauthorized.failureNel[Role])
+        } else {
+          ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
+            validation.flatMap { event =>
+              if (event.eventType.isRole) {
+                accessItemRepository.getRole(AccessItemId(event.getRole.getId))
+              } else {
+                ServiceError("Server Error: event is not for role").failureNel[Role]
+              }
+            }
+          }
+        }
+      }
+    )
+  }
+
+  def processRemoveRoleCommand(cmd: RemoveRoleCmd): Future[ServiceValidation[Boolean]] = {
+    hasPermissionInternal(UserId(cmd.sessionUserId), PermissionId.RoleDelete).fold(
+      err => Future.successful(err.failure[Boolean]),
+      permitted => {
+        if (!permitted) {
+          Future.successful(Unauthorized.failureNel[Boolean])
+        } else {
+          ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
+            validation.map(_ => true)
+          }
+        }
+      }
+    )
   }
 
   // should only called if userId is valid
-  private def hasPermissionInternal(userId: UserId, permissionId: AccessItemId): ServiceValidation[Boolean] = {
+  private def hasPermissionInternal(userId: UserId, permissionId: AccessItemId)
+      : ServiceValidation[Boolean] = {
 
     def hasPermissionParents(parentIds: Set[AccessItemId]): Boolean = {
       val found = parentIds.find { id =>
@@ -256,7 +345,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     accessItemRepository.getByKey(permissionId).map(checkItemAccess)
   }
 
-  def processMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Membership]] = {
+  def processMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[Membership]] = {
     val v = for {
         validCommand <- {
           cmd match {
@@ -317,14 +406,9 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
         if (!permitted) {
           Future.successful(Unauthorized.failureNel[Membership])
         } else {
-          ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
+          ask(membershipProcessor, cmd).mapTo[ServiceValidation[MembershipEvent]].map { validation =>
             validation.flatMap { event =>
-              event.eventType match {
-                case et: AccessEvent.EventType.Membership =>
-                  membershipRepository.getByKey(MembershipId(event.getMembership.getId))
-                case _ =>
-                  ServiceError(s"invalid reply from processor: $event").failureNel[Membership]
-              }
+              membershipRepository.getByKey(MembershipId(event.id))
             }
           }
         }
@@ -332,14 +416,14 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor: Acto
     )
   }
 
-  def processRemoveMembershipCommand(cmd: AccessCommand): Future[ServiceValidation[Boolean]] = {
+  def processRemoveMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[Boolean]] = {
     hasPermissionInternal(UserId(cmd.sessionUserId), PermissionId.MembershipDelete).fold(
       err => Future.successful(err.failure[Boolean]),
       permitted => {
         if (!permitted) {
           Future.successful(Unauthorized.failureNel[Boolean])
         } else {
-          ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
+          ask(membershipProcessor, cmd).mapTo[ServiceValidation[MembershipEvent]].map { validation =>
             validation.map(_ => true)
           }
         }

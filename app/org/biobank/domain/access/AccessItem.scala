@@ -7,6 +7,7 @@ import org.biobank.Global
 import org.biobank.domain._
 import org.biobank.domain.user.UserId
 import play.api.libs.json._
+import scalaz.Scalaz._
 
 /**
  * Predicates that can be used to filter collections of accessItems.
@@ -23,9 +24,9 @@ class AccessItemType(val id: String) extends AnyVal {
 }
 
 /** Identifies a unique [[AccessItem]] in the system.
-  *
-  * Used as a value object to maintain associations to with other entities in the system.
-  */
+ *
+ * Used as a value object to maintain associations to with other entities in the system.
+ */
 final case class AccessItemId(id: String) extends IdentifiedValueObject[String]
 
 object AccessItemId {
@@ -42,10 +43,18 @@ object AccessItemId {
 
 }
 
+trait AccessItemValidations {
+
+  val NameMinLength: Long = 2L
+
+}
+
 sealed trait AccessItem
     extends ConcurrencySafeEntity[AccessItemId]
     with HasUniqueName
     with HasOptionalDescription {
+
+  import org.biobank.domain.CommonValidations._
 
   val accessItemType: AccessItemType
 
@@ -54,6 +63,84 @@ sealed trait AccessItem
   val parentIds: Set[AccessItemId]
 
   val childrenIds: Set[AccessItemId]
+
+  protected def parentIdNotSelf(parentId: AccessItemId): DomainValidation[AccessItem] = {
+    if (this.id == parentId) {
+      DomainError(s"parent ID cannot be self").failureNel[AccessItem]
+    } else {
+      this.successNel[String]
+    }
+  }
+
+  protected def notAlreadyParent(parentId: AccessItemId): DomainValidation[AccessItem] = {
+    if (this.parentIds.exists(_ == parentId)) {
+      DomainError(s"parent ID is already in role: ${parentId}").failureNel[AccessItem]
+    } else {
+      this.successNel[String]
+    }
+  }
+
+  protected def isParent(parentId: AccessItemId): DomainValidation[AccessItem] = {
+    if (this.parentIds.exists(_ == parentId)) {
+      this.successNel[String]
+    } else {
+      DomainError(s"parent ID not in role: ${parentId}").failureNel[AccessItem]
+    }
+  }
+
+  protected def childIdNotSelf(childId: AccessItemId): DomainValidation[AccessItem] = {
+    if (this.id == childId) {
+      DomainError(s"child ID cannot be self").failureNel[AccessItem]
+    } else {
+      this.successNel[String]
+    }
+  }
+
+  protected def notAlreadyChild(childId: AccessItemId): DomainValidation[AccessItem] = {
+    if (this.childrenIds.exists(_ == childId)) {
+      DomainError(s"child ID is already in role: ${childId}").failureNel[AccessItem]
+    } else {
+      this.successNel[String]
+    }
+  }
+
+  protected def isChild(childId: AccessItemId): DomainValidation[AccessItem] = {
+    if (this.childrenIds.exists(_ == childId)) {
+      this.successNel[String]
+    } else {
+      DomainError(s"child ID not in role: ${childId}").failureNel[AccessItem]
+    }
+  }
+
+  def addParent(parentId: AccessItemId): DomainValidation[AccessItem] = {
+    (validateId(parentId, InvalidAccessItemId) |@|
+       parentIdNotSelf(parentId) |@|
+       notAlreadyParent(parentId)) { case _ =>
+        this
+    }
+  }
+
+  def removeParent(parentId: AccessItemId): DomainValidation[AccessItem] = {
+    (validateId(parentId, InvalidAccessItemId) |@|
+       isParent(parentId)) { case _ =>
+        this
+    }
+  }
+
+  def addChild(childId: AccessItemId): DomainValidation[AccessItem] = {
+    (validateId(childId, InvalidAccessItemId) |@|
+       childIdNotSelf(childId) |@|
+       notAlreadyChild(childId)) { case _ =>
+        this
+    }
+  }
+
+  def removeChild(childId: AccessItemId): DomainValidation[AccessItem] = {
+    (validateId(childId, InvalidAccessItemId) |@|
+       isChild(childId)) { case _ =>
+        this
+    }
+  }
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
@@ -77,7 +164,7 @@ object AccessItem {
   @SuppressWarnings(Array("org.wartremover.warts.Option2Iterable"))
   implicit val accessItemFormat: Format[AccessItem] = new Format[AccessItem] {
       override def writes(accessItem: AccessItem): JsValue = {
-        ConcurrencySafeEntity.toJson(accessItem) ++
+        val json = ConcurrencySafeEntity.toJson(accessItem) ++
         Json.obj("accessItemType" -> accessItem.accessItemType.id,
                  "name"           -> accessItem.name,
                  "parentIds"      -> accessItem.parentIds,
@@ -85,6 +172,13 @@ object AccessItem {
         JsObject(
           Seq[(String, JsValue)]() ++
             accessItem.description.map("description" -> Json.toJson(_)))
+
+        accessItem match {
+          case role: Role =>
+            json ++ Json.obj("userIds" -> role.userIds)
+          case _ =>
+            json
+        }
       }
 
       override def reads(json: JsValue): JsResult[AccessItem] =
@@ -109,10 +203,10 @@ object AccessItem {
   implicit val disabledStudyFormat: Reads[Role] = Json.format[Role]
   implicit val permissionFormat: Reads[Permission] = Json.format[Permission]
 
-  val sort2Compare: Map[String, (Role, Role) => Boolean] =
-    Map[String, (Role, Role) => Boolean]("name"  -> compareByName)
+  val sort2Compare: Map[String, (AccessItem, AccessItem) => Boolean] =
+    Map[String, (AccessItem, AccessItem) => Boolean]("name"  -> compareByName)
 
-  def compareByName(a: Role, b: Role): Boolean = {
+  def compareByName(a: AccessItem, b: AccessItem): Boolean = {
     (a.name compareToIgnoreCase b.name) < 0
   }
 }
@@ -131,17 +225,21 @@ final case class Role(id:           AccessItemId,
   import org.biobank.domain.CommonValidations._
 
   /** Used to change the name. */
-  def addUser(userId: UserId): Role = {
-    copy(userIds      = userIds + userId,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  def addUser(userId: UserId): DomainValidation[Role] = {
+    validateId(userId, InvalidUserId).map { _ =>
+      copy(userIds      = userIds + userId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
 
   /** Used to change the name. */
-  def removeUser(userId: UserId): Role = {
-    copy(userIds      = userIds - userId,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  def removeUser(userId: UserId): DomainValidation[Role] = {
+    validateId(userId, InvalidUserId).map { _ =>
+      copy(userIds      = userIds - userId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
 
   /** Used to change the name. */
@@ -162,30 +260,37 @@ final case class Role(id:           AccessItemId,
     }
   }
 
-  def addParent(role: Role): Role = {
-    copy(parentIds    = parentIds + role.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  override def addParent(parentId: AccessItemId): DomainValidation[Role] = {
+    super.addParent(parentId).map { _ =>
+        copy(parentIds    = parentIds + parentId,
+             version      = version + 1,
+             timeModified = Some(OffsetDateTime.now))
+    }
   }
 
-  def removeParent(role: Role): Role = {
-    copy(parentIds    = parentIds - role.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  override def removeParent(parentId: AccessItemId): DomainValidation[Role] = {
+    super.removeParent(parentId).map { _ =>
+      copy(parentIds    = parentIds - parentId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
 
-  def addChild(accessItem: AccessItem): AccessItem = {
-    copy(childrenIds  = childrenIds + accessItem.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  override def addChild(childId: AccessItemId): DomainValidation[Role] = {
+    super.addChild(childId).map { _ =>
+      copy(childrenIds  = childrenIds + childId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
 
-  def removeChild(accessItem: AccessItem): AccessItem = {
-    copy(childrenIds  = childrenIds - accessItem.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  override def removeChild(childId: AccessItemId): DomainValidation[Role] = {
+    super.removeChild(childId).map { _ =>
+      copy(childrenIds  = childrenIds - childId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
-
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
@@ -202,6 +307,37 @@ final case class Role(id:           AccessItemId,
         |}""".stripMargin
 }
 
+object Role extends AccessItemValidations {
+  import org.biobank.domain.CommonValidations._
+
+  def create(id:           AccessItemId,
+             version:      Long,
+             timeAdded:    OffsetDateTime,
+             timeModified: Option[OffsetDateTime],
+             name:         String,
+             description:  Option[String],
+             userIds:      Set[UserId],
+             parentIds:    Set[AccessItemId],
+             childrenIds:  Set[AccessItemId]): DomainValidation[Role] = {
+    (validateId(id, InvalidAccessItemId) |@|
+       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyOption(description, InvalidDescription) |@|
+       userIds.map(validateId(_, InvalidUserId)).toList.sequenceU |@|
+       parentIds.map(validateId(_, InvalidAccessItemId)).toList.sequenceU |@|
+       childrenIds.map(validateId(_, InvalidAccessItemId)).toList.sequenceU) { case _ =>
+        Role(id           = id,
+             version      = version,
+             timeAdded    = timeAdded,
+             timeModified = timeModified,
+             name         = name,
+             description  = description,
+             userIds      = userIds,
+             parentIds    = parentIds,
+             childrenIds  = childrenIds)
+    }
+  }
+}
+
 final case class Permission(id:           AccessItemId,
                             version:      Long,
                             timeAdded:    OffsetDateTime,
@@ -213,28 +349,36 @@ final case class Permission(id:           AccessItemId,
     extends { val accessItemType: AccessItemType = AccessItem.permissionAccessItemType }
     with AccessItem {
 
-  def addParent(accessItem: AccessItem): Permission = {
-    copy(parentIds    = parentIds + accessItem.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  override def addParent(parentId: AccessItemId): DomainValidation[Permission] = {
+    super.addParent(parentId).map { case _ =>
+      copy(parentIds    = parentIds + parentId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
 
-  def removeParent(accessItem: AccessItem): Permission = {
-    copy(parentIds    = parentIds - accessItem.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  override def removeParent(parentId: AccessItemId): DomainValidation[Permission] = {
+    super.removeParent(parentId).map { _ =>
+      copy(parentIds    = parentIds - parentId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
 
-  def addChild(accessItem: AccessItem): Permission = {
-    copy(childrenIds  = childrenIds + accessItem.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  override def addChild(childId: AccessItemId): DomainValidation[Permission] = {
+    super.addChild(childId).map { _ =>
+      copy(childrenIds  = childrenIds + childId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
 
-  def removeChild(accessItem: AccessItem): Permission = {
-    copy(childrenIds  = childrenIds - accessItem.id,
-         version      = version + 1,
-         timeModified = Some(OffsetDateTime.now))
+  override def removeChild(childId: AccessItemId): DomainValidation[Permission] = {
+    super.removeChild(childId).map { _ =>
+      copy(childrenIds  = childrenIds - childId,
+           version      = version + 1,
+           timeModified = Some(OffsetDateTime.now))
+    }
   }
 }
 

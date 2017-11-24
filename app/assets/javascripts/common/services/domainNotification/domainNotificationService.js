@@ -81,13 +81,14 @@ function domainNotificationService($q, $log, $state, gettextCatalog, modalServic
                         removeFailedHeaderHtml,
                         removeFaileBodyHtml) {
     return modalService.modalOkCancel(headerHtml, bodyHtml)
-      .then(() => promiseFunc().catch((error) => {
-        var errMsg = JSON.stringify(error);
-        if (error.status && (error.status === 401)) {
-          errMsg = gettextCatalog.getString('You do not have permission to perform this action');
-        }
-        return modalService.modalOkCancel(removeFailedHeaderHtml,
-                                          removeFaileBodyHtml + ': ' + errMsg);
+      .then(() => promiseFunc()
+            .catch((error) => {
+              var errMsg = JSON.stringify(error);
+              if (error.status && (error.status === 401)) {
+                errMsg = gettextCatalog.getString('You do not have permission to perform this action');
+              }
+              return modalService.modalOkCancel(removeFailedHeaderHtml,
+                                                removeFaileBodyHtml + ': ' + errMsg);
       }))
       .catch(angular.noop);
   }

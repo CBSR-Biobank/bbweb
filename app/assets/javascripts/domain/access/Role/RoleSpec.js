@@ -333,7 +333,7 @@ describe('Role', function() {
                            'addParentRole',
                            parentRoleId,
                            this.url('parent', role.id),
-                           { roleId: parentRoleId },
+                           { parentRoleId: parentRoleId },
                            jsonRole,
                            this.expectRole,
                            failTest)
@@ -360,7 +360,7 @@ describe('Role', function() {
                            'addChildRole',
                            childRoleId,
                            this.url('child', role.id),
-                           { roleId: childRoleId },
+                           { childRoleId: childRoleId },
                            jsonRole,
                            this.expectRole,
                            failTest)

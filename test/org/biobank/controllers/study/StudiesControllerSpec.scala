@@ -4,7 +4,6 @@ import java.time.OffsetDateTime
 import org.biobank.controllers._
 import org.biobank.domain.{AnnotationType, JsonHelper}
 import org.biobank.domain.study._
-import org.biobank.dto._
 import org.biobank.fixture.ControllerFixture
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -50,11 +49,6 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
   private def urlUpdateAnnotationType(annotType: AnnotationType) =
       (study: Study) => urlAddAnnotationType(study) + s"/${annotType.id}"
-
-  private def compareNameAndStateDto(json: JsValue, study: Study): Unit = {
-    compareObj(json, NameAndStateDto(study.id.id, study.name, study.state.id))
-    ()
-  }
 
   private def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {
     val studiesMap = studies.map { study => (study.id, study) }.toMap

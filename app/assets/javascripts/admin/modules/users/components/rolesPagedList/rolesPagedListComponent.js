@@ -13,7 +13,7 @@ class Controller extends PagedListController {
   constructor($log,
               $scope,
               $state,
-              Membership,
+              Role,
               gettextCatalog,
               NameFilter,
               resourceErrorService) {
@@ -28,7 +28,7 @@ class Controller extends PagedListController {
     Object.assign(this,
                   {
                     $scope,
-                    Membership,
+                    Role,
                     NameFilter,
                     resourceErrorService
                   })
@@ -40,12 +40,12 @@ class Controller extends PagedListController {
   }
 
   getItems(options) {
-    return this.Membership.list(options)
+    return this.Role.list(options)
       .catch(this.resourceErrorService.checkUnauthorized())
   }
 
   getItemIcon() {
-    return 'glyphicon-eye-open'
+    return 'glyphicon-file'
   }
 
 }
@@ -56,11 +56,11 @@ class Controller extends PagedListController {
  * @return {object} An AngularJS component.
  */
 const component = {
-  template: require('./membershipsPagedList.html'),
+  template: require('./rolesPagedList.html'),
   controller: Controller,
   controllerAs: 'vm',
   bindings: {
   }
 }
 
-export default ngModule => ngModule.component('membershipsPagedList', component)
+export default ngModule => ngModule.component('rolesPagedList', component)

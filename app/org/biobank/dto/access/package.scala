@@ -4,15 +4,27 @@ import play.api.libs.json._
 
 package access {
 
-  final case class RoleDto(id:           String,
-                           version:      Long,
-                           timeAdded:    String,
-                           timeModified: Option[String],
-                           name:         String,
-                           description:  Option[String],
-                           userData:     Set[EntityInfoDto],
-                           parentData:   EntitySetDto,
-                           childData:    EntitySetDto)
+  final case class AccessItemNameDto(id:             String,
+                                     name:           String,
+                                     accessItemType: String)
+
+  object AccessItemNameDto {
+    def compareByName(a: AccessItemNameDto, b: AccessItemNameDto): Boolean =
+      (a.name compareToIgnoreCase b.name) < 0
+
+    implicit val accessItemNameDtoWriter: Writes[AccessItemNameDto] = Json.writes[AccessItemNameDto]
+  }
+
+  final case class RoleDto(id:             String,
+                           version:        Long,
+                           timeAdded:      String,
+                           timeModified:   Option[String],
+                           accessItemType: String,
+                           name:           String,
+                           description:    Option[String],
+                           userData:       Set[EntityInfoDto],
+                           parentData:     Set[EntityInfoDto],
+                           childData:      Set[EntityInfoDto])
 
   object RoleDto {
 

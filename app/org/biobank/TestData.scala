@@ -709,7 +709,7 @@ class TestData @Inject() (config:         Configuration,
                              "shipping-user").map(UserId(_))
 
       List(
-        Membership(id = MembershipId("all-studies-membership "),
+        Membership(id = MembershipId("all-studies-membership"),
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,

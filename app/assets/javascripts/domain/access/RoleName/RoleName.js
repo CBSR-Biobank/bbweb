@@ -4,26 +4,26 @@
  */
 
 /* @ngInject */
-function CollectionEventTypeNameFactory($q,
-                                        $log,
-                                        biobankApi,
-                                        EntityName,
-                                        DomainEntity,
-                                        DomainError) {
+function RoleNameFactory($q,
+                         $log,
+                         biobankApi,
+                         EntityName,
+                         DomainEntity,
+                         DomainError) {
 
   /**
-   * @classdesc A CollectionEventTypeName contains the ID, and name for a collectionEventType.
+   * @classdesc A RoleName contains the ID, and name for a role.
    *
    * Please do not use this constructor. It is meant for internal use.
    *
    * @class
-   * @memberOf domain.studies
+   * @memberOf domain.access
    * @extends domain.DomainEntity
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-  class CollectionEventTypeName extends EntityName {
+  class RoleName extends EntityName {
 
     constructor(obj = {}) {
       super(obj)
@@ -31,39 +31,37 @@ function CollectionEventTypeNameFactory($q,
   }
 
   /**
-   * Creates a CollectionEventTypeName, but first it validates <code>obj</code> to ensure that it has a
-   * valid schema.
+   * Creates a RoleName, but first it validates <code>obj</code> to ensure that it has a valid schema.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    *
-   * @returns {domain.studies.CollectionEventType} A collectionEventType created from the given object.
+   * @returns {domain.access.Role} A role created from the given object.
    *
-   * @see {@link domain.studies.CollectionEventTypeName.asyncCreate|asyncCreate()} when you need to create
-   * a collectionEventType within asynchronous code.
+   * @see {@link domain.access.RoleName.asyncCreate|asyncCreate()} when you need to create
+   * a role within asynchronous code.
    */
-  CollectionEventTypeName.create = function (obj) {
+  RoleName.create = function (obj) {
     var validation = EntityName.isValid(obj);
     if (!validation.valid) {
       $log.error(validation.message);
       throw new DomainError(validation.message);
     }
-    return new CollectionEventTypeName(obj);
+    return new RoleName(obj);
   };
 
-  CollectionEventTypeName.url = function (studyId, ...paths) {
-    const args = [ `studies/cetypes/names/${studyId}` ].concat(paths);
-    return DomainEntity.url.apply(null, args);
+  RoleName.url = function () {
+    return DomainEntity.url('access/roles/names');
   };
 
   /**
-   * Used to list CollectionEventTypeNames.
+   * Used to list RoleNames.
    *
    * <p>A paged API is used to list studies. See below for more details.</p>
    *
    * @param {object} options - The options to use to list studies.
    *
-   * @param {string} [options.filter] The filter to use on collectionEventType names. Default is empty string.
+   * @param {string} [options.filter] The filter to use on role names. Default is empty string.
    *
    * @param {string} [options.sort=name] Studies can be sorted by <code>name</code> or by
    *        <code>state</code>. Values other than these two yield an error. Use a minus sign prefix to sort
@@ -79,14 +77,14 @@ function CollectionEventTypeNameFactory($q,
    *        from the server.
    *
    * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
-   *          domain.studies.CollectionEventType}.
+   *          domain.access.Role}.
    */
-  CollectionEventTypeName.list = function (studyId, options, omit) {
-    const createFunc = (obj) => new CollectionEventTypeName(obj)
-    return EntityName.list(CollectionEventTypeName.url(studyId), options, createFunc, omit);
+  RoleName.list = function (options, omit) {
+    const createFunc = (obj) => new RoleName(obj)
+    return EntityName.list(RoleName.url(), options, createFunc, omit);
   };
 
-  return CollectionEventTypeName;
+  return RoleName;
 }
 
-export default ngModule => ngModule.factory('CollectionEventTypeName', CollectionEventTypeNameFactory)
+export default ngModule => ngModule.factory('RoleName', RoleNameFactory)

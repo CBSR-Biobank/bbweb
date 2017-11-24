@@ -143,6 +143,8 @@ wartremoverExcluded ++= Seq(
 
     crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "AccessEvents" / "AccessEvent.scala",
     crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "AccessEvents" / "AccessEventsProto.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "MembershipEvents" / "MembershipEvent.scala",
+    crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "MembershipEvents" / "MembershipEventsProto.scala",
     crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreAddedEvent.scala",
     crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreDescriptionUpdatedEvent.scala",
     crossTarget.value / "src_managed" / "main" / "org" / "biobank" / "infrastructure" / "event" / "CentreEvents" / "CentreDisabledEvent.scala",

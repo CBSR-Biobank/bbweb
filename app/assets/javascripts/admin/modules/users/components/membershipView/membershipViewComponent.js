@@ -60,9 +60,9 @@ class MembershipViewController {
     this.noCentresMembership = (!this.membership.centreData.allEntities &&
                                 (this.membership.centreData.entityData.length <= 0));
 
-    this.userNameLabels   = this.userNamesToLabels();
-    this.studyNameLabels  = this.studyNamesToLabels();
-    this.centreNameLabels = this.centreNamesToLabels();
+    this.userNameLabels   = this.entityNamesToLabels(this.membership.userData);
+    this.studyNameLabels  = this.entityNamesToLabels(this.membership.studyData.entityData);
+    this.centreNameLabels = this.entityNamesToLabels(this.membership.centreData.entityData);
   }
 
   entityNamesToLabels(entityData) {
@@ -72,18 +72,6 @@ class MembershipViewController {
       obj:     userInfo
     }));
     return _.sortBy(labels, [ 'label' ]);
-  }
-
-  userNamesToLabels() {
-    return this.entityNamesToLabels(this.membership.userData);
-  }
-
-  studyNamesToLabels() {
-    return this.entityNamesToLabels(this.membership.studyData.entityData);
-  }
-
-  centreNamesToLabels() {
-    return this.entityNamesToLabels(this.membership.centreData.entityData);
   }
 
   remove() {
@@ -153,7 +141,7 @@ class MembershipViewController {
       .then((modalValue) => {
         this.membership.addUser(modalValue.obj.id).then((membership) => {
           this.membership = membership;
-          this.userNameLabels = this.userNamesToLabels();
+          this.userNameLabels = this.entityNamesToLabels(this.membership.userData);
         });
       })
       .catch(angular.noop);
@@ -161,27 +149,25 @@ class MembershipViewController {
 
   // this method is invoked by a child component, so a callback function is returned
   // called to remove a user from the membership
-  userLabelSelected() {
-    return (userName) => {
-      const promiseFn = () =>
-            this.membership.removeUser(userName.id).then((membership) => {
-              this.notificationsService.success(this.gettextCatalog.getString(
-                'User {{name}} removed',
-                { name: userName.name }));
-              this.updateMembership(membership);
-            });
+  userLabelSelected(userName) {
+    const promiseFn = () =>
+          this.membership.removeUser(userName.id).then((membership) => {
+            this.notificationsService.success(this.gettextCatalog.getString(
+              'User {{name}} removed',
+              { name: userName.name }));
+            this.updateMembership(membership);
+          });
 
-      this.domainNotificationService.removeEntity(
-        promiseFn,
-        this.gettextCatalog.getString('Remove user from membership'),
-        this.gettextCatalog.getString(
-          'Are you sure you want to remove the user named <strong>{{name}}</strong> from this membership?',
-          { name: userName.name }),
-        this.gettextCatalog.getString('Remove failed'),
-        this.gettextCatalog.getString(
-          'User named {{name}} cannot be removed',
-          { name: userName.name }));
-    }
+    this.domainNotificationService.removeEntity(
+      promiseFn,
+      this.gettextCatalog.getString('Remove user from membership'),
+      this.gettextCatalog.getString(
+        'Are you sure you want to remove the user named <strong>{{name}}</strong> from this membership?',
+        { name: userName.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString(
+        'User named {{name}} cannot be removed',
+        { name: userName.name }));
   }
 
   getMatchingStudyNames() {
@@ -200,7 +186,7 @@ class MembershipViewController {
       .then((modalValue) => {
         this.membership.addStudy(modalValue.obj.id).then((membership) => {
           this.membership = membership;
-          this.studyNameLabels = this.studyNamesToLabels();
+          this.studyNameLabels = this.entityNamesToLabels(this.membership.studyData.entityData);
         });
       })
       .catch(angular.noop);
@@ -208,27 +194,25 @@ class MembershipViewController {
 
   // this method is invoked by a child component, so a callback function is returned
   // called to remove a user from the membership
-  studyLabelSelected() {
-    return (studyName) => {
-      const promiseFn = () =>
-            this.membership.removeStudy(studyName.id).then((membership) => {
-              this.notificationsService.success(this.gettextCatalog.getString(
-                'Study {{name}} removed',
-                { name: studyName.name }));
-              this.updateMembership(membership);
-            });
+  studyLabelSelected(studyName) {
+    const promiseFn = () =>
+          this.membership.removeStudy(studyName.id).then((membership) => {
+            this.notificationsService.success(this.gettextCatalog.getString(
+              'Study {{name}} removed',
+              { name: studyName.name }));
+            this.updateMembership(membership);
+          });
 
-      this.domainNotificationService.removeEntity(
-        promiseFn,
-        this.gettextCatalog.getString('Remove study from membership'),
-        this.gettextCatalog.getString(
-          'Are you sure you want to remove the study named <strong>{{name}}</strong> from this membership?',
-          { name: studyName.name }),
-        this.gettextCatalog.getString('Remove failed'),
-        this.gettextCatalog.getString(
-          'Study named {{name}} cannot be removed',
-          { name: studyName.name }));
-    }
+    this.domainNotificationService.removeEntity(
+      promiseFn,
+      this.gettextCatalog.getString('Remove study from membership'),
+      this.gettextCatalog.getString(
+        'Are you sure you want to remove the study named <strong>{{name}}</strong> from this membership?',
+        { name: studyName.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString(
+        'Study named {{name}} cannot be removed',
+        { name: studyName.name }));
   }
 
   getMatchingCentreNames() {
@@ -247,7 +231,7 @@ class MembershipViewController {
       .then((modalValue) => {
         this.membership.addCentre(modalValue.obj.id).then((membership) => {
           this.membership = membership;
-          this.centreNameLabels = this.centreNamesToLabels();
+          this.centreNameLabels = this.entityNamesToLabels(this.membership.centreData.entityData);
         });
       })
       .catch(angular.noop);
@@ -255,27 +239,25 @@ class MembershipViewController {
 
   // this method is invoked by a child component, so a callback function is returned
   // called to remove a user from the membership
-  centreLabelSelected() {
-    return (centreName) => {
-      const promiseFn = () =>
-            this.membership.removeCentre(centreName.id).then((membership) => {
-              this.notificationsService.success(this.gettextCatalog.getString(
-                'Centre {{name}} removed',
-                { name: centreName.name }));
-              this.updateMembership(membership);
-            });
+  centreLabelSelected(centreName) {
+    const promiseFn = () =>
+          this.membership.removeCentre(centreName.id).then((membership) => {
+            this.notificationsService.success(this.gettextCatalog.getString(
+              'Centre {{name}} removed',
+              { name: centreName.name }));
+            this.updateMembership(membership);
+          });
 
-      this.domainNotificationService.removeEntity(
-        promiseFn,
-        this.gettextCatalog.getString('Remove centre from membership'),
-        this.gettextCatalog.getString(
-          'Are you sure you want to remove the centre named <strong>{{name}}</strong> from this membership?',
-          { name: centreName.name }),
-        this.gettextCatalog.getString('Remove failed'),
-        this.gettextCatalog.getString(
-          'Centre named {{name}} cannot be removed',
-          { name: centreName.name }));
-    }
+    this.domainNotificationService.removeEntity(
+      promiseFn,
+      this.gettextCatalog.getString('Remove centre from membership'),
+      this.gettextCatalog.getString(
+        'Are you sure you want to remove the centre named <strong>{{name}}</strong> from this membership?',
+        { name: centreName.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString(
+        'Centre named {{name}} cannot be removed',
+        { name: centreName.name }));
   }
 
   back() {
@@ -284,9 +266,9 @@ class MembershipViewController {
 
   updateMembership(membership) {
     this.membership       = membership;
-    this.userNameLabels   = this.userNamesToLabels();
-    this.studyNameLabels  = this.studyNamesToLabels();
-    this.centreNameLabels = this.centreNamesToLabels();
+    this.userNameLabels   = this.entityNamesToLabels(this.membership.userData);
+    this.studyNameLabels  = this.entityNamesToLabels(this.membership.studyData.entityData);
+    this.centreNameLabels = this.entityNamesToLabels(this.membership.centreData.entityData);
   }
 
 }

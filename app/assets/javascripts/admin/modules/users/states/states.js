@@ -33,6 +33,15 @@ function config($stateProvider) {
         'main@': 'userRoles'
       }
     })
+    .state('home.admin.users.roles.role', {
+      url: '/{roleId}',
+      resolve: {
+        role: resolveRole
+      },
+      views: {
+        'main@': 'roleView'
+      }
+    })
     .state('home.admin.users.memberships', {
       url: '/memberships',
       views: {
@@ -56,13 +65,24 @@ function config($stateProvider) {
     });
 
   /* @ngInject */
-  function resolveUser($transition$, User) {
-    return User.get($transition$.params().userId);
+  function resolveUser($transition$, User, resourceErrorService) {
+    const userId = $transition$.params().userId
+    return User.get(userId)
+      .catch(resourceErrorService.goto404(`user ID not found: ${userId}`))
   }
 
   /* @ngInject */
-  function resolveMembership($transition$, Membership) {
-    return Membership.get($transition$.params().membershipId);
+  function resolveMembership($transition$, Membership, resourceErrorService) {
+    const id = $transition$.params().membershipId
+    return Membership.get(id)
+      .catch(resourceErrorService.goto404(`memberhsip ID not found: ${id}`))
+  }
+
+  /* @ngInject */
+  function resolveRole($transition$, Role, resourceErrorService) {
+    const id = $transition$.params().roleId
+    return Role.get(id)
+      .catch(resourceErrorService.goto404(`role ID not found: ${id}`))
   }
 
 }

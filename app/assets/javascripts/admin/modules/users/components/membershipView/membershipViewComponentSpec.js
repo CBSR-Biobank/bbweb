@@ -370,7 +370,7 @@ describe('membershipViewComponent', function() {
       it('can remove the entity associated with the tag', function() {
         this.Membership.prototype[context.membershipRemoveFuncName] =
           jasmine.createSpy().and.returnValue(this.$q.when(this.membership))
-        this.controller[context.labelSelectedFuncName]()(context.entityName)
+        this.controller[context.labelSelectedFuncName](context.entityName)
         this.scope.$digest()
         expect(this.Membership.prototype[context.membershipRemoveFuncName]).toHaveBeenCalled()
         expect(this.notificationsService.success).toHaveBeenCalled()
@@ -380,7 +380,7 @@ describe('membershipViewComponent', function() {
       it('user is informed if removal of the entity attempt fails', function() {
         this.Membership.prototype[context.membershipRemoveFuncName] =
           jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'))
-        this.controller[context.labelSelectedFuncName]()(context.entityName)
+        this.controller[context.labelSelectedFuncName](context.entityName)
         this.scope.$digest()
         expect(this.Membership.prototype[context.membershipRemoveFuncName]).toHaveBeenCalled()
         expect(this.notificationsService.success).not.toHaveBeenCalled()
@@ -391,7 +391,7 @@ describe('membershipViewComponent', function() {
         this.Membership.prototype[context.membershipRemoveFuncName] =
           jasmine.createSpy().and.returnValue(this.$q.when(this.membership))
         this.modalService.modalOkCancel   = jasmine.createSpy().and.returnValue(this.$q.reject('Cancel'))
-        this.controller[context.labelSelectedFuncName]()(context.entityName)
+        this.controller[context.labelSelectedFuncName](context.entityName)
         this.scope.$digest()
         expect(this.Membership.prototype[context.membershipRemoveFuncName]).not.toHaveBeenCalled()
         expect(this.notificationsService.success).not.toHaveBeenCalled()

@@ -208,4 +208,44 @@ abstract class ControllerFixture
     }
   }
 
+  protected def notFound(url: String, json: JsValue, errMsgRegex: String): Unit = {
+    val reply = makeRequest(POST, url, NOT_FOUND, json)
+
+    (reply \ "status").as[String] must include ("error")
+
+    (reply \ "message").as[String] must include regex(errMsgRegex)
+
+    ()
+  }
+
+  protected def hasInvalidVersion(url: String, json: JsValue): Unit = {
+    val reply = makeRequest(POST, url, BAD_REQUEST, json)
+
+    (reply \ "status").as[String] must include ("error")
+
+    (reply \ "message").as[String] must include ("expected version doesn't match current version")
+
+    ()
+  }
+
+  protected def notFoundOnDelete(url: String, errMsgRegex: String): Unit = {
+    val reply = makeRequest(DELETE, url, NOT_FOUND)
+
+    (reply \ "status").as[String] must include ("error")
+
+    (reply \ "message").as[String] must include regex(errMsgRegex)
+
+    ()
+  }
+
+  protected def hasInvalidVersionOnDelete(url: String): Unit = {
+    val reply = makeRequest(DELETE, url, BAD_REQUEST)
+
+    (reply \ "status").as[String] must include ("error")
+
+    (reply \ "message").as[String] must include ("expected version doesn't match current version")
+
+    ()
+  }
+
 }

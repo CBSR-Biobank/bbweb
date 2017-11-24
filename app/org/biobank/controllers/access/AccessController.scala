@@ -5,10 +5,9 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.{ConcurrencySafeEntity, HasUniqueName}
 import org.biobank.domain.access._
-import org.biobank.domain.access.RoleId._
 import org.biobank.domain.centre.CentreId
 import org.biobank.domain.study.StudyId
-import org.biobank.domain.user.UserId
+import org.biobank.domain.user.{User, UserId}
 import org.biobank.dto._
 import org.biobank.dto.access._
 import org.biobank.service.PagedResults
@@ -39,10 +38,27 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
     extends CommandController(controllerComponents) {
 
   import org.biobank.infrastructure.command.AccessCommands._
+  import org.biobank.infrastructure.command.MembershipCommands._
 
   val log: Logger = Logger(this.getClass)
 
   private val PageSizeMax = 20
+
+  def listItemNames: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      validationReply(
+        Future {
+          for {
+            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
+            items         <- accessService.getAccessItems(request.authInfo.userId,
+                                                          filterAndSort.filter,
+                                                          filterAndSort.sort)
+          } yield {
+            items.map(i => AccessItemNameDto(i.id.id, i.name, i.accessItemType.id))
+          }
+        }
+      )
+    }
 
   def listRoles: Action[Unit] =
     action.async(parse.empty) { implicit request =>
@@ -50,22 +66,41 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
         Future {
           for {
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            access     <- accessService.getRoles(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
-            validPage  <- pagedQuery.validPage(access.size)
-            results    <- PagedResults.create(access, pagedQuery.page, pagedQuery.limit)
+            roles      <- accessService.getRoles(request.authInfo.userId,
+                                                 pagedQuery.filter,
+                                                 pagedQuery.sort)
+            validPage  <- pagedQuery.validPage(roles.size)
+            dtos       <- {
+              roles.map(role => roleToDto(request.authInfo.userId, role))
+                .toList.sequenceU.map(_.toSeq)
+            }
+            results    <- PagedResults.create(dtos, pagedQuery.page, pagedQuery.limit)
           } yield results
         }
       )
     }
 
-  def getRole(roleId: RoleId): Action[Unit] =
-    action(parse.empty) { implicit request =>
-      validationReply(accessService.getRole(request.authInfo.userId, roleId))
+  def listRoleNames: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      validationReply(
+        Future {
+          for {
+            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
+            roles         <- accessService.getRoles(request.authInfo.userId,
+                                                    filterAndSort.filter,
+                                                    filterAndSort.sort)
+          } yield {
+            roles.map(r => NameDto(r.id.id, r.name))
+          }
+        }
+      )
     }
 
-  def getRolePermissions(roleId: RoleId): Action[Unit] =
+  def getRole(roleId: AccessItemId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(accessService.getRolePermissions(request.authInfo.userId, roleId))
+      val v = accessService.getRole(request.authInfo.userId, roleId)
+        .flatMap(role => roleToDto(request.authInfo.userId, role))
+      validationReply(v)
     }
 
   def getMembership(membershipId: MembershipId): Action[Unit] =
@@ -97,7 +132,61 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
       )
     }
 
-  def membershipAdd() : Action[JsValue] =
+  def roleAdd(): Action[JsValue] =
+    commandAction[AddRoleCmd](JsNull)(processRoleCommand)
+
+  def roleUpdateName(roleId: AccessItemId): Action[JsValue] =
+    commandAction[RoleUpdateNameCmd](Json.obj("roleId" -> roleId))(processRoleCommand)
+
+  def roleUpdateDescription(roleId: AccessItemId): Action[JsValue] = {
+    val json = Json.obj("roleId" -> roleId)
+    commandAction[RoleUpdateDescriptionCmd](json)(processRoleCommand)
+  }
+
+  def roleAddUser(roleId: AccessItemId): Action[JsValue] =
+    commandAction[RoleAddUserCmd](Json.obj("roleId" -> roleId))(processRoleCommand)
+
+  def roleAddParent(roleId: AccessItemId): Action[JsValue] =
+    commandAction[RoleAddParentCmd](Json.obj("roleId" -> roleId))(processRoleCommand)
+
+  def roleAddChild(roleId: AccessItemId): Action[JsValue] =
+    commandAction[RoleAddChildCmd](Json.obj("roleId" -> roleId))(processRoleCommand)
+
+  def roleRemoveUser(roleId: AccessItemId, version: Long, userId: UserId): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      val cmd = RoleRemoveUserCmd(sessionUserId   = request.authInfo.userId.id,
+                                  expectedVersion = version,
+                                  roleId          = roleId.id,
+                                  userId          = userId.id)
+      processRoleCommand(cmd)
+    }
+
+  def roleRemoveParent(roleId: AccessItemId, version: Long, parentId: AccessItemId): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      val cmd = RoleRemoveParentCmd(sessionUserId   = request.authInfo.userId.id,
+                                    expectedVersion = version,
+                                    roleId          = roleId.id,
+                                    parentRoleId    = parentId.id)
+      processRoleCommand(cmd)
+    }
+
+  def roleRemoveChild(roleId: AccessItemId, version: Long, childId: AccessItemId): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      val cmd = RoleRemoveChildCmd(sessionUserId   = request.authInfo.userId.id,
+                                   expectedVersion = version,
+                                   roleId          = roleId.id,
+                                   childRoleId     = childId.id)
+      processRoleCommand(cmd)
+    }
+
+  def roleRemove(roleId: AccessItemId, version: Long) : Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      val cmd = RemoveRoleCmd(request.authInfo.userId.id, version, roleId.id)
+      val future = accessService.processRemoveRoleCommand(cmd)
+      validationReply(future)
+    }
+
+  def membershipAdd(): Action[JsValue] =
     commandAction[AddMembershipCmd](JsNull)(processMembershipCommand)
 
   def membershipUpdateName(membershipId: MembershipId): Action[JsValue] =
@@ -157,23 +246,61 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
       processMembershipCommand(cmd)
     }
 
-  private def processMembershipCommand(cmd: AccessCommand): Future[Result] = {
+  private def processRoleCommand(cmd: AccessCommand): Future[Result] = {
+    val future = accessService.processRoleCommand(cmd).map { validation =>
+        validation.flatMap(role => roleToDto(UserId(cmd.sessionUserId), role))
+      }
+    validationReply(future)
+  }
+
+  private def processMembershipCommand(cmd: MembershipCommand): Future[Result] = {
     val future = accessService.processMembershipCommand(cmd).map { validation =>
         validation.flatMap(membership => membershipToDto(UserId(cmd.sessionUserId), membership))
       }
     validationReply(future)
   }
 
+  private def getUsers(ids: Set[UserId]): ControllerValidation[Set[User]] = {
+    ids
+      .map(usersService.getUser)
+      .toList.sequenceU
+      .leftMap(err => org.biobank.CommonValidations.InternalServerError.nel)
+      .map(_.toSet)
+  }
+
+  private def roleToDto(requestUserId: UserId,
+                        role:          Role): ControllerValidation[RoleDto] = {
+
+    def getAccessItems(ids: Set[AccessItemId]): ControllerValidation[Set[AccessItem]] = {
+      ids
+        .map { id => accessService.getAccessItem(requestUserId, id) }
+        .toList.sequenceU
+        .leftMap(err => org.biobank.CommonValidations.InternalServerError.nel)
+        .map(_.toSet)
+    }
+
+    for {
+      users    <- getUsers(role.userIds)
+      parents  <- getAccessItems(role.parentIds)
+      children <- getAccessItems(role.childrenIds)
+    } yield {
+      RoleDto(id             = role.id.id,
+              version        = role.version,
+              timeAdded      = role.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+              timeModified   = role.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+              accessItemType = role.accessItemType.id,
+              name           = role.name,
+              description    = role.description,
+              userData       = entityInfoDto(users),
+              parentData     = entityInfoDto(parents),
+              childData      = entityInfoDto(children))
+    }
+  }
+
   private def membershipToDto(requestUserId: UserId,
                               membership:    Membership): ControllerValidation[MembershipDto] ={
     for {
-      users <- {
-        membership.userIds
-          .map(usersService.getUser)
-          .toList.sequenceU
-          .leftMap(err => org.biobank.CommonValidations.InternalServerError.nel)
-          .map(_.toSet)
-      }
+      users <- getUsers(membership.userIds)
       studies <- {
         membership.studyData.ids
           .map(id => studiesService.getStudy(requestUserId, id))
