@@ -10,6 +10,9 @@
 function UserMembershipFactory($q,
                                $log,
                                MembershipBase,
+                               ConcurrencySafeEntity,
+                               EntityInfo,
+                               EntitySet,
                                DomainError) {
 
   /**
@@ -45,7 +48,12 @@ function UserMembershipFactory($q,
    * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
    */
   UserMembership.isValid = function (obj) {
-    return MembershipBase.isValid(obj);
+    return ConcurrencySafeEntity.isValid(UserMembership.SCHEMA,
+                                         [
+                                           EntityInfo.SCHEMA,
+                                           EntitySet.SCHEMA
+                                         ],
+                                         obj);
   };
 
   /**
@@ -81,7 +89,13 @@ function UserMembershipFactory($q,
    * asynchronous code.
    */
   UserMembership.asyncCreate = function (obj) {
-    return new MembershipBase.asyncCreate(obj);
+    var result;
+    try {
+      result = UserMembership.create(obj);
+      return $q.when(result);
+    } catch (e) {
+      return $q.reject(e);
+    }
   };
 
   return UserMembership;

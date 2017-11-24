@@ -7,7 +7,7 @@
 import _ from 'lodash'
 import ngModule from '../../index'
 
-fdescribe('Role', function() {
+describe('Role', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
