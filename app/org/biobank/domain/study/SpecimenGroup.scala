@@ -2,7 +2,7 @@ package org.biobank.domain.study
 
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey
-import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, HasUniqueName, HasOptionalDescription }
+import org.biobank.domain._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.PreservationTemperatureType._
@@ -37,6 +37,7 @@ final case class SpecimenGroup(studyId:                     StudyId,
                                version:                     Long,
                                timeAdded:                   OffsetDateTime,
                                timeModified:                Option[OffsetDateTime],
+                               slug:                        String,
                                name:                        String,
                                description:                 Option[String],
                                units:                       String,
@@ -54,6 +55,7 @@ final case class SpecimenGroup(studyId:                     StudyId,
         |  studyId:                     $studyId,
         |  id:                          $id,
         |  version:                     $version,
+        |  slug:                        $slug,
         |  name:                        $name,
         |  timeAdded:                   $timeAdded,
         |  timeModified:                $timeModified,
@@ -125,19 +127,20 @@ object SpecimenGroup extends SpecimenGroupValidations {
        validateVersion(version) |@|
        validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
-       validateString(units, UnitsRequired)) {
-      case (_, _, _, _, _, _) => SpecimenGroup(studyId,
-                                               id,
-                                               version,
-                                               OffsetDateTime.now,
-                                               None,
-                                               name,
-                                               description,
-                                               units,
-                                               anatomicalSourceType,
-                                               preservationType,
-                                               preservationTemperatureType,
-                                               specimenType)
+       validateString(units, UnitsRequired)) { case _ =>
+        SpecimenGroup(studyId                     = studyId,
+                      id                          = id,
+                      version                     = version,
+                      timeAdded                   = OffsetDateTime.now,
+                      timeModified                = None,
+                      slug                        = Slug(name),
+                      name                        = name,
+                      description                 = description,
+                      units                       = units,
+                      anatomicalSourceType        = anatomicalSourceType,
+                      preservationType            = preservationType,
+                      preservationTemperatureType = preservationTemperatureType,
+                      specimenType                = specimenType)
     }
   }
 

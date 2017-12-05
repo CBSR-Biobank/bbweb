@@ -42,6 +42,7 @@ sealed trait Study
         |  timeAdded:       $timeAdded,
         |  timeModified:    $timeModified,
         |  state:           $state,
+        |  slug:            $slug,
         |  name:            $name,
         |  description:     $description,
         |  annotationTypes: $annotationTypes
@@ -120,6 +121,7 @@ final case class DisabledStudy(id:              StudyId,
                                version:         Long,
                                timeAdded:       OffsetDateTime,
                                timeModified:    Option[OffsetDateTime],
+                               slug:            String,
                                name:            String,
                                description:     Option[String],
                                annotationTypes: Set[AnnotationType])
@@ -176,6 +178,7 @@ final case class DisabledStudy(id:              StudyId,
                  version         = this.version + 1,
                  timeAdded       = this.timeAdded,
                  timeModified    = Some(OffsetDateTime.now),
+                 slug            = this.slug,
                  name            = this.name,
                  description     = this.description,
                  annotationTypes = this.annotationTypes).successNel[String]
@@ -187,6 +190,7 @@ final case class DisabledStudy(id:              StudyId,
                  version         = this.version + 1,
                  timeAdded       = this.timeAdded,
                  timeModified    = Some(OffsetDateTime.now),
+                 slug            = this.slug,
                  name            = this.name,
                  description     = this.description,
                  annotationTypes = this.annotationTypes).successNel[String]
@@ -215,9 +219,15 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
-       annotationTypes.toList.traverseU(validate)) {
-      case (_, newVersion, _, _, _) =>
-        DisabledStudy(id, newVersion, OffsetDateTime.now, None, name, description, annotationTypes)
+       annotationTypes.toList.traverseU(validate)) { case _ =>
+        DisabledStudy(id              = id,
+                      version         = version,
+                      timeAdded       = OffsetDateTime.now,
+                      timeModified    = None,
+                      slug            = Slug(name),
+                      name            = name,
+                      description     = description,
+                      annotationTypes = annotationTypes)
     }
   }
 
@@ -229,12 +239,13 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
  * This class has a private constructor and instances of this class can only be created using
  * the [[EnabledStudy.create]] method on the factory object.
  */
-final case class EnabledStudy(id:                         StudyId,
-                              version:                    Long,
-                              timeAdded:                  OffsetDateTime,
-                              timeModified:               Option[OffsetDateTime],
-                              name:                       String,
-                              description:                Option[String],
+final case class EnabledStudy(id:              StudyId,
+                              version:         Long,
+                              timeAdded:       OffsetDateTime,
+                              timeModified:    Option[OffsetDateTime],
+                              slug:            String,
+                              name:            String,
+                              description:     Option[String],
                               annotationTypes: Set[AnnotationType])
     extends { val state: EntityState = Study.enabledState }
     with Study {
@@ -244,6 +255,7 @@ final case class EnabledStudy(id:                         StudyId,
                   version         = this.version + 1,
                   timeAdded       = this.timeAdded,
                   timeModified    = Some(OffsetDateTime.now),
+                  slug            = this.slug,
                   name            = this.name,
                   description     = this.description,
                   annotationTypes = this.annotationTypes).successNel[String]
@@ -256,12 +268,13 @@ final case class EnabledStudy(id:                         StudyId,
  * This class has a private constructor and instances of this class can only be created using
  * the [[RetiredStudy.create]] method on the factory object.
  */
-final case class RetiredStudy(id:                         StudyId,
-                              version:                    Long,
-                              timeAdded:                  OffsetDateTime,
-                              timeModified:               Option[OffsetDateTime],
-                              name:                       String,
-                              description:                Option[String],
+final case class RetiredStudy(id:              StudyId,
+                              version:         Long,
+                              timeAdded:       OffsetDateTime,
+                              timeModified:    Option[OffsetDateTime],
+                              slug:            String,
+                              name:            String,
+                              description:     Option[String],
                               annotationTypes: Set[AnnotationType])
     extends { val state: EntityState = Study.retiredState }
     with Study {
@@ -271,6 +284,7 @@ final case class RetiredStudy(id:                         StudyId,
                   version         = this.version + 1,
                   timeAdded       = this.timeAdded,
                   timeModified    = Some(OffsetDateTime.now),
+                  slug            = this.slug,
                   name            = this.name,
                   description     = this.description,
                   annotationTypes = this.annotationTypes).successNel[String]

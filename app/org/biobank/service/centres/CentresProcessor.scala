@@ -6,7 +6,7 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject}
 import org.biobank.TestData
-import org.biobank.domain.LocationId
+import org.biobank.domain.{LocationId, Slug}
 import org.biobank.domain.centre._
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.Location
@@ -204,8 +204,13 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     for {
       location <- {
         // need to call Location.create so that a new Id is generated
-        Location.create(cmd.name, cmd.street, cmd.city, cmd.province,
-                        cmd.postalCode, cmd.poBoxNumber, cmd.countryIsoCode)
+        Location.create(cmd.name,
+                        cmd.street,
+                        cmd.city,
+                        cmd.province,
+                        cmd.postalCode,
+                        cmd.poBoxNumber,
+                        cmd.countryIsoCode)
       }
       updatedCentre <- centre.withLocation(location)
     } yield CentreEvent(centre.id.id).update(
@@ -231,6 +236,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       location <- {
         // need to call Location.create so that a new Id is generated
         Location(id             = LocationId(cmd.locationId),
+                 slug           = Slug(cmd.name),
                  name           = cmd.name,
                  street         = cmd.street,
                  city           = cmd.city,
@@ -368,12 +374,11 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                              locations    = Set.empty)
 
       if (validation.isFailure) {
-        log.error(s"could not add study from event: $event")
+        log.error(s"could not add centre from event: $event")
       }
 
       validation.foreach { c =>
-        centreRepository.put(
-          c.copy(timeAdded = OffsetDateTime.parse(event.getTime)))
+        centreRepository.put(c.copy(timeAdded = OffsetDateTime.parse(event.getTime)))
       }
     }
   }
@@ -426,6 +431,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       val eventLocation = locationAddedEvent.getLocation
 
       val v = centre.withLocation(Location(id             = LocationId(eventLocation.getLocationId),
+                                           slug           = Slug(eventLocation.getName),
                                            name           = eventLocation.getName,
                                            street         = eventLocation.getStreet,
                                            city           = eventLocation.getCity,
@@ -446,6 +452,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
       val eventLocation = locationUpdatedEvent.getLocation
       val v = centre.withLocation(
           Location(id             = LocationId(eventLocation.getLocationId),
+                   slug           = Slug(eventLocation.getName),
                    name           = eventLocation.getName,
                    street         = eventLocation.getStreet,
                    city           = eventLocation.getCity,

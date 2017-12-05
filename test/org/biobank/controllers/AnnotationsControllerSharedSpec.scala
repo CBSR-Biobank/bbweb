@@ -172,6 +172,19 @@ trait StudyAnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with Ha
 
   protected def getStudy(entity: T): DomainValidation[EnabledStudy]
 
+  protected def createAnnotationType() = {
+    val name = nameGenerator.next[AnnotationType]
+    AnnotationType(
+      id            = AnnotationTypeId(nameGenerator.next[AnnotationType]),
+      slug          = Slug(name),
+      name          = name,
+      description   = None,
+      valueType     = AnnotationValueType.Text,
+      maxValueCount = None,
+      options       = Seq.empty,
+      required      = true)
+  }
+
   override def annotationTypeUpdateSharedBehaviour() = {
 
     super.annotationTypeUpdateSharedBehaviour

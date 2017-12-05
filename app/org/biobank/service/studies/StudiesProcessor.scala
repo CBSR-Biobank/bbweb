@@ -210,7 +210,11 @@ class StudiesProcessor @Inject() (
     for {
       name  <- nameAvailable(cmd.name)
       id    <- validNewIdentity(studyRepository.nextIdentity, studyRepository)
-      study <- DisabledStudy.create(id, 0L, cmd.name, cmd.description, Set.empty)
+      study <- DisabledStudy.create(id,
+                                    0L,
+                                    cmd.name,
+                                    cmd.description,
+                                    Set.empty)
     } yield {
       StudyEvent(study.id.id).update(
         _.optionalSessionUserId     := cmd.sessionUserId,
@@ -267,19 +271,22 @@ class StudiesProcessor @Inject() (
                                              study: DisabledStudy)
       : ServiceValidation[StudyEvent] = {
     for {
-      annotationType <- AnnotationType(AnnotationTypeId(cmd.annotationTypeId),
-                                       cmd.name,
-                                       cmd.description,
-                                       cmd.valueType,
-                                       cmd.maxValueCount,
-                                       cmd.options,
-                                       cmd.required).successNel[String]
+      valid          <- AnnotationType.create(name          = cmd.name,
+                                              description   = cmd.description,
+                                              valueType     = cmd.valueType,
+                                              maxValueCount = cmd.maxValueCount,
+                                              options       = cmd.options,
+                                              required      = cmd.required)
+      annotationType <- valid.copy(id = AnnotationTypeId(cmd.annotationTypeId)).successNel[String]
       updatedStudy   <- study.withParticipantAnnotationType(annotationType)
-    } yield StudyEvent(study.id.id).update(
-      _.optionalSessionUserId                := cmd.sessionUserId,
-      _.time                                 := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-      _.annotationTypeUpdated.version        := cmd.expectedVersion,
-      _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+    } yield {
+      val timeStr = OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+      StudyEvent(study.id.id).update(
+        _.optionalSessionUserId                := cmd.sessionUserId,
+        _.time                                 := timeStr,
+        _.annotationTypeUpdated.version        := cmd.expectedVersion,
+        _.annotationTypeUpdated.annotationType := EventUtils.annotationTypeToEvent(annotationType))
+    }
   }
 
   private def removeAnnotationTypeCmdToEvent(cmd: UpdateStudyRemoveAnnotationTypeCmd,
@@ -482,8 +489,9 @@ class StudiesProcessor @Inject() (
         log.error(s"could not add study from event: $event")
       }
       v.foreach { s =>
-        studyRepository.put(
-          s.copy(timeAdded = OffsetDateTime.parse(event.getTime)))
+        // the slug needs to be recalculated in case there are mutliples
+        studyRepository.put(s.copy(slug      = studyRepository.slug(s.name),
+                                   timeAdded = OffsetDateTime.parse(event.getTime)))
       }
     }
   }
@@ -528,6 +536,7 @@ class StudiesProcessor @Inject() (
                                         event.getAnnotationTypeAdded.getVersion) { (study, eventTime) =>
       val eventAnnotationType = event.getAnnotationTypeAdded.getAnnotationType
       val annotationType = AnnotationType(AnnotationTypeId(eventAnnotationType.getId),
+                                          Slug(eventAnnotationType.getName),
                                           eventAnnotationType.getName,
                                           eventAnnotationType.description,
                                           AnnotationValueType.withName(eventAnnotationType.getValueType),
@@ -544,6 +553,7 @@ class StudiesProcessor @Inject() (
                                         event.getAnnotationTypeUpdated.getVersion) { (study, eventTime) =>
       val eventAnnotationType = event.getAnnotationTypeUpdated.getAnnotationType
       val annotationType = AnnotationType(AnnotationTypeId(eventAnnotationType.getId),
+                                          Slug(eventAnnotationType.getName),
                                           eventAnnotationType.getName,
                                           eventAnnotationType.description,
                                           AnnotationValueType.withName(eventAnnotationType.getValueType),

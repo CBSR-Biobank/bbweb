@@ -50,6 +50,7 @@ final case class CollectionEventType(studyId:              StudyId,
                                      version:              Long,
                                      timeAdded:            OffsetDateTime,
                                      timeModified:         Option[OffsetDateTime],
+                                     slug:                 String,
                                      name:                 String,
                                      description:          Option[String],
                                      recurring:            Boolean,
@@ -150,6 +151,7 @@ final case class CollectionEventType(studyId:              StudyId,
         |  version:              $version,
         |  timeAdded:            $timeAdded,
         |  timeModified:         $timeModified,
+        |  slug:                 $slug,
         |  name:                 $name,
         |  description:          $description,
         |  recurring:            $recurring,
@@ -179,17 +181,18 @@ object CollectionEventType extends CollectionEventTypeValidations {
        validateString(name, NameRequired) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
        specimenDescriptions.toList.traverseU(CollectionSpecimenDescription.validate) |@|
-       annotationTypes.toList.traverseU(AnnotationType.validate)) {
-      case (_, _, _, _, _, _, _) => CollectionEventType(studyId,
-                                                        id,
-                                                        version,
-                                                        OffsetDateTime.now,
-                                                        None,
-                                                        name,
-                                                        description,
-                                                        recurring,
-                                                        specimenDescriptions,
-                                                        annotationTypes)
+       annotationTypes.toList.traverseU(AnnotationType.validate)) { case _ =>
+        CollectionEventType(studyId              = studyId,
+                            id                   = id,
+                            version              = version,
+                            timeAdded            = OffsetDateTime.now,
+                            timeModified         = None,
+                            slug                 = Slug(name),
+                            name                 = name,
+                            description          = description,
+                            recurring            = recurring,
+                            specimenDescriptions = specimenDescriptions,
+                            annotationTypes      = annotationTypes)
     }
   }
 

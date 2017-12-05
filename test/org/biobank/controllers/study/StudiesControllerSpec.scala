@@ -392,12 +392,12 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fails for an invalid study ID") {
-        val studyId = nameGenerator.next[Study]
-        val json = makeRequest(GET, uri(studyId), NOT_FOUND)
+        val study = factory.createEnabledStudy
+        val json = makeRequest(GET, uri(study.slug), BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex("IdNotFound.*study")
+        (json \ "message").as[String] must include regex("EntityCriteriaNotFound: study slug")
       }
 
     }
@@ -659,22 +659,21 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     describe("POST /api/studies/pannottype/:id/:annotTypeId") {
 
-      it("update a participant annotation type") {
+      it("111 update a participant annotation type") {
         val annotType = factory.createAnnotationType
-        val updatedAnnotType = annotType.copy(name        = nameGenerator.next[Study],
-                                              description = Some(nameGenerator.next[Study]))
-        val study = factory.createDisabledStudy
+        val newName = nameGenerator.next[Study]
+        val study = factory.createDisabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)
 
         val cmdJson = Json.obj(
             "id"               -> study.id.id,
             "expectedVersion"  -> Some(study.version),
-            "annotationTypeId" -> updatedAnnotType.id,
-            "name"             -> updatedAnnotType.name,
-            "description"      -> updatedAnnotType.description,
-            "valueType"        -> updatedAnnotType.valueType,
-            "options"          -> updatedAnnotType.options,
-            "required"         -> updatedAnnotType.required)
+            "annotationTypeId" -> annotType.id,
+            "name"             -> newName,
+            "description"      -> annotType.description,
+            "valueType"        -> annotType.valueType,
+            "options"          -> annotType.options,
+            "required"         -> annotType.required)
         val json = makeRequest(POST, uri("pannottype", study.id.id, annotType.id.id), json = cmdJson)
 
         (json \ "status").as[String] must include ("success")
@@ -696,12 +695,13 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
           repoStudy.annotationTypes.head.id.id must not be empty
           repoStudy.annotationTypes.head must have (
-            'name          (updatedAnnotType.name),
-            'description   (updatedAnnotType.description),
-            'valueType     (updatedAnnotType.valueType),
-            'maxValueCount (updatedAnnotType.maxValueCount),
-            'options       (updatedAnnotType.options),
-            'required      (updatedAnnotType.required)
+            'slug          (Slug(newName)),
+            'name          (newName),
+            'description   (annotType.description),
+            'valueType     (annotType.valueType),
+            'maxValueCount (annotType.maxValueCount),
+            'options       (annotType.options),
+            'required      (annotType.required)
           )
 
           checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)

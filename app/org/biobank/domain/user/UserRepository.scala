@@ -3,7 +3,7 @@ package org.biobank.domain.user
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
 import org.biobank.{Global, TestData}
-import org.biobank.domain.{ DomainValidation, ReadWriteRepository, ReadWriteRepositoryRefImpl }
+import org.biobank.domain._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.{Configuration, Environment, Mode}
 import scalaz.Scalaz._
@@ -11,7 +11,7 @@ import scalaz.Validation.FlatMap._
 
 /** A repository that stores [[User]]s. */
 @ImplementedBy(classOf[UserRepositoryImpl])
-trait UserRepository extends ReadWriteRepository[UserId, User] {
+trait UserRepository extends ReadWriteRepositoryWithSlug[UserId, User] {
 
   def allUsers(): Set[User]
 
@@ -33,7 +33,7 @@ trait UserRepository extends ReadWriteRepository[UserId, User] {
 class UserRepositoryImpl @Inject() (val config:   Configuration,
                                     val env:      Environment,
                                     val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[UserId, User](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[UserId, User](v => v.id)
     with UserRepository {
   import org.biobank.CommonValidations._
 
@@ -104,6 +104,7 @@ class UserRepositoryImpl @Inject() (val config:   Configuration,
    * - for production servers, the password should be changed as soon as possible
    */
   private def createDefaultUser(): Unit = {
+    val name = "Administrator"
     val adminEmail =
       if (env.mode == Mode.Dev) org.biobank.Global.DefaultUserEmail
       else config.get[Option[String]]("admin.email").getOrElse(org.biobank.Global.DefaultUserEmail)
@@ -112,7 +113,8 @@ class UserRepositoryImpl @Inject() (val config:   Configuration,
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
-                   name         = "Administrator",
+                   slug         = Slug(name),
+                   name         = name,
                    email        = adminEmail,
                    password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
                    salt         = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.",

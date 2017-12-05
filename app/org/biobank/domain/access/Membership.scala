@@ -116,6 +116,7 @@ final case class Membership(id:           MembershipId,
                             version:      Long,
                             timeAdded:    OffsetDateTime,
                             timeModified: Option[OffsetDateTime],
+                            slug:         String,
                             name:         String,
                             description:  Option[String],
                             userIds:      Set[UserId],
@@ -198,6 +199,7 @@ final case class Membership(id:           MembershipId,
         |  version:      $version
         |  timeAdded:    $timeAdded
         |  timeModified: $timeModified
+        |  slug:         $slug,
         |  name:         $name
         |  description:  $description
         |  userIds:      $userIds
@@ -243,6 +245,7 @@ object Membership extends MembershipValidations {
                    version      = version,
                    timeAdded    = timeAdded,
                    timeModified = timeModified,
+                   slug         = Slug(name),
                    name         = name,
                    description  = description,
                    userIds      = userIds,
@@ -269,6 +272,7 @@ final case class UserMembership(id:           MembershipId,
                                 version:      Long,
                                 timeAdded:    OffsetDateTime,
                                 timeModified: Option[OffsetDateTime],
+                                slug:         String,
                                 name:         String,
                                 description:  Option[String],
                                 userId:       UserId,
@@ -283,6 +287,7 @@ final case class UserMembership(id:           MembershipId,
         |  version:      $version
         |  timeAdded:    $timeAdded
         |  timeModified: $timeModified
+        |  slug:         $slug,
         |  name:         $name
         |  description:  $description
         |  userId:       $userId
@@ -299,6 +304,7 @@ object UserMembership {
                    version      = usersMembership.version,
                    timeAdded    = usersMembership.timeAdded,
                    timeModified = usersMembership.timeModified,
+                   slug         = usersMembership.slug,
                    name         = usersMembership.name,
                    description  = usersMembership.description,
                    userId       = userId,

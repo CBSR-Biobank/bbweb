@@ -29,9 +29,16 @@ class SpecimenGroupSpec extends DomainSpec {
       val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
-      val v = SpecimenGroup.create(
-        studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+      val v = SpecimenGroup.create(studyId,
+                                   id,
+                                   version,
+                                   name,
+                                   description,
+                                   units,
+                                   anatomicalSourceType,
+                                   preservationType,
+                                   preservationTemperatureType,
+                                   specimenType)
       v mustSucceed { specimenGroup =>
         specimenGroup mustBe a[SpecimenGroup]
 

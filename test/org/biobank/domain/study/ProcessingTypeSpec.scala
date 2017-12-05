@@ -24,8 +24,13 @@ class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingType
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
+      val validation = ProcessingType.create(disabledStudy.id,
+                                             processingTypeId,
+                                             0L,
+                                             name,
+                                             description,
+                                             enabled)
+
       validation mustSucceed { processingType =>
         processingType mustBe a [ProcessingType]
         processingType must have (
@@ -77,8 +82,12 @@ class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingType
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(
-        studyId, processingTypeId, 0L, name, description, enabled)
+      val validation = ProcessingType.create(studyId,
+                                             processingTypeId,
+                                             0L,
+                                             name,
+                                             description,
+                                             enabled)
       validation mustFail "IdRequired"
     }
 
@@ -90,8 +99,12 @@ class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingType
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
+      val validation = ProcessingType.create(disabledStudy.id,
+                                             processingTypeId,
+                                             0L,
+                                             name,
+                                             description,
+                                             enabled)
       validation mustFail "IdRequired"
     }
 
@@ -102,8 +115,12 @@ class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingType
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -2L, name, description, enabled)
+      val validation = ProcessingType.create(disabledStudy.id,
+                                             processingTypeId,
+                                             -2L,
+                                             name,
+                                             description,
+                                             enabled)
       validation mustFail "InvalidVersion"
     }
 
@@ -114,13 +131,21 @@ class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingType
       val description = Some(nameGenerator.next[ProcessingType])
       val enabled = true
 
-      val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
+      val validation = ProcessingType.create(disabledStudy.id,
+                                             processingTypeId,
+                                             0L,
+                                             name,
+                                             description,
+                                             enabled)
       validation mustFail "NameRequired"
 
       name = ""
-      val validation2 = ProcessingType.create(
-        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
+      val validation2 = ProcessingType.create(disabledStudy.id,
+                                              processingTypeId,
+                                              0L,
+                                              name,
+                                              description,
+                                              enabled)
       validation2 mustFail "NameRequired"
     }
 
@@ -131,13 +156,21 @@ class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingType
       var description: Option[String] = Some(null)
       val enabled = true
 
-      val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
+      val validation = ProcessingType.create(disabledStudy.id,
+                                             processingTypeId,
+                                             0L,
+                                             name,
+                                             description,
+                                             enabled)
       validation mustFail "InvalidDescription"
 
       description = Some("")
-      val validation2 = ProcessingType.create(
-        disabledStudy.id, processingTypeId, 0L, name, description, enabled)
+      val validation2 = ProcessingType.create(disabledStudy.id,
+                                              processingTypeId,
+                                              0L,
+                                              name,
+                                              description,
+                                              enabled)
       validation2 mustFail "InvalidDescription"
     }
 
@@ -148,8 +181,12 @@ class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingType
       val description: Option[String] = Some(null)
       val enabled = true
 
-      val validation = ProcessingType.create(
-        disabledStudy.id, processingTypeId, -2L, name, description, enabled)
+      val validation = ProcessingType.create(disabledStudy.id,
+                                             processingTypeId,
+                                             -2L,
+                                             name,
+                                             description,
+                                             enabled)
       validation.mustFail("InvalidVersion", "InvalidDescription")
     }
   }

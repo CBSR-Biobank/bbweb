@@ -28,6 +28,7 @@ object EventUtils {
   def annotationTypeFromEvent(event: EventAnnotationType): AnnotationType = {
     AnnotationType(
       id            = AnnotationTypeId(event.getId),
+      slug          = Slug(event.getName),
       name          = event.getName,
       description   = event.description,
       valueType     = AnnotationValueType.withName(event.getValueType),
@@ -77,6 +78,7 @@ object EventUtils {
       : CollectionSpecimenDescription = {
     CollectionSpecimenDescription(
       id                          = SpecimenDescriptionId(event.getId),
+      slug                        = Slug(event.getName),
       name                        = event.getName,
       description                 = event.description,
       units                       = event.getUnits,

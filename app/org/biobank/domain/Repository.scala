@@ -7,7 +7,7 @@ import scalaz.Scalaz._
 /**
   * A read-only repository.
   */
-trait  ReadRepository[K, A] {
+trait ReadRepository[K, A] {
 
   def isEmpty: Boolean
 
@@ -34,6 +34,12 @@ trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
   def remove(value: A): Unit
 
   def removeAll(): Unit
+
+}
+
+trait ReadWriteRepositoryWithSlug[K, A] extends ReadWriteRepository[K, A] {
+
+  def slug(name: String): String
 
 }
 
@@ -84,6 +90,24 @@ private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) 
 
   def removeAll(): Unit = {
     internalMap.single.transform(map => map.empty)
+  }
+
+}
+
+private [domain] abstract
+class ReadWriteRepositoryRefImplWithSlug
+  [K, A <: ConcurrencySafeEntity[K] with HasName](keyGetter: (A) => K)
+    extends ReadWriteRepositoryRefImpl[K, A](keyGetter) {
+
+  def slug(name: String): String = {
+    val baseSlug = Slug(name)
+    val slugRegex = s"^${baseSlug}(-[0-9]+)?$$".r
+    val count = internalMap.single.get.values
+      .filter { v =>
+        slugRegex.findFirstIn(v.slug) != None
+      }.size
+    if (count <= 0) baseSlug
+    else s"${baseSlug}-$count"
   }
 
 }

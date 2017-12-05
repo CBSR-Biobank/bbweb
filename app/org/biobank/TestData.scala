@@ -186,9 +186,12 @@ object BbpspTestData {
   val ParticipantHashids: Hashids               = Hashids("bbpsp-participants")
   val SpecimenHashids: Hashids                  = Hashids("bbpsp-specimen-specs")
 
+  // the slug is temporarily assigned an empty value, once the set is created, the slug is then derived
+  // from the name below.
   val CollectionSpecimenDescriptions: Set[CollectionSpecimenDescription] =
     Set(CollectionSpecimenDescription(
           id                          = SpecimenDescriptionId(SpecimenHashids.encode(1)),
+          slug                        = "",
           name                        = "10 mL Lavender top EDTA tube",
           description                 = None,
           units                       = "mL",
@@ -200,6 +203,7 @@ object BbpspTestData {
           amount                      = 10.0),
         CollectionSpecimenDescription(
           id                          = SpecimenDescriptionId(SpecimenHashids.encode(2)),
+          slug                        = "",
           name                        = "10 mL Orange top PAXgene tube",
           description                 = None,
           units                       = "mL",
@@ -211,6 +215,7 @@ object BbpspTestData {
           amount                      = 10.0),
         CollectionSpecimenDescription(
           id                          = SpecimenDescriptionId(SpecimenHashids.encode(3)),
+          slug                        = "",
           name                        = "3mL Lavender top EDTA tube",
           description                 = None,
           units                       = "mL",
@@ -222,6 +227,7 @@ object BbpspTestData {
           amount                      = 3),
         CollectionSpecimenDescription(
           id                          = SpecimenDescriptionId(SpecimenHashids.encode(4)),
+          slug                        = "",
           name                        = "4ml lavender top EDTA tube",
           description                 = None,
           units                       = "mL",
@@ -233,6 +239,7 @@ object BbpspTestData {
           amount                      = 4),
         CollectionSpecimenDescription(
           id                          = SpecimenDescriptionId(SpecimenHashids.encode(5)),
+          slug                        = "",
           name                        = "9ml CPDA yellow top tube",
           description                 = None,
           units                       = "mL",
@@ -244,6 +251,7 @@ object BbpspTestData {
           amount                      = 9),
         CollectionSpecimenDescription(
           id                          = SpecimenDescriptionId(SpecimenHashids.encode(6)),
+          slug                        = "",
           name                        = "Urine cup",
           description                 = None,
           units                       = "mL",
@@ -253,12 +261,13 @@ object BbpspTestData {
           specimenType                = SpecimenType.CdpaPlasma,
           maxCount                    = 1,
           amount                      = 15)
-    )
+    ).map { sd => sd.copy(slug = Slug(sd.name)) }
 
   val EventTypeAnnotationTypes: Set[AnnotationType] =
     Set(
       AnnotationType(
         id            = AnnotationTypeId(EventTypeAnnotationTypeHashids.encode(1)),
+        slug          = "",
         name          = "Phlebotomist",
         description   = None,
         valueType     = AnnotationValueType.Text,
@@ -267,18 +276,20 @@ object BbpspTestData {
         required      = true),
       AnnotationType(
         id            = AnnotationTypeId(EventTypeAnnotationTypeHashids.encode(2)),
+        slug          = "",
         name          = "Consent",
         description   = None,
         valueType     = AnnotationValueType.Select,
         maxValueCount = Some(2),
         options       = Seq("Surveillance", "Genetic Predisposition", "Previous Samples", "Genetic Mutation"),
         required      = true)
-    )
+    ).map { at => at.copy(slug = Slug(at.name)) }
 
   val ParticipantAnnotationTypes: Set[AnnotationType] =
     Set(
       AnnotationType(
         id            = AnnotationTypeId(ParticipantAnnotationTypeHashids.encode(1)),
+        slug          = "",
         name          = "Date of birth",
         description   = None,
         valueType     = AnnotationValueType.DateTime,
@@ -287,13 +298,14 @@ object BbpspTestData {
         required      = true),
       AnnotationType(
         id            = AnnotationTypeId(ParticipantAnnotationTypeHashids.encode(2)),
+        slug          = "",
         name          = "Gender",
         description   = None,
         valueType     = AnnotationValueType.Select,
         maxValueCount = Some(1),
         options       = Seq("Female", "Male"),
         required      = true)
-    )
+    ).map { at => at.copy(slug = Slug(at.name)) }
 }
 
 /**
@@ -341,6 +353,7 @@ class TestData @Inject() (config:         Configuration,
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
+                   slug         = Slug(name),
                    name         = name,
                    email        = email,
                    password     = passwordHasher.encrypt(plainPassword, salt),
@@ -360,6 +373,7 @@ class TestData @Inject() (config:         Configuration,
         val locations =
           if (name == "100-Calgary AB") {
             Set(Location(id             = LocationId(s"${name}_id:Primary"),
+                         slug           = "",
                          name           = "Primary",
                          street         = "1403 29 St NW",
                          city           = "Calgary",
@@ -369,6 +383,7 @@ class TestData @Inject() (config:         Configuration,
                          countryIsoCode = "CA"))
           } else if (name == "101-London ON") {
             Set(Location(id             = LocationId(s"${name}_id:Primary"),
+                         slug           = "",
                          name           = "Primary",
                          street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
                          city           = "London",
@@ -378,13 +393,14 @@ class TestData @Inject() (config:         Configuration,
                          countryIsoCode = "CA"))
           } else {
             Set.empty[Location]
-          }
+          }.map(l => l.copy(slug = Slug(l.name)))
 
         if ((name == "100-Calgary AB") || (name == "101-London ON")) {
           EnabledCentre(id           = CentreId(s"${name}_id"),
                         version      = 0L,
                         timeAdded    = Global.StartOfTime,
                         timeModified = None,
+                        slug         = Slug(name),
                         name         = name,
                         description  = Some(description),
                         studyIds     = Set(BbpspTestData.BbpspStudyId),
@@ -394,6 +410,7 @@ class TestData @Inject() (config:         Configuration,
                          version      = 0L,
                          timeAdded    = Global.StartOfTime,
                          timeModified = None,
+                         slug         = Slug(name),
                          name         = name,
                          description  = Some(description),
                          studyIds     = Set(BbpspTestData.BbpspStudyId),
@@ -418,6 +435,7 @@ class TestData @Inject() (config:         Configuration,
                        version         = 0L,
                        timeAdded       = Global.StartOfTime,
                        timeModified    = None,
+                       slug            = Slug(name),
                        name            = name,
                        description     = descMaybe,
                        annotationTypes = BbpspTestData.ParticipantAnnotationTypes).asInstanceOf[Study]
@@ -426,6 +444,7 @@ class TestData @Inject() (config:         Configuration,
                         version         = 0L,
                         timeAdded       = Global.StartOfTime,
                         timeModified    = None,
+                        slug            = Slug(name),
                         name            = name,
                         description     = descMaybe,
                         annotationTypes = BbpspTestData.ParticipantAnnotationTypes).asInstanceOf[Study]
@@ -451,6 +470,7 @@ class TestData @Inject() (config:         Configuration,
                             version              = 0L,
                             timeAdded            = Global.StartOfTime,
                             timeModified         = None,
+                            slug                 = Slug(name),
                             name                 = name,
                             description          = None,
                             recurring            = true,
@@ -675,6 +695,7 @@ class TestData @Inject() (config:         Configuration,
           version      = 0L,
           timeAdded    = Global.StartOfTime,
           timeModified = None,
+          slug         = Slug(name),
           name         = name,
           email        = s"$id@admin.com",
           password     = "$2a$10$Kvl/h8KVhreNDiiOd0XiB.0nut7rysaLcKpbalteFuDN8uIwaojCa",
@@ -713,12 +734,13 @@ class TestData @Inject() (config:         Configuration,
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
+                   slug         = "",
                    name         = "All studies",
                    description  = None,
                    userIds      = studyUserIds,
                    studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
                    centreData   = MembershipEntitySet(false, Set.empty[CentreId]))
-      )
+      ).map(m => m.copy(slug = Slug(m.name)))
     }
   }
 

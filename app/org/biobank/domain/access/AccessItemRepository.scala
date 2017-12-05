@@ -12,7 +12,7 @@ import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[AccessItemRepositoryImpl])
-trait AccessItemRepository extends ReadWriteRepository[AccessItemId, AccessItem] {
+trait AccessItemRepository extends ReadWriteRepositoryWithSlug[AccessItemId, AccessItem] {
 
   def getRole(id: AccessItemId): DomainValidation[Role]
 
@@ -26,7 +26,7 @@ trait AccessItemRepository extends ReadWriteRepository[AccessItemId, AccessItem]
 
 @Singleton
 class AccessItemRepositoryImpl @Inject() (val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[AccessItemId, AccessItem](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[AccessItemId, AccessItem](v => v.id)
     with AccessItemRepository {
 
   import org.biobank.CommonValidations._
@@ -257,6 +257,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
                version      = 0,
                timeAdded    = Global.StartOfTime,
                timeModified = None,
+               slug         = Slug(permissionId.toString),
                name         = permissionId.toString,
                description  = Some(description),
                parentIds    = parentIds,
@@ -362,6 +363,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
          version      = 0,
          timeAdded    = Global.StartOfTime,
          timeModified = None,
+         slug         = Slug(roleId.toString),
          name         = roleId.toString,
          description  = Some(description),
          userIds      = userIds,

@@ -9,7 +9,7 @@ import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CentreRepositoryImpl])
-trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
+trait CentreRepository extends ReadWriteRepositoryWithSlug[CentreId, Centre] {
 
   def getDisabled(id: CentreId): DomainValidation[DisabledCentre]
 
@@ -25,7 +25,7 @@ trait CentreRepository extends ReadWriteRepository[CentreId, Centre] {
 
 @Singleton
 class CentreRepositoryImpl @Inject() (val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[CentreId, Centre](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[CentreId, Centre](v => v.id)
     with CentreRepository {
   import org.biobank.CommonValidations._
 

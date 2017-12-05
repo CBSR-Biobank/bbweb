@@ -289,6 +289,7 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
               timeAdded      = role.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
               timeModified   = role.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
               accessItemType = role.accessItemType.id,
+              slug           = role.slug,
               name           = role.name,
               description    = role.description,
               userData       = entityInfoDto(users),
@@ -317,11 +318,14 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
       val userData        = entityInfoDto(users)
       val studyEntitySet  = entitySetDto(membership.studyData.allEntities, studies)
       val centreEntitySet = entitySetDto(membership.centreData.allEntities, centres)
+      val timeAdded       = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+      val timeModified    = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
 
       MembershipDto(id           = membership.id.id,
                     version      = membership.version,
-                    timeAdded    = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                    timeModified = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+                    timeAdded    = timeAdded,
+                    timeModified = timeModified,
+                    slug         = membership.slug,
                     name         = membership.name,
                     description  = membership.description,
                     userData     = userData,

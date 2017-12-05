@@ -1,7 +1,7 @@
 package org.biobank.domain.study
 
 import java.time.OffsetDateTime
-import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation, HasUniqueName, HasOptionalDescription }
+import org.biobank.domain._
 import play.api.libs.json._
 import scalaz.Scalaz._
 
@@ -21,6 +21,7 @@ final case class ProcessingType(studyId:      StudyId,
                                 version:      Long,
                                 timeAdded:    OffsetDateTime,
                                 timeModified: Option[OffsetDateTime],
+                                slug:         String,
                                 name:         String,
                                 description:  Option[String],
                                 enabled:      Boolean)
@@ -69,15 +70,16 @@ object ProcessingType {
        validateId(id) |@|
        validateVersion(version) |@|
        validateString(name, NameRequired) |@|
-       validateNonEmptyOption(description, InvalidDescription) ) {
-      case (_, _, _, _, _) => ProcessingType(studyId,
-                                             id,
-                                             version,
-                                             OffsetDateTime.now,
-                                             None,
-                                             name,
-                                             description,
-                                             enabled)
+       validateNonEmptyOption(description, InvalidDescription) ) { case _ =>
+        ProcessingType(studyId      = studyId,
+                       id           = id,
+                       version      = version,
+                       timeAdded    = OffsetDateTime.now,
+                       timeModified = None,
+                       slug         = Slug(name),
+                       name         = name,
+                       description  = description,
+                       enabled      = enabled)
     }
   }
 

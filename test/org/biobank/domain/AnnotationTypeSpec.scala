@@ -63,9 +63,8 @@ class AnnotationTypeSpec extends DomainSpec {
     }
 
     it("have more than one validation fail") {
-      createAnnotationType(numberAnnotationTypeTuple.copy(
-                             _1 = "",
-                             _5 = Seq("dup", "dup")))
+      createAnnotationType(numberAnnotationTypeTuple.copy(_1 = "",
+                                                          _5 = Seq("dup", "dup")))
         .mustFail("NameRequired",
                   "DuplicateOptionsError",
                   "non select annotation type with options to select")

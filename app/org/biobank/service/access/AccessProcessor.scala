@@ -145,7 +145,7 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
                              timeAdded    = OffsetDateTime.now,
                              timeModified = None,
                              name         = cmd.name,
-                             description  = None,
+                             description  = cmd.description,
                              userIds      = cmd.userIds.map(id => UserId(id)).toSet,
                              parentIds    = cmd.parentIds.map(id => AccessItemId(id)).toSet,
                              childrenIds  = cmd.childrenIds.map(id => AccessItemId(id)).toSet)

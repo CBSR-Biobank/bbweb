@@ -64,10 +64,11 @@ sealed trait ContainerType
   override def toString: String =
     s"""|ContainerType:{
         |  id:          $id,
-        |  centreId:    $centreId,
-        |  schemaId:    $schemaId,
+        |  slug:        $slug,
         |  name:        $name,
         |  description: $description,
+        |  centreId:    $centreId,
+        |  schemaId:    $schemaId,
         |  shared:      $shared
         |}""".stripMargin
 }
@@ -100,6 +101,7 @@ final case class StorageContainerType(id:           ContainerTypeId,
                                       version:      Long,
                                       timeAdded:    OffsetDateTime,
                                       timeModified: Option[OffsetDateTime],
+                                      slug:         String,
                                       name:         String,
                                       description:  Option[String],
                                       shared:       Boolean,
@@ -138,21 +140,22 @@ object StorageContainerType extends ContainerValidations {
              shared:      Boolean,
              enabled:     Boolean): DomainValidation[StorageContainerType] = {
     (validateId(id) |@|
-      validateId(centreId, CentreIdRequired) |@|
-      validateId(schemaId, ContainerSchemaIdInvalid) |@|
-      validateVersion(version) |@|
-      validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription)) {
-      case (_, _, _, _, _, _) => StorageContainerType(id,
-                                                      centreId,
-                                                      schemaId,
-                                                      version,
-                                                      OffsetDateTime.now,
-                                                      None,
-                                                      name,
-                                                      description,
-                                                      shared,
-                                                      enabled)
+       validateId(centreId, CentreIdRequired) |@|
+       validateId(schemaId, ContainerSchemaIdInvalid) |@|
+       validateVersion(version) |@|
+       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyOption(description, InvalidDescription)) { case _ =>
+        StorageContainerType(id           = id,
+                             centreId     = centreId,
+                             schemaId     = schemaId,
+                             version      = version,
+                             timeAdded    = OffsetDateTime.now,
+                             timeModified = None,
+                             slug         = Slug(name),
+                             name         = name,
+                             description  = description,
+                             shared       = shared,
+                             enabled      = enabled)
     }
   }
 
@@ -167,6 +170,7 @@ final case class SpecimenContainerType(id:           ContainerTypeId,
                                        version:      Long,
                                        timeAdded:    OffsetDateTime,
                                        timeModified: Option[OffsetDateTime],
+                                       slug:         String,
                                        name:         String,
                                        description:  Option[String],
                                        shared:       Boolean,
@@ -191,17 +195,18 @@ object SpecimenContainerType extends ContainerValidations {
        validateId(schemaId, ContainerSchemaIdInvalid) |@|
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription)) {
-      case (_, _, _, _, _, _) => SpecimenContainerType(id,
-                                                       centreId,
-                                                       schemaId,
-                                                       version,
-                                                       timeAdded,
-                                                       timeModified,
-                                                       name,
-                                                       description,
-                                                       shared,
-                                                       enabled)
+       validateNonEmptyOption(description, InvalidDescription)) { case _ =>
+        SpecimenContainerType(id           = id,
+                              centreId     = centreId,
+                              schemaId     = schemaId,
+                              version      = version,
+                              timeAdded    = timeAdded,
+                              timeModified = timeModified,
+                              slug         = Slug(name),
+                              name         = name,
+                              description  = description,
+                              shared       = shared,
+                              enabled      = enabled)
     }
   }
 }

@@ -254,14 +254,14 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                              cet: CollectionEventType)
       : ServiceValidation[CollectionEventTypeEvent] = {
     for {
-      annotationType <- AnnotationType(AnnotationTypeId(cmd.annotationTypeId),
-                                       cmd.name,
-                                       cmd.description,
-                                       cmd.valueType,
-                                       cmd.maxValueCount,
-                                       cmd.options,
-                                       cmd.required).successNel[String]
-      updatedCet   <- cet.withAnnotationType(annotationType)
+      valid          <- AnnotationType.create(cmd.name,
+                                              cmd.description,
+                                              cmd.valueType,
+                                              cmd.maxValueCount,
+                                              cmd.options,
+                                              cmd.required)
+      annotationType <- valid.copy(id = AnnotationTypeId(cmd.annotationTypeId)).successNel[String]
+      updatedCet     <- cet.withAnnotationType(annotationType)
     } yield {
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                              := cet.studyId.id,
@@ -290,14 +290,14 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       : ServiceValidation[CollectionEventTypeEvent] = {
     for {
       specimenDesc <- CollectionSpecimenDescription.create(cmd.name,
-                                                    cmd.description,
-                                                    cmd.units,
-                                                    cmd.anatomicalSourceType,
-                                                    cmd.preservationType,
-                                                    cmd.preservationTemperatureType,
-                                                    cmd.specimenType,
-                                                    cmd.maxCount,
-                                                    cmd.amount)
+                                                           cmd.description,
+                                                           cmd.units,
+                                                           cmd.anatomicalSourceType,
+                                                           cmd.preservationType,
+                                                           cmd.preservationTemperatureType,
+                                                           cmd.specimenType,
+                                                           cmd.maxCount,
+                                                           cmd.amount)
       updatedCet <- cet.withSpecimenDescription(specimenDesc)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                      := cet.studyId.id,
@@ -313,6 +313,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     for {
       specimenDesc <- {
         CollectionSpecimenDescription(SpecimenDescriptionId(cmd.specimenDescriptionId),
+                                      Slug(cmd.name),
                                       cmd.name,
                                       cmd.description,
                                       cmd.units,
@@ -392,14 +393,14 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       val addedEvent = event.getAdded
 
       val v = CollectionEventType.create(
-        studyId              = StudyId(event.getStudyId),
-        id                   = CollectionEventTypeId(event.id),
-        version              = 0L,
-        name                 = addedEvent.getName,
-        description          = addedEvent.description,
-        recurring            = addedEvent.getRecurring,
-        specimenDescriptions = Set.empty,
-        annotationTypes      = Set.empty)
+          studyId              = StudyId(event.getStudyId),
+          id                   = CollectionEventTypeId(event.id),
+          version              = 0L,
+          name                 = addedEvent.getName,
+          description          = addedEvent.description,
+          recurring            = addedEvent.getRecurring,
+          specimenDescriptions = Set.empty,
+          annotationTypes      = Set.empty)
 
       if (v.isFailure) {
         log.error(s"could not add collection event type from event: $v")
@@ -469,6 +470,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                            event.getAnnotationTypeUpdated.getVersion) { (cet, eventTime) =>
       val eventAnnotationType = event.getAnnotationTypeUpdated.getAnnotationType
       val annotationType = AnnotationType(AnnotationTypeId(eventAnnotationType.getId),
+                                          Slug(eventAnnotationType.getName),
                                           eventAnnotationType.getName,
                                           eventAnnotationType.description,
                                           AnnotationValueType.withName(eventAnnotationType.getValueType),

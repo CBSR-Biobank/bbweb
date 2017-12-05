@@ -9,7 +9,7 @@ import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CollectionEventTypeRepositoryImpl])
 trait CollectionEventTypeRepository
-    extends ReadWriteRepository [CollectionEventTypeId, CollectionEventType] {
+    extends ReadWriteRepositoryWithSlug[CollectionEventTypeId, CollectionEventType] {
 
   def withId(studyId: StudyId, ceventTypeId: CollectionEventTypeId)
       : DomainValidation[CollectionEventType]
@@ -24,7 +24,7 @@ trait CollectionEventTypeRepository
 
 @Singleton
 class CollectionEventTypeRepositoryImpl @Inject() (val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[CollectionEventTypeId, CollectionEventType](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[CollectionEventTypeId, CollectionEventType](v => v.id)
     with CollectionEventTypeRepository {
   import org.biobank.CommonValidations._
 

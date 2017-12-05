@@ -75,8 +75,8 @@ object Annotation {
        validateNonEmptyOption(stringValue, NonEmptyStringOption) |@|
        validateNumberStringOption(numberValue) |@|
        selectedValues.toList.traverseU(validateAnnotationOption) |@|
-       validateValues(stringValue, numberValue, selectedValues)) {
-      case (_, _, _, _, _) => true
+       validateValues(stringValue, numberValue, selectedValues)) { case _ =>
+        true
     }
   }
 

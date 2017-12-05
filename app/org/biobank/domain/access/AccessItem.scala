@@ -166,6 +166,7 @@ object AccessItem {
       override def writes(accessItem: AccessItem): JsValue = {
         val json = ConcurrencySafeEntity.toJson(accessItem) ++
         Json.obj("accessItemType" -> accessItem.accessItemType.id,
+                 "slug"           -> accessItem.slug,
                  "name"           -> accessItem.name,
                  "parentIds"      -> accessItem.parentIds,
                  "childrenIds"    -> accessItem.childrenIds) ++
@@ -215,6 +216,7 @@ final case class Role(id:           AccessItemId,
                       version:      Long,
                       timeAdded:    OffsetDateTime,
                       timeModified: Option[OffsetDateTime],
+                      slug:         String,
                       name:         String,
                       description:  Option[String],
                       userIds:      Set[UserId],
@@ -298,6 +300,7 @@ final case class Role(id:           AccessItemId,
         |  version:        $version,
         |  timeAdded:      $timeAdded,
         |  timeModified:   $timeModified,
+        |  slug:           $slug,
         |  name:           $name,
         |  description:    $description,
         |  accessItemType: $accessItemType
@@ -329,6 +332,7 @@ object Role extends AccessItemValidations {
              version      = version,
              timeAdded    = timeAdded,
              timeModified = timeModified,
+             slug         = Slug(name),
              name         = name,
              description  = description,
              userIds      = userIds,
@@ -342,6 +346,7 @@ final case class Permission(id:           AccessItemId,
                             version:      Long,
                             timeAdded:    OffsetDateTime,
                             timeModified: Option[OffsetDateTime],
+                            slug:         String,
                             name:         String,
                             description:  Option[String],
                             parentIds:    Set[AccessItemId],
@@ -382,18 +387,27 @@ final case class Permission(id:           AccessItemId,
   }
 }
 
-object Permission {
+object Permission extends AccessItemValidations {
+  import org.biobank.domain.CommonValidations._
+
   def create(id:           AccessItemId,
              name:         String,
              description:  Option[String],
              parentIds:    Set[AccessItemId],
-             childrenIds:  Set[AccessItemId]): Permission =
-    Permission(id           = id,
-               version      = 0,
-               timeAdded    = Global.StartOfTime,
-               timeModified = None,
-               name         = name,
-               description  = description,
-               parentIds    = parentIds,
-               childrenIds  = childrenIds)
+             childrenIds:  Set[AccessItemId]): DomainValidation[Permission] =
+    (validateId(id, InvalidAccessItemId) |@|
+       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyOption(description, InvalidDescription) |@|
+       parentIds.map(validateId(_, InvalidAccessItemId)).toList.sequenceU |@|
+       childrenIds.map(validateId(_, InvalidAccessItemId)).toList.sequenceU) { case _ =>
+        Permission(id           = id,
+                   version      = 0,
+                   timeAdded    = Global.StartOfTime,
+                   timeModified = None,
+                   slug         = Slug(name),
+                   name         = name,
+                   description  = description,
+                   parentIds    = parentIds,
+                   childrenIds  = childrenIds)
+    }
 }

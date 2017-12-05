@@ -2,7 +2,7 @@ package org.biobank.domain.study
 
 import com.github.ghik.silencer.silent
 import org.biobank.ValidationKey
-import org.biobank.domain.IdentifiedValueObject
+import org.biobank.domain._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationTemperatureType._
 import org.biobank.domain.PreservationType._
@@ -68,6 +68,7 @@ trait SpecimenDescription
   override def toString: String =
     s"""|SpecimenDescription:{
         |  id:                          $id,
+        |  slug:                        $slug,
         |  name:                        $name,
         |  description:                 $description,
         |  units:                       $units,
@@ -117,6 +118,7 @@ trait SpecimenSpecValidations {
 }
 
 final case class CollectionSpecimenDescription(id:                          SpecimenDescriptionId,
+                                               slug:                        String,
                                                name:                        String,
                                                description:                 Option[String],
                                                units:                       String,
@@ -157,29 +159,30 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
              maxCount,
              amount).map { _ =>
       val id = SpecimenDescriptionId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
-      CollectionSpecimenDescription(id,
-                                    name,
-                                    description,
-                                    units,
-                                    anatomicalSourceType,
-                                    preservationType,
-                                    preservationTemperatureType,
-                                    specimenType,
-                                    maxCount,
-                                    amount)
+      CollectionSpecimenDescription(id                          = id,
+                                    slug                        = Slug(name),
+                                    name                        = name,
+                                    description                 = description,
+                                    units                       = units,
+                                    anatomicalSourceType        = anatomicalSourceType,
+                                    preservationType            = preservationType,
+                                    preservationTemperatureType = preservationTemperatureType,
+                                    specimenType                = specimenType,
+                                    maxCount                    = maxCount,
+                                    amount                      = amount)
     }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
   @silent def validate(name:                        String,
-               description:                 Option[String],
-               units:                       String,
-               anatomicalSourceType:        AnatomicalSourceType,
-               preservationType:            PreservationType,
-               preservationTemperatureType: PreservationTemperatureType,
-               specimenType:                SpecimenType,
-               maxCount:                    Int,
-               amount:                      BigDecimal)
+                       description:                 Option[String],
+                       units:                       String,
+                       anatomicalSourceType:        AnatomicalSourceType,
+                       preservationType:            PreservationType,
+                       preservationTemperatureType: PreservationTemperatureType,
+                       specimenType:                SpecimenType,
+                       maxCount:                    Int,
+                       amount:                      BigDecimal)
       : DomainValidation[Boolean] = {
     (validate(name, description, units) |@|
        validatePositiveNumber(maxCount, MaxCountInvalid) |@|

@@ -358,8 +358,8 @@ class UsersProcessor @Inject() (val config:         Configuration,
       }
 
       v.foreach { u =>
-        userRepository.put(
-          u.copy(timeAdded = OffsetDateTime.parse(event.getTime)))
+        userRepository.put(u.copy(slug      = userRepository.slug(registeredEvent.getName),
+                                  timeAdded = OffsetDateTime.parse(event.getTime)))
       }
     }
   }

@@ -46,6 +46,7 @@ object AnnotationTypeId {
  * @param required When true, the user must enter a value for this annotation.
  */
 final case class AnnotationType(id:            AnnotationTypeId,
+                                slug:          String,
                                 name:          String,
                                 description:   Option[String],
                                 valueType:     AnnotationValueType,
@@ -60,6 +61,7 @@ final case class AnnotationType(id:            AnnotationTypeId,
   override def toString: String =
     s"""|AnnotationType:{
         |  id:            $id,
+        |  slug:          $slug,
         |  name:          $name,
         |  description:   $description,
         |  valueType:     $valueType,
@@ -200,10 +202,16 @@ object AnnotationType extends AnnotationTypeValidations {
        validateNonEmptyOption(description, InvalidDescription) |@|
        validateMaxValueCount(maxValueCount) |@|
        validateOptions(options) |@|
-       validateSelectParams(valueType, maxValueCount, options)) {
-      case (_, _, _, _, _) =>
+       validateSelectParams(valueType, maxValueCount, options)) { case _ =>
         val id = AnnotationTypeId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
-        AnnotationType(id, name, description, valueType, maxValueCount, options, required)
+        AnnotationType(id            = id,
+                       slug          = Slug(name),
+                       name          = name,
+                       description   = description,
+                       valueType     = valueType,
+                       maxValueCount = maxValueCount,
+                       options       = options,
+                       required      = required)
     }
   }
 

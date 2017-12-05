@@ -11,7 +11,7 @@ import org.biobank.domain.user.UserId
 import scalaz.Scalaz._
 
 @ImplementedBy(classOf[MembershipRepositoryImpl])
-trait MembershipRepository extends ReadWriteRepository[MembershipId, Membership] {
+trait MembershipRepository extends ReadWriteRepositoryWithSlug[MembershipId, Membership] {
 
   def getUserMembership(userId: UserId): DomainValidation[UserMembership]
 
@@ -19,7 +19,7 @@ trait MembershipRepository extends ReadWriteRepository[MembershipId, Membership]
 
 @Singleton
 class MembershipRepositoryImpl @Inject() (val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[MembershipId, Membership](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[MembershipId, Membership](v => v.id)
     with MembershipRepository {
 
   import org.biobank.CommonValidations._
@@ -28,11 +28,13 @@ class MembershipRepositoryImpl @Inject() (val testData: TestData)
 
   override def init(): Unit = {
     super.init()
+    val name = "All studies and all centres"
     put(Membership(id           = nextIdentity,
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
-                   name         = "All studies and all centres",
+                   slug         = Slug(name),
+                   name         = name,
                    description  = None,
                    userIds      = Set(Global.DefaultUserId),
                    studyData    = MembershipEntitySet(true, Set.empty[StudyId]),

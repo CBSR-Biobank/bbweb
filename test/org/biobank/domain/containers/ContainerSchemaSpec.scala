@@ -75,76 +75,43 @@ class ContainerSchemaSpec extends DomainSpec {
 
   describe("A container schema") {
 
-    it("not be created with an empty id") {
-      val v = ContainerSchema.create(
-        id          = ContainerSchemaId(""),
-        version     = 0L,
-        name        = nameGenerator.next[ContainerType],
-        description = Some(nameGenerator.next[ContainerType]),
-        shared      = true)
+    def createFrom(schema: ContainerSchema) = {
+      ContainerSchema.create(id          = schema.id,
+                             version     = schema.version,
+                             name        = schema.name,
+                             description = schema.description,
+                             shared      = schema.shared)
+    }
 
-      v mustFail "IdRequired"
+    it("not be created with an empty id") {
+      val schema = factory.createContainerSchema.copy(id = ContainerSchemaId(""))
+      createFrom(schema) mustFail "IdRequired"
     }
 
     it("not be created with an invalid version") {
-      val v = ContainerSchema.create(
-        id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = -2,
-        name        = nameGenerator.next[ContainerType],
-        description = Some(nameGenerator.next[ContainerType]),
-        shared      = true)
-
-      v mustFail "InvalidVersion"
+      val schema = factory.createContainerSchema.copy(version = -2)
+      createFrom(schema) mustFail "InvalidVersion"
     }
 
     it("not be created with an null or empty name") {
-      var v = ContainerSchema.create(
-        id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = 0L,
-        name        = null,
-        description = Some(nameGenerator.next[ContainerType]),
-        shared      = true)
+      var schema = factory.createContainerSchema.copy(name = null)
+      createFrom(schema) mustFail "InvalidName"
 
-      v mustFail "InvalidName"
-
-      v = ContainerSchema.create(
-        id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = 0L,
-        name        = "",
-        description = Some(nameGenerator.next[ContainerType]),
-        shared      = true)
-
-      v mustFail "InvalidName"
+      schema = factory.createContainerSchema.copy(name = "")
+      createFrom(schema) mustFail "InvalidName"
     }
 
     it("not be created with an empty description option") {
-      var v = ContainerSchema.create(
-        id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = 0L,
-        name        = nameGenerator.next[ContainerType],
-        description = Some(null),
-        shared      = true)
+      var schema = factory.createContainerSchema.copy(description = Some(null))
+      createFrom(schema) mustFail "InvalidDescription"
 
-      v mustFail "InvalidDescription"
-
-      v = ContainerSchema.create(
-        id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = 0L,
-        name        = nameGenerator.next[ContainerType],
-        description = Some(""),
-        shared      = true)
-
-      v mustFail "InvalidDescription"
+      schema = factory.createContainerSchema.copy(description = Some(""))
+      createFrom(schema) mustFail "InvalidDescription"
     }
 
     it("have more than one validation fail") {
-      val v = ContainerSchema.create(
-        id          = ContainerSchemaId(nameGenerator.next[ContainerType]),
-        version     = -2,
-        name        = null,
-        description = Some(nameGenerator.next[ContainerType]),
-        shared      = true)
-      v mustFail ("InvalidVersion",  "InvalidName")
+      val schema = factory.createContainerSchema.copy(version = -2, name = "")
+      createFrom(schema) mustFail ("InvalidVersion",  "InvalidName")
     }
 
   }

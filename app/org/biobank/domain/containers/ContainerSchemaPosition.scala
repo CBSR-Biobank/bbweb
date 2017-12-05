@@ -35,8 +35,8 @@ object ContainerSchemaPosition extends ContainerSchemaPositionValidations {
       : DomainValidation[ContainerSchemaPosition] = {
     (validateId(id) |@|
       validateId(schemaId, InvalidContainerSchemaId) |@|
-      validateString(label, LabelMinLength, InvalidLabel)) {
-      case (_, _, _) => ContainerSchemaPosition(id, schemaId, label)
+       validateString(label, LabelMinLength, InvalidLabel)) { case _ =>
+        ContainerSchemaPosition(id, schemaId, label)
     }
   }
 

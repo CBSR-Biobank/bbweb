@@ -100,17 +100,6 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     }
   }
 
-  def createCollectionEventAnnotationType() = {
-    AnnotationType(
-      id            = AnnotationTypeId(nameGenerator.next[AnnotationType]),
-      name          = nameGenerator.next[AnnotationType],
-      description   = None,
-      valueType     = AnnotationValueType.Text,
-      maxValueCount = None,
-      options       = Seq.empty,
-      required      = true)
-  }
-
   /**
    * create pairs of annotation types and annotation of each value type plus a second of type select that
    * allows multiple selections

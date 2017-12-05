@@ -34,10 +34,12 @@ class Factory {
   var domainObjects: Map[Class[_], _] = Map.empty
 
   def createRegisteredUser(): RegisteredUser = {
+    val name = nameGenerator.next[User]
     val user = RegisteredUser(version      = 0L,
                               timeAdded    = OffsetDateTime.now,
                               timeModified = None,
-                              name         = nameGenerator.next[User],
+                              slug         = Slug(name),
+                              name         = name,
                               email        = nameGenerator.nextEmail[User],
                               id           = UserId(nameGenerator.next[User]),
                               password     = nameGenerator.next[User],
@@ -48,10 +50,12 @@ class Factory {
   }
 
   def createActiveUser: ActiveUser = {
+    val name = nameGenerator.next[User]
     val user = ActiveUser(version      = 0L,
                           timeAdded    = OffsetDateTime.now,
                           timeModified = None,
-                          name         = nameGenerator.next[User],
+                          slug         = Slug(name),
+                          name         = name,
                           email        = nameGenerator.nextEmail[User],
                           id           = UserId(nameGenerator.next[User]),
                           password     = nameGenerator.next[User],
@@ -62,10 +66,12 @@ class Factory {
   }
 
   def createLockedUser(): LockedUser = {
+    val name = nameGenerator.next[User]
     val user = LockedUser(version      = 0L,
                           timeAdded    = OffsetDateTime.now,
                           timeModified = None,
-                          name         = nameGenerator.next[User],
+                          slug         = Slug(name),
+                          name         = name,
                           email        = nameGenerator.nextEmail[User],
                           id           = UserId(nameGenerator.next[User]),
                           password     = nameGenerator.next[User],
@@ -76,11 +82,13 @@ class Factory {
   }
 
   def createRole(): Role = {
+    val name = nameGenerator.next[Role]
     val role = Role(id           = AccessItemId(nameGenerator.next[AccessItem]),
                     version      = 0L,
                     timeAdded    = OffsetDateTime.now,
                     timeModified = None,
-                    name         = nameGenerator.next[Role],
+                    slug         = Slug(name),
+                    name         = name,
                     description  = Some(nameGenerator.next[Role]),
                     userIds      = Set.empty[UserId],
                     parentIds    = Set.empty[AccessItemId],
@@ -90,11 +98,13 @@ class Factory {
   }
 
   def createPermission(): Permission = {
+    val name = nameGenerator.next[Permission]
     val permission = Permission(id           = AccessItemId(nameGenerator.next[AccessItem]),
                                 version      = 0L,
                                 timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
-                                name         = nameGenerator.next[Permission],
+                                slug         = Slug(name),
+                                name         = name,
                                 description  = Some(nameGenerator.next[Permission]),
                                 parentIds    = Set.empty[AccessItemId],
                                 childrenIds  = Set.empty[AccessItemId])
@@ -103,11 +113,13 @@ class Factory {
   }
 
   def createMembership(): Membership = {
+    val name = nameGenerator.next[Membership]
     val membership = Membership(id           = MembershipId(nameGenerator.next[MembershipId]),
                                 version      = 0L,
                                 timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
-                                name         = nameGenerator.next[Membership],
+                                slug         = Slug(name),
+                                name         = name,
                                 description  = Some(nameGenerator.next[Membership]),
                                 userIds      = Set.empty[UserId],
                                 studyData    = MembershipEntitySet(false, Set.empty[StudyId]),
@@ -117,51 +129,58 @@ class Factory {
   }
 
   def createDisabledStudy(): DisabledStudy = {
-    val study = DisabledStudy(version      = 0L,
-                              timeAdded    = OffsetDateTime.now,
-                              timeModified = None,
-                              id           = StudyId(nameGenerator.next[Study]),
-                              name         = nameGenerator.next[Study],
-                              description  = Some(nameGenerator.next[Study]),
+    val name = nameGenerator.next[Study]
+    val study = DisabledStudy(version         = 0L,
+                              timeAdded       = OffsetDateTime.now,
+                              timeModified    = None,
+                              id              = StudyId(nameGenerator.next[Study]),
+                              slug            = Slug(name),
+                              name            = name,
+                              description     = Some(nameGenerator.next[Study]),
                               annotationTypes = Set.empty)
     domainObjects = domainObjects + (classOf[DisabledStudy] -> study)
     study
   }
 
   def createEnabledStudy(): EnabledStudy = {
-    val enabledStudy = EnabledStudy(id           = StudyId(nameGenerator.next[Study]),
-                                    version      = 0L,
-                                    timeAdded    = OffsetDateTime.now,
-                                    timeModified = None,
-                                    name         = nameGenerator.next[Study],
-                                    description  = Some(nameGenerator.next[Study]),
+    val name = nameGenerator.next[Study]
+    val enabledStudy = EnabledStudy(id              = StudyId(nameGenerator.next[Study]),
+                                    version         = 0L,
+                                    timeAdded       = OffsetDateTime.now,
+                                    timeModified    = None,
+                                    slug            = Slug(name),
+                                    name            = name,
+                                    description     = Some(nameGenerator.next[Study]),
                                     annotationTypes = Set.empty)
     domainObjects = domainObjects + (classOf[EnabledStudy] -> enabledStudy)
     enabledStudy
   }
 
   def createRetiredStudy(): RetiredStudy = {
-    val retiredStudy = RetiredStudy(
-        id              = StudyId(nameGenerator.next[Study]),
-        version         = 0L,
-        timeAdded       = OffsetDateTime.now,
-        timeModified    = None,
-        name            = nameGenerator.next[Study],
-        description     = Some(nameGenerator.next[Study]),
-        annotationTypes = Set.empty)
+    val name = nameGenerator.next[Study]
+    val retiredStudy = RetiredStudy(id              = StudyId(nameGenerator.next[Study]),
+                                    version         = 0L,
+                                    timeAdded       = OffsetDateTime.now,
+                                    timeModified    = None,
+                                    slug            = Slug(name),
+                                    name            = name,
+                                    description     = Some(nameGenerator.next[Study]),
+                                    annotationTypes = Set.empty)
     domainObjects = domainObjects + (classOf[RetiredStudy] -> retiredStudy)
     retiredStudy
   }
 
   def createSpecimenGroup(): SpecimenGroup = {
     val disabledStudy = defaultDisabledStudy
+    val name = nameGenerator.next[SpecimenGroup]
     val specimenGroup = SpecimenGroup(
         id                          = SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
         studyId                     = disabledStudy.id,
         version                     = 0L,
         timeAdded                   = OffsetDateTime.now,
         timeModified                = None,
-        name                        = nameGenerator.next[SpecimenGroup],
+        slug                        = Slug(name),
+        name                        = name,
         description                 = Some(nameGenerator.next[SpecimenGroup]),
         units                       = nameGenerator.next[String],
         anatomicalSourceType        = AnatomicalSourceType.Blood,
@@ -173,9 +192,11 @@ class Factory {
   }
 
   def createCollectionSpecimenDescription(): CollectionSpecimenDescription = {
+    val name = nameGenerator.next[CollectionSpecimenDescription]
     val specimenSpec = CollectionSpecimenDescription(
         id                          = SpecimenDescriptionId(nameGenerator.next[CollectionSpecimenDescription]),
-        name                        = nameGenerator.next[CollectionSpecimenDescription],
+        slug                        = Slug(name),
+        name                        = name,
         description                 = Some(nameGenerator.next[CollectionSpecimenDescription]),
         units                       = nameGenerator.next[String],
         anatomicalSourceType        = AnatomicalSourceType.Blood,
@@ -190,13 +211,15 @@ class Factory {
 
   def createCollectionEventType(): CollectionEventType = {
     val disabledStudy = defaultDisabledStudy
+    val name = nameGenerator.next[CollectionEventType]
     val ceventType = CollectionEventType(
         id                   = CollectionEventTypeId(nameGenerator.next[CollectionEventType]),
         studyId              = disabledStudy.id,
         version              = 0L,
         timeAdded            = OffsetDateTime.now,
         timeModified         = None,
-        name                 = nameGenerator.next[CollectionEventType],
+        slug                 = Slug(name),
+        name                 = name,
         description          = Some(nameGenerator.next[CollectionEventType]),
         recurring            = false,
         specimenDescriptions = Set.empty,
@@ -209,8 +232,10 @@ class Factory {
   def createAnnotationType(valueType:     AnnotationValueType,
                            maxValueCount: Option[Int],
                            options:       Seq[String]): AnnotationType = {
+    val name = nameGenerator.next[AnnotationType]
     val annotationType = AnnotationType(AnnotationTypeId(nameGenerator.next[AnnotationType]),
-                                        nameGenerator.next[AnnotationType],
+                                        Slug(name),
+                                        name,
                                         None,
                                         valueType,
                                         maxValueCount,
@@ -231,13 +256,15 @@ class Factory {
 
   def createProcessingType(): ProcessingType = {
     val disabledStudy = defaultDisabledStudy
+    val name = nameGenerator.next[ProcessingType]
     val processingType = ProcessingType(
         id             = ProcessingTypeId(nameGenerator.next[ProcessingType]),
         studyId        = disabledStudy.id,
         version        = 0L,
         timeAdded      = OffsetDateTime.now,
         timeModified   = None,
-        name           = nameGenerator.next[ProcessingType],
+        slug           = Slug(name),
+        name           = name,
         description    = Some(nameGenerator.next[ProcessingType]),
         enabled        = false)
 
@@ -383,11 +410,13 @@ class Factory {
   }
 
   def createDisabledCentre(): DisabledCentre = {
+    val name = nameGenerator.next[Centre]
     val centre = DisabledCentre(id           = CentreId(nameGenerator.next[Centre]),
                                 version      = 0L,
                                 timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
-                                name         = nameGenerator.next[Centre],
+                                slug         = Slug(name),
+                                name         = name,
                                 description  = Some(nameGenerator.next[Centre]),
                                 studyIds     = Set.empty,
                                 locations    = Set.empty)
@@ -397,11 +426,13 @@ class Factory {
   }
 
   def createEnabledCentre(): EnabledCentre = {
+    val name = nameGenerator.next[Centre]
     val centre = EnabledCentre(id           = CentreId(nameGenerator.next[Centre]),
                                version      = 0L,
                                timeAdded    = OffsetDateTime.now,
                                timeModified = None,
-                               name         = nameGenerator.next[Centre],
+                               slug         = Slug(name),
+                               name         = name,
                                description  = Some(nameGenerator.next[Centre]),
                                studyIds     = Set.empty,
                                locations    = Set.empty)
@@ -410,8 +441,10 @@ class Factory {
   }
 
   def createLocation(): Location = {
+    val name = nameGenerator.next[Location]
     val location = Location(id             = LocationId(nameGenerator.next[Location]),
-                            name           = nameGenerator.next[Location],
+                            slug           = Slug(name),
+                            name           = name,
                             street         = nameGenerator.next[Location],
                             city           = nameGenerator.next[Location],
                             province       = nameGenerator.next[Location],
@@ -423,12 +456,14 @@ class Factory {
   }
 
   def createContainerSchema(): ContainerSchema = {
+    val name = nameGenerator.next[ContainerSchema]
     val containerSchema = ContainerSchema(
         version      = 0L,
         timeAdded    = OffsetDateTime.now,
         timeModified = None,
         id           = ContainerSchemaId(nameGenerator.next[ContainerSchema]),
-        name         = nameGenerator.next[ContainerSchema],
+        slug         = Slug(name),
+        name         = name,
         description  = Some(nameGenerator.next[ContainerSchema]),
         shared       = true)
     domainObjects = domainObjects + (classOf[ContainerSchema] -> containerSchema)

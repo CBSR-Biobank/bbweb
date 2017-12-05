@@ -19,6 +19,7 @@ final case class ContainerSchema(id:           ContainerSchemaId,
                                  version:      Long,
                                  timeAdded:    OffsetDateTime,
                                  timeModified: Option[OffsetDateTime],
+                                 slug:         String,
                                  name:         String,
                                  description:  Option[String],
                                  shared:       Boolean)
@@ -68,8 +69,15 @@ object ContainerSchema extends ContainerSchemaValidations {
     (validateId(id) |@|
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription)) {
-      case (_, _, _, _) => ContainerSchema(id, version, OffsetDateTime.now, None, name, description, shared)
+       validateNonEmptyOption(description, InvalidDescription)) { case _ =>
+        ContainerSchema(id           = id,
+                        version      = version,
+                        timeAdded    = OffsetDateTime.now,
+                        timeModified = None,
+                        slug         = Slug(name),
+                        name         = name,
+                        description  = description,
+                        shared       = shared)
     }
   }
 

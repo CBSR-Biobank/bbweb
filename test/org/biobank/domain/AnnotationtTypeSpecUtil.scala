@@ -4,9 +4,12 @@ import org.biobank.fixture.NameGenerator
 
 object AnnotationTypeSpecUtil {
 
-  type AnnotTypeTuple = Tuple6[
-    String, Some[String], AnnotationValueType.Value,
-    Option[Int], Seq[String], Boolean]
+  type AnnotTypeTuple = Tuple6[String,
+                               Some[String],
+                               AnnotationValueType.Value,
+                               Option[Int],
+                               Seq[String],
+                               Boolean]
 
   val nameGenerator = new NameGenerator(this.getClass)
 
@@ -26,28 +29,28 @@ object AnnotationTypeSpecUtil {
     (name, description, maxValueCount, options, required)
   }
 
-  def textAnnotationTypeTuple = {
+  def textAnnotationTypeTuple(): AnnotTypeTuple = {
     val (name, description, maxValueCount, options, required) =
       nonSelectAnnotationTypeTuple
     val valueType = AnnotationValueType.Text
     (name, description, valueType, maxValueCount, options, required)
   }
 
-  def numberAnnotationTypeTuple = {
+  def numberAnnotationTypeTuple(): AnnotTypeTuple = {
     val (name, description, maxValueCount, options, required) =
       nonSelectAnnotationTypeTuple
     val valueType = AnnotationValueType.Number
     (name, description, valueType, maxValueCount, options, required)
   }
 
-  def dateTimeAnnotationTypeTuple = {
+  def dateTimeAnnotationTypeTuple(): AnnotTypeTuple = {
     val (name, description, maxValueCount, options, required) =
       nonSelectAnnotationTypeTuple
     val valueType = AnnotationValueType.DateTime
     (name, description, valueType, maxValueCount, options, required)
   }
 
-  def selectAnnotationTypeTuple = {
+  def selectAnnotationTypeTuple(): AnnotTypeTuple = {
     val (name, description) = annotationTypeNoValue
 
     val valueType = AnnotationValueType.Select

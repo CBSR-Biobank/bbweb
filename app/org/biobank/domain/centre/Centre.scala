@@ -63,6 +63,7 @@ sealed trait Centre
         |  timeAdded:    $timeAdded,
         |  timeModified: $timeModified,
         |  state:        $state
+        |  slug:         $slug,
         |  name:         $name,
         |  description:  $description,
         |  studyIds:     $studyIds,
@@ -84,6 +85,7 @@ object Centre {
       override def writes(centre: Centre): JsValue = {
         ConcurrencySafeEntity.toJson(centre) ++
         Json.obj("state"     -> centre.state.id,
+                 "slug"      -> centre.slug,
                  "name"      -> centre.name,
                  "studyIds"  -> centre.studyIds,
                  "locations" -> centre.locations) ++
@@ -140,6 +142,7 @@ final case class DisabledCentre(id:           CentreId,
                                 version:      Long,
                                 timeAdded:    OffsetDateTime,
                                 timeModified: Option[OffsetDateTime],
+                                slug:         String,
                                 name:         String,
                                 description:  Option[String],
                                 studyIds:     Set[StudyId],
@@ -192,7 +195,7 @@ final case class DisabledCentre(id:           CentreId,
   /** adds a location to this centre. */
   def withLocation(location: Location): DomainValidation[DisabledCentre] = {
     Location.validate(location).map { _ =>
-      // replaces previous annotation type with same unique id
+      // replaces previous location with same unique id
       copy(locations    = locations - location + location,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
@@ -220,6 +223,7 @@ final case class DisabledCentre(id:           CentreId,
                     version      = this.version + 1,
                     timeAdded    = this.timeAdded,
                     timeModified = this.timeModified,
+                    slug         = this.slug,
                     name         = this.name,
                     description  = this.description,
                     studyIds     = this.studyIds,
@@ -253,9 +257,16 @@ object DisabledCentre extends CentreValidations {
        validateString(name, NameMinLength, InvalidName) |@|
        validateNonEmptyOption(description, InvalidDescription) |@|
        studyIds.toList.traverseU(validateStudyId) |@|
-       locations.toList.traverseU(Location.validate)) {
-      case (_, validVersion, _, _, _, _) =>
-        DisabledCentre(id, validVersion, OffsetDateTime.now, None, name, description, studyIds, locations)
+       locations.toList.traverseU(Location.validate)) { case _ =>
+        DisabledCentre(id           = id,
+                       version      = version,
+                       timeAdded    = OffsetDateTime.now,
+                       timeModified = None,
+                       slug         = Slug(name),
+                       name         = name,
+                       description  = description,
+                       studyIds     = studyIds,
+                       locations    = locations)
     }
   }
 }
@@ -270,6 +281,7 @@ final case class EnabledCentre(id:           CentreId,
                                version:      Long,
                                timeAdded:    OffsetDateTime,
                                timeModified: Option[OffsetDateTime],
+                               slug:         String,
                                name:         String,
                                description:  Option[String],
                                studyIds:     Set[StudyId],
@@ -282,6 +294,7 @@ final case class EnabledCentre(id:           CentreId,
                    version      = this.version + 1,
                    timeAdded    = this.timeAdded,
                    timeModified = this.timeModified,
+                   slug         = this.slug,
                    name         = this.name,
                    description  = this.description,
                    studyIds     = this.studyIds,

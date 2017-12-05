@@ -8,7 +8,7 @@ import scalaz.Validation.FlatMap._
 import scalaz.Scalaz._
 
 @ImplementedBy(classOf[StudyRepositoryImpl])
-trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
+trait StudyRepository extends ReadWriteRepositoryWithSlug[StudyId, Study] {
 
   def allStudies(): Set[Study]
 
@@ -22,7 +22,7 @@ trait StudyRepository extends ReadWriteRepository[StudyId, Study] {
 
 @Singleton
 class StudyRepositoryImpl @Inject() (val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[StudyId, Study](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[StudyId, Study](v => v.id)
     with StudyRepository {
   import org.biobank.CommonValidations._
 

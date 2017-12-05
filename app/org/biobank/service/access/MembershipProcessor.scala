@@ -142,7 +142,7 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
                                          timeAdded    = OffsetDateTime.now,
                                          timeModified = None,
                                          name         = cmd.name,
-                                         description  = None,
+                                         description  = cmd.description,
                                          userIds      = cmd.userIds.map(id => UserId(id)).toSet,
                                          allStudies   = cmd.allStudies,
                                          allCentres   = cmd.allCentres,

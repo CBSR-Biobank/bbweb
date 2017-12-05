@@ -43,7 +43,8 @@ object LocationId {
  *
  * @param countryIsoCode the ISO country code for the country the location is in.
  */
-final case class Location(id:       LocationId,
+final case class Location(id:             LocationId,
+                          slug:           String,
                           name:           String,
                           street:         String,
                           city:           String,
@@ -68,7 +69,15 @@ object Location {
              countryIsoCode: String): DomainValidation[Location] = {
     validate(name).map { _ =>
       val id = LocationId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
-      Location(id, name, street, city, province, postalCode, poBoxNumber, countryIsoCode)
+      Location(id             = id,
+               slug           = Slug(name),
+               name           = name,
+               street         = street,
+               city           = city,
+               province       = province,
+               postalCode     = postalCode,
+               poBoxNumber    = poBoxNumber,
+               countryIsoCode = countryIsoCode)
     }
   }
 

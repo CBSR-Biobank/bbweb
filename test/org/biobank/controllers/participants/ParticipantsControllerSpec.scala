@@ -64,17 +64,6 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
     )
   }
 
-  def createAnnotationType() = {
-    AnnotationType(
-      id            = AnnotationTypeId(nameGenerator.next[AnnotationType]),
-      name          = nameGenerator.next[AnnotationType],
-      description   = None,
-      valueType     = AnnotationValueType.Text,
-      maxValueCount = None,
-      options       = Seq.empty,
-      required      = false)
-  }
-
   def addOnNonEnabledStudy(study: Study, participant: Participant) = {
     study must not be an [EnabledStudy]
 
