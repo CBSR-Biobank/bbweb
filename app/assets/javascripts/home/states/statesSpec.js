@@ -18,6 +18,8 @@ describe('states', function() {
                               '$location',
                               '$httpBackend',
                               '$state');
+
+      this.initAuthentication()
     })
   })
 

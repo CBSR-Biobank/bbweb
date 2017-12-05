@@ -22,7 +22,10 @@ describe('admin/centre states', function() {
                               '$location',
                               '$httpBackend',
                               '$state',
-                              'Centre')
+                              'Centre',
+                              'Factory')
+
+      this.initAuthentication()
     })
   })
 

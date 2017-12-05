@@ -26,6 +26,7 @@ describe('collection states', function() {
                               'CollectionEventType',
                               'Factory')
 
+      this.initAuthentication()
       this.study = this.Study.create(this.Factory.study())
     })
   })

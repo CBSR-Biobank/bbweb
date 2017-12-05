@@ -17,11 +17,15 @@ describe('manageUsersComponent', function() {
       Object.assign(this, ComponentTestSuiteMixin)
 
       this.injectDependencies('$q',
+                              'User',
                               'UserCounts',
                               'Factory')
 
       this.createController = (counts) => {
+        this.User.list =
+          jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult([])));
         this.UserCounts.get = jasmine.createSpy().and.returnValue(this.$q.when(counts))
+
 
         ComponentTestSuiteMixin.createController.call(
           this,

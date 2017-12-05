@@ -9,9 +9,14 @@
  * @return {object} Object containing the functions that will be mixed in.
  */
 /* @ngInject */
-function StateTestSuiteMixin($state, $injector, TestSuiteMixin) {
+function StateTestSuiteMixin($q, $state, $injector, userService, TestSuiteMixin, Factory) {
 
-  return Object.assign({ gotoUrl, resolve }, TestSuiteMixin);
+  return Object.assign({ initAuthentication, gotoUrl, resolve }, TestSuiteMixin);
+
+  function initAuthentication() {
+    const user = Factory.user()
+    userService.requestCurrentUser = jasmine.createSpy().and.returnValue($q.when(user))
+  }
 
   function gotoUrl(url) {
     this.$location.url(url);

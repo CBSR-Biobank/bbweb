@@ -13,9 +13,14 @@ describe('membershipAdminComponent', function() {
     angular.mock.inject(function(ComponentTestSuiteMixin) {
       Object.assign(this, ComponentTestSuiteMixin)
 
-      //this.injectDependencies('')
+      this.injectDependencies('$q',
+                              'Membership',
+                              'Factory')
 
       this.createController = () => {
+        this.Membership.list =
+          jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult([])));
+
         ComponentTestSuiteMixin.createController.call(
           this,
           '<membership-admin></membership-admin>',

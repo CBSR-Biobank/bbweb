@@ -24,6 +24,8 @@ describe('centre states', function() {
                               '$state',
                               'Centre',
                               'Shipment')
+
+      this.initAuthentication()
     })
   })
 

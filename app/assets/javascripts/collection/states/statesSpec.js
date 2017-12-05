@@ -29,6 +29,8 @@ describe('collection states', function() {
                               'Specimen',
                               'Factory')
 
+      this.initAuthentication()
+
       this.study = this.Study.create(this.Factory.study())
       this.participant = this.Participant.create(this.Factory.participant())
     })
