@@ -124,7 +124,8 @@ final case class CollectionEventType(studyId:              StudyId,
                  timeModified  = Some(OffsetDateTime.now))
   }
 
-  def removeSpecimenDescription(specimenDescId: SpecimenDescriptionId): DomainValidation[CollectionEventType] = {
+  def removeSpecimenDescription(specimenDescId: SpecimenDescriptionId)
+      : DomainValidation[CollectionEventType] = {
     specimenDescriptions
       .find { x => x.id == specimenDescId }
       .fold

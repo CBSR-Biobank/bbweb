@@ -48,9 +48,13 @@ trait StudiesService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the studies.
    */
-  def getStudies(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Study]]
+  def getStudies(requestUserId: UserId,
+                 filter:        FilterString,
+                 sort:          SortString): ServiceValidation[Seq[Study]]
 
   def getStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Study]
+
+  def getStudyBySlug(requestUserId: UserId, slug: String): ServiceValidation[Study]
 
   def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]]
 
@@ -111,6 +115,7 @@ class StudiesServiceImpl @Inject()(
     with CentreServicePermissionChecks {
 
   import org.biobank.CommonValidations._
+  import org.biobank.domain.access.AccessItem._
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -173,7 +178,19 @@ class StudiesServiceImpl @Inject()(
     }
   }
 
-  def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]] = {
+  def getStudyBySlug(requestUserId: UserId, slug: String): ServiceValidation[Study] = {
+    for {
+      study      <- studyRepository.getBySlug(slug)
+      permission <- accessService.hasPermissionAndIsMember(requestUserId,
+                                                           PermissionId.StudyRead,
+                                                           Some(study.id),
+                                                           None)
+      result     <- if (permission) study.successNel[String] else Unauthorized.failureNel[Study]
+    } yield result
+  }
+
+  def getCentresForStudy(requestUserId: UserId,
+                         studyId:       StudyId): ServiceValidation[Set[CentreLocation]] = {
     whenPermittedAndIsMember(requestUserId,
                              PermissionId.StudyRead,
                              Some(studyId),

@@ -84,21 +84,17 @@ function StudyFactory($q,
   /**
    * Used for validating plain objects.
    */
-  Study.SCHEMA = {
-    'id': 'Study',
-    'type': 'object',
-    'properties': {
-      'id':              { 'type': 'string' },
-      'version':         { 'type': 'integer', 'minimum': 0 },
-      'timeAdded':       { 'type': 'string' },
-      'timeModified':    { 'type': [ 'string', 'null' ] },
+  Study.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'Study',
+    properties: {
+      'slug':            { 'type': 'string' },
       'name':            { 'type': 'string' },
       'description':     { 'type': [ 'string', 'null' ] },
       'annotationTypes': { 'type': 'array', 'items':{ '$ref': 'AnnotationType' }  },
       'state':           { 'type': 'string' }
     },
-    'required': [ 'id', 'version', 'timeAdded', 'name', 'state' ]
-  };
+    required: [ 'slug', 'name', 'annotationTypes', 'state' ]
+  });
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.studies.Study|Study}.
@@ -160,12 +156,12 @@ function StudyFactory($q,
   /**
    * Retrieves a Study from the server.
    *
-   * @param {string} id the ID of the study to retrieve.
+   * @param {string} slug the slug of the study to retrieve.
    *
    * @returns {Promise<domain.studies.Study>} The study within a promise.
    */
-  Study.get = function (id) {
-    return biobankApi.get(Study.url(id)).then(function(reply) {
+  Study.get = function (slug) {
+    return biobankApi.get(Study.url(slug)).then(function(reply) {
       return Study.asyncCreate(reply);
     });
   };

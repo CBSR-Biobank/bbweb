@@ -19,6 +19,7 @@ var component = {
  */
 /* @ngInject */
 function ParticipantAnnotationTypeViewController($q,
+                                                 $state,
                                                  gettextCatalog,
                                                  notificationsService,
                                                  breadcrumbService) {
@@ -49,11 +50,19 @@ function ParticipantAnnotationTypeViewController($q,
     vm.onUpdate = onUpdate;
   }
 
-  function onUpdate(annotationType) {
+  function onUpdate(attr, annotationType) {
     return vm.study.updateAnnotationType(annotationType)
       .then(postUpdate)
+      .catch(notificationsService.updateError)
       .then(notifySuccess)
-      .catch(notificationsService.updateError);
+      .then(() => {
+        if (attr === 'name') {
+          // reload the state so that the URL gets updated
+          $state.go($state.current.name,
+                    { annotationTypeSlug: vm.annotationType.slug },
+                    { reload: true  })
+        }
+      });
   }
 
   function postUpdate(study) {

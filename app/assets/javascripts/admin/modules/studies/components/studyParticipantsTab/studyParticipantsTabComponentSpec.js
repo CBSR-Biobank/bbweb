@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import ngModule from '../../index'
 
-describe('studyParticipantsTabDirectiveDirective', function() {
+describe('Component: studyParticipantsTab', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -83,7 +83,7 @@ describe('studyParticipantsTabDirectiveDirective', function() {
 
       expect(this.$state.go).toHaveBeenCalledWith(
         'home.admin.studies.study.participants.annotationTypeView',
-        { annotationTypeId: this.annotationType.id });
+        { annotationTypeSlug: this.annotationType.slug });
     });
 
     describe('when removing an annotation type', function() {

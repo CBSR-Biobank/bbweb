@@ -6,7 +6,7 @@
 
 import ngModule from '../../../../app'  // the whole appliction has to be loaded for these states
 
-describe('collection states', function() {
+describe('study admin collection states', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test', function ($qProvider) {
@@ -101,7 +101,7 @@ describe('collection states', function() {
               jsonStudy     = this.Factory.study({ annotationTypes: [ jsonAnnotType ]}),
               study         = this.Study.create(jsonStudy)
         this.Study.get = jasmine.createSpy().and.returnValue(this.$q.when(study))
-        this.gotoUrl(`/admin/studies/study-id-1/participants/annottype/${jsonAnnotType.id}`)
+        this.gotoUrl(`/admin/studies/study-id-1/participants/annottype/${jsonAnnotType.slug}`)
         expect(this.$state.current.name).toBe('home.admin.studies.study.participants.annotationTypeView')
       })
 
@@ -182,7 +182,7 @@ describe('collection states', function() {
 
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(eventType))
         this.gotoUrl(
-          `/admin/studies/study-id-1/collection/events/event-type-id-1/annottypes/${jsonAnnotType.id}`)
+          `/admin/studies/study-id-1/collection/events/event-type-id-1/annottypes/${jsonAnnotType.slug}`)
         expect(this.$state.current.name)
           .toBe('home.admin.studies.study.collection.ceventType.annotationTypeView')
       })
@@ -236,7 +236,7 @@ describe('collection states', function() {
 
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(eventType))
         this.gotoUrl(
-          `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/${jsonSpcDesc.id}`)
+          `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/${jsonSpcDesc.slug}`)
         expect(this.$state.current.name)
           .toBe('home.admin.studies.study.collection.ceventType.specimenDescriptionView')
       })

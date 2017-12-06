@@ -81,16 +81,15 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
       )
     }
 
-  def get(id: StudyId): Action[Unit] =
+  def getBySlug(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.getStudy(request.authInfo.userId, id))
+      validationReply(service.getStudyBySlug(request.authInfo.userId, slug))
     }
 
   def enableAllowed(id: StudyId): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(service.enableAllowed(request.authInfo.userId, id))
     }
-
 
   def centresForStudy(studyId: StudyId): Action[Unit] =
     action.async(parse.empty) { implicit request =>

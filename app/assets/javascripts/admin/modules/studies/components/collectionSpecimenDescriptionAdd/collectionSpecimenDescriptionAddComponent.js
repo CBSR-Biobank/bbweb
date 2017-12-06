@@ -20,7 +20,8 @@ class Controller {
               AnatomicalSourceType,
               PreservationType,
               PreservationTemperatureType,
-              SpecimenType) {
+              SpecimenType,
+              breadcrumbService) {
     Object.assign(this,
                   {
                     $state,
@@ -30,11 +31,26 @@ class Controller {
                     AnatomicalSourceType,
                     PreservationType,
                     PreservationTemperatureType,
-                    SpecimenType
+                    SpecimenType,
+                    breadcrumbService
                   });
   }
 
   $onInit() {
+    const studySlug = this.study.slug,
+          slug = this.collectionEventType.slug
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.studies'),
+      this.breadcrumbService.forStateWithFunc(
+        `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
+        () => this.study.name + ': ' + this.collectionEventType.name),
+      this.breadcrumbService.forStateWithFunc(
+        'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
+        () => this.gettextCatalog.getString('Add collection specimen'))
+    ];
+
     this.anatomicalSourceTypes = _.values(this.AnatomicalSourceType);
     this.preservTypes          = _.values(this.PreservationType);
     this.preservTempTypes      = _.values(this.PreservationTemperatureType);

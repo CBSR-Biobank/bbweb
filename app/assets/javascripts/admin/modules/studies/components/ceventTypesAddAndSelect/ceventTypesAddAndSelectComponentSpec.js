@@ -79,8 +79,9 @@ describe('ceventTypesAddAndSelectComponent', function() {
     this.createController();
     this.controller.select(this.collectionEventType);
     this.scope.$digest();
-    expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType',
-                                                { ceventTypeId: this.collectionEventType.id });
+    expect(this.$state.go).toHaveBeenCalledWith(
+      'home.admin.studies.study.collection.ceventType',
+      { ceventTypeSlug: this.collectionEventType.slug });
   });
 
   it('function recurring returns a valid result', function() {

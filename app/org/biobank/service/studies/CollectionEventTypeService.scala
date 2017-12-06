@@ -28,13 +28,16 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[CollectionEventTypeServiceImpl])
 trait CollectionEventTypeService extends BbwebService {
 
-  def collectionEventTypeWithId(requestUserId:         UserId,
-                                studyId:               StudyId,
-                                collectionEventTypeId: CollectionEventTypeId)
-      : ServiceValidation[CollectionEventType]
+  def eventTypeWithId(requestUserId:         UserId,
+                      studyId:               StudyId,
+                      eventTypeId: CollectionEventTypeId): ServiceValidation[CollectionEventType]
 
-  def collectionEventTypeInUse(requestUserId: UserId, collectionEventTypeId: CollectionEventTypeId)
-      : ServiceValidation[Boolean]
+  def eventTypeBySlug(requestUserId: UserId,
+                      studySlug:     String,
+                      eventTypeSlug: String): ServiceValidation[CollectionEventType]
+
+  def eventTypeInUse(requestUserId: UserId,
+                     eventTypeId:   CollectionEventTypeId): ServiceValidation[Boolean]
 
   def list(requestUserId: UserId,
            studyId:       StudyId,
@@ -54,39 +57,48 @@ trait CollectionEventTypeService extends BbwebService {
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class CollectionEventTypeServiceImpl @Inject()(
   @Named("collectionEventType") val processor: ActorRef,
-  val accessService:                 AccessService,
-  val collectionEventTypeRepository: CollectionEventTypeRepository,
-  val studyRepository:               StudyRepository,
-  val specimenGroupRepository:       SpecimenGroupRepository,
-  val collectionEventRepository:     CollectionEventRepository)
+  val accessService:                           AccessService,
+  val eventTypeRepository:                     CollectionEventTypeRepository,
+  val studiesService:                          StudiesService,
+  val specimenGroupRepository:                 SpecimenGroupRepository,
+  val eventRepository:                         CollectionEventRepository)
                                             (implicit executionContext: BbwebExecutionContext)
     extends CollectionEventTypeService
     with AccessChecksSerivce
     with ServicePermissionChecks {
 
+  import org.biobank.CommonValidations._
+
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def collectionEventTypeWithId(requestUserId:         UserId,
-                                studyId:               StudyId,
-                                collectionEventTypeId: CollectionEventTypeId)
-      : ServiceValidation[CollectionEventType] = {
+  def eventTypeWithId(requestUserId:         UserId,
+                      studyId:               StudyId,
+                      eventTypeId: CollectionEventTypeId): ServiceValidation[CollectionEventType] = {
     whenPermittedAndIsMember(requestUserId,
                              PermissionId.StudyRead,
                              Some(studyId),
                              None) { () =>
-      withStudy(studyId) { study =>
-        collectionEventTypeRepository.withId(study.id, collectionEventTypeId)
+      withStudy(requestUserId, studyId) { study =>
+        eventTypeRepository.withId(study.id, eventTypeId)
       }
     }
   }
 
-  def collectionEventTypeInUse(requestUserId: UserId, id: CollectionEventTypeId): ServiceValidation[Boolean] = {
-    collectionEventTypeRepository.getByKey(id).flatMap { ceventType =>
+  def eventTypeBySlug(requestUserId: UserId,
+                      studySlug:     String,
+                      eventTypeSlug: String): ServiceValidation[CollectionEventType] = {
+    studiesService.getStudyBySlug(requestUserId, studySlug).flatMap { study =>
+      eventTypeRepository.getBySlug(eventTypeSlug)
+    }
+  }
+
+  def eventTypeInUse(requestUserId: UserId, id: CollectionEventTypeId): ServiceValidation[Boolean] = {
+    eventTypeRepository.getByKey(id).flatMap { ceventType =>
       whenPermittedAndIsMember(requestUserId,
                                PermissionId.StudyRead,
                                Some(ceventType.studyId),
                                None) { () =>
-        collectionEventRepository.collectionEventTypeInUse(id).successNel[String]
+        eventRepository.collectionEventTypeInUse(id).successNel[String]
       }
     }
   }
@@ -103,7 +115,7 @@ class CollectionEventTypeServiceImpl @Inject()(
                     else sort
 
       for {
-        study           <- studyRepository.getByKey(studyId)
+        study           <- studiesService.getStudy(requestUserId, studyId)
         ceventTypes     <- getEventTypes(studyId, filter)
         sortExpressions <- { QuerySortParser(sortStr).
                               toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
@@ -126,7 +138,7 @@ class CollectionEventTypeServiceImpl @Inject()(
             ServiceError(s"invalid service call: $cmd, use processRemoveCommand").failureNel[DisabledStudy]
           case c => c.successNel[String]
         }
-        study  <- studyRepository.getDisabled(StudyId(cmd.studyId))
+        study <- getDisabledStudy(cmd.sessionUserId, cmd.studyId)
       } yield study
 
     v.fold(
@@ -138,7 +150,7 @@ class CollectionEventTypeServiceImpl @Inject()(
         ask(processor, cmd).mapTo[ServiceValidation[CollectionEventTypeEvent]].map { validation =>
           for {
             event  <- validation
-            result <- collectionEventTypeRepository.getByKey(CollectionEventTypeId(event.id))
+            result <- eventTypeRepository.getByKey(CollectionEventTypeId(event.id))
           } yield result
         }
       }
@@ -146,7 +158,7 @@ class CollectionEventTypeServiceImpl @Inject()(
   }
 
   def processRemoveCommand(cmd: RemoveCollectionEventTypeCmd): Future[ServiceValidation[Boolean]] = {
-    studyRepository.getDisabled(StudyId(cmd.studyId)).fold(
+    getDisabledStudy(cmd.sessionUserId, cmd.studyId).fold(
       err => Future.successful(err.failure[Boolean]),
       study => whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId),
                                              PermissionId.StudyUpdate,
@@ -161,16 +173,28 @@ class CollectionEventTypeServiceImpl @Inject()(
     )
   }
 
-  private def withStudy[T](studyId: StudyId)(fn: Study => ServiceValidation[T]): ServiceValidation[T] = {
+  private def withStudy[T](sessionUserId: UserId,
+                           studyId:       StudyId)
+                       (fn: Study => ServiceValidation[T]): ServiceValidation[T] = {
     for {
-      study <- studyRepository.getByKey(studyId)
+      study  <- getDisabledStudy(sessionUserId.id, studyId.id)
       result <- fn(study)
     } yield result
   }
 
+  private def getDisabledStudy(sessionUserId: String,
+                               studyId:       String): ServiceValidation[DisabledStudy] = {
+    studiesService.getStudy(UserId(sessionUserId), StudyId(studyId)).flatMap { study =>
+      study match {
+        case s: DisabledStudy => s.successNel[String]
+        case s => InvalidStatus(s"study not disabled: $id").failureNel[DisabledStudy]
+      }
+    }
+  }
+
   private def getEventTypes(studyId: StudyId, filter: FilterString)
       : ServiceValidation[Set[CollectionEventType]] = {
-    val allCeventTypes = collectionEventTypeRepository.allForStudy(studyId).toSet
+    val allCeventTypes = eventTypeRepository.allForStudy(studyId).toSet
     CollectionEventTypeFilter.filterCollectionEvents(allCeventTypes, filter)
   }
 }

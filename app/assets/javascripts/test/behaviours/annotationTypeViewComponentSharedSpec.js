@@ -25,19 +25,24 @@ define(function() {
     describe('(shared) tests', function() {
 
       beforeEach(function() {
-        this.injectDependencies('AnnotationType', 'Factory');
+        this.injectDependencies('$state', 'AnnotationType', 'Factory');
       });
 
       it('on update should invoke the update method on entity', function() {
+        this.$state.go = jasmine.createSpy().and.returnValue(null);
         spyOn(context.entity.prototype, context.updateAnnotationTypeFuncName)
           .and.returnValue(this.$q.when(context.parentObject));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
+        const attribute = 'name';
         context.createController.call(this);
-        this.controller.onUpdate(context.annotationType);
+        this.controller.onUpdate(attribute, context.annotationType);
         this.scope.$digest();
         expect(context.entity.prototype[context.updateAnnotationTypeFuncName])
           .toHaveBeenCalledWith(context.annotationType);
+        expect(this.$state.go).toHaveBeenCalledWith(this.$state.current.name,
+                                                    { annotationTypeSlug: context.annotationType.slug },
+                                                    { reload: true  })
         expect(this.notificationsService.success).toHaveBeenCalled();
       });
 

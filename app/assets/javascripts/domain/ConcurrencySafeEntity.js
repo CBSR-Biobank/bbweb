@@ -67,6 +67,35 @@ function ConcurrencySafeEntityFactory($q,
   ConcurrencySafeEntity.prototype = Object.create(DomainEntity.prototype);
   ConcurrencySafeEntity.prototype.constructor = ConcurrencySafeEntity;
 
+  ConcurrencySafeEntity.SCHEMA = {
+    'id': 'ConcurrencySafeEntity',
+    'type': 'object',
+    'properties': {
+      'id':           { 'type': 'string'},
+      'version':      { 'type': 'integer', 'minimum': 0},
+      'timeAdded':    { 'type': 'string'},
+      'timeModified': { 'type': [ 'string', 'null' ] }
+    },
+    'required': [ 'id', 'version', 'timeAdded', 'name' ]
+  };
+
+  ConcurrencySafeEntity.createDerivedSchema = function ({id, type = 'object', properties, required } = {}) {
+    return Object.assign(
+      {},
+      ConcurrencySafeEntity.SCHEMA,
+      {
+      'id': id,
+      'type': type,
+      'properties': Object.assign(
+        {},
+        ConcurrencySafeEntity.SCHEMA.properties,
+        properties
+      ),
+      'required': ConcurrencySafeEntity.SCHEMA.required.slice().concat(required)
+    }
+  );
+  }
+
   /**
    * If the object does not have an ID it is new and is not yet present in the system.
    *

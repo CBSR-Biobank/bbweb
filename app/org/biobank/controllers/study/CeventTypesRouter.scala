@@ -10,17 +10,17 @@ class CeventTypesRouter @Inject()(controller: CeventTypesController) extends Sim
 
   override def routes: Routes = {
 
-    case GET(p"/${studyId(id)}") =>
-      controller.list(id)
-
     case GET(p"/inuse/${ceventTypeId(cetId)}") =>
       controller.inUse(cetId)
 
     case GET(p"/names/${studyId(id)}") =>
       controller.listNames(id)
 
-    case GET(p"/${studyId(id)}/${ceventTypeId(cetId)}") =>
-      controller.get(id, cetId)
+    case GET(p"/$studySlug/$eventTypeSlug") =>
+      controller.get(studySlug, eventTypeSlug)
+
+    case GET(p"/${studyId(id)}") =>
+      controller.list(id)
 
     case POST(p"/snapshot") =>
       controller.snapshot

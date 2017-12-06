@@ -15,12 +15,13 @@ describe('Component: collectionEventAnnotationTypeAdd', function() {
       _.extend(this, ComponentTestSuiteMixin);
       this.injectDependencies('$rootScope',
                               '$compile',
+                              'Study',
                               'CollectionEventType',
                               'AnnotationType',
                               'Factory');
 
-      this.collectionEventType = new this.CollectionEventType(
-        this.Factory.collectionEventType(this.Factory.study()));
+      this.study = this.Study.create(this.Factory.study());
+      this.collectionEventType = this.CollectionEventType.create(this.Factory.collectionEventType());
 
       this.createController = () =>
         ComponentTestSuiteMixin.createController.call(
@@ -29,7 +30,10 @@ describe('Component: collectionEventAnnotationTypeAdd', function() {
                study="vm.study"
                collection-event-type="vm.ceventType">
              </collection-event-annotation-type-add>`,
-          { ceventType: this.collectionEventType },
+          {
+            study:      this.study,
+            ceventType: this.collectionEventType
+          },
           'collectionEventAnnotationTypeAdd');
     });
   });

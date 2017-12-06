@@ -21,6 +21,7 @@ var component = {
  */
 /* @ngInject */
 function CollectionEventAnnotationTypeViewController($q,
+                                                     $state,
                                                      CollectionEventType,
                                                      gettextCatalog,
                                                      notificationsService,
@@ -31,13 +32,15 @@ function CollectionEventAnnotationTypeViewController($q,
   //---
 
   function onInit() {
+    const studySlug = vm.study.slug,
+          slug = vm.collectionEventType.slug
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
       breadcrumbService.forState('home.admin'),
       breadcrumbService.forState('home.admin.studies'),
       breadcrumbService.forStateWithFunc(
-        `home.admin.studies.study.collection.ceventType({ studyId: "${vm.collectionEventType.studyId}", ceventTypeId: "${vm.collectionEventType.id}" })`,
-        () => vm.study.name),
+        `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
+        () => vm.study.name + ': ' + vm.collectionEventType.name),
       breadcrumbService.forStateWithFunc(
         'home.admin.studies.study.collection.ceventType.annotationTypeView',
         () => {
@@ -52,17 +55,25 @@ function CollectionEventAnnotationTypeViewController($q,
     vm.onUpdate = onUpdate;
 
     // reload the collection event type in case changes were made to it
-    CollectionEventType.get(vm.collectionEventType.studyId, vm.collectionEventType.id)
+    CollectionEventType.get(vm.study.slug, vm.collectionEventType.slug)
       .then(function (ceventType) {
         vm.collectionEventType = ceventType;
       });
   }
 
-  function onUpdate(annotationType) {
+  function onUpdate(attr, annotationType) {
     return vm.collectionEventType.updateAnnotationType(annotationType)
       .then(postUpdate)
       .catch(notificationsService.updateError)
-      .then(notifySuccess);
+      .then(notifySuccess)
+      .then(() => {
+        if (attr === 'name') {
+          // reload the state so that the URL gets updated
+          $state.go($state.current.name,
+                    { annotationTypeSlug: vm.annotationType.slug },
+                    { reload: true  })
+        }
+      });
   }
 
   function postUpdate(collectionEventType) {

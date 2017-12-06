@@ -46,8 +46,8 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
       // this action extracts parameters from the raw query string
       controller.list
 
-    case GET(p"/${studyId(id)}") =>
-      controller.get(id)
+    case GET(p"/$slug") =>
+      controller.getBySlug(slug)
 
     case POST(p"/snapshot") =>
       controller.snapshot

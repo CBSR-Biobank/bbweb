@@ -45,23 +45,43 @@ const stringNext = function () {
 }
 
 const membershipBaseDefaults = function () {
-  return {
-    id:           domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE),
-    name:         stringNext(),
-    description:  faker.lorem.sentences(4),
-    studyData:    this.entitySet(),
-    centreData:   this.entitySet()
-  }
+  return Object.assign(
+    {
+      id:           domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE),
+      description:  faker.lorem.sentences(4),
+      studyData:    this.entitySet(),
+      centreData:   this.entitySet()
+    },
+    nameAndSlug()
+  )
 }
 
-
 const accessItemDefaults = function () {
+  return Object.assign(
+    {
+      id:           domainEntityNameNext(ENTITY_NAME_ACCESS_ITEM),
+      description:  faker.lorem.sentences(4),
+      parentData:   [ this.entityInfo() ],
+      childData:    [ this.entityInfo() ]
+    },
+    nameAndSlug()
+  )
+}
+
+// this function taken from here:
+// https://gist.github.com/mathewbyrne/1280286
+function slugify(text) {
+  return text.toString().toLowerCase().trim()
+    .replace(/[^\w\s-]/g, '') // remove non-word [a-z0-9_], non-whitespace, non-hyphen characters
+    .replace(/[\s_-]+/g, '_') // swap any length of whitespace, underscore, hyphen characters with a single _
+    .replace(/^-+|-+$/g, ''); // remove leading, trailing -
+}
+
+function nameAndSlug() {
+  const name = stringNext()
   return {
-    id:           domainEntityNameNext(ENTITY_NAME_ACCESS_ITEM),
-    name:         stringNext(),
-    description:  faker.lorem.sentences(4),
-    parentData:   [ this.entityInfo() ],
-    childData:    [ this.entityInfo() ]
+    slug: slugify(name),
+    name: name
   }
 }
 
@@ -178,13 +198,15 @@ class Factory {
 
   processingType(options = {}) {
     var study = this.defaultStudy(),
-        defaults = {
-          id:          domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE),
-          studyId:     study.id,
-          name:        this.stringNext(),
-          description: faker.lorem.sentences(4),
-          enabled:     false
-        },
+        defaults = Object.assign(
+          {
+            id:          domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE),
+            studyId:     study.id,
+            description: faker.lorem.sentences(4),
+            enabled:     false
+          },
+          nameAndSlug()
+        ),
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         pt = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_PROCESSING_TYPE, pt);
@@ -200,15 +222,17 @@ class Factory {
    */
   collectionEventType(options = {}) {
     var study = this.defaultStudy(),
-        defaults = {
-          id:                   domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
-          studyId:              study.id,
-          name:                 this.stringNext(),
-          description:          faker.lorem.sentences(4),
-          specimenDescriptions: [],
-          annotationTypes:      [],
-          recurring:            false
-        },
+        defaults = Object.assign(
+          {
+            id:                   domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
+            studyId:              study.id,
+            description:          faker.lorem.sentences(4),
+            specimenDescriptions: [],
+            annotationTypes:      [],
+            recurring:            false
+          },
+          nameAndSlug()
+        ),
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         cet = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_COLLECTION_EVENT_TYPE, cet);
@@ -237,17 +261,19 @@ class Factory {
 
   specimenGroup(options = {}) {
     var study = this.defaultStudy(),
-        defaults = {
-          id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
-          studyId:                     study.id,
-          name:                        this.stringNext(),
-          description:                 faker.lorem.sentences(4),
-          units:                       'mL',
-          anatomicalSourceType:        this.randomAnatomicalSourceType(),
-          preservationType:            this.randomPreservationType(),
-          preservationTemperatureType: this.randomPreservationTemperatureTypeType(),
-          specimenType:                this.randomSpecimenType()
-        },
+        defaults = Object.assign(
+          {
+            id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
+            studyId:                     study.id,
+            description:                 faker.lorem.sentences(4),
+            units:                       'mL',
+            anatomicalSourceType:        this.randomAnatomicalSourceType(),
+            preservationType:            this.randomPreservationType(),
+            preservationTemperatureType: this.randomPreservationTemperatureTypeType(),
+            specimenType:                this.randomSpecimenType()
+          },
+          nameAndSlug()
+        ),
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         sg = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_SPECIMEN_GROUP, sg);
@@ -259,12 +285,13 @@ class Factory {
   }
 
   study(options = {}) {
-    var defaults =  { id:              domainEntityNameNext(ENTITY_NAME_STUDY),
-                      name:            this.stringNext(),
-                      description:     faker.lorem.sentences(4),
-                      annotationTypes: [],
-                      state:           this.StudyState.DISABLED
-                    },
+    var defaults = Object.assign({ id:              domainEntityNameNext(ENTITY_NAME_STUDY),
+                                   description:     faker.lorem.sentences(4),
+                                   annotationTypes: [],
+                                   state:           this.StudyState.DISABLED
+                                 },
+                                 nameAndSlug()
+                                ),
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         s = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_STUDY, s);
@@ -425,13 +452,13 @@ class Factory {
   }
 
   centre(options = {}) {
-    var defaults = { id:          domainEntityNameNext(ENTITY_NAME_CENTRE),
-                     name:        this.stringNext(),
-                     description: this.stringNext(),
-                     state:       this.CentreState.DISABLED,
-                     studyNames:  [],
-                     locations:   []
-                   },
+    var defaults = Object.assign({ id:          domainEntityNameNext(ENTITY_NAME_CENTRE),
+                                   description: this.stringNext(),
+                                   state:       this.CentreState.DISABLED,
+                                   studyNames:  [],
+                                   locations:   []
+                                 },
+                                 nameAndSlug()),
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         c = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_CENTRE, c);
@@ -488,13 +515,13 @@ class Factory {
   }
 
   user(options =  { membership: {} }) {
-    var defaults = { id:         domainEntityNameNext(ENTITY_NAME_USER),
-                     name:       this.stringNext(),
-                     email:      this.stringNext(),
-                     avatarUrl:  null,
-                     state:      this.UserState.REGISTERED,
-                     roles:      []
-                   },
+    var defaults = Object.assign({ id:         domainEntityNameNext(ENTITY_NAME_USER),
+                                   email:      this.stringNext(),
+                                   avatarUrl:  null,
+                                   state:      this.UserState.REGISTERED,
+                                   roles:      []
+                                 },
+                                 nameAndSlug()),
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         membership,
         u;
@@ -517,14 +544,14 @@ class Factory {
    * multiple selection.
    */
   annotationType(options = {}) {
-    var defaults = { id:            domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE),
-                     name:          this.stringNext(),
-                     description:   null,
-                     valueType:     this.AnnotationValueType.TEXT,
-                     options:       [],
-                     maxValueCount: this.AnnotationMaxValueCount.NONE,
-                     required:      false
-                   },
+    var defaults = Object.assign({ id:            domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE),
+                                   description:   null,
+                                   valueType:     this.AnnotationValueType.TEXT,
+                                   options:       [],
+                                   maxValueCount: this.AnnotationMaxValueCount.NONE,
+                                   required:      false
+                                 },
+                                 nameAndSlug()),
         validKeys = Object.keys(defaults),
         at;
 
@@ -558,17 +585,17 @@ class Factory {
   }
 
   collectionSpecimenDescription(options = {}) {
-    var defaults = { id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
-                     name:                        this.stringNext(),
-                     description:                 faker.lorem.sentences(4),
-                     units:                       'mL',
-                     anatomicalSourceType:        this.randomAnatomicalSourceType(),
-                     preservationType:            this.randomPreservationType(),
-                     preservationTemperatureType: this.randomPreservationTemperatureTypeType(),
-                     specimenType:                this.randomSpecimenType(),
-                     maxCount:                    1,
-                     amount:                      0.5
-                   },
+    var defaults = Object.assign({ id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
+                                   description:                 faker.lorem.sentences(4),
+                                   units:                       'mL',
+                                   anatomicalSourceType:        this.randomAnatomicalSourceType(),
+                                   preservationType:            this.randomPreservationType(),
+                                   preservationTemperatureType: this.randomPreservationTemperatureTypeType(),
+                                   specimenType:                this.randomSpecimenType(),
+                                   maxCount:                    1,
+                                   amount:                      0.5
+                                 },
+                                 nameAndSlug()),
         validKeys = Object.keys(defaults),
         spec = Object.assign(defaults, _.pick(options, validKeys));
     return spec;
@@ -664,15 +691,15 @@ class Factory {
    * This is a value object, so it does not have the common fields.
    */
   location(options = {}) {
-    var defaults = { id:             domainEntityNameNext(ENTITY_NAME_LOCATION),
-                     name:           this.stringNext(),
-                     street:         faker.address.streetAddress(),
-                     city:           faker.address.city(),
-                     province:       faker.address.state(),
-                     postalCode:     faker.address.zipCode(),
-                     poBoxNumber:    faker.address.zipCode(),
-                     countryIsoCode: faker.address.country()
-                   },
+    var defaults = Object.assign({ id:             domainEntityNameNext(ENTITY_NAME_LOCATION),
+                                   street:         faker.address.streetAddress(),
+                                   city:           faker.address.city(),
+                                   province:       faker.address.state(),
+                                   postalCode:     faker.address.zipCode(),
+                                   poBoxNumber:    faker.address.zipCode(),
+                                   countryIsoCode: faker.address.country()
+                                 },
+                                 nameAndSlug()),
         validKeys = Object.keys(defaults),
         at = Object.assign(defaults, _.pick(options, validKeys));
     return at;

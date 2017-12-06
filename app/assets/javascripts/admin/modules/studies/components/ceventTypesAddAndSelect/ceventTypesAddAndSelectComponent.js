@@ -81,7 +81,8 @@ function CeventTypesAddAndSelectController($scope,
   }
 
   function select(ceventType) {
-    $state.go('home.admin.studies.study.collection.ceventType', { ceventTypeId: ceventType.id });
+    $state.go('home.admin.studies.study.collection.ceventType',
+              { ceventTypeSlug: ceventType.slug });
   }
 
   function getRecurringLabel(ceventType) {

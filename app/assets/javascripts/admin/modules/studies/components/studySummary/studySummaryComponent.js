@@ -106,6 +106,7 @@ function StudySummaryController($scope,
             $scope.$emit('study-name-changed', study);
             postUpdate(gettextCatalog.getString('Name changed successfully.'),
                        gettextCatalog.getString('Change successful'))(study);
+            $state.go('home.admin.studies.study.summary', { studySlug: study.slug });
           })
           .catch(notificationsService.updateError);
       });

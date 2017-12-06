@@ -31,6 +31,7 @@ function AnnotationTypeFactory($log,
     'type': 'object',
     'properties': {
       'id':            { 'type': 'string'  },
+      'slug':          { 'type': 'string'  },
       'name':          { 'type': 'string'  },
       'description':   { 'type': [ 'string', 'null' ] },
       'valueType':     { 'type': 'string'  },
@@ -38,7 +39,7 @@ function AnnotationTypeFactory($log,
       'options':       { 'type': 'array'   },
       'required':      { 'type': 'boolean' }
     },
-    'required': [ 'id', 'name', 'valueType', 'required' ]
+    'required': [ 'id', 'slug', 'name', 'valueType', 'required' ]
   };
 
   AnnotationType.isValid = function (obj) {

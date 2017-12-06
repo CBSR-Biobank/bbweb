@@ -25,25 +25,17 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
     eventTypes.foreach(addToRepository)
   }
 
-  private def uri(): String = "/api/studies/cetypes"
+  private def uri(paths: String*): String = {
+    if (paths.isEmpty) "/api/studies/cetypes"
+    else "/api/studies/cetypes/" + paths.mkString("/")
+  }
 
-  private def uri(study: Study): String = uri + s"/${study.id.id}"
+  private def urlName(cet: CollectionEventType)                    = uri("name", cet.id.id)
+  private def urlDescription(cet: CollectionEventType)             = uri("description", cet.id.id)
+  private def urlRecurring(cet: CollectionEventType)               = uri("recurring", cet.id.id)
+  private def urlAddSepecimenDescription(cet: CollectionEventType) = uri("spcdesc", cet.id.id)
 
-  private def uri(study: Study, ceventType: CollectionEventType): String =
-    uri(study) + s"/${ceventType.id.id}"
-
-  private def uri(ceventType: CollectionEventType, path: String): String =
-    uri + s"/$path/${ceventType.id.id}"
-
-  private def uri(study: Study, ceventType: CollectionEventType, version: Long): String =
-    uri(study, ceventType) + s"/$version"
-
-  private def urlName(cet: CollectionEventType) = uri(cet, "name")
-  private def urlDescription(cet: CollectionEventType) = uri(cet, "description")
-  private def urlRecurring(cet: CollectionEventType) = uri(cet, "recurring")
-  private def urlAddSepecimenDescription(cet: CollectionEventType) = uri(cet, "spcdesc")
-
-  private def urlAddAnnotationType(cet: CollectionEventType) = uri(cet, "annottype")
+  private def urlAddAnnotationType(cet: CollectionEventType) = uri("annottype", cet.id.id)
 
   private def urlUpdateAnnotationType(annotType: AnnotationType) =
     (cet: CollectionEventType) => urlAddAnnotationType(cet) + s"/${annotType.id}"
@@ -68,7 +60,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         specimenDescriptions   = Set(factory.createCollectionSpecimenDescription),
         annotationTypes = Set(factory.createAnnotationType))
 
-    val json = makeRequest(POST, uri(study), BAD_REQUEST, cetToAddCmd(cet))
+    val json = makeRequest(POST, uri(study.id.id), BAD_REQUEST, cetToAddCmd(cet))
 
     (json \ "status").as[String] must include ("error")
 
@@ -147,7 +139,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         annotationTypes = Set(factory.createAnnotationType))
     collectionEventTypeRepository.put(cet)
 
-    val json = makeRequest(DELETE, uri(study, cet, cet.version), BAD_REQUEST)
+    val json = makeRequest(DELETE, uri(study.id.id, cet.id.id, cet.version.toString), BAD_REQUEST)
 
     (json \ "status").as[String] must include ("error")
 
@@ -158,12 +150,12 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Collection Event Type REST API") {
 
-    describe("GET /api/studies/cetypes/:studyId/:ceventId") {
+    describe("111 GET /api/studies/cetypes/:studySlug/:eventTypeSlug") {
 
       it("get a single collection event type") {
         val f = new EventTypeFixture
         val cet = f.eventTypes(0)
-        val json = makeRequest(GET, uri(f.study, cet))
+        val json = makeRequest(GET, uri(f.study.slug, cet.slug))
 
         (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
@@ -173,25 +165,23 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail for an invalid study ID") {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
-
-        val json = makeRequest(GET, uri(study, cet), NOT_FOUND)
+        val json = makeRequest(GET, uri(study.slug, cet.slug), BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex("IdNotFound.*study")
+        (json \ "message").as[String] must include regex("EntityCriteriaNotFound.*study slug")
       }
 
       it("fail for an invalid collection event type id") {
         val study = factory.createDisabledStudy
-        studyRepository.put(study)
-
         val cet = factory.createCollectionEventType
-
-        val json = makeRequest(GET, uri(study, cet), NOT_FOUND)
+        studyRepository.put(study)
+        val json = makeRequest(GET, uri(study.slug, cet.slug), BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex("IdNotFound.*collection event type")
+        (json \ "message").as[String] must include regex(
+          "EntityCriteriaNotFound.*collection event type slug")
       }
 
     }
@@ -201,13 +191,13 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list none") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
-        PagedResultsSpec(this).emptyResults(uri(study))
+        PagedResultsSpec(this).emptyResults(uri(study.id.id))
       }
 
       it("list a single collection event type") {
         val f = new EventTypeFixture
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri(f.study),
+            uri = uri(f.study.id.id),
             offset = 0,
             total = 1,
             maybeNext = None,
@@ -219,7 +209,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("get all collection event types for a study") {
         val f = new EventTypeFixture(3)
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri(f.study),
+            uri       = uri(f.study.id.id),
             offset    = 0,
             total     = f.eventTypes.size.toLong,
             maybeNext = None,
@@ -238,7 +228,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val sortExprs = Table("sort expressions", "name", "-name")
         forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri         = uri(f.study),
+              uri         = uri(f.study.id.id),
               queryParams = Map("sort" -> sortExpr),
               offset      = 0,
               total       = f.eventTypes.size.toLong,
@@ -260,7 +250,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list the first Collection Event Type in a paged query") {
         val f = new EventTypeFixture(3)
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.study),
+            uri         = uri(f.study.id.id),
             queryParams = Map("filter" -> s"name::${f.eventTypes(0).name}"),
             total       = 1)
 
@@ -270,7 +260,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list the last Collection Event Type in a paged query") {
         val f = new EventTypeFixture(3)
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.study),
+            uri         = uri(f.study.id.id),
             queryParams = Map("filter" -> s"name::${f.eventTypes(2).name}"),
             total       = 1)
 
@@ -279,7 +269,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fail for invalid study id") {
         val study = factory.createDisabledStudy
-        val json = makeRequest(GET, uri(study), NOT_FOUND)
+        val json = makeRequest(GET, uri(study.id.id), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -288,7 +278,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fail when using an invalid query parameters") {
         val f = new EventTypeFixture(3)
-        val url = uri(f.study)
+        val url = uri(f.study.id.id)
 
         PagedResultsSpec(this).failWithNegativePageNumber(url)
         PagedResultsSpec(this).failWithInvalidPageNumber(url)
@@ -309,7 +299,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val json = makeRequest(GET, uri() + s"/names/${f.study.id}?order=asc")
+        val json = makeRequest(GET, uri("names", f.study.id.id) + "?order=asc")
 
         (json \ "status").as[String] must include ("success")
 
@@ -376,7 +366,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         studyRepository.put(study)
 
         val cet = factory.createCollectionEventType
-        val json = makeRequest(POST, uri(study), cetToAddCmd(cet))
+        val json = makeRequest(POST, uri(study.id.id), cetToAddCmd(cet))
 
         (json \ "status").as[String] must include ("success")
 
@@ -404,7 +394,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         List(factory.createDisabledStudy, factory.createDisabledStudy) foreach { study =>
           studyRepository.put(study)
 
-          val json = makeRequest(POST, uri(study), cetToAddCmd(cet.copy(studyId = study.id)))
+          val json = makeRequest(POST, uri(study.id.id), cetToAddCmd(cet.copy(studyId = study.id)))
                                 (json \ "status").as[String] must include ("success")
 
           val jsonId = CollectionEventTypeId((json \ "data" \ "id").as[String])
@@ -438,7 +428,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
 
-        val json = makeRequest(POST, uri(study), NOT_FOUND, cetToAddCmd(cet))
+        val json = makeRequest(POST, uri(study.id.id), NOT_FOUND, cetToAddCmd(cet))
 
         (json \ "status").as[String] must include ("error")
 
@@ -453,7 +443,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         collectionEventTypeRepository.put(ceventType)
 
         val ceventType2 = factory.createCollectionEventType.copy(name = ceventType.name)
-        val json = makeRequest(POST, uri(study), FORBIDDEN, cetToAddCmd(ceventType2))
+        val json = makeRequest(POST, uri(study.id.id), FORBIDDEN, cetToAddCmd(ceventType2))
 
         (json \ "status").as[String] must include ("error")
 
@@ -467,7 +457,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("remove a collection event type") {
         val f = new EventTypeFixture
         val cet = f.eventTypes(0)
-        val json = makeRequest(DELETE, uri(f.study, cet, cet.version))
+        val json = makeRequest(DELETE, uri(f.study.id.id, cet.id.id, cet.version.toString))
 
         (json \ "status").as[String] must include ("success")
 
@@ -494,7 +484,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val f = new EventTypeFixture
         val cet = f.eventTypes(0)
         val newName = nameGenerator.next[CollectionEventType]
-        val json = makeRequest(POST, uri(cet, "name"),
+        val json = makeRequest(POST,
+                               urlName(cet),
                                Json.obj("studyId"         -> cet.studyId.id,
                                         "expectedVersion" -> Some(cet.version),
                                         "name"            -> newName))
@@ -535,7 +526,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val commonName = nameGenerator.next[CollectionEventType]
         studyCetTuples.foreach { case (study, cet) =>
           val json = makeRequest(POST,
-                                 uri(cet, "name"),
+                                 urlName(cet),
                                  Json.obj("studyId"         -> cet.studyId,
                                           "id"              -> cet.id.id,
                                           "expectedVersion" -> cet.version,
@@ -574,7 +565,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val duplicateName = cetList(0).name
         val json = makeRequest(POST,
-                               uri(cetList(1), "name"),
+                               urlName(cetList(1)),
                                FORBIDDEN,
                                Json.obj("studyId"         -> cetList(1).studyId,
                                         "id"              -> cetList(1).id.id,
@@ -615,7 +606,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val cet = f.eventTypes(0)
         val newDescription = Some(nameGenerator.next[CollectionEventType])
         val json = makeRequest(POST,
-                               uri(cet, "description"),
+                               urlDescription(cet),
                                Json.obj("studyId"         -> cet.studyId.id,
                                         "expectedVersion" -> Some(cet.version),
                                         "description"     -> newDescription))
@@ -674,7 +665,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         var version = cet.version
 
         Set(true, false).foreach { recurring =>
-          val json = makeRequest(POST, uri(cet, "recurring"),
+          val json = makeRequest(POST, urlRecurring(cet),
                                  Json.obj("studyId"         -> cet.studyId.id,
                                           "expectedVersion" -> Some(version),
                                           "recurring"       -> recurring))
@@ -738,7 +729,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             "expectedVersion" -> Some(cet.version)) ++
         annotationTypeToJsonNoId(annotType)
 
-        val json = makeRequest(POST, uri(cet, "annottype"), reqJson)
+        val json = makeRequest(POST, urlAddAnnotationType(cet), reqJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -796,7 +787,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("fail when adding annotation type and collection event type ID is invalid") {
-        def url(cet: CollectionEventType) = uri(cet, "annottype")
+        def url(cet: CollectionEventType) = urlAddAnnotationType(cet)
         updateOnInvalidCeventType(annotationTypeToJsonNoId(factory.createAnnotationType),
                                   url)
       }
@@ -819,7 +810,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
                                "expectedVersion" -> Some(cet.version)) ++
         annotationTypeToJson(updatedAnnotationType)
 
-        val json = makeRequest(POST, uri(cet, "annottype") + s"/${annotationType.id}", reqJson)
+        val json = makeRequest(POST, urlAddAnnotationType(cet) + s"/${annotationType.id}", reqJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -897,7 +888,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            uri + s"/annottype/${f.study.id}/${cet.id}/${cet.version}/${annotationType.id}")
+            uri("annottype", f.study.id.id, cet.id.id, cet.version.toString, annotationType.id.id))
 
         (json \ "status").as[String] must include ("success")
 
@@ -932,7 +923,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            uri + s"/annottype/${f.study.id}/${cet.id}/$badVersion/${annotationType.id}",
+            uri("annottype", f.study.id.id, cet.id.id, badVersion.toString, annotationType.id.id),
             BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
@@ -947,9 +938,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       val studyId = nameGenerator.next[Study]
       val cetId = nameGenerator.next[CollectionEventType]
 
-      val json = makeRequest(
-          DELETE,
-          uri + s"/annottype/$studyId/$cetId/0/xyz", NOT_FOUND)
+      val json = makeRequest(DELETE,
+                             uri("annottype", studyId, cetId, "0", "xyz"),
+                             NOT_FOUND)
 
       (json \ "status").as[String] must include ("error")
 
@@ -961,9 +952,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       studyRepository.put(study)
       val cetId = nameGenerator.next[CollectionEventType]
 
-      val json = makeRequest(
-          DELETE,
-          uri + s"/annottype/${study.id}/$cetId/0/xyz", NOT_FOUND)
+      val json = makeRequest(DELETE,
+                             uri("annottype", study.id.id, cetId, "0", "xyz"),
+                             NOT_FOUND)
 
       (json \ "status").as[String] must include ("error")
 
@@ -978,10 +969,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       collectionEventTypeRepository.put(cet.copy(annotationTypes = Set(annotationType)))
 
-      val json = makeRequest(
-          DELETE,
-          uri + s"/annottype/${f.study.id}/${cet.id}/${cet.version}/$badUniqueId",
-          NOT_FOUND)
+      val json = makeRequest(DELETE,
+                             uri("annottype", f.study.id.id, cet.id.id, cet.version.toString, badUniqueId),
+                             NOT_FOUND)
 
       (json \ "status").as[String] must include ("error")
 
@@ -1001,7 +991,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            uri + s"/annottype/${study.id}/${cet.id}/${cet.version}/${annotationType.id}",
+            uri("annottype", study.id.id, cet.id.id, cet.version.toString, annotationType.id.id),
             BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
@@ -1024,7 +1014,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
                              "expectedVersion" -> Some(cet.version)) ++
       collectionSpecimenDescriptionToJsonNoId(spec)
 
-      val json = makeRequest(POST, uri(cet, "spcdesc"), reqJson)
+      val json = makeRequest(POST, urlAddSepecimenDescription(cet), reqJson)
 
       (json \ "status").as[String] must include ("success")
 
@@ -1111,7 +1101,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
                              "expectedVersion" -> Some(cet.version)) ++
       collectionSpecimenDescriptionToJsonNoId(updatedSpecimenDescription)
 
-      val json = makeRequest(POST, uri(cet, "spcdesc") + s"/${specimenDescription.id}", reqJson)
+      val json = makeRequest(POST,
+                             urlAddSepecimenDescription(cet) + s"/${specimenDescription.id}",
+                             reqJson)
 
       (json \ "status").as[String] must include ("success")
 
@@ -1189,7 +1181,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       val json = makeRequest(
           DELETE,
-          uri + s"/spcdesc/${f.study.id}/${cet.id}/${cet.version}/${specimenDescription.id.id}")
+          uri("spcdesc", f.study.id.id, cet.id.id, cet.version.toString, specimenDescription.id.id))
 
       (json \ "status").as[String] must include ("success")
 
@@ -1224,7 +1216,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       val json = makeRequest(
           DELETE,
-          uri + s"/spcdesc/${f.study.id}/${cet.id}/$badVersion/${specimenDescription.id}",
+          uri("spcdesc", f.study.id.id, cet.id.id, badVersion.toString, specimenDescription.id.id),
           BAD_REQUEST)
 
       (json \ "status").as[String] must include ("error")
@@ -1238,9 +1230,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       val studyId = nameGenerator.next[Study]
       val cetId = nameGenerator.next[CollectionEventType]
 
-      val json = makeRequest(
-          DELETE,
-          uri + s"/spcdesc/$studyId/$cetId/0/xyz", NOT_FOUND)
+      val json = makeRequest(DELETE,
+                             uri("spcdesc", studyId, cetId, "0", "xyz"),
+                             NOT_FOUND)
 
       (json \ "status").as[String] must include ("error")
 
@@ -1252,9 +1244,9 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       studyRepository.put(study)
       val cetId = nameGenerator.next[CollectionEventType]
 
-      val json = makeRequest(
-          DELETE,
-          uri + s"/spcdesc/${study.id}/$cetId/0/xyz", NOT_FOUND)
+      val json = makeRequest(DELETE,
+                             uri("spcdesc", study.id.id, cetId, "0", "xyz"),
+                             NOT_FOUND)
 
       (json \ "status").as[String] must include ("error")
 
@@ -1271,7 +1263,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       val json = makeRequest(
           DELETE,
-          uri + s"/spcdesc/${f.study.id}/${cet.id}/${cet.version}/$badUniqueId",
+          uri("spcdesc", f.study.id.id, cet.id.id, cet.version.toString, badUniqueId),
           NOT_FOUND)
 
       (json \ "status").as[String] must include ("error")
@@ -1293,7 +1285,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
         val json = makeRequest(
             DELETE,
-            uri + s"/spcdesc/${study.id}/${cet.id}/${cet.version}/${specimenDescription.id}",
+            uri("spcdesc", study.id.id, cet.id.id, cet.version.toString, specimenDescription.id.id),
             BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")

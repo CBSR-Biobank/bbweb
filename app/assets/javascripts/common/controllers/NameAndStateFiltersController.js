@@ -29,7 +29,7 @@ class NameAndStateFiltersController {
   }
 }
 
-// this controller does not need to be included in AngularJS since it is imported by the controllers that
-// extend it
+// this controller is a base class does not need to be included in AngularJS since it is imported by the
+// controllers that extend it
 export { NameAndStateFiltersController }
 export default () => {}

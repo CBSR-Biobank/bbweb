@@ -71,6 +71,7 @@ object Study {
       override def writes(study: Study): JsValue = {
         ConcurrencySafeEntity.toJson(study) ++
         Json.obj("state"           -> study.state.id,
+                 "slug"            -> study.slug,
                  "name"            -> study.name,
                  "annotationTypes" -> study.annotationTypes) ++
         JsObject(

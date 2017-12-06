@@ -3,7 +3,53 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-var component = {
+import { AnnotationTypeAddController } from '../../../common/controllers/AnnotationTypeAddController'
+
+/*
+ * Controller for this component.
+ */
+class Controller extends AnnotationTypeAddController {
+
+  constructor($state,
+              notificationsService,
+              domainNotificationService,
+              modalService,
+              breadcrumbService,
+              gettextCatalog) {
+    super($state,
+          notificationsService,
+          domainNotificationService,
+          modalService,
+          gettextCatalog,
+          gettextCatalog.getString('Collection Event Type'),
+          'home.admin.studies.study.collection.ceventType')
+
+    Object.assign(this, { breadcrumbService })
+  }
+
+  $onInit() {
+    const studySlug = this.study.slug,
+          slug = this.collectionEventType.slug
+
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.studies'),
+      this.breadcrumbService.forStateWithFunc(
+        `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
+        () => this.study.name + ': ' + this.collectionEventType.name),
+      this.breadcrumbService.forStateWithFunc(
+        'home.admin.studies.study.collection.ceventType.annotationTypeView',
+        () => this.gettextCatalog.getString('Add annotation'))
+    ];
+  }
+
+  addAnnotationType(annotationType) {
+    return this.collectionEventType.addAnnotationType(annotationType)
+  }
+}
+
+const component = {
   template: require('./collectionEventAnnotationTypeAdd.html'),
   controller: Controller,
   controllerAs: 'vm',
@@ -12,35 +58,5 @@ var component = {
     collectionEventType: '<'
   }
 };
-
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function Controller($controller,
-                    $state,
-                    notificationsService,
-                    domainNotificationService) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //---
-
-  function onInit() {
-    vm.domainObjTypeName = 'Collection Event Type';
-    vm.addAnnotationTypePromiseFunc = vm.collectionEventType.addAnnotationType.bind(vm.collectionEventType);
-    vm.returnState = 'home.admin.studies.study.collection.ceventType';
-
-    // initialize this controller's base class
-    $controller('AnnotationTypeAddController', {
-      vm:                        vm,
-      $state:                    $state,
-      notificationsService:      notificationsService,
-      domainNotificationService: domainNotificationService
-    });
-
-    vm.init();
-  }
-}
 
 export default ngModule => ngModule.component('collectionEventAnnotationTypeAdd', component)

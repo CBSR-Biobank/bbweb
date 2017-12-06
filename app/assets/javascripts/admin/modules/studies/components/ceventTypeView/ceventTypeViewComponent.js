@@ -64,10 +64,16 @@ function CeventTypeViewController($scope,
                     { required: true, minLength: 2 }).result
       .then(function (name) {
         vm.collectionEventType.updateName(name)
-          .then(function (ceventType) {
+          .then(ceventType => {
             $scope.$emit('collection-event-type-updated', ceventType);
             postUpdate(gettextCatalog.getString('Name changed successfully.'),
                        gettextCatalog.getString('Change successful'))(ceventType);
+            $state.go($state.current.name,
+                      {
+                        studySlug:      vm.study.slug,
+                        ceventTypeSlug: ceventType.slug
+                      },
+                      { reload: true });
           })
           .catch(notificationsService.updateError);
       });
@@ -110,9 +116,32 @@ function CeventTypeViewController($scope,
     $state.go('home.admin.studies.study.collection.ceventType.specimenDescriptionAdd');
   }
 
+  function editAnnotationType(annotType) {
+    $state.go('home.admin.studies.study.collection.ceventType.annotationTypeView',
+              { annotationTypeSlug: annotType.slug });
+  }
+
+  function removeAnnotationType(annotationType) {
+    if (_.includes(vm.annotationTypeIdsInUse, annotationType.id)) {
+      vm.removeInUseModal(annotationType, vm.annotationTypeName);
+    } else {
+      if (!vm.study.isDisabled()) {
+        throw new Error('modifications not allowed');
+      }
+
+      vm.remove(annotationType, function () {
+        return vm.collectionEventType.removeAnnotationType(annotationType)
+          .then(function (collectionEventType) {
+            vm.collectionEventType = collectionEventType;
+            notificationsService.success(gettextCatalog.getString('Annotation removed'));
+          });
+      });
+    }
+  }
+
   function editSpecimenDescription(specimenDescription) {
     $state.go('home.admin.studies.study.collection.ceventType.specimenDescriptionView',
-              { specimenDescriptionId: specimenDescription.id });
+              { specimenDescriptionSlug: specimenDescription.slug });
   }
 
   function removeSpecimenDescription(specimenDescription) {
@@ -136,29 +165,6 @@ function CeventTypeViewController($scope,
           notificationsService.success(gettextCatalog.getString('Specimen removed'));
           $state.reload();
         });
-    }
-  }
-
-  function editAnnotationType(annotType) {
-    $state.go('home.admin.studies.study.collection.ceventType.annotationTypeView',
-              { annotationTypeId: annotType.id });
-  }
-
-  function removeAnnotationType(annotationType) {
-    if (_.includes(vm.annotationTypeIdsInUse, annotationType.id)) {
-      vm.removeInUseModal(annotationType, vm.annotationTypeName);
-    } else {
-      if (!vm.study.isDisabled()) {
-        throw new Error('modifications not allowed');
-      }
-
-      vm.remove(annotationType, function () {
-        return vm.collectionEventType.removeAnnotationType(annotationType)
-          .then(function (collectionEventType) {
-            vm.collectionEventType = collectionEventType;
-            notificationsService.success(gettextCatalog.getString('Annotation removed'));
-          });
-      });
     }
   }
 

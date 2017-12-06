@@ -3,7 +3,35 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-var component = {
+import { AnnotationTypeAddController } from '../../../common/controllers/AnnotationTypeAddController'
+
+/*
+ * Controller for this component.
+ */
+class ParticipantAnnotationTypeAddController extends AnnotationTypeAddController {
+
+  constructor($state,
+              notificationsService,
+              domainNotificationService,
+              modalService,
+              gettextCatalog) {
+    'ngInject'
+    super($state,
+          notificationsService,
+          domainNotificationService,
+          modalService,
+          gettextCatalog,
+          gettextCatalog.getString('Study'),
+          'home.admin.studies.study.participants')
+  }
+
+  addAnnotationType(annotationType) {
+    return this.study.addAnnotationType(annotationType)
+  }
+
+}
+
+const component = {
   template: require('./participantAnnotationTypeAdd.html'),
   controller: ParticipantAnnotationTypeAddController,
   controllerAs: 'vm',
@@ -11,36 +39,5 @@ var component = {
     study: '<'
   }
 };
-
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function ParticipantAnnotationTypeAddController($controller,
-                                                $state,
-                                                notificationsService,
-                                                domainNotificationService) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //---
-
-  function onInit() {
-    vm.domainObjTypeName = 'Study';
-    vm.addAnnotationTypePromiseFunc = vm.study.addAnnotationType.bind(vm.study);
-    vm.returnState = 'home.admin.studies.study.participants';
-
-    // initialize this controller's base class
-    $controller('AnnotationTypeAddController', {
-      vm:                        vm,
-      $state:                    $state,
-      notificationsService:      notificationsService,
-      domainNotificationService: domainNotificationService
-    });
-
-    vm.init();
-  }
-
-}
 
 export default ngModule => ngModule.component('participantAnnotationTypeAdd', component)

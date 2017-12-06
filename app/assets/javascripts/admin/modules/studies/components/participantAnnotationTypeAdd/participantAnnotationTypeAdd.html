@@ -1,6 +1,6 @@
 <div class="page-header">
   <h1>{{vm.study.name}} <small translate>Add Participant Annotation</small></h1>
 </div>
-<annotation-type-add on-submit="vm.submit"
-                     on-cancel="vm.cancel">
+<annotation-type-add on-submit="vm.submit.bind(vm)"
+                     on-cancel="vm.cancel.bind(vm)">
 </annotation-type-add>

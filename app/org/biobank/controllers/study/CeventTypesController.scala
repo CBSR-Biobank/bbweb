@@ -27,10 +27,9 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
 
   private val PageSizeMax = 10
 
-  def get(studyId: StudyId, ceventTypeId: CollectionEventTypeId): Action[Unit] =
+  def get(studySlug: String, eventTypeSlug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      log.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
-      val ceventType = service.collectionEventTypeWithId(request.authInfo.userId, studyId, ceventTypeId)
+      val ceventType = service.eventTypeBySlug(request.authInfo.userId, studySlug, eventTypeSlug)
       validationReply(ceventType)
     }
 
@@ -135,7 +134,7 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
 
   def inUse(id: CollectionEventTypeId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.collectionEventTypeInUse(request.authInfo.userId, id))
+      validationReply(service.eventTypeInUse(request.authInfo.userId, id))
     }
 
   private def processCommand(cmd: CollectionEventTypeCommand): Future[Result] = {

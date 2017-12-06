@@ -4,9 +4,10 @@ import scalaz.Scalaz._
 
 trait HasAnnotationTypes extends AnnotationTypeValidations {
 
+  import org.biobank.CommonValidations._
+
   val annotationTypes: Set[AnnotationType]
 
-  /** adds an annotation type. */
   protected def checkAddAnnotationType(annotationType: AnnotationType)
       : DomainValidation[Boolean] = {
     (validate(annotationType) |@| nameNotUsed(annotationType)) {
@@ -14,7 +15,6 @@ trait HasAnnotationTypes extends AnnotationTypeValidations {
     }
   }
 
-  /** removes an annotation type. */
   protected def checkRemoveAnnotationType(annotationTypeId: AnnotationTypeId)
       : DomainValidation[AnnotationType] = {
     annotationTypes
@@ -23,10 +23,12 @@ trait HasAnnotationTypes extends AnnotationTypeValidations {
   }
 
   protected def nameNotUsed(annotationType: AnnotationType): DomainValidation[Boolean] = {
+    val nameLowerCase = annotationType.name.toLowerCase
     annotationTypes
-      .find { x => (x.name == annotationType.name) && (x.id != annotationType.id)  } match {
+      .find { x => (x.name.toLowerCase == nameLowerCase) && (x.id != annotationType.id)  }
+      match {
         case Some(_) =>
-          DomainError(s"annotation type name already used: ${annotationType.name}").failureNel[Boolean]
+          EntityCriteriaError(s"annotation type name already used: ${annotationType.name}").failureNel[Boolean]
         case None =>
           true.successNel[DomainError]
       }

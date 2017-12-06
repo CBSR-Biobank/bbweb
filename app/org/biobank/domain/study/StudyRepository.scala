@@ -12,6 +12,8 @@ trait StudyRepository extends ReadWriteRepositoryWithSlug[StudyId, Study] {
 
   def allStudies(): Set[Study]
 
+  def getBySlug(slug: String): DomainValidation[Study]
+
   def getDisabled(id: StudyId): DomainValidation[DisabledStudy]
 
   def getEnabled(id: StudyId): DomainValidation[EnabledStudy]
@@ -35,8 +37,14 @@ class StudyRepositoryImpl @Inject() (val testData: TestData)
 
   def studyNotFound(id: StudyId): IdNotFound = IdNotFound(s"study id: $id")
 
+  def slugNotFound(slug: String): EntityCriteriaNotFound = EntityCriteriaNotFound(s"study slug: $slug")
+
   override def getByKey(id: StudyId): DomainValidation[Study] = {
     getMap.get(id).toSuccessNel(studyNotFound(id).toString)
+  }
+
+  def getBySlug(slug: String): DomainValidation[Study] = {
+    getMap.find(_._2.slug == slug).map(_._2).toSuccessNel(slugNotFound(slug).toString)
   }
 
   def allStudies(): Set[Study] = getValues.toSet

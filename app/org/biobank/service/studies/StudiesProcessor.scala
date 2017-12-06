@@ -518,7 +518,11 @@ class StudiesProcessor @Inject() (
     onValidEventDisabledStudyAndVersion(event,
                                         event.eventType.isNameUpdated,
                                         event.getNameUpdated.getVersion) { (study, eventTime) =>
-      putDisabledOnSuccess(study.withName(event.getNameUpdated.getName), eventTime)
+
+      val v = study.withName(event.getNameUpdated.getName).map { s =>
+          s.copy(slug = studyRepository.slug(s.name))
+        }
+      putDisabledOnSuccess(v, eventTime)
     }
   }
 

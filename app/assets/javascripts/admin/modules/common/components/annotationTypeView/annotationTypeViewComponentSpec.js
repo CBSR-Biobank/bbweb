@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import ngModule from '../../index'
 
-describe('annotationTypeViewDirective', function() {
+describe('Component: annotationTypeView', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -34,25 +34,19 @@ describe('annotationTypeViewDirective', function() {
       this.annotationType   = new this.AnnotationType(this.Factory.annotationType());
       this.onUpdate         = jasmine.createSpy('onUpdate').and.returnValue(this.$q.when(this.study));
 
-      this.createController = (options) => {
-        options = options || {};
-        options.study = options.study || this.study;
-        options.annotationType = options.annotationType || this.annotationType;
-
+      this.createController = ({ readOnly = false, annotationType = this.annotationType } = {}) => {
         ComponentTestSuiteMixin.createController.call(
           this,
           [
             '<annotation-type-view ',
-            '  study="vm.study"',
             '  annotation-type="vm.annotationType"',
-            '  return-state="' + this.returnState  + '"',
+            '  read-only="vm.readOnly"',
             '  on-update="vm.onUpdate"',
             '</annotation-type-view>',
           ].join(''),
           {
-            study:          options.study,
-            annotationType: options.annotationType,
-            returnState:    this.returnState,
+            annotationType: annotationType,
+            readOnly:       readOnly,
             onUpdate:       this.onUpdate
           },
           'annotationTypeView');
@@ -62,19 +56,20 @@ describe('annotationTypeViewDirective', function() {
   });
 
   it('should have valid scope', function() {
-    this.createController();
+    const readOnly = false;
+    this.createController({ readOnly });
     expect(this.controller.annotationType).toBe(this.annotationType);
-    expect(this.controller.returnState).toBe(this.returnState);
+    expect(this.controller.readOnly).toBe(readOnly);
     expect(this.controller.onUpdate).toBeFunction();
   });
 
   it('call to back function returns to valid state', function() {
-    spyOn(this.$state, 'go').and.returnValue(0);
+    spyOn(this.$state, 'go').and.returnValue(null);
 
     this.createController();
     this.controller.back();
     this.scope.$digest();
-    expect(this.$state.go).toHaveBeenCalledWith(this.returnState, {}, { reload: true });
+    expect(this.$state.go).toHaveBeenCalledWith('^', {}, { reload: true });
   });
 
   describe('updates to name', function () {
@@ -82,21 +77,9 @@ describe('annotationTypeViewDirective', function() {
     var context = {};
 
     beforeEach(function () {
+      context.attribute = 'name';
       context.controllerFuncName = 'editName';
       context.modalInputFuncName = 'text';
-    });
-
-    sharedUpdateBehaviour(context);
-
-  });
-
-  describe('updates to required', function () {
-
-    var context = {};
-
-    beforeEach(function () {
-      context.controllerFuncName = 'editRequired';
-      context.modalInputFuncName = 'boolean';
     });
 
     sharedUpdateBehaviour(context);
@@ -108,8 +91,23 @@ describe('annotationTypeViewDirective', function() {
     var context = {};
 
     beforeEach(function () {
+      context.attribute = 'description';
       context.controllerFuncName = 'editDescription';
       context.modalInputFuncName = 'textArea';
+    });
+
+    sharedUpdateBehaviour(context);
+
+  });
+
+  describe('updates to required', function () {
+
+    var context = {};
+
+    beforeEach(function () {
+      context.attribute = 'required';
+      context.controllerFuncName = 'editRequired';
+      context.modalInputFuncName = 'boolean';
     });
 
     sharedUpdateBehaviour(context);
@@ -172,6 +170,7 @@ describe('annotationTypeViewDirective', function() {
         this.controller[context.controllerFuncName]();
         this.scope.$digest();
         expect(this.onUpdate).toHaveBeenCalled();
+        expect(this.onUpdate.calls.argsFor(0)[0]).toBe(context.attribute);
       });
 
     });

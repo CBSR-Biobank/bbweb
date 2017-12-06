@@ -51,7 +51,7 @@ function StudyParticipantsTabController($scope,
 
   function editAnnotationType(annotationType) {
     $state.go('home.admin.studies.study.participants.annotationTypeView',
-              { annotationTypeId: annotationType.id });
+              { annotationTypeSlug: annotationType.slug });
   }
 
   function removeAnnotationType(annotationType) {

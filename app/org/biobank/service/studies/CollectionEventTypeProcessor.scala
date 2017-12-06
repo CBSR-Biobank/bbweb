@@ -378,7 +378,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
             val update = applyEvent(cet, eventTime)
 
             if (update.isFailure) {
-              log.error(s"centre update from event failed: $update")
+              log.error(s"collection event type update from event failed: $update")
             }
           }
         }
@@ -408,7 +408,8 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
       v.foreach { ct =>
         val timeAdded = OffsetDateTime.parse(event.getTime)
-        collectionEventTypeRepository.put(ct.copy(timeAdded = timeAdded))
+        val slug = collectionEventTypeRepository.slug(ct.name)
+        collectionEventTypeRepository.put(ct.copy(slug = slug, timeAdded = timeAdded))
       }
     }
   }
@@ -435,7 +436,12 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     onValidEventAndVersion(event,
                            event.eventType.isNameUpdated,
                            event.getNameUpdated.getVersion) { (cet, eventTime) =>
-      storeIfValid(cet.withName(event.getNameUpdated.getName), eventTime)
+
+
+      val v = cet.withName(event.getNameUpdated.getName).map { updated =>
+        updated.copy(slug = collectionEventTypeRepository.slug(updated.name))
+      }
+      storeIfValid(v, eventTime)
     }
   }
 

@@ -128,7 +128,7 @@ class CollectionEventTypeServiceSpec
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          ceventTypeService.collectionEventTypeWithId(user.id, f.study.id, f.ceventType.id)
+          ceventTypeService.eventTypeWithId(user.id, f.study.id, f.ceventType.id)
             .mustSucceed { result =>
               result.id must be (f.ceventType.id)
             }
@@ -138,11 +138,11 @@ class CollectionEventTypeServiceSpec
       it("users cannot access") {
         val f = new UsersCeventTypeFixture
         info("no membership user")
-        ceventTypeService.collectionEventTypeWithId(f.noMembershipUser.id, f.study.id, f.ceventType.id)
+        ceventTypeService.eventTypeWithId(f.noMembershipUser.id, f.study.id, f.ceventType.id)
           .mustFail("Unauthorized")
 
         info("no permission user")
-        ceventTypeService.collectionEventTypeWithId(f.nonStudyPermissionUser.id, f.study.id, f.ceventType.id)
+        ceventTypeService.eventTypeWithId(f.nonStudyPermissionUser.id, f.study.id, f.ceventType.id)
           .mustFail("Unauthorized")
 
       }
@@ -155,7 +155,7 @@ class CollectionEventTypeServiceSpec
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          ceventTypeService.collectionEventTypeInUse(user.id, f.ceventType.id)
+          ceventTypeService.eventTypeInUse(user.id, f.ceventType.id)
             .mustSucceed { result =>
               result must be (false)
             }
@@ -165,11 +165,11 @@ class CollectionEventTypeServiceSpec
       it("users cannot access") {
         val f = new UsersCeventTypeFixture
         info("no membership user")
-        ceventTypeService.collectionEventTypeInUse(f.noMembershipUser.id, f.ceventType.id)
+        ceventTypeService.eventTypeInUse(f.noMembershipUser.id, f.ceventType.id)
           .mustFail("Unauthorized")
 
         info("no permission user")
-        ceventTypeService.collectionEventTypeInUse(f.nonStudyPermissionUser.id, f.ceventType.id)
+        ceventTypeService.eventTypeInUse(f.nonStudyPermissionUser.id, f.ceventType.id)
           .mustFail("Unauthorized")
       }
 

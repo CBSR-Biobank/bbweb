@@ -92,8 +92,10 @@ describe('Study', function() {
   describe('when getting a single study', function() {
 
     it('can retrieve a single study', function() {
-      this.$httpBackend.whenGET(this.url(this.jsonStudy.id)).respond(this.reply(this.jsonStudy));
-      this.Study.get(this.jsonStudy.id).then(this.expectStudy.bind(this)).catch(failTest);
+      this.$httpBackend.whenGET(this.url(this.jsonStudy.slug)).respond(this.reply(this.jsonStudy));
+      this.Study.get(this.jsonStudy.slug)
+        .then(this.expectStudy.bind(this))
+        .catch(this.failTest);
       this.$httpBackend.flush();
     });
 
@@ -126,7 +128,7 @@ describe('Study', function() {
           };
 
       this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
-      this.Study.list().then(testStudy).catch(failTest);
+      this.Study.list().then(testStudy).catch(this.failTest);
       this.$httpBackend.flush();
     });
 
@@ -150,7 +152,7 @@ describe('Study', function() {
             };
 
         this.$httpBackend.whenGET(url).respond(this.reply(reply));
-        this.Study.list(options).then(testStudy).catch(failTest);
+        this.Study.list(options).then(testStudy).catch(this.failTest);
         this.$httpBackend.flush();
       });
     });
@@ -167,7 +169,7 @@ describe('Study', function() {
           };
 
       this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
-      this.Study.list(options).then(testStudy).catch(failTest);
+      this.Study.list(options).then(testStudy).catch(this.failTest);
       this.$httpBackend.flush();
     });
 
@@ -195,7 +197,7 @@ describe('Study', function() {
         json = _.pick(study, 'name', 'description');
 
     this.$httpBackend.expectPOST(this.url(''), json).respond(this.reply(this.jsonStudy));
-    study.add().then(this.expectStudy.bind(this)).catch(failTest);
+    study.add().then(this.expectStudy.bind(this)).catch(this.failTest);
     this.$httpBackend.flush();
   });
 
@@ -210,7 +212,7 @@ describe('Study', function() {
                            { name: study.name },
                            this.jsonStudy,
                            this.expectStudy.bind(this),
-                           failTest);
+                           this.failTest);
   });
 
   it('can update the description on a study', function() {
@@ -224,7 +226,7 @@ describe('Study', function() {
                            { },
                            this.jsonStudy,
                            this.expectStudy.bind(this),
-                           failTest);
+                           this.failTest);
 
     this.updateEntity.call(this,
                            study,
@@ -234,7 +236,7 @@ describe('Study', function() {
                            { description: study.description },
                            this.jsonStudy,
                            this.expectStudy.bind(this),
-                           failTest);
+                           this.failTest);
   });
 
   describe('for annotation types', function() {
@@ -254,7 +256,7 @@ describe('Study', function() {
                              _.omit(this.annotationType, 'id'),
                              this.jsonStudy,
                              this.expectStudy.bind(this),
-                             failTest);
+                             this.failTest);
     });
 
     it('can update an annotation type on a study', function() {
@@ -266,7 +268,7 @@ describe('Study', function() {
                              this.annotationType,
                              this.jsonStudy,
                              this.expectStudy.bind(this),
-                             failTest);
+                             this.failTest);
     });
 
     it('can remove an annotation on a study', function() {
@@ -275,7 +277,7 @@ describe('Study', function() {
       this.$httpBackend.whenDELETE(url).respond(this.reply(this.jsonStudy));
       this.study.removeAnnotationType(this.annotationType)
         .then(this.expectStudy.bind(this))
-        .catch(failTest);
+        .catch(this.failTest);
       this.$httpBackend.flush();
     });
 
@@ -368,7 +370,7 @@ describe('Study', function() {
       .then((reply) => {
         expect(reply).toContainAll([ dto ]);
       })
-      .catch(failTest);
+      .catch(this.failTest);
     this.$httpBackend.flush();
   });
 
@@ -379,7 +381,7 @@ describe('Study', function() {
       .then((reply) => {
         expect(reply).toBeFalse();
       })
-      .catch(failTest);
+      .catch(this.failTest);
     this.$httpBackend.flush();
   });
 
@@ -399,7 +401,7 @@ describe('Study', function() {
 
         this.$httpBackend.expectPOST(this.url(context.action, study.id), json).respond(this.reply(reply));
         expect(study[context.action]).toBeFunction();
-        study[context.action]().then(checkStudy).catch(failTest);
+        study[context.action]().then(checkStudy).catch(this.failTest);
         this.$httpBackend.flush();
       });
 
@@ -417,11 +419,6 @@ describe('Study', function() {
 
   function shouldFail(error) {
     expect(error.message).toContain('Missing required property');
-  }
-
-  // used by promise tests
-  function failTest(error) {
-    expect(error).toBeUndefined();
   }
 
 });

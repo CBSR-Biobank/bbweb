@@ -15,7 +15,7 @@
           <button class="btn btn-xs btn-primary pull-right"
                   uib-tooltip="{{'Edit name'|translate}}"
                   ng-click="vm.editName()"
-                  ng-if="vm.study.isDisabled()">
+                  ng-if="!vm.readOnly">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
         </div>
@@ -31,7 +31,7 @@
             text="vm.annotationType.description"
             toggle-length="60"
             text-empty-warning="{{'Description not entered yet.'|translate}}"
-            allow-edit="vm.study.isDisabled()"
+            allow-edit="!vm.readOnly"
             on-edit="vm.editDescription()">
           </truncate-toggle>
         </div>
@@ -49,7 +49,7 @@
           <button class="btn btn-xs btn-primary pull-right"
                   uib-tooltip="{{'Edit required'|translate}}"
                   ng-click="vm.editRequired()"
-                  ng-if="vm.study.isDisabled()">
+                  ng-if="!vm.readOnly">
             <i class="glyphicon glyphicon-edit"></i>
           </button>
         </div>

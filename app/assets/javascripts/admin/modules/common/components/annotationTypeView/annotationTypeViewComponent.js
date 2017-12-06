@@ -5,17 +5,21 @@
 
 import _ from 'lodash'
 
-/*
+/**
+ * @param {<domain.AnnotationType>} annotationType the Annotation type to display.
  *
+ * @param {boolean} readOnly When FALSE, user is allowed to make changes to the annotation type.
+ *
+ * @param {function} onUpdate the function has two parameters: the attribute that was modified ({string}), and
+ * the updated annotation type ({@link domain.AnnotationType}).
  */
 var component = {
   template: require('./annotationTypeView.html'),
   controller: AnnotationTypeViewController,
   controllerAs: 'vm',
   bindings: {
-    study:          '<',
     annotationType: '<',
-    returnState:    '@',
+    readOnly:       '<',
     onUpdate:       '&'
   }
 };
@@ -50,7 +54,17 @@ function AnnotationTypeViewController($state,
                     { required: true, minLength: 2 }).result
       .then(function (name) {
         vm.annotationType.name = name;
-        vm.onUpdate()(vm.annotationType);
+        vm.onUpdate()('name', vm.annotationType);
+      });
+  }
+
+  function editDescription() {
+    modalInput.textArea(gettextCatalog.getString('Edit Annotation description'),
+                        gettextCatalog.getString('Description'),
+                        vm.annotationType.description)
+      .result.then(function (description) {
+        var annotationType = _.extend({}, vm.annotationType, { description: description });
+        vm.onUpdate()('description', annotationType);
       });
   }
 
@@ -61,17 +75,7 @@ function AnnotationTypeViewController($state,
                        { required: true }).result
       .then(function (required) {
         vm.annotationType.required = (required === 'true' );
-        vm.onUpdate()(vm.annotationType);
-      });
-  }
-
-  function editDescription() {
-    modalInput.textArea(gettextCatalog.getString('Edit Annotation description'),
-                        gettextCatalog.getString('Description'),
-                        vm.annotationType.description)
-      .result.then(function (description) {
-        var annotationType = _.extend({}, vm.annotationType, { description: description });
-        vm.onUpdate()(annotationType);
+        vm.onUpdate()('required', vm.annotationType);
       });
   }
 
@@ -83,7 +87,7 @@ function AnnotationTypeViewController($state,
   }
 
   function back() {
-    $state.go(vm.returnState, {}, { reload: true });
+    $state.go('^', {}, { reload: true });
   }
 
 }

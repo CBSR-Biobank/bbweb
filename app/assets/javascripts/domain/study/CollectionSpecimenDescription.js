@@ -103,6 +103,7 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
     'type': 'object',
     'properties': {
       'id':                          { 'type': 'string' },
+      'slug':                        { 'type': 'string' },
       'name':                        { 'type': 'string' },
       'description':                 { 'type': [ 'string', 'null' ] },
       'units':                       { 'type': 'string' },
@@ -115,6 +116,7 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
     },
     'required': [
       'id',
+      'slug',
       'name',
       'units',
       'anatomicalSourceType',

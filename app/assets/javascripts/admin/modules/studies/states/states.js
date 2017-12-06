@@ -29,7 +29,7 @@ function config($stateProvider) {
     })
     .state('home.admin.studies.study', {
       abstract: true,
-      url: '/{studyId}',
+      url: '/{studySlug}',
       resolve: {
         study: resolveStudy
       },
@@ -205,7 +205,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.studies.study.participants.annotationTypeView', {
-      url: '/annottype/{annotationTypeId}',
+      url: '/annottype/{annotationTypeSlug}',
       resolve: {
         annotationType: resolveParticipantAnnotationType
       },
@@ -214,7 +214,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.studies.study.collection.ceventType', {
-      url: '/events/{ceventTypeId}',
+      url: '/events/{ceventTypeSlug}',
       resolve: {
         collectionEventType: resolveCollectionEventType
       },
@@ -235,7 +235,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.studies.study.collection.ceventType.annotationTypeView', {
-      url: '/annottypes/{annotationTypeId}',
+      url: '/annottypes/{annotationTypeSlug}',
       resolve: {
         annotationType: resolveAnnotationType
       },
@@ -250,7 +250,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.studies.study.collection.ceventType.specimenDescriptionView', {
-      url: '/spcdescs/{specimenDescriptionId}',
+      url: '/spcdescs/{specimenDescriptionSlug}',
       resolve: {
         specimenDescription: resolveSpcimenDescription
       },
@@ -261,41 +261,41 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveStudy($transition$, Study, resourceErrorService) {
-    const id = $transition$.params().studyId
-    return Study.get($transition$.params().studyId)
-      .catch(resourceErrorService.goto404(`study ID not found: ${id}`))
+    const slug = $transition$.params().studySlug
+    return Study.get(slug)
+      .catch(resourceErrorService.goto404(`study slug invalid: ${slug}`))
   }
 
   /* @ngInject */
   function resolveParticipantAnnotationType($q, $transition$, study, resourceErrorService) {
-    const id = $transition$.params().annotationTypeId,
-          annotationType = _.find(study.annotationTypes, { id }),
-          result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type ID')
-    return result.catch(resourceErrorService.goto404(`invalid participant annotation type ID: ${id}`))
+    const slug = $transition$.params().annotationTypeSlug,
+          annotationType = _.find(study.annotationTypes, { slug }),
+          result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type slug')
+    return result.catch(resourceErrorService.goto404(`invalid participant annotation type ID: ${slug}`))
   }
 
   /* @ngInject */
   function resolveCollectionEventType($transition$, study, CollectionEventType, resourceErrorService) {
-    const id = $transition$.params().ceventTypeId
-    return CollectionEventType.get(study.id, id)
+    const slug = $transition$.params().ceventTypeSlug
+    return CollectionEventType.get(study.slug, slug)
       .catch(resourceErrorService.goto404(
-        `collection event type ID not found: studyId/${study.id}, ceventTypeId/${id}`))
+        `collection event type ID not found: studyId/${study.slug}, ceventTypeSlug/${slug}`))
   }
 
   /* @ngInject */
   function resolveAnnotationType($q, $transition$, collectionEventType, resourceErrorService) {
-    const id = $transition$.params().annotationTypeId,
-          annotationType = _.find(collectionEventType.annotationTypes, { id  }),
+    const slug = $transition$.params().annotationTypeSlug,
+          annotationType = _.find(collectionEventType.annotationTypes, { slug  }),
           result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type ID')
-    return result.catch(resourceErrorService.goto404(`invalid event-type annotation-type ID: ${id}`))
+    return result.catch(resourceErrorService.goto404(`invalid event-type annotation-type ID: ${slug}`))
   }
 
   /* @ngInject */
   function resolveSpcimenDescription($q, $transition$, collectionEventType, resourceErrorService) {
-    const id = $transition$.params().specimenDescriptionId,
-          spcDescription = _.find(collectionEventType.specimenDescriptions, { id }),
+    const slug = $transition$.params().specimenDescriptionSlug,
+          spcDescription = _.find(collectionEventType.specimenDescriptions, { slug }),
           result = spcDescription ? $q.when(spcDescription) : $q.reject('invalid specimen-description ID')
-    return result.catch(resourceErrorService.goto404(`invalid event-type specimen-description ID: ${id}`))
+    return result.catch(resourceErrorService.goto404(`invalid event-type specimen-description ID: ${slug}`))
   }
 
 }

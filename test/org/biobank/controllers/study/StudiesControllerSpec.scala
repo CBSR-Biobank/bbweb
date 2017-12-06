@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import java.time.OffsetDateTime
 import org.biobank.controllers._
-import org.biobank.domain.{AnnotationType, JsonHelper}
+import org.biobank.domain.{AnnotationType, JsonHelper, Slug}
 import org.biobank.domain.study._
 import org.biobank.fixture.ControllerFixture
 import play.api.libs.json._
@@ -382,12 +382,12 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     }
 
-    describe("GET /api/studies/:id") {
+    describe("GET /api/studies/:slug") {
 
-      it("read a study") {
+      it("read a study by slug") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
-        val json = makeRequest(GET, uri(study.id.id))
+        val json = makeRequest(GET, uri(study.slug))
         compareObj((json \ "data").get, study)
       }
 
@@ -423,6 +423,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
           repoStudy must have (
             'id          (studyId),
             'version     (0L),
+            'slug        (Slug(study.name)),
             'name        (study.name),
             'description (study.description)
           )

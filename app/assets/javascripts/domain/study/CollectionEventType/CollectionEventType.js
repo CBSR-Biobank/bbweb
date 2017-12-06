@@ -110,22 +110,18 @@ function CollectionEventTypeFactory($q,
     return DomainEntity.url.apply(null, args);
   };
 
-  CollectionEventType.SCHEMA = {
+  CollectionEventType.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
     'id': 'CollectionEventType',
-    'type': 'object',
     'properties': {
-      'id':                   { 'type': 'string' },
-      'version':              { 'type': 'integer', 'minimum': 0 },
-      'timeAdded':            { 'type': 'string' },
-      'timeModified':         { 'type': 'string' },
+      'slug':                 { 'type': 'string' },
       'name':                 { 'type': 'string' },
       'description':          { 'type': [ 'string', 'null' ] },
       'recurring':            { 'type': 'boolean' },
       'specimenDescriptions': { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenDescription' } },
       'annotationTypes':      { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
     },
-    'required': [ 'id', 'version', 'timeAdded', 'name', 'recurring' ]
-  };
+    'required': [ 'slug', 'name', 'recurring' ]
+  });
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a
@@ -212,20 +208,22 @@ function CollectionEventTypeFactory($q,
   /**
    * Retrieves a CollectionEventType from the server.
    *
-   * @param {string} id the ID of the collection event type to retrieve.
+   * @param {string} studySlug the lsug of the study the collection event type to belongs to.
+   *
+   * @param {string} eventTypeSlug the ID of the collection event type to retrieve.
    *
    * @returns {Promise<domain.studies.CollectionEventType>} The collection event type within a promise.
    */
-  CollectionEventType.get = function(studyId, id) {
-    return biobankApi.get(CollectionEventType.url(studyId, id))
+  CollectionEventType.get = function(studySlug, eventTypeSlug) {
+    return biobankApi.get(CollectionEventType.url(studySlug, eventTypeSlug))
       .then(reply => CollectionEventType.asyncCreate(reply));
   };
 
   /**
    * Fetches all collection event types for a {@link domain.studies.Study|Study}.
    *
-   * @returns {Promise<Array<domain.studies.CollectionEventType>>} An array of collection event types within
-   * a promise.
+   * @returns {Promise<Array<domain.studies.CollectionEventType>>} An array of collection event types within a
+   * promise.
    */
   CollectionEventType.list = function(studyId, options) {
     var url = CollectionEventType.url(studyId),

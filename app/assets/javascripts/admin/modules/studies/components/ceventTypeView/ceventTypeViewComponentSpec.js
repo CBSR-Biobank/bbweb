@@ -39,10 +39,8 @@ describe('ceventTypeViewComponent', function() {
       this.$state.reload = jasmine.createSpy().and.returnValue(null);
       this.$state.go = jasmine.createSpy().and.returnValue(null);
 
-      this.createController = (study, collectionEventType) => {
-        study = study || this.study;
-        collectionEventType = collectionEventType || this.collectionEventType;
-
+      this.createController = (study = this.study,
+                               collectionEventType = this.collectionEventType) => {
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
 
         ComponentTestSuiteMixin.createController.call(
@@ -86,7 +84,7 @@ describe('ceventTypeViewComponent', function() {
     this.scope.$digest();
     expect(this.$state.go).toHaveBeenCalledWith(
       'home.admin.studies.study.collection.ceventType.annotationTypeView',
-      { annotationTypeId: annotType.id });
+      { annotationTypeSlug: annotType.slug });
   });
 
   describe('updates to name', function () {
@@ -152,7 +150,7 @@ describe('ceventTypeViewComponent', function() {
     this.scope.$digest();
     expect(this.$state.go).toHaveBeenCalledWith(
       'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
-      { specimenDescriptionId: specimenDescription.id });
+      { specimenDescriptionSlug: specimenDescription.slug });
   });
 
   describe('removing a specimen description', function() {
