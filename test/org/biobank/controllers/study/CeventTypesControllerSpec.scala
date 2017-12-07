@@ -150,7 +150,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Collection Event Type REST API") {
 
-    describe("111 GET /api/studies/cetypes/:studySlug/:eventTypeSlug") {
+    describe("GET /api/studies/cetypes/:studySlug/:eventTypeSlug") {
 
       it("get a single collection event type") {
         val f = new EventTypeFixture

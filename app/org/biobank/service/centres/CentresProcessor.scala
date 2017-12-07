@@ -371,15 +371,16 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                              name         = addedEvent.getName,
                                              description  = addedEvent.description,
                                              studyIds     = Set.empty,
-                                             locations    = Set.empty)
+                                             locations    = Set.empty).map { c =>
+          c.copy(slug     = centreRepository.slug(c.name),
+                 timeAdded = OffsetDateTime.parse(event.getTime))
+        }
 
       if (validation.isFailure) {
         log.error(s"could not add centre from event: $event")
       }
 
-      validation.foreach { c =>
-        centreRepository.put(c.copy(timeAdded = OffsetDateTime.parse(event.getTime)))
-      }
+      validation.foreach(centreRepository.put)
     }
   }
 
@@ -387,8 +388,11 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
     onValidEventDisabledCentreAndVersion(event,
                                          event.eventType.isNameUpdated,
                                          event.getNameUpdated.getVersion) { (centre, _, eventTime) =>
-      val v = centre.withName(event.getNameUpdated.getName)
-      v.foreach { c => centreRepository.put(c.copy(timeModified = Some(eventTime))) }
+      val v = centre.withName(event.getNameUpdated.getName).map { c =>
+          c.copy(slug         = centreRepository.slug(c.name),
+                 timeModified = Some(eventTime))
+        }
+      v.foreach(centreRepository.put)
       v
     }
   }

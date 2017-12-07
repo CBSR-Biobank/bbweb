@@ -59,7 +59,7 @@ trait AnnotationTypeSetSharedSpec[T <: ConcurrencySafeEntity[_]] { this: FunSpec
       }
     }
 
-    it("111 not allow adding an annotation type with a duplicate name") {
+    it("not allow adding an annotation type with a duplicate name") {
       val entity = createEntity
       val annotationType = factory.createAnnotationType
       addAnnotationType(entity, annotationType) mustSucceed { entity =>

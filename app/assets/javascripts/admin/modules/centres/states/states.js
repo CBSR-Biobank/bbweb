@@ -27,7 +27,7 @@ function config($stateProvider) {
     })
     .state('home.admin.centres.centre', {
       abstract: true,
-      url: '/{centreId}',
+      url: '/{centreSlug}',
       resolve: {
         centre: resolveCentre
       },
@@ -54,7 +54,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.centres.centre.locations.locationView', {
-      url: '/view/:locationId',
+      url: '/view/:locationSlug',
       resolve: {
         location: resolveLocation
       },
@@ -71,17 +71,17 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveCentre($transition$, resourceErrorService, Centre) {
-    const id = $transition$.params().centreId
-    return Centre.get(id)
-      .catch(resourceErrorService.goto404(`centre ID not found: ${id}`))
+    const slug = $transition$.params().centreSlug
+    return Centre.get(slug)
+      .catch(resourceErrorService.goto404(`centre ID not found: ${slug}`))
   }
 
   /* @ngInject */
   function resolveLocation($q, $transition$, resourceErrorService, centre) {
-    const id       = $transition$.params().locationId,
-          location = _.find(centre.locations, { id }),
+    const slug     = $transition$.params().locationSlug,
+          location = _.find(centre.locations, { slug }),
           result   = location ? $q.when(location) : $q.reject('invalid location ID')
-    return result.catch(resourceErrorService.goto404(`invalid location ID: ${id}`))
+    return result.catch(resourceErrorService.goto404(`invalid location ID: ${slug}`))
   }
 
 }

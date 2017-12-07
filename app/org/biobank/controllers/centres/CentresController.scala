@@ -78,11 +78,12 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
       Future(validationReply(service.searchLocations(cmd)))
     }
 
-  def query(id: CentreId): Action[Unit] =
+  def getBySlug(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val reply = service.getCentre(request.authInfo.userId, id)
-        .flatMap(centre => centreToDto(request.authInfo.userId, centre))
-      validationReply(reply)
+      val v = service.getCentreBySlug(request.authInfo.userId, slug).flatMap { centre =>
+          centreToDto(request.authInfo.userId, centre)
+        }
+      validationReply(v)
     }
 
   def snapshot: Action[Unit] =
@@ -147,6 +148,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
                 timeAdded    = centre.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 timeModified = centre.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
                 state        = centre.state.id,
+                slug         = centre.slug,
                 name         = centre.name,
                 description  = centre.description,
                 studyNames   = studyNames.toSet,

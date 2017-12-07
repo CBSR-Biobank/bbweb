@@ -34,8 +34,9 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   }
 
   private def uri(paths: String*): String = {
-    if (paths.isEmpty) "/api/studies"
-    else "/api/studies/" + paths.mkString("/")
+    val basePath = "/api/studies"
+    if (paths.isEmpty) basePath
+    else s"$basePath/" + paths.mkString("/")
   }
 
   private def urlName(study: Study)        = uri("name", study.id.id)
@@ -660,7 +661,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
     describe("POST /api/studies/pannottype/:id/:annotTypeId") {
 
-      it("111 update a participant annotation type") {
+      it("update a participant annotation type") {
         val annotType = factory.createAnnotationType
         val newName = nameGenerator.next[Study]
         val study = factory.createDisabledStudy.copy(annotationTypes = Set(annotType))

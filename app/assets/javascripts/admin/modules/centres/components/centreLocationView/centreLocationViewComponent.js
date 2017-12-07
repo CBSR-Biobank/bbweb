@@ -72,10 +72,16 @@ function CentreLocationViewController($state,
                     { required: true, minLength: 2 }).result
       .then(function (name) {
         vm.location.name = name;
-        vm.centre.updateLocation(vm.location)
-          .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+        return vm.centre.updateLocation(vm.location)
+      })
+      .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                       gettextCatalog.getString('Change successful')))
+      .catch(notificationsService.updateError)
+      .then(() => {
+        // reload the state so that the URL gets updated
+        $state.go($state.current.name,
+                  { locationSlug: vm.location.slug },
+                  { reload: true  })
       });
   }
 

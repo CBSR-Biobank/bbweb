@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import ngModule from '../../index'
 
-describe('Centre', function() {
+fdescribe('Centre', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -120,15 +120,15 @@ describe('Centre', function() {
           expect(reply).toEqual(jasmine.any(this.Centre));
         };
 
-    this.$httpBackend.whenGET(this.url(centre.id)).respond(this.reply(centre));
-    this.Centre.get(centre.id).then(checkReply).catch(failTest);
+    this.$httpBackend.whenGET(this.url(centre.slug)).respond(this.reply(centre));
+    this.Centre.get(centre.slug).then(checkReply).catch(failTest);
     this.$httpBackend.flush();
   });
 
   it('fails when getting a centre and it has a bad format', function() {
     var centre = _.omit(this.Factory.centre(), 'name');
-    this.$httpBackend.whenGET(this.url(centre.id)).respond(this.reply(centre));
-    this.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
+    this.$httpBackend.whenGET(this.url(centre.slug)).respond(this.reply(centre));
+    this.Centre.get(centre.slug).then(shouldNotFail).catch(shouldFail);
     this.$httpBackend.flush();
 
     function shouldFail(error) {
@@ -139,8 +139,8 @@ describe('Centre', function() {
   it('fails when getting a centre and it has a bad study ID', function() {
     var centre = this.Factory.centre({ studyNames: [ '' ]});
 
-    this.$httpBackend.whenGET(this.url(centre.id)).respond(this.reply(centre));
-    this.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
+    this.$httpBackend.whenGET(this.url(centre.slug)).respond(this.reply(centre));
+    this.Centre.get(centre.slug).then(shouldNotFail).catch(shouldFail);
     this.$httpBackend.flush();
 
     function shouldFail(error) {
@@ -152,8 +152,8 @@ describe('Centre', function() {
     var location = _.omit(this.Factory.location(), 'name'),
         centre = this.Factory.centre({ locations: [ location ]});
 
-    this.$httpBackend.whenGET(this.url(centre.id)).respond(this.reply(centre));
-    this.Centre.get(centre.id).then(shouldNotFail).catch(shouldFail);
+    this.$httpBackend.whenGET(this.url(centre.slug)).respond(this.reply(centre));
+    this.Centre.get(centre.slug).then(shouldNotFail).catch(shouldFail);
     this.$httpBackend.flush();
 
     function shouldFail(error) {

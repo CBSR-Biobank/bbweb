@@ -194,9 +194,10 @@ final case class DisabledCentre(id:           CentreId,
 
   /** adds a location to this centre. */
   def withLocation(location: Location): DomainValidation[DisabledCentre] = {
-    Location.validate(location).map { _ =>
+    checkAddLocation(location).map { _ =>
       // replaces previous location with same unique id
-      copy(locations    = locations - location + location,
+      val newLocations = locations - location + location
+      copy(locations    = newLocations,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
     }
@@ -204,13 +205,11 @@ final case class DisabledCentre(id:           CentreId,
 
   /** removes a location from this centre. */
   def removeLocation(id: LocationId): DomainValidation[DisabledCentre] = {
-    locations.find { x => x.id == id }.fold {
-      DomainError(s"location does not exist: $id")
-        .failureNel[DisabledCentre]
-    } { location =>
-      copy(locations    = locations - location,
+    checkRemoveLocation(id).map { location =>
+      val newLocations = locations - location
+      copy(locations    = newLocations,
            version      = version + 1,
-           timeModified = Some(OffsetDateTime.now)).successNel[String]
+           timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -229,6 +228,31 @@ final case class DisabledCentre(id:           CentreId,
                     studyIds     = this.studyIds,
                     locations    = this.locations).successNel[String]
     }
+  }
+
+  protected def checkAddLocation(location: Location): DomainValidation[Boolean] = {
+    (Location.validate(location) |@| nameNotUsed(location)) {
+      case _ => true
+    }
+  }
+
+  protected def checkRemoveLocation(locationId: LocationId)
+      : DomainValidation[Location] = {
+    locations
+      .find { x => x.id == locationId }
+      .toSuccessNel(s"location does not exist: $locationId")
+  }
+
+  protected def nameNotUsed(location: Location): DomainValidation[Boolean] = {
+    val nameLowerCase = location.name.toLowerCase
+    locations
+      .find { x => (x.name.toLowerCase == nameLowerCase) && (x.id != location.id)  }
+      match {
+        case Some(_) =>
+          EntityCriteriaError(s"location name already used: ${location.name}").failureNel[Boolean]
+        case None =>
+          true.successNel[DomainError]
+      }
   }
 }
 

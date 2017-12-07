@@ -11,6 +11,8 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[CentreRepositoryImpl])
 trait CentreRepository extends ReadWriteRepositoryWithSlug[CentreId, Centre] {
 
+  def getBySlug(slug: String): DomainValidation[Centre]
+
   def getDisabled(id: CentreId): DomainValidation[DisabledCentre]
 
   def getEnabled(id: CentreId): DomainValidation[EnabledCentre]
@@ -38,8 +40,14 @@ class CentreRepositoryImpl @Inject() (val testData: TestData)
 
   def notFound(id: CentreId): IdNotFound = IdNotFound(s"centre id: $id")
 
+  def slugNotFound(slug: String): EntityCriteriaNotFound = EntityCriteriaNotFound(s"centre slug: $slug")
+
   override def getByKey(id: CentreId): DomainValidation[Centre] = {
     getMap.get(id).toSuccessNel(notFound(id).toString)
+  }
+
+  def getBySlug(slug: String): DomainValidation[Centre] = {
+    getMap.find(_._2.slug == slug).map(_._2).toSuccessNel(slugNotFound(slug).toString)
   }
 
   def getDisabled(id: CentreId): DomainValidation[DisabledCentre] = {

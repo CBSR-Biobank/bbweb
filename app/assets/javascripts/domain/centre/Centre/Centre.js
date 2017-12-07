@@ -99,22 +99,18 @@ function CentreFactory($q,
   /**
    * Used for validation.
    */
-  Centre.SCHEMA = {
-    'id': 'Centre',
-    'type': 'object',
-    'properties': {
-      'id':           { 'type': 'string'},
-      'version':      { 'type': 'integer', 'minimum': 0},
-      'timeAdded':    { 'type': 'string'},
-      'timeModified': { 'type': [ 'string', 'null' ] },
+  Centre.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'Centre',
+    properties: {
+      'slug':         { 'type': 'string' },
       'name':         { 'type': 'string'},
       'description':  { 'type': [ 'string', 'null' ] },
       'studyNames':   { 'type': 'array', 'items': { '$ref': 'StudyName' } },
       'locations':    { 'type': 'array', 'items': { '$ref': 'Location' } },
       'state':        { 'type': 'string'}
     },
-    'required': [ 'id', 'version', 'timeAdded', 'name', 'state', 'studyNames' ]
-  };
+    required: [ 'slug', 'name', 'state', 'studyNames', 'locations' ]
+  });
 
   /*
    * @private
@@ -217,20 +213,21 @@ function CentreFactory($q,
    * @returns {Promise<Array<domain.centres.CentreLocationName>>} A promise.
    */
   Centre.centreLocationToNames = function (centreLocations) {
-    return centreLocations.map((centreLocation) =>
-                               _.extend({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
-                                        _.pick(centreLocation, 'centreId', 'locationId')));
+    return centreLocations
+      .map(centreLocation =>
+           _.extend({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
+                    _.pick(centreLocation, 'centreId', 'locationId')));
   };
 
   /**
-   * Retrieves the centre with the given ID.
+   * Retrieves a centre from the server.
    *
-   * @param {string} id - The ID associated with the centre.
+   * @param {string} slug the slug of the centre to retrieve.
    *
-   * @returns {Promise} The centre wrapped in a promise.
+   * @returns {Promise<domain.centres.Centre>} The centre wrapped in a promise.
    */
-  Centre.get = function (id) {
-    return biobankApi.get(Centre.url(id)).then(function(reply) {
+  Centre.get = function (slug) {
+    return biobankApi.get(Centre.url(slug)).then(function(reply) {
       return Centre.asyncCreate(reply);
     });
   };

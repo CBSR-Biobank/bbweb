@@ -26,8 +26,8 @@ class CentresRouter @Inject()(controller: CentresController) extends SimpleRoute
       // this action extracts parameters from the raw query string
       controller.list
 
-    case GET(p"/${centreId(id)}")  =>
-      controller.query(id)
+    case GET(p"/$slug")  =>
+      controller.getBySlug(slug)
 
     case POST(p"/")  =>
       controller.add

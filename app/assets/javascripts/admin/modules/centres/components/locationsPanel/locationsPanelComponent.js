@@ -40,7 +40,7 @@ function LocationsPanelController($scope,
   }
 
   function view(location) {
-    $state.go('home.admin.centres.centre.locations.locationView', { locationId: location.id });
+    $state.go('home.admin.centres.centre.locations.locationView', { locationSlug: location.slug });
   }
 
   function remove(location) {

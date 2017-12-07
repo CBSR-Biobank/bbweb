@@ -370,7 +370,7 @@ class TestData @Inject() (config:         Configuration,
       log.debug("testCentres")
 
       centreData.map { case (name, description) =>
-        val locations =
+        val locations = {
           if (name == "100-Calgary AB") {
             Set(Location(id             = LocationId(s"${name}_id:Primary"),
                          slug           = "",
@@ -393,7 +393,8 @@ class TestData @Inject() (config:         Configuration,
                          countryIsoCode = "CA"))
           } else {
             Set.empty[Location]
-          }.map(l => l.copy(slug = Slug(l.name)))
+          }
+        }.map { l => l.copy(slug = Slug(l.id.id)) }
 
         if ((name == "100-Calgary AB") || (name == "101-London ON")) {
           EnabledCentre(id           = CentreId(s"${name}_id"),

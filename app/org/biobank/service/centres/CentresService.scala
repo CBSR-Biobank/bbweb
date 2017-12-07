@@ -43,6 +43,8 @@ trait CentresService extends BbwebService {
 
   def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre]
 
+  def getCentreBySlug(requestUserId: UserId, slug: String): ServiceValidation[Centre]
+
   def centreFromLocation(requestUserId: UserId, id: LocationId): ServiceValidation[Centre]
 
   def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]]
@@ -104,6 +106,17 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
                              Some(id)) { () =>
       centreRepository.getByKey(id)
     }
+  }
+
+  def getCentreBySlug(requestUserId: UserId, slug: String): ServiceValidation[Centre] = {
+    for {
+      centre     <- centreRepository.getBySlug(slug)
+      permission <- accessService.hasPermissionAndIsMember(requestUserId,
+                                                           PermissionId.CentreRead,
+                                                           None,
+                                                           Some(centre.id))
+      result     <- if (permission) centre.successNel[String] else Unauthorized.failureNel[Centre]
+    } yield result
   }
 
   def centreFromLocation(requestUserId: UserId, id: LocationId): ServiceValidation[Centre] = {

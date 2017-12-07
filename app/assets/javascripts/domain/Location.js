@@ -33,6 +33,7 @@ function LocationFactory($log, DomainEntity, DomainError) {
     'type': 'object',
     'properties': {
       'id':             { 'type': 'string'},
+      'slug':           { 'type': 'string'},
       'name':           { 'type': 'string'},
       'street':         { 'type': 'string'},
       'city':           { 'type': 'string'},
@@ -43,6 +44,7 @@ function LocationFactory($log, DomainEntity, DomainError) {
     },
     'required': [
       'id',
+      'slug',
       'name',
       'street',
       'city',

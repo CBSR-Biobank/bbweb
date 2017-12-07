@@ -17,13 +17,15 @@ import play.api.test.Helpers._
 class CentresControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._
 
-  def uri(): String = "/api/centres/"
+  private def uri(paths: String*): String = {
+    val basePath = "/api/centres"
+    if (paths.isEmpty) basePath
+    else s"$basePath/" + paths.mkString("/")
+  }
 
-  def uri(path: String): String = uri + s"$path"
+  def uri(centre: Centre): String = uri(centre.id.id)
 
-  def uri(centre: Centre): String = uri + s"${centre.id.id}"
-
-  def uri(centre: Centre, path: String): String = uri(path) + s"/${centre.id.id}"
+  def uri(centre: Centre, path: String): String = uri(path, centre.id.id)
 
   def centreLocationToJson(centre: Centre, location: Location): JsObject = {
     Json.obj(
@@ -127,13 +129,16 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Centre REST API") {
 
-    describe("GET /api/centres/:id") {
+    describe("GET /api/centres/:slug") {
 
-      it("read a centre") {
+      it("retrieve a centre") {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
-        val json = makeRequest(GET, uri(centre))
-          (json \ "status").as[String] must include ("success")
+        val json = makeRequest(GET, uri(centre.slug))
+
+
+        (json \ "status").as[String] must include ("success")
+
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, centre)
       }
@@ -141,11 +146,11 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       it("not read an invalid centre") {
         val centre = factory.createDisabledCentre
 
-        val json = makeRequest(GET, uri(centre), NOT_FOUND)
+        val json = makeRequest(GET, uri(centre), BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("IdNotFound.*centre")
+        (json \ "message").as[String] must include regex ("EntityCriteriaNotFound: centre slug")
       }
     }
 
@@ -374,7 +379,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       it("add a centre") {
         val centre = factory.createDisabledCentre
         val addJson = Json.obj("name" -> centre.name, "description" -> centre.description)
-        val json = makeRequest(POST, uri, addJson)
+        val json = makeRequest(POST, uri(""), addJson)
 
         (json \ "status").as[String] must include ("success")
 
@@ -388,6 +393,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           repoCentre must have (
             'id          (centreId),
             'version     (0L),
+            'slug        (centre.slug),
             'name        (centre.name),
             'description (centre.description)
             )
@@ -400,14 +406,14 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
 
       it("add a centre with no description") {
         val addJson = Json.obj("name" -> nameGenerator.next[String])
-        val json = makeRequest(POST, uri, addJson)
+        val json = makeRequest(POST, uri(""), addJson)
 
         (json \ "status").as[String] must include ("success")
       }
 
       it("not add a centre with a name that is too short") {
         val addJson = Json.obj("name" -> "A")
-        val json = makeRequest(POST, uri, BAD_REQUEST, json = addJson)
+        val json = makeRequest(POST, uri(""), BAD_REQUEST, json = addJson)
 
         (json \ "status").as[String] must include ("error")
       }
@@ -417,7 +423,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val addJson = Json.obj("name" -> centre.name)
-        val json = makeRequest(POST, uri, FORBIDDEN, json = addJson)
+        val json = makeRequest(POST, uri(""), FORBIDDEN, json = addJson)
 
         (json \ "status").as[String] must include ("error")
 
