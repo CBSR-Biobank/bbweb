@@ -37,11 +37,7 @@ class ShipmentRepositoryImpl @Inject() (val testData: TestData)
 
   def nextIdentity: ShipmentId = new ShipmentId(nextIdentityAsString)
 
-  def notFound(id: ShipmentId): IdNotFound = IdNotFound(s"shipment id: $id")
-
-  override def getByKey(id: ShipmentId): DomainValidation[Shipment] = {
-    getMap.get(id).toSuccessNel(notFound(id).toString)
-  }
+  protected def notFound(id: ShipmentId): IdNotFound = IdNotFound(s"shipment id: $id")
 
   def withCentre(centreId: CentreId): Set[Shipment] = {
     getValues.filter { s => (s.fromCentreId == centreId) || (s.toCentreId == centreId) }.toSet

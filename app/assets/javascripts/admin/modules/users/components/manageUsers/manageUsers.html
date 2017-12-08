@@ -10,4 +10,6 @@
   </translate>
 </div>
 
-<users-paged-list ng-if="vm.haveUsers"></users-paged-list>
+<users-paged-list user-counts="vm.userCounts"
+                  ng-if="vm.haveUsers">
+</users-paged-list>

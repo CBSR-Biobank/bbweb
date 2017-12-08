@@ -67,7 +67,10 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
                                                 filterAndSort.filter,
                                                 filterAndSort.sort)
           } yield {
-            centres.map(centre => NameAndStateDto(centre.id.id, centre.name, centre.state.id))
+            centres.map(centre => NameAndStateDto(centre.id.id,
+                                                  centre.slug,
+                                                  centre.name,
+                                                  centre.state.id))
           }
         }
       )
@@ -137,7 +140,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
     val v = centre.studyIds
       .map { id =>
         studiesService.getStudy(requestUserId, id).map { study =>
-          NameAndStateDto(study.id.id, study.name, study.state.id)
+          NameAndStateDto(study.id.id, study.slug, study.name, study.state.id)
         }
       }
       .toList.sequenceU

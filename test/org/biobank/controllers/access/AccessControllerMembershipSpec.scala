@@ -179,11 +179,11 @@ class AccessControllerMembershipSpec
 
     }
 
-    describe("GET /api/access/membership/:membershipId") {
+    describe("GET /api/access/membership/:slug") {
 
       it("returns a membership") {
         val f = new MembershipFixture
-        val reply = makeRequest(GET, uri("memberships") + s"/${f.membership.id}")
+        val reply = makeRequest(GET, uri("memberships", f.membership.slug))
 
         (reply \ "status").as[String] must be ("success")
 
@@ -194,11 +194,11 @@ class AccessControllerMembershipSpec
       it("fails for an invalid membership") {
         val f = new MembershipFixture
         membershipRepository.remove(f.membership)
-        val reply = makeRequest(GET, uri("memberships") + s"/${f.membership.id}", NOT_FOUND)
+        val reply = makeRequest(GET, uri("memberships", f.membership.slug), BAD_REQUEST)
 
         (reply \ "status").as[String] must be ("error")
 
-        (reply \ "message").as[String] must include regex("IdNotFound: membership id")
+        (reply \ "message").as[String] must include regex("EntityCriteriaNotFound: membership slug")
       }
 
     }

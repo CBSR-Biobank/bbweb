@@ -58,28 +58,39 @@ function AccessItemFactory($q,
 
   }
 
-  AccessItem.SCHEMA = {
-    'id': 'AccessItem',
-    'type': 'object',
-    'properties': {
-      'id':           { 'type': 'string' },
-      'version':      { 'type': 'integer', 'minimum': 0 },
-      'timeAdded':    { 'type': 'string' },
-      'timeModified': { 'type': [ 'string', 'null' ] },
+  AccessItem.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'AccessItem',
+    properties: {
+      'slug':         { 'type': 'string' },
       'name':         { 'type': 'string' },
       'description':  { 'type': [ 'string', 'null' ] },
       'parentData':   { 'type': 'array', 'items': { '$ref': 'EntityInfo' } },
       'childData':    { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
     },
-    'required': [
-      'id',
-      'version',
-      'timeAdded',
+    required: [
+      'slug',
       'name',
       'parentData',
       'childData'
     ]
-  };
+  });
+
+  AccessItem.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = {} } = {}) {
+    return Object.assign(
+      {},
+      AccessItem.SCHEMA,
+      {
+        id: id,
+        type: type,
+        properties: Object.assign(
+          {},
+          AccessItem.SCHEMA.properties,
+          properties
+        ),
+        required: AccessItem.SCHEMA.required.slice().concat(required)
+      }
+    );
+  }
 
   return AccessItem;
 }

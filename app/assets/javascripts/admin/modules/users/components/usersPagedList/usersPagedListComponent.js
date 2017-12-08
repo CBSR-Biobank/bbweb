@@ -63,22 +63,15 @@ class Controller extends PagedListController {
   }
 
   $onInit() {
+    super.$onInit();
+    this.counts = this.userCounts;
     this.emailFilter = '';
-    this.counts      = {};
-
-    this.UserCounts.get()
-      .then((counts) => {
-        this.userCounts = counts;
-        this.haveUsers  = (this.userCounts.total > 0);
-        super.$onInit();
-      })
-      .catch(this.resourceErrorService.checkUnauthorized());
   }
 
   getItems(options) {
     return this.UserCounts.get()
       .then((counts) => {
-        this.counts = counts;
+        this.userCounts = counts;
         return this.User.list(options);
       });
   }
@@ -107,6 +100,7 @@ const component = {
   controller: Controller,
   controllerAs: 'vm',
   bindings: {
+    userCounts: '<'
   }
 };
 

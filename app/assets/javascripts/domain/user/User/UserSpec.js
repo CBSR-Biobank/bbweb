@@ -169,8 +169,8 @@ describe('User', function() {
   it('can retrieve a single user', function() {
     var user = this.Factory.user();
 
-    this.$httpBackend.whenGET(this.url(user.id)).respond(this.reply(user));
-    this.User.get(user.id).then((reply) => {
+    this.$httpBackend.whenGET(this.url(user.slug)).respond(this.reply(user));
+    this.User.get(user.slug).then((reply) => {
       expect(reply).toEqual(jasmine.any(this.User));
     });
     this.$httpBackend.flush();

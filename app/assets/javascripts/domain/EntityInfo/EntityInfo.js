@@ -21,9 +21,10 @@ function EntityInfoFactory($q,
     'type': 'object',
     'properties': {
       'id':   { 'type': 'string' },
+      'slug': { 'type': 'string' },
       'name': { 'type': 'string' }
     },
-    'required': [ 'id', 'name' ]
+    'required': [ 'id', 'slug', 'name' ]
   };
 
   EntityInfo.isValid = function (obj) {

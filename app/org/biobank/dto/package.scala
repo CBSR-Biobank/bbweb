@@ -2,7 +2,6 @@ package org.biobank
 
 import java.time.OffsetDateTime
 import org.biobank.domain.{EntityState, Location}
-import org.biobank.domain.access.RoleId._
 import org.biobank.domain.centre.Shipment
 import org.biobank.dto.access.UserMembershipDto
 import org.biobank.service.centres.CentreLocationInfo
@@ -10,9 +9,11 @@ import play.api.libs.json._
 
 package dto {
 
-  final case class EntityInfoDto(id: String, name: String)
+  final case class EntityInfoDto(id: String, slug: String, name: String)
 
   object EntityInfoDto {
+
+    def compareByName(a: EntityInfoDto, b: EntityInfoDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
 
     implicit val entityInfoDtoFormat: Format[EntityInfoDto] = Json.format[EntityInfoDto]
 
@@ -26,17 +27,10 @@ package dto {
 
   }
 
-  final case class NameDto(id: String, name: String)
-
-  object NameDto {
-    def compareByName(a: NameDto, b: NameDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
-
-    implicit val nameDtoWriter: Writes[NameDto] = Json.writes[NameDto]
-  }
-
-  final case class NameAndStateDto(id: String, name: String, state: String)
+  final case class NameAndStateDto(id: String, slug: String, name: String, state: String)
 
   object NameAndStateDto {
+
     def compareByName(a: NameAndStateDto, b: NameAndStateDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
 
     implicit val nameAndStateDtoWriter: Writes[NameAndStateDto] = Json.writes[NameAndStateDto]
@@ -76,7 +70,7 @@ package dto {
                            name:         String,
                            email:        String,
                            avatarUrl:    Option[String],
-                           roles:        Set[RoleId],
+                           roles:        Set[String],
                            membership:   Option[UserMembershipDto])
 
   object UserDto {

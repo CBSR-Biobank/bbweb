@@ -19,11 +19,9 @@ class HomeController {
       .then((user) => {
         this.user = user;
         this.userIsAuthenticated = true;
-        this.allowCollection = this.user.hasRole('SpecimenCollector');
-        this.shippingAllowed = this.user.hasRole('ShippingUser');
-        this.adminAllowed = this.user.hasAnyRoleOf('StudyAdministrator',
-                                                   'CentreAdministrator',
-                                                   'UserAdministrator');
+        this.allowCollection = this.user.hasSpecimenCollectorRole();
+        this.shippingAllowed = this.user.hasShippingUserRole();
+        this.adminAllowed = this.user.hasAdminRole();
       })
       .catch(() => {
         this.user = null;

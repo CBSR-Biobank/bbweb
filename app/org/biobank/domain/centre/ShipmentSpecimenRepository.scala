@@ -33,18 +33,13 @@ class ShipmentSpecimenRepositoryImpl @Inject() (val testData: TestData)
 
   def nextIdentity: ShipmentSpecimenId = new ShipmentSpecimenId(nextIdentityAsString)
 
-  def notFound(id: ShipmentSpecimenId): IdNotFound = IdNotFound(s"shipment specimen id: $id")
+  protected def notFound(id: ShipmentSpecimenId): IdNotFound = IdNotFound(s"shipment specimen id: $id")
 
   def shipmentAndSpecimenNotFound(shipmentId: ShipmentId, specimenId: SpecimenId): IdNotFound =
     IdNotFound(s"shipment id: $shipmentId, specimen id: $specimenId")
 
   def specimenNotFound(specimen: Specimen): String =
     EntityCriteriaError(s"shipment specimen with inventory ID not found: ${specimen.inventoryId}").toString
-
-
-  override def getByKey(id: ShipmentSpecimenId): DomainValidation[ShipmentSpecimen] = {
-    getMap.get(id).toSuccessNel(notFound(id).toString)
-  }
 
   def allForShipment(id: ShipmentId): Set[ShipmentSpecimen] = {
     getValues.filter { ss => ss.shipmentId == id }.toSet

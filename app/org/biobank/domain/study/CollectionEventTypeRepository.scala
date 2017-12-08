@@ -14,8 +14,6 @@ trait CollectionEventTypeRepository
   def withId(studyId: StudyId, ceventTypeId: CollectionEventTypeId)
       : DomainValidation[CollectionEventType]
 
-  def getBySlug(slug: String): DomainValidation[CollectionEventType]
-
   def allForStudy(studyId: StudyId): Set[CollectionEventType]
 
   def specimenSpecCanBeUpdated(studyId: StudyId, specimenGroupId: SpecimenGroupId): Boolean
@@ -37,18 +35,10 @@ class CollectionEventTypeRepositoryImpl @Inject() (val testData: TestData)
 
   def nextIdentity: CollectionEventTypeId = new CollectionEventTypeId(nextIdentityAsString)
 
-  def notFound(id: CollectionEventTypeId): IdNotFound = IdNotFound(s"collection event type: $id")
+  protected def notFound(id: CollectionEventTypeId): IdNotFound = IdNotFound(s"collection event type: $id")
 
-  def slugNotFound(slug: String): EntityCriteriaNotFound =
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
     EntityCriteriaNotFound(s"collection event type slug: $slug")
-
-  override def getByKey(id: CollectionEventTypeId): DomainValidation[CollectionEventType] = {
-    getMap.get(id).toSuccessNel(notFound(id).toString)
-  }
-
-  def getBySlug(slug: String): DomainValidation[CollectionEventType] = {
-    getMap.find(_._2.slug == slug).map(_._2).toSuccessNel(slugNotFound(slug).toString)
-  }
 
   def withId(studyId: StudyId, ceventTypeId: CollectionEventTypeId)
       : DomainValidation[CollectionEventType] = {

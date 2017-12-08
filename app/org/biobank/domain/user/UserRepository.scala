@@ -48,13 +48,12 @@ class UserRepositoryImpl @Inject() (val config:   Configuration,
 
   def nextIdentity: UserId = new UserId(nextIdentityAsString)
 
-  def notFound(id: UserId): IdNotFound = IdNotFound(s"user id: $id")
+  protected def notFound(id: UserId): IdNotFound = IdNotFound(s"user id: $id")
+
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+    EntityCriteriaNotFound(s"user slug: $slug")
 
   def allUsers(): Set[User] = getValues.toSet
-
-  override def getByKey(id: UserId): DomainValidation[User] = {
-    getMap.get(id).toSuccessNel(notFound(id).toString)
-  }
 
   def getRegistered(id: UserId): DomainValidation[RegisteredUser] = {
     for {

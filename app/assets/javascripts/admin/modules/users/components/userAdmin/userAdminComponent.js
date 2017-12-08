@@ -26,17 +26,10 @@ function UserAdminController(userService, UserCounts, breadcrumbService, resourc
       breadcrumbService.forState('home.admin.users')
     ];
 
-    vm.haveUsers = false;
-
     // request the user to determine if they have the right permissions to be on this page
     userService.requestCurrentUser()
       .then((user) => {
         vm.user = user;
-        return UserCounts.get();
-      })
-      .then((counts) => {
-        vm.userCounts = counts;
-        vm.haveUsers  = (vm.userCounts.total > 0);
       })
       .catch(resourceErrorService.checkUnauthorized());
   }

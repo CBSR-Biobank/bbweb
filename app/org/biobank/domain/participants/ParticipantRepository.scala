@@ -33,11 +33,7 @@ class ParticipantRepositoryImpl @Inject() (val testData: TestData)
 
   def nextIdentity: ParticipantId = new ParticipantId(nextIdentityAsString)
 
-  def notFound(id: ParticipantId): IdNotFound = IdNotFound(s"participant id: $id")
-
-  override def getByKey(id: ParticipantId): DomainValidation[Participant] = {
-    getMap.get(id).toSuccessNel(notFound(id).toString)
-  }
+  protected def notFound(id: ParticipantId): IdNotFound = IdNotFound(s"participant id: $id")
 
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant] = {
     for {

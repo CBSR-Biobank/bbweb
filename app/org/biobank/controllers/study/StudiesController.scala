@@ -75,7 +75,7 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
                                                  filterAndSort.filter,
                                                  filterAndSort.sort)
           } yield {
-            studies.map(s => NameAndStateDto(s.id.id, s.name, s.state.id))
+            studies.map(s => NameAndStateDto(s.id.id, s.slug, s.name, s.state.id))
           }
         }
       )

@@ -4,7 +4,7 @@
  */
 /* global angular */
 
-import * as sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour'
+import * as sharedBehaviour from '../../../test/behaviours/entityInfoSharedBehaviour'
 import ngModule from '../../index'
 
 describe('PermissionName', function() {
@@ -16,7 +16,7 @@ describe('PermissionName', function() {
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
-                              'EntityName',
+                              'EntityInfo',
                               'PermissionName',
                               'Factory')
       this.url = () =>  EntityTestSuiteMixin.url('access/permissions/names')
@@ -40,7 +40,7 @@ describe('PermissionName', function() {
       context.listFunc = (options) => this.PermissionName.list(options)
     })
 
-    sharedBehaviour.entityNameCreateSharedBehaviour(context)
+    sharedBehaviour.entityInfoCreateSharedBehaviour(context)
 
   })
 

@@ -29,15 +29,15 @@ class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter 
       // this action extracts parameters from the raw query string
       controller.listRoleNames
 
-    case GET(p"/roles/${accessItemId(id)}") =>
+    case GET(p"/roles/$slug") =>
       // this action extracts parameters from the query string
-      controller.getRole(id)
+      controller.getRoleBySlug(slug)
 
     case GET(p"/memberships") =>
       controller.listMemberships
 
-    case GET(p"/memberships/${membershipId(mId)}") =>
-      controller.getMembership(mId)
+    case GET(p"/memberships/$slug") =>
+      controller.getMembershipBySlug(slug)
 
     case POST(p"/roles") =>
       controller.roleAdd

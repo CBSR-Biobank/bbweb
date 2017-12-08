@@ -59,10 +59,10 @@ trait JsonHelper extends MustMatchers with OptionValues {
     }
   }
 
-  def compareObj(json: JsValue, nameDto: NameDto) = {
-    (json \ "id").as[String] mustBe (nameDto.id)
+  def compareObj(json: JsValue, entityInfo: EntityInfoDto) = {
+    (json \ "id").as[String] mustBe (entityInfo.id)
 
-    (json \ "name").as[String] mustBe (nameDto.name)
+    (json \ "name").as[String] mustBe (entityInfo.name)
   }
 
   def compareObj(json: JsValue, nameAndStateDto: NameAndStateDto) = {
@@ -434,13 +434,13 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
   protected def compareNameDto[T <: ConcurrencySafeEntity[_] with HasName]
     (json: JsValue, entity: T): Unit = {
-    compareObj(json, NameDto(entity.id.toString, entity.name))
+    compareObj(json, EntityInfoDto(entity.id.toString, entity.slug, entity.name))
     ()
   }
 
   protected def compareNameAndStateDto[T <: ConcurrencySafeEntity[_] with HasName with HasState]
     (json: JsValue, entity: T): Unit = {
-    compareObj(json, NameAndStateDto(entity.id.toString, entity.name, entity.state.id))
+    compareObj(json, NameAndStateDto(entity.id.toString, entity.slug, entity.name, entity.state.id))
     ()
   }
 

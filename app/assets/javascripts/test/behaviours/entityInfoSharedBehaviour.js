@@ -24,7 +24,7 @@ import _ from 'lodash'
  *
  * @return {null} nothing
  */
-function entityNameCreateSharedBehaviour(context) {
+function entityInfoCreateSharedBehaviour(context) {
 
   it('constructor with no parameters has default values', function() {
     var entityName = new context.constructor();
@@ -61,7 +61,7 @@ function entityNameCreateSharedBehaviour(context) {
  *
  * @return {null} nothing
  */
-function entityNameListSharedBehaviour(context) {
+function entityInfoListSharedBehaviour(context) {
 
   it('can retrieve entity names', function() {
     var names = [ context.jsonFactoryFunc() ];
@@ -130,4 +130,4 @@ function entityNameListSharedBehaviour(context) {
 
 }
 
-export  { entityNameCreateSharedBehaviour, entityNameListSharedBehaviour }
+export  { entityInfoCreateSharedBehaviour, entityInfoListSharedBehaviour }

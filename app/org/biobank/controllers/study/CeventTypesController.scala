@@ -3,7 +3,7 @@ package org.biobank.controllers.study
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.study.{StudyId, CollectionEventTypeId}
-import org.biobank.dto.NameDto
+import org.biobank.dto.EntityInfoDto
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.service.PagedResults
 import org.biobank.service.studies.CollectionEventTypeService
@@ -51,7 +51,7 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
     }
   }
 
-  // returns all the names of the collection events in a list of NameDto.
+  // returns all the names of the collection events in a list of EntityInfoDto.
   def listNames(studyId: StudyId): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
       validationReply(
@@ -63,7 +63,7 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
                                           filterAndSort.filter,
                                           filterAndSort.sort)
           } yield {
-            ceventTypes.map(et => NameDto(et.id.id, et.name))
+            ceventTypes.map(et => EntityInfoDto(et.id.id, et.slug, et.name))
           }
         }
       )

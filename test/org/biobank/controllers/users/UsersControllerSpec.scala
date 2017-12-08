@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 import org.biobank.Global
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.dto.NameAndStateDto
-import org.biobank.domain.JsonHelper
+import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -25,13 +25,15 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
     addMembershipForUser(user)
   }
 
-  private def uri: String = "/api/users/"
+  private def uri(paths: String*): String = {
+    val basePath = "/api/users"
+    if (paths.isEmpty) basePath
+    else s"$basePath/" + paths.mkString("/")
+  }
 
-  private def uri(user: User): String = uri + s"${user.id.id}"
+  private def uri(user: User): String = uri(user.id.id)
 
-  private def uri(path: String): String = uri + s"$path"
-
-  private def updateUri(user: User, path: String): String = uri(path) + s"/${user.id.id}"
+  private def updateUri(user: User, path: String): String = uri(path, user.id.id)
 
   private def addMembershipForUser(user: User) = {
     val membership = factory.createMembership.copy(userIds = Set(user.id))
@@ -285,7 +287,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     describe("GET /api/users/names") {
 
-      def userToDto(user: User): NameAndStateDto = NameAndStateDto(user.id.id, user.name, user.state.id)
+      def userToDto(user: User): NameAndStateDto =
+        NameAndStateDto(user.id.id, user.slug, user.name, user.state.id)
 
       describe("must return user names") {
 
@@ -393,7 +396,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
                                "email" -> user.email,
                                "password" -> "testpassword",
                                "avatarUrl" -> user.avatarUrl)
-        val json = makeRequest(POST, uri, json = reqJson)
+        val json = makeRequest(POST, uri(""), json = reqJson)
 
         (json \ "status").as[String] must be ("success")
 
@@ -416,20 +419,27 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         }
       }
 
-      it("fail on registering an existing user") {
-        val user = factory.createRegisteredUser
-        userRepository.put(user)
+      it("users with the same name (different emails) get different slugs") {
+        val name = nameGenerator.next[String]
+        val responses = (0 until 2).map { _ =>
+            val user = factory.createActiveUser.copy(name = name)
+            val reqJson = Json.obj("name" -> user.name,
+                                   "email" -> user.email,
+                                   "password" -> "testpassword",
+                                   "avatarUrl" -> user.avatarUrl)
+            val response = makeRequest(POST, uri(""), json = reqJson)
 
-        val reqJson = Json.obj("name" -> user.name,
-                               "email" -> user.email,
-                               "password" -> "testpassword",
-                               "avatarUrl" -> user.avatarUrl)
-        val json = makeRequest(POST, uri, FORBIDDEN, json = reqJson)
+            (response \ "status").as[String] must be ("success")
+            response
+          }
 
-        (json \ "status").as[String] must be ("error")
+        (responses(0) \ "data" \ "id") must not equal ((responses(1) \ "data" \ "id"))
 
-        (json \ "message").as[String] must include regex("email already registered")
+        (responses(0) \ "data" \ "slug") must not equal ((responses(1) \ "data" \ "slug"))
+
+        (responses(0) \ "data" \ "name") must equal ((responses(1) \ "data" \ "name"))
       }
+
     }
 
     describe("POST /api/users/name/:id") {
@@ -444,6 +454,28 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         (json \ "status").as[String] must be ("success")
         (json \ "data" \ "version").as[Int] must be(user.version + 1)
         (json \ "data" \ "name").as[String] must be(user.name)
+      }
+
+      it("111 users with the same name (different emails) get different slugs") {
+        val users = (0 until 2).map { _ =>
+            val user = factory.createActiveUser
+            userRepository.put(user)
+            user
+          }
+
+        val dupName = users(1).name
+        val reqJson = Json.obj("expectedVersion" -> users(0).version, "name" -> dupName)
+        val response = makeRequest(POST, updateUri(users(0), "name"), reqJson)
+
+        (response \ "data" \ "id").as[String] must equal (users(0).id.id)
+
+        (response \ "data" \ "id").as[String] must not equal (users(1).id.id)
+
+        (response \ "data" \ "slug").as[String] must not equal (Slug(dupName))
+
+        (response \ "data" \ "slug").as[String] must include (Slug(dupName))
+
+        (response \ "data" \ "name").as[String] must equal (dupName)
       }
 
       it("not update a user's name with an invalid name") {
@@ -687,21 +719,25 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("GET /api/users/:id") {
+    describe("GET /api/users/:slug") {
 
       it("return a user") {
         val f = new activeUserFixture
-        val json = makeRequest(GET, uri(f.user))
+        val json = makeRequest(GET, uri(f.user.slug))
+
         (json \ "status").as[String] must be ("success")
+
         val jsonObj = (json \ "data").as[JsObject]
         compareObj(jsonObj, f.user)
       }
 
       it("return not found for an invalid user") {
         val user = factory.createActiveUser
-        val json = makeRequest(GET, uri(user), NOT_FOUND)
+        val json = makeRequest(GET, uri(user), BAD_REQUEST)
+
         (json \ "status").as[String] must be ("error")
-        (json \ "message").as[String] must include("IdNotFound")
+
+        (json \ "message").as[String] must include("EntityCriteriaNotFound: user slug")
       }
     }
 
@@ -863,7 +899,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
-        val fakeRequest = FakeRequest(GET, uri)
+        val fakeRequest = FakeRequest(GET, uri(""))
           .withHeaders("X-XSRF-TOKEN" -> badToken,
                        "Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", badToken))))
         val resp = route(app, fakeRequest)
@@ -883,7 +919,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val badToken = nameGenerator.next[String]
 
         // this request is valid since user is logged in
-        val fakeRequest = FakeRequest(GET, uri)
+        val fakeRequest = FakeRequest(GET, uri(""))
           .withHeaders("X-XSRF-TOKEN" -> validToken,
                        "Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", badToken))))
         val resp = route(app, fakeRequest)
@@ -925,7 +961,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
 
       it("not allow requests missing XSRF-TOKEN cookie") {
-        val resp = route(app, FakeRequest(GET, uri))
+        val resp = route(app, FakeRequest(GET, uri("")))
         resp must not be (None)
         resp.map { result =>
           status(result) mustBe (UNAUTHORIZED)
@@ -940,7 +976,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val user = createActiveUserInRepository(plainPassword)
         val token = doLogin(user.email, plainPassword)
 
-        val fakeRequest = FakeRequest(GET, uri)
+        val fakeRequest = FakeRequest(GET, uri(""))
           .withHeaders("Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", token))))
         val resp = route(app, fakeRequest)
         resp must not be (None)
@@ -969,7 +1005,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         (json \ "status").as[String] must be ("success")
 
         // the following request must fail
-        json = makeRequest(GET, uri, UNAUTHORIZED, JsNull, token)
+        json = makeRequest(GET, uri(""), UNAUTHORIZED, JsNull, token)
         json must be (JsNull)
       }
     }

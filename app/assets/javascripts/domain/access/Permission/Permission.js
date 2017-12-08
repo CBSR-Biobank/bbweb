@@ -23,11 +23,9 @@ function PermissionFactory($q,
 
   }
 
-  Permission.SCHEMA = Object.assign(
-    {},
-    AccessItem.SCHEMA,
-    { 'id': 'Permission' }
-  );
+  Permission.SCHEMA = AccessItem.createDerivedSchema({
+    'id': 'Permission'
+  });
 
   Permission.url = function (...pathItems) {
     return DomainEntity.url.apply(null, [ 'access/permissions' ].concat(pathItems));

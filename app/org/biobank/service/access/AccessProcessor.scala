@@ -340,7 +340,11 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
                                event.getRole.eventType.isNameUpdated,
                                event.getRole.getNameUpdated.getVersion) {
       (role, time) =>
-      role.withName(event.getRole.getNameUpdated.getName).map(r => updateRole(r, time))
+      role.withName(event.getRole.getNameUpdated.getName).map { r =>
+        accessItemRepository.put(r.copy(slug         = accessItemRepository.slug(r.name),
+                                        timeModified = Some(time)))
+        true
+      }
     }
   }
 
@@ -430,7 +434,6 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
   }
 
   private def init(): Unit = {
-    accessItemRepository.init
     accessItemRepository.init
   }
 

@@ -4,7 +4,7 @@
  */
 /* global angular */
 
-import * as sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour'
+import * as sharedBehaviour from '../../../test/behaviours/entityInfoSharedBehaviour'
 import ngModule from '../../index'
 
 describe('RoleName', function() {
@@ -16,7 +16,7 @@ describe('RoleName', function() {
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
-                              'EntityName',
+                              'EntityInfo',
                               'RoleName',
                               'Factory')
       this.url = () =>  EntityTestSuiteMixin.url('access/roles/names')
@@ -40,7 +40,7 @@ describe('RoleName', function() {
       context.listFunc = (options) => this.RoleName.list(options)
     })
 
-    sharedBehaviour.entityNameCreateSharedBehaviour(context)
+    sharedBehaviour.entityInfoCreateSharedBehaviour(context)
 
   })
 
@@ -55,7 +55,7 @@ describe('RoleName', function() {
       context.listFunc = (options) => this.RoleName.list(options)
     })
 
-    sharedBehaviour.entityNameListSharedBehaviour(context)
+    sharedBehaviour.entityInfoListSharedBehaviour(context)
 
   })
 

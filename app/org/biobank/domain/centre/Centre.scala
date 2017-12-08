@@ -54,7 +54,7 @@ sealed trait Centre
     locationWithId(locationId).map(loc => s"${this.name}: ${loc.name}")
   }
 
-  def nameDto(): NameAndStateDto = NameAndStateDto(id.id, name, state.id)
+  def nameDto(): NameAndStateDto = NameAndStateDto(id.id, slug, name, state.id)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {

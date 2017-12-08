@@ -1,6 +1,7 @@
 package org.biobank.domain
 
 import com.github.ghik.silencer.silent
+import org.biobank.CommonValidations.EntityCriteriaNotFound
 import scala.concurrent.stm.Ref
 import scalaz.Scalaz._
 
@@ -23,11 +24,11 @@ trait ReadRepository[K, A] {
   */
 trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
+  def nextIdentity(): K
+
   protected def nextIdentityAsString: String
 
   def init(): Unit
-
-  def nextIdentity(): K
 
   def put(value: A): Unit
 
@@ -41,6 +42,9 @@ trait ReadWriteRepositoryWithSlug[K, A] extends ReadWriteRepository[K, A] {
 
   def slug(name: String): String
 
+  def getBySlug(slug: String): DomainValidation[A]
+
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound
 }
 
 /**
@@ -55,8 +59,10 @@ trait ReadWriteRepositoryWithSlug[K, A] extends ReadWriteRepository[K, A] {
 
   def isEmpty: Boolean = getMap.isEmpty
 
+  protected def notFound(id: K): IdNotFound
+
   def getByKey(key: K): DomainValidation[A] = {
-    getMap.get(key).toSuccessNel(IdNotFound(s"$key").toString)
+    internalMap.single.get.get(key).toSuccessNel(notFound(key).toString)
   }
 
   def getValues: Iterable[A] = getMap.values
@@ -99,6 +105,8 @@ class ReadWriteRepositoryRefImplWithSlug
   [K, A <: ConcurrencySafeEntity[K] with HasName](keyGetter: (A) => K)
     extends ReadWriteRepositoryRefImpl[K, A](keyGetter) {
 
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound
+
   def slug(name: String): String = {
     val baseSlug = Slug(name)
     val slugRegex = s"^${baseSlug}(-[0-9]+)?$$".r
@@ -108,6 +116,10 @@ class ReadWriteRepositoryRefImplWithSlug
       }.size
     if (count <= 0) baseSlug
     else s"${baseSlug}-$count"
+  }
+
+  def getBySlug(slug: String): DomainValidation[A] = {
+    internalMap.single.get.find(_._2.slug == slug).map(_._2).toSuccessNel(slugNotFound(slug).toString)
   }
 
 }

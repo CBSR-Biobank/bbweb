@@ -91,8 +91,8 @@ function entityNameDto(createFunc, options = {}) {
 }
 
 function entityNameAndStateDto(createFunc, options = {}) {
-  const c = createFunc(_.pick(options, ['id', 'name', 'state']));
-  return _.pick(c, ['id', 'name', 'state']);
+  const c = createFunc(_.pick(options, ['id', 'slug', 'name', 'state']));
+  return _.pick(c, ['id', 'slug', 'name', 'state']);
 }
 
 /*
@@ -729,10 +729,7 @@ class Factory {
   }
 
   entityInfo() {
-    return {
-      id:   this.stringNext(),
-      name: this.stringNext()
-    };
+    return Object.assign({ id:   this.stringNext() }, nameAndSlug())
   }
 
   entitySet() {

@@ -5,11 +5,11 @@
 
 /* @ngInject */
 function PermissionNameFactory($q,
-                         $log,
-                         biobankApi,
-                         EntityName,
-                         DomainEntity,
-                         DomainError) {
+                               $log,
+                               biobankApi,
+                               EntityInfo,
+                               DomainEntity,
+                               DomainError) {
 
   /**
    * @classdesc A PermissionName contains the ID, and name for a permission.
@@ -25,7 +25,7 @@ function PermissionNameFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-  class PermissionName extends EntityName {
+  class PermissionName extends EntityInfo {
 
     constructor(obj = {}) {
       super(obj)
@@ -44,7 +44,7 @@ function PermissionNameFactory($q,
    * a permission within asynchronous code.
    */
   PermissionName.create = function (obj) {
-    var validation = EntityName.isValid(obj);
+    var validation = EntityInfo.isValid(obj);
     if (!validation.valid) {
       $log.error(validation.message);
       throw new DomainError(validation.message);

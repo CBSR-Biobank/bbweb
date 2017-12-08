@@ -4,7 +4,7 @@
  */
 /* global angular */
 
-import * as sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour'
+import * as sharedBehaviour from '../../../test/behaviours/entityInfoSharedBehaviour'
 import ngModule from '../../index'
 
 describe('CollectionEventTypeName', function() {
@@ -16,7 +16,7 @@ describe('CollectionEventTypeName', function() {
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
-                              'EntityName',
+                              'EntityInfo',
                               'CollectionEventTypeName',
                               'Factory')
       this.url = (...paths) => {
@@ -49,7 +49,7 @@ describe('CollectionEventTypeName', function() {
       context.listFunc = (options) => this.CollectionEventTypeName.list(eventType.studyId, options);
     });
 
-    sharedBehaviour.entityNameCreateSharedBehaviour(context)
+    sharedBehaviour.entityInfoCreateSharedBehaviour(context)
 
   });
 
@@ -70,7 +70,7 @@ describe('CollectionEventTypeName', function() {
       context.listFunc = (options) => this.CollectionEventTypeName.list(eventType.studyId, options);
     });
 
-    sharedBehaviour.entityNameListSharedBehaviour(context)
+    sharedBehaviour.entityInfoListSharedBehaviour(context)
 
   });
 

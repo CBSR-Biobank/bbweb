@@ -45,16 +45,15 @@ class MembershipRepositoryImpl @Inject() (val testData: TestData)
 
   def nextIdentity: MembershipId = new MembershipId(nextIdentityAsString)
 
-  def domainNotFound(id: MembershipId): IdNotFound = IdNotFound(s"membership id: $id")
+  protected def notFound(id: MembershipId): IdNotFound = IdNotFound(s"membership id: $id")
+
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+    EntityCriteriaNotFound(s"membership slug: $slug")
 
   def getUserMembership(userId: UserId): DomainValidation[UserMembership] = {
     getValues
       .find { m => m.userIds.exists(_ == userId) }
       .map { m => UserMembership.create(m, userId) }
       .toSuccessNel(s"membership for user not found: $userId")
-  }
-
-  override def getByKey(id: MembershipId): DomainValidation[Membership] = {
-    getMap.get(id).toSuccessNel(domainNotFound(id).toString)
   }
 }

@@ -30,8 +30,8 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
       // this action extracts parameters from the query string
       controller.list
 
-    case GET(p"/${userId(id)}") =>
-      controller.user(id)
+    case GET(p"/$slug") =>
+      controller.getBySlug(slug)
 
     case POST(p"/name/${userId(id)}") =>
       controller.updateName(id)

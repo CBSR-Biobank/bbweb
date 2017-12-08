@@ -23,14 +23,20 @@ class CeventSpecimenRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[SpecimenId, CeventSpecimen](v => v.specimenId)
     with CeventSpecimenRepository {
 
-  override def init(): Unit = {
-    super.init()
-    testData.testCeventSpecimens.foreach(put)
-  }
+  import org.biobank.CommonValidations._
 
   // only existing collection event and specimen IDs should be stored, never new IDs
   @SuppressWarnings(Array("org.wartremover.warts.Throw"))
   def nextIdentity: SpecimenId = throw new IllegalStateException("should not be used")
+
+  @SuppressWarnings(Array("org.wartremover.warts.Throw"))
+  protected def notFound(id: SpecimenId): IdNotFound =
+    IdNotFound(s"specimen not found: $id")
+
+  override def init(): Unit = {
+    super.init()
+    testData.testCeventSpecimens.foreach(put)
+  }
 
   def withCeventId(ceventId: CollectionEventId): Set[CeventSpecimen] = {
     getValues.filter(x => x.ceventId == ceventId).toSet

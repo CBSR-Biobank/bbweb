@@ -53,22 +53,19 @@ describe('Component: centreLocationAdd', function() {
   });
 
   it('should display failure information on invalid submit', function() {
-    var $q                  = this.$injector.get('$q'),
-        domainNotificationService = this.$injector.get('domainNotificationService');
+    const err = { message: 'simulated error' },
+          $q = this.$injector.get('$q'),
+          domainNotificationService = this.$injector.get('domainNotificationService');
 
     this.createController(this.centre);
 
-    spyOn(domainNotificationService, 'updateErrorModal').and.callFake(function () {});
-    spyOn(this.Centre.prototype, 'addLocation').and.callFake(function () {
-      var deferred = $q.defer();
-      deferred.reject('err');
-      return deferred.promise;
-    });
+    spyOn(domainNotificationService, 'updateErrorModal').and.returnValue(null);
+    spyOn(this.Centre.prototype, 'addLocation').and.returnValue($q.reject(err));
 
     this.controller.submit(this.location);
     this.scope.$digest();
     expect(domainNotificationService.updateErrorModal)
-      .toHaveBeenCalledWith('err', 'location');
+      .toHaveBeenCalledWith(err, 'location');
   });
 
 

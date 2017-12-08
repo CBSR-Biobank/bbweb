@@ -5,6 +5,7 @@ import play.api.libs.json._
 package access {
 
   final case class AccessItemNameDto(id:             String,
+                                     slug:           String,
                                      name:           String,
                                      accessItemType: String)
 

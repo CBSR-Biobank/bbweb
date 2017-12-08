@@ -16,7 +16,6 @@ class Controller {
               Membership,
               breadcrumbService,
               gettextCatalog,
-              EntityName,
               EntityInfo,
               UserName,
               StudyName,
@@ -30,7 +29,6 @@ class Controller {
       Membership,
       breadcrumbService,
       gettextCatalog,
-      EntityName,
       EntityInfo,
       UserName,
       StudyName,
@@ -74,7 +72,7 @@ class Controller {
 
   userSelected() {
     return (selection) => {
-      this.membership.userData.push(this.entityNameToEntityInfo(selection))
+      this.membership.userData.push(selection)
     }
   }
 
@@ -101,7 +99,7 @@ class Controller {
   studySelected() {
     return (selection) => {
       this.membership.studyData.allEntities = false
-      this.membership.studyData.entityData.push(this.entityNameToEntityInfo(selection))
+      this.membership.studyData.entityData.push(selection)
       this.setValidity()
     }
   }
@@ -139,7 +137,7 @@ class Controller {
   centreSelected() {
     return (selection) => {
       this.membership.centreData.allEntities = false
-      this.membership.centreData.entityData.push(this.entityNameToEntityInfo(selection))
+      this.membership.centreData.entityData.push(selection)
       this.setValidity()
     }
   }
@@ -185,10 +183,6 @@ class Controller {
 
   cancel() {
     this.$state.go(this.returnState)
-  }
-
-  entityNameToEntityInfo(name)  {
-    return this.EntityInfo.create(_.pick(name, 'id', 'name'))
   }
 
   entityInfoToUserName(name)  {

@@ -36,11 +36,7 @@ class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
 
   def nextIdentity: CollectionEventId = new CollectionEventId(nextIdentityAsString)
 
-  def notFound(id: CollectionEventId): IdNotFound = IdNotFound(s"collection event id: $id")
-
-  override def getByKey(id: CollectionEventId): DomainValidation[CollectionEvent] = {
-    getMap.get(id).toSuccessNel(notFound(id).toString)
-  }
+  protected def notFound(id: CollectionEventId): IdNotFound = IdNotFound(s"collection event id: $id")
 
   def withId(participantId: ParticipantId, collectionEventId: CollectionEventId)
       : DomainValidation[CollectionEvent] = {

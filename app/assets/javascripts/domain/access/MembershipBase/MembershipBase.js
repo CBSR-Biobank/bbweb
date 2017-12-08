@@ -67,21 +67,34 @@ function MembershipBaseFactory($q,
   MembershipBase.prototype = Object.create(ConcurrencySafeEntity.prototype);
   MembershipBase.prototype.constructor = MembershipBase;
 
-  MembershipBase.SCHEMA = {
-    'id': 'MembershipBase',
-    'type': 'object',
+  MembershipBase.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'MembershipBase',
     properties: {
-      'id':           { 'type': 'string' },
-      'version':      { 'type': 'integer', 'minimum': 0 },
-      'timeAdded':    { 'type': 'string' },
-      'timeModified': { 'type': [ 'string', 'null' ] },
+      'slug':         { 'type': 'string' },
       'name':         { 'type': 'string' },
       'description':  { 'type': [ 'string', 'null' ] },
       'studyData':    { 'type': 'object', 'items': { '$ref': 'EntitySet' } },
       'centreData':   { 'type': 'object', 'items': { '$ref': 'EntitySet' } }
     },
-    'required': [ 'id', 'version', 'timeAdded', 'studyData', 'centreData' ]
-  };
+    required: [ 'id', 'version', 'timeAdded', 'studyData', 'centreData' ]
+  });
+
+  MembershipBase.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = {} } = {}) {
+    return Object.assign(
+      {},
+      MembershipBase.SCHEMA,
+      {
+        id: id,
+        type: type,
+        properties: Object.assign(
+          {},
+          MembershipBase.SCHEMA.properties,
+          properties
+        ),
+        required: MembershipBase.SCHEMA.required.slice().concat(required)
+      }
+    );
+  }
 
   MembershipBase.prototype.isForAllStudies = function () {
     return this.studyData.isForAllEntities();

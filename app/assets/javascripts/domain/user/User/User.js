@@ -83,14 +83,10 @@ function UserFactory($q,
     return DomainEntity.url.apply(null, args);
   };
 
-  User.SCHEMA = {
-    'id': 'User',
-    'type': 'object',
-    'properties': {
-      'id':           { 'type': 'string' },
-      'version':      { 'type': 'integer', 'minimum': 0 },
-      'timeAdded':    { 'type': 'string' },
-      'timeModified': { 'type': [ 'string', 'null' ] },
+  User.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'User',
+    properties: {
+      'slug':         { 'type': 'string' },
       'name':         { 'type': 'string' },
       'email':        { 'type': 'string' },
       'avatarUrl':    { 'type': [ 'string', 'null' ] },
@@ -103,8 +99,8 @@ function UserFactory($q,
         ]
       }
     },
-    'required': [ 'id', 'version', 'timeAdded', 'name', 'email', 'state' ]
-  };
+    required: [ 'slug', 'name', 'state', 'email' ]
+  });
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.users.User|User}.
@@ -163,12 +159,12 @@ function UserFactory($q,
   /**
    * Retrieves a User from the server.
    *
-   * @param {string} id the ID of the user to retrieve.
+   * @param {string} slug the slug for the user to retrieve.
    *
    * @returns {Promise<domain.users.User>} The user within a promise.
    */
-  User.get = function(id) {
-    return biobankApi.get(User.url(id)).then(User.prototype.asyncCreate);
+  User.get = function(slug) {
+    return biobankApi.get(User.url(slug)).then(User.prototype.asyncCreate);
   };
 
   /**
@@ -307,16 +303,32 @@ function UserFactory($q,
   };
 
   User.prototype.hasStudyAdminRole = function () {
-    return this.hasRole('StudyAdministrator');
+    return this.hasRole('study-administrator');
   };
 
   User.prototype.hasCentreAdminRole = function () {
-    return this.hasRole('CentreAdministrator');
+    return this.hasRole('centre-administrator');
   };
 
   User.prototype.hasUserAdminRole = function () {
-    return this.hasRole('UserAdministrator');
+    return this.hasRole('user-administrator');
   };
+
+  User.prototype.hasAdminRole = function () {
+    return this.hasAnyRoleOf('study-administrator',
+                             'centre-administrator',
+                             'user-administrator');
+  };
+
+  User.prototype.hasSpecimenCollectorRole = function () {
+     return this.hasRole('specimen-collector');
+  };
+
+
+  User.prototype.hasShippingUserRole = function () {
+    return this.hasRole('shipping-user');
+  };
+
 
   function changeStatus(user, state) {
     var json = {

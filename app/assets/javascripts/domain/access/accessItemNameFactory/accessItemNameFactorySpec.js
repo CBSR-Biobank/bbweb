@@ -4,7 +4,7 @@
  */
 /* global angular */
 
-import * as sharedBehaviour from '../../../test/behaviours/entityNameSharedBehaviour'
+import * as sharedBehaviour from '../../../test/behaviours/entityInfoSharedBehaviour'
 import ngModule from '../../index'
 
 describe('accessItemNameFactory', function() {
@@ -48,7 +48,7 @@ describe('accessItemNameFactory', function() {
       context.listFunc = (options) => this.accessItemNameFactory.list(options)
     })
 
-    sharedBehaviour.entityNameListSharedBehaviour(context)
+    sharedBehaviour.entityInfoListSharedBehaviour(context)
 
   })
 

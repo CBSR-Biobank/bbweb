@@ -32,6 +32,15 @@ trait UsersService extends BbwebService {
   def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[User]
 
   /**
+   * Returns a user for the given slug.
+   *
+   * @param requestUserId the ID of the user making the request.
+   *
+   * @param slug the slug for the given user.
+   */
+  def getUserBySlug(requestUserId: UserId, slug: String): ServiceValidation[User]
+
+  /**
    * Should not be used by the REST API since permissions are not checked.
    *
    * @param id the ID of the user to return.
@@ -104,6 +113,18 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
         userRepository.getByKey(id)
       } else {
         Unauthorized.failureNel[User]
+      }
+    }
+  }
+
+  def getUserBySlug(requestUserId: UserId, slug: String): ServiceValidation[User] = {
+    accessService.hasPermission(requestUserId, PermissionId.UserRead).flatMap { permission =>
+      userRepository.getBySlug(slug).flatMap { user =>
+        if (permission || (requestUserId == user.id)) {
+          user.successNel[String]
+        } else {
+          Unauthorized.failureNel[User]
+        }
       }
     }
   }

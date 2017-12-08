@@ -54,7 +54,7 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
                                                           filterAndSort.filter,
                                                           filterAndSort.sort)
           } yield {
-            items.map(i => AccessItemNameDto(i.id.id, i.name, i.accessItemType.id))
+            items.map(i => AccessItemNameDto(i.id.id, i.slug, i.name, i.accessItemType.id))
           }
         }
       )
@@ -90,25 +90,23 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
                                                     filterAndSort.filter,
                                                     filterAndSort.sort)
           } yield {
-            roles.map(r => NameDto(r.id.id, r.name))
+            roles.map(r => EntityInfoDto(r.id.id, r.slug, r.name))
           }
         }
       )
     }
 
-  def getRole(roleId: AccessItemId): Action[Unit] =
+  def getRoleBySlug(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val v = accessService.getRole(request.authInfo.userId, roleId)
+      val v = accessService.getRoleBySlug(request.authInfo.userId, slug)
         .flatMap(role => roleToDto(request.authInfo.userId, role))
       validationReply(v)
     }
 
-  def getMembership(membershipId: MembershipId): Action[Unit] =
+  def getMembershipBySlug(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val v = for {
-          membership <- accessService.getMembership(request.authInfo.userId, membershipId)
-          dto        <- membershipToDto(request.authInfo.userId, membership)
-        } yield dto
+      val v = accessService.getMembershipBySlug(request.authInfo.userId, slug)
+        .flatMap(membership => membershipToDto(request.authInfo.userId, membership))
       validationReply(v)
     }
 
@@ -336,7 +334,7 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
 
   private def entityInfoDto[T <: ConcurrencySafeEntity[_] with HasUniqueName]
     (entities: Set[T]): Set[EntityInfoDto] = {
-    entities.map { entity => EntityInfoDto(entity.id.toString, entity.name) }
+    entities.map { entity => EntityInfoDto(entity.id.toString, entity.slug, entity.name) }
   }
 
   private def entitySetDto[T <: ConcurrencySafeEntity[_] with HasUniqueName]

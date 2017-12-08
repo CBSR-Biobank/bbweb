@@ -19,7 +19,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.users.manage.user', {
-      url: '/:userId',
+      url: '/:slug',
       resolve: {
         user: resolveUser
       },
@@ -34,7 +34,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.users.roles.role', {
-      url: '/{roleId}',
+      url: '/:slug',
       resolve: {
         role: resolveRole
       },
@@ -55,7 +55,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.users.memberships.membership', {
-      url: '/{membershipId}',
+      url: '/:slug',
       resolve: {
         membership: resolveMembership
       },
@@ -66,23 +66,23 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveUser($transition$, User, resourceErrorService) {
-    const userId = $transition$.params().userId
-    return User.get(userId)
-      .catch(resourceErrorService.goto404(`user ID not found: ${userId}`))
-  }
-
-  /* @ngInject */
-  function resolveMembership($transition$, Membership, resourceErrorService) {
-    const id = $transition$.params().membershipId
-    return Membership.get(id)
-      .catch(resourceErrorService.goto404(`memberhsip ID not found: ${id}`))
+    const slug = $transition$.params().slug
+    return User.get(slug)
+      .catch(resourceErrorService.goto404(`user slug not found: ${slug}`))
   }
 
   /* @ngInject */
   function resolveRole($transition$, Role, resourceErrorService) {
-    const id = $transition$.params().roleId
-    return Role.get(id)
-      .catch(resourceErrorService.goto404(`role ID not found: ${id}`))
+    const slug = $transition$.params().slug
+    return Role.get(slug)
+      .catch(resourceErrorService.goto404(`role slug not found: ${slug}`))
+  }
+
+  /* @ngInject */
+  function resolveMembership($transition$, Membership, resourceErrorService) {
+    const slug = $transition$.params().slug
+    return Membership.get(slug)
+      .catch(resourceErrorService.goto404(`memberhsip slug not found: ${slug}`))
   }
 
 }

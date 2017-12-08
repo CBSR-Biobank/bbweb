@@ -38,7 +38,7 @@ class RoleViewController {
   }
 
   $onInit() {
-    this.userCanUpdate = this.userService.getCurrentUser().hasRole('UserAdministrator')
+    this.userCanUpdate = this.userService.getCurrentUser().hasUserAdminRole()
 
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),

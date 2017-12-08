@@ -25,11 +25,7 @@ class SpecimenGroupRepositoryImpl
 
   def nextIdentity: SpecimenGroupId = new SpecimenGroupId(nextIdentityAsString)
 
-  def notFound(id: SpecimenGroupId): IdNotFound = IdNotFound(s"specimen group id: $id")
-
-  override def getByKey(id: SpecimenGroupId): DomainValidation[SpecimenGroup] = {
-    getMap.get(id).toSuccessNel(notFound(id).toString)
-  }
+  protected def notFound(id: SpecimenGroupId): IdNotFound = IdNotFound(s"specimen group id: $id")
 
   def allForStudy(studyId: StudyId): Set[SpecimenGroup] = {
     getValues.filter(x => x.studyId == studyId).toSet

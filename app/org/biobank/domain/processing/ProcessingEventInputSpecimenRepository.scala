@@ -25,9 +25,15 @@ trait ProcessingEventInputSpecimenRepository
 class ProcessingEventInputSpecimenRepositoryImpl
     extends ReadWriteRepositoryRefImpl[ProcessingEventInputSpecimenId, ProcessingEventInputSpecimen](v => v.id)
     with ProcessingEventInputSpecimenRepository {
-  //import org.biobank.CommonValidations._
 
-  def nextIdentity: ProcessingEventInputSpecimenId = new ProcessingEventInputSpecimenId(nextIdentityAsString)
+  import org.biobank.CommonValidations._
+
+  def nextIdentity: ProcessingEventInputSpecimenId =
+    new ProcessingEventInputSpecimenId(nextIdentityAsString)
+
+  protected def notFound(id: ProcessingEventInputSpecimenId): IdNotFound =
+    IdNotFound(s"processing event input specimen type: $id")
+
 
   // private def processingEventIdCriteriaError(processingEventId: ProcessingEventId) =
   //   EntityCriteriaError(

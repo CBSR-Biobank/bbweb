@@ -36,7 +36,10 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
 
   def nextIdentity: AccessItemId = new AccessItemId(nextIdentityAsString)
 
-  def accessItemNotFound(id: AccessItemId): IdNotFound = IdNotFound(s"access item id: $id")
+  protected def notFound(id: AccessItemId): IdNotFound = IdNotFound(s"access item id: $id")
+
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+    EntityCriteriaNotFound(s"access item slug: $slug")
 
   override def init(): Unit = {
     super.init()
@@ -47,10 +50,6 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
         put(role.copy(userIds = role.userIds + userId))
       }
     }
-  }
-
-  override def getByKey(id: AccessItemId): DomainValidation[AccessItem] = {
-    getMap.get(id).toSuccessNel(accessItemNotFound(id).toString)
   }
 
   def getRole(id: AccessItemId): DomainValidation[Role] = {
@@ -246,7 +245,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
                                "User can update shipments",
                                Set(RoleId.ShippingAdministrator))
       )
-    permissions.foreach(put)
+    permissions.foreach(p => put(p.copy(slug = slug(p.name))))
   }
 
   private def createPermission(permissionId: PermissionId,
@@ -275,7 +274,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
 
         createRole(roleId      = RoleId.UserAdministrator,
                    description = "UserAdministrator",
-                   parentIds   = Set(RoleId.SystemAdministrator),
+                   parentIds   = Set(RoleId.WebsiteAdministrator),
                    childrenIds = Set(PermissionId.UserUpdate,
                                      PermissionId.UserChangeState,
                                      PermissionId.UserRead,
@@ -290,7 +289,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
 
         createRole(roleId      = RoleId.CentreAdministrator,
                    description = "Centre Administrator",
-                   parentIds   = Set(RoleId.SystemAdministrator),
+                   parentIds   = Set(RoleId.WebsiteAdministrator),
                    childrenIds = Set(PermissionId.CentreUpdate,
                                      PermissionId.CentreChangeState,
                                      RoleId.CentreUser,
@@ -306,7 +305,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
 
         createRole(roleId      = RoleId.StudyAdministrator,
                    description = "Study Administrator",
-                   parentIds   = Set(RoleId.SystemAdministrator),
+                   parentIds   = Set(RoleId.WebsiteAdministrator),
                    childrenIds = Set(PermissionId.StudyUpdate,
                                      PermissionId.StudyChangeState,
                                      RoleId.StudyUser)),
@@ -335,8 +334,8 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
                                      PermissionId.SpecimenRead,
                                      PermissionId.CollectionEventRead)),
 
-        createRole(roleId      = RoleId.SystemAdministrator,
-                   description = "SystemAdministrator",
+        createRole(roleId      = RoleId.WebsiteAdministrator,
+                   description = "WebsiteAdministrator",
                    userIds     = Set(Global.DefaultUserId),
                    parentIds   = Set.empty[AccessItemId],
                    childrenIds = Set(PermissionId.StudyCreate,
@@ -350,7 +349,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
       )
 
 
-    roles.foreach(put)
+    roles.foreach(r => put(r.copy(slug = slug(r.name))))
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))

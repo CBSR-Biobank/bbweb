@@ -55,20 +55,13 @@ function MembershipFactory($q,
     return DomainEntity.url.apply(null, [ 'access/memberships' ].concat(pathItems));
   };
 
-  Membership.SCHEMA = Object.assign(
-    {},
-    MembershipBase.SCHEMA,
-    {
-      'id': 'Membership',
-      'type': 'object',
-      'properties': Object.assign(
-        {},
-        MembershipBase.SCHEMA.properties,
-        { 'userData':  { 'type': 'array', 'items': { '$ref': 'EntityInfo' } } }
-      ),
-      'required': MembershipBase.SCHEMA.required.slice().concat('userData')
-    }
-  );
+  Membership.SCHEMA = MembershipBase.createDerivedSchema({
+    id: 'Membership',
+    properties: {
+      'userData':  { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
+    },
+    required: [ 'userData' ]
+  });
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.access.Membership|Membership}.
@@ -133,12 +126,12 @@ function MembershipFactory($q,
   /**
    * Retrieves a Membership from the server.
    *
-   * @param {string} id the ID of the membership to retrieve.
+   * @param {string} slug the slug of the membership to retrieve.
    *
    * @returns {Promise<domain.access.Membership>} The membership within a promise.
    */
-  Membership.get = function(id) {
-    return biobankApi.get(Membership.url(id)).then(Membership.asyncCreate);
+  Membership.get = function(slug) {
+    return biobankApi.get(Membership.url(slug)).then(Membership.asyncCreate);
   };
 
   /**

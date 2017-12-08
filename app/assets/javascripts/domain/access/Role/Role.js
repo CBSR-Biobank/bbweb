@@ -134,22 +134,13 @@ function RoleFactory($q,
 
   }
 
-  Role.SCHEMA = Object.assign(
-    {},
-    AccessItem.SCHEMA,
-    {
-      'id': 'Role',
-      'type': 'object',
-      'properties': Object.assign(
-        {},
-        AccessItem.SCHEMA.properties,
-        {
-          'userData': { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
-        }
-      ),
-      'required': AccessItem.SCHEMA.required.slice().concat('userData')
-    }
-  );
+  Role.SCHEMA = AccessItem.createDerivedSchema({
+    id: 'Role',
+    properties: {
+      'userData': { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
+    },
+    required: [ 'userData' ]
+  });
 
   Role.url = function (...pathItems) {
     return DomainEntity.url.apply(null, [ 'access/roles' ].concat(pathItems));

@@ -25,11 +25,7 @@ class ProcessingTypeRepositoryImpl
 
   def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 
-  def notFound(id: ProcessingTypeId): IdNotFound = IdNotFound(s"processing type id: $id")
-
-  override def getByKey(id: ProcessingTypeId): DomainValidation[ProcessingType] = {
-    getMap.get(id).toSuccessNel(notFound(id).toString)
-  }
+  protected def notFound(id: ProcessingTypeId): IdNotFound = IdNotFound(s"processing type id: $id")
 
   def withId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : DomainValidation[ProcessingType] = {

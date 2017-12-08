@@ -6,7 +6,6 @@ import com.google.inject.ImplementedBy
 import javax.inject._
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId._
-import org.biobank.domain.access.RoleId._
 import org.biobank.domain.user.{UserId, UserRepository}
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.centre.{CentreId, CentreRepository}
@@ -33,9 +32,11 @@ trait AccessService extends BbwebService {
 
   def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[Role]
 
+  def getRoleBySlug(requestUserId: UserId, slug: String): ServiceValidation[Role]
+
   def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]]
 
-  def getUserRoles(userId: UserId): Set[RoleId]
+  def getUserRoles(userId: UserId): Set[Role]
 
   //def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]]
 
@@ -51,6 +52,8 @@ trait AccessService extends BbwebService {
                                centreId:     Option[CentreId]): ServiceValidation[Boolean]
 
   def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership]
+
+  def getMembershipBySlug(requestUserId: UserId, slug: String): ServiceValidation[Membership]
 
   def getMemberships(requestUserId: UserId,
                      filter:        FilterString,
@@ -86,8 +89,8 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getUserRoles(userId: UserId): Set[RoleId] = {
-    accessItemRepository.rolesForUser(userId).map(r => RoleId.withName(r.id.id))
+  def getUserRoles(userId: UserId): Set[Role] = {
+    accessItemRepository.rolesForUser(userId)
   }
 
   def getAccessItems(requestUserId: UserId,
@@ -116,6 +119,20 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
   def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[Role] = {
     whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
       accessItemRepository.getRole(roleId)
+    }
+  }
+
+  def getRoleBySlug(requestUserId: UserId, slug: String): ServiceValidation[Role] = {
+    whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
+      for {
+        item <- accessItemRepository.getBySlug(slug)
+        role <- {
+          item match {
+            case role: Role => role.successNel[String]
+            case _ => EntityCriteriaError(s"access item not a role: $id").failureNel[Role]
+          }
+        }
+      } yield role
     }
   }
 
@@ -185,6 +202,12 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
   def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership] = {
     whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
       membershipRepository.getByKey(membershipId)
+    }
+  }
+
+  def getMembershipBySlug(requestUserId: UserId, slug: String): ServiceValidation[Membership] = {
+    whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
+      membershipRepository.getBySlug(slug)
     }
   }
 

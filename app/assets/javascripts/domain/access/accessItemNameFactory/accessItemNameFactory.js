@@ -6,14 +6,14 @@ class AccessItemNameFactory {
   constructor(biobankApi,
               DomainEntity,
               DomainError,
-              EntityName,
+              EntityInfo,
               RoleName,
               PermissionName) {
     Object.assign(this, {
       biobankApi,
       DomainEntity,
       DomainError,
-      EntityName,
+      EntityInfo,
       RoleName,
       PermissionName
     })
@@ -28,7 +28,7 @@ class AccessItemNameFactory {
             }
             throw new this.DomainError('access item name type is invalid: ' + obj.accessItemType)
           }
-    return this.EntityName.list(url, options, createFunc, omit)
+    return this.EntityInfo.list(url, options, createFunc, omit)
   }
 
 }

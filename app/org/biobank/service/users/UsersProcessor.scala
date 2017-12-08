@@ -443,8 +443,11 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
   private def applyNameUpdatedEvent(event: UserEvent): Unit = {
     onValidUserActiveEvent(event) { (user, eventTime) =>
-      val v = user.withName(event.getWhenActive.getNameUpdated.getName)
-      v.foreach(u => userRepository.put(u.copy(timeModified = Some(eventTime))))
+      val v = user.withName(event.getWhenActive.getNameUpdated.getName).map { u =>
+          u.copy(slug         = userRepository.slug(u.name),
+                 timeModified = Some(eventTime))
+        }
+      v.foreach(userRepository.put)
       v.map(_ => true)
     }
   }

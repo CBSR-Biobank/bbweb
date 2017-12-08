@@ -3,7 +3,7 @@ package org.biobank.controllers.users
 import org.biobank.infrastructure.command.Commands._
 import javax.inject.{Inject, Singleton}
 import org.biobank.dto._
-import org.biobank.domain.access.RoleId._
+import org.biobank.domain.access.Role
 import org.biobank.domain.user._
 import org.biobank.controllers._
 import org.biobank.infrastructure.command.UserCommands._
@@ -129,15 +129,15 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
                                                    filterAndSort.filter,
                                                    filterAndSort.sort)
           } yield {
-            users.map(user => NameAndStateDto(user.id.id, user.name, user.state.id))
+            users.map(user => NameAndStateDto(user.id.id, user.slug, user.name, user.state.id))
           }
         }
       )
     }
 
-  /** Retrieves the user for the given id as JSON */
-  def user(id: UserId): Action[Unit] = action(parse.empty) { implicit request =>
-      val v = usersService.getUserIfAuthorized(request.authInfo.userId, id)
+  def getBySlug(slug: String): Action[Unit] =
+    action(parse.empty) { implicit request =>
+      val v = usersService.getUserBySlug(request.authInfo.userId, slug)
         .map(user =>  userToDto(user, accessService.getUserRoles(user.id)))
       validationReply(v)
     }
@@ -219,7 +219,7 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
     validationReply(usersService.processCommand(cmd))
   }
 
-  private def userToDto(user: User, roles: Set[RoleId]): UserDto = {
+  private def userToDto(user: User, roles: Set[Role]): UserDto = {
     UserDto(id           = user.id.id,
             version      = user.version,
             timeAdded    = user.timeAdded,
@@ -229,7 +229,7 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
             name         = user.name,
             email        = user.email,
             avatarUrl    = user.avatarUrl,
-            roles        = roles,
+            roles        = roles.map(r => r.slug),
             membership   = None)
   }
 }

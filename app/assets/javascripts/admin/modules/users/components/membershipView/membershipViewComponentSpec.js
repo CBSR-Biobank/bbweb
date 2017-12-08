@@ -59,7 +59,7 @@ describe('membershipViewComponent', function() {
     expect(this.controller.centreNameLabels).toBeArray()
   })
 
-  it('has valid user labels', function() {
+  fit('has valid user labels', function() {
     const userName = this.UserName.create(this.Factory.userNameDto())
     const membership = this.Membership.create(this.Factory.membership({ userData: [ userName ] }))
     this.createController(membership)
