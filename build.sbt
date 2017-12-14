@@ -4,8 +4,7 @@ val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 
 version := conf.getString("app.version")
 
-val akkaVer = "2.5.6"
-val angularVer = "1.6.5"
+val akkaVer = "2.5.8"
 
 name := "bbweb"
 
@@ -93,7 +92,7 @@ libraryDependencies ++= Seq(
     ehcache,
     filters,
     "org.scala-stm"               %% "scala-stm"                           % "0.8",
-    "com.typesafe.play"           %% "play-json"                           % "2.6.7",
+    "com.typesafe.play"           %% "play-json"                           % "2.6.8",
     ( "com.typesafe.akka"         %% "akka-persistence"                    % akkaVer   % "compile"  )
       .excludeAll(ExclusionRule(organization="com.google.protobuf")),
     "com.typesafe.akka"           %% "akka-persistence-query"              % akkaVer   % "compile",
@@ -101,7 +100,7 @@ libraryDependencies ++= Seq(
     ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "3.0.1" % "compile"  )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "mysql"                       % "mysql-connector-java"                 % "8.0.8-dmr",
-    "org.scalaz"                  %% "scalaz-core"                         % "7.2.16"  % "compile",
+    "org.scalaz"                  %% "scalaz-core"                         % "7.2.17"  % "compile",
     "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
     "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.1",
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
@@ -115,8 +114,8 @@ libraryDependencies ++= Seq(
     "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
     "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.2"   % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
-    "org.codehaus.janino"         %  "janino"                              % "3.0.7"   % "test",
-    "org.mockito"                 %  "mockito-core"                        % "2.11.0"  % "test"
+    "org.codehaus.janino"         %  "janino"                              % "3.0.8"   % "test",
+    "org.mockito"                 %  "mockito-core"                        % "2.13.0"  % "test"
   )
 
 routesGenerator := InjectedRoutesGenerator
