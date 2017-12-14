@@ -13,13 +13,12 @@ var component = {
   controller: SelectStudyController,
   controllerAs: 'vm',
   bindings: {
-    getHeader:              '&',
-    getStudies:             '&',
-    limit:                  '<',
-    messageNoResults:       '@',
-    icon:                   '@',
-    navigateStateName:      '@',
-    navigateStateParamName: '@'
+    header:           '@',
+    getStudies:       '&',
+    limit:            '<',
+    messageNoResults: '@',
+    icon:             '@',
+    onStudySelected:  '&'
   }
 };
 
@@ -109,10 +108,8 @@ function SelectStudyController($state, gettextCatalog, modalService) {
 
   function studySelected(study) {
     study.allLocations().then(function (reply) {
-      var stateParam = {};
-      if (reply.length > 0) {
-        stateParam[vm.navigateStateParamName] = study.id;
-        $state.go(vm.navigateStateName, stateParam);
+      if ((reply.length > 0) && vm.onStudySelected()) {
+        vm.onStudySelected()(study);
       } else {
         modalService.modalOk(
           gettextCatalog.getString('Centre Configuration'),

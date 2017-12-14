@@ -76,7 +76,7 @@ function ConcurrencySafeEntityFactory($q,
       'timeAdded':    { 'type': 'string'},
       'timeModified': { 'type': [ 'string', 'null' ] }
     },
-    'required': [ 'id', 'version', 'timeAdded', 'name' ]
+    'required': [ 'id', 'version', 'timeAdded' ]
   };
 
   ConcurrencySafeEntity.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = {} } = {}) {

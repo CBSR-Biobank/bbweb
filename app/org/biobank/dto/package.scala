@@ -96,7 +96,8 @@ package dto {
                                timeCreated:              OffsetDateTime,
                                amount:                   BigDecimal,
                                units:                    String,
-                               isDefaultAmount:          Boolean)
+                               isDefaultAmount:          Boolean,
+                               eventTypeName:            String)
 
   object SpecimenDto {
 

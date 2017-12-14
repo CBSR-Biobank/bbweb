@@ -27,9 +27,10 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
 
   private val PageSizeMax = 10
 
-  def get(studySlug: String, eventTypeSlug: String): Action[Unit] =
+  def get(studyId: StudyId, ceventTypeId: CollectionEventTypeId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val ceventType = service.eventTypeBySlug(request.authInfo.userId, studySlug, eventTypeSlug)
+      log.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
+      val ceventType = service.eventTypeWithId(request.authInfo.userId, studyId, ceventTypeId)
       validationReply(ceventType)
     }
 

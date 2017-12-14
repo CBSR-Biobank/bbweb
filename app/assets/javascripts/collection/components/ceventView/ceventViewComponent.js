@@ -36,14 +36,22 @@ class CeventViewController {
       annotationUpdate,
       resourceErrorService
     })
+
+    this.annotationLabels = {}
   }
 
   //--
 
   $onInit() {
     this.panelOpen = true
+
     // need to initialize annotations on collection event in the case they have not been assigned
-    this.collectionEvent.setCollectionEventType(this.collectionEventType)
+    this.CollectionEventType.get(this.study.id, this.collectionEvent.collectionEventTypeId)
+      .then(eventType => {
+        this.collectionEventType = eventType;
+        this.collectionEvent.setCollectionEventType(this.collectionEventType)
+        this.setAnnotationLabels()
+      })
   }
 
   postUpdate(message, title, timeout) {
@@ -115,9 +123,11 @@ class CeventViewController {
       })
   }
 
-  getAnnotationUpdateButtonTitle(annotation) {
-    /// label is a name assigned by the user for an annotation type
-    return this.gettextCatalog.getString('Update {{label}}', { label: annotation.getLabel() })
+  setAnnotationLabels() {
+    this.annotationLabels = []
+    this.collectionEvent.annotations.forEach(annotation => {
+      this.annotationLabels[annotation.annotationTypeId] = annotation.getLabel()
+    })
   }
 
 }
@@ -129,7 +139,6 @@ var component = {
   bindings: {
     study:               '<',
     participant:         '<',
-    collectionEventType: '<',
     collectionEvent:     '<'
   }
 }

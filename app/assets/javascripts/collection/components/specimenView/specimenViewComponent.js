@@ -3,8 +3,6 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 /*
  * Displays the details for a single specimen and also allows the user to update certain fields.
  */
@@ -13,19 +11,20 @@ class SpecimenViewController {
   constructor($state,
               gettextCatalog,
               breadcrumbService,
-              specimenStateLabelService) {
+              specimenStateLabelService,
+              CollectionEventType,
+              resourceErrorService) {
     Object.assign(this, {
       $state,
       gettextCatalog,
       breadcrumbService,
-      specimenStateLabelService
+      specimenStateLabelService,
+      CollectionEventType,
+      resourceErrorService
     })
   }
 
   $onInit() {
-    this.specimenDescription = _.find(this.collectionEventType.specimenDescriptions,
-                                      { id: this.specimen.specimenDescriptionId });
-
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),
       this.breadcrumbService.forState('home.collection'),
@@ -62,7 +61,6 @@ var component = {
   bindings: {
     study:               '<',
     participant:         '<',
-    collectionEventType: '<',
     collectionEvent:     '<',
     specimen:            '<'
   }

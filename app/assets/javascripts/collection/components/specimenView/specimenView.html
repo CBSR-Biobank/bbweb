@@ -49,10 +49,20 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3">
-          <strong translate>Visit</strong>
+          <strong translate>Visit #</strong>
         </div>
         <div class="col-md-7">
-          {{vm.collectionEventType.name}}
+          {{vm.collectionEvent.visitNumber}}
+        </div>
+      </div>
+    </li>
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-3">
+          <strong translate>Event type</strong>
+        </div>
+        <div class="col-md-7">
+          {{vm.specimen.eventTypeName}}
         </div>
       </div>
     </li>
@@ -62,7 +72,7 @@
           <strong translate>Specimen Type</strong>
         </div>
         <div class="col-md-7">
-          {{vm.specimenDescription.name}}
+          {{vm.specimen.specimenDescriptionName}}
         </div>
       </div>
     </li>

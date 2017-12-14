@@ -210,7 +210,7 @@ class SpecimensServiceImpl @Inject() (
       val locationInfo = CentreLocationInfo(centre.id.id,
                                             specimen.locationId.id,
                                             locationName)
-      specimen.createDto(cevent, specimenDesc, originLocationInfo, locationInfo)
+      specimen.createDto(cevent, ceventType.name, specimenDesc, originLocationInfo, locationInfo)
     }
   }
 

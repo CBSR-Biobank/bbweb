@@ -152,6 +152,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
+                                           e.ceventType,
                                            e.specimenDescription,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
@@ -189,6 +190,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
+                                           e.ceventType,
                                            e.specimenDescription,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
@@ -223,6 +225,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
+                                           e.ceventType,
                                            e.specimenDescription,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
@@ -257,6 +260,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         storeSpecimens(e.cevent, specimens)
 
         val specimenDto = specimens(0).createDto(e.cevent,
+                                                 e.ceventType.name,
                                                  e.specimenDescription,
                                                  e.centreLocationInfo,
                                                  e.centreLocationInfo)
@@ -280,6 +284,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         storeSpecimens(e.cevent, specimens)
 
         val specimenDto = specimens(1).createDto(e.cevent,
+                                                 e.ceventType.name,
                                                  e.specimenDescription,
                                                  e.centreLocationInfo,
                                                  e.centreLocationInfo)

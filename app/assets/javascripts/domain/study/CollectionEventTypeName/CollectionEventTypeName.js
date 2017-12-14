@@ -7,7 +7,7 @@
 function CollectionEventTypeNameFactory($q,
                                         $log,
                                         biobankApi,
-                                        EntityName,
+                                        EntityInfo,
                                         DomainEntity,
                                         DomainError) {
 
@@ -23,7 +23,7 @@ function CollectionEventTypeNameFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-  class CollectionEventTypeName extends EntityName {
+  class CollectionEventTypeName extends EntityInfo {
 
     constructor(obj = {}) {
       super(obj)
@@ -43,7 +43,7 @@ function CollectionEventTypeNameFactory($q,
    * a collectionEventType within asynchronous code.
    */
   CollectionEventTypeName.create = function (obj) {
-    var validation = EntityName.isValid(obj);
+    var validation = EntityInfo.isValid(obj);
     if (!validation.valid) {
       $log.error(validation.message);
       throw new DomainError(validation.message);
@@ -75,7 +75,7 @@ function CollectionEventTypeNameFactory($q,
    * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size
    *        is 10. If a value larger than 10 is used then the response is an error.
    *
-   * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
+   * @param {Array<domain.EntityInfo>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
    * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
@@ -83,7 +83,7 @@ function CollectionEventTypeNameFactory($q,
    */
   CollectionEventTypeName.list = function (studyId, options, omit) {
     const createFunc = (obj) => new CollectionEventTypeName(obj)
-    return EntityName.list(CollectionEventTypeName.url(studyId), options, createFunc, omit);
+    return EntityInfo.list(CollectionEventTypeName.url(studyId), options, createFunc, omit);
   };
 
   return CollectionEventTypeName;

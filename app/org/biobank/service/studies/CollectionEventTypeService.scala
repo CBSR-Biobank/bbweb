@@ -177,7 +177,7 @@ class CollectionEventTypeServiceImpl @Inject()(
                            studyId:       StudyId)
                        (fn: Study => ServiceValidation[T]): ServiceValidation[T] = {
     for {
-      study  <- getDisabledStudy(sessionUserId.id, studyId.id)
+      study  <- studiesService.getStudy(sessionUserId, studyId)
       result <- fn(study)
     } yield result
   }

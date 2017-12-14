@@ -3,54 +3,58 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-var component = {
-  template: require('./collection.html'),
-  controller: CollectionController,
-  controllerAs: 'vm'
-};
-
 /*
  * Controller for this component.
  *
  * The studyCounts object has the following fields: disabled, enabled, and retired.
  */
-/* @ngInject */
-function CollectionController($state,
-                              gettextCatalog,
-                              Study,
-                              breadcrumbService,
-                              resourceErrorService) {
-  var vm = this;
-  vm.$onInit = onInit;
+class CollectionController {
 
-  //---
+  constructor($state,
+              gettextCatalog,
+              Study,
+              breadcrumbService,
+              resourceErrorService) {
+    'ngInject'
+    Object.assign(this, {
+      $state,
+      gettextCatalog,
+      Study,
+      breadcrumbService,
+      resourceErrorService
+    })
 
-  function onInit() {
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.collection'),
-    ];
+    this.isCollectionAllowed = false
+  }
 
-    vm.isCollectionAllowed  = false;
-    vm.updateEnabledStudies  = updateEnabledStudies;
-    vm.getStudiesPanelHeader = getStudiesPanelHeader;
+  $onInit() {
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.collection'),
+    ]
 
-    Study.collectionStudies()
-      .then(function (reply) {
-        vm.isCollectionAllowed = (reply.items.length > 0);
+    this.Study.collectionStudies()
+      .then(reply => {
+        this.isCollectionAllowed = (reply.items.length > 0);
       })
-      .catch(resourceErrorService.checkUnauthorized());
+      .catch(this.resourceErrorService.checkUnauthorized())
   }
 
   // invoked by the SelectStudy directive
-  function updateEnabledStudies(options) {
-    return Study.collectionStudies(options);
+  updateEnabledStudies(options) {
+    return this.Study.collectionStudies(options);
   }
 
-  function getStudiesPanelHeader() {
-    return gettextCatalog.getString('Studies you participate in');
+  studySelected(study) {
+    this.$state.go('home.collection.study', { studySlug: study.slug })
   }
 
+}
+
+const component = {
+  template: require('./collection.html'),
+  controller: CollectionController,
+  controllerAs: 'vm'
 }
 
 export default ngModule => ngModule.component('collection', component)

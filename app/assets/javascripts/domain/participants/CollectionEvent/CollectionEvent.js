@@ -98,30 +98,23 @@ function CollectionEventFactory($q,
    *
    * @see  CollectionEvent.create() and CollectionEvent.asyncCreate.
    */
-  CollectionEvent.SCHEMA = {
-    'id': 'CollectionEvent',
-    'type': 'object',
-    'properties': {
-      'id':                    { 'type': 'string' },
+  CollectionEvent.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'CollectionEvent',
+    properties: {
       'participantId':         { 'type': 'string' },
       'collectionEventTypeId': { 'type': 'string' },
-      'version':               { 'type': 'integer', 'minimum': 0 },
-      'timeAdded':             { 'type': 'string' },
-      'timeModified':          { 'type': [ 'string', 'null' ] },
       'timeCompleted':         { 'type': 'string' },
       'visitNumber':           { 'type': 'integer' },
       'annotations':           { 'type': 'array' }
     },
     'required': [
-      'id',
       'participantId',
       'collectionEventTypeId',
       'timeCompleted',
       'visitNumber',
-      'annotations',
-      'version'
+      'annotations'
     ]
-  };
+  });
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a

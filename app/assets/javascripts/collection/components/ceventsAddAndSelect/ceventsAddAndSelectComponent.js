@@ -3,15 +3,12 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 var component = {
   template: require('./ceventsAddAndSelect.html'),
   controller: CeventsAddAndSelectDirective,
   controllerAs: 'vm',
   bindings: {
     participant:            '<',
-    collectionEventTypes:   '<',
     updateCollectionEvents: '<'
   }
 };
@@ -20,11 +17,12 @@ var component = {
  * Controller for this component.
  */
 /* @ngInject */
-function CeventsAddAndSelectDirective($state, BbwebError, CollectionEvent) {
+function CeventsAddAndSelectDirective($state,
+                                      BbwebError,
+                                      CollectionEvent,
+                                      CollectionEventTypeName) {
   var vm = this;
   vm.$onInit = onInit;
-
-  vm.collectionEventTypes = [];
 
   //--
 
@@ -61,18 +59,6 @@ function CeventsAddAndSelectDirective($state, BbwebError, CollectionEvent) {
     }
   }
 
-  function setCollectionEventType(cevents) {
-    cevents.forEach((cevent) => {
-      var ceventType = _.find(vm.collectionEventTypes, { id: cevent.collectionEventTypeId });
-      if (_.isUndefined(ceventType)) {
-        vm.collectionEventError = true;
-      } else {
-        cevent.setCollectionEventType(ceventType);
-      }
-    });
-    return CollectionEvent.sortByVisitNumber(cevents);
-  }
-
   function getDisplayState() {
     if (vm.pagedResult.total > 0) {
       return vm.displayStates.HAVE_RESULTS;
@@ -87,8 +73,8 @@ function CeventsAddAndSelectDirective($state, BbwebError, CollectionEvent) {
 
   function updateCollectionEvents() {
     CollectionEvent.list(vm.participant.id, vm.pagerOptions).then(function (pagedResult) {
+      vm.collectionEvents = pagedResult.items;
       vm.pagedResult = pagedResult;
-      vm.collectionEvents = setCollectionEventType(pagedResult.items);
       vm.displayState = getDisplayState();
       vm.showPagination = getShowPagination();
       vm.paginationNumPages = pagedResult.maxPages;
@@ -101,12 +87,15 @@ function CeventsAddAndSelectDirective($state, BbwebError, CollectionEvent) {
   }
 
   function add() {
-    if (vm.collectionEventTypes.length > 1) {
-      $state.go('home.collection.study.participant.cevents.add');
-    } else {
-      $state.go('home.collection.study.participant.cevents.add.details',
-                { eventTypeId: vm.collectionEventTypes[0].id });
-    }
+    CollectionEventTypeName.list(vm.participant.studyId)
+      .then(typeNames => {
+        if (typeNames.length > 1) {
+          $state.go('home.collection.study.participant.cevents.add');
+        } else {
+          $state.go('home.collection.study.participant.cevents.add.details',
+                    { eventTypeId: vm.collectionEventTypes[0].id });
+        }
+      })
   }
 
   function eventInformation(cevent) {

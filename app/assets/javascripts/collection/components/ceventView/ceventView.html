@@ -52,14 +52,14 @@
       <li class="list-group-item" ng-repeat="annotation in vm.collectionEvent.annotations">
         <div class="row">
           <div class="col-md-3">
-            <strong>{{annotation.getLabel()}}</strong>
+            <strong>{{vm.annotationLabels[annotation.annotationTypeId]}}</strong>
           </div>
           <div class="col-md-7">
             {{annotation.getDisplayValue()}}
           </div>
           <div class="col-md-2">
             <button class="btn btn-xs btn-primary pull-right"
-                    uib-tooltip="{{vm.getAnnotationUpdateButtonTitle(annotation)}}"
+                    uib-tooltip="{{'Update this annotation'|translate}}"
                     ng-click="vm.editAnnotation(annotation)">
               <i class="glyphicon glyphicon-edit"></i>
             </button>
@@ -73,8 +73,9 @@
   </div>
 </div>
 
-<cevent-specimens-view
-   study="vm.study"
-   collection-event="vm.collectionEvent"
-   on-specimens-updated="vm.specimensUpdated">
+<cevent-specimens-view study="vm.study"
+                       participant="vm.participant"
+                       collection-event-type="vm.collectionEventType"
+                       collection-event="vm.collectionEvent"
+                       on-specimens-updated="vm.specimensUpdated">
 </cevent-specimens-view>

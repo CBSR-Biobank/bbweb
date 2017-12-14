@@ -17,7 +17,7 @@ function config($stateProvider) {
       }
     })
     .state('home.collection.study', {
-      url: '/study/{studyId}',
+      url: '/study/:studySlug',
       resolve: {
         study: resolveStudy
       },
@@ -51,7 +51,7 @@ function config($stateProvider) {
       }
     })
     .state('home.collection.study.participant.cevents', {
-      url: '/cevents',
+      url: '/events',
       views: {
         'participantDetails': 'ceventsList'
       }
@@ -72,10 +72,9 @@ function config($stateProvider) {
       }
     })
     .state('home.collection.study.participant.cevents.details', {
-      url: '/{eventTypeId}/{eventId}',
+      url: '/{eventId}',
       resolve: {
-        collectionEventType: resolveCollectionEventType,
-        collectionEvent:     resolveCollectionEvent
+        collectionEvent: resolveCollectionEvent
       },
       views: {
         'eventDetails': 'ceventView'
@@ -93,9 +92,9 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveStudy($transition$, resourceErrorService, Study) {
-    const id = $transition$.params().studyId
-    return Study.get(id)
-      .catch(resourceErrorService.goto404(`study ID not found: ${id}`))
+    const slug = $transition$.params().studySlug
+    return Study.get(slug)
+      .catch(resourceErrorService.goto404(`study slug not found: ${slug}`))
   }
 
   /* @ngInject */
@@ -105,22 +104,14 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveParticipant($transition$, Participant, resourceErrorService, study) {
-    const studyId        = $transition$.params().studyId,
-          participantId  = $transition$.params().participantId
-    return Participant.get(studyId, participantId)
-      .then((participant) => {
+    const participantId  = $transition$.params().participantId
+    return Participant.get(study.id, participantId)
+      .then(participant => {
         participant.setStudy(study)
         return participant
       })
       .catch(resourceErrorService.goto404(
-        `participant not found: studyId/${studyId}, participantId/${participantId}`))
-  }
-
-  /* @ngInject */
-  function resolveCollectionEventType($transition$, resourceErrorService, study, CollectionEventType) {
-    const id = $transition$.params().eventTypeId;
-    return CollectionEventType.get(study.id, id)
-      .catch(resourceErrorService.goto404(`collectionEventType ID not found: ${id}`))
+        `participant not found: studyId/${study.id}, participantId/${participantId}`))
   }
 
   /* @ngInject */
@@ -128,6 +119,13 @@ function config($stateProvider) {
     const id = $transition$.params().eventId
     return CollectionEvent.get(id)
       .catch(resourceErrorService.goto404(`collectionEvent ID not found: ${id}`))
+  }
+
+  /* @ngInject */
+  function resolveCollectionEventType($transition$, resourceErrorService, study, CollectionEventType) {
+    const typeId = $transition$.params().eventTypeId;
+    return CollectionEventType.get(study.id, typeId)
+      .catch(resourceErrorService.goto404(`collectionEventType not found: studyId/${study.id}, typeId/${typeId}`))
   }
 
   /* @ngInject */

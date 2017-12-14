@@ -19,10 +19,10 @@ var component = {
  * Controller for this component.
  */
 /* @ngInject */
-function CeventsListController($q, $scope, CollectionEventType) {
+function CeventsListController($q, $scope) {
   var vm = this;
   vm.$onInit = onInit;
-  vm.collectionEventTypes = [];
+  vm.updateCollectionEvents = updateCollectionEvents;
 
   //---
 
@@ -30,15 +30,6 @@ function CeventsListController($q, $scope, CollectionEventType) {
     vm.updateCollectionEvents = 0;
 
     $scope.$on('collection-event-updated', updateCollectionEvents);
-
-    CollectionEventType.list(vm.participant.studyId)
-      .then(pagedResults => {
-        vm.collectionEventTypes = pagedResults.items;
-        if (vm.collectionEventTypes.length <= 0) {
-          return $q.reject(new Error('no collection event types defined for this study'));
-        }
-        return $q.when(pagedResults.items);
-      });
   }
 
   function updateCollectionEvents(event) {

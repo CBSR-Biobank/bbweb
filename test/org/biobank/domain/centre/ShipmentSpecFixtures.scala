@@ -226,8 +226,11 @@ trait ShipmentSpecFixtures {
         val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
                                                     specimen.originLocationId.id,
                                                     originLocationName)
-        val specimenDto =
-          specimen.createDto(f.cevent, f.specimenDescription, centreLocationInfo, centreLocationInfo)
+        val specimenDto = specimen.createDto(f.cevent,
+                                             f.ceventType.name,
+                                             f.specimenDescription,
+                                             centreLocationInfo,
+                                             centreLocationInfo)
         (updatedSpecimen.id, new ShipmentSpecimenData(updatedSpecimen,
                                                       specimenDto,
                                                       shipmentSpecimen,

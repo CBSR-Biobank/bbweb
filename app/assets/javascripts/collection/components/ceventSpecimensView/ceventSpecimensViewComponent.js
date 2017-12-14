@@ -8,8 +8,9 @@ var component = {
   controller: CeventSpecimensViewController,
   controllerAs: 'vm',
   bindings: {
-    study:              '<',
-    collectionEvent: '<'
+    study:               '<',
+    collectionEventType: '<',
+    collectionEvent:     '<'
   }
 };
 
@@ -21,7 +22,8 @@ function CeventSpecimensViewController($q,
                                        Centre,
                                        specimenAddModal,
                                        domainNotificationService,
-                                       notificationsService) {
+                                       notificationsService,
+                                       resourceErrorService) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -85,11 +87,13 @@ function CeventSpecimensViewController($q,
 
     vm.tableDataLoading = true;
 
-    Specimen.list(vm.collectionEvent.id, options).then(function (paginatedSpecimens) {
-      vm.specimens = paginatedSpecimens.items;
-      tableState.pagination.numberOfPages = paginatedSpecimens.maxPages;
-      vm.tableDataLoading = false;
-    });
+    Specimen.list(vm.collectionEvent.id, options)
+      .then(function (paginatedSpecimens) {
+        vm.specimens = paginatedSpecimens.items;
+        tableState.pagination.numberOfPages = paginatedSpecimens.maxPages;
+        vm.tableDataLoading = false;
+      })
+      .catch(resourceErrorService.checkUnauthorized());
   }
 
   function reloadTableData() {

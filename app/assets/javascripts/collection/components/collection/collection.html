@@ -2,7 +2,7 @@
 <div class="page-header">
   <h1 translate>Specimen collection</h1>
 </div>
-<div class="row" ng-if="!vm.isCollectionAllowed">
+<div class="row" ng-if="!vm.isCollectionAllowed" ng-cloak>
   <div class="col-md-12">
     <div class="alert alert-warning" role="alert">
       <p><span class="glyphicon glyphicon-warning-sign"></span>
@@ -14,21 +14,19 @@
     </div>
   </div>
 </div>
-<div class="row" ng-if="vm.isCollectionAllowed">
+<div class="row" ng-if="vm.isCollectionAllowed" ng-cloak>
   <div class="col-md-12">
     <h4 translate>Select the study you wish to work with:</h4>
   </div>
 </div>
 <div class="row" ng-if="vm.isCollectionAllowed" ng-cloak>
   <div class="col-md-6">
-    <select-study
-       get-header="vm.getStudiesPanelHeader"
-       get-studies="vm.updateEnabledStudies"
-       icon="glyphicon-ok-circle"
-       page-size="4"
-       message-no-results="{{'No results match the criteria.'|translate}}"
-       navigate-state-name="home.collection.study"
-       navigate-state-param-name="studyId">
+    <select-study header="{{'Studies you participate in'|translate}}"
+                  get-studies="vm.updateEnabledStudies.bind(vm)"
+                  icon="glyphicon-ok-circle"
+                  page-size="4"
+                  message-no-results="{{'No results match the criteria.'|translate}}"
+                  on-study-selected="vm.studySelected.bind(vm)">
     </select-study>
   </div>
 </div>

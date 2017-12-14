@@ -34,7 +34,7 @@ describe('specimenViewComponent', function() {
                           collection-event-type="vm.collectionEventType"
                           collection-event="vm.collectionEvent"
                           specimen="vm.specimen">
-           <specimen-view>`,
+           </specimen-view>`,
           {
             study:               study,
             participant:         participant,

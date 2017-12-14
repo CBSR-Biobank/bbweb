@@ -1,7 +1,7 @@
 package org.biobank.domain.participants
 
 import org.biobank.domain.Factory
-import org.biobank.domain.study.CollectionSpecimenDescription
+import org.biobank.domain.study.{ CollectionEventType, CollectionSpecimenDescription }
 import scala.language.reflectiveCalls
 import org.biobank.service.centres.CentreLocationInfo
 
@@ -51,6 +51,7 @@ trait SpecimenSpecFixtures {
       val specimens          = _specimens
       val specimenDtos       = specimensToDtos(_specimens,
                                                entities.cevent,
+                                               entities.ceventType,
                                                entities.specimenDescription,
                                                entities.centreLocationInfo,
                                                entities.centreLocationInfo)
@@ -59,10 +60,15 @@ trait SpecimenSpecFixtures {
 
   def specimensToDtos(specimens:              List[Specimen],
                       cevent:                 CollectionEvent,
-                      specimenDescription:           CollectionSpecimenDescription,
+                      ceventType:             CollectionEventType,
+                      specimenDescription:    CollectionSpecimenDescription,
                       fromCentreLocationInfo: CentreLocationInfo,
                       toCentreLocationInfo:   CentreLocationInfo) =
     specimens.map  { s =>
-      s.createDto(cevent, specimenDescription, fromCentreLocationInfo, toCentreLocationInfo)
+      s.createDto(cevent,
+                  ceventType.name,
+                  specimenDescription,
+                  fromCentreLocationInfo,
+                  toCentreLocationInfo)
     }
 }

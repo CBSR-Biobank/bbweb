@@ -53,6 +53,7 @@ sealed trait Specimen
   val amount: scala.math.BigDecimal
 
   def createDto(collectionEvent:    CollectionEvent,
+                eventTypeName:      String,
                 specimenDesc:       CollectionSpecimenDescription,
                 originLocationInfo: CentreLocationInfo,
                 locationInfo:       CentreLocationInfo): SpecimenDto =
@@ -73,7 +74,8 @@ sealed trait Specimen
                 timeCreated              = this.timeCreated,
                 amount                   = this.amount,
                 units                    = specimenDesc.units,
-                isDefaultAmount          = (this.amount == specimenDesc.amount))
+                isDefaultAmount          = (this.amount == specimenDesc.amount),
+                eventTypeName            = eventTypeName)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {

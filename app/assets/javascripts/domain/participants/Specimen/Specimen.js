@@ -134,18 +134,13 @@ function SpecimenFactory($q,
   /**
    * Used for validation.
    */
-  Specimen.SCHEMA = {
-    'id': 'Specimen',
-    'type': 'object',
-    'properties': {
-      'id':                       { 'type': 'string' },
+  Specimen.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'Specimen',
+    properties: {
       'inventoryId':              { 'type': 'string' },
       'specimenDescriptionId':    { 'type': 'string' },
       'specimenDescriptionName':  { 'type': [ 'string', 'null' ] },
       'specimenDescriptionUnits': { 'type': [ 'string', 'null' ] },
-      'version':                  { 'type': 'integer', 'minimum': 0 },
-      'timeAdded':                { 'type': 'string' },
-      'timeModified':             { 'type': [ 'string', 'null' ] },
       'originLocationInfo':       {
         'type':  'object',
         'items': { '$ref': 'CentreLocationInfo' }
@@ -159,19 +154,18 @@ function SpecimenFactory($q,
       'timeCreated':              { 'type': 'string' },
       'amount':                   { 'type': 'number' },
       'isDefaultAmount':          { 'type': [ 'boolean', 'null' ] },
-      'state':                    { 'type': 'string' }
+      'state':                    { 'type': 'string' },
+      'eventTypeName':            { 'type': 'string' }
     },
-    'required': [
-      'id',
+    required: [
       'inventoryId',
       'specimenDescriptionId',
-      'version',
-      'timeCreated',
       'state',
       'originLocationInfo',
-      'locationInfo'
+      'locationInfo',
+      'eventTypeName'
     ]
-  };
+  });
 
   /**
    * @private
