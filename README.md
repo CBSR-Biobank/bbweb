@@ -3,10 +3,10 @@
 
 # Biobank Web Application
 
-Biobank version 4 is a rewrite of the [Biobank] (https://github.com/cbsrbiobank/biobank) application
-and meant to provide the majority of its functionality through a web browser based interface. It
-uses [Domain Driven Design principles] (http://www.domainlanguage.com/ddd/) and employs a [CQRS]
-(https://vaughnvernon.co/?page_id=168]) architecture (Command Query Responsibility Segregation).
+Biobank version 4 is a rewrite of the [Biobank](https://github.com/cbsrbiobank/biobank) application and meant
+to provide the majority of its functionality through a web browser based interface. It uses [Domain Driven
+Design principles](http://www.domainlanguage.com/ddd/) and employs a
+[CQRS](https://vaughnvernon.co/?page_id=168]) architecture (Command Query Responsibility Segregation).
 
 In addition, version 4 includes enhancements to the domain model which provides better work flow
 and an improved user experience.
