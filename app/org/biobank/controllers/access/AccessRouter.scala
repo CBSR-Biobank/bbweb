@@ -81,6 +81,9 @@ class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter 
     case POST(p"/memberships/centre/${membershipId(mId)}") =>
       controller.membershipAddCentre(mId)
 
+    case POST(p"/snapshot") =>
+      controller.snapshot
+
     case DELETE(p"/roles/user/${accessItemId(rId)}/${long(ver)}/${userId(uId)}") =>
       controller.roleRemoveUser(rId, ver, uId)
 

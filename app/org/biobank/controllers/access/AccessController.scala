@@ -244,6 +244,11 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
       processMembershipCommand(cmd)
     }
 
+  def snapshot: Action[Unit] =
+    action(parse.empty) { implicit request =>
+      validationReply(accessService.snapshotRequest(request.authInfo.userId).map { _ => true })
+    }
+
   private def processRoleCommand(cmd: AccessCommand): Future[Result] = {
     val future = accessService.processRoleCommand(cmd).map { validation =>
         validation.flatMap(role => roleToDto(UserId(cmd.sessionUserId), role))

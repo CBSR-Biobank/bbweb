@@ -69,6 +69,8 @@ trait AccessService extends BbwebService {
 
   def processRemoveMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[Boolean]]
 
+  def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
+
 }
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
