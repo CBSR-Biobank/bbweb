@@ -72,7 +72,7 @@ describe('admin/centre states', function() {
     it('should go to valid state', function () {
       this.Centre.get = jasmine.createSpy().and.returnValue(this.$q.when({
         locations: [
-          { id: 'location-id-1' }
+          { id: 'location-id-1', slug:  'location-id-1' }
         ]
       }))
       this.gotoUrl('/admin/centres/centre-id-1/locations/view/location-id-1')

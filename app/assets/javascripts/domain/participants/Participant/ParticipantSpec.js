@@ -215,10 +215,10 @@ describe('Participant', function() {
     var study = this.Factory.study(),
         participant = this.Factory.participant({ studyId: study.id });
 
-    this.$httpBackend.whenGET(this.url('participants', study.id, participant.id))
+    this.$httpBackend.whenGET(this.url('participants', participant.slug))
       .respond(this.reply(participant));
 
-    this.Participant.get(study.id, participant.id).then((reply) => {
+    this.Participant.get(participant.slug).then((reply) => {
       expect(reply).toEqual(jasmine.any(this.Participant));
     });
     this.$httpBackend.flush();

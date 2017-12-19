@@ -25,7 +25,7 @@
     </div>
   </div>
 
-  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.NO_ENTITIES">
+  <ul class="list-group" ng-if="vm.hasNoEntitiesToDisplay()">
     <li class="list-group-item">
       <p class="alert alert-warning" role="alert">
         <span class="glyphicon glyphicon-warning-sign"></span>
@@ -34,7 +34,7 @@
     </li>
   </ul>
 
-  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.NO_RESULTS">
+  <ul class="list-group" ng-if="vm.hasNoResultsToDisplay()">
     <li class="list-group-item">
       <p class="alert alert-warning" role="alert">
         <span class="glyphicon glyphicon-warning-sign"></span>
@@ -43,7 +43,7 @@
     </li>
   </ul>
 
-  <ul class="list-group" ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
+  <ul class="list-group" ng-if="vm.hasResultsToDisplay()">
     <li class="list-group-item" ng-repeat="entity in vm.pagedResult.items">
       <div class="row">
         <div class="col-md-12">
@@ -83,5 +83,5 @@
     next-text="&rsaquo;"
     first-text="&laquo;"
     last-text="&raquo;"
-    ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
+    ng-if="vm.hasResultsToDisplay()">
 </ul>

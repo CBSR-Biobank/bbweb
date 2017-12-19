@@ -23,6 +23,7 @@ describe('Component: ceventsAddAndSelect', function() {
                               'Participant',
                               'CollectionEvent',
                               'CollectionEventType',
+                              'CollectionEventTypeName',
                               'Factory');
 
       this.jsonCevent      = this.Factory.collectionEvent();
@@ -33,12 +34,9 @@ describe('Component: ceventsAddAndSelect', function() {
       this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
       this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
 
-      this.createController = (participant, collectionEventTypes, collectionEvent) => {
-        var replyItems;
-
-        participant = participant || this.participant;
-        collectionEventTypes = collectionEventTypes || this.collectionEventTypes;
-        collectionEvent = collectionEvent || this.collectionEvent;
+      this.createController = (participant = this.participant,
+                               collectionEvent = this.collectionEvent) => {
+        let replyItems, updateCollectionEvents = 0;
 
         if (_.isUndefined(collectionEvent)) {
           replyItems = [];
@@ -52,12 +50,12 @@ describe('Component: ceventsAddAndSelect', function() {
         ComponentTestSuiteMixin.createController.call(
           this,
           `<cevents-add-and-select
-             participant="vm.participant"
-             collection-event-types="vm.collectionEventTypes">
+              participant="vm.participant"
+              update-collection-event="vm.updateValue">
            </cevents-add-and-select>`,
           {
-            participant:          participant,
-            collectionEventTypes: collectionEventTypes
+            participant:            participant,
+            updateCollectionEvents: updateCollectionEvents
           },
           'ceventsAddAndSelect');
       };
@@ -67,33 +65,22 @@ describe('Component: ceventsAddAndSelect', function() {
   it('has valid scope', function() {
     this.createController();
     expect(this.controller.participant).toBe(this.participant);
-    expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
 
     expect(this.controller.pageChanged).toBeFunction();
     expect(this.controller.add).toBeFunction();
     expect(this.controller.eventInformation).toBeFunction();
-    expect(this.controller.displayState).toBe(this.controller.displayStates.HAVE_RESULTS);
-  });
-
-  describe('creating controller', function () {
-
-    it('throws an exception when collection event does not match any collection event types', function() {
-      this.collectionEvent.collectionEventTypeId = this.Factory.stringNext();
-      this.createController(this.participant, [ this.Factory.collectionEventType()]);
-      expect(this.controller.collectionEventError).toBeTrue();
-    });
-
+    expect(this.controller.displayState).toBe(1 /* HAVE_RESULS */);
   });
 
   it('has valid display state when there are no collection events', function() {
     this.collectionEvent = undefined;
-    this.createController(this.participant, this.collectionEventTypes, undefined);
-    expect(this.controller.displayState).toBe(this.controller.displayStates.NONE_ADDED);
+    this.createController(this.participant, undefined);
+    expect(this.controller.displayState).toBe(2 /* NONE_ADDED */);
   });
 
   it('has valid display state when there are collection events', function() {
     this.createController();
-    expect(this.controller.displayState).toBe(this.controller.displayStates.HAVE_RESULTS);
+    expect(this.controller.displayState).toBe(1 /* HAVE_RESULTS */);
   });
 
   it('when pageChanged is called the state is changed', function() {
@@ -107,10 +94,11 @@ describe('Component: ceventsAddAndSelect', function() {
   describe('when add is called, the state is changed', function () {
 
     it('to correct state when there is only a single collection event type defined', function() {
-      expect(this.collectionEventTypes).toBeArrayOfSize(1);
+      const typeName = this.Factory.collectionEventTypeNameDto();
+      this.collectionEventTypes = [ this.Factory.defaultCollectionEventType() ];
 
       spyOn(this.$state, 'go').and.returnValue('ok');
-      spyOn(this.CollectionEvent, 'list').and.returnValue(this.$q.when(this.pagedResult));
+      this.CollectionEventTypeName.list = jasmine.createSpy().and.returnValue(this.$q.when([ typeName ]));
 
       this.createController();
       this.controller.add();
@@ -120,18 +108,18 @@ describe('Component: ceventsAddAndSelect', function() {
     });
 
     it('to correct state when there is more than one collection event type defined', function() {
-      var self = this;
-
-      self.collectionEventTypes = _.range(2).map(() => {
-        var jsonCeventType  = self.Factory.defaultCollectionEventType();
-        return new self.CollectionEventType(jsonCeventType);
+      const typeNames = [];
+      this.collectionEventTypes = _.range(2).map(() => {
+        typeNames.push(this.Factory.collectionEventTypeNameDto());
+        return this.CollectionEventType.create(this.Factory.defaultCollectionEventType());
       });
+      spyOn(this.$state, 'go').and.returnValue('ok');
+      this.createController();
 
-      spyOn(self.$state, 'go').and.returnValue('ok');
-      self.createController();
-      self.controller.add();
-      self.scope.$digest();
-      expect(self.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add');
+      this.CollectionEventTypeName.list = jasmine.createSpy().and.returnValue(this.$q.when(typeNames));
+      this.controller.add();
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add');
     });
 
   });
@@ -149,6 +137,14 @@ describe('Component: ceventsAddAndSelect', function() {
       });
   });
 
+  it('events are reloaded when `updateCollectionEvents` is changed', function() {
+    this.createController();
+    this.CollectionEvent.list = jasmine.createSpy().and.returnValue(this.$q.when([ this.collectionEvent]))
+    this.scope.vm.updateCollectionEvents += 1;
+    this.controller.$onChanges({ updateCollectionEvents: true });
+    expect(this.CollectionEvent.list).toHaveBeenCalled();
+  });
+
   describe('for updating visit number filter', function() {
 
     it('filter is updated when user enters a value', function() {
@@ -164,7 +160,7 @@ describe('Component: ceventsAddAndSelect', function() {
 
       expect(this.controller.pagerOptions.filter).toEqual('visitNumber::' + visitNumber);
       expect(this.controller.pagerOptions.page).toEqual(1);
-      expect(this.controller.displayState).toBe(this.controller.displayStates.NO_RESULTS);
+      expect(this.controller.displayState).toBe(0 /* NO_RESULTS */);
     });
 
     it('filter is updated when user clears the value', function() {

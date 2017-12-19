@@ -59,7 +59,7 @@ describe('Study', function() {
   describe('when creating', function() {
 
     it('can create from with empty annotation types', function() {
-      var jsonStudy = _.omit(this.Factory.study(), 'annotationTypes'),
+      var jsonStudy = this.Factory.study({ annotationTypes: [] }),
           study = this.Study.create(jsonStudy);
       expect(study).toEqual(jasmine.any(this.Study));
     });

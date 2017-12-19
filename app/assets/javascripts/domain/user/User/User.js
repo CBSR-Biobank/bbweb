@@ -95,7 +95,7 @@ function UserFactory($q,
       'membership':   {
         'oneOf': [
           { 'type': 'null' },
-          { '$ref': UserMembership.SCHEMA.id }
+          { 'type': 'object', '$ref': '#UserMembership' }
         ]
       }
     },

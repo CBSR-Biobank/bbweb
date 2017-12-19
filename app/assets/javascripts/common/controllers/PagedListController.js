@@ -6,6 +6,12 @@
 import _ from 'lodash';
 import angular from 'angular'
 
+const DisplayStates = {
+  NO_ENTITIES:  0,
+  NO_RESULTS:   1,
+  HAVE_RESULTS: 2
+};
+
 /**
  * Base class for controllers that display items in a paged fashion.
  *
@@ -37,6 +43,7 @@ class PagedListController {
   constructor($log,
               $state,
               gettextCatalog,
+              resourceErrorService,
               filters,
               sortFieldData,
               limit) {
@@ -44,6 +51,7 @@ class PagedListController {
       $log,
       $state,
       gettextCatalog,
+      resourceErrorService,
       filters,
       sortFieldData,
       limit
@@ -59,12 +67,6 @@ class PagedListController {
       limit:  this.limit
     };
 
-    this.displayStates = {
-      NO_ENTITIES: 0,
-      NO_RESULTS: 1,
-      HAVE_RESULTS: 2
-    };
-
     this.displayState = this.determineDisplayState();
     this.onFiltersCleared = this.filtersCleared.bind(this);
   }
@@ -78,12 +80,12 @@ class PagedListController {
   determineDisplayState() {
     if (this.counts && (this.counts.total > 0) && this.pagedResult) {
       if (this.pagedResult.total > 0) {
-        return this.displayStates.HAVE_RESULTS;
+        return DisplayStates.HAVE_RESULTS;
       } else {
-        return this.displayStates.NO_RESULTS;
+        return DisplayStates.NO_RESULTS;
       }
     }
-    return this.displayStates.NO_ENTITIES;
+    return DisplayStates.NO_ENTITIES;
   }
 
   updateItems() {
@@ -100,9 +102,7 @@ class PagedListController {
         });
         this.displayState = this.determineDisplayState();
       })
-      .catch((error) => {
-        this.$log.error(error);
-      });
+      .catch(this.resourceErrorService.checkUnauthorized());
   }
 
   /*
@@ -141,6 +141,18 @@ class PagedListController {
       filter.clearValue();
     });
     this.updateItems();
+  }
+
+  hasResultsToDisplay() {
+    return this.displayState === DisplayStates.HAVE_RESULTS;
+  }
+
+  hasNoEntitiesToDisplay() {
+    return this.displayState === DisplayStates.NO_ENTITIES;
+  }
+
+  hasNoResultsToDisplay() {
+    return this.displayState === DisplayStates.NO_RESULTS;
   }
 
 }

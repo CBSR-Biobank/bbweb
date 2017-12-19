@@ -33,7 +33,7 @@ function entityInfoCreateSharedBehaviour(context) {
   });
 
   it('fails when creating from an invalid object', function() {
-    this.EntityName.SCHEMA.required.forEach(function (field) {
+    this.EntityInfo.SCHEMA.required.forEach(function (field) {
       var badEntityJson = _.omit(context.jsonFactoryFunc(), field);
 
       expect(function () {
@@ -124,7 +124,7 @@ function entityInfoListSharedBehaviour(context) {
     }
 
     function shouldFail(error) {
-      expect(error).toMatch('invalid.*names from server');
+      expect(error).toMatch('invalid entity info from server');
     }
   });
 

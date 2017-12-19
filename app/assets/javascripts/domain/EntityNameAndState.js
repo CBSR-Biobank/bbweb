@@ -60,6 +60,7 @@ function EntityNameAndStateFactory($q,
     'type': 'object',
     'properties': {
       'id':    { 'type': 'string' },
+      'slug':  { 'type': 'string' },
       'name':  { 'type': 'string' },
       'state': { 'type': 'string' }
     },

@@ -7,7 +7,6 @@
 /* global angular */
 
 import _ from 'lodash';
-import faker from 'faker';
 import ngModule from '../../index'
 
 describe('Component: userAdminComponent', function() {
@@ -28,10 +27,9 @@ describe('Component: userAdminComponent', function() {
       /*
        * Have to create controller as a directive so that $onInit() is fired on the controller.
        */
-      this.createController = (userCounts) => {
+      this.createController = (user) => {
         this.userService.requestCurrentUser =
-          jasmine.createSpy().and.returnValue(this.$q.when(new this.User()));
-        this.UserCounts.get = jasmine.createSpy().and.returnValue(this.$q.when(userCounts));
+          jasmine.createSpy().and.returnValue(this.$q.when(user));
 
         ComponentTestSuiteMixin.createController.call(
           this,
@@ -39,32 +37,14 @@ describe('Component: userAdminComponent', function() {
           undefined,
           'userAdmin');
       };
-
-      this.createUserCounts = (registered, active, locked) => {
-        registered = registered || faker.random.number();
-        active = active || faker.random.number();
-        locked = locked || faker.random.number();
-
-        return new this.UserCounts({
-          total:      registered + active + locked,
-          registered: registered,
-          active:     active,
-          locked:     locked
-        });
-      };
-
-      this.createUserListSpy = (users) => {
-        var reply = this.Factory.pagedResult(users);
-        this.User.list = jasmine.createSpy().and.returnValue(this.$q.when(reply));
-      };
     });
   });
 
   it('scope is valid on startup', function() {
-    var counts = this.createUserCounts(1, 2, 3);
-    this.createUserListSpy([]);
-    this.createController(counts);
-    expect(this.controller.haveUsers).toBe(counts.total > 0);
+    const user = this.User.create(this.Factory.user());
+    this.createController(user);
+    expect(this.controller.breadcrumbs).toBeDefined();
+    expect(this.controller.user).toBe(user);
   });
 
 });

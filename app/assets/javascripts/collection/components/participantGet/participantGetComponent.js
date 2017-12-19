@@ -48,7 +48,7 @@ function ParticipantGetController($q,
     if (vm.uniqueId.length > 0) {
       Participant.getByUniqueId(vm.study.id, vm.uniqueId)
         .then(function (participant) {
-          $state.go('home.collection.study.participant.summary', { participantId: participant.id });
+          $state.go('home.collection.study.participant.summary', { slug: participant.slug });
         })
         .catch(participantGetError);
     }

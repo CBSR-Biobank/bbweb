@@ -21,6 +21,7 @@ class Controller extends PagedListController {
     super($log,
           $state,
           gettextCatalog,
+          resourceErrorService,
           { nameFilter: new NameFilter() },
           [ { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') } ],
           5)
@@ -41,7 +42,6 @@ class Controller extends PagedListController {
 
   getItems(options) {
     return this.Membership.list(options)
-      .catch(this.resourceErrorService.checkUnauthorized())
   }
 
   getItemIcon() {

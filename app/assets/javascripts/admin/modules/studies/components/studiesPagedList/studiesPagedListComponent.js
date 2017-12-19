@@ -31,6 +31,7 @@ class Controller extends PagedListController {
     super($log,
           $state,
           gettextCatalog,
+          resourceErrorService,
           {
             nameFilter: new NameFilter(),
             stateFilter: new StateFilter(true, stateData, 'all')
@@ -70,7 +71,6 @@ class Controller extends PagedListController {
   }
 
   getItems(options) {
-    // KLUDGE: for now, fix after Entity Pagers have been implemented
     return this.StudyCounts.get()
       .then((counts) => {
         this.counts = counts;

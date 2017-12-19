@@ -13,8 +13,7 @@ describe('Component: selectStudy', function() {
 
   const panelHeader = 'selectStudy component header',
         navigateStateName = 'test-navigate-state-name',
-        navigateStateParamName = 'test-navigate-state-param-name',
-        getHeader = () => panelHeader;
+        navigateStateParamName = 'test-navigate-state-param-name';
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -26,15 +25,15 @@ describe('Component: selectStudy', function() {
       this.createController = (scopeVars) => {
         ComponentTestSuiteMixin.createController.call(
           this,
-          `<select-study get-header="vm.getHeader"
-             get-studies="vm.getStudies"
-             icon="glyphicon-ok-circle"
-             limit="vm.limit"
-             message-no-results="No results match the criteria."
-             navigate-state-name="${navigateStateName}"
-             navigate-state-param-name="${navigateStateParamName}">
+          `<select-study
+              header="${panelHeader}"
+              get-studies="vm.getStudies"
+              limit="vm.limit"
+              message-no-results="No results match the criteria."
+              icon="glyphicon-ok-circle"
+              on-study-selected="vm.onStudySelected">
            </select-study>'`,
-          _.extend({ getHeader:  getHeader }, scopeVars),
+          scopeVars,
           'selectStudy');
       };
 
@@ -168,23 +167,23 @@ describe('Component: selectStudy', function() {
       var location = this.Factory.location(),
           centre = this.Factory.centre({ locations: [ location ] }),
           centreLocations = this.Factory.centreLocations([ centre ]),
+          onStudySelected = jasmine.createSpy().and.returnValue(null),
           args;
 
-      spyOn(this.$state, 'go').and.returnValue(null);
       spyOn(this.Study.prototype, 'allLocations').and.returnValue(this.$q.when(centreLocations));
 
       this.createController({
-        getStudies: this.createGetStudiesFn([]),
-        limit: 1
+        getStudies:      this.createGetStudiesFn([]),
+        limit:           1,
+        onStudySelected: onStudySelected
       });
 
       this.controller.studySelected(this.study);
       this.scope.$digest();
-      expect(this.$state.go).toHaveBeenCalled();
+      expect(onStudySelected).toHaveBeenCalled();
 
-      args = this.$state.go.calls.argsFor(0);
-      expect(args[0]).toEqual(navigateStateName);
-      expect(args[1][navigateStateParamName]).toEqual(this.study.id);
+      args = onStudySelected.calls.argsFor(0);
+      expect(args[0]).toBe(this.study);
     });
 
     it('when the selected study does not have centres associated with it', function() {

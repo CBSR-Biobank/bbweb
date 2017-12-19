@@ -29,9 +29,9 @@ describe('Component: ceventList', function() {
       this.jsonCeventType  = this.Factory.defaultCollectionEventType();
       this.jsonParticipant = this.Factory.defaultParticipant();
 
-      this.participant          = new this.Participant(this.jsonParticipant);
+      this.participant          = this.Participant.create(this.jsonParticipant);
       this.collectionEventTypes = [ new this.CollectionEventType(this.jsonCeventType) ];
-      this.collectionEvent      = new this.CollectionEvent(this.jsonCevent);
+      this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
 
       this.CollectionEventType.list = jasmine.createSpy()
         .and.returnValue(this.$q.when(this.Factory.pagedResult(this.collectionEventTypes)));
@@ -42,8 +42,12 @@ describe('Component: ceventList', function() {
       this.createController = (participant = this.participant) => {
         ComponentTestSuiteMixin.createController.call(
           this,
-          '<cevents-list participant="vm.participant"> </cevents-list>',
-          { participant },
+          `<cevents-list participant="vm.participant" update-collection-events="vm.updateValue">
+           </cevents-list>`,
+          {
+            participant: participant,
+            updateValue: this.updateValue
+          },
           'ceventsList');
       };
     });
@@ -51,17 +55,7 @@ describe('Component: ceventList', function() {
 
   it('has valid scope', function() {
     this.createController();
-
     expect(this.controller.participant).toBe(this.participant);
-    expect(this.controller.collectionEventTypes).toBe(this.collectionEventTypes);
-  });
-
-  it('component creation throws an error if there are no collection event types', function() {
-    this.CollectionEventType.list =
-      jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult([])));
-    expect(() => {
-      this.createController(self.participant, []);
-    }).toThrowError(/no collection event types defined for this study/);
   });
 
 });

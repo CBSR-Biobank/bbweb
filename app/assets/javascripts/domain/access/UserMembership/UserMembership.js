@@ -37,7 +37,7 @@ function UserMembershipFactory($q,
   UserMembership.prototype = Object.create(MembershipBase.prototype);
   UserMembership.prototype.constructor = UserMembership;
 
-  UserMembership.SCHEMA = MembershipBase.SCHEMA;
+  UserMembership.SCHEMA = MembershipBase.createDerivedSchema({ id: 'UserMembership'});
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.access.Membership|Membership}.

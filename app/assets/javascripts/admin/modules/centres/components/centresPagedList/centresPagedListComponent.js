@@ -31,6 +31,7 @@ class Controller extends PagedListController {
     super($log,
           $state,
           gettextCatalog,
+          resourceErrorService,
           {
             nameFilter: new NameFilter(),
             stateFilter: new StateFilter(true, stateData, 'all')

@@ -37,7 +37,7 @@ function DomainEntityFactory(UrlService) {
     }
 
     if (!tv4.validate(obj, schema)) {
-      return { valid: false, message: tv4.error.dataPath + ':' + tv4.error.message };
+      return { valid: false, message: tv4.error.dataPath + ':' + tv4.error.message};
     }
     return { valid: true, message: null };
   };

@@ -59,9 +59,7 @@ describe('Component: ceventView', function() {
         expect(collectionEventType).not.toBeArray();
         expect(collectionEvent).toBeDefined();
 
-        if (collectionEvent === undefined) {
-          console.log('here')
-        }
+        this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
 
         ComponentTestSuiteMixin.createController.call(
           this,

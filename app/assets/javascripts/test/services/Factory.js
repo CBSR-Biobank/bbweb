@@ -86,8 +86,8 @@ function nameAndSlug() {
 }
 
 function entityNameDto(createFunc, options = {}) {
-  const c = createFunc(_.pick(options, ['id', 'name']));
-  return _.pick(c, ['id', 'name']);
+  const c = createFunc(_.pick(options, ['id', 'slug', 'name']));
+  return _.pick(c, ['id', 'slug', 'name']);
 }
 
 function entityNameAndStateDto(createFunc, options = {}) {
@@ -332,10 +332,12 @@ class Factory {
    */
   participant(options = {}) {
     var study = this.defaultStudy(),
+        uniqueId = domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
         defaults = {
           id:          domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
           studyId:     study.id,
-          uniqueId:    domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
+          slug:        slugify(uniqueId),
+          uniqueId:    uniqueId,
           annotations: []
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
@@ -428,7 +430,8 @@ class Factory {
           locationInfo:          null,
           timeCreated:           moment(faker.date.recent(10)).format(),
           amount:                1,
-          state:                 this.SpecimenState.USABLE
+          state:                 this.SpecimenState.USABLE,
+          eventTypeName:         ceventType.name
         },
         validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
         spc;
@@ -515,19 +518,18 @@ class Factory {
   }
 
   user(options =  { membership: {} }) {
-    var defaults = Object.assign({ id:         domainEntityNameNext(ENTITY_NAME_USER),
-                                   email:      this.stringNext(),
-                                   avatarUrl:  null,
-                                   state:      this.UserState.REGISTERED,
-                                   roles:      []
-                                 },
-                                 nameAndSlug()),
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        membership,
-        u;
-
-    membership = this.userMembership(options.membership);
-    u = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys), { membership: membership });
+    const defaults = Object.assign({ id:         domainEntityNameNext(ENTITY_NAME_USER),
+                                     email:      this.stringNext(),
+                                     avatarUrl:  null,
+                                     state:      this.UserState.REGISTERED,
+                                     roles:      []
+                                   },
+                                   nameAndSlug()),
+          validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
+          membership = options.membership ? this.userMembership(options.membership) : undefined,
+          u = Object.assign(defaults, this.commonFields(),
+                            _.pick(options, validKeys),
+                            { membership: membership });
     this.updateDefaultEntity(ENTITY_NAME_USER, u);
     return u;
   }
@@ -729,11 +731,11 @@ class Factory {
   }
 
   entityInfo() {
-    return Object.assign({ id:   this.stringNext() }, nameAndSlug())
+    return Object.assign({ id: this.stringNext() }, nameAndSlug())
   }
 
   entitySet() {
-    return { allEntities: false, entityData: [] };
+    return { allEntities: false, entityData: [ this.entityInfo() ] };
   }
 
   membershipBase(options = {}) {
@@ -749,7 +751,7 @@ class Factory {
   }
 
   membership(options = {}) {
-    const defaults  =  Object.assign({ userData: [] }, membershipBaseDefaults.call(this)),
+    const defaults  = Object.assign({ userData: [] }, membershipBaseDefaults.call(this)),
           validKeys = Object.keys(defaults),
           m         = Object.assign({}, defaults, this.membershipBase(options), _.pick(options, validKeys))
     this.updateDefaultEntity(ENTITY_NAME_MEMBERSHIP, m);

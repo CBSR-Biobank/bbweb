@@ -17,10 +17,7 @@ describe('Component: debouncedTextInput', function() {
       _.extend(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
-      this.createController = (label, value) => {
-        if (_.isNil(value)) {
-          value = this.Factory.stringNext();
-        }
+      this.createController = (label, value = this.Factory.stringNext()) => {
         this.onValueChanged = jasmine.createSpy().and.returnValue(null);
         ComponentTestSuiteMixin.createController.call(
           this,

@@ -27,21 +27,19 @@ describe('usersPagedListComponent', function() {
                               '$state',
                               'Factory');
 
-      this.createController = () =>
+      this.createController = (userCounts = {}) =>
         ComponentTestSuiteMixin.createController.call(
           this,
-          '<users-paged-list></users-paged-list',
-          undefined,
+          '<users-paged-list user-counts="vm.userCounts"></users-paged-list>',
+          { userCounts },
           'usersPagedList');
 
-      this.createCountsSpy = (disabled, enabled, retired) => {
-        var counts = {
-          total:    disabled + enabled + retired,
-          disabled: disabled,
-          enabled:  enabled,
-          retired:  retired
-        };
+      this.createCounts = (registered = 0, active = 0, locked = 0) => {
+        const total = registered + active + locked;
+        return { total, registered, active, locked };
+      };
 
+      this.createCountsSpy = (counts) => {
         spyOn(this.UserCounts, 'get').and.returnValue(this.$q.when(counts));
       };
 
@@ -55,9 +53,10 @@ describe('usersPagedListComponent', function() {
   });
 
   it('scope is valid on startup', function() {
-    this.createCountsSpy(2, 5);
+    const counts = this.createCounts(2, 5);
+    this.createCountsSpy(counts)
     this.createUserListSpy([]);
-    this.createController();
+    this.createController(counts);
 
     expect(this.controller.limit).toBeDefined();
     expect(this.controller.filters.stateFilter.allChoices()).toBeArrayOfObjects();
@@ -67,11 +66,12 @@ describe('usersPagedListComponent', function() {
   });
 
   it('when user counts fails', function() {
+    const counts = this.createCounts(2, 5);
     const errFunc = jasmine.createSpy().and.returnValue(null);
     this.resourceErrorService.checkUnauthorized = jasmine.createSpy().and.returnValue(errFunc);
     this.UserCounts.get = jasmine.createSpy()
       .and.returnValue(this.$q.reject({ status: 400, message: 'testing'}));
-    this.createController();
+    this.createController(counts);
     expect(errFunc).toHaveBeenCalled();
   });
 
@@ -80,12 +80,12 @@ describe('usersPagedListComponent', function() {
     var context = {};
 
     beforeEach(function () {
-      context.createController = (usersCount) => {
-        usersCount = usersCount || 0;
+      context.createController = (usersCount = 0) => {
+        const counts = this.createCounts(2, 5);
+        this.createCountsSpy(counts)
         const users = _.range(usersCount).map(() => this.createEntity());
-        this.createCountsSpy(2, 5, 3);
         this.createUserListSpy(users);
-        this.createController();
+        this.createController(counts);
       };
 
       context.getEntitiesLastCallArgs = () => this.User.list.calls.mostRecent().args;
@@ -103,9 +103,10 @@ describe('usersPagedListComponent', function() {
   describe('getItemIcon', function() {
 
     beforeEach(function() {
-      this.createCountsSpy(2, 5);
+      const counts = this.createCounts(2, 5);
+      this.createCountsSpy(counts)
       this.createUserListSpy([]);
-      this.createController();
+      this.createController(counts);
     });
 
     it('getItemIcon returns a valid icon', function() {
@@ -135,9 +136,10 @@ describe('usersPagedListComponent', function() {
     var emailFilterValue = 'test@test.com',
         spyArgs;
 
-    this.createCountsSpy(2, 5);
+    const counts = this.createCounts(2, 5);
+    this.createCountsSpy(counts)
     this.createUserListSpy([]);
-    this.createController();
+    this.createController(counts);
     this.controller.updateSearchFilter('emailFilter')(emailFilterValue);
     this.scope.$digest();
 
@@ -147,9 +149,10 @@ describe('usersPagedListComponent', function() {
   });
 
   it('filters are cleared', function() {
-    this.createCountsSpy(2, 5);
+    const counts = this.createCounts(2, 5);
+    this.createCountsSpy(counts)
     this.createUserListSpy([]);
-    this.createController();
+    this.createController(counts);
     this.controller.updateSearchFilter('emailFilter')('test@test.com');
     this.controller.filtersCleared();
     this.scope.$digest();

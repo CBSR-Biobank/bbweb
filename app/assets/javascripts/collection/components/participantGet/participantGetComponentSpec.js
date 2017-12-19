@@ -28,8 +28,8 @@ describe('Component: participantGet', function() {
 
       this.jsonParticipant = this.Factory.participant();
       this.jsonStudy       = this.Factory.defaultStudy();
-      this.participant     = new this.Participant(this.jsonParticipant);
-      this.study           = new this.Study(this.jsonStudy);
+      this.participant     = this.Participant.create(this.jsonParticipant);
+      this.study           = this.Study.create(this.jsonStudy);
 
       this.createController = (study) => {
         study = study || this.study;
@@ -60,28 +60,26 @@ describe('Component: participantGet', function() {
   describe('when invoking uniqueIdChanged', function() {
 
     it('does nothing with an empty participant ID', function() {
-      spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.when(this.participant));
-
+      this.Participant.get = jasmine.createSpy().and.returnValue(this.$q.when(this.participant));
       this.createController();
       this.controller.uniqueId = '';
       this.controller.onSubmit();
       this.scope.$digest();
 
-      expect(this.Participant.getByUniqueId).not.toHaveBeenCalled();
+      expect(this.Participant.get).not.toHaveBeenCalled();
     });
 
     it('with a valid participant ID changes state', function() {
-      spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.when(this.participant));
-      spyOn(this.$state, 'go').and.returnValue('ok');
+      this.Participant.getByUniqueId = jasmine.createSpy().and.returnValue(this.$q.when(this.participant));
+      spyOn(this.$state, 'go').and.returnValue(null);
 
       this.createController();
-      this.controller.uniqueId = this.Factory.stringNext();
+      this.controller.uniqueId = this.participant.uniqueId;
       this.controller.onSubmit();
       this.scope.$digest();
 
-      expect(this.$state.go).toHaveBeenCalledWith(
-        'home.collection.study.participant.summary',
-        { participantId: this.participant.id });
+      expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.summary',
+                                                  { slug: this.participant.slug });
     });
 
     it('with a NOT_FOUND opens a modal', function() {
@@ -93,7 +91,7 @@ describe('Component: participantGet', function() {
 
       this.createController();
 
-      spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(errorMsg));
+      this.Participant.getByUniqueId = jasmine.createSpy().and.returnValue(this.$q.reject(errorMsg));
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
       spyOn(this.$state, 'go').and.returnValue('ok');
 
@@ -102,9 +100,8 @@ describe('Component: participantGet', function() {
       this.scope.$digest();
 
       expect(this.modalService.modalOkCancel).toHaveBeenCalled();
-      expect(this.$state.go).toHaveBeenCalledWith(
-        'home.collection.study.participantAdd',
-        { uniqueId: uniqueId });
+      expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participantAdd',
+                                                  { uniqueId: uniqueId });
     });
 
     it('with a NOT_FOUND opens a modal and cancel is pressed', function() {
@@ -116,7 +113,7 @@ describe('Component: participantGet', function() {
 
       this.createController();
 
-      spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(errorMsg));
+      this.Participant.getByUniqueId = jasmine.createSpy().and.returnValue(this.$q.reject(errorMsg));
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('Cancel'));
       spyOn(this.$state, 'reload').and.returnValue(null);
 
@@ -130,7 +127,7 @@ describe('Component: participantGet', function() {
 
     it('on a 404 response, when patient with unique id already exists, modal is shown to user', function() {
       this.createController();
-      spyOn(this.Participant, 'getByUniqueId').and.returnValue(
+      this.Participant.getByUniqueId = jasmine.createSpy().and.returnValue(
         this.$q.reject({
           status:  'error',
           message: 'EntityCriteriaError: participant not in study'
@@ -146,7 +143,7 @@ describe('Component: participantGet', function() {
 
     it('promise is rejected on a non 404 response', function() {
       this.createController();
-      spyOn(this.Participant, 'getByUniqueId').and.returnValue(this.$q.reject(
+      this.Participant.getByUniqueId = jasmine.createSpy().and.returnValue(this.$q.reject(
         { status: 400, data: { message: 'xxx' } }));
       spyOn(this.$log, 'error').and.callThrough();
 

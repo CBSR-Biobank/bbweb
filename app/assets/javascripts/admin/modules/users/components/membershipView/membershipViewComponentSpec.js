@@ -59,7 +59,7 @@ describe('membershipViewComponent', function() {
     expect(this.controller.centreNameLabels).toBeArray()
   })
 
-  fit('has valid user labels', function() {
+  it('has valid user labels', function() {
     const userName = this.UserName.create(this.Factory.userNameDto())
     const membership = this.Membership.create(this.Factory.membership({ userData: [ userName ] }))
     this.createController(membership)
@@ -181,6 +181,9 @@ describe('membershipViewComponent', function() {
       const studyName = this.StudyName.create(this.Factory.studyNameDto()),
             rawMembership = this.Factory.membership()
 
+      // shared test requires that this field be an empty array
+      rawMembership.studyData.entityData = [];
+
       context.controllerAddEntityFuncName     = 'addStudy'
       context.addEntityFuncName               = 'addStudy'
       context.entityName                      = studyName
@@ -206,6 +209,9 @@ describe('membershipViewComponent', function() {
     beforeEach(function () {
       const centreName = this.CentreName.create(this.Factory.centreNameDto()),
             rawMembership = this.Factory.membership()
+
+      // shared test requires that this field be an empty array
+      rawMembership.centreData.entityData = [];
 
       context.controllerAddEntityFuncName     = 'addCentre'
       context.addEntityFuncName               = 'addCentre'
@@ -312,7 +318,7 @@ describe('membershipViewComponent', function() {
 
     describe('(shared)', function() {
 
-      it('can add a user', function() {
+      it('can add an entity', function() {
         this.Membership.prototype[context.addEntityFuncName] =
           jasmine.createSpy().and.returnValue(this.$q.when(context.replyMembership))
         this.asyncInputModal.open =

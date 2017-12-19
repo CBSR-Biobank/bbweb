@@ -81,20 +81,16 @@ function ParticipantFactory($q,
 
   Participant.REST_API_URL_SUFFIX = 'participants';
 
-  Participant.SCHEMA = {
-    'id': 'Participant',
-    'type': 'object',
-    'properties': {
-      'id':              { 'type': 'string' },
-      'version':         { 'type': 'integer', 'minimum': 0 },
-      'timeAdded':       { 'type': 'string' },
-      'timeModified':    { 'type': [ 'string', 'null' ] },
-      'uniqueId':        { 'type': 'string' },
-      'studyId':         { 'type': 'string' },
-      'annotations':     { 'type': 'array', 'items':{ '$ref': 'Annotation' } }
+  Participant.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'Participant',
+    properties: {
+      'slug':        { 'type': 'string' },
+      'uniqueId':    { 'type': 'string' },
+      'studyId':     { 'type': 'string' },
+      'annotations': { 'type': 'array', 'items':{ '$ref': 'Annotation' } }
     },
-    'required': [ 'id', 'studyId', 'uniqueId', 'annotations', 'version' ]
-  };
+    required: [ 'slug', 'uniqueId', 'annotations' ]
+  });
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a {@link
@@ -168,18 +164,6 @@ function ParticipantFactory($q,
   };
 
   /**
-   * Retrieves a Participant from the server.
-   *
-   * @param {string} id the ID of the participant to retrieve.
-   *
-   * @returns {Promise<domain.studies.Participant>} The participant within a promise.
-   */
-  Participant.get = function (studyId, id) {
-    return biobankApi.get(Participant.url(studyId, id))
-      .then(Participant.prototype.asyncCreate);
-  };
-
-  /**
    * Retrieves a Participant, using the uniqueId, from the server.
    *
    * @param {string} uniqueId the uniqeue ID assigned to the participant.
@@ -191,6 +175,18 @@ function ParticipantFactory($q,
       .then(function (reply) {
         return Participant.create(reply);
       });
+  };
+
+  /**
+   * Retrieves a Participant from the server.
+   *
+   * @param {string} slug the slug of the study to retrieve.
+   *
+   * @returns {Promise<domain.studies.Participant>} The participant within a promise.
+   */
+  Participant.get = function (slug) {
+    return biobankApi.get(Participant.url(slug))
+      .then(Participant.prototype.asyncCreate);
   };
 
   Participant.prototype.setStudy = function (study) {

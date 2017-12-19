@@ -75,7 +75,7 @@ function AccessItemFactory($q,
     ]
   });
 
-  AccessItem.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = {} } = {}) {
+  AccessItem.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = [] } = {}) {
     return Object.assign(
       {},
       AccessItem.SCHEMA,

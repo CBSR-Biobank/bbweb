@@ -3,7 +3,7 @@
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */
 
-var component = {
+const component = {
   template: require('./ceventsAddAndSelect.html'),
   controller: CeventsAddAndSelectDirective,
   controllerAs: 'vm',
@@ -11,6 +11,12 @@ var component = {
     participant:            '<',
     updateCollectionEvents: '<'
   }
+};
+
+const DisplayStates = {
+  NO_RESULTS: 0,
+  HAVE_RESULTS: 1,
+  NONE_ADDED: 2
 };
 
 /*
@@ -27,11 +33,6 @@ function CeventsAddAndSelectDirective($state,
   //--
 
   function onInit() {
-    vm.displayStates = {
-      NO_RESULTS: 0,
-      HAVE_RESULTS: 1,
-      NONE_ADDED: 2
-    };
 
     vm.pagerOptions = {
       page:      1,
@@ -45,7 +46,6 @@ function CeventsAddAndSelectDirective($state,
     vm.add                  = add;
     vm.eventInformation     = eventInformation;
     vm.visitFilterUpdated   = visitFilterUpdated;
-    vm.collectionEventError = false;
 
     updateCollectionEvents();
   }
@@ -53,21 +53,21 @@ function CeventsAddAndSelectDirective($state,
   /*
    * Parent component can trigger a collection event reload by calling updating this binding.
    */
-  function onChanges() {
-    if (vm.updateCollectionEvents) {
+  function onChanges(changed) {
+    if (changed.updateCollectionEvents) {
       updateCollectionEvents();
     }
   }
 
   function getDisplayState() {
     if (vm.pagedResult.total > 0) {
-      return vm.displayStates.HAVE_RESULTS;
+      return DisplayStates.HAVE_RESULTS;
     }
-    return (vm.visitNumberFilter === '') ? vm.displayStates.NONE_ADDED : vm.displayStates.NO_RESULTS;
+    return (vm.visitNumberFilter === '') ? DisplayStates.NONE_ADDED : DisplayStates.NO_RESULTS;
   }
 
   function getShowPagination() {
-    return (vm.displayState === vm.displayStates.HAVE_RESULTS) &&
+    return (vm.displayState === DisplayStates.HAVE_RESULTS) &&
       (vm.pagedResult.maxPages > 1);
   }
 
@@ -92,8 +92,7 @@ function CeventsAddAndSelectDirective($state,
         if (typeNames.length > 1) {
           $state.go('home.collection.study.participant.cevents.add');
         } else {
-          $state.go('home.collection.study.participant.cevents.add.details',
-                    { eventTypeId: vm.collectionEventTypes[0].id });
+          $state.go('home.collection.study.participant.cevents.add.details', { eventTypeId: typeNames[0].id });
         }
       })
   }

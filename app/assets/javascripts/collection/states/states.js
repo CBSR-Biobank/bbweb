@@ -36,7 +36,7 @@ function config($stateProvider) {
     })
     .state('home.collection.study.participant', {
       abstract: true,
-      url: '/participant/{participantId}',
+      url: '/participant/:slug',
       resolve: {
         participant: resolveParticipant
       },
@@ -104,14 +104,13 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveParticipant($transition$, Participant, resourceErrorService, study) {
-    const participantId  = $transition$.params().participantId
-    return Participant.get(study.id, participantId)
+    const slug  = $transition$.params().slug
+    return Participant.get(slug)
       .then(participant => {
         participant.setStudy(study)
         return participant
       })
-      .catch(resourceErrorService.goto404(
-        `participant not found: studyId/${study.id}, participantId/${participantId}`))
+      .catch(resourceErrorService.goto404(`participant not found: slug/${slug}`))
   }
 
   /* @ngInject */

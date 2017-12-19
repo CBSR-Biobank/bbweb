@@ -79,7 +79,7 @@ function MembershipBaseFactory($q,
     required: [ 'id', 'version', 'timeAdded', 'studyData', 'centreData' ]
   });
 
-  MembershipBase.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = {} } = {}) {
+  MembershipBase.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = [] } = {}) {
     return Object.assign(
       {},
       MembershipBase.SCHEMA,

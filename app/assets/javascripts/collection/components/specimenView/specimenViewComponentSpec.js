@@ -31,7 +31,6 @@ describe('specimenViewComponent', function() {
           this,
           `<specimen-view study="vm.study"
                           participant="vm.participant"
-                          collection-event-type="vm.collectionEventType"
                           collection-event="vm.collectionEvent"
                           specimen="vm.specimen">
            </specimen-view>`,
@@ -70,7 +69,6 @@ describe('specimenViewComponent', function() {
   it('has valid scope', function() {
     var entities = this.createEntities();
     this.createController.apply(this, _.values(entities));
-    expect(this.controller.specimenDescription).toBeDefined();
   });
 
   it('user can return to previous page', function() {

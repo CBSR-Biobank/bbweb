@@ -20,18 +20,8 @@ describe('EntitySet', function() {
                               'TestUtils');
 
       this.TestUtils.addCustomMatchers();
-
-      this.jsonObj = () => ({
-        allEntities: false,
-        entityData: [{
-          id: this.Factory.stringNext(),
-          name: this.Factory.stringNext()
-        }]
-      });
-
       this.createEntitySetFrom = (obj) => new this.EntitySet(obj);
-
-      this.createEntitySet = () => new this.EntitySet(this.jsonObj());
+      this.createEntitySet = () => new this.EntitySet(this.Factory.entitySet());
 
     });
   });
@@ -45,7 +35,7 @@ describe('EntitySet', function() {
   describe('for creating', function() {
 
     it('can create from JSON', function() {
-      var json = this.jsonObj(),
+      var json = this.Factory.entitySet(),
           entitySet = this.EntitySet.create(json);
       expect(entitySet.allEntities).toBe(json.allEntities);
       expect(entitySet.entityData).toContainAll(json.entityData);
@@ -53,7 +43,7 @@ describe('EntitySet', function() {
 
     it('fails when required fields are missing', function() {
       var self = this,
-          json = this.jsonObj();
+          json = this.Factory.entitySet();
       _.keys(json).forEach(function (key) {
         var badJson = _.omit(json, [key]);
         expect(function () {
@@ -64,7 +54,7 @@ describe('EntitySet', function() {
 
     it('fails when required fields on sub objects are missing', function() {
       var self = this,
-          json = this.jsonObj();
+          json = this.Factory.entitySet();
       _.keys(json.entityData[0]).forEach(function (key) {
         var badJson = _.clone(json);
         badJson.entityData = json.entityData.map(function (info) {
@@ -81,7 +71,7 @@ describe('EntitySet', function() {
   describe('for creating asynchronously', function() {
 
     it('can create from JSON', function() {
-      var json = this.jsonObj();
+      var json = this.Factory.entitySet();
       this.EntitySet.asyncCreate(json)
         .then((entitySet) => {
           expect(entitySet.allEntities).toBe(json.allEntities);
@@ -95,7 +85,7 @@ describe('EntitySet', function() {
 
     it('fails when required fields are missing', function() {
       var self = this,
-          json = this.jsonObj();
+          json = this.Factory.entitySet();
       _.keys(json).forEach(function (key) {
         var badJson = _.omit(json, [key]);
         self.EntitySet.asyncCreate(badJson)
@@ -130,11 +120,13 @@ describe('EntitySet', function() {
   describe('isMemberOf', function() {
 
     it('returns true for a name in the set', function() {
-      var id        = this.Factory.stringNext(),
-          name      = this.Factory.stringNext(),
-          entitySet = this.EntitySet.create({ allEntities: false, entityData: [{ id: id, name: name}]});
+      var entityInfo = this.Factory.entityInfo(),
+          entitySet = this.EntitySet.create({
+            allEntities: false,
+            entityData: [ entityInfo ]
+          });
       expect(entitySet.allEntities).toBeFalse();
-      expect(entitySet.isMemberOf(name)).toBeTrue();
+      expect(entitySet.isMemberOf(entityInfo.name)).toBeTrue();
     });
 
     it('returns true if set is for all entities', function() {
@@ -144,9 +136,11 @@ describe('EntitySet', function() {
     });
 
     it('returns false for a name not in the set', function() {
-      var id        = this.Factory.stringNext(),
-          name      = this.Factory.stringNext(),
-          entitySet = this.EntitySet.create({ allEntities: false, entityData: [{ id: id, name: name}]});
+      var entityInfo = this.Factory.entityInfo(),
+          entitySet = this.EntitySet.create({
+            allEntities: false,
+            entityData: [ entityInfo ]
+          });
       expect(entitySet.allEntities).toBeFalse();
       expect(entitySet.isMemberOf(this.Factory.stringNext())).toBeFalse();
     });
@@ -165,12 +159,14 @@ describe('EntitySet', function() {
   });
 
   it('removeEntity removes an entity by name', function() {
-    var id        = this.Factory.stringNext(),
-        name      = this.Factory.stringNext(),
-        entitySet = this.EntitySet.create({ allEntities: false, entityData: [{ id: id, name: name}]});
+      var entityInfo = this.Factory.entityInfo(),
+          entitySet = this.EntitySet.create({
+            allEntities: false,
+            entityData: [ entityInfo ]
+          });
     expect(entitySet.allEntities).toBeFalse();
     expect(entitySet.entityData).toBeNonEmptyArray();
-    entitySet.removeEntity(name);
+    entitySet.removeEntity(entityInfo.name);
     expect(entitySet.entityData).toBeEmptyArray();
   });
 
