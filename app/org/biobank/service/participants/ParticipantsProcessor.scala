@@ -224,13 +224,15 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                  version      = 0L,
                                  uniqueId     = addedEvent.getUniqueId,
                                  annotations  = addedEvent.annotations.map(annotationFromEvent).toSet,
-                                 timeAdded    = OffsetDateTime.parse(event.getTime))
+                                 timeAdded    = OffsetDateTime.parse(event.getTime)).map { p =>
+          p.copy(slug = participantRepository.slug(p.uniqueId))
+        }
 
       if (v.isFailure) {
         log.error(s"could not add collection event from event: $v, $event")
       }
 
-      v.foreach { p => participantRepository.put(p) }
+      v.foreach(participantRepository.put)
     }
   }
 
@@ -264,7 +266,9 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
     onValidEventAndVersion(event,
                            event.eventType.isUniqueIdUpdated,
                            event.getUniqueIdUpdated.getVersion) { (participant, eventTime) =>
-      val v = participant.withUniqueId(event.getUniqueIdUpdated.getUniqueId)
+      val v = participant.withUniqueId(event.getUniqueIdUpdated.getUniqueId).map { p =>
+          p.copy(slug = participantRepository.slug(p.uniqueId))
+        }
       v.foreach( p => participantRepository.put(p.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }

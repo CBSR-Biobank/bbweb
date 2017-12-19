@@ -16,30 +16,34 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
 
-  def uri: String = "/api/participants"
+  class Fixture {
+    val study = factory.createEnabledStudy
+    val participant = factory.createParticipant
 
-  def uri(study: Study): String = uri + s"/${study.id.id}"
+    Set(study, participant).foreach(addToRepository)
+  }
 
-  def uriUniqueId(study: Study, participant: Participant): String =
-    uri + s"/uniqueId/${study.id.id}/${participant.uniqueId}"
+  private def uri(paths: String*): String = {
+    val basePath = "/api/participants"
+    if (paths.isEmpty) basePath
+    else s"$basePath/" + paths.mkString("/")
+  }
 
-  def uri(study: Study, participant: Participant): String =
-    uri(study) + s"/${participant.id.id}"
+  def uri(study: Study): String = uri(study.id.id)
 
-  def uri(participant: Participant): String =
-    uri + s"/${participant.id.id}"
+  def uri(study: Study, participant: Participant): String = uri(study.id.id, participant.id.id)
 
-  def updateUri(participant: Participant, path: String): String =
-    uri + s"/$path/${participant.id.id}"
+  def uri(participant: Participant): String = uri(participant.id.id)
+
+  def updateUri(participant: Participant, path: String): String = uri(path, participant.id.id)
 
   protected def createEntity(annotationTypes: Set[AnnotationType],
                              annotations:     Set[Annotation]): Participant = {
-    val study = factory.createEnabledStudy.copy(annotationTypes = annotationTypes)
-    studyRepository.put(study)
+    val f = new Fixture
+    studyRepository.put(f.study.copy(annotationTypes = annotationTypes))
 
-    val participant = factory.createParticipant.copy(annotations = annotations)
+    val participant = f.participant.copy(annotations = annotations)
     participantRepository.put(participant)
-
     participant
   }
 
@@ -161,48 +165,26 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     }
 
-    describe("GET /api/participants/uniqueId/:studyId/:id") {
+    describe("GET /api/participants/:slug") {
 
-      it("must return false for a participant ID that exists") {
-        val study = factory.createEnabledStudy
-        studyRepository.put(study)
-
-        val participant = factory.createParticipant
-        participantRepository.put(participant)
-
-        val json = makeRequest(GET, uriUniqueId(study, participant))
+      it("can retrieve a participant by slug") {
+        val f = new Fixture
+        val json = makeRequest(GET, uri(f.participant.slug))
 
         (json \ "status").as[String] must include ("success")
 
         val jsObj = (json \ "data").as[JsObject]
-        compareObj(jsObj, participant)
+        compareObj(jsObj, f.participant)
       }
 
-      it("must return BAD_REQUEST for a participant ID that exists but in a different study") {
-        val participant = factory.createParticipant
-        participantRepository.put(participant)
-
-        val study = factory.createEnabledStudy
-        studyRepository.put(study)
-
-        val json = makeRequest(GET, uriUniqueId(study, participant), BAD_REQUEST)
+      it("must return NOT_FOUND for a participant slug that does not exist") {
+        val f = new Fixture
+        participantRepository.remove(f.participant)
+        val json = makeRequest(GET, uri(f.participant.slug), BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("EntityCriteriaError.*participant")
-      }
-
-      it("must return NOT_FOUND for a participant ID that does not exist") {
-        val study = factory.createEnabledStudy
-        studyRepository.put(study)
-
-        val participant = factory.createParticipant
-
-        val json = makeRequest(GET, uriUniqueId(study, participant), NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("EntityCriteriaNotFound.*participant.*unique ID")
+        (json \ "message").as[String] must include regex ("EntityCriteriaNotFound.*participant.*slug")
       }
 
     }

@@ -22,8 +22,10 @@ package domain {
   trait HasName {
     /** A short identifying name. */
     val name: String
+  }
 
-    /** A string that can be used in a URL to identify the domain entity with this name. */
+  trait HasSlug {
+    /** A unique string that can be used in a URL to identify a domain entity. */
     val slug: String
 
   }

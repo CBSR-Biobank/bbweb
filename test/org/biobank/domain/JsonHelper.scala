@@ -432,13 +432,13 @@ trait JsonHelper extends MustMatchers with OptionValues {
     }
   }
 
-  protected def compareNameDto[T <: ConcurrencySafeEntity[_] with HasName]
+  protected def compareNameDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]
     (json: JsValue, entity: T): Unit = {
     compareObj(json, EntityInfoDto(entity.id.toString, entity.slug, entity.name))
     ()
   }
 
-  protected def compareNameAndStateDto[T <: ConcurrencySafeEntity[_] with HasName with HasState]
+  protected def compareNameAndStateDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug with HasState]
     (json: JsValue, entity: T): Unit = {
     compareObj(json, NameAndStateDto(entity.id.toString, entity.slug, entity.name, entity.state.id))
     ()

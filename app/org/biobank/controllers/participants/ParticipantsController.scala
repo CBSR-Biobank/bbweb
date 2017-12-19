@@ -24,14 +24,12 @@ class ParticipantsController @Inject() (controllerComponents: ControllerComponen
 
   def get(studyId: StudyId, participantId: ParticipantId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      log.debug(s"ParticipantsController.get: studyId: $studyId, participantId: $participantId")
       validationReply(participantsService.get(request.authInfo.userId, studyId, participantId))
     }
 
-  def getByUniqueId(studyId: StudyId, uniqueId: String): Action[Unit] =
+  def getBySlug(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      log.debug(s"ParticipantsController.getByUniqueId: studyId: $studyId, uniqueId: $uniqueId")
-      validationReply(participantsService.getByUniqueId(request.authInfo.userId, studyId, uniqueId))
+      validationReply(participantsService.getBySlug(request.authInfo.userId, slug))
     }
 
   def snapshot: Action[Unit] =

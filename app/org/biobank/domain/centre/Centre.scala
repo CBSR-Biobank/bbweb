@@ -37,6 +37,7 @@ sealed trait Centre
     extends ConcurrencySafeEntity[CentreId]
     with HasState
     with HasUniqueName
+    with HasSlug
     with HasOptionalDescription {
 
   val state: EntityState

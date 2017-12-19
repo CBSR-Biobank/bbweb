@@ -302,13 +302,15 @@ class Factory {
 
   def createParticipant(): Participant = {
     val study = defaultEnabledStudy
+    val uniqueId = nameGenerator.next[Participant]
     val participant = Participant(
         studyId      = study.id,
         id           = ParticipantId(nameGenerator.next[Participant]),
         version      = 0L,
         timeAdded    = OffsetDateTime.now,
         timeModified = None,
-        uniqueId     = nameGenerator.next[Participant],
+        slug         = Slug(uniqueId),
+        uniqueId     = uniqueId,
         annotations  = Set.empty
       )
     domainObjects = domainObjects + (classOf[Participant] -> participant)

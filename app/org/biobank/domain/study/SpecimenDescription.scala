@@ -43,6 +43,7 @@ object SpecimenDescriptionId {
 trait SpecimenDescription
     extends IdentifiedValueObject[SpecimenDescriptionId]
     with HasUniqueName
+    with HasSlug
     with HasOptionalDescription {
 
   /** A short identifying name that is unique to the study. */

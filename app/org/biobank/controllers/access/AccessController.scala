@@ -3,7 +3,7 @@ package org.biobank.controllers.access
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.{ConcurrencySafeEntity, HasUniqueName}
+import org.biobank.domain.{ConcurrencySafeEntity, HasName, HasSlug}
 import org.biobank.domain.access._
 import org.biobank.domain.centre.CentreId
 import org.biobank.domain.study.StudyId
@@ -337,12 +337,12 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
     }
   }
 
-  private def entityInfoDto[T <: ConcurrencySafeEntity[_] with HasUniqueName]
+  private def entityInfoDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]
     (entities: Set[T]): Set[EntityInfoDto] = {
     entities.map { entity => EntityInfoDto(entity.id.toString, entity.slug, entity.name) }
   }
 
-  private def entitySetDto[T <: ConcurrencySafeEntity[_] with HasUniqueName]
+  private def entitySetDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]
     (hasAllEntities: Boolean, entities: Set[T]): EntitySetDto = {
     EntitySetDto(hasAllEntities, entityInfoDto(entities))
   }

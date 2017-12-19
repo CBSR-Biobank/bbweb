@@ -28,6 +28,7 @@ sealed trait Study
     extends ConcurrencySafeEntity[StudyId]
     with HasState
     with HasUniqueName
+    with HasSlug
     with HasOptionalDescription {
 
   val state: EntityState
@@ -136,7 +137,8 @@ final case class DisabledStudy(id:              StudyId,
   /** Used to change the name. */
   def withName(name: String): DomainValidation[DisabledStudy] = {
     validateString(name, NameMinLength, InvalidName) map { _ =>
-      copy(name         = name,
+      copy(slug         = Slug(name),
+           name         = name,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
     }

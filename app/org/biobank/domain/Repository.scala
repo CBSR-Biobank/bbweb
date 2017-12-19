@@ -102,13 +102,13 @@ private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) 
 
 private [domain] abstract
 class ReadWriteRepositoryRefImplWithSlug
-  [K, A <: ConcurrencySafeEntity[K] with HasName](keyGetter: (A) => K)
+  [K, A <: ConcurrencySafeEntity[K] with HasSlug](keyGetter: (A) => K)
     extends ReadWriteRepositoryRefImpl[K, A](keyGetter) {
 
   protected def slugNotFound(slug: String): EntityCriteriaNotFound
 
-  def slug(name: String): String = {
-    val baseSlug = Slug(name)
+  def slug(value: String): String = {
+    val baseSlug = Slug(value)
     val slugRegex = s"^${baseSlug}(-[0-9]+)?$$".r
     val count = internalMap.single.get.values
       .filter { v =>

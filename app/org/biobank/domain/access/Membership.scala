@@ -71,6 +71,7 @@ object MembershipEntitySet {
 sealed trait MembershipBase
     extends ConcurrencySafeEntity[MembershipId]
     with HasUniqueName
+    with HasSlug
     with HasOptionalDescription {
   val id:           MembershipId
   val version:      Long

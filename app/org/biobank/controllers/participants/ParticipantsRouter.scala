@@ -11,8 +11,8 @@ class ParticipantsRouter @Inject()(controller: ParticipantsController) extends S
 
   override def routes: Routes = {
 
-    case GET(p"/uniqueId/${studyId(sId)}/$uniqueId") =>
-      controller.getByUniqueId(sId, uniqueId)
+    case GET(p"/$slug") =>
+      controller.getBySlug(slug)
 
     case GET(p"/${studyId(sId)}/${participantId(id)}") =>
       controller.get(sId, id)

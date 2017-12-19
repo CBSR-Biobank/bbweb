@@ -33,7 +33,7 @@ trait UserPredicates extends HasNamePredicates[User] {
 /**
  * A user of the system.
  */
-sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasUniqueName {
+sealed trait User extends ConcurrencySafeEntity[UserId] with HasState with HasUniqueName with HasSlug {
 
   /** the user's current state */
   val state: EntityState

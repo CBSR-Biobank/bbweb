@@ -484,6 +484,7 @@ class StudiesProcessor @Inject() (
                                    name                       = addedEvent.getName,
                                    description                = addedEvent.description,
                                    annotationTypes = Set.empty).map { s =>
+          // the slug needs to be recalculated in case there are mutliples
           s.copy(slug     = studyRepository.slug(s.name),
                  timeAdded = OffsetDateTime.parse(event.getTime))
         }
@@ -491,7 +492,6 @@ class StudiesProcessor @Inject() (
       if (v.isFailure) {
         log.error(s"could not add study from event: $event")
       }
-        // the slug needs to be recalculated in case there are mutliples
       v.foreach(studyRepository.put)
     }
   }

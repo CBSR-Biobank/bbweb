@@ -613,12 +613,14 @@ class TestData @Inject() (config:         Configuration,
       (0 to BbpspTestData.NumParticipants)
         .map { index =>
           val id = ParticipantId(BbpspTestData.ParticipantHashids.encode(index.toLong))
+          val uniqueId = f"P$index%05d"
           val participant =  Participant(id           = id,
                                          studyId      = BbpspTestData.BbpspStudyId,
                                          version      = 0L,
                                          timeAdded    = Global.StartOfTime,
                                          timeModified = None,
-                                         uniqueId     = f"P$index%05d",
+                                         slug         = Slug(uniqueId),
+                                         uniqueId     = uniqueId,
                                          annotations  = Set.empty[Annotation])
           ParticipantData(participant, createCeventData(participant))
         }

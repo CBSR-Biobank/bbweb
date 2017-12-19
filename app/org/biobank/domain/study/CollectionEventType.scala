@@ -58,6 +58,7 @@ final case class CollectionEventType(studyId:              StudyId,
                                      annotationTypes:      Set[AnnotationType])
     extends ConcurrencySafeEntity[CollectionEventTypeId]
     with HasName
+    with HasSlug
     with HasOptionalDescription
     with HasStudyId
     with HasAnnotationTypes {

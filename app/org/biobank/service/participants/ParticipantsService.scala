@@ -12,6 +12,7 @@ import org.biobank.infrastructure.command.ParticipantCommands._
 import org.biobank.infrastructure.event.ParticipantEvents._
 import org.biobank.service._
 import org.biobank.service.access.AccessService
+import org.biobank.service.studies.StudiesService
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent._
 import scalaz.Scalaz._
@@ -23,6 +24,8 @@ trait ParticipantsService extends BbwebService {
   def get(requestUserId: UserId,
           studyId:       StudyId,
           participantId: ParticipantId): ServiceValidation[Participant]
+
+  def getBySlug(requestUserId: UserId, slug: String): ServiceValidation[Participant]
 
   def getByUniqueId(requestUserId: UserId,
                     studyId:       StudyId,
@@ -39,13 +42,15 @@ trait ParticipantsService extends BbwebService {
 class ParticipantsServiceImpl @Inject() (
   @Named("participantsProcessor") val processor: ActorRef,
   val accessService:                             AccessService,
-  val studyRepository:                           StudyRepository,
-  val participantRepository:                     ParticipantRepository,
-  val collectionEventRepository:                 CollectionEventRepository)
+  val studiesService:                            StudiesService,
+  val participantRepository:                     ParticipantRepository)
                                      (implicit executionContext: BbwebExecutionContext)
     extends ParticipantsService
     with AccessChecksSerivce
     with ServicePermissionChecks {
+
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.access.AccessItem._
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -58,6 +63,22 @@ class ParticipantsServiceImpl @Inject() (
                              None) { () =>
       participantRepository.withId(studyId, participantId)
     }
+  }
+
+  def getBySlug(requestUserId: UserId, slug: String): ServiceValidation[Participant] = {
+    for {
+      participant <- participantRepository.getBySlug(slug)
+      study       <- studiesService.getStudy(requestUserId, participant.studyId)
+      permission  <- accessService.hasPermissionAndIsMember(requestUserId,
+                                                            PermissionId.ParticipantRead,
+                                                            Some(study.id),
+                                                            None)
+      result  <- {
+        if (permission) participant.successNel[String]
+        else Unauthorized.failureNel[Participant]
+      }
+    } yield result
+
   }
 
   def getByUniqueId(requestUserId: UserId,

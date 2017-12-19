@@ -19,9 +19,11 @@ final case class Participant(id:           ParticipantId,
                              version:      Long,
                              timeAdded:    OffsetDateTime,
                              timeModified: Option[OffsetDateTime],
+                             slug:         String,
                              uniqueId:     String,
                              annotations:  Set[Annotation])
     extends ConcurrencySafeEntity[ParticipantId]
+    with HasSlug
     with HasStudyId
     with ParticipantValidations
     with HasAnnotations[Participant] {
@@ -60,6 +62,7 @@ final case class Participant(id:           ParticipantId,
         |  version:      $version,
         |  timeAdded:    $timeAdded,
         |  timeModified: $timeModified,
+        |  slug:         $slug,
         |  uniqueId:     $uniqueId,
         |  annotations:  $annotations,
         |}""".stripMargin
@@ -81,7 +84,14 @@ object Participant extends ParticipantValidations {
        validateVersion(version) |@|
        validateString(uniqueId, UniqueIdRequired) |@|
        annotations.toList.traverseU(Annotation.validate)) {
-      case _ => Participant(id, studyId, version, timeAdded, None, uniqueId, annotations)
+      case _ => Participant(id,
+                            studyId,
+                            version,
+                            timeAdded,
+                            None,
+                            Slug(uniqueId),
+                            uniqueId,
+                            annotations)
     }
   }
 

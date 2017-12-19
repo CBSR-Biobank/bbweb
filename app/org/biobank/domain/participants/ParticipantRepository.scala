@@ -10,7 +10,7 @@ import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[ParticipantRepositoryImpl])
 trait ParticipantRepository
-    extends ReadWriteRepository [ParticipantId, Participant] {
+    extends ReadWriteRepositoryWithSlug[ParticipantId, Participant] {
 
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant]
 
@@ -22,8 +22,9 @@ trait ParticipantRepository
 
 @Singleton
 class ParticipantRepositoryImpl @Inject() (val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[ParticipantId, Participant](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[ParticipantId, Participant](v => v.id)
     with ParticipantRepository {
+
   import org.biobank.CommonValidations._
 
   override def init(): Unit = {
@@ -34,6 +35,9 @@ class ParticipantRepositoryImpl @Inject() (val testData: TestData)
   def nextIdentity: ParticipantId = new ParticipantId(nextIdentityAsString)
 
   protected def notFound(id: ParticipantId): IdNotFound = IdNotFound(s"participant id: $id")
+
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+    EntityCriteriaNotFound(s"participant slug: $slug")
 
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant] = {
     for {

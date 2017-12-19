@@ -52,6 +52,7 @@ trait AccessItemValidations {
 sealed trait AccessItem
     extends ConcurrencySafeEntity[AccessItemId]
     with HasUniqueName
+    with HasSlug
     with HasOptionalDescription {
 
   import org.biobank.domain.CommonValidations._
