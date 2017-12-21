@@ -99,14 +99,14 @@ describe('Specimen', function() {
     expect(catchTriggered).toBeTrue();
   });
 
-  describe('getting specimen by ID', function() {
+  describe('getting specimen by slug', function() {
 
-    it('can retrieve a single sepcimen by ID', function() {
+    it('can retrieve a single sepcimen by slug', function() {
       var jsonSpecimen = this.Factory.specimen();
 
-      this.$httpBackend.whenGET(this.url(jsonSpecimen.id)).respond(this.reply(jsonSpecimen));
+      this.$httpBackend.whenGET(this.url('get', jsonSpecimen.slug)).respond(this.reply(jsonSpecimen));
 
-      this.Specimen.get(jsonSpecimen.id).then((reply) => {
+      this.Specimen.get(jsonSpecimen.slug).then((reply) => {
         expect(reply).toEqual(jasmine.any(this.Specimen));
       });
       this.$httpBackend.flush();
@@ -115,29 +115,7 @@ describe('Specimen', function() {
     it('throws an error if id parameter is falsy', function() {
       expect(() => {
         this.Specimen.get(undefined);
-      }).toThrowError(/specimen id not specified/);
-    });
-
-  });
-
-  describe('getting specimen by inventory ID', function() {
-
-    it('can retrieve a single sepcimen by inventory ID', function() {
-      var jsonSpecimen = this.Factory.specimen();
-
-      this.$httpBackend.whenGET(this.url() + '/invid/' + jsonSpecimen.inventoryId)
-        .respond(this.reply(jsonSpecimen));
-
-      this.Specimen.getByInventoryId(jsonSpecimen.inventoryId).then((reply) => {
-        expect(reply).toEqual(jasmine.any(this.Specimen));
-      });
-      this.$httpBackend.flush();
-    });
-
-    it('throws an error if id parameter is falsy', function() {
-      expect(() => {
-        this.Specimen.getByInventoryId(undefined);
-      }).toThrowError(/specimen inventory id not specified/);
+      }).toThrowError(/slug not specified/);
     });
 
   });

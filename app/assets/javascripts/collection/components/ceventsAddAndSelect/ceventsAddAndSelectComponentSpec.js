@@ -34,9 +34,9 @@ describe('Component: ceventsAddAndSelect', function() {
       this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
       this.collectionEventTypes = [ this.CollectionEventType.create(this.jsonCeventType) ];
 
-      this.createController = (participant = this.participant,
-                               collectionEvent = this.collectionEvent) => {
-        let replyItems, updateCollectionEvents = 0;
+      this.createController = (participant = this.participant, collectionEvent = this.collectionEvent) => {
+        let replyItems;
+        const updateCollectionEvents = 0;
 
         if (_.isUndefined(collectionEvent)) {
           replyItems = [];
@@ -132,8 +132,7 @@ describe('Component: ceventsAddAndSelect', function() {
     this.scope.$digest();
     expect(this.$state.go).toHaveBeenCalledWith(
       'home.collection.study.participant.cevents.details', {
-        eventTypeId: this.collectionEvent.collectionEventTypeId,
-        eventId:     this.collectionEvent.id
+        visitNumber: this.collectionEvent.visitNumber
       });
   });
 

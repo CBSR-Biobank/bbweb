@@ -356,17 +356,13 @@ describe('CollectionEvent', function() {
     });
 
     it('can retrieve a single collection event by visit number', function() {
-      var entities        = this.getCollectionEventEntities(true),
-          jsonParticipant = this.Factory.defaultParticipant(),
-          jsonCevent      = this.Factory.defaultCollectionEvent();
+      const jsonParticipant = this.Factory.defaultParticipant(),
+            jsonCevent      = this.Factory.defaultCollectionEvent();
 
-      this.$httpBackend.whenGET(this.url(jsonParticipant.id, 'visitNumber',  jsonCevent.visitNumber))
+      this.$httpBackend.whenGET(this.url('visitNumber', jsonParticipant.id, jsonCevent.visitNumber))
         .respond(this.reply(jsonCevent));
 
-      this.CollectionEvent.getByVisitNumber(jsonParticipant.id,
-                                            jsonCevent.visitNumber,
-                                            entities.collectionEventType,
-                                            entities.annotationTypes)
+      this.CollectionEvent.getByVisitNumber(jsonParticipant.id, jsonCevent.visitNumber)
         .then((reply) => {
           expect(reply).toEqual(jasmine.any(this.CollectionEvent));
         });

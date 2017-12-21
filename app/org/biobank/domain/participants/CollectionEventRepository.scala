@@ -5,6 +5,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.TestData
 import org.biobank.domain._
 import org.biobank.domain.study.CollectionEventTypeId
+import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -28,6 +29,8 @@ class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImpl[CollectionEventId, CollectionEvent](v => v.id)
     with CollectionEventRepository {
   import org.biobank.CommonValidations._
+
+  val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   override def init(): Unit = {
     super.init()
@@ -61,24 +64,17 @@ class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
     }
   }
 
-  def withVisitNumber(participantId: ParticipantId, visitNumber: Int): DomainValidation[CollectionEvent] = {
-    for {
-      cevent <- {
-        getValues.find(cevent => cevent.visitNumber == visitNumber).toSuccessNel(
-          DomainError(
-            s"collection event does not exist: { participantId: $participantId, visitNumber: $visitNumber }"
-          ).toString)
+  def withVisitNumber(participantId: ParticipantId,
+                      visitNumber:   Int): DomainValidation[CollectionEvent] = {
+    internalMap.single.get
+      .find { case (id, cevent) =>
+        (cevent.visitNumber == visitNumber) && (cevent.participantId == participantId)
       }
-      valid <- {
-        if (cevent.participantId != participantId) {
-          EntityCriteriaError(
-            s"participant does not have collection event: { participantId: $participantId, visitNumber: $visitNumber }"
-          ).failureNel[CollectionEvent]
-        } else {
-          cevent.successNel[String]
-        }
-      }
-    } yield valid
+      .map { case (id, cevent) => cevent }
+      .toSuccessNel(
+        DomainError(
+          s"collection event does not exist: participantId/$participantId, visitNumber/$visitNumber }"
+        ).toString)
   }
 
   def allForParticipant(participantId: ParticipantId): Set[CollectionEvent] = {

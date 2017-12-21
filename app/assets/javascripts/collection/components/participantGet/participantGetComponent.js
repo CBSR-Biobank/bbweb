@@ -22,6 +22,7 @@ const patientDoesNotExistRe = /EntityCriteriaNotFound: participant with unique I
 function ParticipantGetController($q,
                                   $log,
                                   $state,
+                                  biobankApi,
                                   gettextCatalog,
                                   modalService,
                                   Participant,
@@ -46,9 +47,10 @@ function ParticipantGetController($q,
 
   function onSubmit() {
     if (vm.uniqueId.length > 0) {
-      Participant.getByUniqueId(vm.study.id, vm.uniqueId)
+      const slug = biobankApi.slugify(vm.uniqueId)
+      Participant.get(slug)
         .then(function (participant) {
-          $state.go('home.collection.study.participant.summary', { slug: participant.slug });
+          $state.go('home.collection.study.participant.summary', { participantSlug: participant.slug });
         })
         .catch(participantGetError);
     }

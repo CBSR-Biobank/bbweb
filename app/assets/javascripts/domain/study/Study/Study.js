@@ -76,8 +76,8 @@ function StudyFactory($q,
   _.extend(Study.prototype, HasAnnotationTypes.prototype);
   Study.prototype.constructor = Study;
 
-  Study.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
-    const args = [ 'studies' ].concat(_.toArray(arguments));
+  Study.url = function (...paths) {
+    const args = [ 'studies' ].concat(paths);
     return DomainEntity.url.apply(null, args);
   };
 

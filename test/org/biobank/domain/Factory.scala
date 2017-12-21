@@ -369,15 +369,17 @@ class Factory {
 
   def createUsableSpecimen(): UsableSpecimen = {
     val specimenDescription = defaultCollectionSpecimenDescription
-    val location = defaultLocation
+    val location            = defaultLocation
+    val inventoryId         = nameGenerator.next[Specimen]
 
     val specimen = UsableSpecimen(
         id                    = SpecimenId(nameGenerator.next[Specimen]),
-        inventoryId           = nameGenerator.next[Specimen],
-        specimenDescriptionId = specimenDescription.id,
         version               = 0,
         timeAdded             = OffsetDateTime.now,
         timeModified          = None,
+        slug                  = Slug(inventoryId),
+        inventoryId           = inventoryId,
+        specimenDescriptionId = specimenDescription.id,
         originLocationId      = location.id,
         locationId            = location.id,
         containerId           = None,
@@ -391,15 +393,17 @@ class Factory {
 
   def createUnusableSpecimen(): UnusableSpecimen = {
     val specimenDescription = defaultCollectionSpecimenDescription
-    val location = defaultLocation
+    val location            = defaultLocation
+    val inventoryId         = nameGenerator.next[Specimen]
 
     val specimen = UnusableSpecimen(
         id                    = SpecimenId(nameGenerator.next[Specimen]),
-        inventoryId           = nameGenerator.next[Specimen],
-        specimenDescriptionId = specimenDescription.id,
         version               = 0,
         timeAdded             = OffsetDateTime.now,
         timeModified          = None,
+        slug                  = Slug(inventoryId),
+        inventoryId           = inventoryId,
+        specimenDescriptionId = specimenDescription.id,
         originLocationId      = location.id,
         locationId            = location.id,
         containerId           = None,

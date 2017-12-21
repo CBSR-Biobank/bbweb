@@ -1,6 +1,7 @@
 package org.biobank.service.participants
 
 import akka.actor._
+
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
@@ -201,9 +202,9 @@ class SpecimensProcessor @Inject() (
           event.getAdded.specimenData.toList.traverseU { info =>
             UsableSpecimen.create(
               id                    = SpecimenId(info.getId),
+              version               = 0L,
               inventoryId           = info.getInventoryId,
               specimenDescriptionId = SpecimenDescriptionId(info.getSpecimenDescriptionId),
-              version               = 0L,
               originLocationId      = LocationId(info.getLocationId),
               locationId            = LocationId(info.getLocationId),
               containerId           = None,
@@ -222,7 +223,7 @@ class SpecimensProcessor @Inject() (
     v.foreach { specimens =>
       val ceventId = CollectionEventId(event.getAdded.getCollectionEventId)
       specimens.foreach { specimen =>
-        specimenRepository.put(specimen)
+        specimenRepository.put(specimen.copy(slug = specimenRepository.slug(specimen.inventoryId)))
         ceventSpecimenRepository.put(CeventSpecimen(ceventId, specimen.id))
       }
     }

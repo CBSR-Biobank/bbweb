@@ -164,20 +164,6 @@ function ParticipantFactory($q,
   };
 
   /**
-   * Retrieves a Participant, using the uniqueId, from the server.
-   *
-   * @param {string} uniqueId the uniqeue ID assigned to the participant.
-   *
-   * @returns {Promise<domain.studies.Participant>} The participant within a promise.
-   */
-  Participant.getByUniqueId = function (studyId, uniqueId) {
-    return biobankApi.get(Participant.url('uniqueId', studyId, uniqueId))
-      .then(function (reply) {
-        return Participant.create(reply);
-      });
-  };
-
-  /**
    * Retrieves a Participant from the server.
    *
    * @param {string} slug the slug of the study to retrieve.

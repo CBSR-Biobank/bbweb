@@ -30,12 +30,12 @@ const STRING_SYMBOL                     = Symbol('string'),
 
 const defaultEntities = new Map();
 
-  /**
-   * Generates a unique name for a domain entity type. If domain entity type is undefined, then a unique
-   * string is generated.
-   *
-   * @param domainEntityType the name of the domain entity type. Eg: 'study', 'centre', 'user', etc.
-   */
+/**
+ * Generates a unique name for a domain entity type. If domain entity type is undefined, then a unique
+ * string is generated.
+ *
+ * @param domainEntityType the name of the domain entity type. Eg: 'study', 'centre', 'user', etc.
+ */
 const domainEntityNameNext = function (domainEntityType = STRING_SYMBOL) {
   return _.uniqueId(domainEntityType.toString() + '_');
 }
@@ -420,21 +420,24 @@ class Factory {
   }
 
   specimen(options = {}) {
-    var ceventType = this.collectionEventType({ specimenDescriptions: [ this.collectionSpecimenDescription() ] }),
-        ctr = this.centre({ locations: [ this.location() ]}),
-        defaults = {
-          id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN),
-          inventoryId:           domainEntityNameNext(ENTITY_NAME_SPECIMEN),
-          specimenDescriptionId: null,
-          originLocationInfo:    null,
-          locationInfo:          null,
-          timeCreated:           moment(faker.date.recent(10)).format(),
-          amount:                1,
-          state:                 this.SpecimenState.USABLE,
-          eventTypeName:         ceventType.name
-        },
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        spc;
+    const ceventType = this.collectionEventType({ specimenDescriptions: [ this.collectionSpecimenDescription() ] }),
+          ctr = this.centre({ locations: [ this.location() ]}),
+          inventoryId = domainEntityNameNext(ENTITY_NAME_SPECIMEN),
+          defaults = {
+            id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN),
+            slug:                  slugify(inventoryId),
+            inventoryId:           inventoryId,
+            specimenDescriptionId: null,
+            originLocationInfo:    null,
+            locationInfo:          null,
+            timeCreated:           moment(faker.date.recent(10)).format(),
+            amount:                1,
+            state:                 this.SpecimenState.USABLE,
+            eventTypeName:         ceventType.name
+          },
+          validKeys = this.commonFieldNames.concat(Object.keys(defaults))
+
+    let spc;
 
     if (ceventType.specimenDescriptions && (ceventType.specimenDescriptions.length > 0)) {
       defaults.specimenDescriptionId = ceventType.specimenDescriptions[0].id;

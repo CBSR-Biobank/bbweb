@@ -98,10 +98,7 @@ function CeventsAddAndSelectDirective($state,
   }
 
   function eventInformation(cevent) {
-    $state.go('home.collection.study.participant.cevents.details', {
-      eventTypeId: cevent.collectionEventTypeId,
-      eventId:     cevent.id
-    });
+    $state.go('home.collection.study.participant.cevents.details', { visitNumber: cevent.visitNumber });
   }
 
   function visitFilterUpdated() {

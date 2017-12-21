@@ -9,6 +9,7 @@ var component = {
   controllerAs: 'vm',
   bindings: {
     study:               '<',
+    participant:         '<',
     collectionEventType: '<',
     collectionEvent:     '<'
   }
@@ -102,7 +103,7 @@ function CeventSpecimensViewController($q,
 
   function viewSpecimen(specimen) {
     $state.go('home.collection.study.participant.cevents.details.specimen',
-              { inventoryId: specimen.inventoryId });
+              { specimenSlug: specimen.slug });
   }
 
   function removeSpecimen(specimen) {

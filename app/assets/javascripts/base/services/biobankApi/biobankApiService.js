@@ -3,7 +3,32 @@
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 
-import angular from 'angular'
+function apiCall(method, url, config = {}) {
+  if (url.indexOf(this.AppConfig.restApiUrlPrefix) < 0) {
+    throw new Error('invalid REST API url: ' + url);
+  }
+
+  Object.assign(config, { method: method, url: url });
+
+  return this.$http(config)
+    .then(response => {
+      // TODO: check status here and log it if it not 'success'
+      if (response.data) {
+        if (response.data.status === 'success'){
+          return this.$q.when(response.data.data);
+        }
+        return this.$q.when(response.data);
+      }
+      return this.$q.when({});
+    })
+    .catch(response => {
+      if (response.data) {
+        this.$log.error(response.status, response.data.message);
+        return this.$q.reject(response.data);
+      }
+      return this.$q.reject(response);
+    });
+}
 
 /**
  * Makes a request to the Biobank server REST API. All REST responses from the server have a similar
@@ -11,61 +36,35 @@ import angular from 'angular'
  *
  * @return {object} An AngularJS service.
  */
-/* @ngInject */
-function biobankApiService($http, $q, $log, AppConfig) {
-  var service = {
-    get:  get,
-    post: post,
-    put:  put,
-    del:  del
-  };
-  return service;
+class biobankApiService {
 
-  //-------------
-
-  function apiCall(method, url, config) {
-    if (url.indexOf(AppConfig.restApiUrlPrefix) < 0) {
-      throw new Error('invalid REST API url: ' + url);
-    }
-
-    config = config || {};
-    angular.extend(config, { method: method, url: url });
-
-    return $http(config)
-      .then(function(response) {
-        // TODO: check status here and log it if it not 'success'
-        if (response.data) {
-          if (response.data.status === 'success'){
-            return $q.when(response.data.data);
-          } else {
-            return $q.when(response.data);
-          }
-        }
-        return $q.when({});
-      })
-      .catch(function(response) {
-        if (response.data) {
-          $log.error(response.status, response.data.message);
-          return $q.reject(response.data);
-        }
-        return $q.reject(response);
-      });
+  constructor($http, $q, $log, AppConfig) {
+    Object.assign(this, { $http, $q, $log, AppConfig })
   }
 
-  function get(url, params) {
-    return apiCall('GET', url, { params: params });
+  get(url, params) {
+    return apiCall.bind(this)('GET', url, { params: params });
   }
 
-  function post(url, data) {
-    return apiCall('POST', url, { data: data });
+  post(url, data) {
+    return apiCall.bind(this)('POST', url, { data: data });
   }
 
-  function put(url, data) {
-    return apiCall('PUT', url, { data: data });
+  put(url, data) {
+    return apiCall.bind(this)('PUT', url, { data: data });
   }
 
-  function del(url) {
-    return apiCall('DELETE', url);
+  del(url) {
+    return apiCall.bind(this)('DELETE', url);
+  }
+
+  // this function taken from here:
+  // https://gist.github.com/mathewbyrne/1280286
+  slugify(text) {
+    return text.toString().toLowerCase().trim()
+      .replace(/[^\w\s-]/g, '') // remove non-word [a-z0-9_], non-whitespace, non-hyphen characters
+      .replace(/[\s_-]+/g, '_') // swap any length of whitespace, underscore, hyphen characters with a single _
+      .replace(/^-+|-+$/g, ''); // remove leading, trailing -
   }
 }
 

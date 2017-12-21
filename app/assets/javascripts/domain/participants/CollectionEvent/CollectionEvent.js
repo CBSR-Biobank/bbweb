@@ -88,8 +88,8 @@ function CollectionEventFactory($q,
   _.extend(CollectionEvent.prototype, HasAnnotations.prototype);
   CollectionEvent.prototype.constructor = CollectionEvent;
 
-  CollectionEvent.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
-    const args = [ 'participants/cevents' ].concat(_.toArray(arguments));
+  CollectionEvent.url = function (...paths) {
+    const args = [ 'participants/cevents' ].concat(paths);
     return DomainEntity.url.apply(null, args);
   };
 
@@ -256,12 +256,10 @@ function CollectionEventFactory($q,
    *
    * @param annotationTypes can be undefined or null.
    */
-  CollectionEvent.getByVisitNumber = function (participantId,
-                                               visitNumber,
-                                               collectionEventType) {
-    return biobankApi.get(this.url(participantId) + '/visitNumber/' + visitNumber)
+  CollectionEvent.getByVisitNumber = function (participantId, visitNumber) {
+    return biobankApi.get(this.url('visitNumber', participantId, visitNumber))
       .then(function (reply) {
-        return CollectionEvent.create(reply, collectionEventType);
+        return CollectionEvent.create(reply);
       });
   };
 

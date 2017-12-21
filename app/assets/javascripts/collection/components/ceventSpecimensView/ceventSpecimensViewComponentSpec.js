@@ -32,9 +32,9 @@ describe('ceventSpecimensViewComponent', function() {
       this.collectionEventType = new this.CollectionEventType(this.rawCollectionEventType);
       this.collectionEvent = new this.CollectionEvent(this.Factory.collectionEvent(),
                                                       this.collectionEventType);
-      this.specimen = new this.Specimen(this.Factory.specimen(),
-                                        this.collectionEventType.specimenDescriptions[0]);
-      this.study = new this.Study(this.Factory.defaultStudy());
+      this.specimen = this.Specimen.create(this.Factory.specimen(),
+                                           this.collectionEventType.specimenDescriptions[0]);
+      this.study = this.Study.create(this.Factory.defaultStudy());
 
       this.createController = (study, collectionEvent) => {
         study = study || this.study;
@@ -161,7 +161,7 @@ describe('ceventSpecimensViewComponent', function() {
 
     expect(this.$state.go).toHaveBeenCalledWith(
       'home.collection.study.participant.cevents.details.specimen',
-      { inventoryId: this.specimen.inventoryId });
+      { specimenSlug: this.specimen.slug });
   });
 
 });

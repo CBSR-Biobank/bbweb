@@ -29,16 +29,9 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
   /**
    * Returns the specimen with the given ID.
    */
-  def get(id: SpecimenId): Action[Unit] =
+  def get(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val v = service.get(request.authInfo.userId, id)
-        .flatMap { specimen => service.specimenToDto(specimen) }
-      validationReply(v)
-    }
-
-  def getByInventoryId(invId: String): Action[Unit] =
-    action(parse.empty) { implicit request =>
-      val v = service.getByInventoryId(request.authInfo.userId, invId)
+      val v = service.getBySlug(request.authInfo.userId, slug)
         .flatMap { specimen => service.specimenToDto(specimen) }
       validationReply(v)
     }

@@ -137,6 +137,7 @@ function SpecimenFactory($q,
   Specimen.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
     id: 'Specimen',
     properties: {
+      'slug':                     { 'type': 'string' },
       'inventoryId':              { 'type': 'string' },
       'specimenDescriptionId':    { 'type': 'string' },
       'specimenDescriptionName':  { 'type': [ 'string', 'null' ] },
@@ -158,6 +159,7 @@ function SpecimenFactory($q,
       'eventTypeName':            { 'type': 'string' }
     },
     required: [
+      'slug',
       'inventoryId',
       'specimenDescriptionId',
       'state',
@@ -227,33 +229,16 @@ function SpecimenFactory($q,
   /**
    * Retrieves a Specimen from the server.
    *
-   * @param {string} id the ID of the specimen to retrieve.
+   * @param {string} slug the slug of the study to retrieve.
    *
    * @returns {Promise} The specimen within a promise.
    */
-  Specimen.get = function (id) {
-    if (!id) {
-      throw new DomainError('specimen id not specified');
+  Specimen.get = function (slug) {
+    if (!slug) {
+      throw new DomainError('slug not specified');
     }
 
-    return biobankApi.get(Specimen.url(id)).then(function (reply) {
-      return Specimen.asyncCreate(reply);
-    });
-  };
-
-  /**
-   * Retrieves a Specimen with the given inventory ID from the server.
-   *
-   * @param {string} inventoryId the inventory ID for the specimen.
-   *
-   * @returns {Promise} The specimen within a promise.
-   */
-  Specimen.getByInventoryId = function (inventoryId) {
-    if (!inventoryId) {
-      throw new DomainError('specimen inventory id not specified');
-    }
-
-    return biobankApi.get(Specimen.url() + '/invid/' + inventoryId).then(function (reply) {
+    return biobankApi.get(Specimen.url('get', slug)).then(function (reply) {
       return Specimen.asyncCreate(reply);
     });
   };

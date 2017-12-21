@@ -20,7 +20,8 @@ import scalaz.Scalaz._
  * defined in either the [[CollectionEvent]] or the specimen link type to which it corresponds .
  */
 sealed trait Specimen
-    extends ConcurrencySafeEntity[SpecimenId] {
+    extends ConcurrencySafeEntity[SpecimenId]
+    with HasSlug {
 
   val state: EntityState
 
@@ -58,15 +59,16 @@ sealed trait Specimen
                 originLocationInfo: CentreLocationInfo,
                 locationInfo:       CentreLocationInfo): SpecimenDto =
     SpecimenDto(id                       = this.id.id,
+                version                  = this.version,
+                timeAdded                = this.timeAdded,
+                timeModified             = this.timeModified,
                 state                    = this.state,
+                slug                     = this.slug,
                 inventoryId              = this.inventoryId,
                 collectionEventId        = collectionEvent.id.id,
                 specimenDescriptionId    = this.specimenDescriptionId.id,
                 specimenDescriptionName  = specimenDesc.name,
                 specimenDescriptionUnits = specimenDesc.units,
-                version                  = this.version,
-                timeAdded                = this.timeAdded,
-                timeModified             = this.timeModified,
                 originLocationInfo       = originLocationInfo,
                 locationInfo             = locationInfo,
                 containerId              = this.containerId.map(_.id),
@@ -80,11 +82,12 @@ sealed trait Specimen
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
         |  id:                    $id
-        |  inventoryId:           $inventoryId
-        |  specimenDescriptionId: $specimenDescriptionId
         |  version:               $version
         |  timeAdded:             $timeAdded
         |  timeModified:          $timeModified
+        |  slug:                  $slug,
+        |  inventoryId:           $inventoryId
+        |  specimenDescriptionId: $specimenDescriptionId
         |  originLocationId:      $originLocationId
         |  locationId:            $locationId
         |  containerId:           $containerId
@@ -104,6 +107,7 @@ object Specimen {
         ConcurrencySafeEntity.toJson(specimen) ++
         Json.obj(
           "state"                 -> specimen.state.id,
+          "slug"                  -> specimen.slug,
           "inventoryId"           -> specimen.inventoryId,
           "specimenDescriptionId" -> specimen.specimenDescriptionId,
           "originLocationId"      -> specimen.originLocationId.id,
@@ -156,11 +160,12 @@ trait SpecimenValidations {
  * A usable specimen is a specimen that can be used for processing.
  */
 final case class UsableSpecimen(id:                    SpecimenId,
-                                inventoryId:           String,
-                                specimenDescriptionId: SpecimenDescriptionId,
                                 version:               Long,
                                 timeAdded:             OffsetDateTime,
                                 timeModified:          Option[OffsetDateTime],
+                                slug:                  String,
+                                inventoryId:           String,
+                                specimenDescriptionId: SpecimenDescriptionId,
                                 originLocationId:      LocationId,
                                 locationId:            LocationId,
                                 containerId:           Option[ContainerId],
@@ -168,6 +173,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
                                 timeCreated:           OffsetDateTime,
                                 amount:                BigDecimal)
     extends { val state: EntityState = Specimen.usableState }
+    with HasSlug
     with Specimen
     with SpecimenValidations
     with ParticipantValidations
@@ -178,7 +184,8 @@ final case class UsableSpecimen(id:                    SpecimenId,
 
   def withInventoryId(inventoryId: String): DomainValidation[Specimen] = {
     validateString(inventoryId, InventoryIdInvalid).map { s =>
-      copy(inventoryId  = inventoryId,
+      copy(slug         = Slug(inventoryId),
+           inventoryId  = inventoryId,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
     }
@@ -224,11 +231,12 @@ final case class UsableSpecimen(id:                    SpecimenId,
 
   def makeUnusable(): DomainValidation[UnusableSpecimen] = {
     UnusableSpecimen(id                    = this.id,
-                     inventoryId           = this.inventoryId,
-                     specimenDescriptionId = this.specimenDescriptionId,
                      version               = this.version + 1,
                      timeAdded             = this.timeAdded,
                      timeModified          = Some(OffsetDateTime.now),
+                     slug                  = this.slug,
+                     inventoryId           = this.inventoryId,
+                     specimenDescriptionId = this.specimenDescriptionId,
                      originLocationId      = this.originLocationId,
                      locationId            = this.locationId,
                      containerId           = this.containerId,
@@ -267,18 +275,19 @@ object UsableSpecimen
              containerId,
              positionId,
              amount)
-      .map(_ => UsableSpecimen(id,
-                               inventoryId,
-                               specimenDescriptionId,
-                               version,
-                               timeAdded,
-                               None,
-                               originLocationId,
-                               locationId,
-                               containerId,
-                               positionId,
-                               timeCreated,
-                               amount))
+      .map(_ => UsableSpecimen(id                    = id,
+                               version               = version,
+                               timeAdded             = timeAdded,
+                               timeModified          = None,
+                               slug                  = Slug(inventoryId),
+                               inventoryId           = inventoryId,
+                               specimenDescriptionId = specimenDescriptionId,
+                               originLocationId      = originLocationId,
+                               locationId            = locationId,
+                               containerId           = containerId,
+                               positionId            = positionId,
+                               timeCreated           = timeCreated,
+                               amount                = amount))
   }
 
   def validate(id:                    SpecimenId,
@@ -312,11 +321,12 @@ object UsableSpecimen
  * It may be that the total amount of the spcimen has already been used in processing.
  */
 final case class UnusableSpecimen(id:                    SpecimenId,
-                                  inventoryId:           String,
-                                  specimenDescriptionId: SpecimenDescriptionId,
                                   version:               Long,
                                   timeAdded:             OffsetDateTime,
                                   timeModified:          Option[OffsetDateTime],
+                                  slug:                  String,
+                                  inventoryId:           String,
+                                  specimenDescriptionId: SpecimenDescriptionId,
                                   originLocationId:      LocationId,
                                   locationId:            LocationId,
                                   containerId:           Option[ContainerId],
@@ -324,15 +334,17 @@ final case class UnusableSpecimen(id:                    SpecimenId,
                                   timeCreated:           OffsetDateTime,
                                   amount:                BigDecimal)
     extends { val state: EntityState = Specimen.unusableState }
+    with HasSlug
     with Specimen {
 
   def makeUsable(): DomainValidation[UsableSpecimen] = {
     UsableSpecimen(id                    = this.id,
-                   inventoryId           = this.inventoryId,
-                   specimenDescriptionId = this.specimenDescriptionId,
                    version               = this.version + 1,
                    timeAdded             = this.timeAdded,
                    timeModified          = Some(OffsetDateTime.now),
+                   slug                  = this.slug,
+                   inventoryId           = this.inventoryId,
+                   specimenDescriptionId = this.specimenDescriptionId,
                    originLocationId      = this.originLocationId,
                    locationId            = this.locationId,
                    containerId           = this.containerId,

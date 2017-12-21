@@ -8,7 +8,7 @@ import scalaz.Scalaz._
 
 @ImplementedBy(classOf[SpecimenRepositoryImpl])
 trait SpecimenRepository
-    extends ReadWriteRepository [SpecimenId, Specimen] {
+    extends ReadWriteRepositoryWithSlug[SpecimenId, Specimen] {
 
   def getByInventoryId(inventoryId: String): DomainValidation[Specimen]
 
@@ -16,7 +16,7 @@ trait SpecimenRepository
 
 @Singleton
 class SpecimenRepositoryImpl @Inject() (val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[SpecimenId, Specimen](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[SpecimenId, Specimen](v => v.id)
     with SpecimenRepository {
   import org.biobank.CommonValidations._
 
@@ -28,6 +28,9 @@ class SpecimenRepositoryImpl @Inject() (val testData: TestData)
   def nextIdentity: SpecimenId = new SpecimenId(nextIdentityAsString)
 
   protected def notFound(id: SpecimenId): IdNotFound = IdNotFound(s"specimen id: $id")
+
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+    EntityCriteriaNotFound(s"specimen slug: $slug")
 
   def inventoryIdCriteriaError(inventoryId: String): String =
     EntityCriteriaError(s"specimen with inventory ID not found: $inventoryId").toString

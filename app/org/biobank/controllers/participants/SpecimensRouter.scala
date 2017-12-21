@@ -10,11 +10,8 @@ class SpecimensRouter @Inject()(controller: SpecimensController) extends SimpleR
   import ParticipantsRouting._
 
   override def routes: Routes = {
-    case GET(p"/get/${specimenId(spcId)}") =>
-      controller.get(spcId)
-
-    case GET(p"/invid/$invId") =>
-      controller.getByInventoryId(invId)
+    case GET(p"/get/$slug") =>
+      controller.get(slug)
 
     case GET(p"/${collectionEventId(ceId)}") =>
       // this action extracts parameters from the query string
