@@ -187,8 +187,8 @@ function UserProfileController($state,
   }
 
   function getRolesValue() {
-    if (vm.user.roles.length > 0) {
-      return vm.user.roles.sort().join(', ');
+    if (vm.user.hasRoles()) {
+      return vm.user.getRoleNames();
     }
     return gettextCatalog.getString('None');
   }

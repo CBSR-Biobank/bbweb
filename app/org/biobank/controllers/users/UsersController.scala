@@ -229,7 +229,7 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
             name         = user.name,
             email        = user.email,
             avatarUrl    = user.avatarUrl,
-            roles        = roles.map(r => r.slug),
+            roleData     = roles.map(r => EntityInfoDto(r.id.id, r.name, r.slug)),
             membership   = None)
   }
 }

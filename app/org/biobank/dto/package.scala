@@ -70,7 +70,7 @@ package dto {
                            name:         String,
                            email:        String,
                            avatarUrl:    Option[String],
-                           roles:        Set[String],
+                           roleData:     Set[EntityInfoDto],
                            membership:   Option[UserMembershipDto])
 
   object UserDto {

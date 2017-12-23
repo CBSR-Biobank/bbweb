@@ -91,7 +91,7 @@ function UserFactory($q,
       'email':        { 'type': 'string' },
       'avatarUrl':    { 'type': [ 'string', 'null' ] },
       'state':        { 'type': 'string' },
-      'roles':        { 'type': 'array', items: 'string' },
+      'roleData':     { 'type': 'array', 'items': { '$ref': 'EntityInfo' } },
       'membership':   {
         'oneOf': [
           { 'type': 'null' },
@@ -294,12 +294,16 @@ function UserFactory($q,
     return (this.state === UserState.LOCKED);
   };
 
-  User.prototype.hasRole = function (role) {
-    return _.includes(this.roles, role);
+  User.prototype.hasRoles = function () {
+    return (this.roleData.length > 0);
+  };
+
+  User.prototype.hasRole = function (roleName) {
+    return _.find(this.roleData, (role) => role.name == roleName);
   };
 
   User.prototype.hasAnyRoleOf = function (/* role1, role2, ..., roleN */) {
-    return _.intersection(Array.prototype.slice.call(arguments), this.roles).length > 0;
+    return _.intersection(Array.prototype.slice.call(arguments), this.roleData).length > 0;
   };
 
   User.prototype.hasStudyAdminRole = function () {
@@ -329,6 +333,9 @@ function UserFactory($q,
     return this.hasRole('shipping-user');
   };
 
+  User.prototype.getRoleNames = function () {
+    return this.roleData.map(role => role.name).join(', ');
+  }
 
   function changeStatus(user, state) {
     var json = {
