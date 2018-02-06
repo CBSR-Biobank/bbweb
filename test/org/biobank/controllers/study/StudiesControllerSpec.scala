@@ -394,7 +394,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fails for an invalid study ID") {
         val study = factory.createEnabledStudy
-        val json = makeRequest(GET, uri(study.slug), BAD_REQUEST)
+        val json = makeRequest(GET, uri(study.slug), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 

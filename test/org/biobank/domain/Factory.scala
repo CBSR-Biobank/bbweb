@@ -353,13 +353,15 @@ class Factory {
     val participant = defaultParticipant
     val collectionEventType = defaultCollectionEventType
 
+    val id = CollectionEventId(nameGenerator.next[CollectionEvent])
     val cevent = CollectionEvent(
-        id                    = CollectionEventId(nameGenerator.next[CollectionEvent]),
+        id                    = id,
         participantId         = participant.id,
         collectionEventTypeId = collectionEventType.id,
         version               = 0,
         timeAdded             = OffsetDateTime.now,
         timeModified          = None,
+        slug                  = Slug(id.id),
         timeCompleted         = OffsetDateTime.now,
         visitNumber           = 1,
         annotations           = Set.empty)

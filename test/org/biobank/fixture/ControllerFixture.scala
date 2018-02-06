@@ -13,7 +13,7 @@ import org.biobank.service.PasswordHasher
 import org.scalatest._
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneServerPerTest
-import play.api.Logger
+import org.slf4j.{Logger, LoggerFactory}
 import play.api.cache.{AsyncCacheApi, DefaultSyncCacheApi, SyncCacheApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -64,13 +64,11 @@ abstract class ControllerFixture
     with OptionValues
     with BbwebFakeApplication {
 
-  val log = Logger(this.getClass())
+  protected val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  val nameGenerator = new NameGenerator(this.getClass())
+  protected val nameGenerator = new NameGenerator(this.getClass())
 
-  var adminToken: String = ""
-
-  val factory = new Factory
+  protected val factory = new Factory
 
   override def newAppForTest(testData: TestData) =
     new GuiceApplicationBuilder()

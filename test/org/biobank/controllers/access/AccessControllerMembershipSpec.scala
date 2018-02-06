@@ -194,7 +194,7 @@ class AccessControllerMembershipSpec
       it("fails for an invalid membership") {
         val f = new MembershipFixture
         membershipRepository.remove(f.membership)
-        val reply = makeRequest(GET, uri("memberships", f.membership.slug), BAD_REQUEST)
+        val reply = makeRequest(GET, uri("memberships", f.membership.slug), NOT_FOUND)
 
         (reply \ "status").as[String] must be ("error")
 

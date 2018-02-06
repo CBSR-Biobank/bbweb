@@ -131,7 +131,8 @@ final case class DisabledStudy(id:              StudyId,
     with Study
     with StudyValidations
     with AnnotationTypeValidations
-    with HasAnnotationTypes {
+    with HasAnnotationTypes
+    with HasSlug {
   import CommonValidations._
 
   /** Used to change the name. */

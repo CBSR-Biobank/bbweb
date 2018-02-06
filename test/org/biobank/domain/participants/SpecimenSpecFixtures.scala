@@ -7,7 +7,7 @@ import org.biobank.service.centres.CentreLocationInfo
 
 trait SpecimenSpecFixtures {
 
-  val factory: Factory
+  protected val factory: Factory
 
   def createEntities() = {
     val _centre = factory.createEnabledCentre.copy(locations = Set(factory.createLocation))
@@ -26,13 +26,13 @@ trait SpecimenSpecFixtures {
                          _centre.locations.head.name)
 
     new {
-      val centre             = _centre
-      val centreLocationInfo = _centreLocationInfo
-      val study              = _study
-      val specimenDescription       = _specimenDescription
-      val ceventType         = _ceventType
-      val participant        = _participant
-      val cevent             = _cevent
+      val centre              = _centre
+      val centreLocationInfo  = _centreLocationInfo
+      val study               = _study
+      val specimenDescription = _specimenDescription
+      val ceventType          = _ceventType
+      val participant         = _participant
+      val cevent              = _cevent
     }
   }
 

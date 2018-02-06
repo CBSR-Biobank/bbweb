@@ -27,23 +27,22 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
 
   private val PageSizeMax = 10
 
-  def get(studyId: StudyId, ceventTypeId: CollectionEventTypeId): Action[Unit] =
+  def get(studySlug: String, ceventTypeSlug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      log.debug(s"CeventTypeController.list: studyId: $studyId, ceventTypeId: $ceventTypeId")
-      val ceventType = service.eventTypeWithId(request.authInfo.userId, studyId, ceventTypeId)
+      val ceventType = service.eventTypeBySlug(request.authInfo.userId, studySlug, ceventTypeSlug)
       validationReply(ceventType)
     }
 
-  def list(studyId: StudyId): Action[Unit] = {
+  def list(studySlug: String): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {
           for {
             pagedQuery  <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            ceventTypes <- service.list(request.authInfo.userId,
-                                       studyId,
-                                       pagedQuery.filter,
-                                       pagedQuery.sort)
+            ceventTypes <- service.listByStudySlug(request.authInfo.userId,
+                                                   studySlug,
+                                                   pagedQuery.filter,
+                                                   pagedQuery.sort)
             validPage   <- pagedQuery.validPage(ceventTypes.size)
             results     <- PagedResults.create(ceventTypes, pagedQuery.page, pagedQuery.limit)
           } yield results
@@ -53,16 +52,16 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
   }
 
   // returns all the names of the collection events in a list of EntityInfoDto.
-  def listNames(studyId: StudyId): Action[Unit] = {
+  def listNames(studySlug: String): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            ceventTypes   <- service.list(request.authInfo.userId,
-                                          studyId,
-                                          filterAndSort.filter,
-                                          filterAndSort.sort)
+            ceventTypes   <- service.listByStudySlug(request.authInfo.userId,
+                                                     studySlug,
+                                                     filterAndSort.filter,
+                                                     filterAndSort.sort)
           } yield {
             ceventTypes.map(et => EntityInfoDto(et.id.id, et.slug, et.name))
           }
@@ -70,6 +69,11 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
       )
     }
   }
+
+  def inUse(slug: String): Action[Unit] =
+    action(parse.empty) { implicit request =>
+      validationReply(service.eventTypeInUse(request.authInfo.userId, slug))
+    }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
@@ -131,11 +135,6 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
           expectedVersion       = ver,
           specimenDescriptionId = sdId)
       processCommand(cmd)
-    }
-
-  def inUse(id: CollectionEventTypeId): Action[Unit] =
-    action(parse.empty) { implicit request =>
-      validationReply(service.eventTypeInUse(request.authInfo.userId, id))
     }
 
   private def processCommand(cmd: CollectionEventTypeCommand): Future[Result] = {

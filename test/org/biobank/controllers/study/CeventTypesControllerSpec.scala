@@ -165,7 +165,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail for an invalid study ID") {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
-        val json = makeRequest(GET, uri(study.slug, cet.slug), BAD_REQUEST)
+        val json = makeRequest(GET, uri(study.slug, cet.slug), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -176,7 +176,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
         studyRepository.put(study)
-        val json = makeRequest(GET, uri(study.slug, cet.slug), BAD_REQUEST)
+        val json = makeRequest(GET, uri(study.slug, cet.slug), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -191,13 +191,13 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list none") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
-        PagedResultsSpec(this).emptyResults(uri(study.id.id))
+        PagedResultsSpec(this).emptyResults(uri(study.slug))
       }
 
       it("list a single collection event type") {
         val f = new EventTypeFixture
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri(f.study.id.id),
+            uri = uri(f.study.slug),
             offset = 0,
             total = 1,
             maybeNext = None,
@@ -209,7 +209,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("get all collection event types for a study") {
         val f = new EventTypeFixture(3)
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri(f.study.id.id),
+            uri       = uri(f.study.slug),
             offset    = 0,
             total     = f.eventTypes.size.toLong,
             maybeNext = None,
@@ -228,7 +228,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val sortExprs = Table("sort expressions", "name", "-name")
         forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri         = uri(f.study.id.id),
+              uri         = uri(f.study.slug),
               queryParams = Map("sort" -> sortExpr),
               offset      = 0,
               total       = f.eventTypes.size.toLong,
@@ -250,7 +250,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list the first Collection Event Type in a paged query") {
         val f = new EventTypeFixture(3)
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.study.id.id),
+            uri         = uri(f.study.slug),
             queryParams = Map("filter" -> s"name::${f.eventTypes(0).name}"),
             total       = 1)
 
@@ -260,7 +260,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list the last Collection Event Type in a paged query") {
         val f = new EventTypeFixture(3)
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.study.id.id),
+            uri         = uri(f.study.slug),
             queryParams = Map("filter" -> s"name::${f.eventTypes(2).name}"),
             total       = 1)
 
@@ -269,16 +269,16 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fail for invalid study id") {
         val study = factory.createDisabledStudy
-        val json = makeRequest(GET, uri(study.id.id), NOT_FOUND)
+        val json = makeRequest(GET, uri(study.slug), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex("IdNotFound.*study")
+        (json \ "message").as[String] must include regex("EntityCriteriaNotFound.*study")
       }
 
       it("fail when using an invalid query parameters") {
         val f = new EventTypeFixture(3)
-        val url = uri(f.study.id.id)
+        val url = uri(f.study.slug)
 
         PagedResultsSpec(this).failWithNegativePageNumber(url)
         PagedResultsSpec(this).failWithInvalidPageNumber(url)
@@ -299,7 +299,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val json = makeRequest(GET, uri("names", f.study.id.id) + "?order=asc")
+        val json = makeRequest(GET, uri("names", f.study.slug) + "?order=asc")
 
         (json \ "status").as[String] must include ("success")
 
@@ -318,7 +318,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val json = makeRequest(GET, uri() + s"/names/${f.study.id}?filter=name::ET1")
+        val json = makeRequest(GET, uri() + s"/names/${f.study.slug}?filter=name::ET1")
 
         (json \ "status").as[String] must include ("success")
 
@@ -336,7 +336,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val json = makeRequest(GET, uri() + s"/names/${f.study.id}?filter=name::xxx")
+        val json = makeRequest(GET, uri() + s"/names/${f.study.slug}?filter=name::xxx")
 
         (json \ "status").as[String] must include ("success")
         val jsonList = (json \ "data").as[List[JsObject]]
@@ -351,7 +351,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val json = makeRequest(GET, uri() + s"/names/${f.study.id}?sort=xxx", BAD_REQUEST)
+        val json = makeRequest(GET, uri() + s"/names/${f.study.slug}?sort=xxx", BAD_REQUEST)
 
         (json \ "status").as[String] must include ("error")
 

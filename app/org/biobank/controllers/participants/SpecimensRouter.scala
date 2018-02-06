@@ -13,9 +13,9 @@ class SpecimensRouter @Inject()(controller: SpecimensController) extends SimpleR
     case GET(p"/get/$slug") =>
       controller.get(slug)
 
-    case GET(p"/${collectionEventId(ceId)}") =>
+    case GET(p"/$eventSlug") =>
       // this action extracts parameters from the query string
-      controller.list(ceId)
+      controller.list(eventSlug)
 
     case POST(p"/snapshot") =>
       controller.snapshot

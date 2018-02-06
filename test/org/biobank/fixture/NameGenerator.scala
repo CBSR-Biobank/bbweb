@@ -13,17 +13,16 @@ import scala.collection.mutable.HashMap
  */
 class NameGenerator(klass: Class[_]) {
 
-  val rootName = klass.getName
+  private val delimiter: String = "_"
 
-  val rootSimpleName = klass.getSimpleName
+  private val rootSimpleName = klass.getSimpleName + delimiter + IdGenerator.next
 
-  val delimiter: String = "_"
-
-  // if a name is found more than once we need to append a new id
-  var names = new HashMap[String, Int].withDefaultValue(0)
+  private val names = new HashMap[String, Int].withDefaultValue(0)
 
   // if a reference is found more than once we need to append a new id
-  var references = new HashMap[Int, Int].withDefaultValue(0)
+  private val references = new HashMap[Int, Int].withDefaultValue(0)
+
+  def name() = rootSimpleName
 
   /**
    * @return a unique name based on the name unicity

@@ -33,6 +33,9 @@ trait SpecimensService extends BbwebService {
   def list(requestUserId: UserId, collectionEventId: CollectionEventId, sort: SortString)
       : ServiceValidation[Seq[Specimen]]
 
+  def listBySlug(requestUserId: UserId, eventSlug: String, sort: SortString)
+      : ServiceValidation[Seq[Specimen]]
+
   def specimenToDto(specimen: Specimen): ServiceValidation[SpecimenDto]
 
   def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]]
@@ -120,7 +123,14 @@ class SpecimensServiceImpl @Inject() (
     } yield specimens
   }
 
-  def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]] = {
+  def listBySlug(requestUserId: UserId, eventSlug: String, sort: SortString)
+      : ServiceValidation[Seq[Specimen]] = {
+    collectionEventRepository.getBySlug(eventSlug) flatMap { event =>
+      list(requestUserId, event.id, sort)
+    }
+  }
+
+ def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]] = {
     val validCommand = cmd match {
         case c: RemoveSpecimenCmd =>
           ServiceError(s"invalid service call: $cmd, use processRemoveCommand").failureNel[CollectionEvent]

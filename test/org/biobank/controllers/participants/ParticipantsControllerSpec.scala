@@ -180,7 +180,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
       it("must return NOT_FOUND for a participant slug that does not exist") {
         val f = new Fixture
         participantRepository.remove(f.participant)
-        val json = makeRequest(GET, uri(f.participant.slug), BAD_REQUEST)
+        val json = makeRequest(GET, uri(f.participant.slug), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 

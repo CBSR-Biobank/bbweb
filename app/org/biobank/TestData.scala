@@ -642,6 +642,7 @@ class TestData @Inject() (config:         Configuration,
                                   version               = 0L,
                                   timeAdded             = Global.StartOfTime,
                                   timeModified          = None,
+                                  slug                  = Slug(id.id),
                                   timeCompleted         = OffsetDateTime.now.minusDays(1),
                                   visitNumber           = eventTypeIndex + 1,
                                   annotations           = Set.empty[Annotation])

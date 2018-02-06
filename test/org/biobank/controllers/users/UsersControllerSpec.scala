@@ -456,7 +456,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         (json \ "data" \ "name").as[String] must be(user.name)
       }
 
-      it("111 users with the same name (different emails) get different slugs") {
+      it("users with the same name (different emails) get different slugs") {
         val users = (0 until 2).map { _ =>
             val user = factory.createActiveUser
             userRepository.put(user)
@@ -733,7 +733,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
       it("return not found for an invalid user") {
         val user = factory.createActiveUser
-        val json = makeRequest(GET, uri(user), BAD_REQUEST)
+        val json = makeRequest(GET, uri(user), NOT_FOUND)
 
         (json \ "status").as[String] must be ("error")
 

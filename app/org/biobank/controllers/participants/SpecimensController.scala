@@ -36,13 +36,13 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
       validationReply(v)
     }
 
-  def list(ceventId: CollectionEventId): Action[Unit] =
+  def list(ceventSlug: String): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {
           for {
             pagedQuery   <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            specimens    <- service.list(request.authInfo.userId, ceventId, pagedQuery.sort)
+            specimens    <- service.listBySlug(request.authInfo.userId, ceventSlug, pagedQuery.sort)
             validPage    <- pagedQuery.validPage(specimens.size)
             specimenDtos <- specimens.map(s => service.specimenToDto(s)).toList.sequenceU
             results      <- PagedResults.create(specimenDtos, pagedQuery.page, pagedQuery.limit)

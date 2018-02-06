@@ -80,7 +80,7 @@ trait ShipmentSpecFixtures {
                                cevent,
                                specimens)
 
-  val factory: Factory
+  protected val factory: Factory
 
   val nonCreatedStates = List(Shipment.packedState,
                               Shipment.sentState,

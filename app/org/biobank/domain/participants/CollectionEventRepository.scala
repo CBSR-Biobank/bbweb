@@ -11,7 +11,7 @@ import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[CollectionEventRepositoryImpl])
 trait CollectionEventRepository
-    extends ReadWriteRepository [CollectionEventId, CollectionEvent] {
+    extends ReadWriteRepositoryWithSlug[CollectionEventId, CollectionEvent] {
 
   def withId(participantId: ParticipantId, collectionEventId: CollectionEventId)
       : DomainValidation[CollectionEvent]
@@ -26,7 +26,7 @@ trait CollectionEventRepository
 
 @Singleton
 class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
-    extends ReadWriteRepositoryRefImpl[CollectionEventId, CollectionEvent](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[CollectionEventId, CollectionEvent](v => v.id)
     with CollectionEventRepository {
   import org.biobank.CommonValidations._
 
@@ -40,6 +40,9 @@ class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
   def nextIdentity: CollectionEventId = new CollectionEventId(nextIdentityAsString)
 
   protected def notFound(id: CollectionEventId): IdNotFound = IdNotFound(s"collection event id: $id")
+
+  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+    EntityCriteriaNotFound(s"collection event slug: $slug")
 
   def withId(participantId: ParticipantId, collectionEventId: CollectionEventId)
       : DomainValidation[CollectionEvent] = {

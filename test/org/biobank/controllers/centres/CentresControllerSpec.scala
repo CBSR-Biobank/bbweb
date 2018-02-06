@@ -146,7 +146,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       it("not read an invalid centre") {
         val centre = factory.createDisabledCentre
 
-        val json = makeRequest(GET, uri(centre), BAD_REQUEST)
+        val json = makeRequest(GET, uri(centre), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 

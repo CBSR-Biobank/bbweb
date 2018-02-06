@@ -36,13 +36,17 @@ trait CollectionEventTypeService extends BbwebService {
                       studySlug:     String,
                       eventTypeSlug: String): ServiceValidation[CollectionEventType]
 
-  def eventTypeInUse(requestUserId: UserId,
-                     eventTypeId:   CollectionEventTypeId): ServiceValidation[Boolean]
+  def eventTypeInUse(requestUserId: UserId, slug: String): ServiceValidation[Boolean]
 
   def list(requestUserId: UserId,
            studyId:       StudyId,
            filter:        FilterString,
            sort:          SortString): ServiceValidation[Seq[CollectionEventType]]
+
+  def listByStudySlug(requestUserId: UserId,
+                      studySlug:     String,
+                      filter:        FilterString,
+                      sort:          SortString): ServiceValidation[Seq[CollectionEventType]]
 
   def processCommand(cmd: CollectionEventTypeCommand)
       : Future[ServiceValidation[CollectionEventType]]
@@ -92,13 +96,13 @@ class CollectionEventTypeServiceImpl @Inject()(
     }
   }
 
-  def eventTypeInUse(requestUserId: UserId, id: CollectionEventTypeId): ServiceValidation[Boolean] = {
-    eventTypeRepository.getByKey(id).flatMap { ceventType =>
+  def eventTypeInUse(requestUserId: UserId, slug: String): ServiceValidation[Boolean] = {
+    eventTypeRepository.getBySlug(slug).flatMap { ceventType =>
       whenPermittedAndIsMember(requestUserId,
                                PermissionId.StudyRead,
                                Some(ceventType.studyId),
                                None) { () =>
-        eventRepository.collectionEventTypeInUse(id).successNel[String]
+        eventRepository.collectionEventTypeInUse(ceventType.id).successNel[String]
       }
     }
   }
@@ -131,7 +135,16 @@ class CollectionEventTypeServiceImpl @Inject()(
     }
   }
 
-  def processCommand(cmd: CollectionEventTypeCommand): Future[ServiceValidation[CollectionEventType]] = {
+   def listByStudySlug(requestUserId: UserId,
+                       studySlug:     String,
+                       filter:        FilterString,
+                       sort:          SortString): ServiceValidation[Seq[CollectionEventType]] = {
+     studiesService.getStudyBySlug(requestUserId, studySlug) flatMap { study =>
+       list(requestUserId, study.id, filter, sort)
+     }
+   }
+
+ def processCommand(cmd: CollectionEventTypeCommand): Future[ServiceValidation[CollectionEventType]] = {
     val v = for {
         validCommand <- cmd match {
           case c: RemoveCollectionEventTypeCmd =>

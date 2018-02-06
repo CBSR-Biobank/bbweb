@@ -155,7 +155,7 @@ class CollectionEventTypeServiceSpec
         val f = new UsersCeventTypeFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          ceventTypeService.eventTypeInUse(user.id, f.ceventType.id)
+          ceventTypeService.eventTypeInUse(user.id, f.ceventType.slug)
             .mustSucceed { result =>
               result must be (false)
             }
@@ -165,11 +165,11 @@ class CollectionEventTypeServiceSpec
       it("users cannot access") {
         val f = new UsersCeventTypeFixture
         info("no membership user")
-        ceventTypeService.eventTypeInUse(f.noMembershipUser.id, f.ceventType.id)
+        ceventTypeService.eventTypeInUse(f.noMembershipUser.id, f.ceventType.slug)
           .mustFail("Unauthorized")
 
         info("no permission user")
-        ceventTypeService.eventTypeInUse(f.nonStudyPermissionUser.id, f.ceventType.id)
+        ceventTypeService.eventTypeInUse(f.nonStudyPermissionUser.id, f.ceventType.slug)
           .mustFail("Unauthorized")
       }
 

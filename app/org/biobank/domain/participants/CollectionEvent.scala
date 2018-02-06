@@ -39,12 +39,14 @@ final case class CollectionEvent(id:                    CollectionEventId,
                                  version:               Long,
                                  timeAdded:             OffsetDateTime,
                                  timeModified:          Option[OffsetDateTime],
+                                 slug:                  String,
                                  timeCompleted:         OffsetDateTime,
                                  visitNumber:           Int,
                                  annotations:           Set[Annotation])
     extends ConcurrencySafeEntity[CollectionEventId]
     with HasParticipantId
     with CollectionEventValidations
+    with HasSlug
     with HasAnnotations[CollectionEvent] {
   import org.biobank.domain.CommonValidations._
 
@@ -113,16 +115,17 @@ object CollectionEvent
        validateId(collectionEventTypeId, CollectionEventTypeIdRequired) |@|
        validateVersion(version) |@|
        validateMinimum(visitNumber, 1, VisitNumberInvalid) |@|
-       annotations.toList.traverseU(Annotation.validate)) {
-      case (_, _, _, _, _, _) => CollectionEvent(id,
-                                                 participantId,
-                                                 collectionEventTypeId,
-                                                 version,
-                                                 timeAdded,
-                                                 None,
-                                                 timeCompleted,
-                                                 visitNumber,
-                                                 annotations)
+       annotations.toList.traverseU(Annotation.validate)) { case _ =>
+        CollectionEvent(id,
+                        participantId,
+                        collectionEventTypeId,
+                        version,
+                        timeAdded,
+                        None,
+                        slug = Slug(s"visit-number-${visitNumber}"),
+                        timeCompleted,
+                        visitNumber,
+                        annotations)
     }
   }
 
