@@ -16,6 +16,7 @@
     </encoder>
   </appender>
 
+  <logger name="application" level="ERROR" />
   <logger name="org.biobank" level="INFO" />
   <logger name="org.biobank.domain" level="INFO" />
   <logger name="org.biobank.service" level="INFO" />
@@ -30,7 +31,6 @@
   <logger name="io.netty" level="INFO" />
   -->
 
-  <logger name="application" level="WARN" />
   <logger name="akka.event.slf4j" level="WARN" />
   <logger name="com.gargoylesoftware.htmlunit" level="WARN" />
 

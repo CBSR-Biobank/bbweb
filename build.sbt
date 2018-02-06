@@ -77,7 +77,7 @@ testOptions in Test := Nil
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-oDS")
 
-addCompilerPlugin("com.github.ghik" %% "silencer-plugin" % "0.5")
+addCompilerPlugin("com.github.ghik" %% "silencer-plugin" % "0.6")
 
 resolvers ++= Seq(
     Classpaths.sbtPluginReleases,
@@ -97,17 +97,17 @@ libraryDependencies ++= Seq(
       .excludeAll(ExclusionRule(organization="com.google.protobuf")),
     "com.typesafe.akka"           %% "akka-persistence-query"              % akkaVer   % "compile",
     "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
-    ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "3.0.1" % "compile"  )
+    ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "3.2.0" % "compile"  )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
-    "mysql"                       % "mysql-connector-java"                 % "8.0.8-dmr",
-    "org.scalaz"                  %% "scalaz-core"                         % "7.2.17"  % "compile",
+    "mysql"                       % "mysql-connector-java"                 % "8.0.9-rc",
+    "org.scalaz"                  %% "scalaz-core"                         % "7.2.19"  % "compile",
     "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
     "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.1",
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
     "com.typesafe.play"           %% "play-mailer"                         % "6.0.1",
     "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.1",
     "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.7.2",
-    "com.github.ghik"             %% "silencer-lib"                        % "0.5"  % "compile",
+    "com.github.ghik"             %% "silencer-lib"                        % "0.6"  % "compile",
     // Testing
     ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.5.1.1"  % "test" )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),

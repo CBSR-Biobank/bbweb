@@ -20,7 +20,7 @@
     </encoder>
   </appender>
 
-  <logger name="application" level="DEBUG" />
+  <logger name="application" level="INFO" />
   <logger name="play" level="DEBUG" />
 
   <logger name="org.biobank.domain" level="INFO" />
