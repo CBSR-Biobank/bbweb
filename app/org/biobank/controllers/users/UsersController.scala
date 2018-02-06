@@ -2,6 +2,7 @@ package org.biobank.controllers.users
 
 import org.biobank.infrastructure.command.Commands._
 import javax.inject.{Inject, Singleton}
+import java.time.format.DateTimeFormatter
 import org.biobank.dto._
 import org.biobank.domain.access.Role
 import org.biobank.domain.user._
@@ -222,8 +223,8 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
   private def userToDto(user: User, roles: Set[Role]): UserDto = {
     UserDto(id           = user.id.id,
             version      = user.version,
-            timeAdded    = user.timeAdded,
-            timeModified = user.timeModified,
+            timeAdded    = user.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+            timeModified = user.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
             state        = user.state,
             slug         = user.slug,
             name         = user.name,

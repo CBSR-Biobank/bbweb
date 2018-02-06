@@ -13,7 +13,8 @@ object TestUtils extends MustMatchers with OptionValues {
 
   val TimeCoparisonSeconds = 2L
 
-  def checkOpionalTime(expectedTimeMaybe: Option[OffsetDateTime], actualTimeMaybe: Option[OffsetDateTime]) = {
+  def checkOpionalTime(expectedTimeMaybe: Option[OffsetDateTime],
+                       actualTimeMaybe: Option[OffsetDateTime]): Unit = {
     expectedTimeMaybe match {
       case Some(expectedTime) => actualTimeMaybe match {
         case Some(actualTime) => checkTimeStamps(expectedTime, actualTime)
@@ -26,16 +27,32 @@ object TestUtils extends MustMatchers with OptionValues {
     }
   }
 
+  def checkOpionalTimeString(expectedTimeMaybe: Option[String],
+                             actualTimeMaybe:   Option[OffsetDateTime]): Unit = {
+    checkOpionalTime(expectedTimeMaybe.map(OffsetDateTime.parse(_)),
+                     actualTimeMaybe)
+  }
+
   def checkTimeStamps(expectedTime:  OffsetDateTime,
-                      actualTime: OffsetDateTime,
+                      actualTime:    OffsetDateTime,
                       maxDifference: Long): Unit = {
     val timediff = Duration.between(actualTime, expectedTime).getSeconds.abs
     timediff must be < maxDifference
     ()
   }
 
+  def checkTimeStamps(expectedTime:  String,
+                      actualTime:    OffsetDateTime,
+                      maxDifference: Long): Unit = {
+    checkTimeStamps(OffsetDateTime.parse(expectedTime), actualTime, maxDifference)
+  }
+
   def checkTimeStamps(expectedTime:  OffsetDateTime, actualTime: OffsetDateTime): Unit = {
     checkTimeStamps(expectedTime, actualTime, TimeCoparisonSeconds)
+  }
+
+  def checkTimeStamps(expectedTime:  String, actualTime: OffsetDateTime): Unit = {
+    checkTimeStamps(OffsetDateTime.parse(expectedTime), actualTime)
   }
 
   def checkTimeStamps(entity:               ConcurrencySafeEntity[_],

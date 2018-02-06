@@ -322,7 +322,8 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "id").as[String] mustBe (specimenDto.id)
     (json \ "version").as[Long] mustBe (specimenDto.version)
     TestUtils.checkTimeStamps(specimenDto.timeAdded, (json \ "timeAdded").as[OffsetDateTime])
-    TestUtils.checkOpionalTime(specimenDto.timeModified, (json \ "timeModified").asOpt[OffsetDateTime])
+    TestUtils.checkOpionalTimeString(specimenDto.timeModified,
+                                     (json \ "timeModified").asOpt[OffsetDateTime])
 
     (json \ "specimenDescriptionId").as[String] mustBe (specimenDto.specimenDescriptionId)
 

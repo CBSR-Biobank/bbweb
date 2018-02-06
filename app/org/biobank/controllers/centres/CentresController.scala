@@ -1,7 +1,7 @@
 package org.biobank.controllers.centres
 
-import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
+import java.time.format.DateTimeFormatter
 import org.biobank.controllers._
 import org.biobank.domain.centre.{ Centre, CentreId }
 import org.biobank.domain.user.UserId

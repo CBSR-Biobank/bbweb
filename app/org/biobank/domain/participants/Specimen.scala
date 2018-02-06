@@ -1,6 +1,7 @@
 package org.biobank.domain.participants
 
 import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import org.biobank.ValidationKey
 import org.biobank.dto.SpecimenDto
 import org.biobank.domain._
@@ -60,8 +61,8 @@ sealed trait Specimen
                 locationInfo:       CentreLocationInfo): SpecimenDto =
     SpecimenDto(id                       = this.id.id,
                 version                  = this.version,
-                timeAdded                = this.timeAdded,
-                timeModified             = this.timeModified,
+                timeAdded                = this.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                timeModified             = this.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
                 state                    = this.state,
                 slug                     = this.slug,
                 inventoryId              = this.inventoryId,

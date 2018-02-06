@@ -4,10 +4,12 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
+import java.time.format.DateTimeFormatter
 import org.biobank.domain.access._
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
 import org.biobank.domain.user.UserId
+import org.biobank.dto.CollectionEventDto
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
@@ -21,18 +23,19 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[CollectionEventsServiceImpl])
 trait CollectionEventsService extends BbwebService {
 
-  def get(requestUserId: UserId, collectionEventId: CollectionEventId): ServiceValidation[CollectionEvent]
+  def get(requestUserId: UserId, collectionEventId: CollectionEventId)
+      : ServiceValidation[CollectionEventDto]
 
   def getByVisitNumber(requestUserId: UserId,
                        participantId: ParticipantId,
-                       visitNumber:   Int): ServiceValidation[CollectionEvent]
+                       visitNumber:   Int): ServiceValidation[CollectionEventDto]
 
   def list(requestUserId: UserId,
            participantId: ParticipantId,
            filter:        FilterString,
-           sort:          SortString): ServiceValidation[Seq[CollectionEvent]]
+           sort:          SortString): ServiceValidation[Seq[CollectionEventDto]]
 
-  def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]]
+  def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEventDto]]
 
   def processRemoveCommand(cmd: RemoveCollectionEventCmd): Future[ServiceValidation[Boolean]]
 
@@ -55,30 +58,28 @@ class CollectionEventsServiceImpl @Inject() (
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def get(requestUserId: UserId, collectionEventId: CollectionEventId): ServiceValidation[CollectionEvent] = {
+  def get(requestUserId: UserId, collectionEventId: CollectionEventId)
+      : ServiceValidation[CollectionEventDto] = {
     for {
-      cevent     <- collectionEventRepository.getByKey(collectionEventId)
-      ceventType <- collectionEventTypeRepository.getByKey(cevent.collectionEventTypeId)
-      permitted  <- whenPermittedAndIsMember(requestUserId,
-                                             PermissionId.CollectionEventRead,
-                                             Some(ceventType.studyId),
-                                             None) { () => true.successNel[String] }
-      } yield cevent
+      cevent <- collectionEventRepository.getByKey(collectionEventId)
+      dto    <- collectionEventToDto(requestUserId, cevent)
+    } yield dto
   }
 
   def getByVisitNumber(requestUserId: UserId,
                        participantId: ParticipantId,
                        visitNumber:   Int)
-      : ServiceValidation[CollectionEvent] = {
-    whenParticipantPermitted(requestUserId, participantId) { participant =>
-      collectionEventRepository.withVisitNumber(participantId, visitNumber)
-    }
+      : ServiceValidation[CollectionEventDto] = {
+    for {
+      cevent <- collectionEventRepository.withVisitNumber(participantId, visitNumber)
+      dto    <- collectionEventToDto(requestUserId, cevent)
+    } yield dto
   }
 
   def list(requestUserId: UserId,
            participantId: ParticipantId,
            filter:        FilterString,
-           sort:          SortString): ServiceValidation[Seq[CollectionEvent]] = {
+           sort:          SortString): ServiceValidation[Seq[CollectionEventDto]] = {
     whenParticipantPermitted(requestUserId, participantId) { participant =>
       val allCevents = collectionEventRepository.allForParticipant(participantId).toSet
       val sortStr = if (sort.expression.isEmpty) new SortString("visitNumber")
@@ -92,15 +93,20 @@ class CollectionEventsServiceImpl @Inject() (
                               toSuccessNel(ServiceError("at least one sort expression is required")) }
         sortFunc        <- { CollectionEvent.sort2Compare.get(firstSort.name).
                               toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+        sorted          <- cevents.toSeq.sortWith(sortFunc).successNel[String]
+        dtos            <-  {
+          cevents.map(event => collectionEventToDto(requestUserId, event, participant))
+            .toList.sequenceU.map(_.toSeq)
+        }
       } yield {
-        val result = cevents.toSeq.sortWith(sortFunc)
+        val result = dtos
         if (firstSort.order == AscendingOrder) result
         else result.reverse
       }
     }
   }
 
-  def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEvent]] = {
+  def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEventDto]] = {
     val validCommand = cmd match {
         case c: RemoveCollectionEventCmd =>
           ServiceError(s"invalid service call: $cmd, use processRemoveCommand").failureNel[DisabledStudy]
@@ -108,7 +114,7 @@ class CollectionEventsServiceImpl @Inject() (
       }
 
     validCommand.fold(
-      err => Future.successful(err.failure[CollectionEvent]),
+      err => Future.successful(err.failure[CollectionEventDto]),
       c => whenParticipantPermittedAsync(cmd) { () =>
         ask(processor, cmd)
           .mapTo[ServiceValidation[CollectionEventEvent]]
@@ -116,7 +122,8 @@ class CollectionEventsServiceImpl @Inject() (
             for {
               event  <- validation
               cevent <- collectionEventRepository.getByKey(CollectionEventId(event.id))
-            } yield cevent
+              dto    <- collectionEventToDto(UserId(cmd.sessionUserId), cevent)
+            } yield dto
           }
       }
     )
@@ -174,6 +181,40 @@ class CollectionEventsServiceImpl @Inject() (
                                              Some(study.id),
                                              None)(block)
     )
+  }
+
+  private def collectionEventToDto(requestUserId: UserId,
+                                   event:         CollectionEvent,
+                                   participant:   Participant): ServiceValidation[CollectionEventDto] = {
+    for {
+      ceventType  <- collectionEventTypeRepository.getByKey(event.collectionEventTypeId)
+      permitted   <- whenPermittedAndIsMember(requestUserId,
+                                              PermissionId.CollectionEventRead,
+                                              Some(ceventType.studyId),
+                                              None) { () => true.successNel[String] }
+    } yield
+        CollectionEventDto(
+          id                      = event.id.id,
+          participantId           = participant.id.id,
+          participantSlug         = participant.slug,
+          collectionEventTypeId   = ceventType.id.id,
+          collectionEventTypeSlug = ceventType.slug,
+          version                 = event.version,
+          timeAdded               = event.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+          timeModified            = event.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+          slug                    = event.slug,
+          timeCompleted           = event.timeCompleted.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+          visitNumber             = event.visitNumber,
+          annotations             = event.annotations)
+
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+  private def collectionEventToDto(requestUserId: UserId, event: CollectionEvent)
+      : ServiceValidation[CollectionEventDto] = {
+    participantRepository.getByKey(event.participantId) flatMap { participant =>
+      collectionEventToDto(requestUserId, event, participant)
+    }
   }
 
 }

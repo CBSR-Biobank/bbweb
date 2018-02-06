@@ -1,7 +1,7 @@
 package org.biobank
 
 import java.time.OffsetDateTime
-import org.biobank.domain.{EntityState, Location}
+import org.biobank.domain.{Annotation, EntityState, Location}
 import org.biobank.domain.centre.Shipment
 import org.biobank.dto.access.UserMembershipDto
 import org.biobank.service.centres.CentreLocationInfo
@@ -61,10 +61,29 @@ package dto {
 
   }
 
+  final case class CollectionEventDto(id:                      String,
+                                      participantId:           String,
+                                      participantSlug:         String,
+                                      collectionEventTypeId:   String,
+                                      collectionEventTypeSlug: String,
+                                      version:                 Long,
+                                      timeAdded:               String,
+                                      timeModified:            Option[String],
+                                      slug:                    String,
+                                      timeCompleted:           String,
+                                      visitNumber:             Int,
+                                      annotations:             Set[Annotation])
+
+  object CollectionEventDto {
+
+    implicit val collectionEventDtoWriter: Writes[CollectionEventDto] = Json.writes[CollectionEventDto]
+
+  }
+
   final case class UserDto(id:           String,
                            version:      Long,
-                           timeAdded:    OffsetDateTime,
-                           timeModified: Option[OffsetDateTime],
+                           timeAdded:    String,
+                           timeModified: Option[String],
                            state:        EntityState,
                            slug:         String,
                            name:         String,
@@ -81,8 +100,8 @@ package dto {
 
   final case class SpecimenDto(id:                       String,
                                version:                  Long,
-                               timeAdded:                OffsetDateTime,
-                               timeModified:             Option[OffsetDateTime],
+                               timeAdded:                String,
+                               timeModified:             Option[String],
                                state:                    EntityState,
                                slug:                     String,
                                inventoryId:              String,

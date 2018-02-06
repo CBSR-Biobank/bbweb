@@ -75,9 +75,9 @@ class CollectionEventRepositoryImpl @Inject() (val testData: TestData)
       }
       .map { case (id, cevent) => cevent }
       .toSuccessNel(
-        DomainError(
+        EntityCriteriaNotFound {
           s"collection event does not exist: participantId/$participantId, visitNumber/$visitNumber }"
-        ).toString)
+        }.toString)
   }
 
   def allForParticipant(participantId: ParticipantId): Set[CollectionEvent] = {

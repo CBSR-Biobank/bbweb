@@ -193,12 +193,12 @@ function CollectionEventFactory($q,
    * @param {biobank.domain.CollectionEventType} [collectionEventType] - The CollectionEventType that
    * describes this object.
    */
-  CollectionEvent.get = function (id) {
-    if (!id) {
+  CollectionEvent.get = function (slug) {
+    if (!slug) {
       throw new DomainError('collection event id not specified');
     }
 
-    return biobankApi.get(this.url(id)).then(function (reply) {
+    return biobankApi.get(this.url(slug)).then(function (reply) {
       return CollectionEvent.asyncCreate(reply);
     });
   };

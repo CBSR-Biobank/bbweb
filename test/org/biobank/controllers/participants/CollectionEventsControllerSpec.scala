@@ -504,7 +504,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
         (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("IdNotFound.*participant id")
+        (json \ "message").as[String] must include regex ("NotFound.*collection event")
       }
 
       it("fail when querying for a collection event with a visit number") {
