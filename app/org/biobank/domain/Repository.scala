@@ -84,7 +84,11 @@ private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) 
   }
 
   protected def nextIdentityAsString: String =
-    play.api.libs.Codecs.sha1(ReadWriteRepositoryRefImpl.md.digest(java.util.UUID.randomUUID.toString.getBytes))
+    // ensure all IDs can be used in URLs
+    Slug(
+      play.api.libs.Codecs.sha1(
+        ReadWriteRepositoryRefImpl.md.digest(
+          java.util.UUID.randomUUID.toString.getBytes)))
 
   def put(value: A): Unit = {
     internalMap.single.transform(map => map + (keyGetter(value) -> value))
