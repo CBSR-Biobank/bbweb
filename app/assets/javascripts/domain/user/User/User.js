@@ -298,12 +298,13 @@ function UserFactory($q,
     return (this.roleData.length > 0);
   };
 
-  User.prototype.hasRole = function (roleName) {
-    return _.find(this.roleData, (role) => role.name == roleName);
+  User.prototype.hasRole = function (roleSlug) {
+    return _.find(this.roleData, (role) => role.slug === roleSlug) !== undefined;
   };
 
   User.prototype.hasAnyRoleOf = function (/* role1, role2, ..., roleN */) {
-    return _.intersection(Array.prototype.slice.call(arguments), this.roleData).length > 0;
+    var slugs = _.map(this.roleData, 'slug');
+    return _.intersection(Array.prototype.slice.call(arguments), slugs).length > 0;
   };
 
   User.prototype.hasStudyAdminRole = function () {

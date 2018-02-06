@@ -12,13 +12,18 @@
   </div>
 </div>
 <div class="container" ng-if="vm.userIsAuthenticated">
-  <div class="row">
+
+  <div class="row" ng-if="!vm.hasRoles">
+    <p translate>Your user permissions are not valid. Please contact your website administrator.</p>
+  </div>
+
+  <div class="row" ng-if="vm.hasRoles">
     <div class="col-md-12" ng-if="vm.userIsAuthenticated">
       <h2 translate>Select a task</h2>
     </div>
   </div>
 
-  <div class="row">
+  <div class="row" ng-if="vm.hasRoles">
 
     <!-- COLLECTION -->
     <div class="col-md-4" ng-if="vm.allowCollection">

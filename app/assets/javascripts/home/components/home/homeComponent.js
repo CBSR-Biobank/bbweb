@@ -18,10 +18,13 @@ class HomeController {
     this.userService.requestCurrentUser()
       .then((user) => {
         this.user = user;
-        this.userIsAuthenticated = true;
-        this.allowCollection = this.user.hasSpecimenCollectorRole();
-        this.shippingAllowed = this.user.hasShippingUserRole();
-        this.adminAllowed = this.user.hasAdminRole();
+        if (user !== undefined) {
+          this.userIsAuthenticated = true;
+          this.allowCollection = this.user.hasSpecimenCollectorRole();
+          this.shippingAllowed = this.user.hasShippingUserRole();
+          this.adminAllowed = this.user.hasAdminRole();
+          this.hasRoles = this.allowCollection && this.shippingAllowed && this.adminAllowed;
+        }
       })
       .catch(() => {
         this.user = null;
