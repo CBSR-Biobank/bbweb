@@ -264,7 +264,7 @@ function SpecimenFactory($q,
    * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type [Specimen]{@link
    *          domain.Specimen}.
    */
-  Specimen.list = function (ceventId, options) {
+  Specimen.list = function (ceventSlug, options) {
     var params,
         validKeys = [
           'sort',
@@ -275,7 +275,7 @@ function SpecimenFactory($q,
     params = _.omitBy(_.pick(options, validKeys), function (value) {
       return value === '';
     });
-    return biobankApi.get(Specimen.url(ceventId), params).then(function(reply) {
+    return biobankApi.get(Specimen.url(ceventSlug), params).then(function(reply) {
       // reply is a paged result
       var deferred = $q.defer();
       try {

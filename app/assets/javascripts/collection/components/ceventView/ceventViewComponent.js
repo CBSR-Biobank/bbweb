@@ -46,7 +46,7 @@ class CeventViewController {
     this.panelOpen = true
 
     // need to initialize annotations on collection event in the case they have not been assigned
-    this.CollectionEventType.get(this.study.id, this.collectionEvent.collectionEventTypeId)
+    this.CollectionEventType.get(this.study.slug, this.collectionEvent.collectionEventTypeSlug)
       .then(eventType => {
         this.collectionEventType = eventType;
         this.collectionEvent.setCollectionEventType(this.collectionEventType)
@@ -95,7 +95,7 @@ class CeventViewController {
   }
 
   remove() {
-    this.Specimen.list(this.collectionEvent.id)
+    this.Specimen.list(this.collectionEvent.slug)
       .then(pagedResult => {
         if (pagedResult.items.length > 0) {
           this.modalService.modalOk(

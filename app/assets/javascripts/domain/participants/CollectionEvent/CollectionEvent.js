@@ -101,16 +101,22 @@ function CollectionEventFactory($q,
   CollectionEvent.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
     id: 'CollectionEvent',
     properties: {
-      'participantId':         { 'type': 'string' },
-      'collectionEventTypeId': { 'type': 'string' },
-      'timeCompleted':         { 'type': 'string' },
-      'visitNumber':           { 'type': 'integer' },
-      'annotations':           { 'type': 'array' }
+      'participantId':           { 'type': 'string' },
+      'participantSlug':         { 'type': 'string' },
+      'collectionEventTypeId':   { 'type': 'string' },
+      'collectionEventTypeSlug': { 'type': 'string' },
+      'timeCompleted':           { 'type': 'string' },
+      'slug':                    { 'type': 'string' },
+      'visitNumber':             { 'type': 'integer' },
+      'annotations':             { 'type': 'array' }
     },
     'required': [
       'participantId',
+      'participantSlug',
       'collectionEventTypeId',
+      'collectionEventTypeSlug',
       'timeCompleted',
+      'slug',
       'visitNumber',
       'annotations'
     ]

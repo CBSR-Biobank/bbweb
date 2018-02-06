@@ -88,7 +88,7 @@ function CeventSpecimensViewController($q,
 
     vm.tableDataLoading = true;
 
-    Specimen.list(vm.collectionEvent.id, options)
+    Specimen.list(vm.collectionEvent.slug, options)
       .then(function (paginatedSpecimens) {
         vm.specimens = paginatedSpecimens.items;
         tableState.pagination.numberOfPages = paginatedSpecimens.maxPages;
