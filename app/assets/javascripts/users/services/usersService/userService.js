@@ -55,6 +55,7 @@ class userService {
         if (err.status === 401) {
           this.currentUser = undefined;
         }
+        return this.$q.reject(err);
       });
   }
 

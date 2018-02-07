@@ -91,7 +91,7 @@ function uiRouterIsAuthorized($transitions) {
         $log = transition.injector().get('$log');
     return userService.requestCurrentUser()
       .catch((error) => {
-        // User isn't authenticated. Redirect to a new Target State
+        // User isn't authenticated. Redirect to login page
         if (error.status && (error.status === 401)) {
           return transition.router.stateService.target('home.users.login');
         }
