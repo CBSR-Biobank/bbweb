@@ -62,7 +62,8 @@ final case class CollectionEventType(studyId:              StudyId,
     with HasOptionalDescription
     with HasStudyId
     with HasAnnotationTypes {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def withName(name: String): DomainValidation[CollectionEventType] = {
     validateString(name, NameRequired).map { _ =>
@@ -73,7 +74,7 @@ final case class CollectionEventType(studyId:              StudyId,
   }
 
   def withDescription(description: Option[String]): DomainValidation[CollectionEventType] = {
-    validateNonEmptyOption(description, InvalidDescription).map { _ =>
+    validateNonEmptyStringOption(description, InvalidDescription) map { _ =>
       copy(description  = description,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
@@ -164,7 +165,8 @@ final case class CollectionEventType(studyId:              StudyId,
 }
 
 object CollectionEventType extends CollectionEventTypeValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   implicit val collectionEventTypeWrites: Format[CollectionEventType] = Json.format[CollectionEventType]
 
@@ -180,8 +182,8 @@ object CollectionEventType extends CollectionEventTypeValidations {
     (validateId(studyId, StudyIdRequired) |@|
        validateId(id) |@|
        validateVersion(version) |@|
-       validateString(name, NameRequired) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateNonEmptyString(name, NameRequired) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        specimenDescriptions.toList.traverseU(CollectionSpecimenDescription.validate) |@|
        annotationTypes.toList.traverseU(AnnotationType.validate)) { case _ =>
         CollectionEventType(studyId              = studyId,

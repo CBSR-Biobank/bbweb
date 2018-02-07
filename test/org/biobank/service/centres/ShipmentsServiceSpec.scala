@@ -582,7 +582,8 @@ class ShipmentsServiceSpec
                 shipmentSpecimenRepository.put(shipmentSpecimen)
             }
 
-            shipmentsService.processShipmentSpecimenCommand(cmd).futureValue mustSucceed { reply =>
+            val v = shipmentsService.processShipmentSpecimenCommand(cmd).futureValue
+            v mustSucceed { reply =>
               reply.id must be (f.shipment.id)
             }
           }

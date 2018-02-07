@@ -57,19 +57,6 @@ class AnnotationSpec extends DomainSpec {
       }
     }
 
-    it("when number value is empty") {
-      val annotation = factory.createAnnotation.copy(numberValue = Some(""))
-      createFrom(annotation) mustSucceed { reply =>
-        reply must have (
-          'annotationTypeId (annotation.annotationTypeId),
-          'stringValue      (annotation.stringValue),
-          'numberValue      (annotation.numberValue),
-          'selectedValues   (annotation.selectedValues)
-        )
-        ()
-      }
-    }
-
   }
 
   describe("not be created") {
@@ -81,7 +68,7 @@ class AnnotationSpec extends DomainSpec {
 
     it("string value is empty") {
       val annotation = factory.createAnnotation.copy(stringValue = Some(""))
-      createFrom(annotation) mustFail "NonEmptyStringOption"
+      createFrom(annotation) mustFail "NonEmptyString"
     }
 
     it("number value is not a number string") {

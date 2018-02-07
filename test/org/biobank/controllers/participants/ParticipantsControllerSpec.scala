@@ -102,35 +102,6 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
     (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
   }
 
-  /**
-   * create pairs of annotation types and annotation of each value type plus a second of type select that
-   * allows multiple selections
-   *
-   * the result is a map where the keys are the annotation types and the values are the corresponding
-   * annotations
-   */
-  def createAnnotationsAndTypes() = {
-    val options = Seq(nameGenerator.next[String],
-                      nameGenerator.next[String],
-                      nameGenerator.next[String])
-
-    (AnnotationValueType.values.map { vt =>
-       vt match {
-         case AnnotationValueType.Select   =>
-           (factory.createAnnotationType(vt, Some(1), options),
-            factory.createAnnotation)
-         case _ =>
-           (factory.createAnnotationType(vt, None, Seq.empty),
-            factory.createAnnotation)
-       }
-     }.toList ++ List(
-       (factory.createAnnotationType(AnnotationValueType.Select,
-                                     Some(2),
-                                     options),
-        factory.createAnnotation))).toMap
-  }
-
-
   describe("Study REST API") {
 
     describe("GET /api/participants/:studyId/:id") {
@@ -215,7 +186,6 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
       it("add a participant with annotations") {
         val annotTypes = createAnnotationsAndTypes
         val annotations = annotTypes.values.toSet
-
         val study = factory.createEnabledStudy.copy(annotationTypes = annotTypes.keys.toSet)
         studyRepository.put(study)
 

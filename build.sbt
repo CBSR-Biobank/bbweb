@@ -115,7 +115,8 @@ libraryDependencies ++= Seq(
     "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.2"   % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
     "org.codehaus.janino"         %  "janino"                              % "3.0.8"   % "test",
-    "org.mockito"                 %  "mockito-core"                        % "2.13.0"  % "test"
+    "org.mockito"                 %  "mockito-core"                        % "2.13.0"  % "test",
+    "it.bitbl"                    %% "scala-faker"                         % "0.4"     % "test"
   )
 
 routesGenerator := InjectedRoutesGenerator

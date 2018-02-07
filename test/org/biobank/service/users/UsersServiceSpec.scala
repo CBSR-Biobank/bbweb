@@ -72,7 +72,7 @@ class UsersServiceSpec
             sessionUserId   = sessionUserId.id,
             id              = user.id.id,
             expectedVersion = user.version,
-            name            = nameGenerator.next[String]),
+            name            = faker.Name.name),
           UpdateUserEmailCmd(
             sessionUserId   = sessionUserId.id,
             id              = user.id.id,
@@ -121,15 +121,16 @@ class UsersServiceSpec
       it("retrieve a user") {
         val f = usersFixture
         usersService.getUserIfAuthorized(f.adminUser.id, f.user.id) mustSucceed { u =>
-          u.id must be (f.user.id)
+          u.id must be (f.user.id.id)
         }
       }
 
       it("retrieve users") {
         val f = usersFixture
-        usersService.getUsers(f.adminUser.id, new FilterString(""), new SortString("")) mustSucceed { users =>
-          users must have length (userRepository.getValues.size.toLong)
-        }
+        usersService.getUsers(f.adminUser.id, new FilterString(""), new SortString(""))
+          .mustSucceed { users =>
+            users must have length (userRepository.getValues.size.toLong)
+          }
       }
 
       it("user counts by status") {
@@ -144,7 +145,7 @@ class UsersServiceSpec
         forAll(commandsTable(f.adminUser.id, f.user, f.userPlainPassword)) { cmd =>
           userRepository.put(f.user) // restore the user to it's previous state
           usersService.processCommand(cmd).futureValue mustSucceed { u =>
-            u.id must be (f.user.id)
+            u.id must be (f.user.id.id)
           }
         }
       }
@@ -156,7 +157,7 @@ class UsersServiceSpec
         Set(u.registeredUser, u.activeUser, u.lockedUser).foreach(userRepository.put)
         forAll(table) { cmd =>
           usersService.processCommand(cmd).futureValue mustSucceed { u =>
-            u.id.id must be (cmd.id)
+            u.id must be (cmd.id)
           }
         }
       }

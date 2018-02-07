@@ -30,7 +30,8 @@ final case class Annotation(annotationTypeId: AnnotationTypeId,
 }
 
 object Annotation {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
@@ -55,7 +56,7 @@ object Annotation {
       : DomainValidation[Boolean] = {
 
     def validateAnnotationOption(opt: String) = {
-      validateString(opt, NonEmptyString)
+      validateNonEmptyString(opt, NonEmptyString)
     }
 
     // at least one, and only one of the three can be assigned
@@ -72,8 +73,8 @@ object Annotation {
     }
 
     (validateId(annotationTypeId, AnnotationTypeIdRequired) |@|
-       validateNonEmptyOption(stringValue, NonEmptyStringOption) |@|
-       validateNumberStringOption(numberValue) |@|
+       validateNonEmptyStringOption(stringValue, NonEmptyString) |@|
+       validateNumberStringOption(numberValue, InvalidNumberString("numberValue")) |@|
        selectedValues.toList.traverseU(validateAnnotationOption) |@|
        validateValues(stringValue, numberValue, selectedValues)) { case _ =>
         true

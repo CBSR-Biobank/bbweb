@@ -27,7 +27,8 @@ final case class ContainerSchemaPosition(id:       ContainerSchemaPositionId,
     extends IdentifiedDomainObject[ContainerSchemaPositionId]
 
 object ContainerSchemaPosition extends ContainerSchemaPositionValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(id:       ContainerSchemaPositionId,
              schemaId: ContainerSchemaId,

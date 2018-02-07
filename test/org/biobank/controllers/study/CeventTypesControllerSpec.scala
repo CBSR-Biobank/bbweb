@@ -225,6 +225,8 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("list collection event types sorted by name") {
         val f = new EventTypeFixture(3)
+        val sortedEventTypes = f.eventTypes
+          .sortWith(org.biobank.domain.study.CollectionEventType.compareByName)
         val sortExprs = Table("sort expressions", "name", "-name")
         forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
@@ -236,13 +238,13 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
               maybePrev   = None)
           jsonItems must have size f.eventTypes.size.toLong
           if (sortExpr == sortExprs(0)) {
-            compareObj(jsonItems(0), f.eventTypes(0))
-            compareObj(jsonItems(1), f.eventTypes(1))
-            compareObj(jsonItems(2), f.eventTypes(2))
+            compareObj(jsonItems(0), sortedEventTypes(0))
+            compareObj(jsonItems(1), sortedEventTypes(1))
+            compareObj(jsonItems(2), sortedEventTypes(2))
           } else {
-            compareObj(jsonItems(0), f.eventTypes(2))
-            compareObj(jsonItems(1), f.eventTypes(1))
-            compareObj(jsonItems(2), f.eventTypes(0))
+            compareObj(jsonItems(0), sortedEventTypes(2))
+            compareObj(jsonItems(1), sortedEventTypes(1))
+            compareObj(jsonItems(2), sortedEventTypes(0))
           }
         }
       }

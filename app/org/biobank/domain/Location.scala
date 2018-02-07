@@ -56,7 +56,8 @@ final case class Location(id:             LocationId,
     with HasName
 
 object Location {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   implicit val locationFormat: Format[Location] = Json.format[Location]
 

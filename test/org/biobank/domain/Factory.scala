@@ -12,6 +12,7 @@ import org.biobank.domain.centre._
 import org.biobank.domain.containers._
 import org.biobank.domain.AnnotationValueType._
 import org.slf4j.LoggerFactory
+import scala.reflect._
 import scalaz.Scalaz._
 
 /**
@@ -27,21 +28,23 @@ import scalaz.Scalaz._
  */
 class Factory {
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  private val log = LoggerFactory.getLogger(this.getClass)
 
-  val nameGenerator = new NameGenerator(this.getClass)
+  private val nameGenerator = new NameGenerator(this.getClass)
 
-  var domainObjects: Map[Class[_], _] = Map.empty
+  private var domainObjects: Map[Class[_], _] = Map.empty
+
+  private def nextIdentityAsString[T: ClassTag](): String = Slug(nameGenerator.next[T])
 
   def createRegisteredUser(): RegisteredUser = {
-    val name = nameGenerator.next[User]
+    val name = faker.Name.name
     val user = RegisteredUser(version      = 0L,
                               timeAdded    = OffsetDateTime.now,
                               timeModified = None,
                               slug         = Slug(name),
                               name         = name,
                               email        = nameGenerator.nextEmail[User],
-                              id           = UserId(nameGenerator.next[User]),
+                              id           = UserId(nextIdentityAsString[User]),
                               password     = nameGenerator.next[User],
                               salt         = nameGenerator.next[User],
                               avatarUrl    = Some(nameGenerator.nextUrl[User]))
@@ -50,14 +53,14 @@ class Factory {
   }
 
   def createActiveUser: ActiveUser = {
-    val name = nameGenerator.next[User]
+    val name = faker.Name.name
     val user = ActiveUser(version      = 0L,
                           timeAdded    = OffsetDateTime.now,
                           timeModified = None,
                           slug         = Slug(name),
                           name         = name,
                           email        = nameGenerator.nextEmail[User],
-                          id           = UserId(nameGenerator.next[User]),
+                          id           = UserId(nextIdentityAsString[User]),
                           password     = nameGenerator.next[User],
                           salt         = nameGenerator.next[User],
                           avatarUrl    = Some(nameGenerator.nextUrl[User]))
@@ -66,14 +69,14 @@ class Factory {
   }
 
   def createLockedUser(): LockedUser = {
-    val name = nameGenerator.next[User]
+    val name = faker.Name.name
     val user = LockedUser(version      = 0L,
                           timeAdded    = OffsetDateTime.now,
                           timeModified = None,
                           slug         = Slug(name),
                           name         = name,
                           email        = nameGenerator.nextEmail[User],
-                          id           = UserId(nameGenerator.next[User]),
+                          id           = UserId(nextIdentityAsString[User]),
                           password     = nameGenerator.next[User],
                           salt         = nameGenerator.next[User],
                           avatarUrl    = Some(nameGenerator.nextUrl[User]))
@@ -82,8 +85,8 @@ class Factory {
   }
 
   def createRole(): Role = {
-    val name = nameGenerator.next[Role]
-    val role = Role(id           = AccessItemId(nameGenerator.next[AccessItem]),
+    val name = faker.Lorem.sentence(3)
+    val role = Role(id           = AccessItemId(nextIdentityAsString[AccessItem]),
                     version      = 0L,
                     timeAdded    = OffsetDateTime.now,
                     timeModified = None,
@@ -98,8 +101,8 @@ class Factory {
   }
 
   def createPermission(): Permission = {
-    val name = nameGenerator.next[Permission]
-    val permission = Permission(id           = AccessItemId(nameGenerator.next[AccessItem]),
+    val name = faker.Lorem.sentence(3)
+    val permission = Permission(id           = AccessItemId(nextIdentityAsString[AccessItem]),
                                 version      = 0L,
                                 timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
@@ -113,8 +116,8 @@ class Factory {
   }
 
   def createMembership(): Membership = {
-    val name = nameGenerator.next[Membership]
-    val membership = Membership(id           = MembershipId(nameGenerator.next[MembershipId]),
+    val name = faker.Lorem.sentence(3)
+    val membership = Membership(id           = MembershipId(nextIdentityAsString[MembershipId]),
                                 version      = 0L,
                                 timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
@@ -129,11 +132,11 @@ class Factory {
   }
 
   def createDisabledStudy(): DisabledStudy = {
-    val name = nameGenerator.next[Study]
+    val name = faker.Lorem.sentence(3)
     val study = DisabledStudy(version         = 0L,
                               timeAdded       = OffsetDateTime.now,
                               timeModified    = None,
-                              id              = StudyId(nameGenerator.next[Study]),
+                              id              = StudyId(nextIdentityAsString[Study]),
                               slug            = Slug(name),
                               name            = name,
                               description     = Some(nameGenerator.next[Study]),
@@ -143,8 +146,8 @@ class Factory {
   }
 
   def createEnabledStudy(): EnabledStudy = {
-    val name = nameGenerator.next[Study]
-    val enabledStudy = EnabledStudy(id              = StudyId(nameGenerator.next[Study]),
+    val name = faker.Lorem.sentence(3)
+    val enabledStudy = EnabledStudy(id              = StudyId(nextIdentityAsString[Study]),
                                     version         = 0L,
                                     timeAdded       = OffsetDateTime.now,
                                     timeModified    = None,
@@ -157,8 +160,8 @@ class Factory {
   }
 
   def createRetiredStudy(): RetiredStudy = {
-    val name = nameGenerator.next[Study]
-    val retiredStudy = RetiredStudy(id              = StudyId(nameGenerator.next[Study]),
+    val name = faker.Lorem.sentence(3)
+    val retiredStudy = RetiredStudy(id              = StudyId(nextIdentityAsString[Study]),
                                     version         = 0L,
                                     timeAdded       = OffsetDateTime.now,
                                     timeModified    = None,
@@ -172,9 +175,9 @@ class Factory {
 
   def createSpecimenGroup(): SpecimenGroup = {
     val disabledStudy = defaultDisabledStudy
-    val name = nameGenerator.next[SpecimenGroup]
+    val name = faker.Lorem.sentence(3)
     val specimenGroup = SpecimenGroup(
-        id                          = SpecimenGroupId(nameGenerator.next[SpecimenGroup]),
+        id                          = SpecimenGroupId(nextIdentityAsString[SpecimenGroup]),
         studyId                     = disabledStudy.id,
         version                     = 0L,
         timeAdded                   = OffsetDateTime.now,
@@ -192,9 +195,9 @@ class Factory {
   }
 
   def createCollectionSpecimenDescription(): CollectionSpecimenDescription = {
-    val name = nameGenerator.next[CollectionSpecimenDescription]
+    val name = faker.Lorem.sentence(3)
     val specimenSpec = CollectionSpecimenDescription(
-        id                          = SpecimenDescriptionId(nameGenerator.next[CollectionSpecimenDescription]),
+        id                          = SpecimenDescriptionId(nextIdentityAsString[CollectionSpecimenDescription]),
         slug                        = Slug(name),
         name                        = name,
         description                 = Some(nameGenerator.next[CollectionSpecimenDescription]),
@@ -211,9 +214,9 @@ class Factory {
 
   def createCollectionEventType(): CollectionEventType = {
     val disabledStudy = defaultDisabledStudy
-    val name = nameGenerator.next[CollectionEventType]
+    val name = faker.Lorem.sentence(3)
     val ceventType = CollectionEventType(
-        id                   = CollectionEventTypeId(nameGenerator.next[CollectionEventType]),
+        id                   = CollectionEventTypeId(nextIdentityAsString[CollectionEventType]),
         studyId              = disabledStudy.id,
         version              = 0L,
         timeAdded            = OffsetDateTime.now,
@@ -232,7 +235,7 @@ class Factory {
   def createAnnotationType(valueType:     AnnotationValueType,
                            maxValueCount: Option[Int],
                            options:       Seq[String]): AnnotationType = {
-    val name = nameGenerator.next[AnnotationType]
+    val name = faker.Lorem.sentence(3)
     val annotationType = AnnotationType(AnnotationTypeId(nameGenerator.next[AnnotationType]),
                                         Slug(name),
                                         name,
@@ -256,9 +259,9 @@ class Factory {
 
   def createProcessingType(): ProcessingType = {
     val disabledStudy = defaultDisabledStudy
-    val name = nameGenerator.next[ProcessingType]
+    val name = faker.Lorem.sentence(3)
     val processingType = ProcessingType(
-        id             = ProcessingTypeId(nameGenerator.next[ProcessingType]),
+        id             = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
         studyId        = disabledStudy.id,
         version        = 0L,
         timeAdded      = OffsetDateTime.now,
@@ -274,7 +277,7 @@ class Factory {
 
   def createSpecimenLinkType(): SpecimenLinkType = {
     val slt = SpecimenLinkType(
-        id                    = SpecimenLinkTypeId(nameGenerator.next[SpecimenLinkType]),
+        id                    = SpecimenLinkTypeId(nextIdentityAsString[SpecimenLinkType]),
         processingTypeId      = defaultProcessingType.id,
         version               = 0L,
         timeAdded             = OffsetDateTime.now,
@@ -283,8 +286,8 @@ class Factory {
         expectedOutputChange  = BigDecimal(1.0),
         inputCount            = 1,
         outputCount           = 1,
-        inputGroupId          = SpecimenGroupId(nameGenerator.next[SpecimenLinkType]),
-        outputGroupId         = SpecimenGroupId(nameGenerator.next[SpecimenLinkType]),
+        inputGroupId          = SpecimenGroupId(nextIdentityAsString[SpecimenLinkType]),
+        outputGroupId         = SpecimenGroupId(nextIdentityAsString[SpecimenLinkType]),
         inputContainerTypeId  = None,
         outputContainerTypeId = None,
         annotationTypeData    = List.empty)
@@ -302,10 +305,10 @@ class Factory {
 
   def createParticipant(): Participant = {
     val study = defaultEnabledStudy
-    val uniqueId = nameGenerator.next[Participant]
+    val uniqueId = nextIdentityAsString[Participant]
     val participant = Participant(
         studyId      = study.id,
-        id           = ParticipantId(nameGenerator.next[Participant]),
+        id           = ParticipantId(nextIdentityAsString[Participant]),
         version      = 0L,
         timeAdded    = OffsetDateTime.now,
         timeModified = None,
@@ -327,7 +330,12 @@ class Factory {
       case AnnotationValueType.DateTime =>
         (Some(OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)), None, Set.empty)
       case Select   =>
-        (None, None, Set(annotationType.options(0)))
+        val options = annotationType.maxValueCount match {
+            case Some(1) => Set(annotationType.options(0))
+            case Some(2) => annotationType.options.toSet
+            case _       => Set.empty[String]
+          }
+        (None, None, options)
     }
   }
 
@@ -345,6 +353,7 @@ class Factory {
     val annot = createAnnotation.copy(stringValue      = stringValue,
                                       numberValue      = numberValue,
                                       selectedValues   = selectedValues)
+    //log.info(s"----> id: ${annotationType.id}, ${annotationType.maxValueCount}, $stringValue, $numberValue, $selectedValues")
     domainObjects = domainObjects + (classOf[Annotation] -> annot)
     annot
   }
@@ -353,7 +362,7 @@ class Factory {
     val participant = defaultParticipant
     val collectionEventType = defaultCollectionEventType
 
-    val id = CollectionEventId(nameGenerator.next[CollectionEvent])
+    val id = CollectionEventId(nextIdentityAsString[CollectionEvent])
     val cevent = CollectionEvent(
         id                    = id,
         participantId         = participant.id,
@@ -372,10 +381,10 @@ class Factory {
   def createUsableSpecimen(): UsableSpecimen = {
     val specimenDescription = defaultCollectionSpecimenDescription
     val location            = defaultLocation
-    val inventoryId         = nameGenerator.next[Specimen]
+    val inventoryId         = nextIdentityAsString[Specimen]
 
     val specimen = UsableSpecimen(
-        id                    = SpecimenId(nameGenerator.next[Specimen]),
+        id                    = SpecimenId(nextIdentityAsString[Specimen]),
         version               = 0,
         timeAdded             = OffsetDateTime.now,
         timeModified          = None,
@@ -396,10 +405,10 @@ class Factory {
   def createUnusableSpecimen(): UnusableSpecimen = {
     val specimenDescription = defaultCollectionSpecimenDescription
     val location            = defaultLocation
-    val inventoryId         = nameGenerator.next[Specimen]
+    val inventoryId         = nextIdentityAsString[Specimen]
 
     val specimen = UnusableSpecimen(
-        id                    = SpecimenId(nameGenerator.next[Specimen]),
+        id                    = SpecimenId(nextIdentityAsString[Specimen]),
         version               = 0,
         timeAdded             = OffsetDateTime.now,
         timeModified          = None,
@@ -418,8 +427,8 @@ class Factory {
   }
 
   def createDisabledCentre(): DisabledCentre = {
-    val name = nameGenerator.next[Centre]
-    val centre = DisabledCentre(id           = CentreId(nameGenerator.next[Centre]),
+    val name = faker.Lorem.sentence(3)
+    val centre = DisabledCentre(id           = CentreId(nextIdentityAsString[Centre]),
                                 version      = 0L,
                                 timeAdded    = OffsetDateTime.now,
                                 timeModified = None,
@@ -434,8 +443,8 @@ class Factory {
   }
 
   def createEnabledCentre(): EnabledCentre = {
-    val name = nameGenerator.next[Centre]
-    val centre = EnabledCentre(id           = CentreId(nameGenerator.next[Centre]),
+    val name = faker.Lorem.sentence(3)
+    val centre = EnabledCentre(id           = CentreId(nextIdentityAsString[Centre]),
                                version      = 0L,
                                timeAdded    = OffsetDateTime.now,
                                timeModified = None,
@@ -449,8 +458,8 @@ class Factory {
   }
 
   def createLocation(): Location = {
-    val name = nameGenerator.next[Location]
-    val location = Location(id             = LocationId(nameGenerator.next[Location]),
+    val name = faker.Lorem.sentence(3)
+    val location = Location(id             = LocationId(nextIdentityAsString[Location]),
                             slug           = Slug(name),
                             name           = name,
                             street         = nameGenerator.next[Location],
@@ -464,12 +473,12 @@ class Factory {
   }
 
   def createContainerSchema(): ContainerSchema = {
-    val name = nameGenerator.next[ContainerSchema]
+    val name = faker.Lorem.sentence(3)
     val containerSchema = ContainerSchema(
         version      = 0L,
         timeAdded    = OffsetDateTime.now,
         timeModified = None,
-        id           = ContainerSchemaId(nameGenerator.next[ContainerSchema]),
+        id           = ContainerSchemaId(nextIdentityAsString[ContainerSchema]),
         slug         = Slug(name),
         name         = name,
         description  = Some(nameGenerator.next[ContainerSchema]),
@@ -482,7 +491,7 @@ class Factory {
                      fromLocation: Location,
                      toCentre:     Centre,
                      toLocation:   Location): CreatedShipment = {
-    val shipment = CreatedShipment(id             = ShipmentId(nameGenerator.next[Shipment]),
+    val shipment = CreatedShipment(id             = ShipmentId(nextIdentityAsString[Shipment]),
                                    version        = 0L,
                                    timeAdded      = OffsetDateTime.now,
                                    timeModified   = None,
@@ -559,7 +568,7 @@ class Factory {
     val shipment = defaultShipment
 
     val shipmentSpecimen = ShipmentSpecimen(
-        id                  = ShipmentSpecimenId(nameGenerator.next[ShipmentSpecimen]),
+        id                  = ShipmentSpecimenId(nextIdentityAsString[ShipmentSpecimen]),
         version             = 0L,
         timeAdded           = OffsetDateTime.now,
         timeModified        = None,
@@ -577,7 +586,7 @@ class Factory {
     // val shipment = defaultShipment
 
     // val shipmentContainer = ShipmentContainer(
-    //     id                  = ShipmentContainerId(nameGenerator.next[ShipmentContainer]),
+    //     id                  = ShipmentContainerId(nextIdentityAsString[ShipmentContainer]),
     //     version             = 0L,
     //     timeAdded           = OffsetDateTime.now,
     //     timeModified        = None,
@@ -590,7 +599,7 @@ class Factory {
 
   // def createEnabledContainerType(centre: Centre): EnabledContainerType = {
   //   val containerType = EnabledContainerType(
-  //     id           = ContainerTypeId(nameGenerator.next[ContainerType]),
+  //     id           = ContainerTypeId(nextIdentityAsString[ContainerType]),
   //     centreId     = Some(centre.id),
   //     schemaId     = defaultContainerSchema.id,
   //     version      = 0L,
@@ -614,7 +623,7 @@ class Factory {
   //     schemaId     = defaultContainerSchema.id,
   //     timeAdded    = OffsetDateTime.now,
   //     timeModified = None,
-  //     id           = ContainerTypeId(nameGenerator.next[ContainerType]),
+  //     id           = ContainerTypeId(nextIdentityAsString[ContainerType]),
   //     name         = nameGenerator.next[ContainerType],
   //     description  = Some(nameGenerator.next[ContainerType]),
   //     shared       = true)

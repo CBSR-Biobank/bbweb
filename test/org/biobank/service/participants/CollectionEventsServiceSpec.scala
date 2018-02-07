@@ -90,7 +90,7 @@ class CollectionEventServiceSpec
           info(label)
           ceventsService.get(user.id, f.cevent.id)
             .mustSucceed { result =>
-              result.id must be (f.cevent.id)
+              result.id must be (f.cevent.id.id)
             }
         }
       }
@@ -117,7 +117,7 @@ class CollectionEventServiceSpec
           info(label)
           ceventsService.getByVisitNumber(user.id, f.participant.id, f.cevent.visitNumber)
             .mustSucceed { result =>
-              result.id must be (f.cevent.id)
+              result.id must be (f.cevent.id.id)
             }
         }
       }
@@ -182,7 +182,7 @@ class CollectionEventServiceSpec
 
           collectionEventRepository.removeAll
           ceventsService.processCommand(cmd).futureValue mustSucceed { reply =>
-            reply.participantId must be (f.participant.id)
+            reply.participantId must be (f.participant.id.id)
           }
         }
       }
@@ -219,7 +219,7 @@ class CollectionEventServiceSpec
 
             collectionEventRepository.put(cevent) // restore it to it's previous state
             ceventsService.processCommand(cmd).futureValue mustSucceed { reply =>
-              reply.id must be (f.cevent.id)
+              reply.id must be (f.cevent.id.id)
             }
           }
         }

@@ -26,7 +26,7 @@ function DomainEntityFactory(UrlService) {
    */
   function DomainEntity(schema, obj) {
     obj = obj || {};
-    _.extend(this, _.pick(obj, _.keys(schema.properties)));
+    Object.assign(this, _.pick(obj, _.keys(schema.properties)));
   }
 
   DomainEntity.isValid = function(schema, additionalSchemas, obj) {

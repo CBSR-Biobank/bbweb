@@ -54,7 +54,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
 
   def getRole(id: AccessItemId): DomainValidation[Role] = {
     for {
-      accessItem <- getByKey(id).leftMap(err => EntityCriteriaNotFound{s"invalid role id: $id"}.nel)
+      accessItem <- getByKey(id).leftMap(err => IdNotFound{s"role id: $id"}.nel)
       role <- {
         accessItem match {
           case role: Role => role.successNel[String]

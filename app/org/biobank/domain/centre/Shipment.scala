@@ -268,18 +268,18 @@ final case class CreatedShipment(id:             ShipmentId,
     with Shipment
     with ShipmentValidations {
 
-  import org.biobank.domain.CommonValidations._
   import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def withCourier(name: String): DomainValidation[CreatedShipment] =
-    validateString(name, CourierNameInvalid).map { name =>
+    validateNonEmptyString(name, CourierNameInvalid).map { name =>
       copy(courierName  = name,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
     }
 
   def withTrackingNumber(trackingNumber: String): DomainValidation[CreatedShipment] =
-    validateString(trackingNumber, TrackingNumberInvalid).map { _ =>
+    validateNonEmptyString(trackingNumber, TrackingNumberInvalid).map { _ =>
       copy(trackingNumber = trackingNumber,
            version        = version + 1,
            timeModified   = Some(OffsetDateTime.now))
@@ -289,8 +289,8 @@ final case class CreatedShipment(id:             ShipmentId,
    * Must be a centre's location.
    */
   def withFromLocation(centreId: CentreId, locationId: LocationId): DomainValidation[CreatedShipment] =
-    (validateString(centreId.id, FromCentreIdInvalid) |@|
-       validateString(locationId.id, LocationIdInvalid)) { case (_, _) =>
+    (validateId(centreId, FromCentreIdInvalid) |@|
+       validateNonEmptyString(locationId.id, LocationIdInvalid)) { case (_, _) =>
         copy(fromCentreId   = centreId,
              fromLocationId = locationId,
              version        = version + 1,
@@ -301,8 +301,8 @@ final case class CreatedShipment(id:             ShipmentId,
    * Must be a centre's location.
    */
   def withToLocation(centreId: CentreId, locationId: LocationId): DomainValidation[CreatedShipment] =
-    (validateString(centreId.id, ToCentreIdInvalid) |@|
-       validateString(locationId.id, LocationIdInvalid)) { case (_, _) =>
+    (validateId(centreId, ToCentreIdInvalid) |@|
+       validateNonEmptyString(locationId.id, LocationIdInvalid)) { case (_, _) =>
         copy(toCentreId   = centreId,
              toLocationId = locationId,
              version      = version + 1,
@@ -351,7 +351,8 @@ final case class CreatedShipment(id:             ShipmentId,
 }
 
 object CreatedShipment extends ShipmentValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(id:             ShipmentId,
              version:        Long,
@@ -396,12 +397,12 @@ object CreatedShipment extends ShipmentValidations {
                toLocationId:   LocationId): DomainValidation[Boolean] = {
     (validateId(id) |@|
        validateVersion(version) |@|
-       validateString(courierName, CourierNameInvalid) |@|
-       validateString(trackingNumber, TrackingNumberInvalid) |@|
+       validateNonEmptyString(courierName, CourierNameInvalid) |@|
+       validateNonEmptyString(trackingNumber, TrackingNumberInvalid) |@|
        validateId(fromCentreId, FromCentreIdInvalid) |@|
-       validateString(fromLocationId.id, FromLocationIdInvalid) |@|
+       validateNonEmptyString(fromLocationId.id, FromLocationIdInvalid) |@|
        validateId(toCentreId, ToCentreIdInvalid) |@|
-       validateString(toLocationId.id, ToLocationIdInvalid)) {
+       validateNonEmptyString(toLocationId.id, ToLocationIdInvalid)) {
       case _ => true
     }
 

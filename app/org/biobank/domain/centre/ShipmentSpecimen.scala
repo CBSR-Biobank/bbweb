@@ -58,10 +58,10 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
     extends ConcurrencySafeEntity[ShipmentSpecimenId]
     with ShipmentSpecimenValidations {
 
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def withShipmentContainer(id: Option[ShipmentContainerId]): DomainValidation[ShipmentSpecimen] = {
-    validateId(id, ShipmentContainerIdInvalid) map { _ =>
+    validateIdOption(id, ShipmentContainerIdInvalid) map { _ =>
       copy(shipmentContainerId = id,
            version             = version + 1,
            timeModified        = Some(OffsetDateTime.now))
@@ -148,7 +148,7 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
 }
 
 object ShipmentSpecimen extends ShipmentSpecimenValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.domain.DomainValidations._
   import org.biobank.CommonValidations._
 
   // Do not want JSON to create a sub object, we just want it to be converted
@@ -190,7 +190,7 @@ object ShipmentSpecimen extends ShipmentSpecimenValidations {
        validateVersion(version) |@|
        validateId(shipmentId, ShipmentIdRequired) |@|
        validateId(specimenId, SpecimenIdRequired) |@|
-       validateId(shipmentContainerId, ShipmentContainerIdInvalid)) {
+       validateIdOption(shipmentContainerId, ShipmentContainerIdInvalid)) {
       case _ => true
     }
   }

@@ -31,23 +31,24 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
    * the result is a map where the keys are the annotation types and the values are the corresponding
    * annotations
    */
-  private def createAnnotationsAndTypes() = {
+  protected def createAnnotationsAndTypes() = {
     val options = Seq(nameGenerator.next[String],
                       nameGenerator.next[String],
                       nameGenerator.next[String])
+    val multipleSelectType = factory.createAnnotationType(AnnotationValueType.Select, Some(2), options)
+    val multipleSelectAnnotation = factory.createAnnotationWithValues(multipleSelectType)
 
     (AnnotationValueType.values.map { vt =>
        vt match {
-         case AnnotationValueType.Select   =>
-           (factory.createAnnotationType(vt, Some(1), options),
-            factory.createAnnotation)
+         case AnnotationValueType.Select =>
+           val annotationType = factory.createAnnotationType(vt, Some(1), options)
+           (annotationType, factory.createAnnotationWithValues(annotationType))
          case _ =>
-           (factory.createAnnotationType(vt, None, Seq.empty),
-            factory.createAnnotation)
+           val annotationType = factory.createAnnotationType(vt, None, Seq.empty)
+           (annotationType, factory.createAnnotationWithValues(annotationType))
        }
-     }.toList ++ List(
-       (factory.createAnnotationType(AnnotationValueType.Select, Some(2), options),
-        factory.createAnnotation))).toMap
+     }.toList ++
+       List((multipleSelectType, multipleSelectAnnotation))).toMap
   }
 
   def annotationTypeUpdateSharedBehaviour() = {

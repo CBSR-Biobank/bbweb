@@ -113,7 +113,7 @@ final case class SpecimenLinkType(processingTypeId:      ProcessingTypeId,
 }
 
 object SpecimenLinkType extends SpecimenLinkTypeValidations {
-  //import org.biobank.domain.CommonValidations._
+  //import org.biobank.domain.DomainValidations._
 
   @silent def create(processingTypeId:      ProcessingTypeId,
                      id:                    SpecimenLinkTypeId,

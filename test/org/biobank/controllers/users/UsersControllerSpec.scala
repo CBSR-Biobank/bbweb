@@ -4,10 +4,12 @@ import java.time.OffsetDateTime
 import org.biobank.Global
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.dto.NameAndStateDto
+import org.biobank.domain.access.{AccessItemId, Role}
 import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.Inside
 import play.api.libs.json._
 import play.api.mvc.{Cookie, Cookies}
 import play.api.test.Helpers._
@@ -16,7 +18,7 @@ import play.api.test._
 /**
  * Tests the REST API for [[User]].
  */
-class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFixtures {
+class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFixtures with Inside {
   import org.biobank.TestUtils._
 
   class activeUserFixture {
@@ -25,75 +27,13 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
     addMembershipForUser(user)
   }
 
-  private def uri(paths: String*): String = {
-    val basePath = "/api/users"
-    if (paths.isEmpty) basePath
-    else s"$basePath/" + paths.mkString("/")
-  }
-
-  private def uri(user: User): String = uri(user.id.id)
-
-  private def updateUri(user: User, path: String): String = uri(path, user.id.id)
-
-  private def addMembershipForUser(user: User) = {
-    val membership = factory.createMembership.copy(userIds = Set(user.id))
-    membershipRepository.put(membership)
-  }
-
-  private def createRegisteredUserInRepository(plainPassword: String): RegisteredUser = {
-    val user = createRegisteredUser(plainPassword)
-    userRepository.put(user)
-    addMembershipForUser(user)
-    user
-  }
-
-  private def createActiveUserInRepository(plainPassword: String): ActiveUser = {
-    val user = createActiveUser(plainPassword)
-    userRepository.put(user)
-    addMembershipForUser(user)
-    user
-  }
-
-  private def createLockedUserInRepository(plainPassword: String): LockedUser = {
-    val user = createLockedUser(plainPassword)
-    userRepository.put(user)
-    addMembershipForUser(user)
-    user
-  }
-
-  private def compareObjs(jsonList: List[JsObject], users: List[User]) = {
-    val usersMap = users.map { user => (user.id, user) }.toMap
-    jsonList.foreach { jsonObj =>
-      val jsonId = UserId((jsonObj \ "id").as[String])
-      compareObj(jsonObj, usersMap(jsonId))
-    }
-  }
-
-  private def jsonUsersFilterOutDefaultUser(jsonList: List[JsObject]): List[JsObject] = {
-    jsonList.filter(json => (json \ "id").as[String] != Global.DefaultUserId.id)
-  }
-
-  private def multipleItemsResultWithDefaultUser(uri:         String,
-                                                 queryParams: Map[String, String] =  Map.empty,
-                                                 offset:      Long,
-                                                 total:       Long,
-                                                 maybeNext:   Option[Int],
-                                                 maybePrev:   Option[Int]) = {
-    val jsonUsers = PagedResultsSpec(this).multipleItemsResult(uri,
-                                                               queryParams,
-                                                               offset,
-                                                               total + 1, // +1 for the default user
-                                                               maybeNext,
-                                                               maybePrev)
-    jsonUsersFilterOutDefaultUser(jsonUsers)
-  }
-
   describe("Users REST API") {
 
     describe("GET /api/users/search") {
 
       it("lists the default user") {
         val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"))
+
         (jsonItem \ "id").as[String] must be (Global.DefaultUserId.id)
       }
 
@@ -302,7 +242,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val f = new Fixture
           val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }
 
-          val json = makeRequest(GET, uri("names"))
+          val json = makeRequest(GET, uri("names") + "?sort=name")
 
           (json \ "status").as[String] must include ("success")
 
@@ -355,14 +295,17 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
                       activeCount:     Long,
                       lockedCount:     Long) = {
         (json \ "total").as[Long] must be (registeredCount + activeCount + lockedCount)
+
         (json \ "registeredCount").as[Long] must be (registeredCount)
+
         (json \ "activeCount").as[Long] must be (activeCount)
+
         (json \ "lockedCount").as[Long] must be (lockedCount)
       }
 
       it("return empty counts") {
         val json = makeRequest(GET, uri("counts"))
-        (json \ "status").as[String] must include ("success")
+                              (json \ "status").as[String] must include ("success")
         checkCounts(json            = (json \ "data").get,
                     registeredCount = 0,
                     activeCount     = 1, // +1 for the default user
@@ -379,7 +322,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         users.foreach { c => userRepository.put(c) }
 
         val json = makeRequest(GET, uri("counts"))
-        (json \ "status").as[String] must include ("success")
+                              (json \ "status").as[String] must include ("success")
         checkCounts(json            = (json \ "data").get,
                     registeredCount = 3,
                     activeCount     = 2 + 1, // +1 for the default user
@@ -420,7 +363,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
 
       it("users with the same name (different emails) get different slugs") {
-        val name = nameGenerator.next[String]
+        val name = faker.Name.name
         val responses = (0 until 2).map { _ =>
             val user = factory.createActiveUser.copy(name = name)
             val reqJson = Json.obj("name" -> user.name,
@@ -440,283 +383,6 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         (responses(0) \ "data" \ "name") must equal ((responses(1) \ "data" \ "name"))
       }
 
-    }
-
-    describe("POST /api/users/name/:id") {
-
-      it("update a user's name") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> user.version, "name" -> user.name)
-        val json = makeRequest(POST, updateUri(user, "name"), reqJson)
-
-        (json \ "status").as[String] must be ("success")
-        (json \ "data" \ "version").as[Int] must be(user.version + 1)
-        (json \ "data" \ "name").as[String] must be(user.name)
-      }
-
-      it("users with the same name (different emails) get different slugs") {
-        val users = (0 until 2).map { _ =>
-            val user = factory.createActiveUser
-            userRepository.put(user)
-            user
-          }
-
-        val dupName = users(1).name
-        val reqJson = Json.obj("expectedVersion" -> users(0).version, "name" -> dupName)
-        val response = makeRequest(POST, updateUri(users(0), "name"), reqJson)
-
-        (response \ "data" \ "id").as[String] must equal (users(0).id.id)
-
-        (response \ "data" \ "id").as[String] must not equal (users(1).id.id)
-
-        (response \ "data" \ "slug").as[String] must not equal (Slug(dupName))
-
-        (response \ "data" \ "slug").as[String] must include (Slug(dupName))
-
-        (response \ "data" \ "name").as[String] must equal (dupName)
-      }
-
-      it("not update a user's name with an invalid name") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "name"            -> "a")
-        val json = makeRequest(POST, updateUri(user, "name"), BAD_REQUEST, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-        (json \ "message").as[String] must include("InvalidName")
-      }
-
-      it("not update a user's name when an invalid version number is used") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1),
-                               "name"            -> user.name)
-        val json = makeRequest(POST, updateUri(user, "name"), BAD_REQUEST, reqJson)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include ("expected version doesn't match current version")
-      }
-    }
-
-    describe("POST /api/users/email/:id") {
-
-      it("update a user's email") {
-        val user = factory.createActiveUser.copy(timeAdded = OffsetDateTime.now.minusMonths(1))
-        userRepository.put(user)
-
-        val newEmail = nameGenerator.nextEmail[User]
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "email"           -> newEmail)
-        val json = makeRequest(POST, updateUri(user, "email"), json = reqJson)
-
-        (json \ "status").as[String] must be ("success")
-
-        (json \ "data" \ "version").as[Int] must be(user.version + 1)
-
-        (json \ "data" \ "email").as[String] must be(newEmail)
-
-        userRepository.getByKey(user.id) mustSucceed { repoUser =>
-          compareObj((json \ "data").as[JsObject], repoUser)
-
-          repoUser must have (
-            'id          (user.id),
-            'version     (user.version + 1),
-            'name        (user.name),
-            'email       (newEmail),
-            'avatarUrl   (user.avatarUrl)
-          )
-
-          checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
-        }
-      }
-
-      it("not update a user's email with an invalid email address") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "email" -> "abcdef")
-        val json = makeRequest(POST, updateUri(user, "email"), BAD_REQUEST, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-        (json \ "message").as[String] must include("InvalidEmail")
-      }
-
-      it("not update a user's email if an invalid version number is used ") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1),
-                               "email" -> user.email)
-        val json = makeRequest(POST, updateUri(user, "email"), BAD_REQUEST, reqJson)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include ("expected version doesn't match current version")
-      }
-
-    }
-
-    describe("POST /api/users/password/:id") {
-
-      it("update a user's password") {
-        val plainPassword = nameGenerator.next[User]
-        val newPassword = nameGenerator.next[User]
-        val salt = passwordHasher.generateSalt
-        val encryptedPassword = passwordHasher.encrypt(plainPassword, salt)
-        val user = factory.createActiveUser.copy(password  = encryptedPassword,
-                                                 salt      = salt,
-                                                 timeAdded = OffsetDateTime.now.minusMonths(1))
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "currentPassword" -> plainPassword,
-                               "newPassword"     -> newPassword)
-        val json = makeRequest(POST, updateUri(user, "password"), json = reqJson)
-
-        (json \ "status").as[String] must be ("success")
-        (json \ "data" \ "id").as[String] must be (user.id.id)
-        (json \ "data" \ "version").as[Long] must be (user.version + 1)
-
-        userRepository.getByKey(user.id) mustSucceed { repoUser =>
-          compareObj((json \ "data").as[JsObject], repoUser)
-
-          repoUser must have (
-            'id          (user.id),
-            'version     (user.version + 1),
-            'name        (user.name),
-            'email       (user.email),
-            'avatarUrl   (user.avatarUrl)
-          )
-
-          checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
-        }
-      }
-
-      it("not update a user's password with an empty current password") {
-        val plainPassword = nameGenerator.next[String]
-        val user = createActiveUserInRepository(plainPassword)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "currentPassword" -> "",
-                               "newPassword"     -> "abcdef")
-        val json = makeRequest(POST, updateUri(user, "password"), BAD_REQUEST, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-      }
-
-      it("not update a user's password with an empty new password") {
-        val plainPassword = nameGenerator.next[String]
-        val user = createActiveUserInRepository(plainPassword)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "currentPassword" -> "abcdef",
-                               "newPassword" -> "")
-        val json = makeRequest(POST, updateUri(user, "password"), BAD_REQUEST, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-      }
-
-      it("fail when attempting to update a user's password with a bad version number") {
-        val plainPassword = nameGenerator.next[String]
-        val user = createActiveUserInRepository(plainPassword)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1),
-                               "currentPassword" -> "abcdef",
-                               "newPassword" -> "")
-        val json = makeRequest(POST, updateUri(user, "password"), BAD_REQUEST, reqJson)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include ("expected version doesn't match current version")
-      }
-    }
-
-    describe("POST /api/users/avatarurl/:id") {
-
-      it("update a user's avatar URL") {
-        val user = factory.createActiveUser.copy(timeAdded = OffsetDateTime.now.minusMonths(1))
-        userRepository.put(user)
-
-        val newAvatarUrl = nameGenerator.nextUrl[User]
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "avatarUrl" -> newAvatarUrl)
-        val json = makeRequest(POST, updateUri(user, "avatarurl"), json = reqJson)
-
-        (json \ "status").as[String] must be ("success")
-        (json \ "data" \ "version").as[Int] must be(user.version + 1)
-        (json \ "data" \ "avatarUrl").as[String] must be(newAvatarUrl)
-
-        userRepository.getByKey(user.id) mustSucceed { repoUser =>
-          compareObj((json \ "data").as[JsObject], repoUser)
-
-          repoUser must have (
-            'id          (user.id),
-            'version     (user.version + 1),
-            'name        (user.name),
-            'email       (user.email),
-            'avatarUrl   (Some(newAvatarUrl))
-          )
-
-          checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
-        }
-      }
-
-      it("remove a user's avatar URL") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version))
-        val json = makeRequest(POST, updateUri(user, "avatarurl"), json = reqJson)
-
-        (json \ "status").as[String] must be ("success")
-        (json \ "data" \ "version").as[Int] must be(user.version + 1)
-        (json \ "data" \ "avatarUrl").asOpt[String] mustBe None
-      }
-
-      it("not update a user's avatar URL if URL is invalid") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "avatarUrl" -> "abcdef")
-        val json = makeRequest(POST, updateUri(user, "avatarurl"), BAD_REQUEST, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-        (json \ "message").as[String] must include("InvalidUrl")
-      }
-
-      it("not update a user's avatar URL if URL is empty") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version),
-                               "avatarUrl" -> "")
-        val json = makeRequest(POST, updateUri(user, "avatarurl"), BAD_REQUEST, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-      }
-
-      it("not update a user's avatar URL if an invalid version number is used") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1),
-                               "avatarUrl" -> user.avatarUrl)
-        val json = makeRequest(POST, updateUri(user, "avatarurl"), BAD_REQUEST, json = reqJson)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include ("expected version doesn't match current version")
-      }
     }
 
     describe("GET /api/users/:slug") {
@@ -741,115 +407,422 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       }
     }
 
-    describe("POST /api/users/activate") {
+    describe("POST /api/users/update/:id") {
 
-      it("activate a user") {
-        val user = factory.createRegisteredUser
-        userRepository.put(user)
+      describe("when updating name") {
 
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version))
-        val json = makeRequest(POST, updateUri(user, "activate"), json = reqJson)
-
-        (json \ "status").as[String] must be ("success")
-      }
-
-      it("must not activate a user with an invalid version number") {
-        val user = factory.createRegisteredUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1))
-        val json = makeRequest(POST, updateUri(user, "activate"), BAD_REQUEST, reqJson)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include ("expected version doesn't match current version")
-      }
-
-    }
-
-    describe("POST /api/users/lock") {
-
-      it("lock a user") {
-        val users = Table("users that can be locked",
-                          factory.createRegisteredUser,
-                          factory.createActiveUser)
-        forAll(users) { user =>
-          info(s"when ${user.state}")
+        it("update a user's name") {
+          val user = factory.createActiveUser
           userRepository.put(user)
-
-          val reqJson = Json.obj("expectedVersion" -> Some(user.version))
-          val json = makeRequest(POST, updateUri(user, "lock"), json = reqJson)
+          val newName = s"${faker.Name.first_name} ${faker.Name.last_name}"
+          val json = makeUpdateRequest(user, "name", JsString(newName))
 
           (json \ "status").as[String] must be ("success")
+
+          (json \ "data" \ "version").as[Int] must be(user.version + 1)
+
+          (json \ "data" \ "name").as[String] must be(newName)
+
+          userRepository.getByKey(user.id) mustSucceed { repoUser =>
+            compareObj((json \ "data").as[JsObject], repoUser)
+
+            repoUser must have (
+              'id          (user.id),
+              'version     (user.version + 1),
+              'name        (newName),
+              'email       (user.email),
+              'avatarUrl   (user.avatarUrl)
+            )
+
+            checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+          }
         }
-      }
 
-      it("must not lock a user when an invalid version number is used") {
-        val user = factory.createActiveUser
-        userRepository.put(user)
+        it("users with the same name (different emails) get different slugs") {
+          val users = (0 until 2).map { _ =>
+              val user = factory.createActiveUser
+              userRepository.put(user)
+              user
+            }
 
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1))
-        val json = makeRequest(POST, updateUri(user, "lock"), BAD_REQUEST, reqJson)
+          val dupName = users(1).name
+          val response = makeUpdateRequest(users(0), "name", JsString(dupName))
 
-        (json \ "status").as[String] must be ("error")
+          (response \ "data" \ "id").as[String] must equal (users(0).id.id)
 
-        (json \ "message").as[String] must include ("expected version doesn't match current version")
-      }
+          (response \ "data" \ "id").as[String] must not equal (users(1).id.id)
 
-      it("must not lock a locked user") {
-        val user = factory.createLockedUser
-        userRepository.put(user)
+          (response \ "data" \ "slug").as[String] must not equal (Slug(dupName))
 
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version))
-        val json = makeRequest(POST, updateUri(user, "lock"), BAD_REQUEST, reqJson)
+          (response \ "data" \ "slug").as[String] must include (Slug(dupName))
 
-        (json \ "status").as[String] must be ("error")
+          (response \ "data" \ "name").as[String] must equal (dupName)
+        }
 
-        (json \ "message").as[String] must include ("user not registered or active")
-      }
-
-    }
-
-    describe("POST /api/users/unlock") {
-
-      it("must unlock a user") {
-        val user = factory.createLockedUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version))
-        val json = makeRequest(POST, updateUri(user, "unlock"), json = reqJson)
-
-        (json \ "status").as[String] must be ("success")
-      }
-
-      it("must not unlock a user if a invalid version number is used") {
-        val user = factory.createLockedUser
-        userRepository.put(user)
-
-        val reqJson = Json.obj("expectedVersion" -> Some(user.version + 1))
-        val json = makeRequest(POST, updateUri(user, "unlock"), BAD_REQUEST, reqJson)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include ("expected version doesn't match current version")
-      }
-
-      it("must not unlock a registered or active user") {
-        val users = Table("user that can't be unlocked",
-                          factory.createRegisteredUser,
-                          factory.createActiveUser)
-        forAll(users) { user =>
-          info(s"${user.state}")
+        it("not update a user's name with an empty name") {
+          val user = factory.createActiveUser
           userRepository.put(user)
-
-          val reqJson = Json.obj("expectedVersion" -> Some(user.version))
-          val json = makeRequest(POST, updateUri(user, "unlock"), BAD_REQUEST, reqJson)
+          val json = makeUpdateRequest(user, "name", JsString(""), BAD_REQUEST)
 
           (json \ "status").as[String] must be ("error")
 
-          (json \ "message").as[String] must include ("user not locked")
+          (json \ "message").as[String] must include("NonEmptyString")
+        }
+
+        it("not update a user's name when an invalid version number is used") {
+          val user = factory.createActiveUser
+          userRepository.put(user)
+
+          val json = makeUpdateRequestWithVersion(user,
+                                                  "name",
+                                                  JsString(user.name),
+                                                  user.version + 1)
+
+          (json \ "status").as[String] must be ("error")
+
+          (json \ "message").as[String] must include ("InvalidVersion")
+        }
+
+        it("not update a user's name with invalid values") {
+          val user = factory.createActiveUser
+          userRepository.put(user)
+
+          forAll(Table(
+                   ( "value", "error message" ),
+                   ( "", "NonEmptyString" ),
+                   ( "$#%", "InvalidName" )
+                 )) { (value, errMsg) =>
+            val json = makeUpdateRequest(user, "name", JsString(value), BAD_REQUEST)
+
+            (json \ "status").as[String] must be ("error")
+
+            (json \ "message").as[String] must include regex (errMsg)
+          }
         }
       }
+
+      describe("when updating email") {
+
+        it("update a user's email") {
+          val user = factory.createActiveUser.copy(timeAdded = OffsetDateTime.now.minusMonths(1))
+          userRepository.put(user)
+          val newEmail = nameGenerator.nextEmail[User]
+          val json = makeUpdateRequest(user, "email", JsString(newEmail))
+
+          (json \ "status").as[String] must be ("success")
+
+          (json \ "data" \ "version").as[Int] must be(user.version + 1)
+
+          (json \ "data" \ "email").as[String] must be(newEmail)
+
+          userRepository.getByKey(user.id) mustSucceed { repoUser =>
+            compareObj((json \ "data").as[JsObject], repoUser)
+
+            repoUser must have (
+              'id          (user.id),
+              'version     (user.version + 1),
+              'name        (user.name),
+              'email       (newEmail),
+              'avatarUrl   (user.avatarUrl)
+            )
+
+            checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+          }
+        }
+
+        it("not update a user's email with an invalid email address") {
+          val user = factory.createActiveUser
+          userRepository.put(user)
+          val json = makeUpdateRequest(user, "email", JsString(faker.Lorem.sentence(3)), BAD_REQUEST)
+          (json \ "status").as[String] must be ("error")
+
+          (json \ "message").as[String] must include("InvalidEmail")
+        }
+
+        it("not update a user's email if an invalid version number is used ") {
+          val user = factory.createActiveUser
+          userRepository.put(user)
+          val json = makeUpdateRequestWithVersion(user,
+                                                  "email",
+                                                  JsString(user.email),
+                                                  user.version + 1)
+
+          (json \ "status").as[String] must be ("error")
+
+          (json \ "message").as[String] must include ("InvalidVersion")
+        }
+
+      }
+
+      describe("when updating password") {
+
+        it("update a user's password") {
+          val plainPassword = nameGenerator.next[User]
+          val newPassword = nameGenerator.next[User]
+          val salt = passwordHasher.generateSalt
+          val encryptedPassword = passwordHasher.encrypt(plainPassword, salt)
+          val user = factory.createActiveUser.copy(password  = encryptedPassword,
+                                                   salt      = salt,
+                                                   timeAdded = OffsetDateTime.now.minusMonths(1))
+          userRepository.put(user)
+
+          val json = makeUpdateRequest(user,
+                                       "password",
+                                       Json.obj("currentPassword" -> plainPassword,
+                                                "newPassword"     -> newPassword))
+
+          (json \ "status").as[String] must be ("success")
+
+          (json \ "data" \ "id").as[String] must be (user.id.id)
+
+          (json \ "data" \ "version").as[Long] must be (user.version + 1)
+
+          userRepository.getByKey(user.id) mustSucceed { repoUser =>
+            compareObj((json \ "data").as[JsObject], repoUser)
+
+            repoUser must have (
+              'id          (user.id),
+              'version     (user.version + 1),
+              'name        (user.name),
+              'email       (user.email),
+              'avatarUrl   (user.avatarUrl)
+            )
+
+            checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+          }
+        }
+
+        it("not update a user's password with an invalid current password") {
+          val plainPassword = nameGenerator.next[String]
+          val user = createActiveUserInRepository(plainPassword)
+
+          forAll(Table(
+                   ( "value" ),
+                   ( ""                      ),
+                   ( faker.Lorem.sentence(3) )
+                 )) { value =>
+            val json = makeUpdateRequest(user,
+                                         "password",
+                                         Json.obj("currentPassword" -> value,
+                                                  "newPassword"     -> faker.Lorem.sentence(3)),
+                                         BAD_REQUEST)
+
+            (json \ "status").as[String] must be ("error")
+
+            (json \ "message").as[String] must include ("InvalidPassword")
+          }
+        }
+
+        it("not update a user's password with an empty new password") {
+          val plainPassword = nameGenerator.next[String]
+          val user = createActiveUserInRepository(plainPassword)
+          val json = makeUpdateRequest(user,
+                                       "password",
+                                       Json.obj("currentPassword" -> plainPassword,
+                                                "newPassword"     -> ""),
+                                       BAD_REQUEST)
+
+          (json \ "status").as[String] must be ("error")
+
+          (json \ "message").as[String] must include ("InvalidNewPassword")
+        }
+
+        it("fail when attempting to update a user's password with a bad version number") {
+          val plainPassword = nameGenerator.next[String]
+          val user = createActiveUserInRepository(plainPassword)
+          val json = makeUpdateRequestWithVersion(user,
+                                                  "password",
+                                                  Json.obj("currentPassword" -> faker.Lorem.sentence(3),
+                                                           "newPassword"     -> faker.Lorem.sentence(3)),
+                                                  user.version + 1)
+
+          (json \ "status").as[String] must be ("error")
+
+          (json \ "message").as[String] must include ("InvalidVersion")
+        }
+      }
+
+      describe("when updating avatar URL") {
+
+        it("update a user's avatar URL") {
+          val user = factory.createActiveUser.copy(timeAdded = OffsetDateTime.now.minusMonths(1))
+          userRepository.put(user)
+          val newAvatarUrl = nameGenerator.nextUrl[User]
+          val json = makeUpdateRequest(user, "avatarUrl", JsString(newAvatarUrl))
+
+          (json \ "status").as[String] must be ("success")
+
+          (json \ "data" \ "version").as[Int] must be(user.version + 1)
+
+          (json \ "data" \ "avatarUrl").as[String] must be(newAvatarUrl)
+
+          userRepository.getByKey(user.id) mustSucceed { repoUser =>
+            compareObj((json \ "data").as[JsObject], repoUser)
+
+            repoUser must have (
+              'id          (user.id),
+              'version     (user.version + 1),
+              'name        (user.name),
+              'email       (user.email),
+              'avatarUrl   (Some(newAvatarUrl))
+            )
+
+            checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+          }
+        }
+
+        it("remove a user's avatar URL") {
+          val user = factory.createActiveUser
+          userRepository.put(user)
+          val json = makeUpdateRequest(user, "avatarUrl", JsString(""))
+
+          (json \ "status").as[String] must be ("success")
+
+          (json \ "data" \ "version").as[Int] must be(user.version + 1)
+
+          (json \ "data" \ "avatarUrl").asOpt[String] mustBe None
+        }
+
+        it("not update a user's avatar URL if URL is invalid") {
+          val user = factory.createActiveUser
+          userRepository.put(user)
+          val json = makeUpdateRequest(user, "avatarUrl", JsString("bad url"), BAD_REQUEST)
+
+          (json \ "status").as[String] must be ("error")
+
+          (json \ "message").as[String] must include("InvalidUrl")
+        }
+
+        it("not update a user's avatar URL if an invalid version number is used") {
+          val user = factory.createActiveUser
+          userRepository.put(user)
+          val json = makeUpdateRequestWithVersion(user,
+                                                  "avatarUrl",
+                                                  JsString(nameGenerator.nextUrl[User]),
+                                                  user.version + 1)
+
+          (json \ "status").as[String] must be ("error")
+
+          (json \ "message").as[String] must include ("InvalidVersion")
+        }
+      }
+
+      describe("when activating a user") {
+
+        userChangeStateSharedBehaviour(factory.createRegisteredUser,
+                                       List[User](factory.createActiveUser, factory.createLockedUser),
+                                       "activate",
+                                       "active")
+
+      }
+
+      describe("when locking a user") {
+
+        userChangeStateSharedBehaviour(factory.createActiveUser,
+                                       List[User](factory.createLockedUser),
+                                       "lock",
+                                       "locked")
+
+      }
+
+      describe("when unlocking a user") {
+
+        userChangeStateSharedBehaviour(factory.createLockedUser,
+                                       List[User](factory.createActiveUser, factory.createRegisteredUser),
+                                       "unlock",
+                                       "active")
+
+      }
+
+    }
+
+    describe("POST /api/users/roles") {
+
+      def addRoleToUserJson(user: User, role: Role): JsObject = {
+        Json.obj("expectedVersion" -> user.version,
+                 "roleId"          -> role.id)
+      }
+
+      it("can add a role to a user") {
+        val user = factory.createActiveUser
+        val role = factory.createRole
+        Set(user, role).foreach(addToRepository)
+
+        val reply = makeRequest(POST, uri("roles", user.id.id), addRoleToUserJson(user, role))
+
+        (reply \ "status").as[String] must be ("success")
+
+        val jsonId = (reply \ "data" \ "id").as[String]
+
+        userRepository.getByKey(UserId(jsonId)) mustSucceed { repoUser =>
+          compareObj((reply \ "data").as[JsObject], repoUser)
+
+          repoUser must have (
+            'id          (user.id),
+            'version     (user.version),
+            'name        (user.name),
+            'email       (user.email),
+            'avatarUrl   (user.avatarUrl),
+            'state       (user.state.id))
+
+          checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
+        }
+
+        val roleData = (reply \ "data" \ "roleData").as[List[JsObject]]
+        roleData.length must be (1)
+
+        val roleId = (roleData(0) \ "id").as[String]
+
+        accessItemRepository.getByKey(AccessItemId(roleId)) mustSucceed { item =>
+          inside(item) { case repoRole: Role =>
+            repoRole must have (
+              'id             (role.id),
+              'version        (role.version + 1)
+            )
+            repoRole.userIds must contain (user.id)
+            checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+          }
+        }
+
+        val roleSlug = (roleData(0) \ "slug").as[String]
+        val roleName = (roleData(0) \ "name").as[String]
+
+        roleSlug must be (role.slug)
+        roleName must be (role.name)
+      }
+
+      it("cannot add the same user more than once") {
+        val user = factory.createActiveUser
+        val role = factory.createRole.copy(userIds = Set(user.id))
+        Set(user, role).foreach(addToRepository)
+
+        badRequest(POST,
+                   uri("roles", user.id.id),
+                   addRoleToUserJson(user, role),
+                   "EntityCriteriaError: user ID is already in role")
+      }
+
+      it("cannot add a user that does not exist") {
+        val user = factory.createActiveUser
+        val role = factory.createRole.copy(userIds = Set(user.id))
+        Set(role).foreach(addToRepository)
+        notFound(POST,
+                 uri("roles", user.id.id),
+                 addRoleToUserJson(user, role),
+                 "IdNotFound: user id")
+      }
+
+      it("cannot add a role that does not exist") {
+        val user = factory.createActiveUser
+        val role = factory.createRole.copy(userIds = Set(user.id))
+        Set(user).foreach(addToRepository)
+        notFound(POST,
+                 uri("roles", user.id.id),
+                 addRoleToUserJson(user, role),
+                 "IdNotFound: role id")
+      }
+
+      // cannot test for invalid version, since version check is determined internally by server
 
     }
 
@@ -942,17 +915,17 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val reqJson = Json.obj("expectedVersion" -> Some(user.version))
 
         // this request is valid since user is logged in
-        val fakeRequest = FakeRequest(POST, updateUri(user, "lock"))
-        .withJsonBody(reqJson)
-        .withHeaders("X-XSRF-TOKEN" -> validToken,
-                     "Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", badToken))))
+        val fakeRequest = FakeRequest(GET, uri("names"))
+          .withJsonBody(reqJson)
+          .withHeaders("X-XSRF-TOKEN" -> validToken,
+                       "Set-Cookie" -> Cookies.encodeCookieHeader(Seq(Cookie("XSRF-TOKEN", badToken))))
 
         //log.info(s"makeRequest: request: $fakeRequest")
 
         val resp = route(app, fakeRequest)
         resp must not be (None)
         resp.map { result =>
-          // log.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
+          //log.info(s"makeRequest: status: ${status(result)}, result: ${contentAsString(result)}")
           status(result) mustBe (UNAUTHORIZED)
           val body = contentAsString(result)
           body mustBe empty
@@ -998,11 +971,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
         // this request is valid since user is logged in
         var json = makeRequest(GET, uri("authenticate"), OK, JsNull, token)
-        (json \ "data" \ "id").as[String] must be (user.id.id)
+                              (json \ "data" \ "id").as[String] must be (user.id.id)
 
         // the user is now logged out
         json = makeRequest(POST, uri("logout"), OK, JsNull, token)
-        (json \ "status").as[String] must be ("success")
+                          (json \ "status").as[String] must be ("success")
 
         // the following request must fail
         json = makeRequest(GET, uri(""), UNAUTHORIZED, JsNull, token)
@@ -1017,7 +990,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val json = makeRequest(POST,
                                uri("passreset"),
                                Json.obj("email" -> user.email))
-        (json \ "status").as[String] must be ("success")
+                              (json \ "status").as[String] must be ("success")
       }
 
       it("not allow a registered user to reset his/her password") {
@@ -1052,7 +1025,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val token = doLogin(user.email, plainPassword)
 
         val authReplyJson = makeRequest(GET, uri("authenticate"), OK, JsNull, token = token)
+
         (authReplyJson \ "status").as[String] must be ("success")
+
         (authReplyJson \ "data" \ "email").as[String] must be (user.email)
       }
 
@@ -1086,10 +1061,230 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val study = factory.createEnabledStudy
         studyRepository.put(study)
         val jsonItem = PagedResultsSpec(this).singleItemResult(uri("studies"))
+
         (jsonItem \ "id").as[String] must be (study.id.id)
       }
 
     }
 
+  }
+
+  describe("DELETE /api/users/roles/:userId/:version/:roleId") {
+
+    it("can remove a user") {
+      val user = factory.createActiveUser
+      val role = factory.createRole.copy(userIds = Set(user.id))
+      Set(user, role).foreach(addToRepository)
+
+      val url = uri("roles", user.id.id, user.version.toString, role.id.id)
+      val reply = makeRequest(DELETE, url)
+
+      (reply \ "status").as[String] must include ("success")
+
+      val jsonId = (reply \ "data" \ "id").as[String]
+      val userId = UserId(jsonId)
+      jsonId.length must be > 0
+
+      userRepository.getByKey(userId) mustSucceed { repoUser =>
+        compareObj((reply \ "data").as[JsObject], repoUser)
+
+        repoUser must have (
+          'id          (user.id),
+          'version     (user.version),
+          'name        (user.name),
+          'email       (user.email),
+          'avatarUrl   (user.avatarUrl),
+          'state       (user.state.id))
+
+        checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
+      }
+
+      val roleData = (reply \ "data" \ "roleData").as[List[JsObject]]
+      roleData.length must be (0)
+
+      accessItemRepository.getByKey(role.id) mustSucceed { item =>
+        inside(item) { case repoRole: Role =>
+          repoRole must have (
+            'id             (role.id),
+            'version        (role.version + 1)
+          )
+          repoRole.userIds must not contain (user.id)
+          checkTimeStamps(repoRole, role.timeAdded, OffsetDateTime.now)
+        }
+      }
+    }
+
+    it("cannot remove a user not in the role") {
+      val user = factory.createActiveUser
+      val role = factory.createRole
+      Set(user, role).foreach(addToRepository)
+
+      val url = uri("roles", user.id.id, user.version.toString, role.id.id)
+      badRequest(DELETE, url, JsNull, "EntityCriteriaError: user ID is not in role")
+    }
+
+    it("cannot remove a user that does not exist") {
+      val user = factory.createActiveUser
+      val role = factory.createRole
+      Set(role).foreach(addToRepository)
+
+      val url = uri("roles", user.id.id, user.version.toString, role.id.id)
+      notFound(DELETE, url, JsNull, "IdNotFound: user id")
+    }
+
+    it("111 fail when removing and role ID does not exist") {
+      val user = factory.createActiveUser
+      val role = factory.createRole
+      Set(user).foreach(addToRepository)
+
+      val url = uri("roles", user.id.id, user.version.toString, role.id.id)
+      notFound(DELETE, url, JsNull, "IdNotFound: role id")
+    }
+
+    // cannot test for invalid version, since version check is determined internally by server
+
+  }
+
+  def userChangeStateSharedBehaviour(user:            User,
+                                     wrongStateUsers: List[User],
+                                     stateAction:     String,
+                                     newState:        String) {
+
+    it(s"can $stateAction a user") {
+      userRepository.put(user)
+      val json = makeUpdateRequest(user, "state", JsString(stateAction))
+
+      (json \ "status").as[String] must be ("success")
+
+      (json \ "data" \ "version").as[Int] must be(user.version + 1)
+
+      (json \ "data" \ "state").as[String] must be(newState)
+
+      userRepository.getByKey(user.id) mustSucceed { repoUser =>
+        compareObj((json \ "data").as[JsObject], repoUser)
+
+        repoUser must have (
+          'id          (user.id),
+          'version     (user.version + 1),
+          'name        (user.name),
+          'email       (user.email),
+          'avatarUrl   (user.avatarUrl),
+          'state       (newState))
+
+        checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+      }
+    }
+
+    it("must not change a user's state with an invalid version number") {
+      userRepository.put(user)
+      val json = makeUpdateRequestWithVersion(user, "state", JsString(stateAction), user.version + 1)
+
+      (json \ "status").as[String] must be ("error")
+
+      (json \ "message").as[String] must include ("InvalidVersion")
+    }
+
+    it("must not change a user to the wrong state") {
+      forAll(Table("user in wrong state", wrongStateUsers:_*)) { user =>
+        info(s"must not $stateAction a user currently in ${user.state} state")
+        userRepository.put(user)
+        val json = makeUpdateRequest(user, "state", JsString(stateAction), BAD_REQUEST)
+
+        (json \ "status").as[String] must be ("error")
+
+        (json \ "message").as[String] must include ("InvalidStatus")
+      }
+    }
+
+  }
+
+  private def uri(paths: String*): String = {
+    val basePath = "/api/users"
+    if (paths.isEmpty) basePath
+    else s"$basePath/" + paths.mkString("/")
+  }
+
+  private def uri(user: User): String = uri(user.id.id)
+
+  private def updateUri(user: User, path: String): String = uri(path, user.id.id)
+
+  private def addMembershipForUser(user: User) = {
+    val membership = factory.createMembership.copy(userIds = Set(user.id))
+    membershipRepository.put(membership)
+  }
+
+  private def createRegisteredUserInRepository(plainPassword: String): RegisteredUser = {
+    val user = createRegisteredUser(plainPassword)
+    userRepository.put(user)
+    addMembershipForUser(user)
+    user
+  }
+
+  private def createActiveUserInRepository(plainPassword: String): ActiveUser = {
+    val user = createActiveUser(plainPassword)
+    userRepository.put(user)
+    addMembershipForUser(user)
+    user
+  }
+
+  private def createLockedUserInRepository(plainPassword: String): LockedUser = {
+    val user = createLockedUser(plainPassword)
+    userRepository.put(user)
+    addMembershipForUser(user)
+    user
+  }
+
+  private def compareObjs(jsonList: List[JsObject], users: List[User]) = {
+    val usersMap = users.map { user => (user.id, user) }.toMap
+    jsonList.foreach { jsonObj =>
+      val jsonId = UserId((jsonObj \ "id").as[String])
+      compareObj(jsonObj, usersMap(jsonId))
+    }
+  }
+
+  private def jsonUsersFilterOutDefaultUser(jsonList: List[JsObject]): List[JsObject] = {
+    jsonList.filter(json => (json \ "id").as[String] != Global.DefaultUserId.id)
+  }
+
+  private def multipleItemsResultWithDefaultUser(uri:         String,
+                                                 queryParams: Map[String, String] =  Map.empty,
+                                                 offset:      Long,
+                                                 total:       Long,
+                                                 maybeNext:   Option[Int],
+                                                 maybePrev:   Option[Int]) = {
+    val jsonUsers = PagedResultsSpec(this).multipleItemsResult(uri,
+                                                               queryParams,
+                                                               offset,
+                                                               total + 1, // +1 for the default user
+                                                               maybeNext,
+                                                               maybePrev)
+    jsonUsersFilterOutDefaultUser(jsonUsers)
+  }
+
+  def makeUpdateRequest(user:           User,
+                        property:       String,
+                        newValue:       JsValue,
+                        expectedStatus: Int = OK): JsValue = {
+    var json = Json.obj("expectedVersion" -> user.version,
+                        "property"        -> property)
+
+    if (newValue !== JsNull) {
+      json = json ++ Json.obj("newValue" -> newValue)
+    }
+    makeRequest(POST, updateUri(user, "update"), expectedStatus, json)
+  }
+
+  def makeUpdateRequestWithVersion(user:           User,
+                                   property:       String,
+                                   newValue:       JsValue,
+                                   version:        Long,
+                                   expectedStatus: Int = BAD_REQUEST): JsValue = {
+
+    var json = Json.obj("expectedVersion" -> version,
+                        "property"        -> property)
+    if (newValue !== JsNull) {
+      json = json ++ Json.obj("newValue" -> newValue)
+    }
+    makeRequest(POST, updateUri(user, "update"), expectedStatus, json)
   }
 }

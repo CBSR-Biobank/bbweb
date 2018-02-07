@@ -100,32 +100,6 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
     }
   }
 
-  /**
-   * create pairs of annotation types and annotation of each value type plus a second of type select that
-   * allows multiple selections
-   *
-   * the result is a map where the keys are the annotation types and the values are the corresponding
-   * annotations
-   */
-  def createAnnotationsAndTypes() = {
-    val options = Seq(nameGenerator.next[String],
-                      nameGenerator.next[String],
-                      nameGenerator.next[String])
-
-    (AnnotationValueType.values.map { vt =>
-       vt match {
-         case AnnotationValueType.Select   =>
-           (factory.createAnnotationType(vt, Some(1), options),
-            factory.createAnnotation)
-         case _ =>
-           (factory.createAnnotationType(vt, None, Seq.empty),
-            factory.createAnnotation)
-       }
-     }.toList ++ List(
-       (factory.createAnnotationType(AnnotationValueType.Select, Some(2), options),
-        factory.createAnnotation))).toMap
-  }
-
   def createEntities(): (EnabledStudy, Participant, CollectionEventType) = {
     val study = factory.createEnabledStudy
     studyRepository.put(study)
@@ -599,7 +573,7 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
         }
       }
 
-      it("be able to add a collection event with an empty, non required, number annotation") {
+      it("fail when tyring to add a collection event with an empty, non required, number annotation") {
         createEntities { (study, participant, ceventType) =>
           val annotType = factory
             .createAnnotationType(AnnotationValueType.Number, None, Seq.empty)
@@ -611,17 +585,14 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
           val cevent = factory.createCollectionEvent
           val json = makeRequest(POST,
                                  uri(participant),
+                                 BAD_REQUEST,
                                  collectionEventToAddJson(cevent, List(annotation)))
 
-          (json \ "status").as[String] must include ("success")
+          (json \ "status").as[String] must include ("error")
 
-          (json \ "data" \ "annotations").as[List[JsObject]] must have size 1
-          val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
-          jsonAnnotations must have size 1
+          (json \ "message").as[String] must include ("InvalidNumberString")
 
-          jsonAnnotations.foreach { jsonAnnotation =>
-            compareAnnotation(jsonAnnotation, annotation)
-          }
+          ()
         }
       }
 

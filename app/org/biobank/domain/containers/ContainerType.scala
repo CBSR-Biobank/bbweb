@@ -24,7 +24,8 @@ sealed trait ContainerType
     with HasSlug
     with HasOptionalDescription
     with ContainerValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /**
    * The [[centre.Centre]] that owns and is allowed to modify this [[ContainerType]].
@@ -54,8 +55,8 @@ sealed trait ContainerType
     validateString(name, NameMinLength, InvalidName)
   }
 
-  def withDescription(description:  Option[String]): DomainValidation[Option[String]] = {
-    validateNonEmptyOption(description, InvalidDescription)
+  def withDescription(description: Option[String]): DomainValidation[Option[String]] = {
+    validateNonEmptyStringOption(description, InvalidDescription)
   }
 
   // def withShared(shared: Boolean): DomainValidation[StorageContainerType]
@@ -130,7 +131,8 @@ final case class StorageContainerType(id:           ContainerTypeId,
 }
 
 object StorageContainerType extends ContainerValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(id:          ContainerTypeId,
              centreId:    Option[CentreId],
@@ -141,11 +143,11 @@ object StorageContainerType extends ContainerValidations {
              shared:      Boolean,
              enabled:     Boolean): DomainValidation[StorageContainerType] = {
     (validateId(id) |@|
-       validateId(centreId, CentreIdRequired) |@|
+       validateIdOption(centreId, CentreIdRequired) |@|
        validateId(schemaId, ContainerSchemaIdInvalid) |@|
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription)) { case _ =>
+       validateNonEmptyStringOption(description, InvalidDescription)) { case _ =>
         StorageContainerType(id           = id,
                              centreId     = centreId,
                              schemaId     = schemaId,
@@ -179,7 +181,8 @@ final case class SpecimenContainerType(id:           ContainerTypeId,
     extends ContainerType
 
 object SpecimenContainerType extends ContainerValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(id:           ContainerTypeId,
              centreId:     Option[CentreId],
@@ -192,11 +195,11 @@ object SpecimenContainerType extends ContainerValidations {
              shared:       Boolean,
              enabled:      Boolean): DomainValidation[SpecimenContainerType] = {
     (validateId(id) |@|
-       validateId(centreId, CentreIdRequired) |@|
+       validateIdOption(centreId, CentreIdRequired) |@|
        validateId(schemaId, ContainerSchemaIdInvalid) |@|
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription)) { case _ =>
+       validateNonEmptyStringOption(description, InvalidDescription)) { case _ =>
         SpecimenContainerType(id           = id,
                               centreId     = centreId,
                               schemaId     = schemaId,

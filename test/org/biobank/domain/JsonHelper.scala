@@ -278,10 +278,12 @@ trait JsonHelper extends MustMatchers with OptionValues {
     Json.obj("annotationTypeId" -> annotType.id,
              "slug"             -> annotType.slug,
              "name"             -> annotType.name,
-             "description"      -> annotType.description,
              "valueType"        -> annotType.valueType,
              "options"          -> annotType.options,
-             "required"         -> annotType.required)
+             "required"         -> annotType.required) ++
+    JsObject(
+      Seq[(String, JsValue)]() ++
+        annotType.description.map("description" -> Json.toJson(_)))
   }
 
   def annotationTypeToJsonNoId(annotType: AnnotationType): JsObject = {

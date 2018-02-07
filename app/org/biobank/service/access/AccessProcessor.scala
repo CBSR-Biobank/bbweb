@@ -11,7 +11,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.user.UserId
 import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.event.AccessEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
+import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -35,6 +35,7 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
     extends Processor {
 
   import AccessProcessor._
+  import org.biobank.CommonValidations._
 
   type ApplyRoleEvent = (Role, OffsetDateTime) => ServiceValidation[Boolean]
 
@@ -187,7 +188,7 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
   private def addUserCmdToEvent(cmd: RoleAddUserCmd, role: Role): ServiceValidation[AccessEvent] = {
     val userId = UserId(cmd.userId)
     if (role.userIds.exists(_ == userId)) {
-      ServiceError(s"user ID is already in role: ${userId}").failureNel[AccessEvent]
+      EntityCriteriaError(s"user ID is already in role: ${userId}").failureNel[AccessEvent]
     } else {
       AccessEvent(cmd.sessionUserId).update(
         _.time                   := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
@@ -223,7 +224,7 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
   private def removeUserCmdToEvent(cmd: RoleRemoveUserCmd, role: Role): ServiceValidation[AccessEvent] = {
     val userId = UserId(cmd.userId)
     if (!role.userIds.exists(_ == userId)) {
-      ServiceError(s"user ID is not in role: ${userId}").failureNel[AccessEvent]
+      EntityCriteriaError(s"user ID is not in role: ${userId}").failureNel[AccessEvent]
     } else {
       AccessEvent(cmd.sessionUserId).update(
         _.time                     := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),

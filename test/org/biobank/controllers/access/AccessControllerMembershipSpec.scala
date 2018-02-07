@@ -384,7 +384,7 @@ class AccessControllerMembershipSpec
         val f = new MembershipFixture
         val json = updateNameJson(f.membership, nameGenerator.next[Membership]) ++
           Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
-        hasInvalidVersion(uri("memberships") + s"/name/${f.membership.id}", json)
+        hasInvalidVersion(POST, uri("memberships") + s"/name/${f.membership.id}", json)
       }
 
     }
@@ -434,7 +434,7 @@ class AccessControllerMembershipSpec
         val f = new MembershipFixture
         val json = updateDescriptionJson(f.membership, Some(nameGenerator.next[Membership])) ++
           Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
-        hasInvalidVersion(uri("memberships") + s"/description/${f.membership.id}", json)
+        hasInvalidVersion(POST, uri("memberships") + s"/description/${f.membership.id}", json)
       }
 
     }
@@ -506,7 +506,7 @@ class AccessControllerMembershipSpec
         val json = addUserJson(f.membership, user) ++
           Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
         userRepository.put(user)
-        hasInvalidVersion(uri("memberships") + s"/user/${f.membership.id}", json)
+        hasInvalidVersion(POST, uri("memberships") + s"/user/${f.membership.id}", json)
       }
 
     }
@@ -629,7 +629,7 @@ class AccessControllerMembershipSpec
         val json = addStudyJson(f.membership, study) ++
           Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
         studyRepository.put(study)
-        hasInvalidVersion(uri("memberships") + s"/study/${f.membership.id}", json)
+        hasInvalidVersion(POST, uri("memberships") + s"/study/${f.membership.id}", json)
       }
 
     }
@@ -752,7 +752,7 @@ class AccessControllerMembershipSpec
         val json = addCentreJson(f.membership, centre) ++
           Json.obj("expectedVersion" -> Some(f.membership.version + 10L))
         centreRepository.put(centre)
-        hasInvalidVersion(uri("memberships") + s"/centre/${f.membership.id}", json)
+        hasInvalidVersion(POST, uri("memberships") + s"/centre/${f.membership.id}", json)
       }
 
     }
@@ -818,7 +818,7 @@ class AccessControllerMembershipSpec
         val user = factory.createRegisteredUser
         val url = uri("memberships") + s"/user/${f.membership.id}/${f.membership.version + 10L}/${user.id.id}"
         userRepository.put(user)
-        hasInvalidVersionOnDelete(url)
+        hasInvalidVersion(DELETE, url)
       }
 
     }
@@ -896,7 +896,7 @@ class AccessControllerMembershipSpec
         val study = factory.createEnabledStudy
         val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version + 10L}/${study.id.id}"
         studyRepository.put(study)
-        hasInvalidVersionOnDelete(url)
+        hasInvalidVersion(DELETE, url)
       }
 
     }
@@ -974,7 +974,7 @@ class AccessControllerMembershipSpec
         val centre = factory.createEnabledCentre
         val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version + 10L}/${centre.id.id}"
         centreRepository.put(centre)
-        hasInvalidVersionOnDelete(url)
+        hasInvalidVersion(DELETE, url)
       }
 
     }
@@ -1003,7 +1003,7 @@ class AccessControllerMembershipSpec
       it("fail when removing with invalid version") {
         val f = new MembershipFixture
         val url = uri("memberships") + s"/${f.membership.id}/${f.membership.version + 10L}"
-        hasInvalidVersionOnDelete(url)
+        hasInvalidVersion(DELETE, url)
       }
 
     }
@@ -1011,11 +1011,11 @@ class AccessControllerMembershipSpec
   }
 
   private def notFound(url: String, json: JsValue): Unit = {
-    notFound(url, json, "IdNotFound.*membership")
+    notFound(POST, url, json, "IdNotFound.*membership")
   }
 
   private def notFoundOnDelete(url: String): Unit = {
-    notFoundOnDelete(url, "IdNotFound.*membership")
+    notFound(DELETE, url, JsNull, "IdNotFound.*membership")
   }
 
 }

@@ -32,56 +32,190 @@ function UserFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-  function User(obj) {
-    /**
-     * The user's full name.
-     *
-     * @name domain.users.User#name
-     * @type {string}
-     */
-    this.name = '';
+  class User extends ConcurrencySafeEntity {
+
+    constructor(obj = {}) {
+      super(User.SCHEMA, obj)
+
+      /**
+       * The user's full name.
+       *
+       * @name domain.users.User#name
+       * @type {string}
+       */
+
+      /**
+       * The user's email address.
+       *
+       * @name domain.users.User#email
+       * @type {string}
+       */
+
+      /**
+       * The user's optional avatar URL.
+       *
+       * @name domain.users.User#avatarUrl
+       * @type {string}
+       */
+
+      /**
+       * The roles this user has.
+       *
+       * @name domain.users.User#roles
+       * @type {Array<string>}
+       */
+
+      /**
+       * The state can be one of: registered, active or locked.
+       *
+       * @name domain.users.User#state
+       * @type {domain.users.UserState}
+       */
+
+      this.membership = new UserMembership(_.get(obj, 'membership', {}));
+    }
 
     /**
-     * The user's email address.
+     * Creates a User from a server reply but first validates that it has a valid schema.
      *
-     * @name domain.users.User#email
-     * @type {string}
-     */
-    this.email = '';
-
-    /**
-     * The user's optional avatar URL.
+     * <i>A wrapper for {@link domain.users.User#asyncCreate}.</i>
      *
-     * @name domain.users.User#avatarUrl
-     * @type {string}
+     * @see {@link domain.ConcurrencySafeEntity#update}
      */
+    asyncCreate(obj) {
+      return User.asyncCreate(obj);
+    }
 
-    /**
-     * The roles this user has.
-     *
-     * @name domain.users.User#roles
-     * @type {Array<string>}
-     */
+    register(password) {
+      var json = {
+        name:      this.name,
+        email:     this.email,
+        password:  password,
+        avatarUrl: this.avatarUrl
+      };
+      return biobankApi.post(User.url(), json).then(User.asyncCreate);
+    }
 
-    /**
-     * The state can be one of: registered, active or locked.
-     *
-     * @name domain.users.User#state
-     * @type {domain.users.UserState}
-     */
-    this.state = UserState.REGISTERED;
+    updateName(name) {
+      return this.update(User.url('update', this.id), { property: 'name', value: name });
+    }
 
-    ConcurrencySafeEntity.call(this, User.SCHEMA, obj);
-    this.membership = new UserMembership(_.get(obj, 'membership', {}));
+    updateEmail(email) {
+      return this.update(User.url('update', this.id), { property: 'email', value: email });
+    }
+
+    updatePassword(currentPassword, newPassword) {
+      return this.update(User.url('update', this.id),
+                         {
+                           property: 'password',
+                           value: {
+                             currentPassword: currentPassword,
+                             newPassword:     newPassword
+                           }
+                         });
+    }
+
+    updateAvatarUrl(avatarUrl) {
+      return this.update(User.url('update', this.id), { property: 'avatarUrl', value: avatarUrl });
+    }
+
+    activate() {
+      if (this.state !== UserState.REGISTERED) {
+        throw new DomainError('user state is not registered: ' + this.state);
+      }
+      return this.update(User.url('update', this.id), { property: 'state', value: 'activate' });
+    }
+
+    lock() {
+      if ((this.state !== UserState.REGISTERED) && (this.state !== UserState.ACTIVE))  {
+        throw new DomainError('user state is not registered or active: ' + this.state);
+      }
+      return this.update(User.url('update', this.id), { property: 'state', value: 'lock' });
+    }
+
+    unlock() {
+      if (this.state !== UserState.LOCKED) {
+        throw new DomainError('user state is not locked: ' + this.state);
+      }
+      return this.update(User.url('update', this.id), { property: 'state', value: 'unlock' });
+    }
+
+    addRole(roleId) {
+      if (_.find(this.roleData, (role) => role.id === roleId) !== undefined) {
+        throw new DomainError('user already has role: ' + roleId);
+      }
+      return this.update(User.url('roles', this.id),
+                         {
+                           expectedVersion: this.version,
+                           roleId:          roleId
+                         });
+    }
+
+    removeRole(roleId) {
+      if (_.find(this.roleData, (role) => role.id === roleId) === undefined) {
+        throw new DomainError('user does not have role: ' + roleId);
+      }
+      return biobankApi.del(User.url('roles', this.id, this.version, roleId))
+        .then(User.asyncCreate);
+    }
+
+    isRegistered() {
+      return (this.state === UserState.REGISTERED);
+    }
+
+    isActive() {
+      return (this.state === UserState.ACTIVE);
+    }
+
+    isLocked() {
+      return (this.state === UserState.LOCKED);
+    }
+
+    hasRoles() {
+      return (this.roleData.length > 0);
+    }
+
+    hasRole(roleSlug) {
+      return _.find(this.roleData, (role) => role.slug === roleSlug) !== undefined;
+    }
+
+    hasAnyRoleOf(/* role1, role2, ..., roleN */) {
+      var slugs = _.map(this.roleData, 'slug');
+      return _.intersection(Array.prototype.slice.call(arguments), slugs).length > 0;
+    }
+
+    hasStudyAdminRole() {
+      return this.hasRole('study-administrator');
+    }
+
+    hasCentreAdminRole() {
+      return this.hasRole('centre-administrator');
+    }
+
+    hasUserAdminRole() {
+      return this.hasRole('user-administrator');
+    }
+
+    hasAdminRole() {
+      return this.hasAnyRoleOf('study-administrator',
+                               'centre-administrator',
+                               'user-administrator');
+    }
+
+    hasSpecimenCollectorRole() {
+      return this.hasRole('specimen-collector');
+    }
+
+
+    hasShippingUserRole() {
+      return this.hasRole('shipping-user');
+    }
+
+    getRoleNames() {
+      return this.roleData.map(role => role.name).join(', ');
+    }
+
   }
-
-  User.prototype = Object.create(ConcurrencySafeEntity.prototype);
-  User.prototype.constructor = User;
-
-  User.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
-    const args = [ 'users' ].concat(_.toArray(arguments));
-    return DomainEntity.url.apply(null, args);
-  };
 
   User.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
     id: 'User',
@@ -101,6 +235,11 @@ function UserFactory($q,
     },
     required: [ 'slug', 'name', 'state', 'email' ]
   });
+
+  User.url = function (/* pathItem1, pathItem2, ... pathItemN */){
+    const args = [ 'users' ].concat(_.toArray(arguments));
+    return DomainEntity.url.apply(null, args);
+  };
 
   /**
    * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.users.User|User}.
@@ -163,8 +302,8 @@ function UserFactory($q,
    *
    * @returns {Promise<domain.users.User>} The user within a promise.
    */
-  User.get = function(slug) {
-    return biobankApi.get(User.url(slug)).then(User.prototype.asyncCreate);
+  User.get = function (slug) {
+    return biobankApi.get(User.url(slug)).then(User.asyncCreate);
   };
 
   /**
@@ -186,7 +325,7 @@ function UserFactory($q,
    * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
    * domain.users.User}.
    */
-  User.list = function(options) {
+  User.list = function (options) {
     var validKeys = [ 'filter',
                       'sort',
                       'page',
@@ -211,141 +350,6 @@ function UserFactory($q,
       return deferred.promise;
     });
   };
-
-  /**
-   * Creates a User from a server reply but first validates that it has a valid schema.
-   *
-   * <i>A wrapper for {@link domain.users.User#asyncCreate}.</i>
-   *
-   * @see {@link domain.ConcurrencySafeEntity#update}
-   */
-  User.prototype.asyncCreate = function (obj) {
-    return User.asyncCreate(obj);
-  };
-
-  User.prototype.register = function (password) {
-    var json = {
-      name:      this.name,
-      email:     this.email,
-      password:  password,
-      avatarUrl: this.avatarUrl
-    };
-    return biobankApi.post(User.url(), json)
-      .then(User.prototype.asyncCreate);
-  };
-
-  User.prototype.updateName = function (name) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this, User.url('name', this.id), { name: name });
-  };
-
-  User.prototype.updateEmail = function (email) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this, User.url('email', this.id), { email: email });
-  };
-
-  User.prototype.updatePassword = function (currentPassword, newPassword) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this, User.url('password', this.id),
-      {
-        currentPassword: currentPassword,
-        newPassword:     newPassword
-      });
-  };
-
-  User.prototype.updateAvatarUrl = function (avatarUrl) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this, User.url('avatarurl', this.id), { avatarUrl: avatarUrl });
-  };
-
-  User.prototype.activate = function () {
-    if (this.state !== UserState.REGISTERED) {
-      throw new DomainError('user state is not registered: ' + this.state);
-    }
-
-    return changeStatus(this, 'activate');
-  };
-
-  User.prototype.lock = function () {
-    if ((this.state !== UserState.REGISTERED) && (this.state !== UserState.ACTIVE))  {
-      throw new DomainError('user state is not registered or active: ' + this.state);
-    }
-
-    return changeStatus(this, 'lock');
-  };
-
-  User.prototype.unlock = function () {
-    if (this.state !== UserState.LOCKED) {
-      throw new DomainError('user state is not locked: ' + this.state);
-    }
-
-    return changeStatus(this, 'unlock');
-  };
-
-  User.prototype.isRegistered = function () {
-    return (this.state === UserState.REGISTERED);
-  };
-
-  User.prototype.isActive = function () {
-    return (this.state === UserState.ACTIVE);
-  };
-
-  User.prototype.isLocked = function () {
-    return (this.state === UserState.LOCKED);
-  };
-
-  User.prototype.hasRoles = function () {
-    return (this.roleData.length > 0);
-  };
-
-  User.prototype.hasRole = function (roleSlug) {
-    return _.find(this.roleData, (role) => role.slug === roleSlug) !== undefined;
-  };
-
-  User.prototype.hasAnyRoleOf = function (/* role1, role2, ..., roleN */) {
-    var slugs = _.map(this.roleData, 'slug');
-    return _.intersection(Array.prototype.slice.call(arguments), slugs).length > 0;
-  };
-
-  User.prototype.hasStudyAdminRole = function () {
-    return this.hasRole('study-administrator');
-  };
-
-  User.prototype.hasCentreAdminRole = function () {
-    return this.hasRole('centre-administrator');
-  };
-
-  User.prototype.hasUserAdminRole = function () {
-    return this.hasRole('user-administrator');
-  };
-
-  User.prototype.hasAdminRole = function () {
-    return this.hasAnyRoleOf('study-administrator',
-                             'centre-administrator',
-                             'user-administrator');
-  };
-
-  User.prototype.hasSpecimenCollectorRole = function () {
-     return this.hasRole('specimen-collector');
-  };
-
-
-  User.prototype.hasShippingUserRole = function () {
-    return this.hasRole('shipping-user');
-  };
-
-  User.prototype.getRoleNames = function () {
-    return this.roleData.map(role => role.name).join(', ');
-  }
-
-  function changeStatus(user, state) {
-    var json = {
-      id:              user.id,
-      expectedVersion: user.version
-    };
-    return biobankApi.post(User.url(state, user.id), json)
-      .then(User.prototype.asyncCreate);
-  }
 
   return User;
 }

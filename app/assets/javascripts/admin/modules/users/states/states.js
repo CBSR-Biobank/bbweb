@@ -27,6 +27,12 @@ function config($stateProvider) {
         'main@': 'userProfile'
       }
     })
+    .state('home.admin.access.users.user.roles', {
+      url: '/roles',
+      views: {
+        'main@': 'userRoles'
+      }
+    })
     .state('home.admin.access.roles', {
       url: '/roles',
       views: {

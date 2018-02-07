@@ -55,7 +55,7 @@ sealed trait AccessItem
     with HasSlug
     with HasOptionalDescription {
 
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   val accessItemType: AccessItemType
 
@@ -225,7 +225,8 @@ final case class Role(id:           AccessItemId,
                       childrenIds:  Set[AccessItemId])
     extends { val accessItemType: AccessItemType = AccessItem.roleAccessItemType }
     with AccessItem {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /** Used to change the name. */
   def addUser(userId: UserId): DomainValidation[Role] = {
@@ -256,7 +257,7 @@ final case class Role(id:           AccessItemId,
 
   /** Used to change the description. */
   def withDescription(description: Option[String]): DomainValidation[Role] = {
-    validateNonEmptyOption(description, InvalidDescription) map { _ =>
+    validateNonEmptyStringOption(description, InvalidDescription) map { _ =>
       copy(description  = description,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
@@ -312,7 +313,8 @@ final case class Role(id:           AccessItemId,
 }
 
 object Role extends AccessItemValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(id:           AccessItemId,
              version:      Long,
@@ -325,7 +327,7 @@ object Role extends AccessItemValidations {
              childrenIds:  Set[AccessItemId]): DomainValidation[Role] = {
     (validateId(id, InvalidAccessItemId) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        userIds.map(validateId(_, InvalidUserId)).toList.sequenceU |@|
        parentIds.map(validateId(_, InvalidAccessItemId)).toList.sequenceU |@|
        childrenIds.map(validateId(_, InvalidAccessItemId)).toList.sequenceU) { case _ =>
@@ -389,7 +391,8 @@ final case class Permission(id:           AccessItemId,
 }
 
 object Permission extends AccessItemValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(id:           AccessItemId,
              name:         String,
@@ -398,7 +401,7 @@ object Permission extends AccessItemValidations {
              childrenIds:  Set[AccessItemId]): DomainValidation[Permission] =
     (validateId(id, InvalidAccessItemId) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        parentIds.map(validateId(_, InvalidAccessItemId)).toList.sequenceU |@|
        childrenIds.map(validateId(_, InvalidAccessItemId)).toList.sequenceU) { case _ =>
         Permission(id           = id,

@@ -15,6 +15,7 @@ import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 object UsersProcessor {
+  import org.biobank.ValidationKey
 
   def props: Props = Props[UsersProcessor]
 
@@ -23,6 +24,8 @@ object UsersProcessor {
   final case class PasswordInfo(password: String, salt: String)
 
   implicit val snapshotStateFormat: Format[SnapshotState] = Json.format[SnapshotState]
+
+  case object InvalidNewPassword extends ValidationKey
 
 }
 
@@ -204,15 +207,16 @@ class UsersProcessor @Inject() (val config:         Configuration,
   private def updatePasswordCmdToEvent(cmd:  UpdateUserPasswordCmd,
                                        user: ActiveUser): ServiceValidation[UserEvent] = {
     if (passwordHasher.valid(user.password, user.salt, cmd.currentPassword)) {
-      val passwordInfo = encryptPassword(cmd.newPassword)
-      user.withPassword(passwordInfo.password, passwordInfo.salt).map { user =>
-        UserEvent(user.id.id).update(
-          _.time                                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-          _.whenActive.sessionUserId            := cmd.sessionUserId,
-          _.whenActive.version                  := cmd.expectedVersion,
-          _.whenActive.passwordUpdated.password := passwordInfo.password,
-          _.whenActive.passwordUpdated.salt     := passwordInfo.salt)
-      }
+      for {
+        validNewPassword <- validateNonEmptyString(cmd.newPassword, InvalidNewPassword)
+        passwordInfo     <- encryptPassword(cmd.newPassword).successNel[String]
+        updated          <- user.withPassword(passwordInfo.password, passwordInfo.salt)
+      } yield UserEvent(user.id.id).update(
+        _.time                                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+        _.whenActive.sessionUserId            := cmd.sessionUserId,
+        _.whenActive.version                  := cmd.expectedVersion,
+        _.whenActive.passwordUpdated.password := passwordInfo.password,
+        _.whenActive.passwordUpdated.salt     := passwordInfo.salt)
     } else {
       InvalidPassword.failureNel[UserEvent]
     }
@@ -260,7 +264,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
     val v = user match {
         case au: ActiveUser => au.lock
         case ru: RegisteredUser => ru.lock
-        case _ => ServiceError(s"user not registered or active: ${user.id.id}").failureNel[LockedUser]
+        case _ => InvalidStatus(s"user not registered or active: ${user.id.id}").failureNel[LockedUser]
       }
 
     v.map { _ =>
@@ -494,7 +498,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       val v = user match {
           case au: ActiveUser => au.lock
           case ru: RegisteredUser => ru.lock
-          case _ => ServiceError(s"user not registered or active: $event").failureNel[LockedUser]
+          case _ => InvalidStatus(s"user not registered or active: $event").failureNel[LockedUser]
         }
       v.foreach(u => userRepository.put(u.copy(timeModified = Some(eventTime))))
       v.map(_ => true)

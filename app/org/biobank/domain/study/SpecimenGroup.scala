@@ -100,7 +100,8 @@ trait SpecimenGroupValidations {
   * Factory object used to create a [[SpecimenGroup]].
   */
 object SpecimenGroup extends SpecimenGroupValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /**
     * The factory method to create a specimen group. Note that it increments the version number
@@ -125,9 +126,9 @@ object SpecimenGroup extends SpecimenGroupValidations {
     (validateId(studyId) |@|
        validateId(id) |@|
        validateVersion(version) |@|
-       validateString(name, NameRequired) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
-       validateString(units, UnitsRequired)) { case _ =>
+       validateNonEmptyString(name, NameRequired) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
+       validateNonEmptyString(units, UnitsRequired)) { case _ =>
         SpecimenGroup(studyId                     = studyId,
                       id                          = id,
                       version                     = version,

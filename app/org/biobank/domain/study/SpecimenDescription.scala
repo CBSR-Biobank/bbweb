@@ -82,7 +82,8 @@ trait SpecimenDescription
 }
 
 trait SpecimenSpecValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   case object UnitsRequired extends ValidationKey
 
@@ -105,7 +106,7 @@ trait SpecimenSpecValidations {
                units:       String)
       : DomainValidation[Boolean] =  {
     (validateString(name, NameRequired) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        validateString(units, UnitsRequired)) {
       case _ => true
     }
@@ -132,7 +133,7 @@ final case class CollectionSpecimenDescription(id:                          Spec
     extends SpecimenDescription
 
 object CollectionSpecimenDescription extends SpecimenSpecValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
 
   implicit val collectionSpecimenSpecWrites: Format[CollectionSpecimenDescription] =
     Json.format[CollectionSpecimenDescription]

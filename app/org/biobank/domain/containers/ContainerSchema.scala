@@ -27,7 +27,8 @@ final case class ContainerSchema(id:           ContainerSchemaId,
     with HasUniqueName
     with HasOptionalDescription
     with ContainerSchemaValidations {
-  import CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /** Used to change the name. */
   def withName(name: String): DomainValidation[ContainerSchema] = {
@@ -38,9 +39,9 @@ final case class ContainerSchema(id:           ContainerSchemaId,
 
   /** Used to change the description. */
   def withDescription(description: Option[String]): DomainValidation[ContainerSchema] = {
-    validateNonEmptyOption(description, InvalidDescription) map (_ =>
+    validateNonEmptyStringOption(description, InvalidDescription) map { _ =>
       copy(version = version + 1, description  = description)
-    )
+    }
   }
 
   def withShared(shared: Boolean): DomainValidation[ContainerSchema] = {
@@ -53,7 +54,8 @@ final case class ContainerSchema(id:           ContainerSchemaId,
   * Factory object used to create a container schema.
   */
 object ContainerSchema extends ContainerSchemaValidations {
-  import CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /**
     * The factory method to create a container schema.
@@ -69,7 +71,7 @@ object ContainerSchema extends ContainerSchemaValidations {
     (validateId(id) |@|
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription)) { case _ =>
+       validateNonEmptyStringOption(description, InvalidDescription)) { case _ =>
         ContainerSchema(id           = id,
                         version      = version,
                         timeAdded    = OffsetDateTime.now,

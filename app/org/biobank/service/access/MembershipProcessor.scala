@@ -36,6 +36,7 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
     extends Processor {
 
   import MembershipProcessor._
+  import org.biobank.CommonValidations._
 
   override val log: LoggingAdapter = Logging(context.system, this)
 
@@ -189,7 +190,7 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
       : ServiceValidation[MembershipEvent] = {
     val userId = UserId(cmd.userId)
     if (membership.userIds.exists(_ == userId)) {
-      ServiceError(s"user ID is already in membership: ${userId}").failureNel[MembershipEvent]
+      EntityCriteriaError(s"user ID is already in membership: ${userId}").failureNel[MembershipEvent]
     } else {
       MembershipEvent(cmd.sessionUserId).update(
         _.time              := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
@@ -252,7 +253,7 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
       : ServiceValidation[MembershipEvent] = {
     val userId = UserId(cmd.userId)
     if (!membership.userIds.exists(_ == userId)) {
-      ServiceError(s"user ID is not in membership: ${userId}").failureNel[MembershipEvent]
+      EntityCriteriaError(s"user ID is not in membership: ${userId}").failureNel[MembershipEvent]
     } else {
       MembershipEvent(cmd.sessionUserId).update(
         _.time                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),

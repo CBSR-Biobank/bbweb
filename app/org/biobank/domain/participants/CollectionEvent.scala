@@ -48,7 +48,7 @@ final case class CollectionEvent(id:                    CollectionEventId,
     with CollectionEventValidations
     with HasSlug
     with HasAnnotations[CollectionEvent] {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
 
   def withVisitNumber(visitNumber: Int): DomainValidation[CollectionEvent] = {
     validateMinimum(visitNumber, 1, VisitNumberInvalid).map { _ =>
@@ -99,7 +99,8 @@ final case class CollectionEvent(id:                    CollectionEventId,
 
 object CollectionEvent
     extends CollectionEventValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(id:                    CollectionEventId,
              participantId:         ParticipantId,

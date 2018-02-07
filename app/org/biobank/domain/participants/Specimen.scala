@@ -180,11 +180,11 @@ final case class UsableSpecimen(id:                    SpecimenId,
     with ParticipantValidations
     with StudyValidations {
 
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.domain.DomainValidations._
   import org.biobank.CommonValidations._
 
   def withInventoryId(inventoryId: String): DomainValidation[Specimen] = {
-    validateString(inventoryId, InventoryIdInvalid).map { s =>
+    validateNonEmptyString(inventoryId, InventoryIdInvalid).map { s =>
       copy(slug         = Slug(inventoryId),
            inventoryId  = inventoryId,
            version      = version + 1,
@@ -253,7 +253,7 @@ object UsableSpecimen
     with StudyValidations {
 
   import org.biobank.CommonValidations._
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(id:                    SpecimenId,
              inventoryId:           String,
@@ -302,13 +302,13 @@ object UsableSpecimen
                amount:                BigDecimal)
       : DomainValidation[Boolean] = {
     (validateId(id) |@|
-       validateString(inventoryId, InventoryIdInvalid) |@|
+       validateNonEmptyString(inventoryId, InventoryIdInvalid) |@|
        validateId(specimenDescriptionId, SpecimenDescriptionIdInvalid) |@|
        validateVersion(version) |@|
-       validateString(originLocationId.id, OriginLocationIdInvalid) |@|
-       validateString(locationId.id, LocationIdInvalid) |@|
-       validateId(containerId, ContainerIdInvalid) |@|
-       validateId(positionId, PositionInvalid) |@|
+       validateNonEmptyString(originLocationId.id, OriginLocationIdInvalid) |@|
+       validateNonEmptyString(locationId.id, LocationIdInvalid) |@|
+       validateIdOption(containerId, ContainerIdInvalid) |@|
+       validateIdOption(positionId, PositionInvalid) |@|
        validatePositiveNumber(amount, AmountInvalid)) {
       case _ => true
     }

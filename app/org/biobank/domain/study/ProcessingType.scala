@@ -57,7 +57,8 @@ final case class ProcessingType(studyId:      StudyId,
 }
 
 object ProcessingType {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def create(studyId:     StudyId,
              id:          ProcessingTypeId,
@@ -70,7 +71,7 @@ object ProcessingType {
        validateId(id) |@|
        validateVersion(version) |@|
        validateString(name, NameRequired) |@|
-       validateNonEmptyOption(description, InvalidDescription) ) { case _ =>
+       validateNonEmptyStringOption(description, InvalidDescription)) { case _ =>
         ProcessingType(studyId      = studyId,
                        id           = id,
                        version      = version,

@@ -9,6 +9,7 @@ import play.api.routing.sird._
 
 class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
   import UsersRouting._
+  import org.biobank.controllers.access.AccessItemRouting._
 
   override def routes: Routes = {
 
@@ -33,26 +34,11 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
     case GET(p"/$slug") =>
       controller.getBySlug(slug)
 
-    case POST(p"/name/${userId(id)}") =>
-      controller.updateName(id)
+    case POST(p"/update/${userId(id)}") =>
+      controller.update(id)
 
-    case POST(p"/email/${userId(id)}") =>
-      controller.updateEmail(id)
-
-    case POST(p"/password/${userId(id)}") =>
-      controller.updatePassword(id)
-
-    case POST(p"/avatarurl/${userId(id)}") =>
-      controller.updateAvatarUrl(id)
-
-    case POST(p"/activate/${userId(id)}") =>
-      controller.activateUser(id)
-
-    case POST(p"/lock/${userId(id)}") =>
-      controller.lockUser(id)
-
-    case POST(p"/unlock/${userId(id)}") =>
-      controller.unlockUser(id)
+    case POST(p"/roles/${userId(id)}") =>
+      controller.addRole(id)
 
     case POST(p"/login") =>
       controller.login
@@ -68,6 +54,9 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
 
     case POST(p"/") =>
       controller.registerUser
+
+    case DELETE(p"/roles/${userId(uId)}/${long(ver)}/${accessItemId(rId)}") =>
+      controller.removeRole(uId, ver, rId)
 
   }
 }

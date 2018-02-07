@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import ngModule from '../../index'
 
-describe('User', function() {
+fdescribe('User', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -24,59 +24,41 @@ describe('User', function() {
         expect(entity).toEqual(jasmine.any(this.User));
       };
 
-      this.statusChangeShared = (jsonObj, user, statusChangePath, userMethod) => {
-        var json = { id: user.id, expectedVersion: user.version };
-
-        this.$httpBackend.expectPOST(this.url(statusChangePath, user.id), json)
-          .respond(this.reply(jsonObj));
-
-        user[userMethod]().then((replyUser) => {
-          expect(replyUser).toEqual(jasmine.any(this.User));
-        });
-        this.$httpBackend.flush();
-      };
-
-      this.url = url;
-
-      //---
-
-      function url() {
-        const args = [ 'users' ].concat(_.toArray(arguments));
-        return EntityTestSuiteMixin.url.apply(null, args);
-      }
+      this.url = (...paths) => EntityTestSuiteMixin.url.apply(null, [ 'users' ].concat(paths))
     });
   });
 
   it('creating a user with no parameters has default values', function() {
-    var user = new this.User();
+    const user = new this.User();
     expect(user.id).toBeNull();
     expect(user.version).toBe(0);
     expect(user.timeAdded).toBeNull();
     expect(user.timeModified).toBeNull();
-    expect(user.name).toBeEmptyString();
-    expect(user.email).toBeEmptyString();
-    expect(user.state).toBe(this.UserState.REGISTERED);
+    expect(user.name).toBeUndefined();
+    expect(user.email).toBeUndefined();
+    expect(user.state).toBeUndefined();
   });
 
   it('creating a user with an object does not modify object', function() {
-    var obj = null, user = new this.User(obj);
+    const obj = null,
+          user = new this.User(obj);
     expect(user).toBeObject();
     expect(obj).toBeNull();
   });
 
   it('fails when creating from object with a non object', function() {
-    var nonObj = 1;
+    const nonObj = 1;
     expect(() => {
       this.User.create(nonObj);
     }).toThrowError(/Invalid type/);
   });
 
   it('fails when creating from object with missing required keys', function() {
-    var obj = this.Factory.user(),
-        requiredKeys = ['id', 'name', 'email', 'state'];
+    const obj = this.Factory.user(),
+          requiredKeys = ['id', 'name', 'email', 'state'];
 
     requiredKeys.forEach((key) => {
-      var badObj = _.omit(obj, key);
+      const badObj = _.omit(obj, key);
 
       expect(() => {
         this.User.create(badObj);
@@ -87,10 +69,10 @@ describe('User', function() {
   describe('when listing multiple users', function() {
 
     it('can list using when filtering by name only', function() {
-      var filter = 'name::test',
-          url = this.url('search') + '?filter=' + filter,
-          jsonUser = this.Factory.user(),
-          reply = this.Factory.pagedResult([ jsonUser ]);
+      const filter = 'name::test',
+            url = this.url('search') + '?filter=' + filter,
+            rawUser = this.Factory.user(),
+            reply = this.Factory.pagedResult([ rawUser ]);
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
@@ -102,10 +84,10 @@ describe('User', function() {
     });
 
     it('can list when using filtering by email only', function() {
-      var filter = 'email::test',
-          url = this.url('search') + '?filter=' + filter,
-          jsonUser = this.Factory.user(),
-          reply = this.Factory.pagedResult([ jsonUser ]);
+      const filter = 'email::test',
+            url = this.url('search') + '?filter=' + filter,
+            rawUser = this.Factory.user(),
+            reply = this.Factory.pagedResult([ rawUser ]);
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
@@ -117,10 +99,10 @@ describe('User', function() {
     });
 
     it('can list using sort parameter only', function() {
-      var sort = 'name',
-          url = this.url('search') + '?sort=' + sort,
-          jsonUser = this.Factory.user(),
-          reply = this.Factory.pagedResult([ jsonUser ]);
+      const sort = 'name',
+            url = this.url('search') + '?sort=' + sort,
+            rawUser = this.Factory.user(),
+            reply = this.Factory.pagedResult([ rawUser ]);
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
@@ -132,11 +114,11 @@ describe('User', function() {
     });
 
     it('should query for multiple users', function() {
-      var filter   = 'email::test',
-          sort     = '-email',
-          url      = this.url('search') + `?filter=${filter}&sort=${sort}`,
-          jsonUser = this.Factory.user(),
-          reply    = this.Factory.pagedResult([ jsonUser ]);
+      const filter   = 'email::test',
+            sort     = '-email',
+            url      = this.url('search') + `?filter=${filter}&sort=${sort}`,
+            rawUser = this.Factory.user(),
+            reply    = this.Factory.pagedResult([ rawUser ]);
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
@@ -148,7 +130,7 @@ describe('User', function() {
     });
 
     it('should handle an invalid response', function() {
-      var reply = this.Factory.pagedResult([ { 'a': 1 } ]);
+      const reply = this.Factory.pagedResult([ { 'a': 1 } ]);
 
       this.$httpBackend.whenGET(this.url('search')).respond(this.reply(reply));
 
@@ -167,7 +149,7 @@ describe('User', function() {
   });
 
   it('can retrieve a single user', function() {
-    var user = this.Factory.user();
+    const user = this.Factory.user();
 
     this.$httpBackend.whenGET(this.url(user.slug)).respond(this.reply(user));
     this.User.get(user.slug).then((reply) => {
@@ -177,10 +159,10 @@ describe('User', function() {
   });
 
   it('can register a user', function() {
-    var password   = this.Factory.stringNext(),
-        serverUser = this.Factory.user(),
-        user       = new this.User(_.omit(serverUser, 'id')),
-        cmd        = registerCommand(user, password);
+    const password   = this.Factory.stringNext(),
+          serverUser = this.Factory.user(),
+          user       = new this.User(_.omit(serverUser, 'id')),
+          cmd        = registerCommand(user, password);
 
     this.$httpBackend.expectPOST(this.url(), cmd).respond(this.reply(serverUser));
 
@@ -191,137 +173,186 @@ describe('User', function() {
   });
 
   it('can update a users name', function() {
-    var jsonUser = this.Factory.user(),
-        user = new this.User(jsonUser);
+    const rawUser = this.Factory.user(),
+          user = this.User.create(rawUser);
 
-    this.updateEntity.call(this,
-                           user,
-                           'updateName',
-                           user.name,
-                           this.url('name', user.id),
-                           { name: user.name },
-                           jsonUser,
-                           this.expectUser,
-                           failTest);
+    this.updateEntity(user,
+                      'updateName',
+                      user.name,
+                      this.url('update', user.id),
+                      { property: 'name', value: user.name },
+                      rawUser,
+                      this.expectUser.bind(this),
+                      failTest.bind(this));
   });
 
   it('can update a users email', function() {
-    var jsonUser = this.Factory.user(),
-        user = new this.User(jsonUser);
+    const rawUser = this.Factory.user(),
+          user = this.User.create(rawUser);
 
-    this.updateEntity.call(this,
-                           user,
-                           'updateEmail',
-                           user.email,
-                           this.url('email', user.id),
-                           { email: user.email },
-                           jsonUser,
-                           this.expectUser,
-                           failTest);
+    this.updateEntity(user,
+                      'updateEmail',
+                      user.email,
+                      this.url('update', user.id),
+                      { property: 'email', value: user.email },
+                      rawUser,
+                      this.expectUser.bind(this),
+                      failTest.bind(this));
   });
 
   it('can update a users avatar url', function() {
-    var newAvatarUrl = this.Factory.stringNext(),
-        jsonUser = this.Factory.user({ avatarUrl: newAvatarUrl }),
-        user = new this.User(jsonUser);
+    const newAvatarUrl = this.Factory.stringNext(),
+          rawUser = this.Factory.user({ avatarUrl: newAvatarUrl }),
+          user = this.User.create(rawUser);
 
-    this.updateEntity.call(this,
-                           user,
-                           'updateAvatarUrl',
-                           user.avatarUrl,
-                           this.url('avatarurl', user.id),
-                           { avatarUrl: user.avatarUrl },
-                           jsonUser,
-                           this.expectUser,
-                           failTest);
+    this.updateEntity(user,
+                      'updateAvatarUrl',
+                      user.avatarUrl,
+                      this.url('update', user.id),
+                      { property: 'avatarUrl', value: user.avatarUrl },
+                      rawUser,
+                      this.expectUser.bind(this),
+                      failTest.bind(this));
   });
 
   it('can update a users password', function() {
-    var currentPassword = this.Factory.stringNext(),
-        newPassword = this.Factory.stringNext(),
-        jsonUser = this.Factory.user(),
-        user = new this.User(jsonUser);
+    const currentPassword = this.Factory.stringNext(),
+          newPassword = this.Factory.stringNext(),
+          rawUser = this.Factory.user(),
+          user = this.User.create(rawUser);
 
-    this.updateEntity.call(this,
-                           user,
-                           'updatePassword',
-                           [ currentPassword, newPassword ],
-                           this.url('password', user.id),
-                           {
-                             currentPassword: currentPassword,
-                             newPassword:     newPassword
-                           },
-                           jsonUser,
-                           this.expectUser,
-                           failTest);
+    this.updateEntity(user,
+                      'updatePassword',
+                      [ currentPassword, newPassword ],
+                      this.url('update', user.id),
+                      {
+                        property: 'password',
+                        value: {
+                          currentPassword: currentPassword,
+                          newPassword:     newPassword
+                        }
+                      },
+                      rawUser,
+                      this.expectUser.bind(this),
+                      failTest.bind(this));
   });
 
-  it('can activate a registered user', function() {
-    var jsonObj = this.Factory.user(),
-        user = this.User.create(jsonObj);
-    this.statusChangeShared(jsonObj, user, 'activate', 'activate', this.UserState.ACTIVE);
-  });
+  it('can change a user`s state', function() {
+    const stateData = [
+      { initialState: this.UserState.REGISTERED, action: 'activate' },
+      { initialState: this.UserState.ACTIVE,     action: 'lock' },
+      { initialState: this.UserState.LOCKED,     action: 'unlock' }
+    ];
 
-  it('can lock an active user', function() {
-    var jsonObj = _.extend(this.Factory.user(), { state: this.UserState.ACTIVE }),
-        user = new this.User(jsonObj);
-    this.statusChangeShared(jsonObj, user, 'lock', 'lock', this.UserState.LOCKED);
-  });
+    stateData.forEach(stateInfo => {
+      const rawUser = this.Factory.user({ state: stateInfo.initialState }),
+            user = this.User.create(rawUser);
 
-  it('can lock an REGISTERED user', function() {
-    var jsonObj = _.extend(this.Factory.user(), { state: this.UserState.REGISTERED }),
-        user = new this.User(jsonObj);
-    this.statusChangeShared(jsonObj, user, 'lock', 'lock', this.UserState.LOCKED);
-  });
-
-  it('can unlock a locked user', function() {
-    var jsonObj = _.extend(this.Factory.user(), { state: this.UserState.LOCKED }),
-        user = new this.User(jsonObj);
-    this.statusChangeShared(jsonObj, user, 'unlock', 'unlock', this.UserState.ACTIVE);
+      this.updateEntity(user,
+                        stateInfo.action,
+                        null,
+                        this.url('update', user.id),
+                        { property: 'state', value: stateInfo.action },
+                        rawUser,
+                        this.expectUser.bind(this),
+                        failTest.bind(this));
+    });
   });
 
   it('fails when calling activate and the user is not registered', function() {
-    var statuses = [ this.UserState.ACTIVE, this.UserState.LOCKED ];
+    const stateData = [
+      {
+        action: 'activate',
+        initialStates: [ this.UserState.ACTIVE, this.UserState.LOCKED ]
+      },
+      {
+        action: 'lock',
+        initialStates: [ this.UserState.LOCKED ]
+      },
+      {
+        action: 'unlock',
+        initialStates: [ this.UserState.REGISTERED, this.UserState.ACTIVE ]
+      }
+    ];
 
-    statuses.forEach((state) => {
-      var user = new this.User(_.extend(this.Factory.user(), { state: state }));
+    stateData.forEach((stateInfo) => {
+      stateInfo.initialStates.forEach(initialState => {
+        const user = this.User.create(this.Factory.user({ state: initialState }));
 
-      expect(() => { user.activate(); })
-        .toThrow(new Error('user state is not registered: ' + state));
-    });
-  });
-
-  it('fails when calling lock and the user is LOCKED', function() {
-    var statuses = [ this.UserState.LOCKED ];
-
-    statuses.forEach((state) => {
-      var user = new this.User(_.extend(this.Factory.user(), { state: state }));
-
-      expect(() => { user.lock(); })
-        .toThrowError(/user state is not registered or active/);
-    });
-  });
-
-  it('fails when calling unlock and the user is not locked', function() {
-    var statuses = [ this.UserState.REGISTERED, this.UserState.ACTIVE ];
-
-    statuses.forEach((state) => {
-      var user = new this.User(_.extend(this.Factory.user(), { state: state }));
-
-      expect(() => { user.unlock(); })
-        .toThrow(new Error('user state is not locked: ' + state));
+        expect(() => { user[stateInfo.action](); })
+          .toThrowError(/user state is not/);
+      });
     });
   });
 
   it('state predicates are valid valid', function() {
     _.values(this.UserState).forEach((state) => {
-      var jsonUser = this.Factory.user({ state: state }),
-          user     = new this.User(jsonUser);
+      const rawUser = this.Factory.user({ state: state }),
+            user     = new this.User(rawUser);
 
       expect(user.isRegistered()).toBe(state === this.UserState.REGISTERED);
       expect(user.isActive()).toBe(state === this.UserState.ACTIVE);
       expect(user.isLocked()).toBe(state === this.UserState.LOCKED);
     });
+  });
+
+  describe('when adding a role', function() {
+
+    it('uses correct URL when adding a role', function() {
+      const rawUser = this.Factory.user(),
+            rawRole  = this.Factory.role(),
+            user     = new this.User(rawUser),
+            reqJson = {
+              expectedVersion: user.version,
+              roleId:          rawRole.id
+            };
+
+      this.$httpBackend.expectPOST(this.url('roles', user.id), reqJson)
+        .respond(this.reply(rawUser));
+
+      user.addRole(rawRole.id).then((reply) => {
+        expect(reply).toEqual(jasmine.any(this.User));
+      });
+      this.$httpBackend.flush();
+
+    });
+
+    it('throws an error when removing a role the user does not have', function() {
+      const rawRoleNameDto  = this.Factory.roleNameDto(),
+            rawUser = this.Factory.user({ roleData: [ rawRoleNameDto ]}),
+            user     = new this.User(rawUser);
+
+      expect(() => {
+        user.addRole(rawRoleNameDto.id).then(this.expectUser.bind(this));
+      }).toThrowError(/user already has role/);
+    })
+
+  })
+
+  describe('when removing a role', function() {
+
+    it('uses correct URL when adding a role', function() {
+      const rawRoleNameDto  = this.Factory.roleNameDto(),
+            rawUser = this.Factory.user({ roleData: [ rawRoleNameDto ]}),
+            user     = new this.User(rawUser);
+
+      this.$httpBackend.expectDELETE(this.url('roles', user.id, user.version, rawRoleNameDto.id))
+        .respond(this.reply(rawUser));
+
+      user.removeRole(rawRoleNameDto.id).then(this.expectUser.bind(this));
+      this.$httpBackend.flush();
+    });
+
+    it('throws an error when removing a role the user does not have', function() {
+      const rawRoleNameDto  = this.Factory.roleNameDto(),
+            rawUser = this.Factory.user(),
+            user     = new this.User(rawUser);
+
+      expect(() => {
+        user.removeRole(rawRoleNameDto.id).then(this.expectUser.bind(this));
+      }).toThrowError(/user does not have role/);
+    })
+
   });
 
   function registerCommand(user, password) {

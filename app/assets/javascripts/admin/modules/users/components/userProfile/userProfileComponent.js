@@ -176,7 +176,7 @@ function UserProfileController($state,
   }
 
   function updateRoles() {
-    $state.go('home.admin.access.user.roles');
+    $state.go('home.admin.access.users.user.roles');
   }
 
   function updateStudyMemberships() {

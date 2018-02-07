@@ -48,8 +48,6 @@ trait ShipmentsService extends BbwebService {
    *
    * @param filter the string representation of the filter expression to use to filter the shipment specimens
    *               in the shipment.
-   *
-   * @param sort the string representation of the sort expression to use when sorting the shipment specimens.
    */
   def getShipmentSpecimens(requestUserId: UserId,
                            shipmentId:    ShipmentId,

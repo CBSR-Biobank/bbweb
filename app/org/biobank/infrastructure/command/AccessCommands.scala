@@ -16,14 +16,6 @@ object AccessCommands {
     val expectedVersion: Long
   }
 
-  final case class AddUserToRoleCmd(sessionUserId:   String,
-                                    userId:          String,
-                                    roleId:          String,
-                                    expectedVersion: Long)
-      extends RoleModifyCommand
-
-  // ROLES
-
   trait RoleCommand extends AccessCommand
 
   final case class AddRoleCmd(sessionUserId: String,
@@ -52,28 +44,28 @@ object AccessCommands {
                                   userId:          String)
       extends RoleModifyCommand
 
-  final case class RoleAddParentCmd(sessionUserId:   String,
-                                    expectedVersion: Long,
-                                    roleId:          String,
-                                    parentRoleId:    String)
-      extends RoleModifyCommand
-
-  final case class RoleAddChildCmd(sessionUserId:   String,
-                                   expectedVersion: Long,
-                                   roleId:          String,
-                                   childRoleId:     String)
-      extends RoleModifyCommand
-
   final case class RoleRemoveUserCmd(sessionUserId:   String,
                                      expectedVersion: Long,
                                      roleId:          String,
                                      userId:          String)
       extends RoleModifyCommand
 
+  final case class RoleAddParentCmd(sessionUserId:   String,
+                                    expectedVersion: Long,
+                                    roleId:          String,
+                                    parentRoleId:    String)
+      extends RoleModifyCommand
+
   final case class RoleRemoveParentCmd(sessionUserId:   String,
                                        expectedVersion: Long,
                                        roleId:          String,
                                        parentRoleId:    String)
+      extends RoleModifyCommand
+
+  final case class RoleAddChildCmd(sessionUserId:   String,
+                                   expectedVersion: Long,
+                                   roleId:          String,
+                                   childRoleId:     String)
       extends RoleModifyCommand
 
   final case class RoleRemoveChildCmd(sessionUserId:   String,
@@ -86,9 +78,6 @@ object AccessCommands {
                                  expectedVersion: Long,
                                  roleId:          String)
       extends RoleModifyCommand
-
-  implicit val adduserToRoleCmdReads: Reads[AddUserToRoleCmd] =
-    Json.reads[AddUserToRoleCmd]
 
   implicit val addRoleCmdReads: Reads[AddRoleCmd] = Json.reads[AddRoleCmd]
 

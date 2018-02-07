@@ -5,7 +5,6 @@ import org.biobank.ValidationKey
 import org.biobank.domain._
 import org.biobank.infrastructure.EnumUtils._
 import play.api.libs.json._
-import scala.util.matching.Regex
 import scalaz.Scalaz._
 
 /**
@@ -140,37 +139,10 @@ object User {
 trait UserValidations {
   val NameMinLength: Long = 2L
 
-  case object PasswordRequired extends ValidationKey
-
   case object SaltRequired extends ValidationKey
 
   case object InvalidName extends ValidationKey
 
-  case object InvalidEmail extends ValidationKey
-
-  case object InvalidUrl extends ValidationKey
-
-  val emailRegex: Regex =
-    "[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?".r
-
-  val urlRegex: Regex =
-    "^((https?|ftp)://|(www|ftp)\\.)[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$".r
-
-  def validateEmail(email: String): DomainValidation[String] = {
-    emailRegex.findFirstIn(email).fold { InvalidEmail.failureNel[String] } { e => email.successNel }
-  }
-
-  def validateAvatarUrl(urlOption: Option[String]): DomainValidation[Option[String]] = {
-    urlOption.fold {
-      none[String].successNel[String]
-    } { url  =>
-      urlRegex.findFirstIn(url).fold {
-        InvalidUrl.failureNel[Option[String]]
-      } { e =>
-        some(url).successNel[String]
-      }
-    }
-  }
 }
 
 
@@ -225,7 +197,8 @@ final case class RegisteredUser(id:           UserId,
 
 /** Factory object. */
 object RegisteredUser extends UserValidations {
-  import CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /** Creates a registered user. */
   def create(id:        UserId,
@@ -238,11 +211,13 @@ object RegisteredUser extends UserValidations {
 
     (validateId(id) |@|
        validateVersion(version) |@|
-       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyString(name, InvalidName) |@|
+       validateName(name) |@|
        validateEmail(email) |@|
-       validateString(password, PasswordRequired) |@|
-       validateString(salt, SaltRequired) |@|
-       validateAvatarUrl(avatarUrl)) { case _ =>
+       validateNonEmptyString(password, PasswordRequired) |@|
+       validateNonEmptyString(salt, SaltRequired) |@|
+       validateNonEmptyStringOption(avatarUrl, InvalidUrl) |@|
+       validateUrl(avatarUrl.getOrElse(""))) { case _ =>
         RegisteredUser(id           = id,
                        version      = version,
                        timeAdded    = OffsetDateTime.now,
@@ -272,13 +247,16 @@ final case class ActiveUser(id:           UserId,
     extends { val state: EntityState = new EntityState("active") }
     with User
     with UserValidations {
-  import CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   def withName(name: String): DomainValidation[ActiveUser] = {
-    validateString(name, NameMinLength, InvalidName).map( _ =>
-      copy(name         = name,
-           version      = version + 1,
-           timeModified = Some(OffsetDateTime.now)))
+    (validateNonEmptyString(name) |@|
+       validateName(name)) { case _ =>
+        copy(name         = name,
+             version      = version + 1,
+             timeModified = Some(OffsetDateTime.now))
+    }
   }
 
   def withEmail(email: String): DomainValidation[ActiveUser] = {
@@ -289,17 +267,23 @@ final case class ActiveUser(id:           UserId,
   }
 
   def withPassword(password: String, salt: String): DomainValidation[ActiveUser] = {
-    validateString(password, PasswordRequired).map(_ =>
-      copy(password     = password,
-           salt         = salt,
-           version      = version + 1,
-           timeModified = Some(OffsetDateTime.now)))
+    (validateNonEmptyString(password, PasswordRequired) |@|
+       validateNonEmptyString(salt, SaltRequired)) { case _ =>
+        copy(password     = password,
+             salt         = salt,
+             version      = version + 1,
+             timeModified = Some(OffsetDateTime.now))
+    }
   }
 
   def withAvatarUrl(avatarUrl: Option[String]): DomainValidation[ActiveUser] = {
-    validateAvatarUrl(avatarUrl).map(_ =>
-      copy(avatarUrl = avatarUrl,
-           version = version + 1,
+    val validAvatarUrl = avatarUrl match {
+        case Some(url) => validateUrl(url)
+        case None      => "valid".successNel[String]
+      }
+    validAvatarUrl.map(_ =>
+      copy(avatarUrl    = avatarUrl,
+           version      = version + 1,
            timeModified = Some(OffsetDateTime.now)))
   }
 

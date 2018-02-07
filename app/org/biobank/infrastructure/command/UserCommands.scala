@@ -44,6 +44,18 @@ object UserCommands {
                                           avatarUrl:       Option[String])
       extends UserModifyCommand
 
+  final case class UpdateUserAddRoleCmd(sessionUserId:   String,
+                                        id:              String,
+                                        expectedVersion: Long,
+                                        roleId:          String)
+      extends UserModifyCommand
+
+  final case class UpdateUserRemoveRoleCmd(sessionUserId:   String,
+                                           id:              String,
+                                           expectedVersion: Long,
+                                           roleId:          String)
+      extends UserModifyCommand
+
   final case class ActivateUserCmd(sessionUserId:   String,
                                    id:              String,
                                    expectedVersion: Long)
@@ -65,30 +77,14 @@ object UserCommands {
   implicit val registerUserCmdReads: Reads[RegisterUserCmd] =
     Json.reads[RegisterUserCmd]
 
-  implicit val updateUserNameCmdReads: Reads[UpdateUserNameCmd] =
-    Json.reads[UpdateUserNameCmd]
-
-  implicit val updateUserEmailCmdReads: Reads[UpdateUserEmailCmd] =
-    Json.reads[UpdateUserEmailCmd]
-
-  implicit val updateUserPasswordCmdReads: Reads[UpdateUserPasswordCmd] =
-    Json.reads[UpdateUserPasswordCmd]
-
-  implicit val updateUserAvatarUrlCmdReads: Reads[UpdateUserAvatarUrlCmd] =
-    Json.reads[UpdateUserAvatarUrlCmd]
-
-  implicit val activateUserCmdReads: Reads[ActivateUserCmd] =
-    Json.reads[ActivateUserCmd]
-
-  implicit val lockUserCmdReads: Reads[LockUserCmd] =
-    Json.reads[LockUserCmd]
-
-  implicit val unlockUserCmdReads: Reads[UnlockUserCmd] =
-    Json.reads[UnlockUserCmd]
-
-
   implicit val resetUserPasswordCmdReads: Reads[ResetUserPasswordCmd] = (
     (__ \ "email").read[String](minLength[String](5))
   ).map { ResetUserPasswordCmd(_) }
+
+  implicit val updateUserAddRoleCmdReads: Reads[UpdateUserAddRoleCmd] =
+    Json.reads[UpdateUserAddRoleCmd]
+
+  implicit val updateUserRemoveRoleCmdReads: Reads[UpdateUserRemoveRoleCmd] =
+    Json.reads[UpdateUserRemoveRoleCmd]
 
 }

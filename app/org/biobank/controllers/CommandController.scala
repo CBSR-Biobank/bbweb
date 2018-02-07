@@ -7,6 +7,18 @@ import play.api.libs.json._
 import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}
 
+object CommandController {
+
+  final case class UpdateEntityJson(sessionUserId:   String,
+                                    id:              String,
+                                    expectedVersion: Long,
+                                    property:        String,
+                                    newValue:        JsValue)
+
+  implicit val updateEntityJsonReads: Reads[UpdateEntityJson] =
+    Json.reads[UpdateEntityJson]
+}
+
 /**
  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
  */
@@ -14,16 +26,16 @@ import scala.concurrent.{ExecutionContext, Future}
 abstract class CommandController(controllerComponents: ControllerComponents)
     extends AbstractController(controllerComponents) {
 
-  implicit val ec: ExecutionContext
+  implicit protected val ec: ExecutionContext
 
-  val action: BbwebAction
+  protected val action: BbwebAction
 
   private val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   @SuppressWarnings(Array("org.wartremover.warts.Var"))
-  def commandAction[T <: Command](jsonExtra: JsValue)
-                   (block: T => Future[Result])
-                   (implicit reads: Reads[T]): Action[JsValue] =
+  protected def commandAction[T <: Command](jsonExtra: JsValue)
+                             (block: T => Future[Result])
+                             (implicit reads: Reads[T]): Action[JsValue] =
     action.async(parse.json) { request =>
       var jsonCmd = request.body.as[JsObject] ++ Json.obj("sessionUserId" -> request.authInfo.userId.id)
       if (jsonExtra != JsNull) {
@@ -35,13 +47,13 @@ abstract class CommandController(controllerComponents: ControllerComponents)
   /**
    * This is for actions that do not require the user to be logged in.
    */
-  def anonymousCommandAction[T <: Command](block: T => Future[Result])
-                         (implicit reads: Reads[T]): Action[JsValue] =
+  protected def anonymousCommandAction[T <: Command](block: T => Future[Result])
+                                      (implicit reads: Reads[T]): Action[JsValue] =
     Action.async(parse.json) { request =>
       processJsonCommand(request.body.as[JsObject])(block)
     }
 
-  private def processJsonCommand[T <: Command](jsonCmd: JsValue)
+  protected def processJsonCommand[T <: Command](jsonCmd: JsValue)
                                 (block: T => Future[Result])
                                 (implicit reads: Reads[T]): Future[Result] = {
     if (log.isTraceEnabled) {
@@ -57,17 +69,19 @@ abstract class CommandController(controllerComponents: ControllerComponents)
     )
   }
 
-  def errorReplyJson(message: String): JsValue = Json.obj("status" -> "error", "message" -> message)
+  protected def errorReplyJson(message: String): JsValue =
+    Json.obj("status" -> "error", "message" -> message)
 
-  def BadRequest(message:String): Result = Results.BadRequest(errorReplyJson(message))
+  protected def BadRequest(message:String): Result = Results.BadRequest(errorReplyJson(message))
 
-  def Forbidden(message: String): Result = Results.Forbidden(errorReplyJson(message))
+  protected def Forbidden(message: String): Result = Results.Forbidden(errorReplyJson(message))
 
-  def NotFound(message: String): Result = Results.NotFound(errorReplyJson(message))
+  protected def NotFound(message: String): Result = Results.NotFound(errorReplyJson(message))
 
-  def InternalServerError(message: String): Result = Results.InternalServerError(errorReplyJson(message))
+  protected def InternalServerError(message: String): Result =
+    Results.InternalServerError(errorReplyJson(message))
 
-  def Ok[T](data: T)(implicit writes: Writes[T]): Result =
+  protected def Ok[T](data: T)(implicit writes: Writes[T]): Result =
     Results.Ok(Json.obj("status" ->"success", "data" -> Json.toJson[T](data)))
 
   protected def validationReply[T](validation: ServiceValidation[T])

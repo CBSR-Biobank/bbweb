@@ -152,7 +152,7 @@ final case class DisabledCentre(id:           CentreId,
     with Centre
     with CentreValidations {
   import org.biobank.CommonValidations._
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /** Used to change the name. */
   def withName(name: String): DomainValidation[DisabledCentre] = {
@@ -165,7 +165,7 @@ final case class DisabledCentre(id:           CentreId,
 
   /** Used to change the description. */
   def withDescription(description: Option[String]): DomainValidation[DisabledCentre] = {
-    validateNonEmptyOption(description, InvalidDescription) map { _ =>
+    validateNonEmptyStringOption(description, InvalidDescription) map { _ =>
       copy(description  = description,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
@@ -261,7 +261,8 @@ final case class DisabledCentre(id:           CentreId,
   * Factory object used to create a centre.
   */
 object DisabledCentre extends CentreValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /**
     * The factory method to create a centre.
@@ -280,7 +281,7 @@ object DisabledCentre extends CentreValidations {
     (validateId(id) |@|
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        studyIds.toList.traverseU(validateStudyId) |@|
        locations.toList.traverseU(Location.validate)) { case _ =>
         DisabledCentre(id           = id,

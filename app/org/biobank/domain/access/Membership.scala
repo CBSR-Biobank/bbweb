@@ -125,8 +125,8 @@ final case class Membership(id:           MembershipId,
                             centreData:   MembershipEntitySet[CentreId])
     extends MembershipBase
     with MembershipValidations {
-
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /** Used to change the name. */
   def withName(name: String): DomainValidation[Membership] = {
@@ -139,7 +139,7 @@ final case class Membership(id:           MembershipId,
 
   /** Used to change the description. */
   def withDescription(description: Option[String]): DomainValidation[Membership] = {
-    validateNonEmptyOption(description, InvalidDescription) map { _ =>
+    validateNonEmptyStringOption(description, InvalidDescription) map { _ =>
       copy(description  = description,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
@@ -210,7 +210,8 @@ final case class Membership(id:           MembershipId,
 }
 
 object Membership extends MembershipValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   case object InvalidMembershipId extends org.biobank.ValidationKey
 
@@ -236,7 +237,7 @@ object Membership extends MembershipValidations {
 
     (validateId(id, InvalidMembershipId) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        userIds.map(validateId(_, InvalidUserId)).toList.sequenceU |@|
        studyIds.map(validateId(_, InvalidStudyId)).toList.sequenceU |@|
        centreIds.map(validateId(_, InvalidCentreId)).toList.sequenceU |@|

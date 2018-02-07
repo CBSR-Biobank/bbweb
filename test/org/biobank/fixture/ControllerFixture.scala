@@ -206,8 +206,11 @@ abstract class ControllerFixture
     }
   }
 
-  protected def notFound(url: String, json: JsValue, errMsgRegex: String): Unit = {
-    val reply = makeRequest(POST, url, NOT_FOUND, json)
+  protected def badRequest(method:      String = GET,
+                           url:         String,
+                           json:        JsValue = JsNull,
+                           errMsgRegex: String): Unit = {
+    val reply = makeRequest(method, url, BAD_REQUEST, json)
 
     (reply \ "status").as[String] must include ("error")
 
@@ -216,18 +219,11 @@ abstract class ControllerFixture
     ()
   }
 
-  protected def hasInvalidVersion(url: String, json: JsValue): Unit = {
-    val reply = makeRequest(POST, url, BAD_REQUEST, json)
-
-    (reply \ "status").as[String] must include ("error")
-
-    (reply \ "message").as[String] must include ("expected version doesn't match current version")
-
-    ()
-  }
-
-  protected def notFoundOnDelete(url: String, errMsgRegex: String): Unit = {
-    val reply = makeRequest(DELETE, url, NOT_FOUND)
+  protected def notFound(method:      String = GET,
+                         url:         String,
+                         json:        JsValue = JsNull,
+                         errMsgRegex: String): Unit = {
+    val reply = makeRequest(method, url, NOT_FOUND, json)
 
     (reply \ "status").as[String] must include ("error")
 
@@ -236,8 +232,10 @@ abstract class ControllerFixture
     ()
   }
 
-  protected def hasInvalidVersionOnDelete(url: String): Unit = {
-    val reply = makeRequest(DELETE, url, BAD_REQUEST)
+  protected def hasInvalidVersion(method: String,
+                                  url:    String,
+                                  json:   JsValue = JsNull): Unit = {
+    val reply = makeRequest(method, url, BAD_REQUEST, json)
 
     (reply \ "status").as[String] must include ("error")
 

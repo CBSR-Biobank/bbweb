@@ -55,8 +55,8 @@ class AnnotationTypeSpec extends DomainSpec {
     }
 
     it("not be created with an invalid options") {
-      createAnnotationType(numberAnnotationTypeTuple.copy(_5 = Seq("")))
-        .mustFail(1, "OptionRequired")
+      val annotationType = numberAnnotationTypeTuple.copy(_5 = Seq(""))
+      createAnnotationType(annotationType) mustFail (1, "OptionRequired")
 
       createAnnotationType(numberAnnotationTypeTuple.copy(_5 = Seq("dup", "dup")))
         .mustFail(1, "DuplicateOptionsError")

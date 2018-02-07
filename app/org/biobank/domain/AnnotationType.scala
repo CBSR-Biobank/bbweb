@@ -73,7 +73,8 @@ final case class AnnotationType(id:            AnnotationTypeId,
 }
 
 trait AnnotationTypeValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   case object MaxValueCountError extends ValidationKey
 
@@ -89,7 +90,7 @@ trait AnnotationTypeValidations {
                options:       Seq[String])
       : DomainValidation[Boolean] = {
     (validateString(name, NameRequired) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        validateMaxValueCount(maxValueCount) |@|
        validateOptions(options) |@|
        validateSelectParams(valueType, maxValueCount, options)) {
@@ -107,14 +108,14 @@ trait AnnotationTypeValidations {
   }
 
   def validateMaxValueCount(option: Option[Int]): DomainValidation[Option[Int]] = {
-    option.fold {
-      none[Int].successNel[String]
-    } { n  =>
-      if (n > -1) {
-        option.successNel
-      } else {
-        MaxValueCountError.failureNel[Option[Int]]
-      }
+    option match {
+      case None => option.successNel[String]
+      case Some(n) =>
+        if (n > -1) {
+          option.successNel[String]
+        } else {
+          MaxValueCountError.failureNel[Option[Int]]
+        }
     }
   }
 
@@ -123,7 +124,7 @@ trait AnnotationTypeValidations {
    */
   def validateOptions(options: Seq[String]): DomainValidation[Seq[String]] = {
     if (options.distinct.size === options.size) {
-      options.toList.map(validateString(_, OptionRequired)).sequenceU.fold(
+      options.toList.map(validateNonEmptyString(_, OptionRequired)).sequenceU.fold(
         err => err.toList.mkString(",").failureNel[Seq[String]],
         list => list.toSeq.successNel
       )
@@ -188,7 +189,8 @@ trait AnnotationTypeValidations {
 }
 
 object AnnotationType extends AnnotationTypeValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   implicit val annotationTypeFormat: Format[AnnotationType] = Json.format[AnnotationType]
 
@@ -198,8 +200,8 @@ object AnnotationType extends AnnotationTypeValidations {
              maxValueCount: Option[Int],
              options:       Seq[String],
              required:      Boolean): DomainValidation[AnnotationType] = {
-    (validateString(name, NameRequired) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+    (validateNonEmptyString(name, NameRequired) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        validateMaxValueCount(maxValueCount) |@|
        validateOptions(options) |@|
        validateSelectParams(valueType, maxValueCount, options)) { case _ =>

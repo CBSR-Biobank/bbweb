@@ -1,0 +1,43 @@
+<breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
+<div class="page-header">
+  <h1 translate>Roles for {{vm.user.name}}</h1>
+</div>
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <translate>Current roles</translate>
+      <span class="pull-right">
+        <button class="btn btn-xs btn-primary"
+                uib-tooltip="{{'Add role'|translate}}"
+                ng-click="vm.addRole()">
+          <translate>Add</translate> <i class="glyphicon glyphicon-plus"></i>
+        </button>
+        <button class="btn btn-xs btn-primary"
+                uib-tooltip="{{'Copy roles from another user'|translate}}"
+                ng-click="vm.copyRoles()">
+          <translate>Copy</translate> <i class="glyphicon glyphicon-copy"></i>
+        </button>
+      </span>
+    </h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-2">
+          <strong translate>Roles:</strong>
+        </div>
+        <div class="col-md-8" ng-if="vm.user.hasRoles()">
+          <tags-list tag-data="vm.roleNameLabels"
+                     on-tag-selected="vm.roleLabelSelected.bind(vm)">
+          </tags-list>
+        </div>
+        <div class="col-md-8" ng-if="!vm.user.hasRoles()">
+          <translate>None</translate>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+<div class="row">
+  <div class="col-xs-12"><pre>-Title-: {{vm.user | json}}</pre></div>
+</div>

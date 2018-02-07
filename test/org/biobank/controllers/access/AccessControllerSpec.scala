@@ -8,9 +8,9 @@ import org.biobank.domain.user._
 import org.biobank.dto.EntityInfoDto
 import org.biobank.fixture.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.scalatest.Inside
 import play.api.libs.json._
 import play.api.test.Helpers._
-import org.scalatest.Inside
 
 /**
  * Tests the roles and permissions REST API for [[User Access]].
@@ -183,7 +183,7 @@ class AccessControllerSpec
 
         (reply \ "status").as[String] must include ("error")
 
-        (reply \ "message").as[String] must include regex("EntityCriteriaNotFound: invalid role id")
+        (reply \ "message").as[String] must include regex("IdNotFound: role id")
       }
 
       it("attempt to create membership fails if child does not exist") {
@@ -269,7 +269,7 @@ class AccessControllerSpec
         val json = updateNameJson(f.role, nameGenerator.next[Role]) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         accessItemRepository.put(f.role)
-        hasInvalidVersion(uri("roles", "name", f.role.id.id), json)
+        hasInvalidVersion(POST, uri("roles", "name", f.role.id.id), json)
       }
 
     }
@@ -323,7 +323,7 @@ class AccessControllerSpec
         val json = updateDescriptionJson(f.role, Some(nameGenerator.next[Role])) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         accessItemRepository.put(f.role)
-        hasInvalidVersion(uri("roles") + s"/description/${f.role.id}", json)
+        hasInvalidVersion(POST, uri("roles") + s"/description/${f.role.id}", json)
       }
 
     }
@@ -400,7 +400,7 @@ class AccessControllerSpec
         val json = addUserJson(f.role, user) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         Set(f.role, user).foreach(addToRepository)
-        hasInvalidVersion(uri("roles", "user", f.role.id.id), json)
+        hasInvalidVersion(POST, uri("roles", "user", f.role.id.id), json)
       }
 
     }
@@ -491,7 +491,7 @@ class AccessControllerSpec
         val json = addParentRoleJson(f.role, parentRole) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         Set(f.role, parentRole).foreach(addToRepository)
-        hasInvalidVersion(uri("roles", "parent", f.role.id.id), json)
+        hasInvalidVersion(POST, uri("roles", "parent", f.role.id.id), json)
       }
 
     }
@@ -592,7 +592,7 @@ class AccessControllerSpec
         val json = addChildJson(f.role, child) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         Set(f.role, child).foreach(addToRepository)
-        hasInvalidVersion(uri("roles", "child", f.role.id.id), json)
+        hasInvalidVersion(POST, uri("roles", "child", f.role.id.id), json)
       }
 
     }
@@ -664,7 +664,7 @@ class AccessControllerSpec
       val user = factory.createRegisteredUser
       val url = uri("roles", "user", f.role.id.id, (f.role.version + 10L).toString, user.id.id)
       Set(f.role, user).map(addToRepository)
-      hasInvalidVersionOnDelete(url)
+      hasInvalidVersion(DELETE, url)
     }
 
   }
@@ -736,7 +736,7 @@ class AccessControllerSpec
       val parentRole = factory.createRole
       val url = uri("roles", "parent", f.role.id.id, (f.role.version + 10L).toString, parentRole.id.id)
       Set(f.role, parentRole).map(addToRepository)
-      hasInvalidVersionOnDelete(url)
+      hasInvalidVersion(DELETE, url)
     }
 
   }
@@ -802,17 +802,17 @@ class AccessControllerSpec
       val f = new RoleFixture
       val url = uri("roles", f.role.id.id, (f.role.version + 10L).toString)
       accessItemRepository.put(f.role)
-      hasInvalidVersionOnDelete(url)
+      hasInvalidVersion(DELETE, url)
     }
 
   }
 
   private def notFound(url: String, json: JsValue): Unit = {
-    notFound(url, json, "EntityCriteriaNotFound: invalid role id")
+    notFound(POST, url, json, "IdNotFound: role id")
   }
 
   private def notFoundOnDelete(url: String): Unit = {
-    notFoundOnDelete(url, "EntityCriteriaNotFound: invalid role id")
+    notFound(DELETE, url, JsNull, "IdNotFound: role id")
   }
 
   def accessItemNamesSharedBehaviour(createEntity: String => AccessItem,

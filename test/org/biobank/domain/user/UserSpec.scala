@@ -85,7 +85,7 @@ class UserSpec extends DomainSpec {
 
     it("have it's name changed") {
       val user = factory.createActiveUser
-      val newName = nameGenerator.next[String]
+      val newName = faker.Name.name
 
       user.withName(newName) mustSucceed { u =>
         u mustBe a[ActiveUser]

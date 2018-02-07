@@ -27,10 +27,10 @@ final case class Participant(id:           ParticipantId,
     with HasStudyId
     with ParticipantValidations
     with HasAnnotations[Participant] {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
 
   def withUniqueId(uniqueId: String): DomainValidation[Participant] = {
-    validateString(uniqueId, UniqueIdRequired).map { _ =>
+    validateNonEmptyString(uniqueId, UniqueIdRequired).map { _ =>
       copy(uniqueId     = uniqueId,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
@@ -69,7 +69,8 @@ final case class Participant(id:           ParticipantId,
 }
 
 object Participant extends ParticipantValidations {
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
   import Annotation._
 
   def create(studyId:     StudyId,
@@ -82,7 +83,7 @@ object Participant extends ParticipantValidations {
     (validateId(id) |@|
        validateId(studyId) |@|
        validateVersion(version) |@|
-       validateString(uniqueId, UniqueIdRequired) |@|
+       validateNonEmptyString(uniqueId, UniqueIdRequired) |@|
        annotations.toList.traverseU(Annotation.validate)) {
       case _ => Participant(id,
                             studyId,

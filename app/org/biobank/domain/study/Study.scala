@@ -133,7 +133,8 @@ final case class DisabledStudy(id:              StudyId,
     with AnnotationTypeValidations
     with HasAnnotationTypes
     with HasSlug {
-  import CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /** Used to change the name. */
   def withName(name: String): DomainValidation[DisabledStudy] = {
@@ -147,7 +148,7 @@ final case class DisabledStudy(id:              StudyId,
 
   /** Used to change the description. */
   def withDescription(description: Option[String]): DomainValidation[DisabledStudy] = {
-    validateNonEmptyOption(description, InvalidDescription) map { _ =>
+    validateNonEmptyStringOption(description, InvalidDescription) map { _ =>
       copy(description  = description,
            version      = version + 1,
            timeModified = Some(OffsetDateTime.now))
@@ -206,7 +207,8 @@ final case class DisabledStudy(id:              StudyId,
  * Factory object used to create a study.
  */
 object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
-  import CommonValidations._
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   /**
    * The factory method to create a study.
@@ -222,7 +224,7 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
     (validateId(id) |@|
        validateVersion(version) |@|
        validateString(name, NameMinLength, InvalidName) |@|
-       validateNonEmptyOption(description, InvalidDescription) |@|
+       validateNonEmptyStringOption(description, InvalidDescription) |@|
        annotationTypes.toList.traverseU(validate)) { case _ =>
         DisabledStudy(id              = id,
                       version         = version,

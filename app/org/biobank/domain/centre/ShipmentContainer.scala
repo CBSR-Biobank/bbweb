@@ -39,7 +39,7 @@ final case class ShipmentContainer(id:           ShipmentContainerId,
 
 object ShipmentContainer {
   import org.biobank.CommonValidations._
-  import org.biobank.domain.CommonValidations._
+  import org.biobank.domain.DomainValidations._
 
   case object ShipmentIdRequired extends ValidationKey
 
