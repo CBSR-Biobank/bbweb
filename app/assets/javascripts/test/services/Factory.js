@@ -363,21 +363,23 @@ class Factory {
   }
 
   collectionEvent(options = {}) {
-    var participant = this.defaultParticipant(),
-        collectionEventType = this.defaultCollectionEventType(),
-        defaults = {
-          id:                    domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT),
-          participantId:         participant.id,
-          collectionEventType:   collectionEventType,
-          collectionEventTypeId: collectionEventType.id,
-          timeCompleted:         moment(faker.date.recent(10)).format(),
-          visitNumber:           1,
-          annotations:           []
-        },
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        ce;
-
-    ce = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    const participant = this.defaultParticipant(),
+          collectionEventType = this.defaultCollectionEventType(),
+          visitNumber = 1,
+          defaults = {
+            id:                      domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT),
+            participantId:           participant.id,
+            participantSlug:         participant.slug,
+            collectionEventType:     collectionEventType,
+            collectionEventTypeId:   collectionEventType.id,
+            collectionEventTypeSlug: collectionEventType.slug,
+            timeCompleted:           moment(faker.date.recent(10)).format(),
+            slug:                    slugify('visit-number-' + visitNumber),
+            visitNumber:             visitNumber,
+            annotations:             []
+          },
+          validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
+          ce = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
 
     if (!options.annotations) {
       // assign annotation types
@@ -437,8 +439,6 @@ class Factory {
           },
           validKeys = this.commonFieldNames.concat(Object.keys(defaults))
 
-    let spc;
-
     if (ceventType.specimenDescriptions && (ceventType.specimenDescriptions.length > 0)) {
       defaults.specimenDescriptionId = ceventType.specimenDescriptions[0].id;
     }
@@ -448,7 +448,7 @@ class Factory {
       defaults.locationInfo = defaults.originLocationInfo;
     }
 
-    spc = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    const spc = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_SPECIMEN, spc);
     return spc;
   }
@@ -525,7 +525,7 @@ class Factory {
                                      email:      this.stringNext(),
                                      avatarUrl:  null,
                                      state:      this.UserState.REGISTERED,
-                                     roles:      []
+                                     roleData:   []
                                    },
                                    nameAndSlug()),
           validKeys = this.commonFieldNames.concat(Object.keys(defaults)),

@@ -32,7 +32,8 @@ class CeventGetTypeController {
   }
 
   updateCollectionEventType() {
-    this.$state.go('home.collection.study.participant.cevents.add.details', { eventTypeId: this.eventTypeId })
+    this.$state.go('home.collection.study.participant.cevents.add.details',
+                   { eventTypeSlug: this.eventTypeSlug })
   }
 }
 

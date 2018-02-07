@@ -59,7 +59,7 @@ function ShippingHomeController($state,
   }
 
   function centreSelected(centre) {
-    $state.go('home.shipping.centre.incoming', { centreId: centre.id });
+    $state.go('home.shipping.centre.incoming', { centreSlug: centre.slug });
   }
 }
 

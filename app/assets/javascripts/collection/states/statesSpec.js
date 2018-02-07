@@ -113,7 +113,7 @@ describe('collection states', function() {
 
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType))
         this.gotoUrl(
-          '/collection/study/study-slug-1/participants/participant-slug-1/events/add/collection-event-type-id-1')
+          '/collection/study/study-slug-1/participants/participant-slug-1/events/add/collection-event-type-slug-1')
         expect(this.$state.current.name).toBe('home.collection.study.participant.cevents.add.details')
       })
 

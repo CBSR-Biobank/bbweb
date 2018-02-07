@@ -92,7 +92,8 @@ function CeventsAddAndSelectDirective($state,
         if (typeNames.length > 1) {
           $state.go('home.collection.study.participant.cevents.add');
         } else {
-          $state.go('home.collection.study.participant.cevents.add.details', { eventTypeId: typeNames[0].id });
+          $state.go('home.collection.study.participant.cevents.add.details',
+                    { eventTypeSlug: typeNames[0].slug });
         }
       })
   }

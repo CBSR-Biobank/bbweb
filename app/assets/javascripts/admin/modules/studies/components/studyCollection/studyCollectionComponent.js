@@ -31,7 +31,7 @@ function StudyCollectionController($scope, CollectionEventType) {
     // updates the selected tab in 'studyViewDirective' which is the parent directive
     $scope.$emit('tabbed-page-update', 'tab-selected');
 
-    CollectionEventType.list(vm.study.id).then(function (pagedResult) {
+    CollectionEventType.list(vm.study.slug).then(function (pagedResult) {
       vm.collectionEventTypes = CollectionEventType.sortByName(pagedResult.items);
     });
 

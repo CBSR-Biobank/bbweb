@@ -63,7 +63,7 @@ function config($stateProvider) {
       }
     })
     .state('home.collection.study.participant.cevents.add.details', {
-      url: '/:eventTypeId',
+      url: '/:eventTypeSlug',
       resolve: {
         collectionEventType: resolveCollectionEventType
       },
@@ -123,10 +123,10 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveCollectionEventType($transition$, resourceErrorService, study, CollectionEventType) {
-    const typeId = $transition$.params().eventTypeId;
-    return CollectionEventType.get(study.id, typeId)
+    const typeSlug = $transition$.params().eventTypeSlug;
+    return CollectionEventType.get(study.slug, typeSlug)
       .catch(resourceErrorService.goto404(
-        `collectionEventType not found: studyId/${study.id}, typeId/${typeId}`))
+        `collectionEventType not found: studySlug/${study.id}, typeSlug/${typeSlug}`))
   }
 
   /* @ngInject */

@@ -208,23 +208,27 @@ function CollectionEventTypeFactory($q,
   /**
    * Retrieves a CollectionEventType from the server.
    *
-   * @param {string} id the ID of the collection event type to retrieve.
+   * @param {string} studySlug the slug of the study this collection event type belongs to.
+   *
+   * @param {string} slug the sllug of the collection event type to retrieve.
    *
    * @returns {Promise<domain.studies.CollectionEventType>} The collection event type within a promise.
    */
-  CollectionEventType.get = function(studyId, id) {
-    return biobankApi.get(CollectionEventType.url(studyId, id))
+  CollectionEventType.get = function(studySlug, slug) {
+    return biobankApi.get(CollectionEventType.url(studySlug, slug))
       .then(reply => CollectionEventType.asyncCreate(reply));
   };
 
   /**
    * Fetches all collection event types for a {@link domain.studies.Study|Study}.
    *
+   * @param {string} studySlug the slug of the study the collection event types belongs to.
+   *
    * @returns {Promise<Array<domain.studies.CollectionEventType>>} An array of collection event types within a
    * promise.
    */
-  CollectionEventType.list = function(studyId, options) {
-    var url = CollectionEventType.url(studyId),
+  CollectionEventType.list = function(studySlug, options) {
+    var url = CollectionEventType.url(studySlug),
         params,
         validKeys = [
           'filter',

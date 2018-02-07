@@ -11,9 +11,7 @@ import ngModule from '../../index'
 
 describe('Component: selectStudy', function() {
 
-  const panelHeader = 'selectStudy component header',
-        navigateStateName = 'test-navigate-state-name',
-        navigateStateParamName = 'test-navigate-state-param-name';
+  const panelHeader = 'selectStudy component header';
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');

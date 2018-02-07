@@ -104,7 +104,7 @@ describe('Component: ceventsAddAndSelect', function() {
       this.controller.add();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add.details',
-                                                  { eventTypeId: this.collectionEventTypes[0].id });
+                                                  { eventTypeSlug: this.collectionEventTypes[0].slug });
     });
 
     it('to correct state when there is more than one collection event type defined', function() {

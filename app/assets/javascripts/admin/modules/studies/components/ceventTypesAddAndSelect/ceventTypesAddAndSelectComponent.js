@@ -51,7 +51,7 @@ function CeventTypesAddAndSelectController($scope,
   }
 
   function updateCollectionEvents() {
-    CollectionEventType.list(vm.study.id, vm.pagerOptions).then(function (pagedResult) {
+    CollectionEventType.list(vm.study.slug, vm.pagerOptions).then(function (pagedResult) {
       vm.pagedResult          = pagedResult;
       vm.collectionEventTypes = CollectionEventType.sortByName(pagedResult.items);
       vm.displayState         = getDisplayState();

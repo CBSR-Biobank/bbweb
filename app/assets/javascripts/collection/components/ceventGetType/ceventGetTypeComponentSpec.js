@@ -81,15 +81,15 @@ describe('Component: ceventGetType', function() {
   describe('when collection event type is updated', function() {
 
     it('changes to correct state selection is valid', function() {
-      var ceventTypeId = this.collectionEventTypes[0].id;
+      const ceventTypeSlug = this.collectionEventTypes[0].slug;
 
       this.createController();
-      this.controller.eventTypeId = ceventTypeId;
+      this.controller.eventTypeSlug = ceventTypeSlug;
       this.controller.updateCollectionEventType();
       this.scope.$digest();
 
-      expect(this.$state.go).toHaveBeenCalledWith(
-        'home.collection.study.participant.cevents.add.details', { eventTypeId: ceventTypeId });
+      expect(this.$state.go).toHaveBeenCalledWith('home.collection.study.participant.cevents.add.details',
+                                                  { eventTypeSlug: ceventTypeSlug });
     });
 
   });

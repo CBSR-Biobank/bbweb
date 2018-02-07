@@ -257,10 +257,9 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
 
   private def shipmentSpecimenToDto(requestUserId: UserId, shipmentSpecimen: ShipmentSpecimen)
       : ServiceValidation[ShipmentSpecimenDto] = {
-    specimensService.get(requestUserId, shipmentSpecimen.specimenId).flatMap { specimen =>
-      specimensService.specimenToDto(specimen).map { specimenDto =>
-        shipmentSpecimen.createDto(specimenDto)
-      }
-    }
+    for {
+      specimen    <- specimensService.get(requestUserId, shipmentSpecimen.specimenId)
+      specimenDto <- specimensService.specimenToDto(specimen)
+    } yield shipmentSpecimen.createDto(specimenDto)
   }
 }

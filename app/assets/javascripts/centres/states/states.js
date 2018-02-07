@@ -18,7 +18,7 @@ function config($stateProvider) {
     })
     .state('home.shipping.centre', {
       abstract: true,
-      url: '/centres/{centreId}',
+      url: '/centres/{centreSlug}',
       resolve: {
         centre: resolveCentre
       },
@@ -123,9 +123,9 @@ function config($stateProvider) {
 
   /* @ngInject */
   function resolveCentre($transition$, resourceErrorService, Centre) {
-    const id = $transition$.params().centreId
-    return Centre.get(id)
-      .catch(resourceErrorService.goto404(`centre ID not found: centreId/${id}`))
+    const slug = $transition$.params().centreSlug
+    return Centre.get(slug)
+      .catch(resourceErrorService.goto404(`centre slug not found: centreId/${slug}`))
   }
 
   /* @ngInject */

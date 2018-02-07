@@ -117,10 +117,10 @@ describe('CollectionEventType', function() {
   });
 
   it('can retrieve a collection event type', function() {
-    var url = this.url(this.jsonStudy.id, this.jsonCet.id);
+    var url = this.url(this.jsonStudy.slug, this.jsonCet.slug);
 
     this.$httpBackend.whenGET(url).respond(this.reply(this.jsonCet));
-    CollectionEventType.get(this.jsonStudy.id, this.jsonCet.id)
+    CollectionEventType.get(this.jsonStudy.slug, this.jsonCet.slug)
       .then(this.expectCet).catch(this.failTest);
     this.$httpBackend.flush();
   });
@@ -129,10 +129,10 @@ describe('CollectionEventType', function() {
     var data = this.getBadCollectionEventTypes();
 
     data.forEach((badCet) => {
-      var url = this.url(this.jsonStudy.id, badCet.cet.id);
+      var url = this.url(this.jsonStudy.slug, badCet.cet.slug);
 
       this.$httpBackend.whenGET(url).respond(this.reply(badCet.cet));
-      CollectionEventType.get(this.jsonStudy.id, badCet.cet.id)
+      CollectionEventType.get(this.jsonStudy.slug, badCet.cet.slug)
         .then(getFail).catch(shouldFail);
       this.$httpBackend.flush();
 
@@ -147,11 +147,11 @@ describe('CollectionEventType', function() {
   });
 
   it('can list collection event types', function() {
-    var url = this.url(this.jsonStudy.id),
+    var url = this.url(this.jsonStudy.slug),
         reply = this.Factory.pagedResult([ this.jsonCet ]);
 
     this.$httpBackend.whenGET(url).respond(this.reply(reply));
-    CollectionEventType.list(this.jsonStudy.id)
+    CollectionEventType.list(this.jsonStudy.slug)
       .then(expectPagedResult)
       .catch(this.failTest);
     this.$httpBackend.flush();
@@ -166,12 +166,12 @@ describe('CollectionEventType', function() {
     // assigns result of this.$httpBackend.whenGET() to variable so that the response
     // can be changed inside the loop
     var data = this.getBadCollectionEventTypes(),
-        url = this.url(this.jsonStudy.id),
+        url = this.url(this.jsonStudy.slug),
         reqHandler = this.$httpBackend.whenGET(url);
 
     data.forEach((item) => {
       reqHandler.respond(this.reply(this.Factory.pagedResult([ item.cet ])));
-      CollectionEventType.list(this.jsonStudy.id).then(getFail).catch(shouldFail);
+      CollectionEventType.list(this.jsonStudy.slug).then(getFail).catch(shouldFail);
       this.$httpBackend.flush();
 
       function getFail() {

@@ -16,6 +16,7 @@ define(function() {
 
       beforeEach(function() {
         this.injectDependencies('$q', 'modalInput', 'notificationsService');
+        this.$state.go = jasmine.createSpy().and.returnValue(null);
       });
 
       it('on update should invoke the update method on entity', function() {

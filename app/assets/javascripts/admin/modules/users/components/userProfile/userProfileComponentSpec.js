@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import ngModule from '../../index'
 
-fdescribe('Component: userProfile', function() {
+describe('Component: userProfile', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -38,7 +38,7 @@ fdescribe('Component: userProfile', function() {
     });
   });
 
-  fit('should have valid scope', function() {
+  it('should have valid scope', function() {
     var user = this.User.create(this.Factory.user());
     this.createController(user);
     expect(this.controller.user.id).toEqual(user.id);
