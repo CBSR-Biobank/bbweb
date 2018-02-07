@@ -27,17 +27,17 @@ describe('breadcrumbService', function() {
         'home.admin',
         'home.admin.studies',
         'home.admin.centres',
-        'home.admin.users',
-        'home.admin.users.manage',
-        'home.admin.users.roles',
-        'home.admin.users.memberships',
+        'home.admin.access',
+        'home.admin.access.users',
+        'home.admin.access.roles',
+        'home.admin.access.memberships',
         'home.collection',
         'home.shipping',
         'home.shipping.add',
         'home.collection.study.participantAdd',
         'home.admin.centres.add',
         'home.admin.studies.add',
-        'home.admin.users.memberships.add'
+        'home.admin.access.memberships.add'
       ]
 
       stateNames.forEach(stateName => {

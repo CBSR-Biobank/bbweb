@@ -23,7 +23,7 @@ function UserAdminController(userService, UserCounts, breadcrumbService, resourc
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
       breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.users')
+      breadcrumbService.forState('home.admin.access')
     ];
 
     // request the user to determine if they have the right permissions to be on this page

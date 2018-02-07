@@ -47,10 +47,10 @@ class MembershipViewController {
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),
       this.breadcrumbService.forState('home.admin'),
-      this.breadcrumbService.forState('home.admin.users'),
-      this.breadcrumbService.forState('home.admin.users.memberships'),
+      this.breadcrumbService.forState('home.admin.access'),
+      this.breadcrumbService.forState('home.admin.access.memberships'),
       this.breadcrumbService.forStateWithFunc(
-        'home.admin.users.memberships.membership',
+        'home.admin.access.memberships.membership',
         () => this.membership.name)
     ];
 
@@ -79,7 +79,7 @@ class MembershipViewController {
           () => this.membership.remove()
           .then(() => {
             this.notificationsService.success(this.gettextCatalog.getString('Membership removed'));
-            this.$state.go('home.admin.users.memberships', {}, { reload: true });
+            this.$state.go('home.admin.access.memberships', {}, { reload: true });
           })
 
     this.domainNotificationService.removeEntity(
@@ -261,7 +261,7 @@ class MembershipViewController {
   }
 
   back() {
-    this.$state.go('home.admin.users.memberships');
+    this.$state.go('home.admin.access.memberships');
   }
 
   updateMembership(membership) {

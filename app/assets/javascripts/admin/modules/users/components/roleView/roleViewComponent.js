@@ -43,10 +43,10 @@ class RoleViewController {
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),
       this.breadcrumbService.forState('home.admin'),
-      this.breadcrumbService.forState('home.admin.users'),
-      this.breadcrumbService.forState('home.admin.users.roles'),
+      this.breadcrumbService.forState('home.admin.access'),
+      this.breadcrumbService.forState('home.admin.access.roles'),
       this.breadcrumbService.forStateWithFunc(
-        'home.admin.users.roles.role',
+        'home.admin.access.roles.role',
         () => this.role.name)
     ]
 
@@ -70,7 +70,7 @@ class RoleViewController {
           () => this.role.remove()
           .then(() => {
             this.notificationsService.success(this.gettextCatalog.getString('Role removed'))
-            this.$state.go('home.admin.users.roles', {}, { reload: true })
+            this.$state.go('home.admin.access.roles', {}, { reload: true })
           })
 
     this.domainNotificationService.removeEntity(
@@ -255,7 +255,7 @@ class RoleViewController {
   }
 
   back() {
-    this.$state.go('home.admin.users.roles')
+    this.$state.go('home.admin.access.roles')
   }
 
   updateLabels(role) {

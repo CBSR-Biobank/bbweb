@@ -276,7 +276,7 @@ describe('membershipViewComponent', function() {
     this.createController(this.Membership.create(this.Factory.membership()))
     this.controller.back();
     this.scope.$digest();
-    expect(this.$state.go).toHaveBeenCalledWith('home.admin.users.memberships');
+    expect(this.$state.go).toHaveBeenCalledWith('home.admin.access.memberships');
   });
 
   function sharedUpdateBehaviour(context) {

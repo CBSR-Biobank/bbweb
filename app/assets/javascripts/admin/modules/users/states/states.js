@@ -6,19 +6,19 @@
 /* @ngInject */
 function config($stateProvider) {
   $stateProvider
-    .state('home.admin.users', {
+    .state('home.admin.access', {
       url: '/users',
       views: {
         'main@': 'userAdmin'
       }
     })
-    .state('home.admin.users.manage', {
+    .state('home.admin.access.users', {
       url: '/manage',
       views: {
         'main@': 'manageUsers'
       }
     })
-    .state('home.admin.users.manage.user', {
+    .state('home.admin.access.users.user', {
       url: '/:slug',
       resolve: {
         user: resolveUser
@@ -27,13 +27,13 @@ function config($stateProvider) {
         'main@': 'userProfile'
       }
     })
-    .state('home.admin.users.roles', {
+    .state('home.admin.access.roles', {
       url: '/roles',
       views: {
         'main@': 'userRoles'
       }
     })
-    .state('home.admin.users.roles.role', {
+    .state('home.admin.access.roles.role', {
       url: '/:slug',
       resolve: {
         role: resolveRole
@@ -42,19 +42,19 @@ function config($stateProvider) {
         'main@': 'roleView'
       }
     })
-    .state('home.admin.users.memberships', {
+    .state('home.admin.access.memberships', {
       url: '/memberships',
       views: {
         'main@': 'membershipAdmin'
       }
     })
-    .state('home.admin.users.memberships.add', {
+    .state('home.admin.access.memberships.add', {
       url: '/add',
       views: {
         'main@': 'membershipAdd'
       }
     })
-    .state('home.admin.users.memberships.membership', {
+    .state('home.admin.access.memberships.membership', {
       url: '/:slug',
       resolve: {
         membership: resolveMembership

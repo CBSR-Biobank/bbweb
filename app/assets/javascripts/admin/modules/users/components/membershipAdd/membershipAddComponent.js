@@ -34,16 +34,16 @@ class Controller {
       StudyName,
       CentreName
     })
-    this.returnState = 'home.admin.users.memberships'
+    this.returnState = 'home.admin.access.memberships'
   }
 
   $onInit() {
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),
       this.breadcrumbService.forState('home.admin'),
-      this.breadcrumbService.forState('home.admin.users'),
-      this.breadcrumbService.forState('home.admin.users.memberships'),
-      this.breadcrumbService.forState('home.admin.users.memberships.add')
+      this.breadcrumbService.forState('home.admin.access'),
+      this.breadcrumbService.forState('home.admin.access.memberships'),
+      this.breadcrumbService.forState('home.admin.access.memberships.add')
     ]
 
     this.membership = new this.Membership()

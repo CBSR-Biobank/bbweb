@@ -28,8 +28,8 @@ function MembershipAdminsController(breadcrumbService) {
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
       breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.users'),
-      breadcrumbService.forState('home.admin.users.memberships'),
+      breadcrumbService.forState('home.admin.access'),
+      breadcrumbService.forState('home.admin.access.memberships'),
     ];
   }
 

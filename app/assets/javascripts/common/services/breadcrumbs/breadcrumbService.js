@@ -19,17 +19,17 @@ class BreadcrumbService {
       [ 'home.admin',                           () => gettextCatalog.getString('Administration') ],
       [ 'home.admin.studies',                   () => gettextCatalog.getString('Studies') ],
       [ 'home.admin.centres',                   () => gettextCatalog.getString('Centres') ],
-      [ 'home.admin.users',                     () => gettextCatalog.getString('Users') ],
-      [ 'home.admin.users.manage',              () => gettextCatalog.getString('Manage users') ],
-      [ 'home.admin.users.roles',               () => gettextCatalog.getString('Roles') ],
-      [ 'home.admin.users.memberships',         () => gettextCatalog.getString('Memberships') ],
+      [ 'home.admin.access',                     () => gettextCatalog.getString('Users') ],
+      [ 'home.admin.access.users',              () => gettextCatalog.getString('Manage users') ],
+      [ 'home.admin.access.roles',               () => gettextCatalog.getString('Roles') ],
+      [ 'home.admin.access.memberships',         () => gettextCatalog.getString('Memberships') ],
       [ 'home.collection',                      () => gettextCatalog.getString('Collection') ],
       [ 'home.shipping',                        () => gettextCatalog.getString('Shipping') ],
       [ 'home.shipping.add',                    () => gettextCatalog.getString('Add shipment') ],
       [ 'home.collection.study.participantAdd', () => gettextCatalog.getString('Add participant') ],
       [ 'home.admin.centres.add',               addLabelFunc ],
       [ 'home.admin.studies.add',               addLabelFunc ],
-      [ 'home.admin.users.memberships.add',     addLabelFunc ]
+      [ 'home.admin.access.memberships.add',     addLabelFunc ]
     ]);
   }
 

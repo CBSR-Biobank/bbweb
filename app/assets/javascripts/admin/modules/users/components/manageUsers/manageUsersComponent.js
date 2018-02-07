@@ -25,8 +25,8 @@ function Controller(breadcrumbService,
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
       breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.users'),
-      breadcrumbService.forState('home.admin.users.manage')
+      breadcrumbService.forState('home.admin.access'),
+      breadcrumbService.forState('home.admin.access.users')
     ];
 
     vm.haveUsers = false;

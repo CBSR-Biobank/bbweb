@@ -285,7 +285,7 @@ describe('membershipAddComponent', function() {
       this.controller.submit()
       this.scope.$digest()
       expect(this.notificationsService.submitSuccess).toHaveBeenCalled()
-      expect(this.$state.go).toHaveBeenCalledWith('home.admin.users.memberships', {}, { reload: true })
+      expect(this.$state.go).toHaveBeenCalledWith('home.admin.access.memberships', {}, { reload: true })
     })
 
     it('handles rejection of membership update', function() {
@@ -304,7 +304,7 @@ describe('membershipAddComponent', function() {
     this.createController()
     this.controller.cancel()
     this.scope.$digest()
-    expect(this.$state.go).toHaveBeenCalledWith('home.admin.users.memberships')
+    expect(this.$state.go).toHaveBeenCalledWith('home.admin.access.memberships')
   })
 
 })

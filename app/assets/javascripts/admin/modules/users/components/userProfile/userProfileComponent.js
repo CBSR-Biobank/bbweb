@@ -36,10 +36,11 @@ function UserProfileController($state,
     vm.breadcrumbs = [
       breadcrumbService.forState('home'),
       breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.users'),
+      breadcrumbService.forState('home.admin.access'),
+      breadcrumbService.forState('home.admin.access.users'),
       breadcrumbService.forStateWithFunc(
-        'home.admin.users.user',
-        function () { return gettextCatalog.getString('User: {{name}}', { name: vm.user.name }); })
+        'home.admin.access.users.user',
+        function () { return gettextCatalog.getString('{{name}}', { name: vm.user.name }); })
     ];
 
     vm.studyMemberships        = '';
@@ -175,7 +176,7 @@ function UserProfileController($state,
   }
 
   function updateRoles() {
-    $state.go('home.admin.users.user.roles');
+    $state.go('home.admin.access.user.roles');
   }
 
   function updateStudyMemberships() {
