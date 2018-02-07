@@ -30,7 +30,7 @@ function config($stateProvider) {
     .state('home.admin.access.roles', {
       url: '/roles',
       views: {
-        'main@': 'userRoles'
+        'main@': 'accessRoles'
       }
     })
     .state('home.admin.access.roles.role', {

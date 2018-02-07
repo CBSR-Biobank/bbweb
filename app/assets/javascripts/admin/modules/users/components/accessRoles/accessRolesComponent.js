@@ -7,8 +7,8 @@
  * Allows the logged in user to modify another user's roles.
  */
 var component = {
-  template: require('./userRoles.html'),
-  controller: UserRolesController,
+  template: require('./accessRoles.html'),
+  controller: AccessRolesController,
   controllerAs: 'vm',
   bindings: {
     user: '<'
@@ -19,7 +19,7 @@ var component = {
  * Controller for this component.
  */
 /* @ngInject */
-function UserRolesController(breadcrumbService) {
+function AccessRolesController(breadcrumbService) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -36,4 +36,4 @@ function UserRolesController(breadcrumbService) {
 
 }
 
-export default ngModule => ngModule.component('userRoles', component)
+export default ngModule => ngModule.component('accessRoles', component)
