@@ -56,22 +56,23 @@ class AccessControllerSpec
             maybePrev = None)
         jsonItems must have size limit.toLong
         jsonItems
-          .map { json => (json \ "name").as[String] }
-          .foreach { jsonName => RoleId.withName(jsonName) }
+          .map { json => (json \ "id").as[String] }
+          .foreach { jsonId => RoleId.withName(jsonId) }
       }
 
       it("list a single role filtered by name") {
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri("roles"),
-                            Map("filter" -> s"name::${RoleId.ShippingUser.toString}"))
+        accessItemRepository.getByKey(AccessItemId(RoleId.ShippingUser.toString)) mustSucceed { role =>
+          val jsonItem = PagedResultsSpec(this)
+            .singleItemResult(uri("roles"), Map("filter" -> s"'name::${role.name}'"))
 
-        (jsonItem \ "accessItemType").as[String] must be (AccessItem.roleAccessItemType.toString)
+          (jsonItem \ "accessItemType").as[String] must be (AccessItem.roleAccessItemType.toString)
 
-        (jsonItem \ "name").as[String] must be (RoleId.ShippingUser.toString)
+          (jsonItem \ "name").as[String] must be (role.name)
 
-        (jsonItem \ "parentData").as[Set[EntityInfoDto]].size must be > 0
+          (jsonItem \ "parentData").as[Set[EntityInfoDto]].size must be > 0
 
-        (jsonItem \ "childData").as[Set[EntityInfoDto]].size must be > 0
+          (jsonItem \ "childData").as[Set[EntityInfoDto]].size must be > 0
+        }
       }
 
       it("list roles when sorted by name") {
