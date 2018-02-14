@@ -38,7 +38,7 @@ class AccessItemNameFactory {
    *
    * @param {Array<domain.access.AccessItem>} The items to omit from the result.
    *
-   * @returns {Promise<biobank.domain.PagedResult>} A promise containing a {@link biobank.domain.PagedResult}
+   * @returns {Promise<domain.PagedResult>} A promise containing a {@link domain.PagedResult}
    * with items of type {@link domain.access.AccessItem}s.
    */
   list(options, omit) {

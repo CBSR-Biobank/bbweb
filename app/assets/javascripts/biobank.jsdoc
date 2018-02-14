@@ -29,11 +29,108 @@
  */
 
 /**
- * AngularJS objects related to centres.
- * @namespace centres
+ * Components used by the application.
+ * <p>
+ * These components use the AngularJS framework.
+ * @namespace ng
+ */
+
+/**
+ * AngularJS components available to the rest of the application.
+ * @namespace ng.base
+ */
+
+/**
+ * AngularJS services available to the rest of the application.
+ * @namespace ng.base.services
+ */
+
+/**
+ * Common AngularJS components available to the rest of the application.
+ * @namespace ng.common
+ */
+
+/**
+ * Common AngularJS filters available to the rest of the application.
+ * @namespace ng.common.filters
+ */
+
+/**
+ * AngularJS components used for administration.
+ * @namespace ng.admin
+ */
+
+/**
+ * AngularJS administration components available to other administration modules.
+ * @namespace ng.admin.common
+ */
+
+/**
+ * AngularJS administration common controllers that are used as base classes.
+ * @namespace ng.admin.common.controllers
+ */
+
+/**
+ * AngularJS administration common components.
+ * @namespace ng.admin.common.components
+ */
+
+/**
+ * AngularJS common components.
+ * @namespace ng.common.components
+ */
+
+/**
+ * AngularJS common controllers that are used as base classes.
+ * @namespace ng.common.controllers
+ */
+
+/**
+ * AngularJS services that are used by the rest of the application.
+ * @namespace ng.common.services
  */
 
 /**
  * AngularJS components related to centres.
- * @namespace centres.components
+ * @namespace ng.centres
+ */
+
+/**
+ * AngularJS components related to specimen collection.
+ * @namespace ng.collection
+ */
+
+/**
+ * AngularJS components related to centres.
+ * @namespace ng.centres.components
+ */
+
+/**
+ * AngularJS components related to the home page.
+ * @namespace ng.home
+ */
+
+/**
+ * AngularJS components related to the home page.
+ * @namespace ng.home.components
+ */
+
+/**
+ * AngularJS components related to shipment specimens.
+ * @namespace ng.shipmentSpecimens
+ */
+
+/**
+ * AngularJS components related to studies.
+ * @namespace ng.studies
+ */
+
+/**
+ * AngularJS components used for testing.
+ * @namespace ng.studies
+ */
+
+/**
+ * AngularJS components related to users.
+ * @namespace ng.studies
  */

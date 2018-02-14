@@ -92,7 +92,7 @@ function CentreNameFactory($q,
    * @param {Array<domain.EntityNameAndState>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
-   * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
+   * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
    *          domain.centres.Centre}.
    */
   CentreName.list = function (options, omit) {

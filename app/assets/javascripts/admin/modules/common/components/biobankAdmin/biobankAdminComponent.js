@@ -4,9 +4,15 @@
  */
 
 /**
- * Home page for Administration tasks.
+ * @class ng.admin.common.components.annotationTypeView
+ *
+ * An AngularJS component that displays the Administration Home page.
+ * <p>
+ * From this page the user is able to select various links that lead to other tasks.
+ *
+ * @memberOf ng.admin.common.components
  */
-var component = {
+var biobankAdmin = {
   template: require('./biobankAdmin.html'),
   controller: BiobankAdminController,
   controllerAs: 'vm',
@@ -47,4 +53,4 @@ function BiobankAdminController(adminService, userService, User, breadcrumbServi
   }
 }
 
-export default ngModule => ngModule.component('biobankAdmin', component)
+export default ngModule => ngModule.component('biobankAdmin', biobankAdmin)

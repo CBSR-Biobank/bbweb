@@ -288,7 +288,7 @@ function UserFactory($q,
      * @param {int} options.limit The total number of users to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
-     * @returns {Promise<biobank.domain.PagedResult>} A promise of {@link biobank.domain.PagedResult} with
+     * @returns {Promise<domain.PagedResult>} A promise of {@link domain.PagedResult} with
      * items of type {@link domain.users.User}.
      */
     static list(options) {

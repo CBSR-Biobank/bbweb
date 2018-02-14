@@ -6,8 +6,8 @@
 import moment from 'moment'
 
 /**
- * @class common.timeService
- * @memberof common
+ * @class timeService
+ * @memberof ng.base.services
  *
  * @description An AnuglarJS service that converts dates to strings. Dates are converted to local time and UTC
  * strings.

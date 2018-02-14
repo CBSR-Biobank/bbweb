@@ -3,12 +3,16 @@ package org.biobank.service.access
 import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
+import java.time.format.DateTimeFormatter
 import javax.inject._
+import org.biobank.domain.{ConcurrencySafeEntity, HasName, HasSlug}
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.user.{UserId, UserRepository}
 import org.biobank.domain.study.{StudyId, StudyRepository}
 import org.biobank.domain.centre.{CentreId, CentreRepository}
+import org.biobank.dto._
+import org.biobank.dto.access._
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.command.MembershipCommands._
@@ -28,15 +32,16 @@ trait AccessService extends BbwebService {
 
   def getAccessItems(requestUserId: UserId,
                      filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[AccessItem]]
+                     sort:          SortString): ServiceValidation[Seq[AccessItemNameDto]]
 
-  def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[Role]
+  def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[RoleDto]
 
-  def getRoleBySlug(requestUserId: UserId, slug: String): ServiceValidation[Role]
+  def getRoleBySlug(requestUserId: UserId, slug: String): ServiceValidation[RoleDto]
 
-  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString): ServiceValidation[Seq[Role]]
+  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[RoleDto]]
 
-  def getUserRoles(userId: UserId): Set[Role]
+  def getUserRoles(userId: UserId): ServiceValidation[Set[UserRoleDto]]
 
   //def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]]
 
@@ -57,11 +62,11 @@ trait AccessService extends BbwebService {
 
   def getMemberships(requestUserId: UserId,
                      filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[Membership]]
+                     sort:          SortString): ServiceValidation[Seq[MembershipDto]]
 
   def getUserMembership(userId: UserId): ServiceValidation[UserMembership]
 
-  def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[Role]]
+  def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[RoleDto]]
 
   def processRemoveRoleCommand(cmd: RemoveRoleCmd): Future[ServiceValidation[Boolean]]
 
@@ -91,13 +96,13 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def getUserRoles(userId: UserId): Set[Role] = {
-    accessItemRepository.rolesForUser(userId)
+  def getUserRoles(userId: UserId): ServiceValidation[Set[UserRoleDto]] = {
+    accessItemRepository.rolesForUser(userId).map(roleToUserRoleDto).toList.sequenceU.map(_.toSet)
   }
 
   def getAccessItems(requestUserId: UserId,
                      filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[AccessItem]] = {
+                     sort:          SortString): ServiceValidation[Seq[AccessItemNameDto]] = {
     whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
       val allItems = accessItemRepository.getValues.toSet
       val sortStr = if (sort.expression.isEmpty) new SortString("name")
@@ -111,20 +116,27 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
         sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
                               toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
       } yield {
-        val result = items.toSeq.sortWith(sortFunc)
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
+        val sortedItems = items.toSeq.sortWith(sortFunc)
+        val dtos =         sortedItems.map(i => AccessItemNameDto(i.id.id,
+                                                                  i.slug,
+                                                                  i.name,
+                                                                  i.accessItemType.id))
+        if (firstSort.order == AscendingOrder) dtos
+        else dtos.reverse
       }
     }
   }
 
-  def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[Role] = {
+  def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[RoleDto] = {
     whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
-      accessItemRepository.getRole(roleId)
+      for {
+        role <- accessItemRepository.getRole(roleId)
+        dto <- roleToDto(role)
+      } yield dto
     }
   }
 
-  def getRoleBySlug(requestUserId: UserId, slug: String): ServiceValidation[Role] = {
+  def getRoleBySlug(requestUserId: UserId, slug: String): ServiceValidation[RoleDto] = {
     whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
       for {
         item <- accessItemRepository.getBySlug(slug)
@@ -134,12 +146,13 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
             case _ => EntityCriteriaError(s"access item not a role: $id").failureNel[Role]
           }
         }
-      } yield role
+        dto <- roleToDto(role)
+      } yield dto
     }
   }
 
   def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString)
-    : ServiceValidation[Seq[Role]] = {
+    : ServiceValidation[Seq[RoleDto]] = {
     whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
       val allRoles = accessItemRepository.getRoles
       val sortStr = if (sort.expression.isEmpty) new SortString("name")
@@ -152,10 +165,11 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
                               toSuccessNel(ServiceError("at least one sort expression is required")) }
         sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
                               toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+        sortedRoles     <- roles.toSeq.sortWith(sortFunc).successNel[String]
+        dtos            <- sortedRoles.map(roleToDto).toList.sequenceU
       } yield {
-        val result = roles.toSeq.sortWith(sortFunc)
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
+        if (firstSort.order == AscendingOrder) dtos
+        else dtos.reverse
       }
     }
   }
@@ -215,7 +229,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
 
   def getMemberships(requestUserId: UserId,
                      filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[Membership]] = {
+                     sort:          SortString): ServiceValidation[Seq[MembershipDto]] = {
     whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
       val allMemberships = membershipRepository.getValues.toSet
       val sortStr = if (sort.expression.isEmpty) new SortString("name")
@@ -228,11 +242,11 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
                               toSuccessNel(ServiceError("at least one sort expression is required")) }
         sortFunc        <- { Membership.sort2Compare.get(firstSort.name).
                               toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+        sorted          <- memberships.toSeq.sortWith(sortFunc).successNel[String]
+        dtos            <- sorted.map(membershipToDto).toList.sequenceU
       } yield {
-        val result = memberships.toSeq.sortWith(sortFunc)
-
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
+        if (firstSort.order == AscendingOrder) dtos
+        else dtos.reverse
       }
     }
   }
@@ -247,7 +261,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     }
   }
 
-  def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[Role]] = {
+  def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[RoleDto]] = {
     val v = for {
         validCommand <- {
           cmd match {
@@ -299,17 +313,17 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
 
     log.debug(s"processRoleCommand: cmd: $cmd")
     v.fold(
-      err => Future.successful(err.failure[Role]),
+      err => Future.successful(err.failure[RoleDto]),
       permitted => {
         if (!permitted) {
-          Future.successful(Unauthorized.failureNel[Role])
+          Future.successful(Unauthorized.failureNel[RoleDto])
         } else {
           ask(processor, cmd).mapTo[ServiceValidation[AccessEvent]].map { validation =>
             validation.flatMap { event =>
               if (event.eventType.isRole) {
-                accessItemRepository.getRole(AccessItemId(event.getRole.getId))
+                accessItemRepository.getRole(AccessItemId(event.getRole.getId)).flatMap(roleToDto)
               } else {
-                ServiceError("Server Error: event is not for role").failureNel[Role]
+                ServiceError("Server Error: event is not for role").failureNel[RoleDto]
               }
             }
           }
@@ -477,5 +491,99 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
       permission => if (permission) block()
                     else Unauthorized.failureNel[T]
     )
+  }
+
+  private def roleToDto(role: Role): ServiceValidation[RoleDto] = {
+
+    def getAccessItems(ids: Set[AccessItemId]): ServiceValidation[Set[AccessItem]] = {
+      ids
+        .map { id => accessItemRepository.getByKey(id) }
+        .toList.sequenceU
+        .leftMap(err => org.biobank.CommonValidations.InternalServerError.nel)
+        .map(_.toSet)
+    }
+
+    for {
+      users    <- role.userIds.map(userRepository.getByKey).toList.sequenceU.map(_.toSet)
+      parents  <- getAccessItems(role.parentIds)
+      children <- getAccessItems(role.childrenIds)
+    } yield {
+      RoleDto(id             = role.id.id,
+              version        = role.version,
+              timeAdded      = role.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+              timeModified   = role.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+              accessItemType = role.accessItemType.id,
+              slug           = role.slug,
+              name           = role.name,
+              description    = role.description,
+              userData       = entityInfoDto(users),
+              parentData     = entityInfoDto(parents),
+              childData      = entityInfoDto(children))
+    }
+  }
+
+  private def roleToUserRoleDto(role: Role): ServiceValidation[UserRoleDto] = {
+
+    def getAccessItems(ids: Set[AccessItemId]): ServiceValidation[Set[AccessItem]] = {
+      ids
+        .map { id => accessItemRepository.getByKey(id) }
+        .toList.sequenceU
+        .leftMap(err => org.biobank.CommonValidations.InternalServerError.nel)
+        .map(_.toSet)
+    }
+
+    getAccessItems(role.childrenIds).map { children =>
+      UserRoleDto(id             = role.id.id,
+                  version        = role.version,
+                  slug           = role.slug,
+                  name           = role.name,
+                  parentData     = Set.empty[EntityInfoDto],
+                  childData      = entityInfoDto(children))
+    }
+  }
+
+  private def membershipToDto(membership: Membership): ServiceValidation[MembershipDto] ={
+    for {
+      users    <- membership.userIds.map(userRepository.getByKey).toList.sequenceU.map(_.toSet)
+      studies <- {
+        membership.studyData.ids
+          .map(id => studyRepository.getByKey(id))
+          .toList.sequenceU
+          .map(_.toSet)
+      }
+      centres <- {
+        membership.centreData.ids
+          .map(centreRepository.getByKey(_))
+          .toList.sequenceU
+          .map(_.toSet)
+      }
+    } yield {
+      val userData        = entityInfoDto(users)
+      val studyEntitySet  = entitySetDto(membership.studyData.allEntities, studies)
+      val centreEntitySet = entitySetDto(membership.centreData.allEntities, centres)
+      val timeAdded       = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+      val timeModified    = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+
+      MembershipDto(id           = membership.id.id,
+                    version      = membership.version,
+                    timeAdded    = timeAdded,
+                    timeModified = timeModified,
+                    slug         = membership.slug,
+                    name         = membership.name,
+                    description  = membership.description,
+                    userData     = userData,
+                    studyData    = studyEntitySet,
+                    centreData   = centreEntitySet)
+    }
+  }
+
+  private def entityInfoDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]
+    (entities: Set[T]): Set[EntityInfoDto] = {
+    entities.map { entity => EntityInfoDto(entity.id.toString, entity.slug, entity.name) }
+  }
+
+  private def entitySetDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]
+    (hasAllEntities: Boolean, entities: Set[T]): EntitySetDto = {
+    EntitySetDto(hasAllEntities, entityInfoDto(entities))
   }
 }

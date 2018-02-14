@@ -1,7 +1,4 @@
-/**
- * Angular module for base layer functionality.
- * @namespace base
- *
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2017 Canadian BioSample Repository (CBSR)
  */

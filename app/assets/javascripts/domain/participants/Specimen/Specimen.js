@@ -261,7 +261,7 @@ function SpecimenFactory($q,
    *
    * @param {number} options.limit - The maximum number of specimens returned per page.
    *
-   * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type [Specimen]{@link
+   * @returns {Promise} A promise of {@link domain.PagedResult} with items of type [Specimen]{@link
    *          domain.Specimen}.
    */
   Specimen.list = function (ceventSlug, options) {

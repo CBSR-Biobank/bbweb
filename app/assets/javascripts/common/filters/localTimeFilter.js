@@ -8,8 +8,8 @@ function localTimeFilterFactory(timeService) {
   return localTimeFilter;
 
   /**
-   * @class common.localTimeFilter
-   * @memberof common
+   * @class localTimeFilter
+   * @memberOf ng.common.filters
    *
    * @description An Angular filter that displays a <code>Date</code> object as a local time.
    */

@@ -5,6 +5,8 @@
 
 /**
  * Uses Toastr to display notifications in pop up dialog boxes.
+ *
+ * @memberOf ng.common.services
  */
 class NotificationsService {
 
@@ -17,6 +19,17 @@ class NotificationsService {
     this.toastr.success('Your changes were saved.');
   }
 
+  /**
+   * Displays an success in the browser as a temporary popup dialog box.
+   * <p>
+   * Success messages have a green background.
+   *
+   * @param {string} message The message to display.
+   *
+   * @param {string} title The title to display.
+   *
+   * @param {int} timeout the amout of time to display the dialog box for.
+   */
   success(message, title, timeout = 1500) {
     var options = {
       closeButton:     true,
@@ -27,6 +40,17 @@ class NotificationsService {
     this.toastr.success(message, title, options);
   }
 
+  /**
+   * Displays an error in the browser as a temporary popup dialog box.
+   * <p>
+   * Error messages have a red background.
+   *
+   * @param {string} message The message to display.
+   *
+   * @param {string} title The title to display.
+   *
+   * @param {int} timeout the amout of time to display the dialog box for.
+   */
   error(message, title, timeout = 0) {
     var options = {
       closeButton:     true,
@@ -39,7 +63,11 @@ class NotificationsService {
   }
 
   /**
-   * Error is the error returned from a biobankApiService call that failed.
+   * Displays an error in the browser as a temporary popup dialog box.
+   * <p>
+   * Meant to be called when a change to a domain entity fails.
+   *
+   * @param {string} err The error message to display.
    */
   updateError(err) {
     var message,

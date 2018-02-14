@@ -4,14 +4,24 @@
  */
 
 /**
- * Used for all 3 different study annotation types: collection event, participant and specimen link
- * annotation types.
+ * @class ng.admin.common.components.annotationTypeAdd
  *
- * Property 'onSubmit' is the function that is called when the user submits the form.
+ * An AngularJS component that allows the user to add an {@link domain.AnnotationType AnnotationType} using an
+ * HTML form. The annotation type can then be added to one of these domain entities:
  *
- * @return {object} An AngularJS directive.
+ * - {@link domain.studies.CollectionEventType CollectionEventType}
+ * - {@link domain.studies.Study Study}
+ * - specimen link.
+ *
+ * @memberOf ng.admin.common.components
+ *
+ * @param {ng.admin.common.components.annotationTypeAdd.onSubmit} onSubmit The function that is called when
+ * the user submits the form.
+ *
+ * @param {ng.admin.common.components.annotationTypeAdd.onCancel} onCancel The function that is called when the
+ * user presses the *Cancel* button on the form.
  */
-var component = {
+var annotationTypeAdd = {
   template: require('./annotationTypeAdd.html'),
   controller: Controller,
   controllerAs: 'vm',
@@ -20,6 +30,21 @@ var component = {
     onCancel: '&'
   }
 };
+
+/**
+ * The callback function called by component {@link ng.admin.common.components.annotationTypeAdd
+ * annotationTypeAdd} after the user presses the *Submit* button in the component's HTML form.
+ *
+ * @callback ng.admin.common.components.annotationTypeAdd.onSubmit
+ * @param {domain.AnnotationType} annotationType - the annotation type with the values entered by the user.
+ */
+
+/**
+ * The callback function called by component {@link ng.admin.common.components.annotationTypeAdd
+ * annotationTypeAdd} after the user presses the *Cancel* button in the component's HTML form.
+ *
+ * @callback ng.admin.common.components.annotationTypeAdd.onCancel
+ */
 
 /*
  * Controller for this component.
@@ -104,4 +129,4 @@ function Controller(AnnotationType,
 
 }
 
-export default ngModule => ngModule.component('annotationTypeAdd', component)
+export default ngModule => ngModule.component('annotationTypeAdd', annotationTypeAdd)

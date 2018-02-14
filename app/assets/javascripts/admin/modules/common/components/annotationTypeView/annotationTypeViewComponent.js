@@ -6,14 +6,20 @@
 import _ from 'lodash'
 
 /**
+ * @class ng.admin.common.components.annotationTypeView
+ *
+ * An AngularJS component that allows the user to view a {@link domain.AnnotationType}.
+ *
+ * @memberOf ng.admin.common.components
+ *
  * @param {domain.AnnotationType} annotationType the Annotation type to display.
  *
- * @param {boolean} readOnly When FALSE, user is allowed to make changes to the annotation type.
+ * @param {boolean} readOnly When *FALSE*, user is allowed to make changes to the annotation type.
  *
- * @param {function} onUpdate the function has two parameters: the attribute that was modified ({string}), and
- * the updated annotation type ({@link domain.AnnotationType}).
+ * @param {ng.admin.common.components.annotationTypeView.onUpdate} onUpdate Used only if `readOnly` is
+ * *False*. This function called after the user made a change to the annotation type.
  */
-var component = {
+var annotationTypeView = {
   template: require('./annotationTypeView.html'),
   controller: AnnotationTypeViewController,
   controllerAs: 'vm',
@@ -23,6 +29,15 @@ var component = {
     onUpdate:       '&'
   }
 };
+
+/**
+ * The callback function called by component {@link ng.admin.common.components.annotationTypeView
+ * annotationTypeView} after the user has made changes to the annotation type.
+ *
+ * @callback ng.admin.common.components.annotationTypeView.onUpdate
+ * @param {string} attribute - the attribute that was modified
+ * @param {domain.AnnotationType} annotationType - the updated annotation type.
+ */
 
 /* @ngInject */
 function AnnotationTypeViewController($state,
@@ -92,4 +107,4 @@ function AnnotationTypeViewController($state,
 
 }
 
-export default ngModule => ngModule.component('annotationTypeView', component)
+export default ngModule => ngModule.component('annotationTypeView', annotationTypeView)

@@ -185,7 +185,7 @@ function StudyFactory($q,
    * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size
    *        is 10. If a value larger than 10 is used then the response is an error.
    *
-   * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
+   * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
    *          domain.studies.Study}.
    */
   Study.list = function (options) {
@@ -224,7 +224,7 @@ function StudyFactory($q,
    * @param {int} [options.limit=10] The total number of studies to return per page. The maximum page size
    *        is 10. If a value larger than 10 is used then the response is an error.
    *
-   * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
+   * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
    *          domain.studies.Study}.
    */
   Study.collectionStudies = function (options) {

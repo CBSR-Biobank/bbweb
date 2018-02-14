@@ -5,6 +5,8 @@
 
 /**
  * Base class controller for components that allow adding annotation types.
+ *
+ * @memberOf  ng.admin.common.controllers
  */
 class AnnotationTypeAddController {
 
@@ -41,12 +43,22 @@ class AnnotationTypeAddController {
   }
 
   /**
-   * This function should be overriden and will add the annotation type to the domain entity.
+   * This function should be overriden and is invoked to add the annotation type to the parent domain entity.
+   * @abstract
+   *
+   * @param {domain.AnnotationType} annotationType - The annotation type to be persisted.
    */
   addAnnotationType(annotationType) { // eslint-disable-line no-unused-vars
     throw new Error('subclass should override this function')
   }
 
+  /**
+   * Used when the annotation type is ready to be sent to the server to persist it.
+   * <p>
+   * Usually called when the user presses the button to submit the form.
+   *
+   * @param {domain.AnnotationType} annotationType - The annotation type to be persisted.
+   */
   submit(annotationType) {
     this.addAnnotationType(annotationType)
       .then(() => {
@@ -65,6 +77,9 @@ class AnnotationTypeAddController {
       })
   }
 
+  /**
+   * Invokes the UI Router to change state due to the user pressing the **Cancel** button.
+   */
   cancel() {
     this.$state.go(this.returnState, {}, { reload: true });
   }

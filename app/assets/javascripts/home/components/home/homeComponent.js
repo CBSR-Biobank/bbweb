@@ -3,6 +3,9 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
+/*
+ * Controller for this component.
+ */
 class HomeController {
 
   constructor($rootScope, userService, breadcrumbService) {
@@ -33,7 +36,14 @@ class HomeController {
 
 }
 
-const component = {
+/**
+ * @class home
+ *
+ * An AngularJS component for the home page.
+ *
+ * @memberOf ng.home.components
+ */
+const home = {
   template: require('./home.html'),
   controller: HomeController,
   controllerAs: 'vm',
@@ -41,4 +51,4 @@ const component = {
   }
 };
 
-export default ngModule => ngModule.component('home', component)
+export default ngModule => ngModule.component('home', home)

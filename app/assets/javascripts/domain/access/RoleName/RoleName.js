@@ -76,7 +76,7 @@ function RoleNameFactory($q,
    * @param {Array<domain.EntityInfo>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
-   * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
+   * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
    *          domain.access.Role}.
    */
   RoleName.list = function (options, omit) {
