@@ -17,9 +17,9 @@ describe('CollectionEvent', function() {
     angular.mock.inject(function(AnnotationsEntityTestSuiteMixin,
                                  ServerReplyMixin,
                                  TestUtils) {
-      _.extend(this,
-               AnnotationsEntityTestSuiteMixin,
-               ServerReplyMixin);
+      Object.assign(this,
+                    AnnotationsEntityTestSuiteMixin,
+                    ServerReplyMixin);
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',
@@ -93,10 +93,10 @@ describe('CollectionEvent', function() {
 
     expect(collectionEvent.id).toBeNull();
     expect(collectionEvent.version).toBe(0);
-    expect(collectionEvent.timeAdded).toBeNull();
-    expect(collectionEvent.timeModified).toBeNull();
-    expect(collectionEvent.timeCompleted).toBeNull();
-    expect(collectionEvent.visitNumber).toBeNull();
+    expect(collectionEvent.timeAdded).toBeUndefined();
+    expect(collectionEvent.timeModified).toBeUndefined();
+    expect(collectionEvent.timeCompleted).toBeUndefined();
+    expect(collectionEvent.visitNumber).toBeUndefined();
   });
 
   it('constructor with annotation parameter has valid values', function() {
@@ -181,17 +181,14 @@ describe('CollectionEvent', function() {
   });
 
   it('fails when constructing with invalid collection event type', function() {
-    var serverCollectionEvent,
-        ceventType;
+    const serverCollectionEvent =
+          this.Factory.collectionEvent({collectionEventTypeId: this.Factory.stringNext()});
+    const ceventType = this.CollectionEventType.create(this.Factory.collectionEventType(this.jsonStudy));
 
-    serverCollectionEvent = this.Factory.collectionEvent({
-      collectionEventTypeId: this.Factory.stringNext()
-    });
-    ceventType = this.CollectionEventType.create(
-      this.Factory.collectionEventType(this.jsonStudy));
-
-    expect(() => new this.CollectionEvent(serverCollectionEvent, ceventType))
-     .toThrowError('invalid collection event type');
+    expect(() => {
+      const x = new this.CollectionEvent(serverCollectionEvent, ceventType);
+      return x;
+    }).toThrowError('invalid collection event type');
   });
 
   describe('when creating', function() {

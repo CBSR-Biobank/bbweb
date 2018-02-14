@@ -50,8 +50,8 @@ describe('Study', function() {
 
     expect(study.id).toBeNull();
     expect(study.version).toBe(0);
-    expect(study.timeAdded).toBeNull();
-    expect(study.timeModified).toBeNull();
+    expect(study.timeAdded).toBeUndefined();
+    expect(study.timeModified).toBeUndefined();
     expect(study.name).toBeEmptyString();
     expect(study.state).toBe(this.StudyState.DISABLED);
   });

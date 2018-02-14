@@ -172,17 +172,13 @@ function ParticipantFactory($q,
    */
   Participant.get = function (slug) {
     return biobankApi.get(Participant.url(slug))
-      .then(Participant.prototype.asyncCreate);
+      .then(Participant.asyncCreate);
   };
 
   Participant.prototype.setStudy = function (study) {
     this.study = study;
     this.studyId = study.id;
     this.setAnnotationTypes(study.annotationTypes);
-  };
-
-  Participant.prototype.asyncCreate = function (obj) {
-    return Participant.asyncCreate(obj);
   };
 
   /**
@@ -212,7 +208,7 @@ function ParticipantFactory($q,
       deferred.reject(invalidAnnotationErrMsg);
     } else {
       biobankApi.post(Participant.url(this.studyId), cmd)
-        .then(this.asyncCreate)
+        .then(Participant.asyncCreate)
         .then(function (participant) {
           deferred.resolve(participant);
         });
@@ -225,17 +221,14 @@ function ParticipantFactory($q,
    * Sets the collection event type after an update.
    */
   Participant.prototype.update = function (path, reqJson) {
-    var self = this;
-
-    return ConcurrencySafeEntity.prototype.update.call(this, Participant.url(path, self.id), reqJson)
-      .then(postUpdate);
-
-    function postUpdate(updatedParticipant) {
-      if (self.study) {
-        updatedParticipant.setStudy(self.study);
-      }
-      return $q.when(updatedParticipant);
-    }
+    return ConcurrencySafeEntity.prototype.update.call(this, Participant.url(path, this.id), reqJson)
+      .then(Participant.asyncCreate)
+      .then(updatedParticipant => {
+        if (this.study) {
+          updatedParticipant.setStudy(this.study);
+        }
+        return $q.when(updatedParticipant);
+      });
   };
 
   Participant.prototype.updateUniqueId = function (uniqueId) {
@@ -248,7 +241,8 @@ function ParticipantFactory($q,
 
   Participant.prototype.removeAnnotation = function (annotation) {
     var url = Participant.url('annot', this.id, this.version, annotation.annotationTypeId);
-    return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url);
+    return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url)
+      .then(Participant.asyncCreate);
   };
 
   /** return constructor function */

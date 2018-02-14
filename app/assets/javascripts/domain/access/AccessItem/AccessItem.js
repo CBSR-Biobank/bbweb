@@ -13,6 +13,10 @@ function AccessItemFactory($q,
                            DomainEntity,
                            ConcurrencySafeEntity,
                            EntityInfo) {
+  /**
+   * A base class for User Access Management objects.
+   * @memberOf domain.access
+   */
   class AccessItem extends ConcurrencySafeEntity {
 
     constructor(schema = AccessItem.SCHEMA, obj = {}) {
@@ -21,14 +25,14 @@ function AccessItemFactory($q,
       /**
        * A short identifying name that is unique.
        *
-       * @name domain.users.AccessItem#name
+       * @name domain.access.AccessItem#name
        * @type {string}
        */
 
       /**
        * An optional description that can provide additional details on the name.
        *
-       * @name domain.users.AccessItem#description
+       * @name domain.access.AccessItem#description
        * @type {string}
        * @default null
        */
@@ -36,7 +40,7 @@ function AccessItemFactory($q,
       /**
        * This AccessItem's parents.
        *
-       * @name domain.users.AccessItem#parentData
+       * @name domain.access.AccessItem#parentData
        * @type {Array<EntityInfo>}
        */
       this.parentData = []
@@ -47,13 +51,30 @@ function AccessItemFactory($q,
       /**
        * This AccessItem's children.
        *
-       * @name domain.users.AccessItem#userData
+       * @name domain.access.AccessItem#userData
        * @type {Array<EntityInfo>}
        */
       this.childData = []
       if (obj.childData) {
         this.childData = obj.childData.map(info => new EntityInfo(info))
       }
+    }
+
+    static createDerivedSchema({ id, type = 'object', properties = {}, required = [] } = {}) {
+      return Object.assign(
+        {},
+        AccessItem.SCHEMA,
+        {
+          id: id,
+          type: type,
+          properties: Object.assign(
+            {},
+            AccessItem.SCHEMA.properties,
+            properties
+          ),
+          required: AccessItem.SCHEMA.required.slice().concat(required)
+        }
+      );
     }
 
   }
@@ -74,23 +95,6 @@ function AccessItemFactory($q,
       'childData'
     ]
   });
-
-  AccessItem.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = [] } = {}) {
-    return Object.assign(
-      {},
-      AccessItem.SCHEMA,
-      {
-        id: id,
-        type: type,
-        properties: Object.assign(
-          {},
-          AccessItem.SCHEMA.properties,
-          properties
-        ),
-        required: AccessItem.SCHEMA.required.slice().concat(required)
-      }
-    );
-  }
 
   return AccessItem;
 }

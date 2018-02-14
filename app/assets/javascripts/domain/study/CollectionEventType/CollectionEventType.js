@@ -36,14 +36,13 @@ function CollectionEventTypeFactory($q,
    *
    * @param {Study} options.study the study this collection even type belongs to.
    */
-  function CollectionEventType(obj, options) {
+  function CollectionEventType(obj = {}, options = {}) {
     /**
      * The ID of the {@link domain.studies.Study|Study} this collection event type belongs to.
      *
      * @name domain.studies.CollectionEventType#studyId
      * @type {string}
      */
-    this.studyId = _.get(obj, 'studyId', null);
 
     /**
      * A short identifying name that is unique.
@@ -51,7 +50,6 @@ function CollectionEventTypeFactory($q,
      * @name domain.studies.CollectionEventType#name
      * @type {string}
      */
-    this.name = '';
 
     /**
      * An optional description that can provide additional details on the name.
@@ -67,7 +65,6 @@ function CollectionEventTypeFactory($q,
      * @name domain.studies.CollectionEventType#recurring
      * @type {boolean}
      */
-    this.recurring = false;
 
     /**
      * The specifications for the specimens that are collected for this collection event type.
@@ -75,7 +72,6 @@ function CollectionEventTypeFactory($q,
      * @name domain.studies.CollectionEventType#specimenDescriptions
      * @type {Array<domain.studies.CollectionSpecimenDescription>}
      */
-    this.specimenDescriptions = [];
 
     /**
      * The annotation types that are collected for this collection event type.
@@ -83,16 +79,21 @@ function CollectionEventTypeFactory($q,
      * @name domain.studies.CollectionEventType#annotationTypes
      * @type {Array<domain.AnnotationType>}
      */
-    this.annotationTypes = [];
+
+    obj = Object.assign(
+      {
+        id:        null,
+        recurring: false
+      },
+      obj,
+    );
 
     ConcurrencySafeEntity.call(this, CollectionEventType.SCHEMA, obj);
 
-    options                      = options || {};
-    options.study                = _.get(options, 'study', undefined);
     options.specimenDescriptions = _.get(options, 'specimenDescriptions', []);
     options.annotationTypes      = _.get(options, 'annotationTypes', []);
 
-    _.extend(this, _.pick(options, 'study', 'specimenDescriptions', 'annotationTypes'));
+    Object.assign(this, _.pick(options, 'study', 'specimenDescriptions', 'annotationTypes'));
 
     if (options.study) {
       this.studyId = options.study.id;
@@ -100,14 +101,13 @@ function CollectionEventTypeFactory($q,
   }
 
   CollectionEventType.prototype = Object.create(ConcurrencySafeEntity.prototype);
-  _.extend(CollectionEventType.prototype,
+  Object.assign(CollectionEventType.prototype,
            HasAnnotationTypes.prototype,
            HasCollectionSpecimenDescriptions.prototype);
   CollectionEventType.prototype.constructor = CollectionEventType;
 
-  CollectionEventType.url = function (/* pathItem1, pathItem2, ... pathItemN */) {
-    const args = [ 'studies/cetypes' ].concat(_.toArray(arguments));
-    return DomainEntity.url.apply(null, args);
+  CollectionEventType.url = function (...paths) {
+    return DomainEntity.url.apply(null, [ 'studies/cetypes' ].concat(paths));
   };
 
   CollectionEventType.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
@@ -268,17 +268,6 @@ function CollectionEventTypeFactory($q,
     });
   };
 
-  /**
-   * Creates a CollectionEventType from a server reply but first validates that it has a valid schema.
-   *
-   * <p>A wrapper for {@link domian.studies.CollectionEventType#asyncCreate}.</p>
-   *
-   * @see {@link domain.ConcurrencySafeEntity#update}
-   */
-  CollectionEventType.prototype.asyncCreate = function (obj) {
-    return CollectionEventType.asyncCreate(obj);
-  };
-
   CollectionEventType.prototype.add = function() {
     var json = _.pick(this, 'studyId','name', 'recurring', 'description');
     return biobankApi.post(CollectionEventType.url(this.studyId), json)
@@ -292,9 +281,14 @@ function CollectionEventTypeFactory($q,
     return biobankApi.del(url);
   };
 
+  CollectionEventType.prototype.update = function (path, reqJson) {
+    return ConcurrencySafeEntity.prototype.update.call(this, path, reqJson)
+      .then(CollectionEventType.asyncCreate);
+  };
+
   CollectionEventType.prototype.updateName = function (name) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this, CollectionEventType.url('name', this.id), { studyId: this.studyId, name: name });
+    return this.update(CollectionEventType.url('name', this.id),
+                       { studyId: this.studyId, name: name });
   };
 
   CollectionEventType.prototype.updateDescription = function (description) {
@@ -302,60 +296,53 @@ function CollectionEventTypeFactory($q,
     if (description) {
       json.description = description;
     }
-    return ConcurrencySafeEntity.prototype.update.call(this, CollectionEventType.url('description', this.id), json);
+    return this.update(CollectionEventType.url('description', this.id), json);
   };
 
   CollectionEventType.prototype.updateRecurring = function (recurring) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this,
-      CollectionEventType.url('recurring', this.id),
-      { studyId: this.studyId, recurring: recurring });
+    return this.update(CollectionEventType.url('recurring', this.id),
+                       { studyId: this.studyId, recurring: recurring });
   };
 
   CollectionEventType.prototype.addSpecimenDescription = function (specimenDescription) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this,
-      CollectionEventType.url('spcdesc', this.id),
-      _.extend({ studyId: this.studyId }, _.omit(specimenDescription, 'id')));
+    return this.update(CollectionEventType.url('spcdesc', this.id),
+                       Object.assign({ studyId: this.studyId }, _.omit(specimenDescription, 'id')));
   };
 
   CollectionEventType.prototype.updateSpecimenDescription = function (specimenDescription) {
-    var url = CollectionEventType.url('spcdesc', this.id, specimenDescription.id);
-    return ConcurrencySafeEntity.prototype.update.call(
-      this,
-      url,
-      _.extend({ studyId: this.studyId }, specimenDescription));
+    return this.update(CollectionEventType.url('spcdesc', this.id, specimenDescription.id),
+                       Object.assign({ studyId: this.studyId }, specimenDescription));
   };
 
   CollectionEventType.prototype.removeSpecimenDescription = function (specimenDescription) {
-    var url,
-        found = _.find(this.specimenDescriptions,  { id: specimenDescription.id });
+    const found = _.find(this.specimenDescriptions,  { id: specimenDescription.id });
 
     if (!found) {
       throw new DomainError('specimen description with ID not present: ' + specimenDescription.id);
     }
 
-    url = CollectionEventType.url('spcdesc', this.studyId, this.id, this.version, specimenDescription.id);
+    const url = CollectionEventType.url('spcdesc',
+                                        this.studyId,
+                                        this.id,
+                                        this.version,
+                                        specimenDescription.id);
     return biobankApi.del(url).then(CollectionEventType.asyncCreate);
   };
 
   CollectionEventType.prototype.addAnnotationType = function (annotationType) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this,
-      CollectionEventType.url('annottype', this.id),
-      _.extend({ studyId: this.studyId }, _.omit(annotationType, 'uniqueId')));
+    return this.update(CollectionEventType.url('annottype', this.id),
+                       Object.assign({ studyId: this.studyId }, _.omit(annotationType, 'uniqueId')));
   };
 
   CollectionEventType.prototype.updateAnnotationType = function (annotationType) {
-    return ConcurrencySafeEntity.prototype.update.call(
-      this,
-      CollectionEventType.url('annottype', this.id, annotationType.id),
-      _.extend({ studyId: this.studyId }, annotationType));
+    return this.update(CollectionEventType.url('annottype', this.id, annotationType.id),
+                       Object.assign({ studyId: this.studyId }, annotationType));
   };
 
   CollectionEventType.prototype.removeAnnotationType = function (annotationType) {
     var url = CollectionEventType.url('annottype', this.studyId, this.id, this.version, annotationType.id);
-    return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
+    return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url)
+      .then(CollectionEventType.asyncCreate);
   };
 
   CollectionEventType.prototype.inUse = function () {

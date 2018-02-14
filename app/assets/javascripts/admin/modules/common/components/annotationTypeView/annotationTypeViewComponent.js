@@ -6,7 +6,7 @@
 import _ from 'lodash'
 
 /**
- * @param {<domain.AnnotationType>} annotationType the Annotation type to display.
+ * @param {domain.AnnotationType} annotationType the Annotation type to display.
  *
  * @param {boolean} readOnly When FALSE, user is allowed to make changes to the annotation type.
  *

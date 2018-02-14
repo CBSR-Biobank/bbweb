@@ -4,7 +4,7 @@
  */
 
 /**
- * The statuses a {@link domain.users.User User} can have.
+ * A {@link domain.users.User User} can be in one of these states.
  *
  * @enum {string}
  * @memberOf domain.users

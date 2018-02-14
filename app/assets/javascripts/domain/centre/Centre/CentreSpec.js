@@ -66,8 +66,8 @@ describe('Centre', function() {
 
     expect(centre.id).toBeNull();
     expect(centre.version).toBe(0);
-    expect(centre.timeAdded).toBeNull();
-    expect(centre.timeModified).toBeNull();
+    expect(centre.timeAdded).toBeUndefined();
+    expect(centre.timeModified).toBeUndefined();
     expect(centre.name).toBeEmptyString();
     expect(centre.description).toBeNull();
     expect(centre.locations).toBeEmptyArray();

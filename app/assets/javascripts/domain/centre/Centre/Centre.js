@@ -305,6 +305,10 @@ function CentreFactory($q,
     });
   };
 
+  Centre.prototype.update = function (url, additionalJson) {
+    return ConcurrencySafeEntity.prototype.update.call(this, url, additionalJson).then(Centre.asyncCreate);
+  };
+
   /**
    * Updates the centre's name.
    *

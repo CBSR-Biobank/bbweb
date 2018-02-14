@@ -98,8 +98,8 @@ describe('Participant', function() {
 
     expect(participant.id).toBeNull();
     expect(participant.version).toBe(0);
-    expect(participant.timeAdded).toBeNull();
-    expect(participant.timeModified).toBeNull();
+    expect(participant.timeAdded).toBeUndefined();
+    expect(participant.timeModified).toBeUndefined();
     expect(participant.uniqueId).toBeEmptyString();
   });
 
@@ -311,8 +311,8 @@ describe('Participant', function() {
                       this.url('participants/uniqueId', participant.id),
                       { uniqueId: participant.uniqueId },
                       jsonParticipant,
-                      this.expectParticipant,
-                      this.failTest);
+                      this.expectParticipant.bind(this),
+                      this.failTest.bind(this));
   });
 
   describe('updates to annotations', function () {

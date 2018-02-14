@@ -4,6 +4,11 @@
  */
 
 /**
+ * Domain entities related to user access management.
+ * @namespace domain.access
+ */
+
+/**
  * Domain entities related to users.
  * @namespace domain.users
  */

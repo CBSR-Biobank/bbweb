@@ -83,8 +83,8 @@ describe('CollectionEventType', function() {
     var ceventType = new this.CollectionEventType();
 
     expect(ceventType.isNew()).toBe(true);
-    expect(ceventType.studyId).toBe(null);
-    expect(ceventType.name).toBe('');
+    expect(ceventType.studyId).toBeUndefined();
+    expect(ceventType.name).toBeUndefined();
     expect(ceventType.recurring).toBe(false);
     expect(ceventType.specimenDescriptions).toBeArrayOfSize(0);
     expect(ceventType.annotationTypes).toBeArrayOfSize(0);
@@ -216,53 +216,48 @@ describe('CollectionEventType', function() {
   });
 
   it('should update name', function () {
-    var cet = new this.CollectionEventType(this.jsonCet);
-    this.updateEntity.call(this,
-                           cet,
-                           'updateName',
-                           cet.name,
-                           this.url('name', cet.id),
-                           { name: cet.name, studyId: cet.studyId },
-                           this.jsonCet,
-                           this.expectCet,
-                           this.failTest);
+    var cet = this.CollectionEventType.create(this.jsonCet);
+    this.updateEntity(cet,
+                      'updateName',
+                      cet.name,
+                      this.url('name', cet.id),
+                      { name: cet.name, studyId: cet.studyId },
+                      this.jsonCet,
+                      this.expectCet.bind(this),
+                      this.failTest.bind(this));
   });
 
   it('should update description', function () {
-    var cet = new this.CollectionEventType(this.jsonCet);
+    var cet = this.CollectionEventType.create(this.jsonCet);
+    this.updateEntity(cet,
+                      'updateDescription',
+                      undefined,
+                      this.url('description', cet.id),
+                      { studyId: cet.studyId },
+                      this.jsonCet,
+                      this.expectCet.bind(this),
+                      this.failTest.bind(this));
 
-    this.updateEntity.call(this,
-                           cet,
-                           'updateDescription',
-                           undefined,
-                           this.url('description', cet.id),
-                           { studyId: cet.studyId },
-                           this.jsonCet,
-                           this.expectCet,
-                           this.failTest);
-
-    this.updateEntity.call(this,
-                           cet,
-                           'updateDescription',
-                           cet.description,
-                           this.url('description', cet.id),
-                           { description: cet.description, studyId: cet.studyId },
-                           this.jsonCet,
-                           this.expectCet,
-                           this.failTest);
+    this.updateEntity(cet,
+                      'updateDescription',
+                      cet.description,
+                      this.url('description', cet.id),
+                      { description: cet.description, studyId: cet.studyId },
+                      this.jsonCet,
+                      this.expectCet.bind(this),
+                      this.failTest.bind(this));
   });
 
   it('should update recurring', function () {
     var cet = new this.CollectionEventType(this.jsonCet);
-    this.updateEntity.call(this,
-                           cet,
-                           'updateRecurring',
-                           cet.recurring,
-                           this.url('recurring', cet.id),
-                           { recurring: cet.recurring, studyId: cet.studyId },
-                           this.jsonCet,
-                           this.expectCet,
-                           this.failTest);
+    this.updateEntity(cet,
+                      'updateRecurring',
+                      cet.recurring,
+                      this.url('recurring', cet.id),
+                      { recurring: cet.recurring, studyId: cet.studyId },
+                      this.jsonCet,
+                      this.expectCet.bind(this),
+                      this.failTest.bind(this));
   });
 
   describe('for specimen specs', function() {
@@ -274,15 +269,14 @@ describe('CollectionEventType', function() {
     });
 
     it('should add a specimen description', function () {
-      this.updateEntity.call(this,
-                             this.cet,
-                             'addSpecimenDescription',
-                             _.omit(this.jsonSpec, 'id'),
-                             this.url('spcdesc', this.cet.id),
-                             _.extend(_.omit(this.jsonSpec, 'id'), { studyId: this.cet.studyId }),
-                             this.jsonCet,
-                             this.expectCet,
-                             this.failTest);
+      this.updateEntity(this.cet,
+                        'addSpecimenDescription',
+                        _.omit(this.jsonSpec, 'id'),
+                        this.url('spcdesc', this.cet.id),
+                        _.extend(_.omit(this.jsonSpec, 'id'), { studyId: this.cet.studyId }),
+                        this.jsonCet,
+                        this.expectCet.bind(this),
+                        this.failTest.bind(this));
     });
 
     it('should remove a specimen description', function () {

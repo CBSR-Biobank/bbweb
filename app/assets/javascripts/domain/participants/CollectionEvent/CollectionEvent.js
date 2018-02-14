@@ -50,7 +50,6 @@ function CollectionEventFactory($q,
      * @name domain.participants.CollectionEvent#visitNumber
      * @type {integer}
      */
-    this.visitNumber = null;
 
     /**
      * The time this collection event was completed at.
@@ -58,7 +57,6 @@ function CollectionEventFactory($q,
      * @name domain.participants.CollectionEvent#timeCompleted
      * @type {Date}
      */
-    this.timeCompleted = null;
 
     /**
      * The annotations assigned to this collection event.
@@ -66,7 +64,14 @@ function CollectionEventFactory($q,
      * @name domain.participants.CollectionEvent#annotations
      * @type {Array<domain.AnnotationType>}
      */
-    this.annotations = [];
+
+    // set defaults if not already there
+    obj = Object.assign(
+      { id: null,
+        version: 0,
+        annotations: []
+      },
+      obj);
 
     ConcurrencySafeEntity.call(this, CollectionEvent.SCHEMA, obj);
 
@@ -323,7 +328,8 @@ function CollectionEventFactory($q,
   };
 
   CollectionEvent.prototype.update = function (path, reqJson) {
-    return ConcurrencySafeEntity.prototype.update.call(this, CollectionEvent.url(path, this.id), reqJson);
+    return ConcurrencySafeEntity.prototype.update.call(this, CollectionEvent.url(path, this.id), reqJson)
+      .then(CollectionEvent.asyncCreate);
   };
 
   CollectionEvent.prototype.updateVisitNumber = function (visitNumber) {
@@ -340,7 +346,8 @@ function CollectionEventFactory($q,
 
   CollectionEvent.prototype.removeAnnotation = function (annotation) {
     var url = CollectionEvent.url('annot', this.id, this.version, annotation.annotationTypeId);
-    return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url);
+    return HasAnnotations.prototype.removeAnnotation.call(this, annotation, url)
+      .then(CollectionEvent.asyncCreate);
   };
 
   /** return constructor function */

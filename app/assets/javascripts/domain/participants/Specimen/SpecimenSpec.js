@@ -67,8 +67,8 @@ describe('Specimen', function() {
     expect(specimen.locationInfo).toBeNull();
     expect(specimen.containerId).toBeUndefined();
     expect(specimen.positionId).toBeUndefined();
-    expect(specimen.timeAdded).toBeNull();
-    expect(specimen.timeModified).toBeNull();
+    expect(specimen.timeAdded).toBeUndefined();
+    expect(specimen.timeModified).toBeUndefined();
     expect(specimen.timeCreated).toBeNull();
     expect(specimen.amount).toBeNull();
     expect(specimen.state).toBeNull();

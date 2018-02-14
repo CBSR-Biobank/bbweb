@@ -24,8 +24,7 @@ function DomainEntityFactory(UrlService) {
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * the derived class. Objects of this type are usually returned by the server's REST API.
    */
-  function DomainEntity(schema, obj) {
-    obj = obj || {};
+  function DomainEntity(schema, obj = {}) {
     Object.assign(this, _.pick(obj, _.keys(schema.properties)));
   }
 

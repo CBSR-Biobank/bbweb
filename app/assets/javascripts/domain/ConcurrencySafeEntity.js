@@ -27,7 +27,6 @@ function ConcurrencySafeEntityFactory($q,
      * @type string
      * @protected
      */
-    this.id = null;
 
     /**
      * The current version for the object. Used for optimistic concurrency versioning.
@@ -35,7 +34,6 @@ function ConcurrencySafeEntityFactory($q,
      * @type number
      * @protected
      */
-    this.version = 0;
 
     /**
      * The date and time, in ISO time format, when this entity was added to the system.
@@ -43,7 +41,6 @@ function ConcurrencySafeEntityFactory($q,
      * @type Date
      * @protected
      */
-    this.timeAdded = null;
 
     /**
      * The date and time, in ISO time format, when this entity was last updated.
@@ -51,7 +48,8 @@ function ConcurrencySafeEntityFactory($q,
      * @type Date
      * @protected
      */
-    this.timeModified = null;
+
+    obj = Object.assign({ id: null, version: 0 }, obj)
 
     DomainEntity.call(this, schema, obj);
 
@@ -109,24 +107,17 @@ function ConcurrencySafeEntityFactory($q,
     return DomainEntity.isValid(schema, additionalSchemas, obj);
   };
 
-  /** @protected */
-  ConcurrencySafeEntity.prototype.asyncCreate = function (obj) { // eslint-disable-line no-unused-vars
-    var deferred = $q.defer();
-    deferred.reject('the subclass should override this method');
-    return deferred.promise;
-  };
 
   /** @protected */
-  ConcurrencySafeEntity.prototype.update = function (url, additionalJson) {
-    var self = this,
-        json;
+  /*
+   * Sends a request to the server to update this entity.
+   */
+  ConcurrencySafeEntity.prototype.update = function (url, additionalJson = {}) {
     if (_.isNil(this.id)) {
       throw new DomainError('entity has not been persisted');
     }
-    json = _.extend({ expectedVersion: self.version }, additionalJson || {});
-    return biobankApi.post(url, json).then(function(reply) {
-      return self.asyncCreate(reply);
-    });
+    const json = _.extend({ expectedVersion: this.version }, additionalJson);
+    return biobankApi.post(url, json);
   };
 
   return ConcurrencySafeEntity;

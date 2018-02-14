@@ -212,6 +212,11 @@ function MembershipFactory($q,
     return biobankApi.del(url);
   };
 
+  /** @protected */
+  Membership.prototype.update = function (url, additionalJson) {
+    return ConcurrencySafeEntity.prototype.update.call(this, url, additionalJson).then(Membership.asyncCreate);
+  };
+
   /**
    * Updates the name.
    *
@@ -220,7 +225,7 @@ function MembershipFactory($q,
    * @returns {Promise<domain.access.Membership>} A promise containing the membership with the new name.
    */
   Membership.prototype.updateName = function (name) {
-    return this.update.call(this, Membership.url('name', this.id), { name: name });
+    return this.update(Membership.url('name', this.id), { name: name });
   };
 
   /**
@@ -232,9 +237,8 @@ function MembershipFactory($q,
    * @returns {Promise<domain.access.Membership>} A promise containing the membership with the new description.
    */
   Membership.prototype.updateDescription = function (description) {
-    return this.update.call(this,
-                            Membership.url('description', this.id),
-                            description ? { description: description } : {});
+    return this.update(Membership.url('description', this.id),
+                       description ? { description: description } : {});
   };
 
   Membership.prototype.addUser = function (id) {

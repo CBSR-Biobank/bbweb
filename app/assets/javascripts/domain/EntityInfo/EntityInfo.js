@@ -72,7 +72,7 @@ function EntityInfoFactory($q,
    * @param {Array<domain.EntityName>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
-   * @returns {Promise<Array<objects>} A promise containing an array of objcts. The objects are created by
+   * @returns {Promise<Array<objects>>} A promise containing an array of objcts. The objects are created by
    * calling {@link createFunc}.
    */
   EntityInfo.list = function (url, options, createFunc, omit) {

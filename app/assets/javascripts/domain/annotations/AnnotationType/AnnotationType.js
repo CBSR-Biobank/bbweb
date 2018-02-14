@@ -3,9 +3,6 @@
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 
-/**
- *
- */
 /* @ngInject */
 function AnnotationTypeFactory($log,
                                DomainEntity,
@@ -13,6 +10,17 @@ function AnnotationTypeFactory($log,
                                AnnotationValueType,
                                AnnotationMaxValueCount) {
 
+  /**
+   * @class
+   * @memberOf domain
+   * @extends domain.DomainEntity
+   *
+   * @classdesc Information for the format of an annotation.
+
+   * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+   * this class. Objects of this type are usually returned by the server's REST API.
+   *
+   */
   function AnnotationType(obj) {
     // FIXME: jsdoc for this classes members is needed
     this.id            = '';

@@ -3,6 +3,7 @@
  * @copyright 2015 Canadian BioSample Repository (CBSR)
  */
 
+
 import _ from 'lodash'
 
 /*
@@ -16,25 +17,25 @@ function UserFactory($q,
                      ConcurrencySafeEntity,
                      DomainError,
                      UserState,
+                     RoleIds,
                      UserMembership) {
 
   /**
-   * Use this contructor to create a new User to be persited on the server. Use {@link
-   * domain.users.User.create|create()} or {@link domain.users.User.asyncCreate|asyncCreate()} to
-   * create objects returned by the server.
-   *
-   * @class
-   * @memberOf domain.users
+   * Information for a user of the system.
    * @extends domain.ConcurrencySafeEntity
-   *
-   * @classdesc Informaiton for a user of the system.
+   * @memberOf domain.users
+   */
+  class User extends ConcurrencySafeEntity {
+
+    /**
+     * Use this contructor to create a new User to be persited on the server. Use {@link
+     * domain.users.User.create|create()} or {@link domain.users.User.asyncCreate|asyncCreate()} to create
+     * objects returned by the server.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-  class User extends ConcurrencySafeEntity {
-
-    constructor(obj = {}) {
+    constructor(obj = { state: UserState.REGISTERED }) {
       super(User.SCHEMA, obj)
 
       /**
@@ -59,10 +60,10 @@ function UserFactory($q,
        */
 
       /**
-       * The roles this user has.
+       * Information for the roles this user has.
        *
-       * @name domain.users.User#roles
-       * @type {Array<string>}
+       * @name domain.users.User#roleData
+       * @type {Array<domain.EntityInfo>}
        */
 
       /**
@@ -75,17 +76,6 @@ function UserFactory($q,
       this.membership = new UserMembership(_.get(obj, 'membership', {}));
     }
 
-    /**
-     * Creates a User from a server reply but first validates that it has a valid schema.
-     *
-     * <i>A wrapper for {@link domain.users.User#asyncCreate}.</i>
-     *
-     * @see {@link domain.ConcurrencySafeEntity#update}
-     */
-    asyncCreate(obj) {
-      return User.asyncCreate(obj);
-    }
-
     register(password) {
       var json = {
         name:      this.name,
@@ -94,6 +84,11 @@ function UserFactory($q,
         avatarUrl: this.avatarUrl
       };
       return biobankApi.post(User.url(), json).then(User.asyncCreate);
+    }
+
+    /** @protected */
+    update(url, additionalJson) {
+      return super.update(url, additionalJson).then(User.asyncCreate);
     }
 
     updateName(name) {
@@ -141,7 +136,7 @@ function UserFactory($q,
     }
 
     addRole(roleId) {
-      if (_.find(this.roleData, (role) => role.id === roleId) !== undefined) {
+      if (this.roleData.find(role => role.id === roleId) !== undefined) {
         throw new DomainError('user already has role: ' + roleId);
       }
       return this.update(User.url('roles', this.id),
@@ -152,7 +147,7 @@ function UserFactory($q,
     }
 
     removeRole(roleId) {
-      if (_.find(this.roleData, (role) => role.id === roleId) === undefined) {
+      if (this.roleData.find(role => role.id === roleId) === undefined) {
         throw new DomainError('user does not have role: ' + roleId);
       }
       return biobankApi.del(User.url('roles', this.id, this.version, roleId))
@@ -176,46 +171,153 @@ function UserFactory($q,
     }
 
     hasRole(roleSlug) {
-      return _.find(this.roleData, (role) => role.slug === roleSlug) !== undefined;
+      return this.roleData.find(role => role.slug === roleSlug) !== undefined;
     }
 
-    hasAnyRoleOf(/* role1, role2, ..., roleN */) {
-      var slugs = _.map(this.roleData, 'slug');
-      return _.intersection(Array.prototype.slice.call(arguments), slugs).length > 0;
+    hasAnyRoleOf(...roleIds) {
+      var ids = _.map(this.roleData, 'ids');
+      return roleIds.filter(id => ids.includes(id)).length > 0;
     }
 
     hasStudyAdminRole() {
-      return this.hasRole('study-administrator');
+      return this.hasRole(RoleIds.StudyAdministrator);
     }
 
     hasCentreAdminRole() {
-      return this.hasRole('centre-administrator');
+      return this.hasRole(RoleIds.CentreAdministrator);
     }
 
     hasUserAdminRole() {
-      return this.hasRole('user-administrator');
+      return this.hasRole(RoleIds.UserAdministrator);
     }
 
     hasAdminRole() {
-      return this.hasAnyRoleOf('study-administrator',
-                               'centre-administrator',
-                               'user-administrator');
+      return this.hasAnyRoleOf(RoleIds.StudyAdministrator,
+                               RoleIds.CentreAdministrator,
+                               RoleIds.UserAdministrator);
     }
 
     hasSpecimenCollectorRole() {
-      return this.hasRole('specimen-collector');
+      return this.hasRole(RoleIds.SpecimenCollector);
     }
 
 
     hasShippingUserRole() {
-      return this.hasRole('shipping-user');
+      return this.hasRole(RoleIds.ShippingUser);
     }
 
     getRoleNames() {
       return this.roleData.map(role => role.name).join(', ');
     }
 
+    static url (...paths){
+      return DomainEntity.url.apply(null, [ 'users' ].concat(paths));
+    }
+
+    /** @protected */
+    static isValid(obj) {
+      return ConcurrencySafeEntity.isValid(User.SCHEMA, [UserMembership.SCHEMA], obj);
+    }
+
+    /**
+     * Creates a User, but first it validates <code>obj</code> to ensure that it has a valid schema.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.users.User} A user created from the given object.
+     *
+     * @see {@link domain.users.User.asyncCreate|asyncCreate()} when you need to create
+     * a user within asynchronous code.
+     */
+    static create(obj) {
+      var validation = User.isValid(obj);
+      if (!validation.valid) {
+        $log.error(validation.message);
+        throw new DomainError(validation.message);
+      }
+      return new User(obj);
+    }
+
+    /**
+     * Creates a User from a server reply, but first validates that <tt>obj</tt> has a valid schema.
+     * <i>Meant to be called from within promise code.</i>
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {Promise<domain.users.User>} A user wrapped in a promise.
+     *
+     * @see {@link domain.users.User.create|create()} when not creating a User within asynchronous code.
+     */
+    static asyncCreate(obj) {
+      var result;
+
+      try {
+        result = User.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
+      }
+    }
+
+    /**
+     * Retrieves a User from the server.
+     *
+     * @param {string} slug the slug for the user to retrieve.
+     *
+     * @returns {Promise<domain.users.User>} The user within a promise.
+     */
+    static get(slug) {
+      return biobankApi.get(User.url(slug)).then(User.asyncCreate);
+    }
+
+    /**
+     * Used to list users.
+     *
+     * @param {object} options - The options to use.
+     *
+     * @param {string} options.filter The filter expression to use on user to refine the list.
+     *
+     * @param {string} options.sort Users can be sorted by 'name', 'email' or by 'state'. Values other
+     * than these yield an error. Use a minus sign prefix to sort in descending order.
+     *
+     * @param {int} options.page If the total results are longer than limit, then page selects which
+     * users should be returned. If an invalid value is used then the response is an error.
+     *
+     * @param {int} options.limit The total number of users to return per page. The maximum page size is
+     * 10. If a value larger than 10 is used then the response is an error.
+     *
+     * @returns {Promise<biobank.domain.PagedResult>} A promise of {@link biobank.domain.PagedResult} with
+     * items of type {@link domain.users.User}.
+     */
+    static list(options) {
+      var validKeys = [ 'filter',
+                        'sort',
+                        'page',
+                        'limit'
+                      ],
+          params;
+
+      options = options || {};
+      params = _.omitBy(_.pick(options, validKeys), function (value) {
+        return value === '';
+      });
+
+      return biobankApi.get(User.url('search'), params).then(function(reply) {
+        // reply is a paged result
+        var deferred = $q.defer();
+        try {
+          reply.items = reply.items.map((obj) => User.create(obj));
+          deferred.resolve(reply);
+        } catch (e) {
+          deferred.reject('invalid users from server');
+        }
+        return deferred.promise;
+      });
+    }
   }
+
 
   User.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
     id: 'User',
@@ -233,123 +335,8 @@ function UserFactory($q,
         ]
       }
     },
-    required: [ 'slug', 'name', 'state', 'email' ]
+    required: [ 'slug', 'name', 'state', 'email', 'roleData' ]
   });
-
-  User.url = function (/* pathItem1, pathItem2, ... pathItemN */){
-    const args = [ 'users' ].concat(_.toArray(arguments));
-    return DomainEntity.url.apply(null, args);
-  };
-
-  /**
-   * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.users.User|User}.
-   *
-   * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-   * this class. Objects of this type are usually returned by the server's REST API.
-   *
-   * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
-   */
-  User.isValid = function (obj) {
-    return ConcurrencySafeEntity.isValid(User.SCHEMA, [UserMembership.SCHEMA], obj);
-  };
-
-  /**
-   * Creates a User, but first it validates <code>obj</code> to ensure that it has a valid schema.
-   *
-   * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-   * this class. Objects of this type are usually returned by the server's REST API.
-   *
-   * @returns {domain.users.User} A user created from the given object.
-   *
-   * @see {@link domain.users.User.asyncCreate|asyncCreate()} when you need to create
-   * a user within asynchronous code.
-   */
-  User.create = function (obj) {
-    var validation = User.isValid(obj);
-    if (!validation.valid) {
-      $log.error(validation.message);
-      throw new DomainError(validation.message);
-    }
-    return new User(obj);
-  };
-
-  /**
-   * Creates a User from a server reply, but first validates that <tt>obj</tt> has a valid schema.
-   * <i>Meant to be called from within promise code.</i>
-   *
-   * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-   * this class. Objects of this type are usually returned by the server's REST API.
-   *
-   * @returns {Promise<domain.users.User>} A user wrapped in a promise.
-   *
-   * @see {@link domain.users.User.create|create()} when not creating a User within asynchronous code.
-   */
-  User.asyncCreate = function (obj) {
-    var result;
-
-    try {
-      result = User.create(obj);
-      return $q.when(result);
-    } catch (e) {
-      return $q.reject(e);
-    }
-  };
-
-  /**
-   * Retrieves a User from the server.
-   *
-   * @param {string} slug the slug for the user to retrieve.
-   *
-   * @returns {Promise<domain.users.User>} The user within a promise.
-   */
-  User.get = function (slug) {
-    return biobankApi.get(User.url(slug)).then(User.asyncCreate);
-  };
-
-  /**
-   * Used to list users.
-   *
-   * @param {object} options - The options to use.
-   *
-   * @param {string} options.filter The filter expression to use on user to refine the list.
-   *
-   * @param {string} options.sor Users can be sorted by 'name', 'email' or by 'state'. Values other
-   * than these yield an error. Use a minus sign prefix to sort in descending order.
-   *
-   * @param {int} options.page If the total results are longer than limit, then page selects which
-   * users should be returned. If an invalid value is used then the response is an error.
-   *
-   * @param {int} options.limit The total number of users to return per page. The maximum page size is
-   * 10. If a value larger than 10 is used then the response is an error.
-   *
-   * @returns {Promise} A promise of {@link biobank.domain.PagedResult} with items of type {@link
-   * domain.users.User}.
-   */
-  User.list = function (options) {
-    var validKeys = [ 'filter',
-                      'sort',
-                      'page',
-                      'limit'
-                    ],
-        params;
-
-    options = options || {};
-    params = _.omitBy(_.pick(options, validKeys), function (value) {
-      return value === '';
-    });
-
-    return biobankApi.get(User.url('search'), params).then(function(reply) {
-      // reply is a paged result
-      var deferred = $q.defer();
-      try {
-        reply.items = reply.items.map((obj) => User.create(obj));
-        deferred.resolve(reply);
-      } catch (e) {
-        deferred.reject('invalid users from server');
-      }
-      return deferred.promise;
-    });
-  };
 
   return User;
 }

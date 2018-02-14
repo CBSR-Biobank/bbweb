@@ -49,8 +49,8 @@ describe('ShipmentSpecimen domain object:', function() {
 
       expect(ss.id).toBeNull();
       expect(ss.version).toBe(0);
-      expect(ss.timeAdded).toBeNull();
-      expect(ss.timeModified).toBeNull();
+      expect(ss.timeAdded).toBeUndefined();
+      expect(ss.timeModified).toBeUndefined();
       expect(ss.state).toBe(this.ShipmentItemState.PRESENT);
       expect(ss.shipmentId).toBeNull();
       expect(ss.specimen).toBeNull();

@@ -55,8 +55,8 @@ describe('Shipment domain object:', function() {
 
       expect(shipment.id).toBeNull();
       expect(shipment.version).toBe(0);
-      expect(shipment.timeAdded).toBeNull();
-      expect(shipment.timeModified).toBeNull();
+      expect(shipment.timeAdded).toBeUndefined();
+      expect(shipment.timeModified).toBeUndefined();
       expect(shipment.state).toBe(this.ShipmentState.CREATED);
       expect(shipment.courierName).toBeEmptyString();
       expect(shipment.trackingNumber).toBeEmptyString();

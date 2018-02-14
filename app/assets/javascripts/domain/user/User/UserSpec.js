@@ -7,7 +7,7 @@
 import _ from 'lodash';
 import ngModule from '../../index'
 
-fdescribe('User', function() {
+describe('User', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -32,11 +32,11 @@ fdescribe('User', function() {
     const user = new this.User();
     expect(user.id).toBeNull();
     expect(user.version).toBe(0);
-    expect(user.timeAdded).toBeNull();
-    expect(user.timeModified).toBeNull();
+    expect(user.timeAdded).toBeUndefined();
+    expect(user.timeModified).toBeUndefined();
     expect(user.name).toBeUndefined();
     expect(user.email).toBeUndefined();
-    expect(user.state).toBeUndefined();
+    expect(user.state).toBe(this.UserState.REGISTERED);
   });
 
   it('creating a user with an object does not modify object', function() {

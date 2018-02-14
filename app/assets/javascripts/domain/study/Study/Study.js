@@ -268,8 +268,8 @@ function StudyFactory($q,
    *
    * @see {@link domain.ConcurrencySafeEntity#update}
    */
-  Study.prototype.asyncCreate = function (obj) {
-    return Study.asyncCreate(obj);
+  Study.prototype.update = function (url, additionalJson) {
+    return ConcurrencySafeEntity.prototype.update.call(this, url, additionalJson).then(Study.asyncCreate);
   };
 
   /**
@@ -280,7 +280,7 @@ function StudyFactory($q,
    * @returns {Promise<domain.studies.Study>} A promise containing the study with the new name.
    */
   Study.prototype.updateName = function (name) {
-    return this.update.call(this, Study.url('name', this.id), { name: name });
+    return this.update(Study.url('name', this.id), { name: name });
   };
 
   /**
@@ -292,9 +292,8 @@ function StudyFactory($q,
    * @returns {Promise<domain.studies.Study>} A promise containing the study with the new description.
    */
   Study.prototype.updateDescription = function (description) {
-    return this.update.call(this,
-                            Study.url('description', this.id),
-                            description ? { description: description } : {});
+    return this.update(Study.url('description', this.id),
+                       description ? { description: description } : {});
   };
 
   /**
@@ -305,9 +304,7 @@ function StudyFactory($q,
    * @returns {Promise<domain.studies.Study>} A promise containing the study with the new annotation type.
    */
   Study.prototype.addAnnotationType = function (annotationType) {
-    return this.update.call(this,
-                            Study.url('pannottype', this.id),
-                            _.omit(annotationType, 'id'));
+    return this.update(Study.url('pannottype', this.id), _.omit(annotationType, 'id'));
   };
 
   /**
@@ -319,9 +316,7 @@ function StudyFactory($q,
    * type.
    */
   Study.prototype.updateAnnotationType = function (annotationType) {
-    return this.update.call(this,
-                            Study.url('pannottype', this.id) + '/' + annotationType.id,
-                            annotationType);
+    return this.update(Study.url('pannottype', this.id) + '/' + annotationType.id, annotationType);
   };
 
   /**
@@ -334,7 +329,8 @@ function StudyFactory($q,
    */
   Study.prototype.removeAnnotationType = function (annotationType) {
     var url = Study.url('pannottype', this.id, this.version, annotationType.id);
-    return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url);
+    return HasAnnotationTypes.prototype.removeAnnotationType.call(this, annotationType, url)
+      .then(Study.asyncCreate);
   };
 
   /**

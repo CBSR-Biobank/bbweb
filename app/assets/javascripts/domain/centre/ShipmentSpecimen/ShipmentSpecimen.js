@@ -259,21 +259,6 @@ function ShipmentSpecimenFactory($q,
   };
 
   /**
-   * Creates a Shipment Specimen from a server reply but first validates that it has a valid schema.
-   *
-   * <p>A wrapper for {@link domian.centres.Shipment#asyncCreate}.</p>
-   *
-   * @param {object} obj - The object containing the initial values for this shipment specimen.
-   *
-   * @returns {domain.centre.ShipmentSpecimen} A new shipment specimen.
-   *
-   * @see domain.ConcurrencySafeEntity.update
-   */
-  ShipmentSpecimen.prototype.asyncCreate = function (obj) {
-    return ShipmentSpecimen.asyncCreate(obj);
-  };
-
-  /**
    * Changes the state of this shipment to <code>Lost</code>.
    *
    * @see [ShipmentState]{@link domain.centres.ShipmentState}

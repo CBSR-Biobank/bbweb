@@ -36,7 +36,7 @@ function HasAnnotationsFactory($q,
     if (!found) {
       return $q.reject('annotation with annotation type ID not present: ' + annotation.annotationTypeId);
     }
-    return biobankApi.del(url).then(this.asyncCreate);
+    return biobankApi.del(url);
   };
 
   HasAnnotations.prototype.setAnnotationTypes = function (annotationTypes) {

@@ -317,6 +317,10 @@ function ShipmentFactory($q,
     return biobankApi.del(url);
   };
 
+  Shipment.prototype.update = function (url, additionalJson) {
+    return ConcurrencySafeEntity.prototype.update.call(this, url, additionalJson).then(Shipment.asyncCreate);
+  };
+
   /**
    * Updates the shipment's courier name.
    *

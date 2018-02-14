@@ -6,58 +6,52 @@
 /**
  * Uses Toastr to display notifications in pop up dialog boxes.
  */
-/* @ngInject */
-function notificationsService($q, gettextCatalog, toastr) {
-  var service = {
-    submitSuccess: submitSuccess,
-    success:       success,
-    error:         error,
-    updateError:   updateError
-  };
-  return service;
+class NotificationsService {
 
-  //-------
-
-  function submitSuccess() {
-    toastr.success('Your changes were saved.');
+  constructor($q, gettextCatalog, toastr) {
+    'ngInject'
+    Object.assign(this, { $q, gettextCatalog, toastr })
   }
 
-  function success(message, title, timeout) {
+  submitSuccess() {
+    this.toastr.success('Your changes were saved.');
+  }
+
+  success(message, title, timeout = 1500) {
     var options = {
-      closeButton: true,
-      timeOut:  timeout || 1500,
+      closeButton:     true,
+      timeOut:         timeout,
       extendedTimeOut: 0
     };
 
-    toastr.success(message, title, options);
+    this.toastr.success(message, title, options);
   }
 
-  function error(message, title, _timeout) {
-    var timeout = _timeout || 0;
+  error(message, title, timeout = 0) {
     var options = {
-      closeButton: true,
-      timeOut:  timeout,
+      closeButton:     true,
+      timeOut:         timeout,
       extendedTimeOut: (timeout > 0) ? timeout * 2 : 0,
-      positionClass: 'toast-bottom-right'
+      positionClass:   'toast-bottom-right'
     };
 
-    toastr.error(message, title, options);
+    this.toastr.error(message, title, options);
   }
 
   /**
    * Error is the error returned from a biobankApiService call that failed.
    */
-  function updateError(err) {
+  updateError(err) {
     var message,
-        title   = gettextCatalog.getString('Cannot apply your change');
+        title   = this.gettextCatalog.getString('Cannot apply your change');
     if (err.message) {
       message = err.message;
     } else {
-      message = gettextCatalog.getString('Your change could not be saved');
+      message = this.gettextCatalog.getString('Your change could not be saved');
     }
-    error(message, title);
+    this.error(message, title);
   }
 
 }
 
-export default ngModule => ngModule.service('notificationsService', notificationsService)
+export default ngModule => ngModule.service('notificationsService', NotificationsService)

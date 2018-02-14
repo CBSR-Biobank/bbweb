@@ -42,7 +42,7 @@ function HasAnnotationTypesFactory($q,
     if (!found) {
       return $q.reject(new DomainError('annotation type with ID not present: ' + annotationType.id));
     }
-    return biobankApi.del(url).then( self.asyncCreate);
+    return biobankApi.del(url);
   };
 
   return HasAnnotationTypes;

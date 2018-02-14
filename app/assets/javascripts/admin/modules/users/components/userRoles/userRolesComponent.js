@@ -15,6 +15,7 @@ class Controller {
               breadcrumbService,
               gettextCatalog,
               domainNotificationService,
+              notificationsService,
               RoleName,
               asyncInputModal) {
     'ngInject'
@@ -22,6 +23,7 @@ class Controller {
       $log,
       breadcrumbService,
       domainNotificationService,
+      notificationsService,
       gettextCatalog,
       RoleName,
       asyncInputModal
@@ -69,11 +71,11 @@ class Controller {
 
   roleLabelSelected(roleName) {
     const promiseFn = () =>
-          this.user.removeRole(roleName.id).then((user) => {
+          this.user.removeRole(roleName.id)
+          .then((user) => {
             this.user =  user;
-            this.notificationsService.success(this.gettextCatalog.getString(
-              'Role {{name}} removed',
-              { name: roleName.name }))
+            this.notificationsService.success(
+              this.gettextCatalog.getString('Role removed: {{name}}', { name: roleName.name }))
           })
 
     this.domainNotificationService.removeEntity(

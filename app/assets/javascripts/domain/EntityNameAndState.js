@@ -16,9 +16,9 @@ function EntityNameAndStateFactory($q,
                                    DomainError) {
 
   /**
-   * @classdesc A base class for domain entity name objects. A name object is a triplet of: ID, name, and
-   * state.
-   *
+   * @classdesc A base class for domain entity name objects. A name object is a triplet of: `ID`, `name`, and
+   * `state`.
+   * <p>
    * Please do not use this constructor. It is meant for internal use.
    *
    * @class
@@ -68,7 +68,8 @@ function EntityNameAndStateFactory($q,
   };
 
   /**
-   * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.EntityNameAndState|EntityNameAndState}.
+   * Checks if <tt>obj</tt> has valid properties to construct a {@link
+   * domain.EntityNameAndState|EntityNameAndState}.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
@@ -115,7 +116,7 @@ function EntityNameAndStateFactory($q,
    * @param {Array<domain.EntityNameAndState>} omit - the list of names to filter out of the result returned
    *        from the server.
    *
-   * @returns {Promise<Array<objects>} A promise containing an array of objcts. The objects are created by
+   * @returns {Promise<Array<objects>>} A promise containing an array of objcts. The objects are created by
    * calling {@link createFunc}.
    */
   EntityNameAndState.list = function (url, options, constructor, omit) {
