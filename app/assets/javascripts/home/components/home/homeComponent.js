@@ -27,7 +27,7 @@ class HomeController {
           this.allowCollection = this.user.hasSpecimenCollectorRole();
           this.shippingAllowed = this.user.hasShippingUserRole();
           this.adminAllowed = this.user.hasAdminRole();
-          this.hasRoles = this.allowCollection && this.shippingAllowed && this.adminAllowed;
+          this.hasRoles = this.allowCollection || this.shippingAllowed || this.adminAllowed;
         }
       })
       .catch(() => {

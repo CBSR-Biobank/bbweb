@@ -34,6 +34,18 @@ package access {
 
   }
 
+  final case class UserRoleDto(id:             String,
+                               version:        Long,
+                               slug:           String,
+                               name:           String,
+                               childData:      Set[EntityInfoDto])
+
+  object UserRoleDto {
+
+    implicit val userRoleDtoWriter: Writes[UserRoleDto] = Json.writes[UserRoleDto]
+
+  }
+
   final case class MembershipDto(id:           String,
                                  version:      Long,
                                  timeAdded:    String,

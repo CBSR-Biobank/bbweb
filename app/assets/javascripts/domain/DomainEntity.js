@@ -30,8 +30,8 @@ function DomainEntityFactory(UrlService) {
 
   DomainEntity.isValid = function(schema, additionalSchemas, obj) {
     if (additionalSchemas) {
-      additionalSchemas.forEach(function (schema) {
-        tv4.addSchema(schema);
+      additionalSchemas.forEach(schema => {
+        tv4.addSchema(schema.id, schema);
       });
     }
 

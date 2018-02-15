@@ -3,7 +3,7 @@ package org.biobank
 import java.time.OffsetDateTime
 import org.biobank.domain.{Annotation, EntityState, Location}
 import org.biobank.domain.centre.Shipment
-import org.biobank.dto.access.UserMembershipDto
+import org.biobank.dto.access.{UserRoleDto, UserMembershipDto}
 import org.biobank.service.centres.CentreLocationInfo
 import play.api.libs.json._
 
@@ -89,7 +89,7 @@ package dto {
                            name:         String,
                            email:        String,
                            avatarUrl:    Option[String],
-                           roleData:     Set[EntityInfoDto],
+                           roles:        Set[UserRoleDto],
                            membership:   Option[UserMembershipDto])
 
   object UserDto {

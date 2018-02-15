@@ -6,12 +6,13 @@ import com.google.inject.ImplementedBy
 import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.ValidationKey
-import org.biobank.domain.access.{AccessItemId, Role}
+import org.biobank.domain.access.AccessItemId
 import org.biobank.domain.access.PermissionId
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.study.{Study, StudyId, StudyRepository}
 import org.biobank.domain.user._
 import org.biobank.dto._
+import org.biobank.dto.access.{RoleDto, UserRoleDto}
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.command.UserCommands._
@@ -130,7 +131,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
   def getUserIfAuthorized(requestUserId: UserId, id: UserId): ServiceValidation[UserDto] = {
     accessService.hasPermission(requestUserId, PermissionId.UserRead).flatMap { permission =>
       if (permission || (requestUserId == id)) {
-        userRepository.getByKey(id) map { user =>
+        userRepository.getByKey(id) flatMap { user =>
           userToDto(user, accessService.getUserRoles(user.id))
         }
       } else {
@@ -143,7 +144,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     accessService.hasPermission(requestUserId, PermissionId.UserRead).flatMap { permission =>
       userRepository.getBySlug(slug).flatMap { user =>
         if (permission || (requestUserId == user.id)) {
-          userToDto(user, accessService.getUserRoles(user.id)).successNel[String]
+          userToDto(user, accessService.getUserRoles(user.id))
         } else {
           Unauthorized.failureNel[UserDto]
         }
@@ -171,9 +172,15 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
                               toSuccessNel(ServiceError("at least one sort expression is required")) }
         sortFunc        <- { User.sort2Compare.get(firstSort.name).
                               toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+        dtos            <- {
+          users
+            .toSeq
+            .sortWith(sortFunc)
+            .map(user => userToDto(user, accessService.getUserRoles(user.id)))
+            .toList.sequenceU
+            .map(_.toSeq)
+        }
       } yield {
-        val sorted = users.toSeq.sortWith(sortFunc)
-        val dtos = sorted.map(user => userToDto(user, accessService.getUserRoles(user.id)))
         if (firstSort.order == AscendingOrder) dtos
         else dtos.reverse
       }
@@ -215,7 +222,8 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
         if (passwordHasher.valid(user.password, user.salt, enteredPwd)) user.successNel[String]
         else InvalidPassword.failureNel[User]
       }
-    } yield userToDto(user, accessService.getUserRoles(user.id))
+      dto <- userToDto(user, accessService.getUserRoles(user.id))
+    } yield dto
   }
 
   def register(cmd: RegisterUserCmd): Future[ServiceValidation[UserDto]] = {
@@ -237,8 +245,8 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
             for {
               event <- validation
               user  <- userRepository.getByKey(UserId(event.id))
-            } yield userToDto(user, accessService.getUserRoles(user.id))
-
+              dto   <- userToDto(user, accessService.getUserRoles(user.id))
+            } yield dto
           }
         } else {
           Future.successful(Unauthorized.failureNel[UserDto])
@@ -247,15 +255,17 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     }
 
     // asks the access service to process a command
-    def accessServiceProcess(userId: UserId, validation: ServiceValidation[AccessModifyCommand]) = {
+    def accessServiceProcess(userId: UserId, validation: ServiceValidation[AccessModifyCommand])
+    : Future[ServiceValidation[UserDto]] = {
       validation.fold(
         err => Future.successful(err.failure[UserDto]),
         command => {
-          accessService.processRoleCommand(command).mapTo[ServiceValidation[Role]].map { v =>
+          accessService.processRoleCommand(command).mapTo[ServiceValidation[RoleDto]].map { v =>
             for {
               event <- v
               user  <- userRepository.getByKey(userId)
-            } yield userToDto(user, accessService.getUserRoles(userId))
+              dto   <- userToDto(user, accessService.getUserRoles(userId))
+            } yield dto
           }
         }
       )
@@ -298,18 +308,21 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     }
   }
 
-  private def userToDto(user: User, roles: Set[Role]): UserDto = {
-    UserDto(id           = user.id.id,
-            version      = user.version,
-            timeAdded    = user.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-            timeModified = user.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
-            state        = user.state,
-            slug         = user.slug,
-            name         = user.name,
-            email        = user.email,
-            avatarUrl    = user.avatarUrl,
-            roleData     = roles.map(r => EntityInfoDto(r.id.id, r.slug, r.name)),
-            membership   = None)
+  private def userToDto(user: User, roles: ServiceValidation[Set[UserRoleDto]])
+      : ServiceValidation[UserDto] = {
+    roles.map { roles =>
+      UserDto(id           = user.id.id,
+              version      = user.version,
+              timeAdded    = user.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+              timeModified = user.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+              state        = user.state,
+              slug         = user.slug,
+              name         = user.name,
+              email        = user.email,
+              avatarUrl    = user.avatarUrl,
+              roles       = roles,
+              membership   = None)
+    }
   }
 
 }

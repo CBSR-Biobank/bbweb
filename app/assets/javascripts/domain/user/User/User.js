@@ -17,6 +17,7 @@ function UserFactory($q,
                      ConcurrencySafeEntity,
                      DomainError,
                      UserState,
+                     UserRole,
                      RoleIds,
                      UserMembership) {
 
@@ -136,7 +137,7 @@ function UserFactory($q,
     }
 
     addRole(roleId) {
-      if (this.roleData.find(role => role.id === roleId) !== undefined) {
+      if (this.roles.find(role => role.id === roleId) !== undefined) {
         throw new DomainError('user already has role: ' + roleId);
       }
       return this.update(User.url('roles', this.id),
@@ -147,7 +148,7 @@ function UserFactory($q,
     }
 
     removeRole(roleId) {
-      if (this.roleData.find(role => role.id === roleId) === undefined) {
+      if (this.roles.find(role => role.id === roleId) === undefined) {
         throw new DomainError('user does not have role: ' + roleId);
       }
       return biobankApi.del(User.url('roles', this.id, this.version, roleId))
@@ -167,15 +168,22 @@ function UserFactory($q,
     }
 
     hasRoles() {
-      return (this.roleData.length > 0);
+      return (this.roles.length > 0);
     }
 
-    hasRole(roleSlug) {
-      return this.roleData.find(role => role.slug === roleSlug) !== undefined;
+    hasRole(roleId) {
+      const hasRole = this.roles.find(role => role.id === roleId);
+      if (hasRole) {
+        return true;
+      }
+      return this.roles
+        .filter(role => role.childData.find(childInfo => childInfo.id === roleId))
+        .length > 0;
     }
 
     hasAnyRoleOf(...roleIds) {
-      var ids = _.map(this.roleData, 'ids');
+      var ids =
+          _.flatten(this.roles.map(role => Array.of(role.id).concat(role.childData.map(info => info.id))));
       return roleIds.filter(id => ids.includes(id)).length > 0;
     }
 
@@ -207,7 +215,7 @@ function UserFactory($q,
     }
 
     getRoleNames() {
-      return this.roleData.map(role => role.name).join(', ');
+      return this.roles.map(role => role.name).join(', ');
     }
 
     static url (...paths){
@@ -216,7 +224,9 @@ function UserFactory($q,
 
     /** @protected */
     static isValid(obj) {
-      return ConcurrencySafeEntity.isValid(User.SCHEMA, [UserMembership.SCHEMA], obj);
+      return ConcurrencySafeEntity.isValid(User.SCHEMA,
+                                           [ UserRole.SCHEMA, UserMembership.SCHEMA ],
+                                           obj);
     }
 
     /**
@@ -327,15 +337,15 @@ function UserFactory($q,
       'email':        { 'type': 'string' },
       'avatarUrl':    { 'type': [ 'string', 'null' ] },
       'state':        { 'type': 'string' },
-      'roleData':     { 'type': 'array', 'items': { '$ref': 'EntityInfo' } },
+      'roles':        { 'type': 'array', 'items': { '$ref': 'UserRole' } },
       'membership':   {
         'oneOf': [
           { 'type': 'null' },
-          { 'type': 'object', '$ref': '#UserMembership' }
+          { 'type': 'object', '$ref': 'UserMembership' }
         ]
       }
     },
-    required: [ 'slug', 'name', 'state', 'email', 'roleData' ]
+    required: [ 'slug', 'name', 'state', 'email', 'roles' ]
   });
 
   return User;

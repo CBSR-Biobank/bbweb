@@ -399,11 +399,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
       it("return not found for an invalid user") {
         val user = factory.createActiveUser
-        val json = makeRequest(GET, uri(user), NOT_FOUND)
-
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include("EntityCriteriaNotFound: user slug")
+        notFound(GET, uri(user), JsNull, "EntityCriteriaNotFound: user slug")
       }
     }
 
@@ -459,28 +455,13 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           (response \ "data" \ "name").as[String] must equal (dupName)
         }
 
-        it("not update a user's name with an empty name") {
-          val user = factory.createActiveUser
-          userRepository.put(user)
-          val json = makeUpdateRequest(user, "name", JsString(""), BAD_REQUEST)
-
-          (json \ "status").as[String] must be ("error")
-
-          (json \ "message").as[String] must include("NonEmptyString")
-        }
-
         it("not update a user's name when an invalid version number is used") {
           val user = factory.createActiveUser
           userRepository.put(user)
-
-          val json = makeUpdateRequestWithVersion(user,
-                                                  "name",
-                                                  JsString(user.name),
-                                                  user.version + 1)
-
-          (json \ "status").as[String] must be ("error")
-
-          (json \ "message").as[String] must include ("InvalidVersion")
+          val json = Json.obj("expectedVersion" -> (user.version + 1L),
+                              "property"        -> "name",
+                              "newValue"        -> user.name)
+          badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
         }
 
         it("not update a user's name with invalid values") {
@@ -492,11 +473,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
                    ( "", "NonEmptyString" ),
                    ( "$#%", "InvalidName" )
                  )) { (value, errMsg) =>
-            val json = makeUpdateRequest(user, "name", JsString(value), BAD_REQUEST)
 
-            (json \ "status").as[String] must be ("error")
-
-            (json \ "message").as[String] must include regex (errMsg)
+            val json = Json.obj("expectedVersion" -> user.version,
+                                "property"        -> "name",
+                                "newValue"        -> value)
+            badRequest(POST, updateUri(user, "update"), json, errMsg)
           }
         }
       }
@@ -533,23 +514,19 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         it("not update a user's email with an invalid email address") {
           val user = factory.createActiveUser
           userRepository.put(user)
-          val json = makeUpdateRequest(user, "email", JsString(faker.Lorem.sentence(3)), BAD_REQUEST)
-          (json \ "status").as[String] must be ("error")
-
-          (json \ "message").as[String] must include("InvalidEmail")
+          val json = Json.obj("expectedVersion" -> user.version,
+                              "property"        -> "email",
+                              "newValue"        -> faker.Lorem.sentence(3))
+          badRequest(POST, updateUri(user, "update"), json, "InvalidEmail")
         }
 
-        it("not update a user's email if an invalid version number is used ") {
+        it("not update a user's email if an invalid version number is used") {
           val user = factory.createActiveUser
           userRepository.put(user)
-          val json = makeUpdateRequestWithVersion(user,
-                                                  "email",
-                                                  JsString(user.email),
-                                                  user.version + 1)
-
-          (json \ "status").as[String] must be ("error")
-
-          (json \ "message").as[String] must include ("InvalidVersion")
+          val json = Json.obj("expectedVersion" -> (user.version + 10L),
+                              "property"        -> "email",
+                              "newValue"        -> user.email)
+          badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
         }
 
       }
@@ -601,44 +578,35 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
                    ( ""                      ),
                    ( faker.Lorem.sentence(3) )
                  )) { value =>
-            val json = makeUpdateRequest(user,
-                                         "password",
-                                         Json.obj("currentPassword" -> value,
-                                                  "newPassword"     -> faker.Lorem.sentence(3)),
-                                         BAD_REQUEST)
-
-            (json \ "status").as[String] must be ("error")
-
-            (json \ "message").as[String] must include ("InvalidPassword")
+            val newValue = Json.obj("currentPassword" -> value,
+                                    "newPassword"     -> faker.Lorem.sentence(3))
+            val json = Json.obj("expectedVersion" -> user.version,
+                                "property"        -> "password",
+                                "newValue"        -> newValue)
+            badRequest(POST, updateUri(user, "update"), json, "InvalidPassword")
           }
         }
 
         it("not update a user's password with an empty new password") {
           val plainPassword = nameGenerator.next[String]
           val user = createActiveUserInRepository(plainPassword)
-          val json = makeUpdateRequest(user,
-                                       "password",
-                                       Json.obj("currentPassword" -> plainPassword,
-                                                "newPassword"     -> ""),
-                                       BAD_REQUEST)
-
-          (json \ "status").as[String] must be ("error")
-
-          (json \ "message").as[String] must include ("InvalidNewPassword")
+          val newValue = Json.obj("currentPassword" -> plainPassword,
+                                  "newPassword"     -> "")
+          val json = Json.obj("expectedVersion" -> user.version,
+                              "property"        -> "password",
+                              "newValue"        -> newValue)
+          badRequest(POST, updateUri(user, "update"), json, "InvalidNewPassword")
         }
 
         it("fail when attempting to update a user's password with a bad version number") {
           val plainPassword = nameGenerator.next[String]
           val user = createActiveUserInRepository(plainPassword)
-          val json = makeUpdateRequestWithVersion(user,
-                                                  "password",
-                                                  Json.obj("currentPassword" -> faker.Lorem.sentence(3),
-                                                           "newPassword"     -> faker.Lorem.sentence(3)),
-                                                  user.version + 1)
-
-          (json \ "status").as[String] must be ("error")
-
-          (json \ "message").as[String] must include ("InvalidVersion")
+          val newValue = Json.obj("currentPassword" -> plainPassword,
+                                  "newPassword"     -> faker.Lorem.sentence(3))
+          val json = Json.obj("expectedVersion" -> (user.version + 10L),
+                              "property"        -> "password",
+                              "newValue"        -> newValue)
+          badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
         }
       }
 
@@ -674,6 +642,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         it("remove a user's avatar URL") {
           val user = factory.createActiveUser
           userRepository.put(user)
+
           val json = makeUpdateRequest(user, "avatarUrl", JsString(""))
 
           (json \ "status").as[String] must be ("success")
@@ -686,24 +655,19 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         it("not update a user's avatar URL if URL is invalid") {
           val user = factory.createActiveUser
           userRepository.put(user)
-          val json = makeUpdateRequest(user, "avatarUrl", JsString("bad url"), BAD_REQUEST)
-
-          (json \ "status").as[String] must be ("error")
-
-          (json \ "message").as[String] must include("InvalidUrl")
+          val json = Json.obj("expectedVersion" -> user.version,
+                              "property"        -> "avatarUrl",
+                              "newValue"        -> "bad url")
+          badRequest(POST, updateUri(user, "update"), json, "InvalidUrl")
         }
 
         it("not update a user's avatar URL if an invalid version number is used") {
           val user = factory.createActiveUser
           userRepository.put(user)
-          val json = makeUpdateRequestWithVersion(user,
-                                                  "avatarUrl",
-                                                  JsString(nameGenerator.nextUrl[User]),
-                                                  user.version + 1)
-
-          (json \ "status").as[String] must be ("error")
-
-          (json \ "message").as[String] must include ("InvalidVersion")
+          val json = Json.obj("expectedVersion" -> (user.version + 10L),
+                              "property"        -> "avatarUrl",
+                              "newValue"        -> nameGenerator.nextUrl[User])
+          badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
         }
       }
 
@@ -768,10 +732,10 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
         }
 
-        val roleData = (reply \ "data" \ "roleData").as[List[JsObject]]
-        roleData.length must be (1)
+        val roles = (reply \ "data" \ "roles").as[List[JsObject]]
+        roles.length must be (1)
 
-        val roleId = (roleData(0) \ "id").as[String]
+        val roleId = (roles(0) \ "id").as[String]
 
         accessItemRepository.getByKey(AccessItemId(roleId)) mustSucceed { item =>
           inside(item) { case repoRole: Role =>
@@ -784,8 +748,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           }
         }
 
-        val roleSlug = (roleData(0) \ "slug").as[String]
-        val roleName = (roleData(0) \ "name").as[String]
+        val roleSlug = (roles(0) \ "slug").as[String]
+        val roleName = (roles(0) \ "name").as[String]
 
         roleSlug must be (role.slug)
         roleName must be (role.name)
@@ -1099,8 +1063,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
       }
 
-      val roleData = (reply \ "data" \ "roleData").as[List[JsObject]]
-      roleData.length must be (0)
+      val roles = (reply \ "data" \ "roles").as[List[JsObject]]
+      roles.length must be (0)
 
       accessItemRepository.getByKey(role.id) mustSucceed { item =>
         inside(item) { case repoRole: Role =>
@@ -1177,22 +1141,21 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
     it("must not change a user's state with an invalid version number") {
       userRepository.put(user)
-      val json = makeUpdateRequestWithVersion(user, "state", JsString(stateAction), user.version + 1)
-
-      (json \ "status").as[String] must be ("error")
-
-      (json \ "message").as[String] must include ("InvalidVersion")
+      val json = Json.obj("expectedVersion" -> (user.version + 10L),
+                          "property"        -> "state",
+                          "newValue"        -> stateAction)
+      badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
     }
 
     it("must not change a user to the wrong state") {
       forAll(Table("user in wrong state", wrongStateUsers:_*)) { user =>
         info(s"must not $stateAction a user currently in ${user.state} state")
         userRepository.put(user)
-        val json = makeUpdateRequest(user, "state", JsString(stateAction), BAD_REQUEST)
 
-        (json \ "status").as[String] must be ("error")
-
-        (json \ "message").as[String] must include ("InvalidStatus")
+        val json = Json.obj("expectedVersion" -> user.version,
+                            "property"        -> "state",
+                            "newValue"        -> stateAction)
+        badRequest(POST, updateUri(user, "update"), json, "InvalidStatus")
       }
     }
 
@@ -1268,20 +1231,6 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
     var json = Json.obj("expectedVersion" -> user.version,
                         "property"        -> property)
 
-    if (newValue !== JsNull) {
-      json = json ++ Json.obj("newValue" -> newValue)
-    }
-    makeRequest(POST, updateUri(user, "update"), expectedStatus, json)
-  }
-
-  def makeUpdateRequestWithVersion(user:           User,
-                                   property:       String,
-                                   newValue:       JsValue,
-                                   version:        Long,
-                                   expectedStatus: Int = BAD_REQUEST): JsValue = {
-
-    var json = Json.obj("expectedVersion" -> version,
-                        "property"        -> property)
     if (newValue !== JsNull) {
       json = json ++ Json.obj("newValue" -> newValue)
     }

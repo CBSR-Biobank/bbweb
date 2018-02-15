@@ -1,15 +1,11 @@
 package org.biobank.controllers.access
 
-import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.{ConcurrencySafeEntity, HasName, HasSlug}
 import org.biobank.domain.access._
 import org.biobank.domain.centre.CentreId
 import org.biobank.domain.study.StudyId
-import org.biobank.domain.user.{User, UserId}
-import org.biobank.dto._
-import org.biobank.dto.access._
+import org.biobank.domain.user.UserId
 import org.biobank.service.PagedResults
 import org.biobank.service.access.AccessService
 import org.biobank.service.centres.CentresService
@@ -53,9 +49,7 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
             items         <- accessService.getAccessItems(request.authInfo.userId,
                                                           filterAndSort.filter,
                                                           filterAndSort.sort)
-          } yield {
-            items.map(i => AccessItemNameDto(i.id.id, i.slug, i.name, i.accessItemType.id))
-          }
+          } yield items
         }
       )
     }
@@ -70,11 +64,7 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
                                                  pagedQuery.filter,
                                                  pagedQuery.sort)
             validPage  <- pagedQuery.validPage(roles.size)
-            dtos       <- {
-              roles.map(role => roleToDto(request.authInfo.userId, role))
-                .toList.sequenceU.map(_.toSeq)
-            }
-            results    <- PagedResults.create(dtos, pagedQuery.page, pagedQuery.limit)
+            results    <- PagedResults.create(roles, pagedQuery.page, pagedQuery.limit)
           } yield results
         }
       )
@@ -89,9 +79,7 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
             roles         <- accessService.getRoles(request.authInfo.userId,
                                                     filterAndSort.filter,
                                                     filterAndSort.sort)
-          } yield {
-            roles.map(r => EntityInfoDto(r.id.id, r.slug, r.name))
-          }
+          } yield roles
         }
       )
     }
@@ -99,14 +87,12 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
   def getRoleBySlug(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
       val v = accessService.getRoleBySlug(request.authInfo.userId, slug)
-        .flatMap(role => roleToDto(request.authInfo.userId, role))
       validationReply(v)
     }
 
   def getMembershipBySlug(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
       val v = accessService.getMembershipBySlug(request.authInfo.userId, slug)
-        .flatMap(membership => membershipToDto(request.authInfo.userId, membership))
       validationReply(v)
     }
 
@@ -120,11 +106,7 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
                                                         pagedQuery.filter,
                                                         pagedQuery.sort)
             validPage   <- pagedQuery.validPage(memberships.size)
-            dtos        <- {
-              memberships.map(membership => membershipToDto(request.authInfo.userId, membership))
-                .toList.sequenceU.map(_.toSeq)
-            }
-            results     <- PagedResults.create(dtos, pagedQuery.page, pagedQuery.limit)
+            results     <- PagedResults.create(memberships, pagedQuery.page, pagedQuery.limit)
           } yield results
         }
       )
@@ -250,102 +232,13 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
     }
 
   private def processRoleCommand(cmd: AccessCommand): Future[Result] = {
-    val future = accessService.processRoleCommand(cmd).map { validation =>
-        validation.flatMap(role => roleToDto(UserId(cmd.sessionUserId), role))
-      }
+    val future = accessService.processRoleCommand(cmd)
     validationReply(future)
   }
 
   private def processMembershipCommand(cmd: MembershipCommand): Future[Result] = {
-    val future = accessService.processMembershipCommand(cmd).map { validation =>
-        validation.flatMap(membership => membershipToDto(UserId(cmd.sessionUserId), membership))
-      }
+    val future = accessService.processMembershipCommand(cmd)
     validationReply(future)
   }
-
-  private def getUsers(ids: Set[UserId]): ControllerValidation[Set[User]] = {
-    ids
-      .map(usersService.getUser)
-      .toList.sequenceU
-      .leftMap(err => org.biobank.CommonValidations.InternalServerError.nel)
-      .map(_.toSet)
-  }
-
-  private def roleToDto(requestUserId: UserId,
-                        role:          Role): ControllerValidation[RoleDto] = {
-
-    def getAccessItems(ids: Set[AccessItemId]): ControllerValidation[Set[AccessItem]] = {
-      ids
-        .map { id => accessService.getAccessItem(requestUserId, id) }
-        .toList.sequenceU
-        .leftMap(err => org.biobank.CommonValidations.InternalServerError.nel)
-        .map(_.toSet)
-    }
-
-    for {
-      users    <- getUsers(role.userIds)
-      parents  <- getAccessItems(role.parentIds)
-      children <- getAccessItems(role.childrenIds)
-    } yield {
-      RoleDto(id             = role.id.id,
-              version        = role.version,
-              timeAdded      = role.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-              timeModified   = role.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
-              accessItemType = role.accessItemType.id,
-              slug           = role.slug,
-              name           = role.name,
-              description    = role.description,
-              userData       = entityInfoDto(users),
-              parentData     = entityInfoDto(parents),
-              childData      = entityInfoDto(children))
-    }
-  }
-
-  private def membershipToDto(requestUserId: UserId,
-                              membership:    Membership): ControllerValidation[MembershipDto] ={
-    for {
-      users <- getUsers(membership.userIds)
-      studies <- {
-        membership.studyData.ids
-          .map(id => studiesService.getStudy(requestUserId, id))
-          .toList.sequenceU
-          .map(_.toSet)
-      }
-      centres <- {
-        membership.centreData.ids
-          .map(centresService.getCentre(requestUserId, _))
-          .toList.sequenceU
-          .map(_.toSet)
-      }
-    } yield {
-      val userData        = entityInfoDto(users)
-      val studyEntitySet  = entitySetDto(membership.studyData.allEntities, studies)
-      val centreEntitySet = entitySetDto(membership.centreData.allEntities, centres)
-      val timeAdded       = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-      val timeModified    = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
-
-      MembershipDto(id           = membership.id.id,
-                    version      = membership.version,
-                    timeAdded    = timeAdded,
-                    timeModified = timeModified,
-                    slug         = membership.slug,
-                    name         = membership.name,
-                    description  = membership.description,
-                    userData     = userData,
-                    studyData    = studyEntitySet,
-                    centreData   = centreEntitySet)
-    }
-  }
-
-  private def entityInfoDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]
-    (entities: Set[T]): Set[EntityInfoDto] = {
-    entities.map { entity => EntityInfoDto(entity.id.toString, entity.slug, entity.name) }
-  }
-
-  private def entitySetDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]
-    (hasAllEntities: Boolean, entities: Set[T]): EntitySetDto = {
-    EntitySetDto(hasAllEntities, entityInfoDto(entities))
-  }
-
 
 }

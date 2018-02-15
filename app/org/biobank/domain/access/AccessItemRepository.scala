@@ -69,31 +69,10 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
   }
 
   def rolesForUser(userId: UserId): Set[Role] = {
-
-    @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-    def roleChildren(role: Role): Set[Role] = {
-      role.childrenIds.map(getByKey).toList.sequenceU.fold(
-        err => Set.empty[Role],
-        list => list.flatMap { item =>
-          item match {
-            case r: Role => roleChildren(r) + role
-            case r => Set(role)
-          }
-        }.toSet
-      )
-    }
-
-    val hasRole = getValues.find { item =>
-        item match {
-          case r: Role => r.userIds.exists(_ == userId)
-          case _ => false
-        }
-      }
-
-    hasRole match {
-      case Some(role: Role) => roleChildren(role) + role
-      case _ => Set.empty[Role]
-    }
+    getValues
+      .collect { case r: Role => r }
+      .filter { r => r.userIds.exists(_ == userId) }
+      .toSet
   }
 
   def getPermission(id: AccessItemId): DomainValidation[Permission] = {

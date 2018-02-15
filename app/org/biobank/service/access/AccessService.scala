@@ -524,21 +524,25 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
 
   private def roleToUserRoleDto(role: Role): ServiceValidation[UserRoleDto] = {
 
-    def getAccessItems(ids: Set[AccessItemId]): ServiceValidation[Set[AccessItem]] = {
+    @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
+    def getAccessItems(ids: Set[AccessItemId]): ServiceValidation[List[AccessItem]] = {
       ids
-        .map { id => accessItemRepository.getByKey(id) }
-        .toList.sequenceU
-        .leftMap(err => org.biobank.CommonValidations.InternalServerError.nel)
-        .map(_.toSet)
+        .toList
+        .flatMap { id =>
+          val items = for {
+              item       <- accessItemRepository.getByKey(id)
+              childItems <- getAccessItems(item.childrenIds)
+            } yield List(item) ++ childItems
+          items.sequenceU
+        }.sequenceU
     }
 
-    getAccessItems(role.childrenIds).map { children =>
+    getAccessItems(role.childrenIds) map { children =>
       UserRoleDto(id             = role.id.id,
                   version        = role.version,
                   slug           = role.slug,
                   name           = role.name,
-                  parentData     = Set.empty[EntityInfoDto],
-                  childData      = entityInfoDto(children))
+                  childData      = entityInfoDto(children.toSet))
     }
   }
 
