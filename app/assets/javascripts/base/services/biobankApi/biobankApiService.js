@@ -41,6 +41,7 @@ function apiCall(method, url, config = {}) {
 class biobankApiService {
 
   constructor($http, $q, $log, AppConfig) {
+    'ngInject'
     Object.assign(this, { $http, $q, $log, AppConfig })
   }
 

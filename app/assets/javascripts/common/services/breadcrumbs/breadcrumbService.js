@@ -11,6 +11,7 @@
 class BreadcrumbService {
 
   constructor(gettextCatalog) {
+    'ngInject'
     Object.assign(this, { gettextCatalog })
 
     const addLabelFunc  = () =>  gettextCatalog.getString('Add'),

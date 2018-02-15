@@ -13,8 +13,11 @@
 </div>
 <div class="container" ng-if="vm.userIsAuthenticated">
 
-  <div class="row" ng-if="!vm.hasRoles">
-    <p translate>Your user permissions are not valid. Please contact your website administrator.</p>
+  <div class="alert alert-warning" ng-if="!vm.hasRoles">
+    <span class="glyphicon glyphicon-warning-sign"></span>
+    <translate>
+      Your user permissions are not valid. Please contact your website administrator.
+    </translate>
   </div>
 
   <div class="row" ng-if="vm.hasRoles">

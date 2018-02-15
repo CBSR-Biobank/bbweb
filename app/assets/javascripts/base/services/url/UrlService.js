@@ -6,6 +6,7 @@
 class UrlService {
 
   constructor(AppConfig) {
+    'ngInject'
     Object.assign(this, { AppConfig })
   }
 

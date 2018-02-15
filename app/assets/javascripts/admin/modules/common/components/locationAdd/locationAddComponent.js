@@ -42,11 +42,12 @@ const locationAdd = {
  * @callback ng.admin.common.components.locationAdd.onCancel
  */
 
+
 /*
  * Controller for this component.
  */
 /* @ngInject */
-function LocationAddController($state, Location) {
+function LocationAddController(Location) {
   var vm = this;
   vm.$onInit = onInit;
 

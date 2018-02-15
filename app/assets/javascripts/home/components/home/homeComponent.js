@@ -9,6 +9,7 @@
 class HomeController {
 
   constructor($rootScope, userService, breadcrumbService) {
+    'ngInject'
     Object.assign(this, { $rootScope, userService, breadcrumbService })
   }
 

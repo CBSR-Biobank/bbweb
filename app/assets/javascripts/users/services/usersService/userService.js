@@ -14,6 +14,7 @@ class userService {
               biobankApi,
               User,
               UrlService) {
+    'ngInject'
     Object.assign(this, {
       $q,
       $cookies,
