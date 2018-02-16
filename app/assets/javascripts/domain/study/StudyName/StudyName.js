@@ -45,6 +45,8 @@ function StudyNameFactory($q,
   StudyName.prototype = Object.create(EntityNameAndState.prototype);
   StudyName.prototype.constructor = StudyName;
 
+  StudyName.SCHEMA = Object.assign(EntityNameAndState.SCHEMA, { id: 'StudyName'});
+
   /**
    * Creates a StudyName, but first it validates <code>obj</code> to ensure that it has a valid schema.
    *
