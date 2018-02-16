@@ -2,40 +2,39 @@
  *
  */
 
-var component = {
+/*
+ * Controller for this component.
+ */
+class ManageUsersController {
+
+  constructor(breadcrumbService, UserCounts) {
+    'ngInject'
+    Object.assign(this, {breadcrumbService, UserCounts});
+  }
+
+  $onInit() {
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.access'),
+      this.breadcrumbService.forState('home.admin.access.users')
+    ];
+
+    this.haveUsers = false;
+
+    this.UserCounts.get().then(counts => {
+      this.userCounts = counts;
+      this.haveUsers  = (this.userCounts.total > 0);
+    });
+  }
+}
+
+const manageUsers = {
   template: require('./manageUsers.html'),
-  controller: Controller,
+  controller: ManageUsersController,
   controllerAs: 'vm',
   bindings: {
   }
 };
 
-/*
- * Controller for this component.
- */
-/* @ngInclude */
-function Controller(breadcrumbService,
-                    UserCounts) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //--
-
-  function onInit() {
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.access'),
-      breadcrumbService.forState('home.admin.access.users')
-    ];
-
-    vm.haveUsers = false;
-
-    UserCounts.get().then(function (counts) {
-      vm.userCounts = counts;
-      vm.haveUsers  = (vm.userCounts.total > 0);
-    });
-  }
-}
-
-export default ngModule => ngModule.component('manageUsers', component)
+export default ngModule => ngModule.component('manageUsers', manageUsers);
