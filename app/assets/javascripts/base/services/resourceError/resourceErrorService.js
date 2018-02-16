@@ -10,6 +10,7 @@
 class ResourceErrorService {
 
   constructor($q, $log, $state, userService, gettextCatalog) {
+    'ngInject'
     Object.assign(this, { $q, $log, $state, userService, gettextCatalog })
   }
 

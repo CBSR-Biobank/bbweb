@@ -9,6 +9,7 @@
 class AsyncInputModalService {
 
   constructor($uibModal) {
+    'ngInject'
     Object.assign(this, { $uibModal })
   }
 
