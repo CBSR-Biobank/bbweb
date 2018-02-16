@@ -163,8 +163,8 @@ function CollectionEventTypeFactory($q,
 
     if (obj.annotationTypes) {
       try {
-        options.annotationTypes =
-          obj.annotationTypes.map((annotationType) => AnnotationType.create(annotationType));
+        options.annotationTypes = obj.annotationTypes
+          .map(annotationType => AnnotationType.create(annotationType));
       } catch (e) {
         throw new DomainError('invalid annotation types from server: ' + validation.message);
       }

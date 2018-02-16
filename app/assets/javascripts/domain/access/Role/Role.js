@@ -223,8 +223,7 @@ function RoleFactory($q,
      * @param {int} options.limit The total number of roles to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
-     * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
-     * domain.access.Role}.
+     * @returns {Promise<domain.PagedResult>} A promise with items of type {@link domain.access.Role}.
      */
     static list(options) {
       var validKeys = [ 'filter', 'page', 'limit' ],

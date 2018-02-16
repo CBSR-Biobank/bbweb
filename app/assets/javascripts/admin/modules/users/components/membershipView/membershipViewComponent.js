@@ -1,12 +1,12 @@
 /**
  *
  */
-import _       from 'lodash';
-import angular from 'angular';
+import _ from 'lodash';
 
 class MembershipViewController {
 
-  constructor($state,
+  constructor($log,
+              $state,
               notificationsService,
               domainNotificationService,
               gettextCatalog,
@@ -17,11 +17,13 @@ class MembershipViewController {
               EntityInfo,
               UserName,
               StudyName,
-              CentreName) {
+              CentreName,
+              matchingUserNames) {
     'ngInject';
 
     Object.assign(this,
                   {
+                    $log,
                     $state,
                     notificationsService,
                     domainNotificationService,
@@ -33,7 +35,8 @@ class MembershipViewController {
                     EntityInfo,
                     UserName,
                     StudyName,
-                    CentreName
+                    CentreName,
+                    matchingUserNames
                   });
 
     this.onUserLabelSelected   = this.userLabelSelected.bind(this);
@@ -110,7 +113,9 @@ class MembershipViewController {
                                 this.gettextCatalog.getString('Change successful')))
           .catch(this.notificationsService.updateError);
       })
-      .catch(angular.noop);
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   editDescription() {
@@ -123,28 +128,25 @@ class MembershipViewController {
                                 this.gettextCatalog.getString('Change successful')))
           .catch(this.notificationsService.updateError);
       })
-      .catch(angular.noop);
-  }
-
-  getMatchingUserNames() {
-    return (viewValue) =>
-      this.UserName.list({ filter: 'name:like:' + viewValue}, this.membership.userData)
-      .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   addUser() {
-    this.asyncInputModal.open(this.gettextCatalog.getString('Add user to membership'),
-                              this.gettextCatalog.getString('User'),
-                              this.gettextCatalog.getString('enter a user\'s name or partial name'),
-                              this.gettextCatalog.getString('No matching users found'),
-                              this.getMatchingUserNames()).result
-      .then((modalValue) => {
-        this.membership.addUser(modalValue.obj.id).then((membership) => {
-          this.membership = membership;
-          this.userNameLabels = this.entityNamesToLabels(this.membership.userData);
-        });
+    this.matchingUserNames.open(this.gettextCatalog.getString('Add user to membership'),
+                                this.gettextCatalog.getString('User'),
+                                this.gettextCatalog.getString('enter a user\'s name or partial name'),
+                                this.gettextCatalog.getString('No matching users found'),
+                                [])
+      .then(modalValue => this.membership.addUser(modalValue.obj.id))
+      .then((membership) => {
+        this.membership = membership;
+        this.userNameLabels = this.entityNamesToLabels(this.membership.userData);
       })
-      .catch(angular.noop);
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   // this method is invoked by a child component, so a callback function is returned
@@ -189,7 +191,9 @@ class MembershipViewController {
           this.studyNameLabels = this.entityNamesToLabels(this.membership.studyData.entityData);
         });
       })
-      .catch(angular.noop);
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   // this method is invoked by a child component, so a callback function is returned
@@ -234,7 +238,9 @@ class MembershipViewController {
           this.centreNameLabels = this.entityNamesToLabels(this.membership.centreData.entityData);
         });
       })
-      .catch(angular.noop);
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   // this method is invoked by a child component, so a callback function is returned

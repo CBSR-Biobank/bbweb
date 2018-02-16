@@ -83,7 +83,7 @@ function ShipmentSpecimenFactory($q,
   ShipmentSpecimen.REST_API_URL_SUFFIX = 'shipments/specimens';
 
   ShipmentSpecimen.SCHEMA = {
-    'id': 'Shipment',
+    'id': 'ShipmentSpecimen',
     'type': 'object',
     'properties': {
       'id':           { 'type': 'string' },
@@ -92,7 +92,7 @@ function ShipmentSpecimenFactory($q,
       'timeModified': { 'type': [ 'string', 'null' ] },
       'state':        { 'type': 'string' },
       'shipmentId':   { 'type': 'string' },
-      'specimen':     { 'type': 'object', 'items': { '$ref': 'Specimen' } }
+      'specimen':     { '$ref': 'Specimen' }
     },
     'required': [
       'id',

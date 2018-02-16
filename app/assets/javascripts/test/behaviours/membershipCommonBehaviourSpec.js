@@ -39,7 +39,7 @@ define(function (require) {
             expect(function () {
               var badJson = _.omit(json, [field]);
               self.membershipFromJson(badJson);
-            }).toThrowError(/:Missing required property:/);
+            }).toThrowError(/Missing required property/);
           });
         });
 
@@ -76,7 +76,7 @@ define(function (require) {
                 fail('should never be called');
               })
               .catch(function (err) {
-                expect(err.message).toContain(':Missing required property:');
+                expect(err.message).toContain('Missing required property');
               });
           });
           this.$rootScope.$digest();

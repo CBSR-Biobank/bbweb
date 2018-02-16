@@ -1,0 +1,22 @@
+<div class="row">
+  <div class="col-md-3">
+    <strong translate>Membership</strong>
+  </div>
+  <div class="col-md-7" ng-if="vm.user.hasMemberships()">
+    <tags-list tag-data="vm.membershipNameLabels"
+               on-tag-selected="vm.membershipLabelSelected.bind(vm)">
+    </tags-list>
+  </div>
+  <div class="col-md-7" ng-if="!vm.user.hasMemberships()">
+    <translate>None</translate>
+  </div>
+  <div class="col-md-2">
+    <span class="pull-right">
+      <update-remove-buttons on-update="vm.addMembership()"
+                             on-remove="vm.removeMembership()"
+                             update-button-enabled="'true'"
+                             remove-button-enabled="'true'">
+      </update-remove-buttons>
+    </span>
+  </div>
+</div>

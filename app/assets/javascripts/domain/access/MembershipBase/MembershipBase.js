@@ -73,8 +73,8 @@ function MembershipBaseFactory($q,
       'slug':         { 'type': 'string' },
       'name':         { 'type': 'string' },
       'description':  { 'type': [ 'string', 'null' ] },
-      'studyData':    { 'type': 'object', 'items': { '$ref': 'EntitySet' } },
-      'centreData':   { 'type': 'object', 'items': { '$ref': 'EntitySet' } }
+      'studyData':    { '$ref': 'EntitySet' },
+      'centreData':   { '$ref': 'EntitySet' }
     },
     required: [ 'id', 'version', 'timeAdded', 'studyData', 'centreData' ]
   });

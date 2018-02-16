@@ -63,7 +63,7 @@ describe('Role', function() {
         expect(() => {
           const badJson = _.omit(json, [field]);
           this.Role.create(badJson);
-        }).toThrowError(/:Missing required property:/);
+        }).toThrowError(/Missing required property/);
       });
     });
 
@@ -98,7 +98,7 @@ describe('Role', function() {
             fail('should never be called');
           })
           .catch(err => {
-            expect(err.message).toContain(':Missing required property:');
+            expect(err.message).toContain('Missing required property');
           });
       });
       this.$rootScope.$digest();

@@ -44,23 +44,23 @@ describe('CollectionEventType', function() {
        * Returns 3 collection event types, each one with a different missing field.
        */
       this.getBadCollectionEventTypes = () => {
-        var badSpecimenDescription   = _.omit(this.Factory.collectionSpecimenDescription(), 'name'),
-            badAnnotationType = _.omit(this.Factory.annotationType(), 'name'),
-            data = [
-              {
-                cet: _.omit(this.Factory.collectionEventType(), 'name'),
-                errMsg : 'Missing required property'
-              },
-              {
-                cet: this.Factory.collectionEventType({ specimenDescriptions: [ badSpecimenDescription ]}),
-                errMsg : 'specimenDescriptions.*Missing required property'
-              },
-              {
-                cet: this.Factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
+        const badSpecimenDescription   = _.omit(this.Factory.collectionSpecimenDescription(), 'name'),
+              badAnnotationType = _.omit(this.Factory.annotationType(), 'name');
+
+        return [
+          {
+            cet: _.omit(this.Factory.collectionEventType(), 'name'),
+            errMsg : 'Missing required property'
+          },
+          {
+            cet: this.Factory.collectionEventType({ specimenDescriptions: [ badSpecimenDescription ]}),
+            errMsg : 'specimenDescriptions.*Missing required property'
+          },
+          {
+            cet: this.Factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
                 errMsg : 'annotationTypes.*Missing required property'
-              }
-            ];
-        return data;
+          }
+        ];
       };
 
       this.url = url;
@@ -102,9 +102,8 @@ describe('CollectionEventType', function() {
         badJsonCet = _.extend(this.Factory.collectionEventType(this.jsonStudy),
                               { specimenDescriptions: [ jsonSpec ] });
 
-    expect(() => {
-      CollectionEventType.create(badJsonCet);
-    }).toThrowError(/specimenDescriptions.*Missing required property/);
+    expect(() => CollectionEventType.create(badJsonCet))
+      .toThrowError(/specimenDescriptions.*Missing required property/);
   });
 
   it('fails when creating from bad json annotation type data', function() {
@@ -112,7 +111,7 @@ describe('CollectionEventType', function() {
         badJsonCet = _.extend(this.Factory.collectionEventType(this.jsonStudy),
                               { annotationTypes: [ jsonAnnotType ] });
 
-    expect(() => { CollectionEventType.create(badJsonCet); })
+    expect(() => CollectionEventType.create(badJsonCet))
       .toThrowError(/annotationTypes.*Missing required property/);
   });
 
@@ -126,9 +125,7 @@ describe('CollectionEventType', function() {
   });
 
   it('fails when getting a collection event type and it has a bad format', function() {
-    var data = this.getBadCollectionEventTypes();
-
-    data.forEach((badCet) => {
+    this.getBadCollectionEventTypes().forEach((badCet) => {
       var url = this.url(this.jsonStudy.slug, badCet.cet.slug);
 
       this.$httpBackend.whenGET(url).respond(this.reply(badCet.cet));

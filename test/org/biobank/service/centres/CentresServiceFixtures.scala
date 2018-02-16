@@ -23,10 +23,12 @@ trait CentresServiceFixtures extends ProcessorTestFixture with UserServiceFixtur
 
     val allCentresMembership = factory.createMembership.copy(
         userIds = Set(allCentresAdminUser.id),
+        studyData = MembershipEntitySet(true, Set.empty[StudyId]),
         centreData = MembershipEntitySet(true, Set.empty[CentreId]))
 
     val centreOnlyMembership = factory.createMembership.copy(
         userIds = Set(centreOnlyAdminUser.id, centreUser.id),
+        studyData = MembershipEntitySet(true, Set.empty[StudyId]),
         centreData = MembershipEntitySet(false, Set(centre.id)))
 
     val noCentresMembership = factory.createMembership.copy(

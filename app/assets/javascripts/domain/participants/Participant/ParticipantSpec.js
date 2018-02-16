@@ -193,7 +193,7 @@ describe('Participant', function() {
       jsonParticipant.annotations = [{ tmp: 1 }];
       expect(function () {
         self.Participant.create(jsonParticipant);
-      }).toThrowError(/bad annotation type/);
+      }).toThrowError(/annotations.*Missing required property/);
     });
 
     it('fails when creating async from an object with invalid keys', function() {

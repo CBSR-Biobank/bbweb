@@ -326,6 +326,10 @@ class Factory {
     return entityNameAndStateDto(this.permission.bind(this), options);
   }
 
+  membershipNameDto(options) {
+    return entityNameAndStateDto(this.membership.bind(this), options);
+  }
+
   /**
    * If this.defaultStudy has annotation types, then participant will have annotations based on the study's,
    * unless options.annotationTypes is defined.
@@ -520,19 +524,20 @@ class Factory {
     return this.defaultEntity(ENTITY_NAME_SHIPMENT_SPECIMEN, this.shipment);
   }
 
-  user(options =  { membership: {} }) {
-    const defaults = Object.assign({ id:         domainEntityNameNext(ENTITY_NAME_USER),
-                                     email:      this.stringNext(),
-                                     avatarUrl:  null,
-                                     state:      this.UserState.REGISTERED,
-                                     roleData:   []
+  user(options =  { membership: undefined }) {
+    const defaults = Object.assign({ id:        domainEntityNameNext(ENTITY_NAME_USER),
+                                     email:     this.stringNext(),
+                                     avatarUrl: null,
+                                     state:     this.UserState.REGISTERED,
+                                     roles:     []
                                    },
                                    nameAndSlug()),
           validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-          membership = options.membership ? this.userMembership(options.membership) : undefined,
           u = Object.assign(defaults, this.commonFields(),
-                            _.pick(options, validKeys),
-                            { membership: membership });
+                            _.pick(options, validKeys));
+    if (options.membership) {
+      Object.assign(u, { membership: this.userMembership(options.membership) });
+    }
     this.updateDefaultEntity(ENTITY_NAME_USER, u);
     return u;
   }
@@ -542,10 +547,10 @@ class Factory {
   }
 
   /**
-   * @param {ValueType} option.valueType the type of annotation Type to create. Valid types are: Text,
+   * @param {ValueType} options.valueType the type of annotation Type to create. Valid types are: Text,
    * Number, DateTime and Select.
    *
-   * @param {Int} option.maxValueCount when valueType is 'Select', use 1 for single selection or '2' for
+   * @param {Int} options.maxValueCount when valueType is 'Select', use 1 for single selection or '2' for
    * multiple selection.
    */
   annotationType(options = {}) {
@@ -787,6 +792,12 @@ class Factory {
 
   defaultRole() {
     return this.defaultEntity(ENTITY_NAME_ROLE, this.role);
+  }
+
+  userRole() {
+    const role = this.defaultRole(),
+          userRole = _.omit(role, [ 'userData', 'parentData' ]);
+    return userRole;
   }
 
   permission(options = {}) {

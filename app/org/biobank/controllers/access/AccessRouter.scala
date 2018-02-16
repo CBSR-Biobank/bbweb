@@ -36,6 +36,9 @@ class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter 
     case GET(p"/memberships") =>
       controller.listMemberships
 
+    case GET(p"/memberships/names") =>
+      controller.listMembershipNames
+
     case GET(p"/memberships/$slug") =>
       controller.getMembershipBySlug(slug)
 

@@ -28,8 +28,8 @@ function entityInfoCreateSharedBehaviour(context) {
 
   it('constructor with no parameters has default values', function() {
     var entityName = new context.constructor();
-    expect(entityName.id).toBeNull();
-    expect(entityName.name).toBeNull();
+    expect(entityName.id).toBeUndefined();
+    expect(entityName.name).toBeUndefined();
   });
 
   it('fails when creating from an invalid object', function() {

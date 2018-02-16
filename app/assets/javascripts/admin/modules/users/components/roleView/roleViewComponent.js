@@ -7,6 +7,7 @@ import angular from 'angular'
 class RoleViewController {
 
   constructor($state,
+              $log,
               notificationsService,
               domainNotificationService,
               gettextCatalog,
@@ -17,24 +18,28 @@ class RoleViewController {
               EntityInfo,
               UserName,
               RoleName,
-              accessItemNameFactory) {
+              accessItemNameFactory,
+              matchingRoleNames) {
     'ngInject'
 
-    Object.assign(this,
-                  {
-                    $state,
-                    notificationsService,
-                    domainNotificationService,
-                    gettextCatalog,
-                    breadcrumbService,
-                    userService,
-                    modalInput,
-                    asyncInputModal,
-                    EntityInfo,
-                    UserName,
-                    RoleName,
-                    accessItemNameFactory
-                  })
+    Object.assign(
+      this,
+      {
+        $state,
+        $log,
+        notificationsService,
+        domainNotificationService,
+        gettextCatalog,
+        breadcrumbService,
+        userService,
+        modalInput,
+        asyncInputModal,
+        EntityInfo,
+        UserName,
+        RoleName,
+        accessItemNameFactory,
+        matchingRoleNames
+      })
   }
 
   $onInit() {
@@ -114,7 +119,9 @@ class RoleViewController {
                                 this.gettextCatalog.getString('Change successful')))
           .catch(this.notificationsService.updateError)
       })
-      .catch(angular.noop)
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   addUser() {
@@ -133,7 +140,9 @@ class RoleViewController {
           this.userNameLabels = this.entityNamesToLabels(this.role.userData)
         })
       })
-      .catch(angular.noop)
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   // this method is invoked by a child component, so a callback function is returned
@@ -162,25 +171,27 @@ class RoleViewController {
     const parentRolesToOmit =
           this.role.parentData
           .concat(this.role.childData)
-          .concat(this.EntityInfo.create({ id: this.role.id, name: this.role.name }))
+          .concat(this.EntityInfo.create({
+            id: this.role.id,
+            slug: this.role.slug,
+            name: this.role.name
+          }))
 
-    const getMatchingRoleNames = (viewValue) =>
-          this.RoleName.list({ filter: 'name:like:' + viewValue}, parentRolesToOmit)
-          .then(nameObjs =>
-                nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })))
-
-    this.asyncInputModal.open(this.gettextCatalog.getString('Add parent role to role'),
-                              this.gettextCatalog.getString('Parent role'),
-                              this.gettextCatalog.getString('enter a parent role\'s name or partial name'),
-                              this.gettextCatalog.getString('No matching parent roles found'),
-                              getMatchingRoleNames).result
+    this.matchingRoleNames
+      .open(this.gettextCatalog.getString('Add parent role to role'),
+            this.gettextCatalog.getString('Parent role'),
+            this.gettextCatalog.getString('enter a parent role\'s name or partial name'),
+            this.gettextCatalog.getString('No matching parent roles found'),
+            parentRolesToOmit)
       .then((modalValue) => {
         this.role.addParentRole(modalValue.obj.id).then((role) => {
           this.role = role
           this.parentNameLabels = this.entityNamesToLabels(this.role.parentData)
         })
       })
-      .catch(angular.noop)
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   // this method is invoked by a child component, so a callback function is returned
@@ -210,25 +221,27 @@ class RoleViewController {
     const childRolesToOmit =
           this.role.childData
           .concat(this.role.parentData)
-          .concat(this.EntityInfo.create({ id: this.role.id, name: this.role.name }))
+          .concat(this.EntityInfo.create({
+            id: this.role.id,
+            slug: this.role.slug,
+            name: this.role.name
+          }))
 
-    const getMatchingAccessItemNames = (viewValue) =>
-          this.accessItemNameFactory.list({ filter: 'name:like:' + viewValue}, childRolesToOmit)
-          .then(nameObjs =>
-                nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })))
-
-    this.asyncInputModal.open(this.gettextCatalog.getString('Add child role to role'),
-                              this.gettextCatalog.getString('Child role'),
-                              this.gettextCatalog.getString('enter a child role\'s name or partial name'),
-                              this.gettextCatalog.getString('No matching child roles found'),
-                              getMatchingAccessItemNames).result
+    this.matchingRoleNames
+      .open(this.gettextCatalog.getString('Add child role to role'),
+            this.gettextCatalog.getString('Child role'),
+            this.gettextCatalog.getString('enter a child role\'s name or partial name'),
+            this.gettextCatalog.getString('No matching child roles found'),
+            childRolesToOmit)
       .then((modalValue) => {
         this.role.addChildRole(modalValue.obj.id).then((role) => {
           this.role = role
           this.childNameLabels = this.entityNamesToLabels(this.role.childData)
         })
       })
-      .catch(angular.noop)
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   // this method is invoked by a child component, so a callback function is returned

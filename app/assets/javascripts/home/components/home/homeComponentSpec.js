@@ -34,8 +34,7 @@ describe('Component: home', function() {
 
   it('has valid scope', function() {
     var user = this.User.create(this.Factory.user());
-    this.userService.requestCurrentUser =
-      jasmine.createSpy().and.returnValue(this.$q.when(user));
+    this.userService.requestCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(user));
     this.createController();
     expect(this.controller.user).toEqual(jasmine.any(this.User));
     expect(this.$rootScope.pageTitle).toBeDefined('Biobank');

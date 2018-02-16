@@ -260,8 +260,6 @@ function StudyFactory($q,
   /**
    * Creates a Study from a server reply but first validates that it has a valid schema.
    *
-   * <p>A wrapper for {@link domian.studies.Study#asyncCreate}.</p>
-   *
    * @param {object} obj - the object to take initial values from.
    *
    * @returns {domain.studies.Study} A new Study object.

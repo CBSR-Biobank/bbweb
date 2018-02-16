@@ -106,6 +106,9 @@ function ConcurrencySafeEntityFactory($q,
     return (this.id === null);
   };
 
+  /**
+   * Checks if `obj` has valid properties to construct an object with the given schemas.
+   */
   ConcurrencySafeEntity.isValid = function(schema, additionalSchemas, obj) {
     return DomainEntity.isValid(schema, additionalSchemas, obj);
   };

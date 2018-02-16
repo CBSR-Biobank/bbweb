@@ -45,7 +45,7 @@ function EntityTestSuiteMixin($httpBackend, TestSuiteMixin) {
           fail('should not invoked')
         })
         .catch((err) => {
-          expect(err.message).toContain(':Missing required property:')
+          expect(err.message).toContain('Missing required property')
         })
     });
   }

@@ -42,12 +42,12 @@ describe('AnnotationType', function() {
   it('has default values', function() {
     var annotationType = new this.AnnotationType();
 
-    expect(annotationType.id).toBeEmptyString();
-    expect(annotationType.name).toBeEmptyString();
-    expect(annotationType.description).toBeNull();
-    expect(annotationType.valueType).toBeEmptyString();
-    expect(annotationType.maxValueCount).toBeNull();
-    expect(annotationType.options).toBeEmptyArray();
+    expect(annotationType.id).toBeUndefined();
+    expect(annotationType.name).toBeUndefined();
+    expect(annotationType.description).toBeUndefined();
+    expect(annotationType.valueType).toBeUndefined();
+    expect(annotationType.maxValueCount).toBeUndefined();
+    expect(annotationType.options).toBeUndefined();
   });
 
   it('create fails for invalid JSON', function () {

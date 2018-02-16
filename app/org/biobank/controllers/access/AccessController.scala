@@ -76,10 +76,10 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
         Future {
           for {
             filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            roles         <- accessService.getRoles(request.authInfo.userId,
-                                                    filterAndSort.filter,
-                                                    filterAndSort.sort)
-          } yield roles
+            roleNames     <- accessService.getRoleNames(request.authInfo.userId,
+                                                        filterAndSort.filter,
+                                                        filterAndSort.sort)
+          } yield roleNames
         }
       )
     }
@@ -108,6 +108,20 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
             validPage   <- pagedQuery.validPage(memberships.size)
             results     <- PagedResults.create(memberships, pagedQuery.page, pagedQuery.limit)
           } yield results
+        }
+      )
+    }
+
+  def listMembershipNames: Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      validationReply(
+        Future {
+          for {
+            filterAndSort   <- FilterAndSortQuery.create(request.rawQueryString)
+            membershipNames <- accessService.getMembershipNames(request.authInfo.userId,
+                                                                filterAndSort.filter,
+                                                                filterAndSort.sort)
+          } yield membershipNames
         }
       )
     }

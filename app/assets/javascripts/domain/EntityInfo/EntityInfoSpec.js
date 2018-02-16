@@ -27,8 +27,8 @@ describe('EntityInfo', function() {
 
   it('constructor with no parameters has default values', function() {
     const entityInfo = new this.EntityInfo()
-    expect(entityInfo.id).toBeNull()
-    expect(entityInfo.name).toBeNull()
+    expect(entityInfo.id).toBeUndefined()
+    expect(entityInfo.name).toBeUndefined()
   })
 
   describe('for creating', function() {

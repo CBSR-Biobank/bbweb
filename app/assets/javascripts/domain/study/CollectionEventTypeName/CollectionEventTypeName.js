@@ -82,8 +82,8 @@ function CollectionEventTypeNameFactory($q,
    *          domain.studies.CollectionEventType}.
    */
   CollectionEventTypeName.list = function (studyId, options, omit) {
-    const createFunc = (obj) => new CollectionEventTypeName(obj)
-    return EntityInfo.list(CollectionEventTypeName.url(studyId), options, createFunc, omit);
+    return EntityInfo.list(CollectionEventTypeName.url(studyId), options, omit)
+      .then(items => items.map(item => CollectionEventTypeName.create(item)));
   };
 
   return CollectionEventTypeName;

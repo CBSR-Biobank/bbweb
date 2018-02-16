@@ -4,8 +4,6 @@
  */
 
 /**
- * @class ng.admin.common.components.annotationTypeAdd
- *
  * An AngularJS component that allows the user to add an {@link domain.AnnotationType AnnotationType} using an
  * HTML form. The annotation type can then be added to one of these domain entities:
  *

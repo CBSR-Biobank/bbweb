@@ -11,39 +11,68 @@ import tv4 from 'tv4'
  *
  */
 /* @ngInject */
-function DomainEntityFactory(UrlService) {
+function DomainEntityFactory($log, UrlService) {
 
   /**
-   * @classdesc An abstract class for an entity in the domain.
-   *
-   * @class
+   * An abstract class for an entity in the domain.
    * @memberOf domain
-   *
-   * @param {string[]} schema - the tv4 schema for this class.
-   *
-   * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-   * the derived class. Objects of this type are usually returned by the server's REST API.
    */
-  function DomainEntity(schema, obj = {}) {
-    Object.assign(this, _.pick(obj, _.keys(schema.properties)));
+  class DomainEntity {
+
+    /**
+     *
+     * @param {object} schema - the tv4 schema for this class.
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * the derived class. Objects of this type are usually returned by the server's REST API.
+     */
+    constructor(schema, obj = {}) {
+      /**
+       * The unique ID that identifies an object of this type.
+       * @name domain.DomainEntity#id
+       * @type string
+       * @protected
+       */
+
+      Object.assign(this, _.pick(obj, _.keys(schema.properties)));
+    }
+
+    /**
+     *
+     * @param {object} schema - the tv4 schema for this class.
+     *
+     * @param {object} additionalSchemas - the tv4 schemas this class depends on.
+     *
+     * @param {object} obj - An initialization object whose properties are the same as the members from
+     * the derived class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @return {domain.Validation} A validation object.
+     */
+    static isValid(schema, additionalSchemas, obj) {
+      if (additionalSchemas) {
+        additionalSchemas.forEach(schema => {
+          tv4.addSchema(schema.id, schema);
+        });
+      }
+
+      if (!tv4.validate(obj, schema)) {
+        $log.error('validation error:', schema.id, tv4.error.dataPath + ':' + tv4.error.message);
+        return { valid: false, message: tv4.error.dataPath + ':' + tv4.error.message};
+      }
+      return { valid: true, message: null };
+    }
+
+    /**
+     * A utility function that builds a URL to the REST API for the server.
+     *
+     * @param {string[]} paths - The paths to the REST API URL.
+     *
+     * @return {string} A URL to the server's REST API joined with slashes.
+     */
+    static url(...paths) {
+      return UrlService.url.apply(UrlService, paths);
+    }
   }
-
-  DomainEntity.isValid = function(schema, additionalSchemas, obj) {
-    if (additionalSchemas) {
-      additionalSchemas.forEach(schema => {
-        tv4.addSchema(schema.id, schema);
-      });
-    }
-
-    if (!tv4.validate(obj, schema)) {
-      return { valid: false, message: tv4.error.dataPath + ':' + tv4.error.message};
-    }
-    return { valid: true, message: null };
-  };
-
-  DomainEntity.url = function (...paths) {
-    return UrlService.url.apply(UrlService, paths);
-  };
 
   return DomainEntity;
 }

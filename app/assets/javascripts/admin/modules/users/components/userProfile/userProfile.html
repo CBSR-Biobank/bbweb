@@ -71,59 +71,21 @@
 
     <!-- ROLES -->
     <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3"><strong translate>Roles</strong></div>
-        <div class="col-md-7">{{vm.rolesValue}}</div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Update roles'|translate}}"
-                  ng-click="vm.updateRoles()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
+      <user-roles user="vm.user"
+                  on-role-add-request="vm.addRole.bind(vm)"
+                  on-role-remove-request="vm.removeRole.bind(vm)">
+      </user-roles>
     </li>
 
-    <!-- STUDY MEMBERSHIPS -->
+    <!-- MEMBERSHIPS -->
     <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3"><strong translate>Study Memberships</strong></div>
-        <div class="col-md-7" ng-if="vm.studyMembershipLabels">
-          <tags-list tag-data="vm.studyMembershipLabels"></tags-list>
-        </div>
-        <div class="col-md-7" ng-if="!vm.studyMembershipLabels">
-          {{'None'|translate}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Update study memberships'|translate}}"
-                  ng-click="vm.updateStudyMemberships()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
-
-    <!-- CENTRE MEMBERSHIPS -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3"><strong translate>Centre Memberships</strong></div>
-        <div class="col-md-7">
-          <tags-list tag-data="vm.centreMembershipLabels"></tags-list>
-        </div>
-        <div class="col-md-7" ng-if="!vm.studyMembershipLabels">
-          {{'None'|translate}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Update centre memberships'|translate}}"
-                  ng-click="vm.updateCentreMemberships()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
+      <user-membership user="vm.user"
+                       on-membership-add-request="vm.addMembership.bind(vm)"
+                       on-membership-remove-request="vm.removeMembership.bind(vm)">
+      </user-membership>
     </li>
   </ul>
+
   <status-line state-label-func="vm.stateLabelFunc(vm.user.state)"
                time-added="vm.user.timeAdded"
                time-modified="vm.user.timeModified"></status-line>

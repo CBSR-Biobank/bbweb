@@ -2,12 +2,10 @@ package org.biobank.controllers.access
 
 import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.centre._
 import org.biobank.domain.study._
 import org.biobank.domain.user._
-import org.biobank.fixture.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -19,9 +17,7 @@ import org.scalatest.Inside
  * Tests for [[Role]]s and [[Permissions]] in AccessControllerSpec.scala.
  */
 class AccessControllerMembershipSpec
-    extends ControllerFixture
-    with AccessControllerSpecCommon
-    with JsonHelper
+    extends AccessControllerSpecCommon
     with UserFixtures
     with Inside {
   import org.biobank.TestUtils._
@@ -318,6 +314,13 @@ class AccessControllerMembershipSpec
         (reply \ "message").as[String] must include regex("IdNotFound: centre id")
       }
 
+    }
+
+    describe("GET /api/access/memberships/names") {
+      val createEntity = (name: String) => factory.createMembership.copy(name = name)
+      val baseUrl = uri("memberships", "names")
+
+      it should behave like accessEntityNameSharedBehaviour(createEntity, baseUrl)
     }
 
     describe("POST /api/access/memberships/name/:membershipId") {

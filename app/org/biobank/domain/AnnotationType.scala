@@ -36,8 +36,8 @@ object AnnotationTypeId {
  * @param valueType The type of information stored by the annotation. I.e. text, number, date, or an
  * item from a drop down list. See [[AnnotationValueType]].
  *
- * @param maxValueCount When valueType is [[AnnotationValueType.Select]] (i.e. a drop down list),
- * this is the number of items allowed to be selected. If the value is 0 then any number of values can be
+ * @param maxValueCount When valueType is [[AnnotationValueType.Select]] (i.e. a drop down list), this is the
+ * number of items allowed to be selected. If the value is greater than 1 then any number of values can be
  * selected.
  *
  * @param options When valueType is [[AnnotationValueType.Select]], these are the list of options allowed to

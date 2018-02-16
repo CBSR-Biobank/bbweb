@@ -7,7 +7,7 @@
  *
  * @property {boolean} valid - True when the validation check passed all checks.
  *
- * @property {string} message - A message that explains why the validation failed. The message is an empty
+ * @property {string} [message] - A message that explains why the validation failed. The message is an empty
  * string if the validation passed all checks.
  */
 
@@ -26,5 +26,5 @@
  *
  * @property {int} offset - The page offset. Starts at 0.
  *
- * @param {int} total - the total elements in all pages.
+ * @property {int} total - the total elements in all pages.
  */

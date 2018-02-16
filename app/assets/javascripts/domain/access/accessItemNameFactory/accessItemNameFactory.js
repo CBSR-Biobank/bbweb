@@ -10,14 +10,17 @@ class AccessItemNameFactory {
               EntityInfo,
               RoleName,
               PermissionName) {
-    Object.assign(this, {
-      biobankApi,
-      DomainEntity,
-      DomainError,
-      EntityInfo,
-      RoleName,
-      PermissionName
-    })
+    'ngInject'
+    Object.assign(
+      this,
+      {
+        biobankApi,
+        DomainEntity,
+        DomainError,
+        EntityInfo,
+        RoleName,
+        PermissionName
+      })
   }
 
   /**
@@ -42,15 +45,16 @@ class AccessItemNameFactory {
    * with items of type {@link domain.access.AccessItem}s.
    */
   list(options, omit) {
-    const url = this.DomainEntity.url('access/items/names'),
-          createFunc = (obj) => {
-            switch (obj.accessItemType) {
-            case 'role':       return this.RoleName.create(obj);
-            case 'permission': return this.PermissionName.create(obj);
-            }
-            throw new this.DomainError('access item name type is invalid: ' + obj.accessItemType)
-          }
-    return this.EntityInfo.list(url, options, createFunc, omit)
+    const url = this.DomainEntity.url('access/items/names')
+
+    return this.EntityInfo.list(url, options, omit)
+      .then(items => items.map(item => {
+        switch (item.accessItemType) {
+        case 'role':       return this.RoleName.create(item);
+        case 'permission': return this.PermissionName.create(item);
+        }
+        throw new this.DomainError('access item name type is invalid: ' + item.accessItemType)
+      }))
   }
 
 }

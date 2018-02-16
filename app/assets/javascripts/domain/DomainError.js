@@ -3,7 +3,8 @@
  * @copyright 2016 Canadian BioSample Repository (CBSR)
  */
 
-function DomainErrorFactory() {
+/* @ngInject */
+function DomainErrorFactory($log) {
 
   /**
    * Description
@@ -11,6 +12,7 @@ function DomainErrorFactory() {
   function DomainError(message) {
     this.message = message;
     this.stack = (new Error()).stack;
+    $log.error('DomainError', message);
   }
 
   DomainError.prototype = Object.create(Error.prototype);

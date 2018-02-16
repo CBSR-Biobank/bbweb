@@ -30,13 +30,9 @@ describe('StudyName', function() {
         expect(entity).toEqual(jasmine.any(this.StudyName));
       };
 
-      this.url = url;
-
-      //---
-
-      function url() {
-        const args = [ 'studies/names' ].concat(_.toArray(arguments));
-        return EntityTestSuiteMixin.url.apply(null, args);
+      this.url = (...paths) => {
+        const allPaths = [ 'studies/names' ].concat(paths)
+        return EntityTestSuiteMixin.url(...allPaths);
       }
     });
   });

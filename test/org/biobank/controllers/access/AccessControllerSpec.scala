@@ -6,7 +6,6 @@ import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.user._
 import org.biobank.dto.EntityInfoDto
-import org.biobank.fixture.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.Inside
 import play.api.libs.json._
@@ -18,8 +17,7 @@ import play.api.test.Helpers._
  * Tests for [[Membership]]s in AccessControllerMembershipSpec.scala.
  */
 class AccessControllerSpec
-    extends ControllerFixture
-    with AccessControllerSpecCommon
+    extends AccessControllerSpecCommon
     with JsonHelper
     with UserFixtures
     with Inside {
@@ -108,14 +106,14 @@ class AccessControllerSpec
       val createEntity = (name: String) => factory.createRole.copy(name = name)
       val baseUrl = uri("roles", "names")
 
-      it should behave like accessItemNamesSharedBehaviour(createEntity, baseUrl)
+      it should behave like accessEntityNameSharedBehaviour(createEntity, baseUrl)
     }
 
     describe("GET /api/access/items/names") {
       val createEntity = (name: String) => factory.createPermission.copy(name = name)
       val baseUrl = uri("items", "names")
 
-      it should behave like accessItemNamesSharedBehaviour(createEntity, baseUrl)
+      it should behave like accessEntityNameSharedBehaviour(createEntity, baseUrl)
     }
 
     describe("POST /api/access/roles") {
@@ -814,58 +812,6 @@ class AccessControllerSpec
 
   private def notFoundOnDelete(url: String): Unit = {
     notFound(DELETE, url, JsNull, "IdNotFound: role id")
-  }
-
-  def accessItemNamesSharedBehaviour(createEntity: String => AccessItem,
-                                     baseUrl:      String) {
-
-      it("list multiple item names in ascending order") {
-        val items = List(createEntity("ITEM2"),
-                         createEntity("ITEM1"))
-        items.foreach(addToRepository)
-
-        val json = makeRequest(GET, baseUrl + "?filter=name:like:ITEM&order=asc")
-
-        (json \ "status").as[String] must include ("success")
-
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size items.size.toLong
-
-        compareNameDto(jsonList(0), items(1))
-        compareNameDto(jsonList(1), items(0))
-      }
-
-      it("list single study when using a filter") {
-        val items = List(createEntity("ITEM2"),
-                         createEntity("ITEM1"))
-        items.foreach(addToRepository)
-
-        val json = makeRequest(GET, baseUrl + "?filter=name::ITEM1")
-
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 1
-
-        compareNameDto(jsonList(0), items(1))
-      }
-
-      it("list nothing when using a name filter for name not in system") {
-        val json = makeRequest(GET, baseUrl + "?filter=name::abc123")
-
-        (json \ "status").as[String] must include ("success")
-
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 0
-      }
-
-      it("fail for invalid sort field") {
-        val json = makeRequest(GET, baseUrl + "?sort=xxxx", BAD_REQUEST)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("invalid sort field")
-      }
-
   }
 
 }

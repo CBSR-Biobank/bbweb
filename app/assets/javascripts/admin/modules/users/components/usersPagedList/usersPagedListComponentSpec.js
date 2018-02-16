@@ -110,14 +110,14 @@ describe('usersPagedListComponent', function() {
     });
 
     it('getItemIcon returns a valid icon', function() {
-      var statesInfo = [
+      const statesInfo = [
             { state: this.UserState.REGISTERED, icon: 'glyphicon-cog' },
             { state: this.UserState.ACTIVE,     icon: 'glyphicon-user' },
             { state: this.UserState.LOCKED,     icon: 'glyphicon-lock' }
           ];
 
-      statesInfo.forEach((info) => {
-        var user = this.User.create(this.Factory.user({ state: info.state }));
+      statesInfo.forEach(info => {
+        const user = this.User.create(this.Factory.user({ state: info.state }));
         expect(this.controller.getItemIcon(user)).toEqual(info.icon);
       });
     });

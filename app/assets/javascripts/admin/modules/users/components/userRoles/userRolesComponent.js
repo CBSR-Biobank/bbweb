@@ -8,75 +8,86 @@ import _ from 'lodash'
 /*
  * Controller for this component.
  */
-/* @ngInject */
-class Controller {
+class UserRolesController {
 
-  constructor($log,
-              breadcrumbService,
+  constructor($q,
+              $log,
+              asyncInputModal,
               gettextCatalog,
               domainNotificationService,
               notificationsService,
+              modalService,
               RoleName,
-              asyncInputModal) {
+              UserName,
+              matchingRoleNames,
+              matchingUserNames) {
     'ngInject'
-    Object.assign(this, {
-      $log,
-      breadcrumbService,
-      domainNotificationService,
-      notificationsService,
-      gettextCatalog,
-      RoleName,
-      asyncInputModal
-    })
+    Object.assign(
+      this,
+      {
+        $q,
+        $log,
+        asyncInputModal,
+        gettextCatalog,
+        domainNotificationService,
+        notificationsService,
+        modalService,
+        RoleName,
+        UserName,
+        matchingRoleNames,
+        matchingUserNames
+      })
   }
 
   $onInit() {
-    this.breadcrumbs = [
-      this.breadcrumbService.forState('home'),
-      this.breadcrumbService.forState('home.admin'),
-      this.breadcrumbService.forState('home.admin.access'),
-      this.breadcrumbService.forState('home.admin.access.users'),
-      this.breadcrumbService.forStateWithFunc(
-        'home.admin.access.users.user',
-        () => this.gettextCatalog.getString('{{name}}', { name: this.user.name })),
-      this.breadcrumbService.forState('home.admin.access.users.user.roles')
-    ];
-
     this.updateLabels();
   }
 
+  $onChanges(changed) {
+    if (changed.user) {
+      this.user = changed.user.currentValue;
+      this.updateLabels();
+    }
+  }
+
+  updateLabels() {
+    this.roleNameLabels = this.rolesToLabels(this.user.roles)
+  }
+
+  rolesToLabels(roles) {
+    const labels = roles.map((role) => ({
+      label:   role.name,
+      tooltip: this.gettextCatalog.getString('Remove ' + role.name),
+      obj:     role
+    }))
+    return _.sortBy(labels, [ 'label' ])
+  }
+
   addRole() {
-    const rolesToOmit = this.user.roles
-
-    const getMatchingRoleNames = (viewValue) =>
-          this.RoleName.list({ filter: 'name:like:' + viewValue}, rolesToOmit)
-          .then(nameObjs =>
-                nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })))
-
-    this.asyncInputModal.open(this.gettextCatalog.getString('Add a role'),
-                              this.gettextCatalog.getString('Role'),
-                              this.gettextCatalog.getString('enter a role\'s name or partial name'),
-                              this.gettextCatalog.getString('No matching roles found'),
-                              getMatchingRoleNames).result
+    this.matchingRoleNames.open(this.gettextCatalog.getString('Add a role'),
+                                this.gettextCatalog.getString('Role'),
+                                this.gettextCatalog.getString('enter a role\'s name or partial name'),
+                                this.gettextCatalog.getString('No matching roles found'),
+                                this.user.roles)
       .then((modalValue) => {
-        this.user.addRole(modalValue.obj.id).then((user) => {
-          this.user = user
-          this.roleNameLabels = this.entityNamesToLabels(this.user.roleData)
-        })
+        this.onRoleAddRequest()(modalValue.obj.id)
       })
       .catch((error) => {
         this.$log.error(error);
-      })
+      });
   }
 
   roleLabelSelected(roleName) {
-    const promiseFn = () =>
-          this.user.removeRole(roleName.id)
-          .then((user) => {
-            this.user =  user;
-            this.notificationsService.success(
-              this.gettextCatalog.getString('Role removed: {{name}}', { name: roleName.name }))
-          })
+    const promiseFn = () => {
+      this.onRoleRemoveRequest()(roleName)
+        .then(() => {
+          this.notificationsService.success(
+            this.gettextCatalog.getString('Role removed: {{name}}', { name: roleName.name }))
+        })
+        .catch((error) => {
+          this.$log.error(error);
+        });
+    }
 
     this.domainNotificationService.removeEntity(
       promiseFn,
@@ -86,36 +97,22 @@ class Controller {
         { name: roleName.name }),
       this.gettextCatalog.getString('Remove failed'),
       this.gettextCatalog.getString('The role named {{name}} cannot be removed', { name: roleName.name }))
-  }
 
-  copyRoles() {
   }
-
-  entityNamesToLabels(entityData) {
-    const labels = entityData.map((roleInfo) => ({
-      label:   roleInfo.name,
-      tooltip: this.gettextCatalog.getString('Remove ' + roleInfo.name),
-      obj:     roleInfo
-    }))
-    return _.sortBy(labels, [ 'label' ])
-  }
-
-  updateLabels() {
-    this.roleNameLabels = this.entityNamesToLabels(this.user.roleData)
-  }
-
 }
 
 /*
  * Allows the logged in user to modify another user's roles.
  */
-var component = {
+var userRoles = {
   template: require('./userRoles.html'),
-  controller: Controller,
+  controller: UserRolesController,
   controllerAs: 'vm',
   bindings: {
-    user: '<'
+    user:                '<',
+    onRoleAddRequest:    '&',
+    onRoleRemoveRequest: '&'
   }
 };
 
-export default ngModule => ngModule.component('userRoles', component)
+export default ngModule => ngModule.component('userRoles', userRoles)

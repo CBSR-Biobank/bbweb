@@ -103,7 +103,7 @@ describe('Centre', function() {
 
     expect(() => {
       this.Centre.create(badCentreJson);
-    }).toThrowError(/invalid object from server.*locations/);
+    }).toThrowError(/invalid object from server/);
   });
 
   it('state predicates return valid results', function() {
@@ -157,7 +157,6 @@ describe('Centre', function() {
     this.$httpBackend.flush();
 
     function shouldFail(error) {
-      expect(error.message).toContain('locations');
       expect(error.message).toContain('Missing required property');
     }
   });

@@ -41,6 +41,9 @@ trait AccessService extends BbwebService {
   def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString)
       : ServiceValidation[Seq[RoleDto]]
 
+  def getRoleNames(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[EntityInfoDto]]
+
   def getUserRoles(userId: UserId): ServiceValidation[Set[UserRoleDto]]
 
   //def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]]
@@ -63,6 +66,9 @@ trait AccessService extends BbwebService {
   def getMemberships(requestUserId: UserId,
                      filter:        FilterString,
                      sort:          SortString): ServiceValidation[Seq[MembershipDto]]
+
+  def getMembershipNames(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[EntityInfoDto]]
 
   def getUserMembership(userId: UserId): ServiceValidation[UserMembership]
 
@@ -174,12 +180,12 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     }
   }
 
-  // def assignRole(cmd: AddUserToRoleCmd): Future[ServiceValidation[Role]] = {
-  //   for {
-  //     user <- Future { userRepository.getByKey(UserId(cmd.userId)) }
-  //     role <- processRoleCommand(cmd)
-  //   } yield role
-  // }
+  def getRoleNames(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[EntityInfoDto]] = {
+    getRoles(requestUserId, filter, sort).map {
+      _.map { r => EntityInfoDto(r.id, r.slug, r.name) }
+    }
+  }
 
   def hasPermission(userId: UserId, permissionId: AccessItemId): ServiceValidation[Boolean] = {
     val v = userRepository.getByKey(userId).flatMap { _ =>
@@ -252,6 +258,13 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
         if (firstSort.order == AscendingOrder) dtos
         else dtos.reverse
       }
+    }
+  }
+
+  def getMembershipNames(requestUserId: UserId, filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[EntityInfoDto]] = {
+    getMemberships(requestUserId, filter, sort).map {
+      _.map { m => EntityInfoDto(m.id, m.slug, m.name) }
     }
   }
 

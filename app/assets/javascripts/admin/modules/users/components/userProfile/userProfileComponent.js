@@ -5,7 +5,192 @@
 
 import _ from 'lodash'
 
-var component = {
+/*
+ * Controller for this component.
+ */
+/* @ngInject */
+class UserProfileController {
+
+  constructor($state,
+              gettextCatalog,
+              modalService,
+              modalInput,
+              notificationsService,
+              domainNotificationService,
+              userService,
+              User,
+              breadcrumbService,
+              userStateLabelService) {
+    'ngInject'
+    Object.assign(this,
+                  {
+                    $state,
+                    gettextCatalog,
+                    modalService,
+                    modalInput,
+                    notificationsService,
+                    domainNotificationService,
+                    userService,
+                    User,
+                    breadcrumbService,
+                    userStateLabelService
+                  });
+  }
+
+  $onInit() {
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.access'),
+      this.breadcrumbService.forState('home.admin.access.users'),
+      this.breadcrumbService.forStateWithFunc(
+        'home.admin.access.users.user',
+        () => this.gettextCatalog.getString('{{name}}', { name: this.user.name }))
+    ];
+
+    this.studyMemberships     = '';
+    this.centreMemberships    = '';
+    this.allowRemoveAvatarUrl = (this.user.avatarUrl !== null);
+    this.stateLabelFunc       = this.userStateLabelService.stateToLabelFunc(this.user.state);
+
+
+    if (this.user.membership) {
+      if (this.user.membership.isForAllStudies()) {
+        this.studyMemberships = this.gettextCatalog.getString('All Studies');
+      } else if (this.user.membership.studyData.entityData.length > 0){
+        this.studyMembershipLabels = _.sortBy(
+          this.user.membership.studyData.entityData.map((entityInfo) => ({
+            label: entityInfo.name
+          })),
+          [ 'label']
+        );
+      }
+
+      if (this.user.membership.isForAllCentres()) {
+        this.centreMemberships = this.gettextCatalog.getString('All Centres');
+      } else if (this.user.membership.centreData.entityData.length > 0){
+        this.centreMembershipLabels = _.sortBy(
+          this.user.membership.centreData.entityData.map((entityInfo) => ({
+            label: entityInfo.name
+          })),
+          [ 'label' ]
+        );
+      }
+    } else {
+      this.studyMemberships = this.gettextCatalog.getString('None');
+      this.centreMemberships = this.gettextCatalog.getString('None');
+    }
+  }
+
+  updateError(err) {
+    this.notificationsService.updateError(
+      this.gettextCatalog.getString('Your change could not be saved: ') + err.data.message,
+      this.gettextCatalog.getString('Cannot apply your change'));
+  }
+
+  postUpdate(message, title, timeout) {
+    timeout = timeout || 1500;
+    return user => {
+      this.user = user;
+      this.allowRemoveAvatarUrl = (this.user.avatarUrl !== null);
+      this.notificationsService.success(message, title, timeout);
+    };
+  }
+
+  updateName() {
+    const name = this.user.name;
+
+    this.modalInput.text(this.gettextCatalog.getString('Update user name'),
+                         this.gettextCatalog.getString('Name'),
+                         name,
+                         { required: true, minLength: 2 })
+      .result
+      .then(name => this.user.updateName(name))
+      .then(this.postUpdate(this.gettextCatalog.getString('User name updated successfully.'),
+                            this.gettextCatalog.getString('Update successful')))
+      .catch(this.updateError.bind(this));
+  }
+
+  updateEmail() {
+    this.modalInput.email(this.gettextCatalog.getString('Update user email'),
+                     this.gettextCatalog.getString('Email'),
+                     this.user.email,
+                     { required: true })
+      .result
+      .then(email => this.user.updateEmail(email))
+      .then(this.postUpdate(this.gettextCatalog.getString('Email updated successfully.'),
+                            this.gettextCatalog.getString('Update successful')))
+      .catch(this.updateError.bind(this));
+  }
+
+  updateAvatarUrl() {
+    this.modalInput.url(this.gettextCatalog.getString('Update avatar URL'),
+                   this.gettextCatalog.getString('Avatar URL'),
+                   this.user.avatarUrl)
+      .result
+      .then(avatarUrl => this.user.updateAvatarUrl(avatarUrl))
+      .then(this.postUpdate(this.gettextCatalog.getString('Avatar URL updated successfully.'),
+                            this.gettextCatalog.getString('Update successful')))
+      .catch(this.updateError.bind(this));
+  }
+
+  removeAvatarUrl() {
+    const header = this.gettextCatalog.getString('Remove Avatar URL'),
+          body = this.gettextCatalog.getString('Are you sure you want to remove your Avatar URL?');
+    this.modalService.modalOkCancel(header, body)
+      .then(() => this.user.updateAvatarUrl(null))
+      .then(this.postUpdate(this.gettextCatalog.getString('Avatar URL remove successfully.'),
+                            this.gettextCatalog.getString('Remove successful')))
+      .catch(this.updateError.bind(this));
+  }
+
+  updatePassword() {
+    this.modalInput.password(this.gettextCatalog.getString('Change password')).result
+      .then(result => this.user.updatePassword(result.currentPassword, result.newPassword))
+      .then(this.postUpdate(this.gettextCatalog.getString('Your password was updated successfully.'),
+                            this.gettextCatalog.getString('Update successful')))
+      .catch(err => {
+        if (err.data.message.indexOf('invalid password') > -1) {
+          this.notificationsService.error(
+            this.gettextCatalog.getString('Your current password was incorrect.'),
+            this.gettextCatalog.getString('Cannot update your password'));
+        } else {
+          this.updateError(err);
+        }
+      });
+  }
+
+  addRole(roleId) {
+    this.user.addRole(roleId)
+      .then(user => {
+        this.user = user
+      })
+  }
+
+  removeRole(roleName) {
+    this.user.removeRole(roleName.id)
+      .then(user => {
+        this.user = user;
+      })
+  }
+
+  addMembership(membershipId) {
+    this.user.addMembership(membershipId)
+      .then(user => {
+        this.user = user
+      })
+  }
+
+  removeMembership(membershipName) {
+    this.user.removeMembership(membershipName.id)
+      .then(user => {
+        this.user = user;
+      })
+  }
+
+}
+
+var userProfile = {
   template: require('./userProfile.html'),
   controller: UserProfileController,
   controllerAs: 'vm',
@@ -14,185 +199,4 @@ var component = {
   }
 };
 
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function UserProfileController($state,
-                               gettextCatalog,
-                               modalService,
-                               modalInput,
-                               notificationsService,
-                               userService,
-                               User,
-                               breadcrumbService,
-                               userStateLabelService) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //--
-
-  function onInit() {
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.access'),
-      breadcrumbService.forState('home.admin.access.users'),
-      breadcrumbService.forStateWithFunc(
-        'home.admin.access.users.user',
-        function () { return gettextCatalog.getString('{{name}}', { name: vm.user.name }); })
-    ];
-
-    vm.studyMemberships        = '';
-    vm.centreMemberships       = '';
-    vm.updateName              = updateName;
-    vm.updateEmail             = updateEmail;
-    vm.updatePassword          = updatePassword;
-    vm.updateAvatarUrl         = updateAvatarUrl;
-    vm.removeAvatarUrl         = removeAvatarUrl;
-    vm.updateStudyMemberships  = updateStudyMemberships;
-    vm.updateCentreMemberships = updateCentreMemberships;
-    vm.updateRoles             = updateRoles;
-    vm.rolesValue              = getRolesValue();
-
-    vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
-
-    vm.stateLabelFunc  = userStateLabelService.stateToLabelFunc(vm.user.state);
-
-
-    if (vm.user.membership) {
-      if (vm.user.membership.isForAllStudies()) {
-        vm.studyMemberships = gettextCatalog.getString('All Studies');
-      } else if (vm.user.membership.studyData.entityData.length > 0){
-        vm.studyMembershipLabels = _.sortBy(
-          vm.user.membership.studyData.entityData.map((entityInfo) => ({
-            label: entityInfo.name
-          })),
-          [ 'label']
-        );
-      }
-
-      if (vm.user.membership.isForAllCentres()) {
-        vm.centreMemberships = gettextCatalog.getString('All Centres');
-      } else if (vm.user.membership.centreData.entityData.length > 0){
-        vm.centreMembershipLabels = _.sortBy(
-          vm.user.membership.centreData.entityData.map((entityInfo) => ({
-            label: entityInfo.name
-          })),
-          [ 'label' ]
-        );
-      }
-    } else {
-      vm.studyMemberships = gettextCatalog.getString('None');
-      vm.centreMemberships = gettextCatalog.getString('None');
-    }
-  }
-
-  function updateError(err) {
-    notificationsService.updateError(
-      gettextCatalog.getString('Your change could not be saved: ') + err.data.message,
-      gettextCatalog.getString('Cannot apply your change'));
-  }
-
-  function postUpdate(message, title, timeout) {
-    timeout = timeout || 1500;
-    return function (user) {
-      vm.user = user;
-      vm.allowRemoveAvatarUrl = (vm.user.avatarUrl !== null);
-      notificationsService.success(message, title, timeout);
-    };
-  }
-
-  function updateName() {
-    var name = vm.user.name;
-
-    modalInput.text(gettextCatalog.getString('Update user name'),
-                    gettextCatalog.getString('Name'),
-                    name,
-                    { required: true, minLength: 2 })
-      .result.then(function (name) {
-        vm.user.updateName(name)
-          .then(function (user) {
-            postUpdate(gettextCatalog.getString('User name updated successfully.'),
-                       gettextCatalog.getString('Update successful'))(user);
-            vm.user = user;
-          })
-          .catch(updateError);
-      });
-  }
-
-  function updateEmail() {
-    modalInput.email(gettextCatalog.getString('Update user email'),
-                     gettextCatalog.getString('Email'),
-                     vm.user.email,
-                     { required: true })
-      .result.then(function (email) {
-        vm.user.updateEmail(email)
-          .then(postUpdate(gettextCatalog.getString('Email updated successfully.'),
-                           gettextCatalog.getString('Update successful')))
-          .catch(updateError);
-      });
-  }
-
-  function updateAvatarUrl() {
-    modalInput.url(gettextCatalog.getString('Update avatar URL'),
-                   gettextCatalog.getString('Avatar URL'),
-                   vm.user.avatarUrl)
-      .result.then(function (avatarUrl) {
-        vm.user.updateAvatarUrl(avatarUrl)
-          .then(postUpdate(gettextCatalog.getString('Avatar URL updated successfully.'),
-                           gettextCatalog.getString('Update successful')))
-          .catch(updateError);
-      });
-  }
-
-  function removeAvatarUrl() {
-    modalService.modalOkCancel(gettextCatalog.getString('Remove Avatar URL'),
-                               gettextCatalog.getString('Are you sure you want to remove your Avatar URL?'))
-      .then(function() {
-        vm.user.updateAvatarUrl(null)
-          .then(postUpdate(gettextCatalog.getString('Avatar URL remove successfully.'),
-                           gettextCatalog.getString('Remove successful')))
-          .catch(updateError);
-      });
-  }
-
-  function updatePassword() {
-    modalInput.password(gettextCatalog.getString('Change password')).result
-      .then(function (result) {
-        vm.user.updatePassword(result.currentPassword, result.newPassword)
-          .then(postUpdate(gettextCatalog.getString('Your password was updated successfully.'),
-                           gettextCatalog.getString('Update successful')))
-          .catch(function (err) {
-            if (err.data.message.indexOf('invalid password') > -1) {
-              notificationsService.error(
-                gettextCatalog.getString('Your current password was incorrect.'),
-                gettextCatalog.getString('Cannot update your password'));
-            } else {
-              updateError(err);
-            }
-          });
-      });
-  }
-
-  function updateRoles() {
-    $state.go('home.admin.access.users.user.roles');
-  }
-
-  function updateStudyMemberships() {
-    console.log('here');
-  }
-
-  function updateCentreMemberships() {
-    console.log('here');
-  }
-
-  function getRolesValue() {
-    if (vm.user.hasRoles()) {
-      return vm.user.getRoleNames();
-    }
-    return gettextCatalog.getString('None');
-  }
-}
-
-export default ngModule => ngModule.component('userProfile', component)
+export default ngModule => ngModule.component('userProfile', userProfile)

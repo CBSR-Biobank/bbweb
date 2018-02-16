@@ -60,7 +60,7 @@ describe('Membership', function() {
 
     function jsonMembershipWithStudy(id, name) {
       var json = this.Factory.membership();
-      json.studyData.entityData = [{ id: id, name: name}];
+      json.studyData.entityData = [ Object.assign(this.Factory.entityInfo(), { id: id, name: name}) ];
       return json;
     }
 
@@ -72,7 +72,7 @@ describe('Membership', function() {
 
     function jsonMembershipWithCentre(id, name) {
       var json = this.Factory.membership();
-      json.centreData.entityData = [{ id: id, name: name}];
+      json.centreData.entityData = [ Object.assign(this.Factory.entityInfo(), { id: id, name: name}) ];
       return json;
     }
 

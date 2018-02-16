@@ -27,6 +27,7 @@ describe('membershipViewComponent', function() {
                               'asyncInputModal',
                               'notificationsService',
                               'modalInput',
+                              'matchingUserNames',
                               'Factory')
 
       this.createController = (membership) => {
@@ -164,13 +165,34 @@ describe('membershipViewComponent', function() {
       context.membership                      = this.Membership.create(rawMembership)
       context.controllerEntityLabelsFieldName = 'userNameLabels'
       context.entityNameClass                 = this.UserName
-      context.controllerGetMatchingEntityNamesFuncName = 'getMatchingUserNames'
+      context.controllerGetMatchingEntityNamesFuncName = undefined
 
       context.replyMembership =
         this.Membership.create(Object.assign({}, rawMembership, { userData: [ userName ]}))
     });
 
     sharedAsyncModalBehaviour(context);
+
+    it('correctly adds a user', function() {
+      const rawMembership = this.Factory.membership(),
+            membership    = this.Membership.create(rawMembership),
+            user = this.Factory.user();
+
+      this.matchingUserNames.open = jasmine.createSpy().and.returnValue(this.$q.when({
+        obj: {
+          id: user.id
+        }
+      }));
+
+      this.Membership.prototype.addUser = jasmine.createSpy().and.returnValue(this.$q.when(membership))
+
+      this.createController(membership);
+      this.controller.addUser();
+      this.scope.$digest();
+
+      expect(this.matchingUserNames.open).toHaveBeenCalled();
+      expect(this.Membership.prototype.addUser).toHaveBeenCalled();
+    })
 
   })
 
@@ -339,14 +361,17 @@ describe('membershipViewComponent', function() {
         this.createController(context.membership)
         context.entityNameClass.list =
           jasmine.createSpy().and.returnValue(this.$q.when([ context.entityName ]))
-        this.controller[context.controllerGetMatchingEntityNamesFuncName]()()
-          .then(nameObjs => {
-            expect(nameObjs).toBeArrayOfSize(1)
-            expect(nameObjs[0].label).toBe(context.entityName.name)
-            expect(nameObjs[0].obj).toBe(context.entityName)
-          });
-        this.scope.$digest()
-        expect(context.entityNameClass.list).toHaveBeenCalled()
+
+        if (context.controllerGetMatchingEntityNamesFuncName) {
+          this.controller[context.controllerGetMatchingEntityNamesFuncName]()()
+            .then(nameObjs => {
+              expect(nameObjs).toBeArrayOfSize(1)
+              expect(nameObjs[0].label).toBe(context.entityName.name)
+              expect(nameObjs[0].obj).toBe(context.entityName)
+            });
+          this.scope.$digest()
+          expect(context.entityNameClass.list).toHaveBeenCalled()
+        }
       })
 
       it('entity labels not modified is user presses the modal cancel button ', function() {

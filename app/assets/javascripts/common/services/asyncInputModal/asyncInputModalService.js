@@ -2,10 +2,11 @@
  *
  */
 
-/*
- * This service provides a single function which opens a modal.
+/**
+ * This AngularJS Service allows the user to open a modal dialog box.
+ *
+ * @memberOf ng.common.services
  */
-/* @ngInject */
 class AsyncInputModalService {
 
   constructor($uibModal) {
@@ -14,7 +15,14 @@ class AsyncInputModalService {
   }
 
   /**
-   * A modal that allows the user to select a value returned by the server.
+   * Opens a modal that allows the user to enter some text and then select a matching value.
+   *
+   * <p>Matches for this text are then retrieved asynchronously from the server, and the matches are displayed
+   * in a Bootstrap Typeahead input (`uib-typeahead`).
+   *
+   * <p>If the user presses the **OK** button, the object returned by the modal is the object corresponding
+   * to the label selected by the user. See {@link ng.common.services.AsyncInputModalService.GetResults
+   * GetResults}.
    *
    * @param {string} heading the heading to display as the modal's title.
    *
@@ -23,11 +31,12 @@ class AsyncInputModalService {
    * @param {string} placeholder a message to display in the input field when no value is present.
    *
    * @param {string} noResultsMessage the message to display to the user if the input they provided does not
-   *                 yield any results.
+   * yield any results.
    *
-   * @param {function} getResults the function that is called to get the matching values from the server.
+   * @param {ng.common.services.AsyncInputModalService.GetResults} getResults the function that is called to
+   * get the matching values from the server.
    *
-   * @return {uibModalInstance} The instance of the modal that was opened. This is a ui-bootstrap class.
+   * @return {uibModalInstance} The instance of the modal that was opened. This is a `ui-bootstrap` class.
    */
   open(heading,
        label,
@@ -78,5 +87,29 @@ class AsyncInputModalService {
 
   }
 }
+
+/**
+ * The callback function called by component {@link ng.common.services.AsyncInputModalService
+ * AsyncInputModalService} to retrieve the results matching the input entered by the user.
+ *
+ * @callback ng.common.services.AsyncInputModalService.GetResults
+ *
+ * @param {string} viewValue - the text entered by the user.
+ *
+ * @return {Promise<Array<ng.common.services.AsyncInputModalService.Results>>}
+ */
+
+/**
+ * One of the objects that is returned by {@link ng.common.services.AsyncInputModalService.GetResults
+ * GetResults}.
+ *
+ * @typedef ng.common.services.AsyncInputModalService.Results
+ *
+ * @type object
+ *
+ * @property {string} label - the label to display to the user.
+ *
+ * @property {object} obj - The object the label represents.
+ */
 
 export default ngModule => ngModule.service('asyncInputModal', AsyncInputModalService)

@@ -3,6 +3,7 @@ package org.biobank
 import akka.stream.Materializer
 import java.time.{OffsetDateTime, ZoneOffset}
 import javax.inject._
+import org.biobank.domain.Slug
 import org.biobank.domain.user._
 import play.api.{Configuration, Logger}
 
@@ -38,7 +39,7 @@ object Global {
 
   val DefaultUserEmail: String = "admin@admin.com"
 
-  val DefaultUserId: UserId = UserId(DefaultUserEmail)
+  val DefaultUserId: UserId = UserId(Slug(DefaultUserEmail))
 
   val StartOfTime: OffsetDateTime = OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
 

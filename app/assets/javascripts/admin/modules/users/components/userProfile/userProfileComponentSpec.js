@@ -141,10 +141,10 @@ describe('Component: userProfile', function() {
   });
 
   it('can remove a users avatar', function() {
-    var user = new this.User(this.Factory.user());
+    var user = this.User.create(this.Factory.user());
 
     spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-    spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(this.$q.when(new this.User()));
+    spyOn(this.User.prototype, 'updateAvatarUrl').and.returnValue(this.$q.when(user));
     spyOn(this.notificationsService, 'success').and.returnValue(null);
 
     this.createController(user);
@@ -169,13 +169,13 @@ describe('Component: userProfile', function() {
   });
 
   it('can update users password', function() {
-    var user = new this.User(this.Factory.user());
+    const user = this.User.create(this.Factory.user());
 
     this.createController(user);
 
     spyOn(this.modalInput, 'password').and.returnValue(
-      {result : this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
-    spyOn(this.User.prototype, 'updatePassword').and.returnValue(this.$q.when(new this.User()));
+      { result : this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
+    spyOn(this.User.prototype, 'updatePassword').and.returnValue(this.$q.when(user));
     spyOn(this.notificationsService, 'success').and.callFake(function () {});
 
     this.controller.updatePassword();

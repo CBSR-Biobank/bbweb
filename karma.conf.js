@@ -28,6 +28,12 @@ function KarmaConf(config) {
       captureConsole: false
     },
 
+    browserConsoleLogOptions: {
+      level: 'log',
+      format: '%b %T: %m',
+      terminal: true
+    },
+
     // If using jasmine-core 2.6.0 the follwing settings are required
     // browserNoActivityTimeout: 60000,
     // browserDisconnectTimeout: 30000,

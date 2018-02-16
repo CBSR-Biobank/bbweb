@@ -16,7 +16,7 @@ import _ from 'lodash'
  *
  * @param {boolean} readOnly When *FALSE*, user is allowed to make changes to the annotation type.
  *
- * @param {ng.admin.common.components.annotationTypeView.onUpdate} onUpdate Used only if `readOnly` is
+ * @param {ng.admin.common.components.annotationTypeView.onUpdate} [onUpdate] Used only if `readOnly` is
  * *False*. This function called after the user made a change to the annotation type.
  */
 var annotationTypeView = {

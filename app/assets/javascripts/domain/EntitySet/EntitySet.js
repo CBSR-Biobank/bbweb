@@ -12,11 +12,76 @@ function EntitySetFactory($q,
                           DomainError,
                           EntityInfo) {
 
-  function EntitySet(obj) {
-    this.allEntities = false;
-    this.entityData = [];
+  class EntitySet extends DomainEntity {
 
-    DomainEntity.call(this, EntitySet.SCHEMA, obj);
+    constructor(obj) {
+      super(EntitySet.SCHEMA,
+            Object.assign(
+              {
+                allEntities: false,
+                entityData:  []
+              },
+              obj
+            )
+           );
+    }
+
+    isForAllEntities() {
+      return this.allEntities;
+    }
+
+    isMemberOf(name) {
+      if (this.allEntities) {
+        return true;
+      }
+      const result = _.find(this.entityData, function (info) {
+        return info.name === name;
+      });
+      return !_.isUndefined(result);
+    }
+
+    addEntity(id, name) {
+      this.entityData.push({ id: id, name: name});
+    }
+
+    removeEntity(name) {
+      _.remove(this.entityData, function (info) {
+        return info.name === name;
+      });
+    }
+
+    getEntityIds() {
+      return this.entityData.map(function (entityInfo) {
+        return entityInfo.id;
+      });
+    }
+
+    static isValid(obj) {
+      return DomainEntity.isValid(EntitySet.SCHEMA, [ EntityInfo.SCHEMA ], obj);
+    }
+
+    static create(obj) {
+      const validation = EntitySet.isValid(obj);
+      if (!validation.valid) {
+        $log.error(validation.message);
+        throw new DomainError(validation.message);
+      }
+      obj.entityData = obj.entityData.map(function (info) {
+        return EntityInfo.create(info);
+      });
+      return new EntitySet(obj);
+    }
+
+    static asyncCreate(obj) {
+      var result;
+
+      try {
+        result = EntitySet.create(obj);
+        return $q.when(result);
+      } catch (e) {
+        return $q.reject(e);
+      }
+    }
   }
 
   EntitySet.SCHEMA = {
@@ -27,64 +92,6 @@ function EntitySetFactory($q,
       'entityData':  { 'type': 'array',  'items': { '$ref': 'EntityInfo' } }
     },
     'required': [ 'allEntities', 'entityData' ]
-  };
-
-  EntitySet.isValid = function (obj) {
-    return DomainEntity.isValid(EntitySet.SCHEMA, [ EntityInfo.SCHEMA ], obj);
-  };
-
-  EntitySet.create = function (obj) {
-    var validation = EntitySet.isValid(obj);
-    if (!validation.valid) {
-      $log.error(validation.message);
-      throw new DomainError(validation.message);
-    }
-    obj.entityData = obj.entityData.map(function (info) {
-      return EntityInfo.create(info);
-    });
-    return new EntitySet(obj);
-  };
-
-  EntitySet.asyncCreate = function (obj) {
-    var result;
-
-    try {
-      result = EntitySet.create(obj);
-      return $q.when(result);
-    } catch (e) {
-      return $q.reject(e);
-    }
-  };
-
-  EntitySet.prototype.isForAllEntities = function () {
-    return this.allEntities;
-  };
-
-  EntitySet.prototype.isMemberOf = function (name) {
-    var result;
-    if (this.allEntities) {
-      return true;
-    }
-    result = _.find(this.entityData, function (info) {
-      return info.name === name;
-    });
-    return !_.isUndefined(result);
-  };
-
-  EntitySet.prototype.addEntity = function (id, name) {
-    this.entityData.push({ id: id, name: name});
-  };
-
-  EntitySet.prototype.removeEntity = function (name) {
-    _.remove(this.entityData, function (info) {
-      return info.name === name;
-    });
-  };
-
-  EntitySet.prototype.getEntityIds = function () {
-    return this.entityData.map(function (entityInfo) {
-      return entityInfo.id;
-    });
   };
 
   return EntitySet;

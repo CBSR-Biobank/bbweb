@@ -40,7 +40,7 @@ function UserMembershipFactory($q,
   UserMembership.SCHEMA = MembershipBase.createDerivedSchema({ id: 'UserMembership'});
 
   /**
-   * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.access.Membership|Membership}.
+   * Checks if `obj` has valid properties to construct a {@link domain.access.Membership|Membership}.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.

@@ -76,6 +76,16 @@
  */
 
 /**
+ * AngularJS user administration.
+ * @namespace ng.admin.users
+ */
+
+/**
+ * AngularJS user administration services.
+ * @namespace ng.admin.users.services
+ */
+
+/**
  * AngularJS common components.
  * @namespace ng.common.components
  */

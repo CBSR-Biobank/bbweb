@@ -102,7 +102,7 @@ function ParticipantFactory($q,
    * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
    */
   Participant.isValid = function (obj) {
-    return ConcurrencySafeEntity.isValid(Participant.SCHEMA, [Annotation.schema ], obj);
+    return ConcurrencySafeEntity.isValid(Participant.SCHEMA, [ Annotation.SCHEMA ], obj);
   };
 
   /**

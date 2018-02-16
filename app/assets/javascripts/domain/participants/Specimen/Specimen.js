@@ -174,7 +174,7 @@ function SpecimenFactory($q,
    */
   Specimen.isValid = function(obj) {
     return ConcurrencySafeEntity.isValid(Specimen.SCHEMA,
-                                         [ centreLocationInfoSchema, Specimen.schema ],
+                                         [ centreLocationInfoSchema ],
                                          obj);
   };
 

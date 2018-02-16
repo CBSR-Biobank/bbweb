@@ -19,7 +19,9 @@ function UserFactory($q,
                      UserState,
                      UserRole,
                      RoleIds,
-                     UserMembership) {
+                     UserMembership,
+                     EntitySet,
+                     EntityInfo) {
 
   /**
    * Information for a user of the system.
@@ -147,11 +149,30 @@ function UserFactory($q,
                          });
     }
 
+    /**
+     * @return {Promise<domain.users.User>} The user with the role removed.
+     */
     removeRole(roleId) {
       if (this.roles.find(role => role.id === roleId) === undefined) {
-        throw new DomainError('user does not have role: ' + roleId);
+        return $q.reject('user does not have role: ' + roleId);
       }
       return biobankApi.del(User.url('roles', this.id, this.version, roleId))
+        .then(User.asyncCreate);
+    }
+
+    addMembership(membershipId) {
+      return this.update(User.url('memberships', this.id),
+                         {
+                           expectedVersion: this.version,
+                           membershipId:          membershipId
+                         });
+    }
+
+    /**
+     * @return {Promise<domain.users.User>} The user with the membership removed.
+     */
+    removeMembership(membershipId) {
+      return biobankApi.del(User.url('memberships', this.id, this.version, membershipId))
         .then(User.asyncCreate);
     }
 
@@ -218,15 +239,24 @@ function UserFactory($q,
       return this.roles.map(role => role.name).join(', ');
     }
 
+    hasMembership() {
+      return this.membership !== undefined;
+    }
+
     static url (...paths){
       return DomainEntity.url.apply(null, [ 'users' ].concat(paths));
     }
 
     /** @protected */
     static isValid(obj) {
-      return ConcurrencySafeEntity.isValid(User.SCHEMA,
-                                           [ UserRole.SCHEMA, UserMembership.SCHEMA ],
-                                           obj);
+      return super.isValid(User.SCHEMA,
+                           [
+                             UserRole.SCHEMA,
+                             UserMembership.SCHEMA,
+                             EntitySet.SCHEMA,
+                             EntityInfo.SCHEMA
+                           ],
+                           obj);
     }
 
     /**
@@ -341,7 +371,7 @@ function UserFactory($q,
       'membership':   {
         'oneOf': [
           { 'type': 'null' },
-          { 'type': 'object', '$ref': 'UserMembership' }
+          { '$ref': 'UserMembership' }
         ]
       }
     },

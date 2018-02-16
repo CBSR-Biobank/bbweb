@@ -22,6 +22,7 @@
                ng-model-options="{ debounce: 250 }"
                placeholder="{{vm.placeholder}}"
                uib-typeahead="value.obj as value.label for value in vm.getValues($viewValue)"
+               typeahead-editable="false"
                typeahead-loading="vm.loadingValue"
                typeahead-on-select="vm.valueSelected($item)"
                typeahead-no-results="vm.noValueResults"

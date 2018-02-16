@@ -27,8 +27,9 @@ define(function (require) {
 
     it('constructor with no parameters has default values', function() {
       var entityName = new context.constructor();
-      expect(entityName.id).toBeNull();
-      expect(entityName.name).toBeNull();
+      expect(entityName.id).toBeUndefined();
+      expect(entityName.name).toBeUndefined();
+      expect(entityName.slug).toBeUndefined();
     });
 
     it('fails when creating from an invalid object', function() {
@@ -105,7 +106,7 @@ define(function (require) {
         }
 
         function shouldFail(error) {
-          expect(error).toMatch('invalid.*names from server');
+          expect(error).toMatch('Missing required property');
         }
       });
 

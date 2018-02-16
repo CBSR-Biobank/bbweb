@@ -74,7 +74,7 @@ describe('Study', function() {
 
     it('fails when creating from a non object for an annotation type', function() {
       var badStudyJson = this.Factory.study({ annotationTypes: [ 1 ]});
-      expect(() => { this.Study.create(badStudyJson); })
+      expect(() => this.Study.create(badStudyJson))
         .toThrowError(/Invalid type/);
     });
 
@@ -107,8 +107,12 @@ describe('Study', function() {
     });
 
     it('fails when getting a study and it has a bad annotation type', function() {
-      var annotationType = _.omit(this.Factory.annotationType(), 'name'),
+      const annotationType = _.omit(this.Factory.annotationType(), 'name'),
           study = this.Factory.study({ annotationTypes: [ annotationType ]});
+
+      const shouldFail = (error) => {
+       expect(error.message).toContain('Missing required property');
+      }
 
       this.$httpBackend.whenGET(this.url(study.id)).respond(this.reply(study));
       this.Study.get(study.id).then(shouldNotFail).catch(shouldFail);

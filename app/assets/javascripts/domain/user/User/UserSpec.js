@@ -24,7 +24,10 @@ describe('User', function() {
         expect(entity).toEqual(jasmine.any(this.User));
       };
 
-      this.url = (...paths) => EntityTestSuiteMixin.url.apply(null, [ 'users' ].concat(paths))
+      this.url = (...paths) => {
+        const allPaths = [ 'users' ].concat(paths);
+        return EntityTestSuiteMixin.url(...allPaths);
+      }
     });
   });
 
@@ -76,10 +79,15 @@ describe('User', function() {
 
       this.$httpBackend.whenGET(url).respond(this.reply(reply));
 
-      this.User.list({ filter: filter }).then((pagedResult) => {
-        expect(pagedResult.items).toBeArrayOfSize(1);
-        expect(pagedResult.items[0]).toEqual(jasmine.any(this.User));
-      });
+      this.User.list({ filter: filter })
+        .then((pagedResult) => {
+          expect(pagedResult.items).toBeArrayOfSize(1);
+          expect(pagedResult.items[0]).toEqual(jasmine.any(this.User));
+        })
+        .catch(error => {
+          console.log(error);
+          fail('here');
+        });
       this.$httpBackend.flush();
     });
 
@@ -317,13 +325,13 @@ describe('User', function() {
 
     });
 
-    it('throws an error when removing a role the user does not have', function() {
-      const rawRoleNameDto  = this.Factory.roleNameDto(),
-            rawUser = this.Factory.user({ roleData: [ rawRoleNameDto ]}),
+    it('throws an error when adding a role the user already has', function() {
+      const rawUserRole  = this.Factory.userRole(),
+            rawUser = this.Factory.user({ roles: [ rawUserRole ]}),
             user     = new this.User(rawUser);
 
       expect(() => {
-        user.addRole(rawRoleNameDto.id).then(this.expectUser.bind(this));
+        user.addRole(rawUserRole.id).then(this.expectUser.bind(this));
       }).toThrowError(/user already has role/);
     })
 
@@ -332,26 +340,29 @@ describe('User', function() {
   describe('when removing a role', function() {
 
     it('uses correct URL when adding a role', function() {
-      const rawRoleNameDto  = this.Factory.roleNameDto(),
-            rawUser = this.Factory.user({ roleData: [ rawRoleNameDto ]}),
+      const rawUserRole  = this.Factory.userRole(),
+            rawUser = this.Factory.user({ roles: [ rawUserRole ]}),
             user     = new this.User(rawUser);
 
-      this.$httpBackend.expectDELETE(this.url('roles', user.id, user.version, rawRoleNameDto.id))
+      this.$httpBackend.expectDELETE(this.url('roles', user.id, user.version, rawUserRole.id))
         .respond(this.reply(rawUser));
 
-      user.removeRole(rawRoleNameDto.id).then(this.expectUser.bind(this));
+      user.removeRole(rawUserRole.id).then(this.expectUser.bind(this));
       this.$httpBackend.flush();
     });
 
     it('throws an error when removing a role the user does not have', function() {
-      const rawRoleNameDto  = this.Factory.roleNameDto(),
+      const rawUserRole  = this.Factory.userRole(),
             rawUser = this.Factory.user(),
             user     = new this.User(rawUser);
 
-      expect(() => {
-        user.removeRole(rawRoleNameDto.id).then(this.expectUser.bind(this));
-      }).toThrowError(/user does not have role/);
+      user.removeRole(rawUserRole.id)
+        .then(failTest)
+        .catch(error => {
+          console.log(error);
+        });
     })
+
 
   });
 
