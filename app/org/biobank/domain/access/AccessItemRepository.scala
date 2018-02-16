@@ -165,7 +165,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
         createPermissionSimple(PermissionId.StudyRead,
                                "Read studies",
                                "User can view studies",
-                               Set(RoleId.StudyUser, RoleId.SpecimenCollector)),
+                               Set(RoleId.StudyUser, RoleId.SpecimenCollector, RoleId.ShippingUser)),
         createPermissionSimple(PermissionId.StudyCreate,
                                "Create studies",
                                "User can create studies",
@@ -339,7 +339,8 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
                                      PermissionId.ShipmentChangeState,
                                      PermissionId.CentreRead,
                                      PermissionId.SpecimenRead,
-                                     PermissionId.CollectionEventRead)),
+                                     PermissionId.CollectionEventRead,
+                                     PermissionId.StudyRead)),
 
         createRole(roleId      = RoleId.WebsiteAdministrator,
                    name        = "Website Administrator",

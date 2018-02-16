@@ -9,7 +9,6 @@ import org.biobank.domain.centre.CentreId
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.user.UserId
 import org.biobank.service.access.AccessService
-//import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalaz.Scalaz._
@@ -49,8 +48,6 @@ trait ServicePermissionChecks {
   import org.biobank.domain.access.AccessItem._
   import org.biobank.domain.access.PermissionId._
 
-  //private val log: Logger = LoggerFactory.getLogger(this.getClass)
-
   protected val accessService: AccessService
 
   protected def whenPermitted[T](requestUserId: UserId, permissionId: PermissionId)
@@ -78,12 +75,16 @@ trait ServicePermissionChecks {
                                             studyId:      Option[StudyId],
                                             centreId:     Option[CentreId])
                                         (block: () => ServiceValidation[T]): ServiceValidation[T] = {
-    accessService.hasPermissionAndIsMember(requestUserId, permissionId, studyId, centreId)
+    val v = accessService.hasPermissionAndIsMember(requestUserId, permissionId, studyId, centreId)
       .fold(
         err        => err.failure[T],
         permission => if (permission) block()
                       else Unauthorized.failureNel[T]
       )
+
+    org.slf4j.LoggerFactory.getLogger(this.getClass)
+      .info(s"whenPermittedAndIsMember: permission: $permissionId, studyId: $studyId, centreId: $centreId, $v")
+    v
   }
 
   protected def whenPermittedAndIsMemberAsync[T](requestUserId: UserId,

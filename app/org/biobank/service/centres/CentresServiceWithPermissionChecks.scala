@@ -5,12 +5,15 @@ import org.biobank.domain.user.UserId
 import org.biobank.domain.centre._
 import org.biobank.service._
 import org.biobank.service.ServicePermissionChecks
+import org.slf4j.Logger
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 trait CentreServicePermissionChecks extends ServicePermissionChecks {
 
   import org.biobank.domain.access.PermissionId._
+
+  val log: Logger
 
   protected val centreRepository: CentreRepository
 

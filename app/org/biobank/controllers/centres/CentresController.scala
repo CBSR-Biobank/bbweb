@@ -1,10 +1,8 @@
 package org.biobank.controllers.centres
 
 import javax.inject.{Inject, Singleton}
-import java.time.format.DateTimeFormatter
 import org.biobank.controllers._
-import org.biobank.domain.centre.{ Centre, CentreId }
-import org.biobank.domain.user.UserId
+import org.biobank.domain.centre.CentreId
 import org.biobank.dto._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.service._
@@ -47,11 +45,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
             pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
             centres    <- service.getCentres(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
             validPage  <- pagedQuery.validPage(centres.size)
-            dtos        <- {
-             centres.map(centre => centreToDto(request.authInfo.userId, centre))
-                .toList.sequenceU.map(_.toSeq)
-            }
-            results    <- PagedResults.create(dtos, pagedQuery.page, pagedQuery.limit)
+            results    <- PagedResults.create(centres, pagedQuery.page, pagedQuery.limit)
           } yield results
         }
       )
@@ -67,10 +61,10 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
                                                 filterAndSort.filter,
                                                 filterAndSort.sort)
           } yield {
-            centres.map(centre => NameAndStateDto(centre.id.id,
+            centres.map(centre => NameAndStateDto(centre.id,
                                                   centre.slug,
                                                   centre.name,
-                                                  centre.state.id))
+                                                  centre.state))
           }
         }
       )
@@ -83,9 +77,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
 
   def getBySlug(slug: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val v = service.getCentreBySlug(request.authInfo.userId, slug).flatMap { centre =>
-          centreToDto(request.authInfo.userId, centre)
-        }
+      val v = service.getCentreBySlug(request.authInfo.userId, slug)
       validationReply(v)
     }
 
@@ -130,33 +122,8 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
     commandAction[DisableCentreCmd](Json.obj("id" -> id))(processCommand)
 
   private def processCommand(cmd: CentreCommand): Future[Result] = {
-    val future = service.processCommand(cmd).map { validation =>
-        validation.flatMap(centre => centreToDto(UserId(cmd.sessionUserId), centre))
-      }
+    val future = service.processCommand(cmd)
     validationReply(future)
-  }
-
-  private def centreToDto(requestUserId: UserId, centre: Centre): ControllerValidation[CentreDto] = {
-    val v = centre.studyIds
-      .map { id =>
-        studiesService.getStudy(requestUserId, id).map { study =>
-          NameAndStateDto(study.id.id, study.slug, study.name, study.state.id)
-        }
-      }
-      .toList.sequenceU
-
-    v.map { studyNames =>
-      CentreDto(id           = centre.id.id,
-                version      = centre.version,
-                timeAdded    = centre.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                timeModified = centre.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
-                state        = centre.state.id,
-                slug         = centre.slug,
-                name         = centre.name,
-                description  = centre.description,
-                studyNames   = studyNames.toSet,
-                locations    = centre.locations)
-    }
   }
 
 }

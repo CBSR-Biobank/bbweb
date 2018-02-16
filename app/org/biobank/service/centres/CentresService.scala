@@ -3,18 +3,20 @@ package org.biobank.service.centres
 import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Named}
 import org.biobank.domain.LocationId
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId
 import org.biobank.domain.centre._
-import org.biobank.domain.study.StudyRepository
 import org.biobank.domain.user.UserId
+import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
 import org.biobank.service._
 import org.biobank.service.access.AccessService
+import org.biobank.service.studies.StudiesService
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._
@@ -39,15 +41,15 @@ trait CentresService extends BbwebService {
 
   def getCentres(requestUserId: UserId,
                  filter:        FilterString,
-                 sort:          SortString): ServiceValidation[Seq[Centre]]
+                 sort:          SortString): ServiceValidation[Seq[CentreDto]]
 
   def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre]
 
-  def getCentreBySlug(requestUserId: UserId, slug: String): ServiceValidation[Centre]
+  def getCentreBySlug(requestUserId: UserId, slug: String): ServiceValidation[CentreDto]
 
   def centreFromLocation(requestUserId: UserId, id: LocationId): ServiceValidation[Centre]
 
-  def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]]
+  def processCommand(cmd: CentreCommand): Future[ServiceValidation[CentreDto]]
 
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
@@ -64,8 +66,8 @@ trait CentresService extends BbwebService {
  */
 class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: ActorRef,
                                     val accessService:             AccessService,
-                                    val centreRepository:          CentreRepository,
-                                    val studyRepository:           StudyRepository)
+                                    val studiesService:            StudiesService,
+                                    val centreRepository:          CentreRepository)
     extends CentresService
     with AccessChecksSerivce
     with CentreServicePermissionChecks {
@@ -93,9 +95,10 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
 
   def getCentres(requestUserId: UserId,
                  filter:        FilterString,
-                 sort:          SortString):ServiceValidation[Seq[Centre]] =  {
+                 sort:          SortString):ServiceValidation[Seq[CentreDto]] =  {
     withPermittedCentres(requestUserId) { centres =>
       filterCentresInternal(centres, filter, sort)
+        .flatMap(centres => centres.map(centreToDto(requestUserId, _)).toList.sequenceU.map(_.toSeq))
     }
   }
 
@@ -108,14 +111,15 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     }
   }
 
-  def getCentreBySlug(requestUserId: UserId, slug: String): ServiceValidation[Centre] = {
+  def getCentreBySlug(requestUserId: UserId, slug: String): ServiceValidation[CentreDto] = {
     for {
       centre     <- centreRepository.getBySlug(slug)
       permission <- accessService.hasPermissionAndIsMember(requestUserId,
                                                            PermissionId.CentreRead,
                                                            None,
                                                            Some(centre.id))
-      result     <- if (permission) centre.successNel[String] else Unauthorized.failureNel[Centre]
+      dto        <- centreToDto(requestUserId, centre)
+      result     <- if (permission) dto.successNel[String] else Unauthorized.failureNel[CentreDto]
     } yield result
   }
 
@@ -160,19 +164,22 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     }
   }
 
-  def processCommand(cmd: CentreCommand): Future[ServiceValidation[Centre]] = {
+  def processCommand(cmd: CentreCommand): Future[ServiceValidation[CentreDto]] = {
     val (permissionId, centreId) = cmd match {
         case c: CentreStateChangeCommand => (PermissionId.CentreChangeState, Some(CentreId(c.id)))
         case c: CentreModifyCommand      => (PermissionId.CentreUpdate, Some(CentreId(c.id)))
         case c: AddCentreCmd             => (PermissionId.CentreCreate, None)
       }
 
-    whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId), permissionId, None, centreId) { () =>
+    val requestUserId = UserId(cmd.sessionUserId)
+
+    whenPermittedAndIsMemberAsync(requestUserId, permissionId, None, centreId) { () =>
       ask(processor, cmd).mapTo[ServiceValidation[CentreEvent]].map { validation =>
         for {
           event  <- validation
           centre <- centreRepository.getByKey(CentreId(event.id))
-        } yield centre
+          dto    <- centreToDto(requestUserId, centre)
+        } yield dto
       }
     }
   }
@@ -196,6 +203,29 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
       val result = centres.toSeq.sortWith(sortFunc)
       if (sortExpressions(0).order == AscendingOrder) result
       else result.reverse
+    }
+  }
+
+  private def centreToDto(requestUserId: UserId, centre: Centre): ServiceValidation[CentreDto] = {
+    val v = centre.studyIds
+      .map { id =>
+        studiesService.getStudy(requestUserId, id).map { study =>
+          NameAndStateDto(study.id.id, study.slug, study.name, study.state.id)
+        }
+      }
+      .toList.sequenceU
+
+    v.map { studyNames =>
+      CentreDto(id           = centre.id.id,
+                version      = centre.version,
+                timeAdded    = centre.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                timeModified = centre.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+                state        = centre.state.id,
+                slug         = centre.slug,
+                name         = centre.name,
+                description  = centre.description,
+                studyNames   = studyNames.toSet,
+                locations    = centre.locations)
     }
   }
 

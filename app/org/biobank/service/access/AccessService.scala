@@ -58,7 +58,7 @@ trait AccessService extends BbwebService {
 
   def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership]
 
-  def getMembershipBySlug(requestUserId: UserId, slug: String): ServiceValidation[Membership]
+  def getMembershipBySlug(requestUserId: UserId, slug: String): ServiceValidation[MembershipDto]
 
   def getMemberships(requestUserId: UserId,
                      filter:        FilterString,
@@ -70,7 +70,7 @@ trait AccessService extends BbwebService {
 
   def processRemoveRoleCommand(cmd: RemoveRoleCmd): Future[ServiceValidation[Boolean]]
 
-  def processMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[Membership]]
+  def processMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[MembershipDto]]
 
   def processRemoveMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[Boolean]]
 
@@ -212,7 +212,11 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     for {
       permission <- hasPermissionInternal(userId, permissionId)
       member     <- isMemberInternal(userId, studyId, centreId)
-    } yield (permission && member)
+    } yield {
+      //log.info(s"hasPermissionAndIsMember: permission: $permissionId, member: $member")
+
+      (permission && member)
+    }
   }
 
   def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership] = {
@@ -221,9 +225,9 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     }
   }
 
-  def getMembershipBySlug(requestUserId: UserId, slug: String): ServiceValidation[Membership] = {
+  def getMembershipBySlug(requestUserId: UserId, slug: String): ServiceValidation[MembershipDto] = {
     whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
-      membershipRepository.getBySlug(slug)
+      membershipRepository.getBySlug(slug).flatMap(membershipToDto)
     }
   }
 
@@ -347,44 +351,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     )
   }
 
-  // should only called if userId is valid
-  private def hasPermissionInternal(userId: UserId, permissionId: AccessItemId)
-      : ServiceValidation[Boolean] = {
-
-    def hasPermissionParents(parentIds: Set[AccessItemId]): Boolean = {
-      val found = parentIds.find { id =>
-          accessItemRepository.getByKey(id).fold(
-            err => false,
-            item => checkItemAccess(item)
-          )
-        }.toSuccessNel("not allowed")
-      log.debug(s"hasPermissionParents: ${found}")
-      found.fold(err => false, _ => true)
-    }
-
-    def checkItemAccess(item: AccessItem): Boolean = {
-      item match {
-        case permission: Permission =>
-          log.debug(s"checkItemAccess: ${item.id}, checking permission parents: ${permission.parentIds}")
-          hasPermissionParents(permission.parentIds)
-
-        case role: Role =>
-          val result = if (role.userIds.exists(_ == userId)) {
-              true
-            } else {
-              log.debug(s"checkItemAccess: ${item.id}, checking role parents")
-              hasPermissionParents(role.parentIds)
-            }
-          log.debug(s"checkItemAccess: role: ${item.id}, result: $result")
-          result
-      }
-    }
-
-    log.debug(s"hasPermission: userId: $userId, permissionId: $permissionId")
-    accessItemRepository.getByKey(permissionId).map(checkItemAccess)
-  }
-
-  def processMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[Membership]] = {
+  def processMembershipCommand(cmd: MembershipCommand): Future[ServiceValidation[MembershipDto]] = {
     val v = for {
         validCommand <- {
           cmd match {
@@ -440,14 +407,14 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
       } yield permitted
 
     v.fold(
-      err => Future.successful(err.failure[Membership]),
+      err => Future.successful(err.failure[MembershipDto]),
       permitted => {
         if (!permitted) {
-          Future.successful(Unauthorized.failureNel[Membership])
+          Future.successful(Unauthorized.failureNel[MembershipDto])
         } else {
           ask(membershipProcessor, cmd).mapTo[ServiceValidation[MembershipEvent]].map { validation =>
             validation.flatMap { event =>
-              membershipRepository.getByKey(MembershipId(event.id))
+              membershipRepository.getByKey(MembershipId(event.id)).flatMap(membershipToDto)
             }
           }
         }
@@ -468,6 +435,43 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
         }
       }
     )
+  }
+
+  // should only called if userId is valid
+  private def hasPermissionInternal(userId: UserId, permissionId: AccessItemId)
+      : ServiceValidation[Boolean] = {
+
+    def hasPermissionParents(parentIds: Set[AccessItemId]): Boolean = {
+      val found = parentIds.find { id =>
+          accessItemRepository.getByKey(id).fold(
+            err => false,
+            item => checkItemAccess(item)
+          )
+        }.toSuccessNel("not allowed")
+      log.debug(s"hasPermissionParents: ${found}")
+      found.fold(err => false, _ => true)
+    }
+
+    def checkItemAccess(item: AccessItem): Boolean = {
+      item match {
+        case permission: Permission =>
+          log.debug(s"checkItemAccess: ${item.id}, checking permission parents: ${permission.parentIds}")
+          hasPermissionParents(permission.parentIds)
+
+        case role: Role =>
+          val result = if (role.userIds.exists(_ == userId)) {
+              true
+            } else {
+              log.debug(s"checkItemAccess: ${item.id}, checking role parents")
+              hasPermissionParents(role.parentIds)
+            }
+          log.debug(s"checkItemAccess: role: ${item.id}, result: $result")
+          result
+      }
+    }
+
+    log.debug(s"hasPermission: userId: $userId, permissionId: $permissionId")
+    accessItemRepository.getByKey(permissionId).map(checkItemAccess)
   }
 
   // should only called if userId is valid, studyId is None or valid, and centreId is None or valid

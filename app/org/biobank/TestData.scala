@@ -730,9 +730,10 @@ class TestData @Inject() (config:         Configuration,
     } else {
       val studyUserIds = Set("study-administrator",
                              "study-user",
-                             "specimen-collector",
-                             "shipping-admin",
-                             "shipping-user").map(UserId(_))
+                             "specimen-collector").map(UserId(_))
+
+      val centreUserIds = Set("shipping-admin",
+                              "shipping-user").map(UserId(_))
 
       List(
         Membership(id = MembershipId("all-studies-membership"),
@@ -744,7 +745,17 @@ class TestData @Inject() (config:         Configuration,
                    description  = None,
                    userIds      = studyUserIds,
                    studyData    = MembershipEntitySet(true, Set.empty[StudyId]),
-                   centreData   = MembershipEntitySet(false, Set.empty[CentreId]))
+                   centreData   = MembershipEntitySet(false, Set.empty[CentreId])),
+        Membership(id = MembershipId("all-centres-membership"),
+                   version      = 0L,
+                   timeAdded    = Global.StartOfTime,
+                   timeModified = None,
+                   slug         = "",
+                   name         = "All centres",
+                   description  = None,
+                   userIds      = centreUserIds,
+                   studyData    = MembershipEntitySet(false, Set.empty[StudyId]),
+                   centreData   = MembershipEntitySet(true, Set.empty[CentreId]))
       ).map(m => m.copy(slug = Slug(m.name)))
     }
   }

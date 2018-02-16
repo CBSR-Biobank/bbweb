@@ -339,7 +339,7 @@ class CentresServiceSpec
                                           f.enabledCentre)) { cmd =>
             Set(f.disabledCentre, f.enabledCentre).foreach(addToRepository)
             centresService.processCommand(cmd).futureValue mustSucceed { c =>
-              c.id.id must be (cmd.id)
+              c.id must be (cmd.id)
             }
           }
         }
