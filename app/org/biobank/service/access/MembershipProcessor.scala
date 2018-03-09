@@ -361,11 +361,18 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
   private def applyUserAddedEvent(event: MembershipEvent): Unit = {
     onValidMembershipEventAndVersion(event,
                                      event.eventType.isUserAdded,
-                                     event.getUserAdded.getVersion) {
-      (membership, _, time) =>
-      val updated = membership
-        .addUser(UserId(event.getUserAdded.getId))
-        .copy(timeModified = Some(time))
+                                     event.getUserAdded.getVersion) { (membership, _, time) =>
+
+      // remove this user from other memberships
+      val userIdToAdd = UserId(event.getUserAdded.getId)
+      membershipRepository.getValues
+        .filter { membership => membership.userIds.find(_ == userIdToAdd).isDefined }
+        .foreach { membership =>
+          val updated = membership.removeUser(userIdToAdd).copy(timeModified = Some(time))
+          membershipRepository.put(updated)
+        }
+
+      val updated = membership.addUser(userIdToAdd).copy(timeModified = Some(time))
       membershipRepository.put(updated)
       true.successNel[String]
     }

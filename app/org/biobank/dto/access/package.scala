@@ -7,7 +7,8 @@ package access {
   final case class AccessItemNameDto(id:             String,
                                      slug:           String,
                                      name:           String,
-                                     accessItemType: String)
+                                     accessItemType: String) extends Dto
+
 
   object AccessItemNameDto {
     def compareByName(a: AccessItemNameDto, b: AccessItemNameDto): Boolean =
@@ -26,7 +27,7 @@ package access {
                            description:    Option[String],
                            userData:       Set[EntityInfoDto],
                            parentData:     Set[EntityInfoDto],
-                           childData:      Set[EntityInfoDto])
+                           childData:      Set[EntityInfoDto]) extends Dto
 
   object RoleDto {
 
@@ -38,7 +39,7 @@ package access {
                                version:        Long,
                                slug:           String,
                                name:           String,
-                               childData:      Set[EntityInfoDto])
+                               childData:      Set[EntityInfoDto]) extends Dto
 
   object UserRoleDto {
 
@@ -55,7 +56,7 @@ package access {
                                  description:  Option[String],
                                  userData:     Set[EntityInfoDto],
                                  studyData:    EntitySetDto,
-                                 centreData:   EntitySetDto)
+                                 centreData:   EntitySetDto) extends Dto
 
   object MembershipDto {
 
@@ -67,10 +68,11 @@ package access {
                                      version:      Long,
                                      timeAdded:    String,
                                      timeModified: Option[String],
+                                     slug:         String,
                                      name:         String,
                                      description:  Option[String],
                                      studyData:    EntitySetDto,
-                                     centreData:   EntitySetDto)
+                                     centreData:   EntitySetDto) extends Dto
 
   object UserMembershipDto {
 

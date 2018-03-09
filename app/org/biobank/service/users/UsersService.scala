@@ -6,15 +6,15 @@ import com.google.inject.ImplementedBy
 import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.ValidationKey
-import org.biobank.domain.access.AccessItemId
-import org.biobank.domain.access.PermissionId
+import org.biobank.domain.access.{AccessItemId, MembershipId, PermissionId}
 import org.biobank.domain.centre.CentreRepository
 import org.biobank.domain.study.{Study, StudyId, StudyRepository}
 import org.biobank.domain.user._
 import org.biobank.dto._
-import org.biobank.dto.access.{RoleDto, UserRoleDto}
+import org.biobank.dto.access.{MembershipDto, RoleDto, UserRoleDto}
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.AccessCommands._
+import org.biobank.infrastructure.command.MembershipCommands._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
 import org.biobank.service._
@@ -91,16 +91,6 @@ trait UsersService extends BbwebService {
    * Permissions not checked since anyone can attempt a login.
    */
   def loginAllowed(email: String, enteredPwd: String): ServiceValidation[UserDto]
-
-  /**
-   * Permissions not checked since anyone can register as a user.
-   */
-  def register(cmd: RegisterUserCmd): Future[ServiceValidation[UserDto]]
-
-  /**
-   * Permissions not checked since anyone can request a password reset..
-   */
-  def resetPassword(cmd: ResetUserPasswordCmd): Future[ServiceValidation[UserDto]]
 
   def processCommand(cmd: UserCommand): Future[ServiceValidation[UserDto]]
 
@@ -226,15 +216,6 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     } yield dto
   }
 
-  def register(cmd: RegisterUserCmd): Future[ServiceValidation[UserDto]] = {
-    processCommand(cmd)
-  }
-
-  def resetPassword(cmd: ResetUserPasswordCmd): Future[ServiceValidation[UserDto]] = {
-    processCommand(cmd)
-  }
-
-
   def processCommand(cmd: UserCommand): Future[ServiceValidation[UserDto]] = {
 
     def processIfPermitted(validation: ServiceValidation[Boolean]) = {
@@ -254,41 +235,9 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
       )
     }
 
-    // asks the access service to process a command
-    def accessServiceProcess(userId: UserId, validation: ServiceValidation[AccessModifyCommand])
-    : Future[ServiceValidation[UserDto]] = {
-      validation.fold(
-        err => Future.successful(err.failure[UserDto]),
-        command => {
-          accessService.processRoleCommand(command).mapTo[ServiceValidation[RoleDto]].map { v =>
-            for {
-              event <- v
-              user  <- userRepository.getByKey(userId)
-              dto   <- userToDto(user, accessService.getUserRoles(userId))
-            } yield dto
-          }
-        }
-      )
-    }
-
     cmd match {
-      case c: UpdateUserAddRoleCmd =>
-        val v = accessService.getRole(UserId(c.sessionUserId), AccessItemId(c.roleId)).map { role =>
-            RoleAddUserCmd(sessionUserId   = c.sessionUserId,
-                           expectedVersion = role.version,
-                           roleId          = c.roleId,
-                           userId          = c.id)
-        }
-        accessServiceProcess(UserId(c.id), v)
-
-      case c: UpdateUserRemoveRoleCmd =>
-        val v = accessService.getRole(UserId(c.sessionUserId), AccessItemId(c.roleId)).map { role =>
-            RoleRemoveUserCmd(sessionUserId   = c.sessionUserId,
-                              expectedVersion = role.version,
-                              roleId          = c.roleId,
-                              userId          = c.id)
-        }
-        accessServiceProcess(UserId(c.id), v)
+      case c: UserAccessCommand =>
+        processUserAccessCommand(c)
 
       case c: UserStateChangeCommand =>
         val v = accessService.hasPermission(UserId(c.sessionUserId), PermissionId.UserChangeState)
@@ -308,20 +257,124 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     }
   }
 
-  private def userToDto(user: User, roles: ServiceValidation[Set[UserRoleDto]])
+  private def processUserAccessCommand(cmd: UserAccessCommand): Future[ServiceValidation[UserDto]] = {
+
+    def checkUserAndVersion(userId: UserId, expectedVersion: Long): ServiceValidation[User] = {
+      for {
+        user         <- userRepository.getByKey(userId)
+        validVersion <- user.requireVersion(expectedVersion)
+      } yield user
+    }
+
+    def dtoFromUserId(userId: UserId) = {
+      for {
+        user  <- userRepository.getByKey(userId)
+        dto   <- userToDto(user, accessService.getUserRoles(userId))
+      } yield dto
+    }
+
+    // asks the access service to process a role command
+    def accessServiceProcessRoleCommand (userId: UserId, validation: ServiceValidation[AccessCommand])
+        : Future[ServiceValidation[UserDto]] = {
+      validation.fold(
+        err => Future.successful(err.failure[UserDto]),
+        command => {
+          accessService.processRoleCommand(command).mapTo[ServiceValidation[RoleDto]].map { v =>
+            for {
+              roleDto <- v
+              userDto <- dtoFromUserId(userId)
+            } yield userDto
+          }
+        }
+      )
+    }
+
+    // asks the access service to process a membership command
+    def accessServiceProcessMembershipCommand(userId:     UserId,
+                                              validation: ServiceValidation[MembershipCommand])
+        : Future[ServiceValidation[UserDto]] = {
+      validation.fold(
+        err => Future.successful(err.failure[UserDto]),
+        command => {
+          accessService
+            .processMembershipCommand(command)
+            .mapTo[ServiceValidation[MembershipDto]].map { v =>
+              for {
+                membershipDto <- v
+                userDto       <- dtoFromUserId(userId)
+              } yield userDto
+            }
+        }
+      )
+    }
+
+    cmd match {
+      case c: UpdateUserAddRoleCmd =>
+        val v = for {
+            user <- checkUserAndVersion(UserId(c.id), c.expectedVersion)
+            role <- accessService.getRole(UserId(c.sessionUserId), AccessItemId(c.roleId))
+          } yield RoleAddUserCmd(sessionUserId   = c.sessionUserId,
+                                 expectedVersion = role.version,
+                                 roleId          = c.roleId,
+                                 userId          = c.id)
+        accessServiceProcessRoleCommand(UserId(c.id), v)
+
+      case c: UpdateUserRemoveRoleCmd =>
+        val v = for {
+            user <- checkUserAndVersion(UserId(c.id), c.expectedVersion)
+            role <- accessService.getRole(UserId(c.sessionUserId), AccessItemId(c.roleId))
+          } yield RoleRemoveUserCmd(sessionUserId   = c.sessionUserId,
+                                    expectedVersion = role.version,
+                                    roleId          = c.roleId,
+                                    userId          = c.id)
+        accessServiceProcessRoleCommand(UserId(c.id), v)
+
+      case c: UpdateUserAddMembershipCmd =>
+        val v = for {
+            user       <- checkUserAndVersion(UserId(c.id), c.expectedVersion)
+            membership <- accessService.getMembership(UserId(c.sessionUserId),
+                                                      MembershipId(c.membershipId))
+          } yield MembershipAddUserCmd(sessionUserId   = c.sessionUserId,
+                                       expectedVersion = membership.version,
+                                       membershipId          = c.membershipId,
+                                       userId          = c.id)
+        accessServiceProcessMembershipCommand(UserId(c.id), v)
+
+      case c: UpdateUserRemoveMembershipCmd =>
+        val v = for {
+            user       <- checkUserAndVersion(UserId(c.id), c.expectedVersion)
+            membership <- accessService.getMembership(UserId(c.sessionUserId),
+                                                      MembershipId(c.membershipId))
+          } yield MembershipRemoveUserCmd(sessionUserId   = c.sessionUserId,
+                                          expectedVersion = membership.version,
+                                          membershipId          = c.membershipId,
+                                          userId          = c.id)
+        accessServiceProcessMembershipCommand(UserId(c.id), v)
+
+    }
+  }
+
+  private def userToDto(user: User,
+                        userRoles: ServiceValidation[Set[UserRoleDto]])
       : ServiceValidation[UserDto] = {
-    roles.map { roles =>
-      UserDto(id           = user.id.id,
-              version      = user.version,
-              timeAdded    = user.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-              timeModified = user.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
-              state        = user.state,
-              slug         = user.slug,
-              name         = user.name,
-              email        = user.email,
-              avatarUrl    = user.avatarUrl,
-              roles       = roles,
-              membership   = None)
+    userRoles.map { roles =>
+      val dto = UserDto(
+          id           = user.id.id,
+          version      = user.version,
+          timeAdded    = user.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+          timeModified = user.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+          state        = user.state,
+          slug         = user.slug,
+          name         = user.name,
+          email        = user.email,
+          avatarUrl    = user.avatarUrl,
+          roles        = roles,
+          membership   = None)
+
+      accessService.getUserMembershipDto(user.id).fold(
+        err => dto,
+        membership => dto.copy(membership = Some(membership))
+      )
     }
   }
 

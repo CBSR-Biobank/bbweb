@@ -64,13 +64,19 @@ class UserRolesController {
   }
 
   addRole() {
+    let roleLabel;
     this.matchingRoleNames.open(this.gettextCatalog.getString('Add a role'),
                                 this.gettextCatalog.getString('Role'),
                                 this.gettextCatalog.getString('enter a role\'s name or partial name'),
                                 this.gettextCatalog.getString('No matching roles found'),
                                 this.user.roles)
       .then((modalValue) => {
-        this.onRoleAddRequest()(modalValue.obj.id)
+        roleLabel = modalValue.label;
+        return this.onRoleAddRequest()(modalValue.obj.id)
+      })
+      .then(() => {
+        this.notificationsService.success(
+          this.gettextCatalog.getString('Role added: {{name}}', { name: roleLabel }))
       })
       .catch((error) => {
         this.$log.error(error);
@@ -84,7 +90,7 @@ class UserRolesController {
           this.notificationsService.success(
             this.gettextCatalog.getString('Role removed: {{name}}', { name: roleName.name }))
         })
-        .catch((error) => {
+       .catch((error) => {
           this.$log.error(error);
         });
     }

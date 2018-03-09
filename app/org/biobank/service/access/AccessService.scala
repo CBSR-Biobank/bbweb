@@ -5,7 +5,7 @@ import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import java.time.format.DateTimeFormatter
 import javax.inject._
-import org.biobank.domain.{ConcurrencySafeEntity, HasName, HasSlug}
+import org.biobank.domain.{ConcurrencySafeEntity, HasName, HasSlug, IdentifiedValueObject}
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.user.{UserId, UserRepository}
@@ -71,6 +71,8 @@ trait AccessService extends BbwebService {
       : ServiceValidation[Seq[EntityInfoDto]]
 
   def getUserMembership(userId: UserId): ServiceValidation[UserMembership]
+
+  def getUserMembershipDto(userId: UserId): ServiceValidation[UserMembershipDto]
 
   def processRoleCommand(cmd: AccessCommand): Future[ServiceValidation[RoleDto]]
 
@@ -270,6 +272,10 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
 
   def getUserMembership(userId: UserId): ServiceValidation[UserMembership] = {
     membershipRepository.getUserMembership(userId)
+  }
+
+  def getUserMembershipDto(userId: UserId): ServiceValidation[UserMembershipDto] = {
+    getUserMembership(userId).flatMap(userMembershipToDto)
   }
 
   def getAccessItem(requestUserId: UserId, accessItemId: AccessItemId): ServiceValidation[AccessItem] = {
@@ -565,23 +571,11 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
 
   private def membershipToDto(membership: Membership): ServiceValidation[MembershipDto] ={
     for {
-      users    <- membership.userIds.map(userRepository.getByKey).toList.sequenceU.map(_.toSet)
-      studies <- {
-        membership.studyData.ids
-          .map(id => studyRepository.getByKey(id))
-          .toList.sequenceU
-          .map(_.toSet)
-      }
-      centres <- {
-        membership.centreData.ids
-          .map(centreRepository.getByKey(_))
-          .toList.sequenceU
-          .map(_.toSet)
-      }
+      users           <- membership.userIds.map(userRepository.getByKey).toList.sequenceU.map(_.toSet)
+      studyEntitySet  <- membershipStudyDataToEntitySet(membership)
+      centreEntitySet <- membershipCentreDataToEntitySet(membership)
     } yield {
       val userData        = entityInfoDto(users)
-      val studyEntitySet  = entitySetDto(membership.studyData.allEntities, studies)
-      val centreEntitySet = entitySetDto(membership.centreData.allEntities, centres)
       val timeAdded       = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
       val timeModified    = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
 
@@ -596,6 +590,49 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
                     studyData    = studyEntitySet,
                     centreData   = centreEntitySet)
     }
+  }
+
+  private def userMembershipToDto(membership: UserMembership): ServiceValidation[UserMembershipDto] ={
+    for {
+      studyEntitySet  <- membershipStudyDataToEntitySet(membership)
+      centreEntitySet <- membershipCentreDataToEntitySet(membership)
+    } yield {
+      val timeAdded       = membership.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+      val timeModified    = membership.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME))
+
+      UserMembershipDto(id           = membership.id.id,
+                        version      = membership.version,
+                        timeAdded    = timeAdded,
+                        timeModified = timeModified,
+                        slug         = membership.slug,
+                        name         = membership.name,
+                        description  = membership.description,
+                        studyData    = studyEntitySet,
+                        centreData   = centreEntitySet)
+    }
+  }
+
+  private def membershipStudyDataToEntitySet(membership: MembershipBase)
+      : ServiceValidation[EntitySetDto] = {
+    idsToEntities(membership.studyData.ids, studyRepository.getByKey).map { studies =>
+      entitySetDto(membership.studyData.allEntities, studies)
+    }
+  }
+
+  private def membershipCentreDataToEntitySet(membership: MembershipBase)
+      : ServiceValidation[EntitySetDto] = {
+    idsToEntities(membership.centreData.ids, centreRepository.getByKey).map { centres =>
+      entitySetDto(membership.centreData.allEntities, centres)
+    }
+  }
+
+  private def idsToEntities[I <: IdentifiedValueObject[_], E <: ConcurrencySafeEntity[I]]
+    (ids: Set[I], getEntity: I => ServiceValidation[E]): ServiceValidation[Set[E]] = {
+    ids
+      .map(id => getEntity(id))
+      .toList
+      .sequenceU
+      .map(_.toSet)
   }
 
   private def entityInfoDto[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]

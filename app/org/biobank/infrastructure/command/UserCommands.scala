@@ -13,6 +13,8 @@ object UserCommands {
 
   trait UserStateChangeCommand extends UserModifyCommand
 
+  trait UserAccessCommand extends UserModifyCommand
+
   final case class RegisterUserCmd(name:      String,
                                    email:     String,
                                    password:  String,
@@ -48,13 +50,25 @@ object UserCommands {
                                         id:              String,
                                         expectedVersion: Long,
                                         roleId:          String)
-      extends UserModifyCommand
+      extends UserAccessCommand
 
   final case class UpdateUserRemoveRoleCmd(sessionUserId:   String,
                                            id:              String,
                                            expectedVersion: Long,
                                            roleId:          String)
-      extends UserModifyCommand
+      extends UserAccessCommand
+
+  final case class UpdateUserAddMembershipCmd(sessionUserId:   String,
+                                              id:              String,
+                                              expectedVersion: Long,
+                                              membershipId:    String)
+      extends UserAccessCommand
+
+  final case class UpdateUserRemoveMembershipCmd(sessionUserId:   String,
+                                                 id:              String,
+                                                 expectedVersion: Long,
+                                                 membershipId:    String)
+      extends UserAccessCommand
 
   final case class ActivateUserCmd(sessionUserId:   String,
                                    id:              String,
@@ -86,5 +100,11 @@ object UserCommands {
 
   implicit val updateUserRemoveRoleCmdReads: Reads[UpdateUserRemoveRoleCmd] =
     Json.reads[UpdateUserRemoveRoleCmd]
+
+  implicit val updateUserAddMembershipCmdReads: Reads[UpdateUserAddMembershipCmd] =
+    Json.reads[UpdateUserAddMembershipCmd]
+
+  implicit val updateUserRemoveMembershipCmdReads: Reads[UpdateUserRemoveMembershipCmd] =
+    Json.reads[UpdateUserRemoveMembershipCmd]
 
 }

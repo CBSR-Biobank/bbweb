@@ -47,7 +47,11 @@ class biobankApiService {
 
   /**
    * Sends a GET request to the server.
-
+   *
+   * @param {string} url - The resource that is being requested.
+   *
+   * @param {string} params - The query parameters to append to the resource.
+   *
    * @return {Promise<object>} The object returned from the server.
    */
   get(url, params) {
@@ -56,7 +60,11 @@ class biobankApiService {
 
   /**
    * Sends a POST request to the server.
-
+   *
+   * @param {string} url - The resource that to add.
+   *
+   * @param {object} data - The JSON parameters to append to the request.
+   *
    * @return {Promise<object>} The object returned from the server.
    */
   post(url, data) {
@@ -65,7 +73,11 @@ class biobankApiService {
 
   /**
    * Sends a PUT request to the server.
-
+   *
+   * @param {string} url - The resource to replace.
+   *
+   * @param {object} data - The JSON parameters to append to the request.
+   *
    * @return {Promise<object>} The object returned from the server.
    */
   put(url, data) {
@@ -74,7 +86,9 @@ class biobankApiService {
 
   /**
    * Sends a DELETE request to the server.
-
+   *
+   * @param {string} url - The resource to delete.
+   *
    * @return {Promise<object>} The object returned from the server.
    */
   del(url) {

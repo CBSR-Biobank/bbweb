@@ -33,7 +33,7 @@ class MatchingMembershipNamesService {
    * @return {Promise<domain.access.MemberhipName>} If the user presses the **OK** button, the membership name
    * selected by the user. Otherwise, a rejected promise is returned.
    */
-  open(title, prompt, placeholder, noMatchesMessage, namesToOmit) {
+  open(title, prompt, placeholder, noMatchesMessage, namesToOmit = []) {
     const getMatchingMembershipNames = viewValue => {
       let filter = 'name:like:' + viewValue
       if (namesToOmit.length > 0) {

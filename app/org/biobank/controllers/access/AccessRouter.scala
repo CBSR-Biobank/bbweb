@@ -9,8 +9,7 @@ import play.api.routing.sird._
 
 class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter {
   import AccessItemRouting._
-  //import PermissionsRouting._
-  import MembershipsRouting._
+  import MembershipRouting._
   import org.biobank.controllers.study.StudiesRouting._
   import org.biobank.controllers.centres.CentreRouting._
   import org.biobank.controllers.users.UsersRouting._
@@ -128,7 +127,7 @@ object AccessItemRouting {
 }
 
 
-object MembershipsRouting {
+object MembershipRouting {
 
   implicit object bindableMembershipId extends Parsing[MembershipId](
     MembershipId.apply,

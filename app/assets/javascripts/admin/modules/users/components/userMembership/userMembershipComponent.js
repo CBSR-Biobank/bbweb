@@ -49,25 +49,36 @@ class UserMembershipController {
   }
 
   updateLabels() {
-    this.membershipNameLabels = this.membershipToLabel(this.user.membership)
+    if (this.user.membership) {
+      this.membershipNameLabels = [ this.membershipToLabel(this.user.membership) ];
+    } else {
+      this.membershipNameLabels = [];
+    }
   }
 
   membershipToLabel(membership) {
     return {
       label:   membership.name,
-      tooltip: this.gettextCatalog.getString('Remove ' + membership.name),
+      tooltip: this.gettextCatalog.getString('Remove membership ' + membership.name),
       obj:     membership
     }
   }
 
   addMembership() {
-    this.matchingMembershipNames.open(this.gettextCatalog.getString('Add a membership'),
-                                this.gettextCatalog.getString('Membership'),
-                                this.gettextCatalog.getString('enter a membership\'s name or partial name'),
-                                this.gettextCatalog.getString('No matching membership found'),
-                                this.user.membership)
-      .then((modalValue) => {
-        this.onMembershipAddRequest()(modalValue.obj.id)
+    let membershipLabel;
+    this.matchingMembershipNames
+      .open(this.gettextCatalog.getString('Add a membership'),
+            this.gettextCatalog.getString('Membership'),
+            this.gettextCatalog.getString('enter a membership\'s name or partial name'),
+            this.gettextCatalog.getString('No matching membership found'),
+            this.user.membership)
+      .then(modalValue => {
+        membershipLabel = modalValue.label;
+        return this.onMembershipAddRequest()(modalValue.obj.id);
+      })
+      .then(() => {
+        this.notificationsService.success(
+          this.gettextCatalog.getString('Membership added: {{name}}', { name: membershipLabel }))
       })
       .catch((error) => {
         this.$log.error(error);

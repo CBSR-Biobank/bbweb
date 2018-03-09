@@ -76,7 +76,9 @@ function UserFactory($q,
        * @type {domain.users.UserState}
        */
 
-      this.membership = new UserMembership(_.get(obj, 'membership', {}));
+      if (obj.membership) {
+        this.membership = new UserMembership(obj.membership);
+      }
     }
 
     register(password) {
@@ -164,7 +166,7 @@ function UserFactory($q,
       return this.update(User.url('memberships', this.id),
                          {
                            expectedVersion: this.version,
-                           membershipId:          membershipId
+                           membershipId:    membershipId
                          });
     }
 

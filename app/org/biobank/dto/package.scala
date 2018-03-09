@@ -9,6 +9,8 @@ import play.api.libs.json._
 
 package dto {
 
+  trait Dto
+
   final case class EntityInfoDto(id: String, slug: String, name: String)
 
   object EntityInfoDto {

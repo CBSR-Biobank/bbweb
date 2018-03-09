@@ -10,6 +10,7 @@ import play.api.routing.sird._
 class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
   import UsersRouting._
   import org.biobank.controllers.access.AccessItemRouting._
+  import org.biobank.controllers.access.MembershipRouting._
 
   override def routes: Routes = {
 
@@ -40,6 +41,9 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
     case POST(p"/roles/${userId(id)}") =>
       controller.addRole(id)
 
+    case POST(p"/memberships/${userId(id)}") =>
+      controller.addMembership(id)
+
     case POST(p"/login") =>
       controller.login
 
@@ -57,6 +61,9 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
 
     case DELETE(p"/roles/${userId(uId)}/${long(ver)}/${accessItemId(rId)}") =>
       controller.removeRole(uId, ver, rId)
+
+    case DELETE(p"/memberships/${userId(uId)}/${long(ver)}/${membershipId(rId)}") =>
+      controller.removeMembership(uId, ver, rId)
 
   }
 }

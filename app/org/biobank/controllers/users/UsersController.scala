@@ -3,7 +3,7 @@ package org.biobank.controllers.users
 import org.biobank.infrastructure.command.Commands._
 import javax.inject.{Inject, Singleton}
 import org.biobank.dto._
-import org.biobank.domain.access.AccessItemId
+import org.biobank.domain.access.{AccessItemId, MembershipId}
 import org.biobank.domain.user._
 import org.biobank.controllers._
 import org.biobank.infrastructure.command.UserCommands._
@@ -143,11 +143,12 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
       validationReply(v)
     }
 
+  /**
+   * Permissions not checked since anyone can register as a user.
+   */
   def registerUser(): Action[JsValue] =
     anonymousCommandAction[RegisterUserCmd]{ cmd =>
-      Logger.debug(s"registerUser: cmd: $cmd")
-      val future = usersService.register(cmd)
-      future.map { validation =>
+      usersService.processCommand(cmd).map { validation =>
         validation.fold(
           err   => {
             val errs = err.list.toList.mkString(", ")
@@ -167,12 +168,14 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
       validationReply(usersService.snapshotRequest(request.authInfo.userId).map { _ => true })
     }
 
-  /** Resets the user's password.
+  /**
+   * Resets the user's password.
+   *
+   * Permissions not checked since anyone can request a password reset..
    */
   def passwordReset(): Action[JsValue] =
     anonymousCommandAction[ResetUserPasswordCmd]{ cmd =>
-      val future = usersService.resetPassword(cmd)
-      future.map { validation =>
+      usersService.processCommand(cmd).map { validation =>
         validation.fold(
           err   => Unauthorized,
           event => Ok("password has been reset")
@@ -223,6 +226,18 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
                                         id              = userId.id,
                                         expectedVersion = version,
                                         roleId          = roleId.id)
+      processCommand(cmd)
+    }
+
+  def addMembership(userId: UserId): Action[JsValue] =
+    commandAction[UpdateUserAddMembershipCmd](Json.obj("id" -> userId))(processCommand)
+
+  def removeMembership(userId: UserId, version: Long, membershipId: MembershipId): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      val cmd = UpdateUserRemoveMembershipCmd(sessionUserId   = request.authInfo.userId.id,
+                                              id              = userId.id,
+                                              expectedVersion = version,
+                                              membershipId    = membershipId.id)
       processCommand(cmd)
     }
 

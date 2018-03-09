@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 import org.biobank.Global
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.dto.NameAndStateDto
-import org.biobank.domain.access.{AccessItemId, Role}
+import org.biobank.domain.access.{AccessItemId, Membership, MembershipId, Role}
 import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.user._
 import org.biobank.fixture.ControllerFixture
@@ -695,12 +695,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
                                        List[User](factory.createActiveUser, factory.createRegisteredUser),
                                        "unlock",
                                        "active")
-
       }
 
     }
 
-    describe("POST /api/users/roles") {
+    describe("POST /api/users/roles/:userId") {
 
       def addRoleToUserJson(user: User, role: Role): JsObject = {
         Json.obj("expectedVersion" -> user.version,
@@ -786,7 +785,142 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
                  "IdNotFound: role id")
       }
 
-      // cannot test for invalid version, since version check is determined internally by server
+      it("cannot add a role to a user with a wrong user version") {
+        val user = factory.createActiveUser
+        val role = factory.createRole
+        Set(user, role).foreach(addToRepository)
+
+        badRequest(POST,
+                   uri("roles", user.id.id),
+                   addRoleToUserJson(user, role) ++ Json.obj("expectedVersion" -> (user.version + 10L)),
+                   "InvalidVersion.*ActiveUser: expected version doesn't match current version")
+      }
+
+    }
+
+    describe("POST /api/users/memberships/:userId") {
+
+      def addMembershipToUserJson(user: User, membership: Membership): JsObject = {
+        Json.obj("expectedVersion" -> user.version,
+                 "membershipId"    -> membership.id)
+      }
+
+      it("can add a membership to a user") {
+        val user = factory.createActiveUser
+        val membership = factory.createMembership
+        Set(user, membership).foreach(addToRepository)
+
+        val reply = makeRequest(POST,
+                                uri("memberships", user.id.id),
+                                addMembershipToUserJson(user, membership))
+
+        (reply \ "status").as[String] must be ("success")
+
+        val jsonId = (reply \ "data" \ "id").as[String]
+
+        userRepository.getByKey(UserId(jsonId)) mustSucceed { repoUser =>
+          compareObj((reply \ "data").as[JsObject], repoUser)
+
+          repoUser must have (
+            'id          (user.id),
+            'version     (user.version),
+            'name        (user.name),
+            'email       (user.email),
+            'avatarUrl   (user.avatarUrl),
+            'state       (user.state.id))
+
+          checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
+        }
+
+        val jsonMembership = (reply \ "data" \ "membership").as[JsObject]
+        val jsonMembershipId = (jsonMembership \ "id").as[String]
+
+        membershipRepository.getByKey(MembershipId(jsonMembershipId)) mustSucceed { item =>
+          inside(item) { case repoMembership: Membership =>
+            repoMembership must have (
+              'id             (membership.id),
+              'version        (membership.version + 1)
+            )
+            repoMembership.userIds must contain (user.id)
+            checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          }
+        }
+
+        val membershipSlug = (jsonMembership \ "slug").as[String]
+        val membershipName = (jsonMembership \ "name").as[String]
+
+        membershipSlug must be (membership.slug)
+        membershipName must be (membership.name)
+      }
+
+      it("if user is member of another membership, they are removed when added to a new one") {
+        val user = factory.createActiveUser
+        val membershipExisting = factory.createMembership.copy(userIds = Set(user.id))
+        val membershipNew = factory.createMembership
+        Set(user, membershipExisting, membershipNew).foreach(addToRepository)
+
+        val reply = makeRequest(POST,
+                                uri("memberships", user.id.id),
+                                addMembershipToUserJson(user, membershipNew))
+
+        (reply \ "status").as[String] must be ("success")
+
+        (reply \ "data" \ "id").as[String]  must be (user.id.id)
+        (reply \ "data" \ "membership" \ "id").as[String]  must be (membershipNew.id.id)
+
+        membershipRepository.getByKey(membershipExisting.id) mustSucceed { m =>
+          m.userIds.find(_ == user.id) mustBe None
+        }
+
+        membershipRepository.getByKey(membershipNew.id) mustSucceed { m =>
+          m.userIds.find(_ == user.id) must be ('defined)
+        }
+      }
+
+      it("cannot add the same user more than once to a membership") {
+        val user = factory.createActiveUser
+        val membership = factory.createMembership.copy(userIds = Set(user.id))
+        Set(user, membership).foreach(addToRepository)
+
+        badRequest(POST,
+                   uri("memberships", user.id.id),
+                   addMembershipToUserJson(user, membership),
+                   "EntityCriteriaError: user ID is already in membership")
+      }
+
+      it("cannot add a user that does not exist to a membership") {
+        val user = factory.createActiveUser
+        val membership = factory.createMembership.copy(userIds = Set(user.id))
+        Set(membership).foreach(addToRepository)
+
+        notFound(POST,
+                 uri("memberships", user.id.id),
+                 addMembershipToUserJson(user, membership),
+                 "IdNotFound: user id")
+      }
+
+      it("cannot add a membership that does not exist") {
+        val user = factory.createActiveUser
+        val membership = factory.createMembership.copy(userIds = Set(user.id))
+        Set(user).foreach(addToRepository)
+
+        notFound(POST,
+                 uri("memberships", user.id.id),
+                 addMembershipToUserJson(user, membership),
+                 "IdNotFound: membership id")
+      }
+
+      it("cannot add a role to a user with a wrong user version") {
+        val user = factory.createActiveUser
+        val membership = factory.createMembership
+        Set(user, membership).foreach(addToRepository)
+
+        badRequest(POST,
+                   uri("memberships", user.id.id),
+                   addMembershipToUserJson(user, membership) ++
+                     Json.obj("expectedVersion" -> (user.version + 10L)),
+                   "InvalidVersion.*ActiveUser: expected version doesn't match current version")
+      }
 
     }
 
@@ -1035,7 +1169,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
   describe("DELETE /api/users/roles/:userId/:version/:roleId") {
 
-    it("can remove a user") {
+    it("can remove a role from a user") {
       val user = factory.createActiveUser
       val role = factory.createRole.copy(userIds = Set(user.id))
       Set(user, role).foreach(addToRepository)
@@ -1105,7 +1239,102 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       notFound(DELETE, url, JsNull, "IdNotFound: role id")
     }
 
-    // cannot test for invalid version, since version check is determined internally by server
+    it("cannot remove a role to a user with a wrong user version") {
+      val user = factory.createActiveUser
+      val role = factory.createRole.copy(userIds = Set(user.id))
+      Set(user, role).foreach(addToRepository)
+
+      val url = uri("roles", user.id.id, (user.version + 10L).toString, role.id.id)
+      badRequest(DELETE,
+                 url,
+                 JsNull,
+                 "InvalidVersion.*ActiveUser: expected version doesn't match current version")
+    }
+
+  }
+
+  describe("DELETE /api/users/memberships/:userId/:version/:membershipId") {
+
+    it("can remove a membership from a user") {
+      val user = factory.createActiveUser
+      val membership = factory.createMembership.copy(userIds = Set(user.id))
+      Set(user, membership).foreach(addToRepository)
+
+      val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
+      val reply = makeRequest(DELETE, url)
+
+      (reply \ "status").as[String] must include ("success")
+
+      val jsonId = (reply \ "data" \ "id").as[String]
+      val userId = UserId(jsonId)
+      jsonId.length must be > 0
+
+      userRepository.getByKey(userId) mustSucceed { repoUser =>
+        compareObj((reply \ "data").as[JsObject], repoUser)
+
+        repoUser must have (
+          'id          (user.id),
+          'version     (user.version),
+          'name        (user.name),
+          'email       (user.email),
+          'avatarUrl   (user.avatarUrl),
+          'state       (user.state.id))
+
+        checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
+      }
+
+      (reply \ "data" \ "memberships").asOpt[JsObject] mustBe None
+
+      membershipRepository.getByKey(membership.id) mustSucceed { item =>
+        inside(item) { case repoMembership: Membership =>
+          repoMembership must have (
+            'id             (membership.id),
+            'version        (membership.version + 1)
+          )
+          repoMembership.userIds must not contain (user.id)
+          checkTimeStamps(repoMembership, membership.timeAdded, OffsetDateTime.now)
+        }
+      }
+    }
+
+    it("cannot remove a user not in the membership") {
+      val user = factory.createActiveUser
+      val membership = factory.createMembership
+      Set(user, membership).foreach(addToRepository)
+
+      val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
+      badRequest(DELETE, url, JsNull, "EntityCriteriaError: user ID is not in membership")
+    }
+
+    it("cannot remove a user that does not exist") {
+      val user = factory.createActiveUser
+      val membership = factory.createMembership
+      Set(membership).foreach(addToRepository)
+
+      val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
+      notFound(DELETE, url, JsNull, "IdNotFound: user id")
+    }
+
+    it("111 fail when removing and membership ID does not exist") {
+      val user = factory.createActiveUser
+      val membership = factory.createMembership
+      Set(user).foreach(addToRepository)
+
+      val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
+      notFound(DELETE, url, JsNull, "IdNotFound: membership id")
+    }
+
+    it("cannot remove a membership to a user with a wrong user version") {
+      val user = factory.createActiveUser
+      val membership = factory.createMembership.copy(userIds = Set(user.id))
+      Set(user, membership).foreach(addToRepository)
+
+      val url = uri("memberships", user.id.id, (user.version + 10L).toString, membership.id.id)
+      badRequest(DELETE,
+                 url,
+                 JsNull,
+                 "InvalidVersion.*ActiveUser: expected version doesn't match current version")
+    }
 
   }
 
