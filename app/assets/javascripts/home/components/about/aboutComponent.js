@@ -1,16 +1,14 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
- * @class home
- *
  * An AngularJS component for the about page.
  *
- * @memberOf ng.home.components
+ * @memberOf home.components
  */
-const about = {
+const aboutComponent = {
   template: require('./about.html'),
   controller: AboutController,
   controllerAs: 'vm',
@@ -36,4 +34,4 @@ function AboutController(breadcrumbService) {
   }
 }
 
-export default ngModule => ngModule.component('about', about)
+export default ngModule => ngModule.component('about', aboutComponent)

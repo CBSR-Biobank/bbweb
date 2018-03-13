@@ -2,7 +2,7 @@
  * The app module as an AngularJS module.
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global PRODUCTION, DEVELOPMENT */
 

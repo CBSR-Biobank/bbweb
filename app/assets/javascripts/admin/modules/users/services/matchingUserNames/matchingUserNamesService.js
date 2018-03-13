@@ -2,7 +2,7 @@
  * This AngularJS Service allows the user to select a {@link domain.users.UserName UserName} from a
  * modal that contains a `uib-typeahead`.
  *
- * @memberOf ng.admin.users.services
+ * @memberOf admin.users.services
  */
 class MatchingUserNamesService {
 

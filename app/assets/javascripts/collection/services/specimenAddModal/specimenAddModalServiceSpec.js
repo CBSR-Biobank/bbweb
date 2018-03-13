@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -28,10 +28,9 @@ describe('Service: specimenAddModal', function() {
                               'Factory');
       this.addModalMatchers();
 
-      this.openModal = (centreLocations, specimenDescriptions, defaultDatetime) => {
-        centreLocations = centreLocations || [];
-        specimenDescriptions = specimenDescriptions || [];
-        defaultDatetime = defaultDatetime || new Date();
+      this.openModal = (centreLocations = [],
+                        specimenDescriptions = [],
+                        defaultDatetime = new Date()) => {
         this.modal = this.specimenAddModal.open(centreLocations, specimenDescriptions, defaultDatetime);
         this.modal.result.then(angular.noop, angular.noop);
         this.$rootScope.$digest();

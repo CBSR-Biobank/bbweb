@@ -20,7 +20,7 @@ describe('unpackedShipmentViewComponent', function() {
                               '$compile',
                               '$state',
                               'Shipment',
-                              'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
+                              'shipmentReceiveTasksService',
                               'modalService',
                               'notificationsService',
                               'Factory');
@@ -39,16 +39,20 @@ describe('unpackedShipmentViewComponent', function() {
     });
   });
 
-  it('has valid scope', function() {
+ it('has valid scope', function() {
     var shipment = this.createShipment();
     this.createController(shipment);
 
     expect(this.controller.active).toEqual(0);
     expect(this.controller.tabs).toBeNonEmptyArray();
+
+    const taskData = this.shipmentReceiveTasksService.getTaskData();
     expect(this.controller.progressInfo).toBeDefined();
-    expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_RECEIVE_PROGRESS_ITEMS.length);
-    expect(this.controller.progressInfo.items).toContainAll(this.SHIPMENT_RECEIVE_PROGRESS_ITEMS);
-    expect(this.controller.progressInfo.current).toBe(3);
+    expect(this.controller.progressInfo).toBeArrayOfSize(Object.keys(taskData).length);
+    taskData.forEach((taskInfo, index) => {
+      taskInfo.status = (index < 3);
+      expect(this.controller.progressInfo).toContain(taskInfo);
+    });
   });
 
   it('has valid tabs', function() {

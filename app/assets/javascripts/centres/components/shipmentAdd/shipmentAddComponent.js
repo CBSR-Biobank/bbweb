@@ -1,19 +1,16 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
 
-var component = {
-  template: require('./shipmentAdd.html'),
-  controller: ShipmentAddController,
-  controllerAs: 'vm',
-  bindings: {}
-};
-
-/**
- *
+/*
+ * Controller for this component.
  */
 /* @ngInject */
 function ShipmentAddController($state,
@@ -22,7 +19,7 @@ function ShipmentAddController($state,
                                Shipment,
                                domainNotificationService,
                                notificationsService,
-                               SHIPMENT_SEND_PROGRESS_ITEMS,
+                               shipmentSendTasksService,
                                breadcrumbService) {
   var vm = this;
   vm.$onInit = onInit;
@@ -36,10 +33,10 @@ function ShipmentAddController($state,
       breadcrumbService.forState('home.shipping.add')
     ];
 
-    vm.progressInfo = {
-      items: SHIPMENT_SEND_PROGRESS_ITEMS,
-      current: 1
-    };
+    vm.progressInfo = shipmentSendTasksService.getTaskData().map((taskInfo, index) => {
+      taskInfo.status = (index < 1);
+      return taskInfo;
+    });
 
     vm.hasValidCentres           = false;
     vm.shipment                  = new Shipment();
@@ -96,4 +93,17 @@ function ShipmentAddController($state,
   }
 }
 
-export default ngModule => ngModule.component('shipmentAdd', component)
+/**
+ * An AngularJS component that lets the user add a {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.shipmentAdd
+*/
+const shipmentAddComponent = {
+  template: require('./shipmentAdd.html'),
+  controller: ShipmentAddController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('shipmentAdd', shipmentAddComponent)

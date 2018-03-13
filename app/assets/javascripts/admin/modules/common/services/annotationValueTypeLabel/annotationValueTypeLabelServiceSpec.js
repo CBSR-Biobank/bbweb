@@ -20,32 +20,32 @@ describe('annotationValueTypeLabelService', function() {
   });
 
   describe('shared behaviour', function() {
-    var context = {};
+    const context = {};
     beforeEach(function() {
-      var self = this;
-
       context.labels = _.values(this.AnnotationValueType);
-      context.toLabelFunc = this.annotationValueTypeLabelService.valueTypeToLabelFunc;
+      context.toLabelFunc =
+        this.annotationValueTypeLabelService.valueTypeToLabelFunc.bind(this.annotationValueTypeLabelService);
       context.expectedLabels = [];
-      _.values(this.AnnotationValueType).forEach(function (valueType) {
-        if (valueType === self.AnnotationValueType.DATE_TIME) {
+
+      Object.values(this.AnnotationValueType).forEach(valueType => {
+        if (valueType === this.AnnotationValueType.DATE_TIME) {
           context.expectedLabels[valueType] = 'Date and time';
         } else {
-          context.expectedLabels[valueType] = self.capitalizeFirstLetter(valueType);
+          context.expectedLabels[valueType] = this.capitalizeFirstLetter(valueType);
         }
       });
     });
     sharedBehaviour(context);
   });
 
-  it('name', function() {
+  it('has valid enumeration values', function() {
     var labels = this.annotationValueTypeLabelService.getLabels(),
         labelIds = _.map(labels, 'id');
     expect(labels.length).toBe(_.keys(this.AnnotationValueType).length);
-    _.values(this.AnnotationValueType).forEach(function (valueType) {
+    Object.values(this.AnnotationValueType).forEach(valueType => {
       expect(labelIds).toContain(valueType);
     });
-    _.map(labels, 'labelFunc').forEach(function (labelFunc) {
+    _.map(labels, 'labelFunc').forEach(labelFunc => {
       expect(labelFunc).toBeFunction();
     });
   });

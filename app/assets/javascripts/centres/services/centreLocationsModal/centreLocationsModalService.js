@@ -1,30 +1,75 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
 
-/*
- * Opens a modal that allows the user to select a centre location.
+let service;
+
+/**
+ * An AngularJS service that allows for the creation of a modal to let the user to select a {@link
+ * domain.centres.Centre Centre} {@link domain.Location Location}.
+ *
+ * @memberOf centres.services
  */
-/* @ngInject */
-function centreLocationsModalService($uibModal,
-                                     Centre) {
-  var service = {
-    open: openModal
-  };
-  return service;
+class CentreLocationsModalService {
 
-  //-------
+  constructor($uibModal, Centre) {
+    'ngInject';
+    Object.assign(this, { $uibModal, Centre });
+    service = this;
+  }
 
-  function openModal(heading, label, placeholder, value, locationInfosToOmit) {
-    var modal,
-        locationIdsToOmit =  _.map(locationInfosToOmit, 'locationId');
+  /**
+   * Opens a modal that lets the user select a {@link domain.centres.Centre Centre} {@link domain.Location
+   * Location} by entering the partial name of a location. The partial name is then sent to the server and the
+   * results displayed in a **UI Bootstrap** *UIB Typeahead* attached to the modal's text input.
+   *
+   * @param {string} heading - the text to display as the modals header.
+   *
+   * @param {string} label - The label for the input field.
+   *
+   * @param {string} placeholder - The place holder text to display in the input field.
+   *
+   * @param {string} [value] - The initial value to display in the input field.
+   *
+   * @param {Array<domain.centres.CentreLocationInfo>} [locationInfosToOmit=[]] - the locations to omit from
+   * the results returned by the server.
+   *
+   * @return {object} The **UI Bootstrap Modal** instance.
+   */
+  open(heading, label, placeholder, value, locationInfosToOmit = []) {
+    const locationIdsToOmit =  _.map(locationInfosToOmit, 'locationId');
+    let modal = null;
 
-    ModalController.$inject = [];
+    class ModalController {
 
-    modal = $uibModal.open({
+      constructor() {
+        Object.assign(this, { heading, label, placeholder });
+        this.locationInfo = value;
+      }
+
+
+      okPressed() {
+        modal.close(this.locationInfo);
+      }
+
+      closePressed() {
+        modal.dismiss('cancel');
+      }
+
+      getCentreLocationInfo(filter) {
+        return service.Centre.locationsSearch(filter)
+          .then(locations => {
+            _.remove(locations,
+                     location => _.includes(locationIdsToOmit, location.locationId));
+            return locations;
+          });
+      }
+    }
+
+    modal = service.$uibModal.open({
       template: require('./centreLocationsModal.html'),
       controller: ModalController,
       controllerAs: 'vm',
@@ -34,44 +79,8 @@ function centreLocationsModalService($uibModal,
     });
 
     return modal;
-
-    //--
-
-    function ModalController() {
-      var vm = this;
-
-      vm.heading               = heading;
-      vm.label                 = label;
-      vm.placeholder           = placeholder;
-      vm.locationInfo          = value;
-      vm.centreLocations       = undefined;
-
-      vm.okPressed             = okPressed;
-      vm.closePressed          = closePressed;
-      vm.getCentreLocationInfo = getCentreLocationInfo;
-
-      //--
-
-      function okPressed() {
-        modal.close(vm.locationInfo);
-      }
-
-      function closePressed() {
-        modal.dismiss('cancel');
-      }
-
-      function getCentreLocationInfo(filter) {
-        return Centre.locationsSearch(filter)
-          .then(function (locations) {
-            _.remove(locations, function (location) {
-              return _.includes(locationIdsToOmit, location.locationId);
-            });
-            return locations;
-          });
-      }
-    }
   }
 
 }
 
-export default ngModule => ngModule.service('centreLocationsModalService', centreLocationsModalService)
+export default ngModule => ngModule.service('centreLocationsModalService', CentreLocationsModalService)

@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -79,7 +79,7 @@ xdescribe('SpecimenGroup', function() {
     expect(specimenGroup.units).toBe('');
     expect(specimenGroup.anatomicalSourceType).toBe('');
     expect(specimenGroup.preservationType).toBe('');
-    expect(specimenGroup.preservationTemperatureType).toBe('');
+    expect(specimenGroup.preservationTemperature).toBe('');
     expect(specimenGroup.specimenType).toBe('');
   });
 
@@ -136,7 +136,7 @@ xdescribe('SpecimenGroup', function() {
   //                          'units',
   //                          'anatomicalSourceType',
   //                          'preservationType',
-  //                          'preservationTemperatureType',
+  //                          'preservationTemperature',
   //                          'specimenType'),
   //                   funutils.pickOptional(specimenGroup, 'description'));
   // }

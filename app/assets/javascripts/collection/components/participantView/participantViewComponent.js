@@ -1,17 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @namespace collection.components.participantView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./participantView.html'),
-  controller: ParticipantViewController,
-  controllerAs: 'vm',
-  bindings: {
-    study:       '<',
-    participant: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -62,4 +56,23 @@ function ParticipantViewController($window,
 
 }
 
-export default ngModule => ngModule.component('participantView', component)
+/**
+ * An AngularJS component that displays information for a {@link domain.participants.Participant Participant}.
+ *
+ * @memberOf collection.components.participantView
+ *
+ * @param {domain.studies.Study} study - The study the *Participant* belongs to.
+ *
+ * @param {domain.participants.Participant} participant - The participant to display information for.
+ */
+const participantViewComponent = {
+  template: require('./participantView.html'),
+  controller: ParticipantViewController,
+  controllerAs: 'vm',
+  bindings: {
+    study:       '<',
+    participant: '<'
+  }
+};
+
+export default ngModule => ngModule.component('participantView', participantViewComponent)

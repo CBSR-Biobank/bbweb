@@ -1,16 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.studies.Study Study} administration.
  *
+ * @namespace admin.studies.components.studyProcessingTab
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./studyProcessingTab.html'),
-  controller: StudyProcessingTabController,
-  controllerAs: 'vm',
-  bindings: {
-    study:         '<',
-    processingDto: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -29,4 +24,22 @@ function StudyProcessingTabController($scope) {
 
 }
 
-export default ngModule => ngModule.component('studyProcessingTab', component)
+/**
+ * An AngularJS component that displays the {@link domain.studies.ProcessingType ProcessingTypes} configured
+ * for a {@link domain.studies.Study Study},
+ *
+ * @memberOf admin.studies.components.studyProcessingTab
+ *
+ * @param {domain.studies.Study} study - the *Study* to view *Processing Types* for.
+ */
+const studyProcessingTabComponent = {
+  template: require('./studyProcessingTab.html'),
+  controller: StudyProcessingTabController,
+  controllerAs: 'vm',
+  bindings: {
+    study:         '<',
+    processingDto: '<'
+  }
+};
+
+export default ngModule => ngModule.component('studyProcessingTab', studyProcessingTabComponent)

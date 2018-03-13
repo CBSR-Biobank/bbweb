@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
   /**
@@ -12,7 +12,7 @@
    * @memberOf domain
    * @see domain.PreservationType
    */
-const PreservationTemperatureType = {
+const PreservationTemperature = {
     PLUS_4_CELCIUS:    '4 C',
     MINUS_20_CELCIUS:  '-20 C',
     MINUS_80_CELCIUS:  '-80 C',
@@ -20,4 +20,4 @@ const PreservationTemperatureType = {
     ROOM_TEMPERATURE:  'Room Temperature'
   };
 
-export default ngModule => ngModule.constant('PreservationTemperatureType', PreservationTemperatureType)
+export default ngModule => ngModule.constant('PreservationTemperature', PreservationTemperature)

@@ -1,20 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @namespace collection.components.participantAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-/**
- * This component is used for adding a participant.
- */
-var component = {
-  template: require('./participantAdd.html'),
-  controller: ParticipantAddController,
-  controllerAs: 'vm',
-  bindings: {
-    study:    '<',
-    uniqueId: '@'
-  }
-};
 
 /*
  * Controller for this component.
@@ -71,4 +62,23 @@ function ParticipantAddController($state,
   }
 }
 
-export default ngModule => ngModule.component('participantAdd', component)
+/**
+ * An AngularJS component that lets the user add a {@link domain.participants.Participant Participant}.
+ *
+ * @memberOf collection.components.participantAdd
+ *
+ * @param {domain.studies.Study} study - the study the *Participant* should be added to.
+ *
+ * @param {string} uniqueId - the *Unique ID* to give this participant.
+ */
+const participantAddComponent = {
+  template: require('./participantAdd.html'),
+  controller: ParticipantAddController,
+  controllerAs: 'vm',
+  bindings: {
+    study:    '<',
+    uniqueId: '@'
+  }
+};
+
+export default ngModule => ngModule.component('participantAdd', participantAddComponent)

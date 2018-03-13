@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 import _ from 'lodash';
 import faker  from 'faker';
@@ -106,7 +106,7 @@ class Factory {
   constructor(AnnotationValueType,
               AnnotationMaxValueCount,
               AnatomicalSourceType,
-              PreservationTemperatureType,
+              PreservationTemperature,
               PreservationType,
               SpecimenType,
               StudyState,
@@ -122,7 +122,7 @@ class Factory {
       AnnotationValueType,
       AnnotationMaxValueCount,
       AnatomicalSourceType,
-      PreservationTemperatureType,
+      PreservationTemperature,
       PreservationType,
       SpecimenType,
       StudyState,
@@ -251,8 +251,8 @@ class Factory {
     return faker.random.arrayElement(_.values(this.PreservationType));
   }
 
-  randomPreservationTemperatureTypeType() {
-    return faker.random.arrayElement(_.values(this.PreservationTemperatureType));
+  randomPreservationTemperature() {
+    return faker.random.arrayElement(_.values(this.PreservationTemperature));
   }
 
   randomSpecimenType() {
@@ -269,7 +269,7 @@ class Factory {
             units:                       'mL',
             anatomicalSourceType:        this.randomAnatomicalSourceType(),
             preservationType:            this.randomPreservationType(),
-            preservationTemperatureType: this.randomPreservationTemperatureTypeType(),
+            preservationTemperature: this.randomPreservationTemperature(),
             specimenType:                this.randomSpecimenType()
           },
           nameAndSlug()
@@ -600,7 +600,7 @@ class Factory {
                                    units:                       'mL',
                                    anatomicalSourceType:        this.randomAnatomicalSourceType(),
                                    preservationType:            this.randomPreservationType(),
-                                   preservationTemperatureType: this.randomPreservationTemperatureTypeType(),
+                                   preservationTemperature: this.randomPreservationTemperature(),
                                    specimenType:                this.randomSpecimenType(),
                                    maxCount:                    1,
                                    amount:                      0.5

@@ -7,20 +7,23 @@ function EmailFilterFactory(SearchFilter) {
 
   /**
    * EmailFilter's aid in using the search API provided by the Biobank REST API.
+   *
+   * @memberOf domain.filters
    */
-  function EmailFilter() {
-    SearchFilter.call(this, EmailFilter.name);
-  }
+  class EmailFilter extends SearchFilter {
 
-  EmailFilter.prototype = Object.create(SearchFilter.prototype);
-  EmailFilter.prototype.constructor = EmailFilter;
-
-  EmailFilter.prototype.getValue = function () {
-    if (this.value !== '') {
-      return 'email:like:' + this.value;
+    constructor() {
+      super(EmailFilter.name);
     }
-    return '';
-  };
+
+    getValue() {
+      if (this.value !== '') {
+        return 'email:like:' + this.value;
+      }
+      return '';
+    }
+
+  }
 
   return EmailFilter;
 }

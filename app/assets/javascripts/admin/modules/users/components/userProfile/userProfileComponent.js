@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.userProfile
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -190,7 +194,15 @@ class UserProfileController {
 
 }
 
-var userProfile = {
+/**
+ * An AngularJS component that allows the logged in user to modify their or another {@link
+ * domain.users.user User's} settings.
+ *
+ * @memberOf admin.users.components.userProfile
+ *
+ * @param {domain.users.User} user - the user to modify settings for.
+ */
+const userProfileComponent = {
   template: require('./userProfile.html'),
   controller: UserProfileController,
   controllerAs: 'vm',
@@ -199,4 +211,4 @@ var userProfile = {
   }
 };
 
-export default ngModule => ngModule.component('userProfile', userProfile)
+export default ngModule => ngModule.component('userProfile', userProfileComponent)

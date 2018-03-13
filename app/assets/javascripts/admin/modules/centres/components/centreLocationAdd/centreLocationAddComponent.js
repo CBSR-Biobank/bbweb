@@ -1,16 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.centres.Centre Centre} administration.
+ *
+ * @namespace admin.centres.components.centreLocationAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./centreLocationAdd.html'),
-  controller: CentreLocationAddController,
-  controllerAs: 'vm',
-  bindings: {
-    centre: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -62,4 +57,21 @@ function CentreLocationAddController($state,
 
 }
 
-export default ngModule => ngModule.component('centreLocationAdd', component)
+/**
+ * An AngularJS component that allows the user to add a {@link domain.Location Location} to a {@link
+ * domain.centres.Centre Centre}.
+ *
+ * @memberOf admin.centres.components.centreLocationAdd
+ *
+ * @param {domain.centres.Centre} centre - the centre to add the location to.
+ */
+const centreLocationAddComponent = {
+  template: require('./centreLocationAdd.html'),
+  controller: CentreLocationAddController,
+  controllerAs: 'vm',
+  bindings: {
+    centre: '<'
+  }
+};
+
+export default ngModule => ngModule.component('centreLocationAdd', centreLocationAddComponent)

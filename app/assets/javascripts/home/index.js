@@ -4,7 +4,7 @@
  * Shows the start page and provides controllers for the header and the footer.
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import CommonModule    from '../common'

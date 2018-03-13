@@ -1,16 +1,11 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentViewSent
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./shipmentViewSent.html'),
-  controller: ShipmentViewSentController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -23,7 +18,7 @@ function ShipmentViewSentController($q,
                                     notificationsService,
                                     timeService,
                                     modalService,
-                                    SHIPMENT_RECEIVE_PROGRESS_ITEMS,
+                                    shipmentReceiveTasksService,
                                     shipmentSkipToUnpackedModalService) {
   var vm = this;
   vm.$onInit = onInit;
@@ -37,10 +32,10 @@ function ShipmentViewSentController($q,
     vm.receiveShipment     = receiveShipment;
     vm.unpackShipment      = unpackShipment;
 
-    vm.progressInfo = {
-      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
-      current: 1
-    };
+    vm.progressInfo = shipmentReceiveTasksService.getTaskData().map((taskInfo, index) => {
+      taskInfo.status = (index < 1);
+      return taskInfo;
+    });
   }
 
   function returnToPackedState() {
@@ -111,4 +106,20 @@ function ShipmentViewSentController($q,
   }
 }
 
-export default ngModule => ngModule.component('shipmentViewSent', component)
+/**
+ * An AngularJS component that displays information for a sent {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.shipmentViewSent
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display.
+ */
+const shipmentViewSentComponent = {
+  template: require('./shipmentViewSent.html'),
+  controller: ShipmentViewSentController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment: '<'
+  }
+};
+
+export default ngModule => ngModule.component('shipmentViewSent', shipmentViewSentComponent)

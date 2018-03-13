@@ -92,7 +92,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "preservationType").as[String]            mustBe (specimenDescription.preservationType.toString)
 
-    (json \ "preservationTemperatureType").as[String] mustBe (specimenDescription.preservationTemperatureType.toString)
+    (json \ "preservationTemperature").as[String] mustBe (specimenDescription.preservationTemperature.toString)
 
     (json \ "specimenType").as[String]                mustBe (specimenDescription.specimenType.toString)
 
@@ -298,7 +298,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
              "units"                       -> desc.units,
              "anatomicalSourceType"        -> desc.anatomicalSourceType.toString,
              "preservationType"            -> desc.preservationType.toString,
-             "preservationTemperatureType" -> desc.preservationTemperatureType.toString,
+             "preservationTemperature" -> desc.preservationTemperature.toString,
              "specimenType"                -> desc.specimenType.toString,
              "maxCount"                    -> desc.maxCount,
              "amount"                      -> desc.amount)

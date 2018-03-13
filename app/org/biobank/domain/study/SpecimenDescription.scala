@@ -4,7 +4,7 @@ import com.github.ghik.silencer.silent
 import org.biobank.ValidationKey
 import org.biobank.domain._
 import org.biobank.domain.AnatomicalSourceType._
-import org.biobank.domain.PreservationTemperatureType._
+import org.biobank.domain.PreservationTemperature._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.SpecimenType._
 import org.biobank.domain.{DomainValidation, HasUniqueName, HasOptionalDescription}
@@ -34,7 +34,7 @@ object SpecimenDescriptionId {
 /** Used to configure a [[SpecimenType]] used by a [[Study]].
  *
  * It records ownership, summary, storage, and classification information that applies to an
- * entire group or collection of [[Specimen]]s. A specimen group is defined either for
+ * entire group or collection of [[Specimen]]s. A specimen description is defined either for
  * specimen types collected from participants, or for specimen types that are processed.
  *
  * This class has a private constructor and instances of this class can only be created using
@@ -61,7 +61,7 @@ trait SpecimenDescription
   val preservationType: PreservationType
 
   /** See [[PreservationType]]. */
-  val preservationTemperatureType: PreservationTemperatureType
+  val preservationTemperature: PreservationTemperature
 
   /** See [[SpecimenType]]. */
   val specimenType: SpecimenType
@@ -75,7 +75,7 @@ trait SpecimenDescription
         |  units:                       $units,
         |  anatomicalSourceType:        $anatomicalSourceType,
         |  preservationType:            $preservationType,
-        |  preservationTemperatureType: $preservationTemperatureType,
+        |  preservationTemperature: $preservationTemperature,
         |  specimenType:                $specimenType
         |}""".stripMargin
 
@@ -126,7 +126,7 @@ final case class CollectionSpecimenDescription(id:                          Spec
                                                units:                       String,
                                                anatomicalSourceType:        AnatomicalSourceType,
                                                preservationType:            PreservationType,
-                                               preservationTemperatureType: PreservationTemperatureType,
+                                               preservationTemperature: PreservationTemperature,
                                                specimenType:                SpecimenType,
                                                maxCount:                    Int,
                                                amount:                      BigDecimal)
@@ -146,7 +146,7 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
              units:                       String,
              anatomicalSourceType:        AnatomicalSourceType,
              preservationType:            PreservationType,
-             preservationTemperatureType: PreservationTemperatureType,
+             preservationTemperature: PreservationTemperature,
              specimenType:                SpecimenType,
              maxCount:                    Int,
              amount:                      BigDecimal)
@@ -156,7 +156,7 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
              units,
              anatomicalSourceType,
              preservationType,
-             preservationTemperatureType,
+             preservationTemperature,
              specimenType,
              maxCount,
              amount).map { _ =>
@@ -168,7 +168,7 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
                                     units                       = units,
                                     anatomicalSourceType        = anatomicalSourceType,
                                     preservationType            = preservationType,
-                                    preservationTemperatureType = preservationTemperatureType,
+                                    preservationTemperature = preservationTemperature,
                                     specimenType                = specimenType,
                                     maxCount                    = maxCount,
                                     amount                      = amount)
@@ -181,7 +181,7 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
                        units:                       String,
                        anatomicalSourceType:        AnatomicalSourceType,
                        preservationType:            PreservationType,
-                       preservationTemperatureType: PreservationTemperatureType,
+                       preservationTemperature: PreservationTemperature,
                        specimenType:                SpecimenType,
                        maxCount:                    Int,
                        amount:                      BigDecimal)
@@ -200,7 +200,7 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
              specimenDesc.units,
              specimenDesc.anatomicalSourceType,
              specimenDesc.preservationType,
-             specimenDesc.preservationTemperatureType,
+             specimenDesc.preservationTemperature,
              specimenDesc.specimenType,
              specimenDesc.maxCount,
              specimenDesc.amount)

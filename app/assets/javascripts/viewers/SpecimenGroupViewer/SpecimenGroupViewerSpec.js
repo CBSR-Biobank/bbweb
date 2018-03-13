@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -74,7 +74,7 @@ xdescribe('SpecimenGroupViewer', function() {
         expect(attr.value).toBe(specimenGroup.preservationType);
         break;
       case 'Preservation Temperature':
-        expect(attr.value).toBe(specimenGroup.preservationTemperatureType);
+        expect(attr.value).toBe(specimenGroup.preservationTemperature);
         break;
       case 'Specimen Type':
         expect(attr.value).toBe(specimenGroup.specimenType);

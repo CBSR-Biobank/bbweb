@@ -1,15 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.studies.Study Study} administration.
+ *
+ * @namespace admin.studies.components.studiesAdmin
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./studiesAdmin.html'),
-  controller: StudiesAdminController,
-  controllerAs: 'vm',
-  bindings: {
-  }
-};
 
 /*
  * Controller for this component.
@@ -31,4 +27,20 @@ function StudiesAdminController(breadcrumbService) {
 
 }
 
-export default ngModule => ngModule.component('studiesAdmin', component)
+/**
+ * An AngularJS component that displays the main page for {@link domain.studies.Study Study} Adminisrattion.
+ *
+ * This page lists all studies (in a paged fashion) in the system. The user can then select one of these
+ * studies to configure it.
+ *
+ * @memberOf admin.studies.components.studiesAdmin
+ */
+const studiesAdminComponent = {
+  template: require('./studiesAdmin.html'),
+  controller: StudiesAdminController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('studiesAdmin', studiesAdminComponent)

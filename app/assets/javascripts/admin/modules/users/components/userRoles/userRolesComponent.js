@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.userRoles
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -107,10 +111,21 @@ class UserRolesController {
   }
 }
 
-/*
- * Allows the logged in user to modify another user's roles.
+/**
+ * An AngularJS component that allows the logged in user to modify another {@link domain.users.user
+ * User's} {@link domain.access.Role Roles}.
+ *
+ * @memberOf admin.users.components.userRoles
+ *
+ * @param {domain.users.User} user - the user to modify roles for.
+ *
+ * @param {admin.users.components.userRole.onAddRequest} onAddRequest - the function this compoennt
+ * calls to request a new role be added.
+ *
+ * @param {admin.users.components.userRole.onRemoveRequest} onRemoveRequest - the function this component
+ * calls to request removal of a role.
  */
-var userRoles = {
+const userRolesComponent = {
   template: require('./userRoles.html'),
   controller: UserRolesController,
   controllerAs: 'vm',
@@ -121,4 +136,22 @@ var userRoles = {
   }
 };
 
-export default ngModule => ngModule.component('userRoles', userRoles)
+/**
+ * The callback function called by {@link common.components.dateTimePicker dateTimePicker} when the
+ * user enters a new value.
+ *
+ * @callback admin.users.components.userRoles.onAddRequest
+ *
+ * @param {domain.access.Role} role - the role to add
+ */
+
+/**
+ * The callback function called by {@link common.components.dateTimePicker dateTimePicker} when the
+ * user enters a new value.
+ *
+ * @callback admin.users.components.userRoles.onRemoveRequest
+ *
+ * @param {domain.access.Role} role - the role to remove
+ */
+
+export default ngModule => ngModule.component('userRoles', userRolesComponent)

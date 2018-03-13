@@ -21,7 +21,7 @@ describe('shipmentAddComponent', function() {
                               'Centre',
                               'Shipment',
                               'ShipmentState',
-                              'SHIPMENT_SEND_PROGRESS_ITEMS',
+                              'shipmentSendTasksService',
                               'domainNotificationService',
                               'Factory');
 
@@ -57,9 +57,14 @@ describe('shipmentAddComponent', function() {
     this.createCentreLocationsSpy([]);
     this.createController();
     expect(this.controller.progressInfo).toBeDefined();
-    expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_SEND_PROGRESS_ITEMS.length);
-    expect(this.controller.progressInfo.items).toContainAll(this.SHIPMENT_SEND_PROGRESS_ITEMS);
-    expect(this.controller.progressInfo.current).toBe(1);
+
+    const taskData = this.shipmentSendTasksService.getTaskData();
+    taskData[0].status = true;
+    expect(this.controller.progressInfo).toBeArrayOfSize(Object.keys(taskData).length);
+    taskData.forEach(taskInfo => {
+      expect(this.controller.progressInfo).toContain(taskInfo);
+    });
+
     expect(this.controller.hasValidCentres).toBeFalse();
     expect(this.controller.shipment).toEqual(jasmine.any(this.Shipment));
     expect(this.controller.submit).toBeFunction();

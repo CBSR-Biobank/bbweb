@@ -22,7 +22,7 @@ describe('shipmentViewReceivedComponent', function() {
                               'toastr',
                               'Shipment',
                               'ShipmentState',
-                              'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
+                              'shipmentReceiveTasksService',
                               'modalInput',
                               'notificationsService',
                               'modalService',
@@ -41,10 +41,14 @@ describe('shipmentViewReceivedComponent', function() {
     var shipment = this.createShipment();
     this.createController(shipment);
 
+    const taskData = this.shipmentReceiveTasksService.getTaskData();
+
     expect(this.controller.progressInfo).toBeDefined();
-    expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_RECEIVE_PROGRESS_ITEMS.length);
-    expect(this.controller.progressInfo.items).toContainAll(this.SHIPMENT_RECEIVE_PROGRESS_ITEMS);
-    expect(this.controller.progressInfo.current).toBe(2);
+    expect(this.controller.progressInfo).toBeArrayOfSize(Object.keys(taskData).length);
+    taskData.forEach((taskInfo, index) => {
+      taskInfo.status = (index < 2);
+      expect(this.controller.progressInfo).toContain(taskInfo);
+    });
   });
 
   describe('when unpacking a shipment', function() {

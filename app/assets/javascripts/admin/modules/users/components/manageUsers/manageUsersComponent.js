@@ -1,5 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
  *
+ * @namespace admin.users.components.manageUsers
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -29,7 +34,13 @@ class ManageUsersController {
   }
 }
 
-const manageUsers = {
+/**
+ * An AngularJS component that allows the logged in user to configure other {@link domain.users.User User's}
+ * of the system.
+ *
+ * @memberOf admin.users.components.manageUsers
+ */
+const manageUsersComponent = {
   template: require('./manageUsers.html'),
   controller: ManageUsersController,
   controllerAs: 'vm',
@@ -37,4 +48,4 @@ const manageUsers = {
   }
 };
 
-export default ngModule => ngModule.component('manageUsers', manageUsers);
+export default ngModule => ngModule.component('manageUsers', manageUsersComponent);

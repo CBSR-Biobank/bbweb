@@ -2,7 +2,7 @@ package org.biobank.infrastructure.command
 
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.AnnotationValueType._
-import org.biobank.domain.PreservationTemperatureType._
+import org.biobank.domain.PreservationTemperature._
 import org.biobank.domain.PreservationType._
 import org.biobank.domain.SpecimenType._
 import play.api.libs.json.Reads._
@@ -93,26 +93,26 @@ object CollectionEventTypeCommands {
                                                        units:                       String,
                                                        anatomicalSourceType:        AnatomicalSourceType,
                                                        preservationType:            PreservationType,
-                                                       preservationTemperatureType: PreservationTemperatureType,
+                                                       preservationTemperature: PreservationTemperature,
                                                        specimenType:                SpecimenType,
                                                        maxCount:                    Int,
                                                        amount:                      BigDecimal)
       extends CollectionEventTypeModifyCommand
 
-  final case class UpdateCollectionSpecimenDescriptionCmd(sessionUserId:               String,
-                                                          studyId:                     String,
-                                                          id:                          String,
-                                                          expectedVersion:             Long,
-                                                          specimenDescriptionId:       String,
-                                                          name:                        String,
-                                                          description:                 Option[String],
-                                                          units:                       String,
-                                                          anatomicalSourceType:        AnatomicalSourceType,
-                                                          preservationType:            PreservationType,
-                                                          preservationTemperatureType: PreservationTemperatureType,
-                                                          specimenType:                SpecimenType,
-                                                          maxCount:                    Int,
-                                                          amount:                      BigDecimal)
+  final case class UpdateCollectionSpecimenDescriptionCmd(sessionUserId:           String,
+                                                          studyId:                 String,
+                                                          id:                      String,
+                                                          expectedVersion:         Long,
+                                                          specimenDescriptionId:   String,
+                                                          name:                    String,
+                                                          description:             Option[String],
+                                                          units:                   String,
+                                                          anatomicalSourceType:    AnatomicalSourceType,
+                                                          preservationType:        PreservationType,
+                                                          preservationTemperature: PreservationTemperature,
+                                                          specimenType:            SpecimenType,
+                                                          maxCount:                Int,
+                                                          amount:                  BigDecimal)
       extends CollectionEventTypeModifyCommand
 
   final case class RemoveCollectionSpecimenDescriptionCmd(sessionUserId:         String,

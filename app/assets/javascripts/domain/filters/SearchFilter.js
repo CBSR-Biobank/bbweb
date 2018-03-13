@@ -7,37 +7,45 @@ function SearchFilterFactory() {
 
   /**
    * SearchFilter's aid in using the search API provided by the Biobank REST API.
+   *
+   * @memberOf domain.filters
    */
-  function SearchFilter(name) {
+  class SearchFilter {
 
     /**
-     * A short identifying name.
-     *
-     * @name domain.SearchFilter#name
-     * @type {string}
+     * @param {string} name - the name of the filter.
      */
-    this.name = name;
+    constructor(name) {
 
-    /**
-     * A short identifying name that is unique.
-     *
-     * @name domain.SearchFilter#value
-     * @type {string}
-     */
-    this.value = '';
+      /**
+       * A short identifying name.
+       *
+       * @name domain.SearchFilter#name
+       * @type {string}
+       */
+      this.name = name;
+
+      /**
+       * The value to use for this filter.
+       *
+       * @name domain.SearchFilter#value
+       * @type {string}
+       */
+      this.value = '';
+    }
+
+    setValue(value) {
+      this.value = value;
+    }
+
+    getValue() {
+      return this.value;
+    }
+
+    clearValue() {
+      this.setValue('');
+    }
   }
-
-  SearchFilter.prototype.setValue = function (value) {
-    this.value = value;
-  };
-
-  SearchFilter.prototype.getValue = function () {
-    return this.value;
-  };
-
-  SearchFilter.prototype.clearValue = function () {
-    this.setValue('');
-  };
 
   return SearchFilter;
 }

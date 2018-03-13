@@ -48,7 +48,7 @@ message CollectionEventTypeEvent {
     optional string units                       = 4;
     optional string anatomicalSourceType        = 5;
     optional string preservationType            = 6;
-    optional string preservationTemperatureType = 7;
+    optional string preservationTemperature = 7;
     optional string specimenType                = 8;
     optional int32  maxCount                    = 9;
     optional double amount                      = 10;

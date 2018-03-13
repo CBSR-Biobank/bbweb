@@ -21,7 +21,7 @@ describe('shipmentViewPackedComponent', function() {
                               '$state',
                               'toastr',
                               'Shipment',
-                              'SHIPMENT_SEND_PROGRESS_ITEMS',
+                              'shipmentSendTasksService',
                               'modalInput',
                               'notificationsService',
                               'modalService',
@@ -40,10 +40,14 @@ describe('shipmentViewPackedComponent', function() {
     var shipment = this.createShipment();
     this.createController(shipment);
 
+    const taskData = this.shipmentSendTasksService.getTaskData();
+
     expect(this.controller.progressInfo).toBeDefined();
-    expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_SEND_PROGRESS_ITEMS.length);
-    expect(this.controller.progressInfo.items).toContainAll(this.SHIPMENT_SEND_PROGRESS_ITEMS);
-    expect(this.controller.progressInfo.current).toBe(3);
+    expect(this.controller.progressInfo).toBeArrayOfSize(Object.keys(taskData).length);
+    taskData.forEach((taskInfo) => {
+      taskInfo.status = true;
+      expect(this.controller.progressInfo).toContain(taskInfo);
+    });
   });
 
   describe('when sending a shipment', function() {

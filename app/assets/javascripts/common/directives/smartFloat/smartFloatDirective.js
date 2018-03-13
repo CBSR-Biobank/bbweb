@@ -1,31 +1,34 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-const FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
-
-/**
- * Validates that value is a float.
- */
 function smartFloatDirectiveFactory() {
-  var directive = {
-    require: 'ngModel',
-    link: link
-  };
-  return directive;
 
-  function link(scope, element, attrs, ctrl) {
-    ctrl.$parsers.unshift(function(viewValue) {
-      if (FLOAT_REGEXP.test(viewValue)) {
-        ctrl.$setValidity('float', true);
-        return parseFloat(viewValue.replace(',', '.'));
-      }
+  /**
+   * Validates that a value is a float.
+   *
+   * @memberOf common.directives
+   */
+  class SmartFloatDirective {
 
-      ctrl.$setValidity('float', false);
-      return undefined;
-    });
+    constructor() {
+      this.require = 'ngModel';
+
+      /** @readonly */
+      this.FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+    }
+
+    link(scope, element, attrs, ctrl) {
+      ctrl.$parsers.unshift((viewValue) => {
+        const value = this.FLOAT_REGEXP.test(viewValue) ? parseFloat(viewValue.replace(',', '.')) : NaN;
+        ctrl.$setValidity('float', !isNaN(value));
+        return value;
+      });
+    }
   }
+
+  return new SmartFloatDirective();
 }
 
 export default ngModule => ngModule.directive('smartFloat', smartFloatDirectiveFactory)

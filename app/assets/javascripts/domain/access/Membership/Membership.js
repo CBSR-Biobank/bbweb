@@ -1,6 +1,6 @@
-/**
+/*/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -147,7 +147,7 @@ function MembershipFactory($q,
    * @param {int} options.limit The total number of memberships to return per page. The maximum page size is
    * 10. If a value larger than 10 is used then the response is an error.
    *
-   * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
+   * @returns {Promise<common.controllers.PagedListController.PagedResult>} with items of type {@link
    * domain.access.Membership}.
    */
   Membership.list = function(options) {

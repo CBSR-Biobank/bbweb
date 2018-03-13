@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -38,13 +38,11 @@ class HomeController {
 }
 
 /**
- * @class home
- *
  * An AngularJS component for the home page.
  *
- * @memberOf ng.home.components
+ * @memberOf home.components
  */
-const home = {
+const homeComponent = {
   template: require('./home.html'),
   controller: HomeController,
   controllerAs: 'vm',
@@ -52,4 +50,4 @@ const home = {
   }
 };
 
-export default ngModule => ngModule.component('home', home)
+export default ngModule => ngModule.component('home', homeComponent)

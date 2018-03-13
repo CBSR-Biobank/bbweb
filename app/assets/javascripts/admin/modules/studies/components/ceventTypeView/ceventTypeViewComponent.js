@@ -1,18 +1,14 @@
 /**
+ * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
  *
+ * @namespace admin.studies.components.ceventTypeView
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
 
-var component = {
-  template: require('./ceventTypeView.html'),
-  controller: CeventTypeViewController,
-  controllerAs: 'vm',
-  bindings: {
-    study:               '<',
-    collectionEventType: '<'
-  }
-};
+import _ from 'lodash'
 
 /*
  * Controller for this component.
@@ -25,10 +21,10 @@ function CeventTypeViewController($scope,
                                   modalInput,
                                   domainNotificationService,
                                   notificationsService,
-                                  CollectionEventAnnotationTypeModals) {
+                                  CollectionEventAnnotationTypeRemove) {
   var vm = this;
   vm.$onInit = onInit;
-  _.extend(vm, new CollectionEventAnnotationTypeModals());
+  vm.annotationTypeRemove = new CollectionEventAnnotationTypeRemove();
 
   //--
 
@@ -123,19 +119,19 @@ function CeventTypeViewController($scope,
 
   function removeAnnotationType(annotationType) {
     if (_.includes(vm.annotationTypeIdsInUse, annotationType.id)) {
-      vm.removeInUseModal(annotationType, vm.annotationTypeName);
+      vm.annotationTypeRemove.removeInUseModal(annotationType, vm.annotationTypeName);
     } else {
       if (!vm.study.isDisabled()) {
         throw new Error('modifications not allowed');
       }
 
-      vm.remove(annotationType, function () {
-        return vm.collectionEventType.removeAnnotationType(annotationType)
-          .then(function (collectionEventType) {
+      vm.annotationTypeRemove.remove(
+        annotationType,
+        () => vm.collectionEventType.removeAnnotationType(annotationType)
+          .then(collectionEventType => {
             vm.collectionEventType = collectionEventType;
             notificationsService.success(gettextCatalog.getString('Annotation removed'));
-          });
-      });
+          }));
     }
   }
 
@@ -203,4 +199,26 @@ function CeventTypeViewController($scope,
   }
 }
 
-export default ngModule => ngModule.component('ceventTypeView', component)
+/**
+ * An AngularJS component that displays a {@link domain.studies.CollectionEventType CollectionEventType} for a
+ * {@link domain.studies.Study Study}.
+ *
+ * The component also allows the user to make changes to the collection event type.
+ *
+ * @memberOf admin.studies.components.ceventTypeView
+ *
+ * @param {domain.studies.Study} study - the study the collection event type belongs to.
+ *
+ * @param {domain.studies.CollectionEventType} collectionEventType - the collection event types to display.
+ */
+const ceventTypeViewComponent = {
+  template: require('./ceventTypeView.html'),
+  controller: CeventTypeViewController,
+  controllerAs: 'vm',
+  bindings: {
+    study:               '<',
+    collectionEventType: '<'
+  }
+};
+
+export default ngModule => ngModule.component('ceventTypeView', ceventTypeViewComponent)

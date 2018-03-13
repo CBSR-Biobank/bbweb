@@ -1,5 +1,6 @@
-/**
- *
+/*
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018Canadian BioSample Repository (CBSR)
  */
 
 /* @ngInject */
@@ -7,20 +8,22 @@ function NameFilterFactory(SearchFilter) {
 
   /**
    * NameFilter's aid in using the search API provided by the Biobank REST API.
+   *
+   * @memberOf domain.filters
    */
-  function NameFilter() {
-    SearchFilter.call(this, NameFilter.name);
-  }
+  class NameFilter extends SearchFilter {
 
-  NameFilter.prototype = Object.create(SearchFilter.prototype);
-  NameFilter.prototype.constructor = NameFilter;
-
-  NameFilter.prototype.getValue = function () {
-    if (this.value !== '') {
-      return 'name:like:' + this.value;
+    constructor() {
+      super(NameFilter.name);
     }
+
+    getValue() {
+      if (this.value !== '') {
+        return 'name:like:' + this.value;
+      }
     return '';
-  };
+    }
+  }
 
   return NameFilter;
 }

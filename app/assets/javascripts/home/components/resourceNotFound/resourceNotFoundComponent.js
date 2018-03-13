@@ -1,21 +1,19 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 class ResourceNotFoundController {
-
-  constructor() {
-    'ngInject'
-    Object.assign(this, {})
-  }
-
 }
 
 /**
+ * An AngularJS component that displays an error message on the page.
  *
+ * @memberOf home.components
+ *
+ * @param {string} errMessage - the message to display on the page.
  */
-var COMPONENT = {
+const resourceNotFoundComponent = {
   template: require('./resourceNotFound.html'),
   controller: ResourceNotFoundController,
   controllerAs: 'vm',
@@ -24,4 +22,4 @@ var COMPONENT = {
   }
 };
 
-export default ngModule => ngModule.component('resourceNotFound', COMPONENT)
+export default ngModule => ngModule.component('resourceNotFound', resourceNotFoundComponent)

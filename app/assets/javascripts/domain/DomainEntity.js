@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -11,7 +11,7 @@ import tv4 from 'tv4'
  *
  */
 /* @ngInject */
-function DomainEntityFactory($log, UrlService) {
+function DomainEntityFactory($log, biobankApi) {
 
   /**
    * An abstract class for an entity in the domain.
@@ -70,7 +70,7 @@ function DomainEntityFactory($log, UrlService) {
      * @return {string} A URL to the server's REST API joined with slashes.
      */
     static url(...paths) {
-      return UrlService.url.apply(UrlService, paths);
+      return biobankApi.url(...paths);
     }
   }
 

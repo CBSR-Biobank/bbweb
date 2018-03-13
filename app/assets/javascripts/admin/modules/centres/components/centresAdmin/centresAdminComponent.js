@@ -1,15 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.centres.Centre Centre} administration.
+ *
+ * @namespace admin.centres.components.centresAdmin
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./centresAdmin.html'),
-  controller: CentresAdminController,
-  controllerAs: 'vm',
-  bindings: {
-  }
-};
 
 /*
  * Controller for this component.
@@ -30,4 +26,17 @@ function CentresAdminController(breadcrumbService) {
   }
 }
 
-export default ngModule => ngModule.component('centresAdmin', component)
+/**
+ * An AngularJS component for the {@link domain.centres.Centre Centre} administration main page.
+ *
+ * @memberOf admin.centres.components.centresAdmin
+ */
+const centresAdminComponent = {
+  template: require('./centresAdmin.html'),
+  controller: CentresAdminController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('centresAdmin', centresAdminComponent)

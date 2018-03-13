@@ -1,20 +1,12 @@
 /**
- * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
- */
-
-var component = {
-  template: require('./shipmentViewLost.html'),
-  controller: ShipmentViewLostController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment: '<'
-  }
-};
-
-/*
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
  *
+ * @namespace centres.components.shipmentViewLost
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
 /* @ngInject */
 function ShipmentViewLostController($state,
                                     gettextCatalog,
@@ -43,4 +35,20 @@ function ShipmentViewLostController($state,
   }
 }
 
-export default ngModule => ngModule.component('shipmentViewLost', component)
+/**
+ * An AngularJS component that displays information for a lost {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.shipmentViewLost
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display.
+ */
+const shipmentViewLostComponent = {
+  template: require('./shipmentViewLost.html'),
+  controller: ShipmentViewLostController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment: '<'
+  }
+};
+
+export default ngModule => ngModule.component('shipmentViewLost', shipmentViewLostComponent)

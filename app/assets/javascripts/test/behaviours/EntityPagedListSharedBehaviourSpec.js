@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global inject */
 
@@ -19,8 +19,8 @@ export default function sharedBehaviour(context) {
     it('has valid scope', function() {
       context.createController();
 
-      expect(this.controller.sortFieldData).toBeArrayOfSize(context.sortFieldIds.length);
-      expect(_.map(this.controller.sortFieldData, 'id')).toContainAll(context.sortFieldIds);
+      expect(this.controller.sortChoices).toBeArrayOfSize(context.sortFieldIds.length);
+      expect(_.map(this.controller.sortChoices, 'id')).toContainAll(context.sortFieldIds);
       expect(this.controller.selectedState).toBe('all');
       expect(this.controller.pagerOptions.limit).toBe(5);
       expect(this.controller.pagerOptions.sort).toBe(context.defaultSortFiled);
@@ -29,8 +29,8 @@ export default function sharedBehaviour(context) {
       expect(this.controller.sortFieldSelected).toBeFunction();
       expect(this.controller.filtersCleared).toBeFunction();
 
-      expect(this.controller.sortFieldData).not.toBeEmptyArray();
-      this.controller.sortFieldData.forEach((sortField) => {
+      expect(this.controller.sortChoices).not.toBeEmptyArray();
+      this.controller.sortChoices.forEach((sortField) => {
         expect(sortField.id).toBeString()
         expect(sortField.labelFunc).toBeFunction()
         expect(sortField.labelFunc()).toBeString()

@@ -1,37 +1,38 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
+import { LabelService } from '../../../base/services/LabelService';
 
 /**
- * An AngularJS service that converts a UserState to a i18n string that can
- * be displayed to the user.
+ * An AngularJS service that converts a {@link domain.users.userStates.UserState UserState} to a *translated
+ * string* that can be displayed to the user.
  *
- * @param {object} UserState - AngularJS constant that enumerates all the user states.
- *
- * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
- *
- * @return {Service} The AngularJS service.
+ * @memberOf users.services
  */
-/* @ngInject */
-function userStateLabelService(labelService,
-                               UserState,
-                               gettextCatalog) {
-  var labels = {};
+class userStateLabelService extends LabelService {
 
-  labels[UserState.REGISTERED] = function () { return gettextCatalog.getString('Registered'); };
-  labels[UserState.ACTIVE]     = function () { return gettextCatalog.getString('Active'); };
-  labels[UserState.LOCKED]     = function () { return gettextCatalog.getString('Locked'); };
+  /**
+   * @param {base.BbwebError} BbwebError - AngularJS factory for exceptions.
+   *
+   * @param {object} UserState - AngularJS constant that enumerates all the user states.
+   *
+   * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
+   */
+  constructor(BbwebError, UserState, gettextCatalog) {
+    'ngInject';
 
-  var service = {
-    stateToLabelFunc
-  };
-  return service;
+    super(BbwebError, [
+      { id: UserState.REGISTERED, label: () => gettextCatalog.getString('Registered') },
+      { id: UserState.ACTIVE,     label: () => gettextCatalog.getString('Active') },
+      { id: UserState.LOCKED,     label: () => gettextCatalog.getString('Locked') },
+    ]);
+    Object.assign(this, { UserState, gettextCatalog });
+  }
 
-  //-------
-
-  function stateToLabelFunc(state) {
-    return labelService.getLabel(labels, state);
+  stateToLabelFunc(state) {
+    return this.getLabel(state);
   }
 
 }

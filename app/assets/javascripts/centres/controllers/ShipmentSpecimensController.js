@@ -1,23 +1,35 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
- * Controller for components that display shipment specimens.
+ * Base controller for components that display shipment specimens.
  *
  * This controller is usually used as a base class.
  *
- * @param {domain.centres.Shipment} vm.shipment - the shipment to retrieve specimens for.
+ * @memberOf centres.controllers
  */
 class ShipmentSpecimensController {
 
+  /**
+   * @param {AngularJS_Service} $q
+   *
+   * @param {domain.centres.ShipmentSpecimen} ShipmentSpecimen - The AngularJS Factory.
+   */
   constructor($q, ShipmentSpecimen) {
+    /**
+     * The shipment to retrieve specimens for.
+     *
+     * @name centres.controllers.ShipmentSpecimensController#shipment
+     * @type {domain.centres.Shipment}
+     */
+
     Object.assign(this, { $q, ShipmentSpecimen })
   }
 
   /**
-   * Returns the specimens to associated with the shipment.
+   * Returns the specimens to associate with the shipment.
    *
    * Needs to return a promise.
    */

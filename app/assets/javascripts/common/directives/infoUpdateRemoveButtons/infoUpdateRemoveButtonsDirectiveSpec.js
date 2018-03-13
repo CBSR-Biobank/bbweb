@@ -1,8 +1,8 @@
-/**
+/*
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -14,9 +14,9 @@ describe('Directive: infoUpdateRemoveButtons', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (DirectiveTestSuiteMixin) {
-      _.extend(this, DirectiveTestSuiteMixin);
-      this.createController = (options) => {
-        options = options || {};
+      Object.assign(this, DirectiveTestSuiteMixin);
+
+      this.createController = (options = {}) => {
         DirectiveTestSuiteMixin.createController.call(
           this,
           `<info-update-remove-buttons

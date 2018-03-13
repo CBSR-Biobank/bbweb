@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -50,7 +50,7 @@ xdescribe('Controller: SpecimenGroupEditCtrl', function() {
 
         this.AnatomicalSourceType        = this.$injector.get('AnatomicalSourceType');
         this.PreservationType            = this.$injector.get('PreservationType');
-        this.PreservationTemperatureType = this.$injector.get('PreservationTemperatureType');
+        this.PreservationTemperature = this.$injector.get('PreservationTemperature');
         this.SpecimenType                = this.$injector.get('SpecimenType');
 
         TestUtils.addCustomMatchers();
@@ -102,11 +102,11 @@ xdescribe('Controller: SpecimenGroupEditCtrl', function() {
           $controller('SpecimenGroupEditCtrl as vm', {
             $scope:                      userContext.scope,
             $state:                      $state,
-            domainNotificationService:         domainNotificationService,
+            domainNotificationService:   domainNotificationService,
             notificationsService:        notificationsService,
             AnatomicalSourceType:        userContext.AnatomicalSourceType,
             PreservationType:            userContext.PreservationType,
-            PreservationTemperatureType: userContext.PreservationTemperatureType,
+            PreservationTemperature:     userContext.PreservationTemperature,
             SpecimenType:                userContext.SpecimenType,
             study:                       entities.study,
             specimenGroup:               entities.specimenGroup

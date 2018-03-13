@@ -1,18 +1,14 @@
 /**
+ * AngularJS Component for {@link domain.participants.Participant Participant} {@link domain.AnnotationType
+ * AnnotationType} administration.
  *
+ * @namespace admin.studies.components.participantAnnotationTypeView
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-var component = {
-  template: require('./participantAnnotationTypeView.html'),
-  controller: ParticipantAnnotationTypeViewController,
-  controllerAs: 'vm',
-  bindings: {
-    study:          '<',
-    annotationType: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -83,4 +79,24 @@ function ParticipantAnnotationTypeViewController($q,
 
 }
 
-export default ngModule => ngModule.component('participantAnnotationTypeView', component)
+/**
+ * An AngularJS component that allows the user to display an {@link domain.AnnotationType AnnotationType} that
+ * belongs to a {@link domain.studies.Study Study} for a {@link domain.participants.Participant Participant}.
+ *
+ * @memberOf admin.studies.components.participantAnnotationTypeView
+ *
+ * @param {domain.studies.Study} study - the *Study* the *Annotation Type* belongs to.
+ *
+ * @param {domain.AnnotationType} annotationType - the *Annotation Type* to display.
+ */
+const participantAnnotationTypeViewComponent = {
+  template: require('./participantAnnotationTypeView.html'),
+  controller: ParticipantAnnotationTypeViewController,
+  controllerAs: 'vm',
+  bindings: {
+    study:          '<',
+    annotationType: '<'
+  }
+};
+
+export default ngModule => ngModule.component('participantAnnotationTypeView', participantAnnotationTypeViewComponent)

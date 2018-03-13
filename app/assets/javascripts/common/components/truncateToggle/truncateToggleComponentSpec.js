@@ -2,14 +2,14 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
 import _ from 'lodash';
 import ngModule from '../../index'
 
-describe('Directive: truncateToggle', function() {
+describe('Component: truncateToggle', function() {
   var textEmptyWarning = 'text not entered yet.';
 
   beforeEach(() => {

@@ -18,7 +18,7 @@ http POST localhost:9000/studies/pannottype "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TO
 
 http POST localhost:9000/studies/pannottype "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN studyId=$STUDY_ID name=PAT5 description="Lorem ipsum dolor sit amet" valueType=Number maxValueCount:=0 options:='[]' required:=true
 
-http POST localhost:9000/studies/sgroups "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN studyId=$STUDY_ID name=SG5 description="Lorem ipsum dolor sit amet" units="mL" anatomicalSourceType=Blood preservationType="Frozen Specimen" preservationTemperatureType="-80 C" specimenType="Buffy coat"
+http POST localhost:9000/studies/sgroups "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN studyId=$STUDY_ID name=SG5 description="Lorem ipsum dolor sit amet" units="mL" anatomicalSourceType=Blood preservationType="Frozen Specimen" preservationTemperature="-80 C" specimenType="Buffy coat"
 
 http POST localhost:9000/studies/cetypes "Cookie:XSRF-TOKEN=$TOKEN" X-XSRF-TOKEN:$TOKEN studyId=$STUDY_ID name=CET3 description="Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam" recurring:=true specimenGroupData:='[{"specimenGroupId":"__ID_HERE__", "name":"__NAME_HERE__", "maxCount":1, "amount":1.0, "units":"__UNITS_HERE__"}]' annotationTypeData:='[]'
 

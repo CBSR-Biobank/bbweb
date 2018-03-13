@@ -1,7 +1,7 @@
 /**
  * Centres configuration module.
  *
- * @author Nelson Loyola <loyola@ualberta.ca * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @author Nelson Loyola <loyola@ualberta.ca * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 import DomainModule    from '../domain'
 import angular         from 'angular';

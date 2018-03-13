@@ -1,6 +1,12 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
  *
+ * @namespace admin.users.components.roleView
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
 import _       from 'lodash'
 import angular from 'angular'
 
@@ -284,13 +290,23 @@ class RoleViewController {
 
 }
 
-var component = {
+/**
+ * An AngularJS component that allows the user to view the configuration for a {@link domain.access.Role
+ * Role}.
+ *
+ * The user is also allowed to modify or delete this role.
+ *
+ * @memberOf admin.users.components.roleView
+ *
+ * @param {domain.access.Role} role - the role to view.
+ */
+const roleViewComponent = {
   template: require('./roleView.html'),
   controller: RoleViewController,
   controllerAs: 'vm',
   bindings: {
     role: '<'
   }
-}
+};
 
-export default ngModule => ngModule.component('roleView', component)
+export default ngModule => ngModule.component('roleView', roleViewComponent)

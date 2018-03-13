@@ -1,22 +1,17 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentViewPacked
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./shipmentViewPacked.html'),
-  controller: ShipmentViewPackedController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment: '<'
-  }
-};
 
 /* @ngInject */
 function ShipmentViewPackedController($q,
                                       $state,
                                       gettextCatalog,
-                                      SHIPMENT_SEND_PROGRESS_ITEMS,
+                                      shipmentSendTasksService,
                                       modalInput,
                                       notificationsService,
                                       timeService,
@@ -31,10 +26,10 @@ function ShipmentViewPackedController($q,
     vm.sendShipment = sendShipment;
     vm.addMoreItems = addMoreItems;
 
-    vm.progressInfo = {
-      items: SHIPMENT_SEND_PROGRESS_ITEMS,
-      current: 3
-    };
+    vm.progressInfo = shipmentSendTasksService.getTaskData().map((taskInfo) => {
+      taskInfo.status = true;
+      return taskInfo;
+    });
   }
 
   function sendShipment() {
@@ -70,4 +65,20 @@ function ShipmentViewPackedController($q,
   }
 }
 
-export default ngModule => ngModule.component('shipmentViewPacked', component)
+/**
+ * An AngularJS component that displays information for a packed {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.shipmentViewPacked
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display.
+ */
+const shipmentViewPackedComponent = {
+  template: require('./shipmentViewPacked.html'),
+  controller: ShipmentViewPackedController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment: '<'
+  }
+};
+
+export default ngModule => ngModule.component('shipmentViewPacked', shipmentViewPackedComponent)

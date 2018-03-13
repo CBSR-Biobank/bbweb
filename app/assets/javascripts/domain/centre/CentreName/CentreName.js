@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -101,8 +101,8 @@ function CentreNameFactory($q,
      * @param {Array<domain.EntityNameAndState>} omit - the list of names to filter out of the result returned
      *        from the server.
      *
-     * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
-     *          domain.centres.Centre}.
+     * @returns {Promise<common.controllers.PagedListController.PagedResult>} with items of type {@link
+     * domain.centres.Centre}.
      */
     static list(options, omit) {
       return EntityNameAndState.list(CentreName.url(), options, omit)

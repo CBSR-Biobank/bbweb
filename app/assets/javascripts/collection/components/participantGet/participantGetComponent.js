@@ -1,16 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @namespace collection.components.participantGet
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./participantGet.html'),
-  controller: ParticipantGetController,
-  controllerAs: 'vm',
-  bindings: {
-    study: '<'
-  }
-};
 
 const patientDoesNotExistRe = /EntityCriteriaNotFound: participant with unique ID does not exist/,
       studyMismatchRe = /EntityCriteriaError: participant not in study/i;
@@ -93,4 +88,21 @@ function ParticipantGetController($q,
   }
 }
 
-export default ngModule => ngModule.component('participantGet', component)
+/**
+ * An AngularJS component that allows requests that the user to enter a *Unique ID* for a {@link
+ * domain.participants.Participant Participant}.
+ *
+ * @memberOf collection.components.participantGet
+ *
+ * @param {domain.studies.Study} study - the study the *Participant* belongs to.
+ */
+const participantGetComponent = {
+  template: require('./participantGet.html'),
+  controller: ParticipantGetController,
+  controllerAs: 'vm',
+  bindings: {
+    study: '<'
+  }
+};
+
+export default ngModule => ngModule.component('participantGet', participantGetComponent)

@@ -1,27 +1,16 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.selectCentre
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
 
-var component = {
-  template: require('./selectCentre.html'),
-  controller: SelectCentreController,
-  controllerAs: 'vm',
-  bindings: {
-    panelHeader:      '@',
-    getCentres:       '&',
-    onCentreSelected: '&',
-    limit:            '<',
-    messageNoResults: '@',
-    icon:             '@'
-
-  }
-};
-
-/**
- * Allows a user to select a centre based on criteria.
+/*
+ * Controller for this component
  */
 function SelectCentreController() {
   var vm = this;
@@ -101,4 +90,63 @@ function SelectCentreController() {
 
 }
 
-export default ngModule => ngModule.component('selectCentre', component)
+/**
+ * An AngularJS component that allows a user to select a {@link domain.centres.Centre Centre} from the list
+ * provided by function `getCentres()`.
+ *
+ * A Bootstrap *Panel* is used to display the centres.
+ *
+ * @memberOf centres.components.selectCentre
+ *
+ * @param {string} panelHeader - the string to display in the panel's header.
+ *
+ * @param {centres.components.selectCentre.GetCentres} getCentres - the function to use to retrieve centres.
+ *
+ * @param {centres.components.selectCentre.CentreSelected} onCentreSelected - the function called by this
+ * component when the user has selected a centre.
+ *
+ * @param {int} limit - the default value to use in parameter `options.limit` when invoking `getCentres`.
+ *
+ * @param {string} messageNoResults - the message to display if `getCentres` returns an empty result.
+ *
+ * @param {string} icon - the name of the Bootstrap Glyphicon to display for the centres.
+ */
+const selectCentreComponent = {
+  template: require('./selectCentre.html'),
+  controller: SelectCentreController,
+  controllerAs: 'vm',
+  bindings: {
+    panelHeader:      '@',
+    getCentres:       '&',
+    onCentreSelected: '&',
+    limit:            '<',
+    messageNoResults: '@',
+    icon:             '@'
+  }
+};
+
+/**
+ * The callback function used by {@link centres.components.selectCentre.selectCentreComponent
+ * selectCentreComponent} to retrieve {@link domain.centres.Centre Centres}.
+ *
+ * @callback centres.components.selectCentre.GetCentres
+ *
+ * @param {common.controllers.PagedListController.PagerOptions} options - the pager options used to retrieve
+ * centres.
+ *
+ * @returns {Promise<common.controllers.PagedListController.PagedResult<domain.centres.Centre>>} A promise
+ * with items of type {@link domain.centres.Centre Centre}.
+ */
+
+/**
+ * The callback function used by {@link centres.components.selectCentre.selectCentreComponent
+ * selectCentreComponent} when the user selects a {@link domain.centres.Centre Centre}.
+ *
+ * @callback centres.components.selectCentre.CentreSelected
+ *
+ * @param {domain.centres.Centre} centre - the centre selected by the user.
+ *
+ * @returns {undefined}
+ */
+
+export default ngModule => ngModule.component('selectCentre', selectCentreComponent)

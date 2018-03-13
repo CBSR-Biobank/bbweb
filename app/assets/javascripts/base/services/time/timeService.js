@@ -1,33 +1,31 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import moment from 'moment'
 
 /**
- * @class timeService
- * @memberof ng.base.services
+ * An AngularJS service that converts dates to strings.
  *
- * @description An AnuglarJS service that converts dates to strings. Dates are converted to local time and UTC
- * strings.
+ * Dates are converted to local time and UTC strings.
  *
- * @param {object} AppConfig - This application's configuration object.
+ * @memberof base.services
  *
+ * @param {AngularJS_Provider} AppConfig - This application's configuration object.
  */
-/* @ngInject */
-function timeService(AppConfig) {
-  var service = {
-    dateAndTimeToUtcString: dateAndTimeToUtcString,
-    dateToDisplayString:    dateToDisplayString
-  };
-  return service;
+class TimeService {
 
-  //-------
+  constructor(AppConfig) {
+    'ngInject';
+    Object.assign(this, { AppConfig });
+  }
 
-  /*
+  /**
    * Converts date to local time, with seconds and milliseconds set to zero, and returns it as
    * a moment.
+   *
+   * @private
    *
    * @param {Date} date - the date to convert to local time.
    *
@@ -35,7 +33,7 @@ function timeService(AppConfig) {
    *
    * @throws An error if date is undefined.
    */
-  function dateToLocal(date) {
+  dateToLocal(date) {
     var datetime;
 
     if (!date) {
@@ -49,9 +47,11 @@ function timeService(AppConfig) {
     return datetime.local();
   }
 
-  /*
+  /**
    * Converts the date part of <code>date</code> and the time part in <code>time</code> to
    * local time in a string.
+   *
+   * @private
    *
    * @param {Date} date - the date part comes from this parameter. If <code>time</code> is used, the time
    * values contained in this parameter are ignored.
@@ -62,9 +62,9 @@ function timeService(AppConfig) {
    *
    * @return {Moment} The combined date and time as local time.
    *
-   * @throws An error if date or time are undefined.
+   * @throws {Error} An error if date or time are undefined.
    */
-  function dateAndTimeToLocal(date, time) {
+  dateAndTimeToLocal(date, time) {
     var datetime, momentTime;
 
     if (!date || !time) {
@@ -84,50 +84,46 @@ function timeService(AppConfig) {
   }
 
   /**
-   * @function common.timeService.dateAndTimeToUtcString
+   * Converts the date part of <code>date</code> and the time part in `time` to a UTC time in a
+   * string.
    *
-   * @description Converts the date part of <code>date</code> and the time part in <code>time</code> to
-   * a UTC time in a string.
+   * @param {Date} date - the date part comes from this parameter. If `time` is used, the time values
+   * contained in this parameter are ignored.
    *
-   * @param {Date} date - the date part comes from this parameter. If <code>time</code> is used, the time
-   * values contained in this parameter are ignored.
+   * @param {Date} [time] - the time part comes from this parameter. The date values contained in this
+   * paramerter are ignored. If this parameter is omitted, then the time values in the `date` parameter are
+   * used.
    *
-   * @param {date} [time] - the time part comes from this parameter. The date values contained in this
-   * paramerter are ignored. If this parameter is omitted, then the time values in the <code>date</code>
-   * parameter are used.
+   * @return {string} a string representation of the date and time, the date part comes from `date` and the
+   * time part comes from `time`.
    *
-   * @return {String} a string representation of the date and time, the date part comes from 'date' and the
-   * time part comes from 'time'.
-   *
-   * @throws An error if date and time are undefined.
+   * @throws {Error} An error if date and time are undefined.
    */
-  function dateAndTimeToUtcString(date, time) {
+  dateAndTimeToUtcString(date, time) {
     if (!date && !time) {
       throw new Error('date or time is invalid');
     }
     if (!time) {
-      return dateToLocal(date).utc().format();
+      return this.dateToLocal(date).utc().format();
     }
-    return dateAndTimeToLocal(date, time).utc().format();
+    return this.dateAndTimeToLocal(date, time).utc().format();
   }
 
   /**
-   * @function common.timeService.dateToDisplayString
-   *
-   * @description Converts the date to a string that can be displayed to the user.
+   * Converts the date to a string that can be displayed to the user.
    *
    * @param {Date} [date] - the date to be converted to a string. If it is undefined, then a blank string is
    * returned.
    *
    * @return {string} The date as a string, or if date is undefined a blank string.
    */
-  function dateToDisplayString(date) {
+  dateToDisplayString(date) {
     if (!date) {
       return '';
     }
-    return dateToLocal(date).format(AppConfig.dateTimeFormat);
+    return this.dateToLocal(date).format(this.AppConfig.dateTimeFormat);
   }
 
 }
 
-export default ngModule => ngModule.service('timeService', timeService)
+export default ngModule => ngModule.service('timeService', TimeService)

@@ -1,3 +1,5 @@
-<ol class="progtrckr" data-progtrckr-steps="{{vm.numSteps}}">
-    <li ng-class="step.class" ng-repeat="step in vm.steps">{{$index + 1}}. {{step.name}}</li>
+<ol class="progtrckr" data-progtrckr-steps="{{vm.taskData.length}}">
+  <li ng-class="task.class" ng-repeat="task in vm.tasks">
+    {{$index + 1}}. {{vm.labelService.getLabel(task.id)()}}
+  </li>
 </ol>

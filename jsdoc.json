@@ -1,7 +1,7 @@
 {
   "tags": {
     "allowUnknownTags": true,
-    "dictionaries": ["jsdoc","closure"]
+    "dictionaries": ["jsdoc"]
   },
   "source": {
     "include": [ "app/assets/javascripts" ],
@@ -12,11 +12,13 @@
     "plugins/markdown"
   ],
   "templates": {
+    "baseline": "./baseline-config.json",
     "cleverLinks": false,
-    "monospaceLinks": false
+    "monospaceLinks": false,
+    "useLongnameInNav": false,
+    "showInheritedInNav": true
   },
   "opts": {
-    //"template": "templates/default",
     "template": "node_modules/jsdoc-baseline",
     "encoding": "utf8",
     "destination": "./documentation/js/",

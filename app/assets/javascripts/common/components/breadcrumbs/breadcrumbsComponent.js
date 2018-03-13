@@ -1,6 +1,10 @@
 /**
+ * AngularJS component available to the rest of the application.
+ *
+ * @namespace common.components.breadcrumbs
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -10,15 +14,13 @@ class BreadcrumbsController {
 }
 
 /**
- * @class breadcrumbs
- *
  * An AngularJS component that displays breadcrumbs at the top of a page.
  *
- * @memberOf ng.common.components
+ * @memberOf common.components.breadcrumbs
  *
- * @param {ng.common.services.BreadcrumbService.breadcrumb} crumbs - The breadcrumbs to display.
+ * @param {Array<common.services.BreadcrumbService.breadcrumb>} crumbs - The breadcrumbs to display.
  */
-const breadcrumbs = {
+const breadcrumbsComponent = {
   template: require('./breadcrumbs.html'),
   controller: BreadcrumbsController,
   controllerAs: 'vm',
@@ -27,4 +29,4 @@ const breadcrumbs = {
   }
 };
 
-export default ngModule => ngModule.component('breadcrumbs', breadcrumbs)
+export default ngModule => ngModule.component('breadcrumbs', breadcrumbsComponent)

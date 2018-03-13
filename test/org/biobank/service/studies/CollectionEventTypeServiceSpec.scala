@@ -100,7 +100,7 @@ class CollectionEventTypeServiceSpec
             units                       = specimenDesc.units,
             anatomicalSourceType        = specimenDesc.anatomicalSourceType,
             preservationType            = specimenDesc.preservationType,
-            preservationTemperatureType = specimenDesc.preservationTemperatureType,
+            preservationTemperature = specimenDesc.preservationTemperature,
             specimenType                = specimenDesc.specimenType,
             maxCount                    = specimenDesc.maxCount,
             amount                      = specimenDesc.amount

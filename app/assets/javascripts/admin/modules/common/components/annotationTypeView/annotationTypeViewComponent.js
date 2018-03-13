@@ -1,43 +1,13 @@
 /**
+ * AngularJS Components used in Administration modules
+ *
+ * @namespace admin.common.components.annotationTypeView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-/**
- * @class ng.admin.common.components.annotationTypeView
- *
- * An AngularJS component that allows the user to view a {@link domain.AnnotationType}.
- *
- * @memberOf ng.admin.common.components
- *
- * @param {domain.AnnotationType} annotationType the Annotation type to display.
- *
- * @param {boolean} readOnly When *FALSE*, user is allowed to make changes to the annotation type.
- *
- * @param {ng.admin.common.components.annotationTypeView.onUpdate} [onUpdate] Used only if `readOnly` is
- * *False*. This function called after the user made a change to the annotation type.
- */
-var annotationTypeView = {
-  template: require('./annotationTypeView.html'),
-  controller: AnnotationTypeViewController,
-  controllerAs: 'vm',
-  bindings: {
-    annotationType: '<',
-    readOnly:       '<',
-    onUpdate:       '&'
-  }
-};
-
-/**
- * The callback function called by component {@link ng.admin.common.components.annotationTypeView
- * annotationTypeView} after the user has made changes to the annotation type.
- *
- * @callback ng.admin.common.components.annotationTypeView.onUpdate
- * @param {string} attribute - the attribute that was modified
- * @param {domain.AnnotationType} annotationType - the updated annotation type.
- */
 
 /* @ngInject */
 function AnnotationTypeViewController($state,
@@ -55,11 +25,11 @@ function AnnotationTypeViewController($state,
       annotationValueTypeLabelService.valueTypeToLabelFunc(vm.annotationType.valueType,
                                                            vm.annotationType.isSingleSelect());
 
-    vm.editName                     = editName;
-    vm.editRequired                 = editRequired;
-    vm.editDescription              = editDescription;
-    vm.editSelectionOptions         = editSelectionOptions;
-    vm.back                         = back;
+    vm.editName             = editName;
+    vm.editRequired         = editRequired;
+    vm.editDescription      = editDescription;
+    vm.editSelectionOptions = editSelectionOptions;
+    vm.back                 = back;
   }
 
   function editName() {
@@ -107,4 +77,37 @@ function AnnotationTypeViewController($state,
 
 }
 
-export default ngModule => ngModule.component('annotationTypeView', annotationTypeView)
+/**
+ * An AngularJS component that allows the user to view a {@link domain.AnnotationType}.
+ *
+ * @memberOf admin.common.components.annotationTypeView
+ *
+ * @param {domain.AnnotationType} annotationType the Annotation type to display.
+ *
+ * @param {boolean} readOnly When *FALSE*, user is allowed to make changes to the annotation type.
+ *
+ * @param {admin.common.components.annotationTypeView.onUpdate} [onUpdate] Used only if `readOnly` is
+ * *False*. This function called after the user made a change to the annotation type.
+ */
+const annotationTypeViewComponent = {
+  template: require('./annotationTypeView.html'),
+  controller: AnnotationTypeViewController,
+  controllerAs: 'vm',
+  bindings: {
+    annotationType: '<',
+    readOnly:       '<',
+    onUpdate:       '&'
+  }
+};
+
+/**
+ * The callback function called by {@link
+ * ng.admin.common.components.annotationTypeView.annotationTypeViewComponent annotationTypeViewComponent}
+ * after the user has made changes to the annotation type.
+ *
+ * @callback admin.common.components.annotationTypeView.onUpdate
+ * @param {string} attribute - the attribute that was modified
+ * @param {domain.AnnotationType} annotationType - the updated annotation type.
+ */
+
+export default ngModule => ngModule.component('annotationTypeView', annotationTypeViewComponent)

@@ -1,15 +1,7 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./biobankHeader.html'),
-  controller: BiobankHeaderController,
-  controllerAs: 'vm',
-  bindings: {
-  }
-};
 
 /*
  * Controller for this component.
@@ -60,4 +52,18 @@ function BiobankHeaderController($scope,
   }
 }
 
-export default ngModule => ngModule.component('biobankHeader', component)
+
+/**
+ * An AngularJS component for the page header.
+ *
+ * @memberOf home.components
+ */
+const biobankHeaderComponent = {
+  template: require('./biobankHeader.html'),
+  controller: BiobankHeaderController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('biobankHeader', biobankHeaderComponent)

@@ -1,6 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.participants.Participant Participant} {@link domain.AnnotationType
+ * AnnotationType} administration.
+ *
+ * @namespace admin.studies.components.participantAnnotationTypeAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import { AnnotationTypeAddController } from '../../../common/controllers/AnnotationTypeAddController'
@@ -31,7 +36,15 @@ class ParticipantAnnotationTypeAddController extends AnnotationTypeAddController
 
 }
 
-const component = {
+/**
+ * An AngularJS component that allows the user to add a {@link domain.participants.Participant Participant}
+ * {@link domain.AnnotationType AnnotationType} to a {@link domain.studies.Study Study}.
+ *
+ * @memberOf admin.studies.components.participantAnnotationTypeAdd
+ *
+ * @param {domain.studies.Study} study - the study the *Annotation Type* should be added to to.
+ */
+const participantAnnotationTypeAddComponent = {
   template: require('./participantAnnotationTypeAdd.html'),
   controller: ParticipantAnnotationTypeAddController,
   controllerAs: 'vm',
@@ -40,4 +53,5 @@ const component = {
   }
 };
 
-export default ngModule => ngModule.component('participantAnnotationTypeAdd', component)
+export default ngModule => ngModule.component('participantAnnotationTypeAdd',
+                                             participantAnnotationTypeAddComponent)

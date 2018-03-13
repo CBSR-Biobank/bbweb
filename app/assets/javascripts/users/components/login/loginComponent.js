@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
@@ -53,7 +53,7 @@ function LoginController($state,
   }
 
   function login(credentials) {
-    userService.login(credentials).then(goToHomeState).catch(loginFailure);
+    userService.login(credentials.email, credentials.password).then(goToHomeState).catch(loginFailure);
   }
 
   function loginFailure(error) {

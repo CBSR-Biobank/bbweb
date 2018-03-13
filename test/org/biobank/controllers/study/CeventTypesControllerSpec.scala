@@ -1044,7 +1044,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
           'units                       (spec.units),
           'anatomicalSourceType        (spec.anatomicalSourceType),
           'preservationType            (spec.preservationType),
-          'preservationTemperatureType (spec.preservationTemperatureType),
+          'preservationTemperature (spec.preservationTemperature),
           'specimenType                (spec.specimenType)
         )
 
@@ -1133,7 +1133,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
           'units                       (updatedSpecimenDescription.units),
           'anatomicalSourceType        (updatedSpecimenDescription.anatomicalSourceType),
           'preservationType            (updatedSpecimenDescription.preservationType),
-          'preservationTemperatureType (updatedSpecimenDescription.preservationTemperatureType),
+          'preservationTemperature (updatedSpecimenDescription.preservationTemperature),
           'specimenType                (updatedSpecimenDescription.specimenType)
         )
         checkTimeStamps(repoCet, cet.timeAdded, OffsetDateTime.now)

@@ -1,21 +1,11 @@
 /**
- * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
- */
-
-/**
- * Displays the study name and description and allows the user to change the state of the study.
+ * AngularJS Component for {@link domain.studies.Study Study} administration.
  *
- * Emits event 'study-name-changed' when the user updates the name on the study.
+ * @namespace admin.studies.components.studySummary
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-var component = {
-  template: require('./studySummary.html'),
-  controller: StudySummaryController,
-  controllerAs: 'vm',
-  bindings: {
-    study: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -125,4 +115,23 @@ function StudySummaryController($scope,
   }
 }
 
-export default ngModule => ngModule.component('studySummary', component)
+/**
+ * An AngularJS component that displays a {@link domain.studies.Study Study} name and description and allows
+ * the user to change the state of the study.
+ *
+ * Emits event `study-name-changed` when the user updates the name on the study.
+ *
+ * @memberOf admin.studies.components.studySummary
+ *
+ * @param {domain.studies.Study} study - the *Study* to view information for.
+ */
+const studySummaryComponent = {
+  template: require('./studySummary.html'),
+  controller: StudySummaryController,
+  controllerAs: 'vm',
+  bindings: {
+    study: '<'
+  }
+};
+
+export default ngModule => ngModule.component('studySummary', studySummaryComponent)

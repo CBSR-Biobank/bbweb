@@ -1,22 +1,33 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
 
 /* @ngInject */
 function localTimeFilterFactory(timeService) {
-  return localTimeFilter;
 
   /**
-   * @class localTimeFilter
-   * @memberOf ng.common.filters
+   * An AngualrJS Filter.
    *
-   * @description An Angular filter that displays a <code>Date</code> object as a local time.
+   * @memberOf common.filters
    */
-  function localTimeFilter(time) {
-    return timeService.dateToDisplayString(time);
+  class LocalTimeFilter {
+
+    /**
+     * Displays a date object as a local time.
+     *
+     * @param {Date} time - the date and /or time to convert.
+     *
+     * @return {string}
+     */
+    static filter(time) {
+      return timeService.dateToDisplayString(time);
+    }
+
   }
 
+  return LocalTimeFilter.filter;
 }
 
 export default ngModule => ngModule.filter('localTime', localTimeFilterFactory)

@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -12,7 +12,7 @@ import ngModule from '../../index'
 /**
  * TODO: not sure how to test open / closed state of the panel since it is a ui-bootstrap panel.
  */
-describe('Directive: panelButtons', function() {
+describe('Component: panelButtons', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -23,11 +23,11 @@ describe('Directive: panelButtons', function() {
 
       this.element = angular.element();
 
-      this.createController = (options) => {
-        options = options || {};
+      this.createController = (options = {}) => {
         DirectiveTestSuiteMixin.createController.call(
           this,
-          `<panel-buttons on-add="vm.add()"
+          `<panel-buttons
+              on-add="vm.add()"
               add-button-title="add location"
               add-button-enabled="vm.addEnabled"
               panel-open="model.panelOpen">

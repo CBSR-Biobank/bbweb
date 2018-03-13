@@ -1,13 +1,18 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 
 function BbwebErrorFactory() {
 
   /**
-   * Description
+   * @class
+   * Exception used by the Biobank {@link AngularJS} layer when an programming error is encountered.
+   *
+   * @memberOf base
+   *
+   * @param {string} message - the error message to associate with this exception.
    */
   function BbwebError(message) {
     this.message = message;

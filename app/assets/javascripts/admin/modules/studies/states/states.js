@@ -1,14 +1,23 @@
 /**
- * Configure routes of studies module.
+ * UI Router states for {@link domain.studies.Study Study} administration.
+ *
+ * @namespace admin.studies.states
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
 
+/**
+ * UI Router states used for {@link domain.studies.Study Study} Administration.
+ *
+ * @function admin.studies.states.adminStudiesUiRouterConfig
+ *
+ * @param {AngularJS_Service} $stateProvider
+ */
 /* @ngInject */
-function config($stateProvider) {
+function adminStudiesUiRouterConfig($stateProvider) {
   $stateProvider
     .state('home.admin.studies', {
       url: '/studies',
@@ -300,4 +309,4 @@ function config($stateProvider) {
 
 }
 
-export default ngModule => ngModule.config(config)
+export default ngModule => ngModule.config(adminStudiesUiRouterConfig)

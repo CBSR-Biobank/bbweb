@@ -67,7 +67,7 @@ object EventUtils {
       _.units                       := specimenDesc.units,
       _.anatomicalSourceType        := specimenDesc.anatomicalSourceType.toString,
       _.preservationType            := specimenDesc.preservationType.toString,
-      _.preservationTemperatureType := specimenDesc.preservationTemperatureType.toString,
+      _.preservationTemperature := specimenDesc.preservationTemperature.toString,
       _.specimenType                := specimenDesc.specimenType.toString,
       _.maxCount                    := specimenDesc.maxCount,
       _.amount                      := specimenDesc.amount.doubleValue
@@ -77,17 +77,17 @@ object EventUtils {
   def specimenDescriptionFromEvent(event: CollectionEventTypeEvent.SpecimenDescription)
       : CollectionSpecimenDescription = {
     CollectionSpecimenDescription(
-      id                          = SpecimenDescriptionId(event.getId),
-      slug                        = Slug(event.getName),
-      name                        = event.getName,
-      description                 = event.description,
-      units                       = event.getUnits,
-      anatomicalSourceType        = AnatomicalSourceType.withName(event.getAnatomicalSourceType),
-      preservationType            = PreservationType.withName(event.getPreservationType),
-      preservationTemperatureType = PreservationTemperatureType.withName(event.getPreservationTemperatureType),
-      specimenType                = SpecimenType.withName(event.getSpecimenType),
-      maxCount                    = event.getMaxCount,
-      amount                      = event.getAmount
+      id                      = SpecimenDescriptionId(event.getId),
+      slug                    = Slug(event.getName),
+      name                    = event.getName,
+      description             = event.description,
+      units                   = event.getUnits,
+      anatomicalSourceType    = AnatomicalSourceType.withName(event.getAnatomicalSourceType),
+      preservationType        = PreservationType.withName(event.getPreservationType),
+      preservationTemperature = PreservationTemperature.withName(event.getPreservationTemperature),
+      specimenType            = SpecimenType.withName(event.getSpecimenType),
+      maxCount                = event.getMaxCount,
+      amount                  = event.getAmount
     )
   }
 

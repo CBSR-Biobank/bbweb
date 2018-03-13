@@ -1,8 +1,19 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-var component = {
+/*
+ * Controller for this component.
+ */
+function BiobankFooterCompnent() {
+}
+
+/**
+ * An AngularJS component for the page footer.
+ *
+ * @memberOf home.components
+ */
+const biboankFooterComponent = {
   template: '',
   controller: BiobankFooterCompnent,
   controllerAs: 'vm',
@@ -10,11 +21,4 @@ var component = {
   }
 };
 
-/*
- * Controller for this component.
- */
-function BiobankFooterCompnent() {
-
-}
-
-export default ngModule => ngModule.component('biobankFooter', component)
+export default ngModule => ngModule.component('biobankFooter', biboankFooterComponent)

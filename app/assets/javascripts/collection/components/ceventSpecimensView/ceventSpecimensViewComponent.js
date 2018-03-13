@@ -1,19 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.participants.CollectionEvent CollectionEvents}.
+ *
+ * @namespace collection.components.ceventSpecimensView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./ceventSpecimensView.html'),
-  controller: CeventSpecimensViewController,
-  controllerAs: 'vm',
-  bindings: {
-    study:               '<',
-    participant:         '<',
-    collectionEventType: '<',
-    collectionEvent:     '<'
-  }
-};
 
 /* @ngInject */
 function CeventSpecimensViewController($q,
@@ -53,21 +45,19 @@ function CeventSpecimensViewController($q,
     }
 
     defer.promise
-      .then(function (centreLocations) {
+      .then(centreLocations => {
         vm.centreLocations = centreLocations;
         return specimenAddModal.open(vm.centreLocations,
                                      vm.collectionEvent.collectionEventType.specimenDescriptions,
                                      new Date(vm.collectionEvent.timeCompleted)).result;
       })
-      .then(function (specimens) {
-        return Specimen.add(vm.collectionEvent.id, specimens)
-          .then(function () {
-            notificationsService.success(gettextCatalog.getString('Specimen added'));
-            reloadTableData();
-          })
-          .catch(function (err) {
-            notificationsService.error(JSON.stringify(err));
-          });
+      .then(specimens => Specimen.add(vm.collectionEvent.id, specimens))
+      .catch(function (err) {
+        notificationsService.error(JSON.stringify(err));
+      })
+      .then(() => {
+        notificationsService.success(gettextCatalog.getString('Specimen added'));
+        reloadTableData();
       });
   }
 
@@ -128,4 +118,32 @@ function CeventSpecimensViewController($q,
 
 }
 
-export default ngModule => ngModule.component('ceventSpecimensView', component)
+/**
+ * An AngularJS component that displays the {@link domain.participants.Specimen Specimens} that were collected
+ * in a {@link domain.participants.CollectionEvent CollectionEvent}.
+ *
+ * @memberOf collection.components.ceventSpecimensView
+ *
+ * @param {domain.studies.Study} study - The study the *Participant* belongs to.
+ *
+ * @param {domain.participants.Participant} participant - The participant the *Collection Event* belongs to.
+ *
+ * @param {domain.studies.CollectionEventType} collectionEventType - the *Collection Event Type* for this
+ * *Collection Event*. Must for the study given in `study`.
+ *
+ * @param {domain.participants.CollectionEvent} collectionEvenType - the *Collection Event* to display the
+ * specimens for. Must be for the participant given in `participant`.
+ */
+const ceventSpecimensViewComponent = {
+  template: require('./ceventSpecimensView.html'),
+  controller: CeventSpecimensViewController,
+  controllerAs: 'vm',
+  bindings: {
+    study:               '<',
+    participant:         '<',
+    collectionEventType: '<',
+    collectionEvent:     '<'
+  }
+};
+
+export default ngModule => ngModule.component('ceventSpecimensView', ceventSpecimensViewComponent)

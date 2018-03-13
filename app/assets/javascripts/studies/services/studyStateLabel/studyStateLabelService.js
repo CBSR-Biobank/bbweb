@@ -1,35 +1,47 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
+import { LabelService } from '../../../base/services/LabelService';
 
 /**
  * An AngularJS service that converts a StudyState to a i18n string that can
  * be displayed to the study.
  *
- * @param {object} StudyState - AngularJS constant that enumerates all the study states.
- *
- * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
- *
- * @return {Service} The AngularJS service.
+ * @memberof studies.service
  */
-/* @ngInject */
-function StudyStateLabelService(labelService, StudyState, gettextCatalog) {
-  var labels = {};
+class StudyStateLabelService extends LabelService {
 
-  labels[StudyState.DISABLED] = () => gettextCatalog.getString('Disabled');
-  labels[StudyState.ENABLED]  = () => gettextCatalog.getString('Enabled');
-  labels[StudyState.RETIRED]  = () => gettextCatalog.getString('Retired');
+  /**
+   * @param {base.BbwebError} BbwebError - AngularJS factory for exceptions.
+   *
+   * @param {object} StudyState - AngularJS constant that enumerates all the study states.
+   *
+   * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
+   */
+  constructor(BbwebError, StudyState, gettextCatalog) {
+    'ngInject';
 
-  var service = {
-    stateToLabelFunc
-  };
-  return service;
+    super(BbwebError,
+          [
+            { id: StudyState.DISABLED, label: () => gettextCatalog.getString('Disabled') },
+            { id: StudyState.ENABLED,  label: () => gettextCatalog.getString('Enabled') },
+            { id: StudyState.RETIRED,  label: () => gettextCatalog.getString('Retired') },
+          ]);
+    Object.assign(this, { StudyState, gettextCatalog });
+  }
 
-  //-------
-
-  function stateToLabelFunc(state) {
-    return labelService.getLabel(labels, state);
+  /**
+   * Returns the function that should be called to display the label for a {@link domain.studies.StudyState
+   * StudyState} state.
+   *
+   * @param {domain.studies.StudyState} state - the state to get a function for.
+   *
+   * @return {function} a function that returns a label that can be displayed to the user.
+   */
+  stateToLabelFunc(state) {
+    return this.getLabel(state);
   }
 
 }

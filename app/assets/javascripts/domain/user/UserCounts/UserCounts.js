@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -11,6 +11,12 @@ import _ from 'lodash'
 /* @ngInject */
 function UserCountsFactory(biobankApi) {
 
+
+  /**
+   * The counts of users indexed by state.
+   *
+   * @memberOf domain.users
+   */
   function UserCounts(options = {}) {
     var defaults = {
       total:      0,

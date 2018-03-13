@@ -23,24 +23,22 @@ describe('shipmentSpecimensAddComponent', function() {
                               'modalService',
                               'Factory');
 
-      this.createController = (shipment, readOnly = false) => {
+      this.createController = shipment => {
         ShippingComponentTestSuiteMixin.createController.call(
           this,
-          '<shipment-specimens-add shipment="vm.shipment" read-only="vm.readOnly"></shipment-specimens-add>',
-          { shipment, readOnly },
+          '<shipment-specimens-add shipment="vm.shipment"></shipment-specimens-add>',
+          { shipment },
           'shipmentSpecimensAdd');
       };
     });
   });
 
   it('should have valid scope', function() {
-    var shipment = this.createShipment(),
-        readOnly = true;
+    var shipment = this.createShipment();
 
-    this.createController(shipment, readOnly);
+    this.createController(shipment);
 
     expect(this.controller.shipment).toBe(shipment);
-    expect(this.controller.readOnly).toBe(readOnly);
     expect(this.controller.inventoryIds).toBeEmptyString();
     expect(this.controller.refreshSpecimensTable).toBe(0);
     expect(this.controller.addSpecimens).toBeFunction();

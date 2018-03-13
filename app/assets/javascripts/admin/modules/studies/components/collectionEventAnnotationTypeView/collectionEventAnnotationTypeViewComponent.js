@@ -1,20 +1,13 @@
 /**
+ * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
+ *
+ * @namespace admin.studies.components.collectionEventAnnotationTypeView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-var component = {
-  template: require('./collectionEventAnnotationTypeView.html'),
-  controller: CollectionEventAnnotationTypeViewController,
-  controllerAs: 'vm',
-  bindings: {
-    study:               '<',
-    collectionEventType: '<',
-    annotationType:      '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -95,4 +88,29 @@ function CollectionEventAnnotationTypeViewController($q,
 
 }
 
-export default ngModule => ngModule.component('collectionEventAnnotationTypeView', component)
+/**
+ * An AngularJS component that allows the user to display an {@link domain.AnnotationType AnnotationType} that
+ * belongs to a {@link domain.studies.CollectionEventType CollectionEventType}.
+ *
+ * @memberOf admin.studies.components.collectionEventAnnotationTypeView
+ *
+ * @param {domain.studies.Study} study - the study the collection event type belongs to.
+ *
+ * @param {domain.studies.CollectionEventType} collectionEventType - the collection event type the
+ * annotation type belongs to.
+ *
+ * @param {domain.AnnotationType} annotationType - the annotation type to display.
+ */
+const collectionEventAnnotationTypeViewComponent = {
+  template: require('./collectionEventAnnotationTypeView.html'),
+  controller: CollectionEventAnnotationTypeViewController,
+  controllerAs: 'vm',
+  bindings: {
+    study:               '<',
+    collectionEventType: '<',
+    annotationType:      '<'
+  }
+};
+
+export default ngModule => ngModule.component('collectionEventAnnotationTypeView',
+                                             collectionEventAnnotationTypeViewComponent)

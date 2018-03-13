@@ -1,23 +1,18 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentViewCompleted
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./shipmentViewCompleted.html'),
-  controller: ShipmentViewCompletedController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment: '<'
-  }
-};
 
 /* @ngInject */
 function ShipmentViewCompletedController($state,
                                          gettextCatalog,
                                          notificationsService,
                                          modalService,
-                                         SHIPMENT_RECEIVE_PROGRESS_ITEMS) {
+                                         shipmentReceiveTasksService) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -26,10 +21,10 @@ function ShipmentViewCompletedController($state,
   function onInit() {
     vm.returnToUnpackedState = returnToUnpackedState;
 
-    vm.progressInfo = {
-      items: SHIPMENT_RECEIVE_PROGRESS_ITEMS,
-      current: 4
-    };
+    vm.progressInfo = shipmentReceiveTasksService.getTaskData().map(taskInfo => {
+      taskInfo.status = true;
+      return taskInfo;
+    });
   }
 
   function returnToUnpackedState() {
@@ -46,4 +41,20 @@ function ShipmentViewCompletedController($state,
   }
 }
 
-export default ngModule => ngModule.component('shipmentViewCompleted', component)
+/**
+ * An AngularJS component that displays information for a completed {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.shipmentViewCompleted
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display.
+ */
+const shipmentViewCompletedComponent = {
+  template: require('./shipmentViewCompleted.html'),
+  controller: ShipmentViewCompletedController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment: '<'
+  }
+};
+
+export default ngModule => ngModule.component('shipmentViewCompleted', shipmentViewCompletedComponent)

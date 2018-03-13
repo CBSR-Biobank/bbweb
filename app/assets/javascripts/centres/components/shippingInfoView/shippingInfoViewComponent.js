@@ -1,18 +1,11 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shippintInfoView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./shippingInfoView.html'),
-  controller: ShippingInfoViewController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment:    '<',
-    collapsible: '<',
-    readOnly:    '<'
-  }
-};
 
 /* @ngInject */
 function ShippingInfoViewController(gettextCatalog,
@@ -104,4 +97,26 @@ function ShippingInfoViewController(gettextCatalog,
 
 }
 
-export default ngModule => ngModule.component('shippingInfoView', component)
+/**
+ * An AngularJS component that displays information for a {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.shippintInfoView
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display information for.
+ *
+ * @param {boolean} collapsible - when `TRUE` the panel the information is displayed in can be collapsed.
+ *
+ * @param {boolean} readOnly - when `FALSE` the user is allowed to make changes to the shipment.
+ */
+const shippingInfoViewComponent = {
+  template: require('./shippingInfoView.html'),
+  controller: ShippingInfoViewController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment:    '<',
+    collapsible: '<',
+    readOnly:    '<'
+  }
+};
+
+export default ngModule => ngModule.component('shippingInfoView', shippingInfoViewComponent)

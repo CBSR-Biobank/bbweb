@@ -1,12 +1,12 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
  * Used to store common data for breadcrumbs.
  *
- * @memberOf ng.common.services
+ * @memberOf common.services
  */
 class BreadcrumbService {
 
@@ -14,7 +14,7 @@ class BreadcrumbService {
     'ngInject'
     Object.assign(this, { gettextCatalog })
 
-    const addLabelFunc  = () =>  gettextCatalog.getString('Add'),
+    const addLabelFunc  = () => gettextCatalog.getString('Add'),
           roleLabelFunc = () => gettextCatalog.getString('Roles')
 
     this.breadcrumbStateToDisplayFunc = new Map([
@@ -45,7 +45,7 @@ class BreadcrumbService {
    *
    * @param {string} stateName - the state name to return the breadcrumb for.
    *
-   * @return {ng.common.services.BreadcrumbService.breadcrumb} the breadcrumb object.
+   * @return {common.services.BreadcrumbService.breadcrumb} the breadcrumb object.
    */
   forState(stateName) {
     if (!this.breadcrumbStateToDisplayFunc.has(stateName)) {
@@ -64,7 +64,7 @@ class BreadcrumbService {
    * @param {function} displayNameFunc - A function that will display the text on the page. This function must
    * be called when the user changes the language.
    *
-   * @return {ng.common.services.BreadcrumbService.breadcrumb} the breadcrumb object.
+   * @return {common.services.BreadcrumbService.breadcrumb} the breadcrumb object.
    */
   forStateWithFunc(stateName, displayNameFunc) {
     return { route: stateName, displayNameFn: displayNameFunc };
@@ -75,17 +75,17 @@ class BreadcrumbService {
 /**
  * This object represents a breadcrumb.
  *
- * <p> Breadcrumbs are used at the top of an HTML page to give the user feedback on where the current page is
+ * Breadcrumbs are used at the top of an HTML page to give the user feedback on where the current page is
  * located in the application.
  *
- * <p>The series of breadcrumbs represent the pages the user has navigated through to get to the current page.
+ * The series of breadcrumbs represent the pages the user has navigated through to get to the current page.
  *
- * <p> Breadcrumbs follow the state hierarchy used by the application.
+ * Breadcrumbs follow the state hierarchy used by the application.
  *
- * <p> The reason a breadcrumb uses a function is so that the it can be called to display the correct string
+ * The reason a breadcrumb uses a function is so that the it can be called to display the correct string
  * when the user changes the language.
  *
- * @typedef ng.common.services.BreadcrumbService.breadcrumb
+ * @typedef common.services.BreadcrumbService.breadcrumb
  *
  * @param {string} stateName - The name of the UI Router state in the breadcrumb list.
  *

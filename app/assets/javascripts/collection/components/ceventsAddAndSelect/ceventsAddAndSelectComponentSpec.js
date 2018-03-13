@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -36,7 +36,7 @@ describe('Component: ceventsAddAndSelect', function() {
 
       this.createController = (participant = this.participant, collectionEvent = this.collectionEvent) => {
         let replyItems;
-        const updateCollectionEvents = 0;
+        const collectionEventsRefresh = 0;
 
         if (_.isUndefined(collectionEvent)) {
           replyItems = [];
@@ -51,11 +51,11 @@ describe('Component: ceventsAddAndSelect', function() {
           this,
           `<cevents-add-and-select
               participant="vm.participant"
-              update-collection-event="vm.updateValue">
+              collection-events-refresh="vm.updateValue">
            </cevents-add-and-select>`,
           {
-            participant:            participant,
-            updateCollectionEvents: updateCollectionEvents
+            participant:             participant,
+            collectionEventsRefresh: collectionEventsRefresh
           },
           'ceventsAddAndSelect');
       };
@@ -136,11 +136,11 @@ describe('Component: ceventsAddAndSelect', function() {
       });
   });
 
-  it('events are reloaded when `updateCollectionEvents` is changed', function() {
+  it('events are reloaded when `collectionEventsRefresh` is changed', function() {
     this.createController();
     this.CollectionEvent.list = jasmine.createSpy().and.returnValue(this.$q.when([ this.collectionEvent]))
-    this.scope.vm.updateCollectionEvents += 1;
-    this.controller.$onChanges({ updateCollectionEvents: true });
+    this.scope.vm.collectionEventsRefresh += 1;
+    this.controller.$onChanges({ collectionEventsRefresh: true });
     expect(this.CollectionEvent.list).toHaveBeenCalled();
   });
 

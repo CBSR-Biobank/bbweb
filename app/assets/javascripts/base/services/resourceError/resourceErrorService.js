@@ -1,11 +1,13 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  *
  */
 
 /**
+ * An AngularJS Service that changes state to a 404 page and displays a message.
  *
+ * @memberOf base.services
  */
 class ResourceErrorService {
 
@@ -14,7 +16,13 @@ class ResourceErrorService {
     Object.assign(this, { $q, $log, $state, userService, gettextCatalog })
   }
 
-  // returns a function that can be called from a promise's catch clause
+  /**
+   * Returns a function that handles a rejected promise from a call to one of the methods in {@link
+   * ng.base.services.BiobankApiService BiobankApiService}.
+   *
+   * @return {base.services.ErrorService.CheckRejectedRequest} Returns a function that can be called from a
+   * promise's catch clause..
+   */
   checkUnauthorized() {
     return (err) => {
       if (err.status === 401) {
@@ -28,7 +36,11 @@ class ResourceErrorService {
     }
   }
 
-  // returns a function that can be called from a promise's catch clause
+  /**
+   * Returns a function that can be called from a promise's catch clause.
+   *
+   * @return {function} the function to bind to the promise.
+   */
   goto404(msg) {
     return (err) => {
       const errMessage = `${msg}: ${err.message}`
@@ -39,5 +51,14 @@ class ResourceErrorService {
   }
 
 }
+
+/**
+ * Changes the application's state to the `404` state and displays an appropriate message based on the status
+ * code.
+ *
+ * @callback base.services.ResourceErrorService.CheckRejectedRequest
+ *
+ * @param {$httpResponseObject} err - the error returned by the $http request.
+ */
 
 export default ngModule => ngModule.service('resourceErrorService', ResourceErrorService)

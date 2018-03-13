@@ -1,16 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.centres.Centre Centre} administration.
+ *
+ * @namespace admin.centres.components.locationsPanel
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./locationsPanel.html'),
-  controller: LocationsPanelController,
-  controllerAs: 'vm',
-  bindings: {
-    centre: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -62,4 +57,24 @@ function LocationsPanelController($scope,
 
 }
 
-export default ngModule => ngModule.component('locationsPanel', component)
+/**
+ * An AngularJS component that displays the {@link domain.Location Locations} associated with a {@link
+ * domain.centres.Centre Centre}.
+ *
+ * The component allows for the user to view details for an individual location, add a new location, or remove
+ * an existing location.
+ *
+ * @memberOf admin.centres.components.locationsPanel
+ *
+ * @param {domain.centres.Centre} centre - the centre to display locations for.
+ */
+const locationPanelComponent = {
+  template: require('./locationsPanel.html'),
+  controller: LocationsPanelController,
+  controllerAs: 'vm',
+  bindings: {
+    centre: '<'
+  }
+};
+
+export default ngModule => ngModule.component('locationsPanel', locationPanelComponent)

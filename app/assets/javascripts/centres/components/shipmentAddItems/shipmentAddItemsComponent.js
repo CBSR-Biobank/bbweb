@@ -1,16 +1,11 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentAddItems
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./shipmentAddItems.html'),
-  controller: ShipmentAddItemsController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment: '<'
-  }
-};
 
 /**
  * Allows the user to add items to a shipment.
@@ -21,7 +16,7 @@ var component = {
 function ShipmentAddItemsController($q,
                                     $state,
                                     gettextCatalog,
-                                    SHIPMENT_SEND_PROGRESS_ITEMS,
+                                    shipmentSendTasksService,
                                     Shipment,
                                     ShipmentState,
                                     modalInput,
@@ -44,7 +39,7 @@ function ShipmentAddItemsController($q,
         return gettextCatalog.getString(
           '{{courierName}} - {{trackingNumber}}: Items to ship',
           {
-            courierName: vm.shipment.courierName,
+            courierName:    vm.shipment.courierName,
             trackingNumber: vm.shipment.trackingNumber
           });
 
@@ -56,10 +51,10 @@ function ShipmentAddItemsController($q,
     vm.tagAsSent      = tagAsSent;
     vm.removeShipment = removeShipment;
 
-    vm.progressInfo = {
-      items: SHIPMENT_SEND_PROGRESS_ITEMS,
-      current: 2
-    };
+    vm.progressInfo = shipmentSendTasksService.getTaskData().map((taskInfo, index) => {
+      taskInfo.status = (index < 2);
+      return taskInfo;
+    });
   }
 
   function validateStateChangeAllowed() {
@@ -137,4 +132,24 @@ function ShipmentAddItemsController($q,
   }
 }
 
-export default ngModule => ngModule.component('shipmentAddItems', component)
+/**
+ * An AngularJS component that lets the user add {@link domain.participants.Specimen Specimens} or
+ * {@link domain.centres.Container Containers} to a {@link domain.centres.Shipment Shipment}.
+ *
+ * After the user adds an item, this component also lets the user tag the shipment as {@link
+ * domain.centres.ShipmentState PACKED} or {@link domain.centres.ShipmentState SENT}.
+ *
+ * @memberOf centres.components.shipmentAddItems
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment the items will be added to.
+ */
+const shipmentAddItemsComponent = {
+  template: require('./shipmentAddItems.html'),
+  controller: ShipmentAddItemsController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment: '<'
+  }
+};
+
+export default ngModule => ngModule.component('shipmentAddItems', shipmentAddItemsComponent)

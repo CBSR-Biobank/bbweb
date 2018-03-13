@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -87,13 +87,12 @@ describe('Service: userService', function() {
     describe('logging in', function() {
 
       var doLogin = function (token, user) {
-        var credentials = {
-          email: 'test@test.com',
-          password: 'test'
-        };
-        this.$httpBackend.expectPOST(this.url('users/login'), credentials).respond(this.reply(this.jsonUser));
+        const email = 'test@test.com',
+              password = 'test';
+        this.$httpBackend.expectPOST(this.url('users/login'), { email, password })
+          .respond(this.reply(this.jsonUser));
 
-        this.userService.login(credentials).then(function(reply) {
+        this.userService.login(email, password).then(function(reply) {
           expect(_.isEqual(reply, user));
         });
         this.$httpBackend.flush();

@@ -1,6 +1,6 @@
 /*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import DomainModule    from '../domain'
@@ -9,6 +9,26 @@ import angularGettext  from 'angular-gettext'
 import angularSanitize from 'angular-sanitize'
 import angularToastr   from 'angular-toastr'
 import angularUiRouter from '@uirouter/angularjs'
+
+/**
+ * AngularJS components available to the rest of the application.
+ * @namespace common
+ */
+
+/**
+ * AngularJS Controllers available to the rest of the application.
+ * @namespace common.controllers
+ */
+
+/**
+ * AngularJS Directives available to the rest of the application.
+ * @namespace common.directives
+ */
+
+/**
+ * AngularJS Filters available to the rest of the application.
+ * @namespace common.filters
+ */
 
 const loadModules = require.context('./modules', true, /[\\\/]index\.js$/)
 

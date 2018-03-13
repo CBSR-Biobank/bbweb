@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @namespace collection.components.collection
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -51,10 +55,16 @@ class CollectionController {
 
 }
 
-const component = {
+/**
+ * An AngularJS component that displays the main page for {@link domain.participants.Specimen Specimen}
+ * collection.
+ *
+ * @memberOf collection.components.collection
+ */
+const collectionComponent = {
   template: require('./collection.html'),
   controller: CollectionController,
   controllerAs: 'vm'
-}
+};
 
-export default ngModule => ngModule.component('collection', component)
+export default ngModule => ngModule.component('collection', collectionComponent)

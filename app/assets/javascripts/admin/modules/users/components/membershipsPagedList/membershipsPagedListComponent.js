@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.membershipsPagedList
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import { PagedListController } from '../../../../../common/controllers/PagedListController'
@@ -8,7 +12,7 @@ import { PagedListController } from '../../../../../common/controllers/PagedList
 /*
  * Controller for this component.
  */
-class Controller extends PagedListController {
+class MembershipsPagedListController extends PagedListController {
 
   constructor($log,
               $scope,
@@ -51,16 +55,19 @@ class Controller extends PagedListController {
 }
 
 /**
- * Displays studies in a panel list.
+ * An AngularJS component that displays {@link domain.access.Membership Memberships} in a panel list.
  *
- * @return {object} An AngularJS component.
+ * The list of memberships can be filtered and sorted by different fields. The memberships are displayed in a
+ * paged fashion, allowing the user to page through all the memberships in the system.
+ *
+ * @memberOf admin.users.components.membershipsPagedList
  */
-const component = {
+const membershipsPagedListComponent = {
   template: require('./membershipsPagedList.html'),
-  controller: Controller,
+  controller: MembershipsPagedListController,
   controllerAs: 'vm',
   bindings: {
   }
-}
+};
 
-export default ngModule => ngModule.component('membershipsPagedList', component)
+export default ngModule => ngModule.component('membershipsPagedList', membershipsPagedListComponent)

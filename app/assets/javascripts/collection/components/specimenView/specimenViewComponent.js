@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @namespace collection.components.specimenView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -54,7 +58,22 @@ class SpecimenViewController {
   }
 }
 
-var component = {
+/**
+ * An AngularJS component that lets the user view a {@link domain.participants.Specimen Specimen's}
+ * information.
+ *
+ * @memberOf collection.components.specimenView
+ *
+ * @param {domain.studies.Study} study - The study the *Specimen* belongs to.
+ *
+ * @param {domain.participants.Participant} participant - The participant the *Specimen* belongs to.
+ *
+ * @param {domain.participants.CollectionEvent} collectionEvenType - the *Collection Event* the specimen
+ * belongs to.
+ *
+ * @param {domain.participants.Specimen} specimen - the specimen to view.
+ */
+const specimenViewComponent = {
   template: require('./specimenView.html'),
   controller: SpecimenViewController,
   controllerAs: 'vm',
@@ -66,4 +85,4 @@ var component = {
   }
 };
 
-export default ngModule => ngModule.component('specimenView', component)
+export default ngModule => ngModule.component('specimenView', specimenViewComponent)

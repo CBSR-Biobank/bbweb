@@ -1,22 +1,13 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shippingHome
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-/**
- * Allows the user to select a centre associated to her account or the user group she is associated with.
- *
- * @param {domain.centres.CentreLocationDto} - the locations returned from the server.
- */
-var component = {
-  template: require('./shippingHome.html'),
-  controller: ShippingHomeController,
-  controllerAs: 'vm',
-  bindings: {
-  }
-};
 
 /* @ngInject */
 function ShippingHomeController($state,
@@ -63,4 +54,17 @@ function ShippingHomeController($state,
   }
 }
 
-export default ngModule => ngModule.component('shippingHome', component)
+/**
+ * An AngularJS component that displays the home page for {@link domain.centres.Shipment Shipping}.
+ *
+ * @memberOf centres.components.shippingHome
+ */
+const shippingHomeComponent = {
+  template: require('./shippingHome.html'),
+  controller: ShippingHomeController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('shippingHome', shippingHomeComponent)

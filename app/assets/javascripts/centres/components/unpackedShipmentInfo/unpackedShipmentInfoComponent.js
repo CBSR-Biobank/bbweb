@@ -1,16 +1,11 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.unpackedShipmentInfo
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: '<shipping-info-view shipment="vm.shipment" read-only="true"></shipping-info-view>',
-  controller: UnpackedShipmentInfoController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment: '<'
-  }
-};
 
 /*
  * The controller for this component.
@@ -27,4 +22,21 @@ function UnpackedShipmentInfoController($scope) {
   }
 }
 
-export default ngModule => ngModule.component('unpackedShipmentInfo', component)
+/**
+ * An AngularJS component that lets the user view the information for an unpacked {@link
+ * domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.unpackedShipmentInfo
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display information for.
+ */
+const unpackedShipmentInfoComponent = {
+  template: '<shipping-info-view shipment="vm.shipment" read-only="true"></shipping-info-view>',
+  controller: UnpackedShipmentInfoController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment: '<'
+  }
+};
+
+export default ngModule => ngModule.component('unpackedShipmentInfo', unpackedShipmentInfoComponent)

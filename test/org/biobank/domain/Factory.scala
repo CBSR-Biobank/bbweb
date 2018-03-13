@@ -188,7 +188,7 @@ class Factory {
         units                       = nameGenerator.next[String],
         anatomicalSourceType        = AnatomicalSourceType.Blood,
         preservationType            = PreservationType.FreshSpecimen,
-        preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
+        preservationTemperature = PreservationTemperature.Minus80celcius,
         specimenType                = SpecimenType.FilteredUrine)
     domainObjects = domainObjects + (classOf[SpecimenGroup] -> specimenGroup)
     specimenGroup
@@ -197,17 +197,17 @@ class Factory {
   def createCollectionSpecimenDescription(): CollectionSpecimenDescription = {
     val name = faker.Lorem.sentence(3)
     val specimenSpec = CollectionSpecimenDescription(
-        id                          = SpecimenDescriptionId(nextIdentityAsString[CollectionSpecimenDescription]),
-        slug                        = Slug(name),
-        name                        = name,
-        description                 = Some(nameGenerator.next[CollectionSpecimenDescription]),
-        units                       = nameGenerator.next[String],
-        anatomicalSourceType        = AnatomicalSourceType.Blood,
-        preservationType            = PreservationType.FreshSpecimen,
-        preservationTemperatureType = PreservationTemperatureType.Minus80celcius,
-        specimenType                = SpecimenType.FilteredUrine,
-        maxCount                    = 1,
-        amount                      = BigDecimal(0.5))
+        id                      = SpecimenDescriptionId(nextIdentityAsString[CollectionSpecimenDescription]),
+        slug                    = Slug(name),
+        name                    = name,
+        description             = Some(nameGenerator.next[CollectionSpecimenDescription]),
+        units                   = nameGenerator.next[String],
+        anatomicalSourceType    = AnatomicalSourceType.Blood,
+        preservationType        = PreservationType.FreshSpecimen,
+        preservationTemperature = PreservationTemperature.Minus80celcius,
+        specimenType            = SpecimenType.FilteredUrine,
+        maxCount                = 1,
+        amount                  = BigDecimal(0.5))
     domainObjects = domainObjects + (classOf[CollectionSpecimenDescription] -> specimenSpec)
     specimenSpec
   }

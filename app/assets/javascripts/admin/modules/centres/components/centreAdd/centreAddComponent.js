@@ -1,17 +1,13 @@
 /**
+ * AngularJS Component for {@link domain.centres.Centre Centre} administration.
+ *
+ * @namespace admin.centres.components.centreAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-var component = {
-  template: require('./centreAdd.html'),
-  controller: CentreAddDirective,
-  controllerAs: 'vm',
-  bindings: {
-  }
-};
 
 /*
  * Controller for this component.
@@ -70,4 +66,17 @@ function CentreAddDirective($state,
   }
 }
 
-export default ngModule => ngModule.component('centreAdd', component)
+/**
+ * An AngularJS component that allows the user to add a {@link domain.centres.Centre Centre} to the system.
+ *
+ * @memberOf admin.centres.components.centreAdd
+ */
+const centreAddComponent = {
+  template: require('./centreAdd.html'),
+  controller: CentreAddDirective,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('centreAdd', centreAddComponent)

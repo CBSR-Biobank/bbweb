@@ -1,29 +1,41 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/**
- * Displays a right justified button group with the following buttons:
- *
- *  - information,
- *  - update
- *  - remove
- */
+import { UpdateRemoveButtonsDirective } from '../updateRemoveButtons/updateRemoveButtonsDirective';
+
 function infoUpdateRemoveButtonsFactory() {
-  var directive = {
-    restrict: 'E',
-    replace: true,
-    scope: {
-      info:                '&onInfo',
-      update:              '&onUpdate',
-      remove:              '&onRemove',
-      updateButtonEnabled: '&',
-      removeButtonEnabled: '&'
-    },
-    template: require('./infoUpdateRemoveButtons.html')
-  };
-  return directive;
+
+  /**
+   * An AngularJS Directive that displays a right justified button group with the following buttons:
+   *
+   * - information
+   * - update
+   * - remove
+   *
+   * @memberOf common.directives
+   *
+   * @param {function} onInfo - the function to be called when the user presses the `Info` button.
+   *
+   * @param {function} onUpdate - the function to be called when the user presses the `Update` button.
+   *
+   * @param {function} onRemove - the function to be called when the user presses the `Remove` button.
+   *
+   * @param {boolean} updateButtonEnabled - when `TRUE` the `Update` button is enabled.
+   *
+   * @param {boolean} removeButtonEnabled - when `TRUE` the `Remove` button is enabled.
+   */
+  class InfoUpdateRemoveButtonsDirective extends UpdateRemoveButtonsDirective {
+
+    constructor() {
+      super(require('./infoUpdateRemoveButtons.html'));
+      this.scope.info = '&onInfo';
+    }
+
+  }
+
+  return new InfoUpdateRemoveButtonsDirective();
 }
 
 export default ngModule => ngModule.directive('infoUpdateRemoveButtons', infoUpdateRemoveButtonsFactory)

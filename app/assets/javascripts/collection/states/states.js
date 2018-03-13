@@ -1,12 +1,22 @@
 /**
- * collection routes.
+ * UI Router states used {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @namespace collection.states
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+/**
+ * UI Router states used {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @name collection.states.collectionUiRouterConfig
+ * @function
+ *
+ * @param {AngularJS_Service} $stateProvider
+ */
 /* @ngInject */
-function config($stateProvider) {
+function collectionUiRouterConfig($stateProvider) {
 
   $stateProvider
     .state('home.collection', {
@@ -138,4 +148,4 @@ function config($stateProvider) {
 
 }
 
-export default ngModule => ngModule.config(config)
+export default ngModule => ngModule.config(collectionUiRouterConfig)

@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /* @ngInject */
@@ -51,7 +51,7 @@ function AnnotationTypeFactory($log,
        * be selected. If the value is greater than 1 then any number of values can be selected.
        *
        * @name domain.AnnotationType#maxValueCount
-       * @type {int}
+       * @type {domain.AnnotationMaxValueCount}
        */
 
       /**

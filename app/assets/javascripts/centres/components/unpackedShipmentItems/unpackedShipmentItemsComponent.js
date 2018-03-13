@@ -1,20 +1,13 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.unpackedShipmentItems
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-var component = {
-  template: require('./unpackedShipmentItems.html'),
-  controller: UnpackedShipmentItemsController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment:  '<',
-    itemState: '@'
-  }
-};
-
 
 /*
  * Loads all Shipment Specimens in PRESENT state.
@@ -90,4 +83,25 @@ function UnpackedShipmentItemsController($q,
 
 }
 
-export default ngModule => ngModule.component('unpackedShipmentItems', component)
+/**
+ * An AngularJS component that displays the {@link domain.centres.ShipmentItemState RECEIVED} or {@link
+ * domain.centres.ShipmentItemState MISSING} items in an unpacked {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.unpackedShipmentItems
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display information for.
+ *
+ * @param {domain.centres.ShipmentItemState} itemState - the state of the items to display: either {@link
+ * domain.centres.ShipmentItemState RECEIVED} or {@link domain.centres.ShipmentItemState MISSING}.
+ */
+const unpackedShipmentItemsComponent = {
+  template: require('./unpackedShipmentItems.html'),
+  controller: UnpackedShipmentItemsController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment:  '<',
+    itemState: '@'
+  }
+};
+
+export default ngModule => ngModule.component('unpackedShipmentItems', unpackedShipmentItemsComponent)

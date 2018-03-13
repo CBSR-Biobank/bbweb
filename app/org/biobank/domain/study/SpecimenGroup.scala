@@ -5,7 +5,7 @@ import org.biobank.ValidationKey
 import org.biobank.domain._
 import org.biobank.domain.AnatomicalSourceType._
 import org.biobank.domain.PreservationType._
-import org.biobank.domain.PreservationTemperatureType._
+import org.biobank.domain.PreservationTemperature._
 import org.biobank.domain.SpecimenType._
 import play.api.libs.json._
 import scalaz._
@@ -28,7 +28,7 @@ import Scalaz._
  *
  * @param preservationType see [[PreservationType]].
  *
- * @param preservationTemperatureType see [[PreservationTemperatureType]].
+ * @param preservationTemperature see [[PreservationTemperature]].
  *
  * @param specimenType see [[SpecimenType]].
  */
@@ -43,7 +43,7 @@ final case class SpecimenGroup(studyId:                     StudyId,
                                units:                       String,
                                anatomicalSourceType:        AnatomicalSourceType,
                                preservationType:            PreservationType,
-                               preservationTemperatureType: PreservationTemperatureType,
+                               preservationTemperature: PreservationTemperature,
                                specimenType:                SpecimenType)
     extends ConcurrencySafeEntity[SpecimenGroupId]
     with HasUniqueName
@@ -63,7 +63,7 @@ final case class SpecimenGroup(studyId:                     StudyId,
         |  units:                       $units,
         |  anatomicalSourceType:        $anatomicalSourceType,
         |  preservationType:            $preservationType,
-        |  preservationTemperatureType: $preservationTemperatureType,
+        |  preservationTemperature: $preservationTemperature,
         |  specimenType:                $specimenType
         |}""".stripMargin
 
@@ -72,7 +72,7 @@ final case class SpecimenGroup(studyId:                     StudyId,
              units:                       String,
              anatomicalSourceType:        AnatomicalSourceType,
              preservationType:            PreservationType,
-             preservationTemperatureType: PreservationTemperatureType,
+             preservationTemperature: PreservationTemperature,
              specimenType:                SpecimenType)
       : DomainValidation[SpecimenGroup] =  {
     val v = SpecimenGroup.create(this.studyId,
@@ -83,7 +83,7 @@ final case class SpecimenGroup(studyId:                     StudyId,
                                  units,
                                  anatomicalSourceType,
                                  preservationType,
-                                 preservationTemperatureType,
+                                 preservationTemperature,
                                  specimenType)
     v.map(_.copy(timeModified = Some(OffsetDateTime.now)))
   }
@@ -120,7 +120,7 @@ object SpecimenGroup extends SpecimenGroupValidations {
              units:                       String,
              anatomicalSourceType:        AnatomicalSourceType,
              preservationType:            PreservationType,
-             preservationTemperatureType: PreservationTemperatureType,
+             preservationTemperature: PreservationTemperature,
              specimenType:                SpecimenType)
       : DomainValidation[SpecimenGroup] =  {
     (validateId(studyId) |@|
@@ -140,7 +140,7 @@ object SpecimenGroup extends SpecimenGroupValidations {
                       units                       = units,
                       anatomicalSourceType        = anatomicalSourceType,
                       preservationType            = preservationType,
-                      preservationTemperatureType = preservationTemperatureType,
+                      preservationTemperature = preservationTemperature,
                       specimenType                = specimenType)
     }
   }

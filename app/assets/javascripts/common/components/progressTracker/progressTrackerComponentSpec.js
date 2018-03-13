@@ -1,9 +1,10 @@
-/**
+/*
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
 /* global angular */
 
 import _ from 'lodash';
@@ -18,44 +19,51 @@ describe('progressTrackerComponent', function() {
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
 
-      this.createController = (items, current) => {
+      this.createController = (taskData) => {
         ComponentTestSuiteMixin.createController.call(
           this,
-          [
-            '<progress-tracker',
-            '  items="vm.progressInfo.items"',
-            '  current="vm.progressInfo.current">',
-            '</progress-tracker>'
-          ].join(''),
-          { progressInfo:  { items: items, current: current } },
+          '<progress-tracker task-data="vm.taskData"></progress-tracker>',
+          { taskData },
           'progressTracker');
       };
+
+      const labelFunc = () => this.Factory.stringNext();
+
+      this.createTaskData = () => _.range(3).map(() => ({
+        id:     this.Factory.stringNext(),
+        label:  () => labelFunc,
+        status: false
+      }));
     });
   });
 
   it('has valid scope', function() {
-    var items = _.range(3).map(() => this.Factory.stringNext()),
-        current = items[0];
-    this.createController(items, current);
-    expect(this.controller.numSteps).toBe(items.length);
-    expect(this.controller.steps).toBeArrayOfSize(items.length);
+    const tasks = this.createTaskData();
+
+    this.createController(tasks);
+    expect(this.controller.tasks.length).toBe(tasks.length);
+    expect(this.controller.tasks).toBeArrayOfSize(tasks.length);
   });
 
   it('all steps can be marked as todo', function() {
-    var items = _.range(3).map(() => this.Factory.stringNext());
-    this.createController(items, 0);
-    expect(this.controller.numSteps).toBe(items.length);
-    this.controller.steps.forEach((step) => {
+    const tasks = this.createTaskData();
+    this.createController(tasks, 0);
+    expect(this.controller.tasks.length).toBe(tasks.length);
+    this.controller.tasks.forEach((step) => {
       expect(step.class).toBe('progtrckr-todo');
     });
   });
 
   it('all steps can be marked as done', function() {
-    var items = _.range(3).map(() => this.Factory.stringNext());
-    this.createController(items, items.length);
-    expect(this.controller.numSteps).toBe(items.length);
-    this.controller.steps.forEach((step) => {
-      expect(step.class).toBe('progtrckr-done');
+    const tasks = this.createTaskData();
+    tasks.forEach(task => {
+      task.status = true;
+    });
+
+    this.createController(tasks, tasks[tasks.length - 1].id);
+    expect(this.controller.tasks.length).toBe(tasks.length);
+    this.controller.tasks.forEach(task => {
+      expect(task.class).toBe('progtrckr-done');
     });
   });
 

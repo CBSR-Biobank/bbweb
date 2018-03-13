@@ -1,17 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.participants.CollectionEvent CollectionEvents}.
+ *
+ * @namespace collection.components.ceventsAddAndSelect
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-const component = {
-  template: require('./ceventsAddAndSelect.html'),
-  controller: CeventsAddAndSelectDirective,
-  controllerAs: 'vm',
-  bindings: {
-    participant:            '<',
-    updateCollectionEvents: '<'
-  }
-};
 
 const DisplayStates = {
   NO_RESULTS: 0,
@@ -23,7 +17,7 @@ const DisplayStates = {
  * Controller for this component.
  */
 /* @ngInject */
-function CeventsAddAndSelectDirective($state,
+function CeventsAddAndSelectController($state,
                                       BbwebError,
                                       CollectionEvent,
                                       CollectionEventTypeName) {
@@ -47,15 +41,15 @@ function CeventsAddAndSelectDirective($state,
     vm.eventInformation     = eventInformation;
     vm.visitFilterUpdated   = visitFilterUpdated;
 
-    updateCollectionEvents();
+    collectionEventRefresh();
   }
 
   /*
    * Parent component can trigger a collection event reload by calling updating this binding.
    */
   function onChanges(changed) {
-    if (changed.updateCollectionEvents) {
-      updateCollectionEvents();
+    if (changed.collectionEventsRefresh) {
+      collectionEventRefresh();
     }
   }
 
@@ -71,7 +65,7 @@ function CeventsAddAndSelectDirective($state,
       (vm.pagedResult.maxPages > 1);
   }
 
-  function updateCollectionEvents() {
+  function collectionEventRefresh() {
     CollectionEvent.list(vm.participant.id, vm.pagerOptions).then(function (pagedResult) {
       vm.collectionEvents = pagedResult.items;
       vm.pagedResult = pagedResult;
@@ -82,7 +76,7 @@ function CeventsAddAndSelectDirective($state,
   }
 
   function pageChanged() {
-    updateCollectionEvents();
+    collectionEventRefresh();
     $state.go('home.collection.study.participant.cevents');
   }
 
@@ -109,8 +103,30 @@ function CeventsAddAndSelectDirective($state,
       vm.pagerOptions.filter = '';
     }
     vm.pagerOptions.page = 1;
-    updateCollectionEvents();
+    collectionEventRefresh();
   }
 }
 
-export default ngModule => ngModule.component('ceventsAddAndSelect', component)
+/**
+ * An AngularJS component that displays all the {@link domain.participants.CollectionEvent CollectionEvents}
+ * for a {@link domain.participants.Participant Participant} and allows the user to select one.
+ *
+ * @namespace collection.components.ceventsAddAndSelect
+ *
+ * @param {domain.participants.Participant} participant - The participant to select a *Collection Event*
+ * from.
+ *
+ * @param {int} collectionEventsRefresh - a parent component should increment this value when it wishes to
+ * have this component refresh the list of *Collection Events*.
+ */
+const ceventsAddAndSelectComponent = {
+  template: require('./ceventsAddAndSelect.html'),
+  controller: CeventsAddAndSelectController,
+  controllerAs: 'vm',
+  bindings: {
+    participant:             '<',
+    collectionEventsRefresh: '<'
+  }
+};
+
+export default ngModule => ngModule.component('ceventsAddAndSelect', ceventsAddAndSelectComponent)

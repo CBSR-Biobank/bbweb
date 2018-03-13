@@ -1,34 +1,45 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { LabelService } from '../../../base/services/LabelService';
 
 /**
- * An AngularJS service that converts a SpecimenState to a i18n string that can
- * be displayed to the centre.
+ * An AngularJS service that converts a {@link domain.participants.specimenStates.SpecimenState SpecimenState}
+ * to a *translated string* that can be displayed to the user.
  *
- * @param {object} SpecimenState - AngularJS constant that enumerates all the centre states.
- *
- * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
- *
- * @return {Service} The AngularJS service.
+ * @memberOf collection.services
  */
-function SpecimenStateLabelService(labelService, SpecimenState, gettextCatalog) {
-  var labels = {};
+class SpecimenStateLabelService extends LabelService {
 
-  labels[SpecimenState.USABLE]   = () => gettextCatalog.getString('Usable');
-  labels[SpecimenState.UNUSABLE] = () => gettextCatalog.getString('Unusable');
+  /**
+   * @param {base.BbwebError} BbwebError - AngularJS factory for exceptions.
+   *
+   * @param {domain.participants.SpecimenState} SpecimenState - AngularJS constant that enumerates all the
+   * {@link domain.participant.Specimen Specimen} states.
+   *
+   * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
+   */
+  constructor(BbwebError, SpecimenState, gettextCatalog) {
+    'ngInject';
+    super(BbwebError, [
+      { id: SpecimenState.USABLE,   label: () => gettextCatalog.getString('Usable') },
+      { id: SpecimenState.UNUSABLE, label: () => gettextCatalog.getString('Unusable') }
+    ]);
+    Object.assign(this, { SpecimenState, gettextCatalog });
+  }
 
-  var service = {
-    stateToLabelFunc: stateToLabelFunc
-  };
-  return service;
-
-  //-------
-
-  function stateToLabelFunc(state) {
-    return labelService.getLabel(labels, state);
+  /**
+   * Returns the function that should be called to display the label for a {@link
+   * domain.participants.SpecimenState SpecimenState}.
+   *
+   * @param {domain.participants.SpecimenState} state - the state to get a function for.
+   *
+   * @return {function} a function that returns a label that can be displayed to the user.
+   */
+  stateToLabelFunc(state) {
+    return this.getLabel(state);
   }
 
 }

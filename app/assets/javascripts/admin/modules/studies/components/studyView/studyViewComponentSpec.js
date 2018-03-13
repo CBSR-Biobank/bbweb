@@ -2,14 +2,14 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
 import _ from 'lodash';
 import ngModule from '../../index'
 
-describe('Directive: studyViewDirective', function() {
+describe('Component: studyView', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');

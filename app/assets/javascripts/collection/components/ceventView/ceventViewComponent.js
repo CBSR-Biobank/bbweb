@@ -1,8 +1,15 @@
 /**
+ * AngularJS Component for {@link domain.participants.CollectionEvent CollectionEvents}.
+ *
+ * @namespace collection.components.ceventView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+/*
+ * Controller for this component
+ */
 class CeventViewController {
 
   constructor($scope,
@@ -132,7 +139,22 @@ class CeventViewController {
 
 }
 
-var component = {
+/**
+ * An AngularJS component that allows the user to view a {@link domain.participants.CollectionEvent
+ * CollectionEvent}.
+ *
+ * <p>The user can also make changes to the collection event by using the controls used by this component.
+ *
+ * @memberOf collection.components.ceventView
+ *
+ * @param {domain.studies.Study} study - the study the *Collection Event* belongs to.
+ *
+ * @param {domain.participants.Participant} participant - the participant the *Collection Event* belongs to.
+ *
+ * @param {domain.participants.CollectionEvent} collectionEvent - the collection event to be viewed. Must be
+ * for the participant given in `participant`.
+ */
+const ceventViewComponent = {
   template: require('./ceventView.html'),
   controller: CeventViewController,
   controllerAs: 'vm',
@@ -143,4 +165,4 @@ var component = {
   }
 }
 
-export default ngModule => ngModule.component('ceventView', component)
+export default ngModule => ngModule.component('ceventView', ceventViewComponent)

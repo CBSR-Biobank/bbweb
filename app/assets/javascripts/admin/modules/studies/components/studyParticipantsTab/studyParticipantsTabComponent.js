@@ -1,20 +1,13 @@
 /**
+ * AngularJS Component for {@link domain.studies.Study Study} administration.
  *
+ * @namespace admin.studies.components.studyParticipantsTab
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-/**
- * Displays the participant annotations defined for a study.
- */
-var component = {
-  template: require('./studyParticipantsTab.html'),
-  controller: StudyParticipantsTabController,
-  controllerAs: 'vm',
-  bindings: {
-    study: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -22,12 +15,12 @@ var component = {
 /* @ngInject */
 function StudyParticipantsTabController($scope,
                                         $state,
-                                        ParticipantAnnotationTypeModals,
+                                        ParticipantAnnotationTypeRemove,
                                         notificationsService,
                                         gettextCatalog) {
   var vm = this;
   vm.$onInit = onInit;
-  _.extend(vm, new ParticipantAnnotationTypeModals());
+  vm.annotationTypeRemove = new ParticipantAnnotationTypeRemove();
 
   //--
 
@@ -56,21 +49,37 @@ function StudyParticipantsTabController($scope,
 
   function removeAnnotationType(annotationType) {
     if (_.includes(vm.annotationTypeIdsInUse, annotationType.id)) {
-      vm.removeInUseModal(annotationType, 'ParticipantAnnotationType');
+      vm.annotationTypeRemove.removeInUseModal(annotationType, 'ParticipantAnnotationType');
     } else {
       if (!vm.modificationsAllowed) {
         throw new Error('modifications not allowed');
       }
 
-      vm.remove(annotationType, function () {
-        return vm.study.removeAnnotationType(annotationType)
-          .then(function () {
-            notificationsService.success(gettextCatalog.getString('Annotation removed'));
-          });
-      });
+      vm.annotationTypeRemove.remove(
+        annotationType,
+        () => vm.study.removeAnnotationType(annotationType)
+          .then(() =>
+                notificationsService.success(gettextCatalog.getString('Annotation removed'))));
     }
 
   }
 }
 
-export default ngModule => ngModule.component('studyParticipantsTab', component)
+/**
+ * An AngularJS component that displays the {@link domain.participants.Participant Participants} related
+ * configuration for a {@link domain.studies.Study Study}.
+ *
+ * @memberOf admin.studies.components.studyParticipantsTab
+ *
+ * @param {domain.studies.Study} study - the study to display information for.
+ */
+const studyParticipantsTabComponent = {
+  template: require('./studyParticipantsTab.html'),
+  controller: StudyParticipantsTabController,
+  controllerAs: 'vm',
+  bindings: {
+    study: '<'
+  }
+};
+
+export default ngModule => ngModule.component('studyParticipantsTab', studyParticipantsTabComponent)

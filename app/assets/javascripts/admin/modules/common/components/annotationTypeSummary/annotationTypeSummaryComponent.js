@@ -1,19 +1,21 @@
 /**
+ * AngularJS Components used in Administration modules
+ *
+ * @namespace admin.common.components.annotationTypeSummary
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
- * @class ng.admin.common.components.annotationTypeSummary
- *
  * An AngularJS component that displays summary information about an {@link domain.AnnotationType} in
  * a list item within a Bootstrap panel.
  *
- * @memberOf ng.admin.common.components
+ * @memberOf admin.common.components.annotationTypeSummary
  *
  * @param {domain.AnnotationType} annotationType the Annotation type summary to display.
  */
-var annotationTypeSummary = {
+const annotationTypeSummaryComponent = {
   template: require('./annotationTypeSummary.html'),
   controller: AnnotationTypeSummaryController,
   controllerAs: 'vm',
@@ -32,4 +34,4 @@ function AnnotationTypeSummaryController() {
   }
 }
 
-export default ngModule => ngModule.component('annotationTypeSummary', annotationTypeSummary)
+export default ngModule => ngModule.component('annotationTypeSummary', annotationTypeSummaryComponent)

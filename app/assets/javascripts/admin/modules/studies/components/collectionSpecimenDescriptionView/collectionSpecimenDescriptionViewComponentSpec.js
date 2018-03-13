@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -164,13 +164,13 @@ describe('Component: collectionSpecimenDescriptionView', function() {
     var context = {};
 
     beforeEach(function () {
-      this.injectDependencies('PreservationTemperatureType');
+      this.injectDependencies('PreservationTemperature');
 
       context.createController         = this.createController.bind(this);
       context.controllerUpdateFuncName = 'editPreservationTemperature';
       context.modalInputFuncName       = 'select';
       context.ceventType               = this.collectionEventType;
-      context.newValue                 = this.PreservationTemperatureType.ROOM_TEMPERATURE;
+      context.newValue                 = this.PreservationTemperature.ROOM_TEMPERATURE;
     });
 
     sharedBehaviour(context);

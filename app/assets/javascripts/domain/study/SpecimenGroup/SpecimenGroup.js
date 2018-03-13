@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -24,7 +24,7 @@ function SpecimenGroupFactory(funutils,
     'units',
     'anatomicalSourceType',
     'preservationType',
-    'preservationTemperatureType',
+    'preservationTemperature',
     'specimenType'
   ];
 
@@ -44,7 +44,7 @@ function SpecimenGroupFactory(funutils,
           units:                       '',
           anatomicalSourceType:        '',
           preservationType:            '',
-          preservationTemperatureType: '',
+          preservationTemperature: '',
           specimenType:                ''
         };
 
@@ -86,7 +86,7 @@ function SpecimenGroupFactory(funutils,
                               'units',
                               'anatomicalSourceType',
                               'preservationType',
-                              'preservationTemperatureType',
+                              'preservationTemperature',
                               'specimenType'),
                        funutils.pickOptional(self, 'description'));
 

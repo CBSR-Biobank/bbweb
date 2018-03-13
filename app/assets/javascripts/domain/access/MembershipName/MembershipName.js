@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /* @ngInject */
@@ -64,8 +64,8 @@ function MembershipNameFactory($q,
      *        <code>state</code>. Values other than these two yield an error. Use a minus sign prefix to sort
      *        in descending order.
      *
-     * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
-     *          domain.access.Membership}.
+     * @returns {Promise<common.controllers.PagedListController.PagedResult>} with items of type {@link
+     * domain.access.Membership}.
      */
     static list(options, omit) {
       return EntityInfo.list(MembershipName.url(), options, omit)

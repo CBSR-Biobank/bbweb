@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -114,8 +114,8 @@ function UserNameFactory($q,
      * @param {Array<domain.EntityNameAndState>} omit - the list of names to filter out of the result returned
      *        from the server.
      *
-     * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
-     *          domain.users.User}.
+     * @returns {Promise<common.controllers.PagedListController.PagedResult>} with items of type {@link
+     * domain.users.User}.
      */
     static list(options, omit) {
       return super.list(UserName.url(), options, omit)

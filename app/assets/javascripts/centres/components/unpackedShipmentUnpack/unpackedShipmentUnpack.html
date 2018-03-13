@@ -43,7 +43,7 @@
                                 on-get-specimens="vm.getPresentSpecimens.bind(vm)"
                                 no-specimens-message="{{'No specimens present in shipment'|translate}}"
                                 actions="vm.actions"
-                                on-action-selected="vm.tableActionSelected">
+                                on-action-selected="vm.tableActionSelected.bind(vm)">
       </ss-specimens-paged-table>
     </collapsible-panel>
   </div>

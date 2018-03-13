@@ -1,21 +1,13 @@
 /**
+ * AngularJS Component for {@link domain.centres.Centre Centre} administration.
+ *
+ * @namespace admin.centres.components.centreStudiesPanel
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-/**
- * Allows the user to link a center to one or more study.
- */
-var component = {
-  template: require('./centreStudiesPanel.html'),
-  controller: CentreStudiesPanelController,
-  controllerAs: 'vm',
-  bindings: {
-    centre: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -104,4 +96,21 @@ function CentreStudiesPanelController($scope,
 
 }
 
-export default ngModule => ngModule.component('centreStudiesPanel', component)
+/**
+ * An AngularJS component that allows the user to link a {@link domain.centres.Centre Centre} to one or more
+ * {@link domain.studies.Study Study}.
+ *
+ * @memberOf admin.centres.components.centreStudiesPanel
+ *
+ * @param {domain.centres.Centre} centre - the centre to link studies to.
+ */
+const centreStudiesPanelComponent = {
+  template: require('./centreStudiesPanel.html'),
+  controller: CentreStudiesPanelController,
+  controllerAs: 'vm',
+  bindings: {
+    centre: '<'
+  }
+};
+
+export default ngModule => ngModule.component('centreStudiesPanel', centreStudiesPanelComponent)

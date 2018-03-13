@@ -1,6 +1,10 @@
 /**
+ * AngularJS Components used in Administration modules
+ *
+ * @namespace admin.common.components.annotationTypeAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
@@ -11,15 +15,15 @@
  * - {@link domain.studies.Study Study}
  * - specimen link.
  *
- * @memberOf ng.admin.common.components
+ * @memberOf admin.common.components.annotationTypeAdd
  *
- * @param {ng.admin.common.components.annotationTypeAdd.onSubmit} onSubmit The function that is called when
+ * @param {admin.common.components.annotationTypeAdd.onSubmit} onSubmit The function that is called when
  * the user submits the form.
  *
- * @param {ng.admin.common.components.annotationTypeAdd.onCancel} onCancel The function that is called when the
+ * @param {admin.common.components.annotationTypeAdd.onCancel} onCancel The function that is called when the
  * user presses the *Cancel* button on the form.
  */
-var annotationTypeAdd = {
+const annotationTypeAddComponent = {
   template: require('./annotationTypeAdd.html'),
   controller: Controller,
   controllerAs: 'vm',
@@ -30,18 +34,20 @@ var annotationTypeAdd = {
 };
 
 /**
- * The callback function called by component {@link ng.admin.common.components.annotationTypeAdd
- * annotationTypeAdd} after the user presses the *Submit* button in the component's HTML form.
+ * The callback function called by {@link
+ * ng.admin.common.components.annotationTypeAdd.annotationTypeAddComponent annotationTypeAddComponent} after
+ * the user presses the *Submit* button in the component's HTML form.
  *
- * @callback ng.admin.common.components.annotationTypeAdd.onSubmit
+ * @callback admin.common.components.annotationTypeAdd.onSubmit
  * @param {domain.AnnotationType} annotationType - the annotation type with the values entered by the user.
  */
 
 /**
- * The callback function called by component {@link ng.admin.common.components.annotationTypeAdd
- * annotationTypeAdd} after the user presses the *Cancel* button in the component's HTML form.
+ * The callback function called by {@link
+ * ng.admin.common.components.annotationTypeAdd.annotationTypeAddComponent annotationTypeAddComponent} after
+ * the user presses the *Cancel* button in the component's HTML form.
  *
- * @callback ng.admin.common.components.annotationTypeAdd.onCancel
+ * @callback admin.common.components.annotationTypeAdd.onCancel
  */
 
 /*
@@ -127,4 +133,4 @@ function Controller(AnnotationType,
 
 }
 
-export default ngModule => ngModule.component('annotationTypeAdd', annotationTypeAdd)
+export default ngModule => ngModule.component('annotationTypeAdd', annotationTypeAddComponent)

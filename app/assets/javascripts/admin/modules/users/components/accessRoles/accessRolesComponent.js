@@ -1,19 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.accessRoles
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-/*
- * Allows the logged in user to modify another user's roles.
- */
-var component = {
-  template: require('./accessRoles.html'),
-  controller: AccessRolesController,
-  controllerAs: 'vm',
-  bindings: {
-    user: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -36,4 +28,21 @@ function AccessRolesController(breadcrumbService) {
 
 }
 
-export default ngModule => ngModule.component('accessRoles', component)
+/**
+ * An AngularJS component that allows the logged in user to modify another {@link domain.users.User User's}
+ * {@link domain.access.Role Roles}.
+ *
+ * @memberOf admin.users.components.accessRoles
+ *
+ * @param {domain.users.User} user - the user to modify roles for.
+ */
+const accessRolesComponent = {
+  template: require('./accessRoles.html'),
+  controller: AccessRolesController,
+  controllerAs: 'vm',
+  bindings: {
+    user: '<'
+  }
+};
+
+export default ngModule => ngModule.component('accessRoles', accessRolesComponent)

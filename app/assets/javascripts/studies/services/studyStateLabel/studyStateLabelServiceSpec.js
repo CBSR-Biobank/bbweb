@@ -25,7 +25,8 @@ describe('studyStateLabelService', function() {
       var self = this;
 
       context.labels = _.values(this.StudyState);
-      context.toLabelFunc = this.studyStateLabelService.stateToLabelFunc;
+      context.toLabelFunc =
+        this.studyStateLabelService.stateToLabelFunc.bind(this.studyStateLabelService);
       context.expectedLabels = [];
       _.values(this.StudyState).forEach(function (state) {
         context.expectedLabels[state] = self.capitalizeFirstLetter(state);

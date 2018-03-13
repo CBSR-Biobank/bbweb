@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.userMembership
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -109,19 +113,48 @@ class UserMembershipController {
   }
 }
 
-/*
- * Allows the logged in user to modify another user's membership.
+/**
+ * An AngularJS component that allows the logged in user to modify another {@link domain.users.user
+ * User's} {@link domain.access.Membership Membership}.
+ *
+ * @memberOf admin.users.components.userMembership
+ *
+ * @param {domain.users.User} user - the user to modify the membership for.
+ *
+ * @param {admin.users.components.userMembership.onAddRequest} onAddRequest - the function this
+ * component calls to request  a new membership be added.
+ *
+ * @param {admin.users.components.userMembership.onRemoveRequest} onRemoveRequest - the function
+ * this component calls to request removal of a membership.
  */
-var userMembership = {
+const userMembershipComponent = {
   template: require('./userMembership.html'),
   controller: UserMembershipController,
   controllerAs: 'vm',
   bindings: {
     user:                '<',
-    onMembershipAddRequest:    '&',
-    onMembershipRemoveRequest: '&',
-    onMembershipCopyRequest:   '&'
+    onAddRequest:    '&',
+    onRemoveRequest: '&'
   }
 };
 
-export default ngModule => ngModule.component('userMembership', userMembership)
+/**
+ * The callback function called by {@link common.components.dateTimePicker dateTimePicker} when the
+ * user enters a new value.
+ *
+ * @callback admin.users.components.userMembership.onAddRequest
+ *
+ * @param {domain.access.Membership} membership - the membership to add
+ */
+
+/**
+ * The callback function called by {@link common.components.dateTimePicker dateTimePicker} when the
+ * user enters a new value.
+ *
+ * @callback admin.users.components.userMembership.onRemoveRequest
+ *
+ * @param {domain.access.Membership} membership - the membership to remove
+ */
+
+
+export default ngModule => ngModule.component('userMembership', userMembershipComponent)

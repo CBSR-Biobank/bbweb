@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.studies.Study Study} administration.
+ *
+ * @namespace admin.studies.components.studiesPagedList
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import { PagedListController } from '../../../../../common/controllers/PagedListController';
@@ -9,7 +13,7 @@ import _ from 'lodash';
 /*
  * Controller for this component.
  */
-class Controller extends PagedListController {
+class StudiesPagedListController extends PagedListController {
 
   constructor($log,
               $state,
@@ -34,7 +38,7 @@ class Controller extends PagedListController {
           resourceErrorService,
           {
             nameFilter: new NameFilter(),
-            stateFilter: new StateFilter(true, stateData, 'all')
+            stateFilter: new StateFilter(stateData, 'all', true)
           },
           [
             { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') },
@@ -93,16 +97,19 @@ class Controller extends PagedListController {
 }
 
 /**
- * Displays studies in a panel list.
+ * An AngularJS component that displays {@link domain.studies.Study Studies} in a panel list.
  *
- * @return {object} An AngularJS component.
+ * The list of studies can be filtered and sorted by different fields. The studies are displayed in a paged
+ * fashion, allowing the user to page through all the studies in the system.
+ *
+ * @memberOf admin.studies.components.studiesPagedList
  */
-const component = {
+const studiesPagedListComponent = {
   template: require('./studiesPagedList.html'),
-  controller: Controller,
+  controller: StudiesPagedListController,
   controllerAs: 'vm',
   bindings: {
   }
 };
 
-export default ngModule => ngModule.component('studiesPagedList', component)
+export default ngModule => ngModule.component('studiesPagedList', studiesPagedListComponent)

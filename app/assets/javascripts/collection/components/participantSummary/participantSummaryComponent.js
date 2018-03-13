@@ -1,17 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @namespace collection.components.participantSummary
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./participantSummary.html'),
-  controller: ParticipantSummaryController,
-  controllerAs: 'vm',
-  bindings: {
-    study:       '<',
-    participant: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -68,4 +62,25 @@ function ParticipantSummaryController(gettextCatalog,
   }
 }
 
-export default ngModule => ngModule.component('participantSummary', component)
+
+/**
+ * An AngularJS component that displays summary information for a {@link domain.participants.Participant
+ * Participant}.
+ *
+ * @memberOf collection.components.participantSummary
+ *
+ * @param {domain.studies.Study} study - the study the *Participant* should be added to.
+ *
+ * @param {domain.participants.Participant} participant - The participant to display information for.
+ */
+const participantSummaryComponent = {
+  template: require('./participantSummary.html'),
+  controller: ParticipantSummaryController,
+  controllerAs: 'vm',
+  bindings: {
+    study:       '<',
+    participant: '<'
+  }
+};
+
+export default ngModule => ngModule.component('participantSummary', participantSummaryComponent)

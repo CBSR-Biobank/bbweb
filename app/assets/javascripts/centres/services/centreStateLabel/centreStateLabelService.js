@@ -1,36 +1,48 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
+import { LabelService } from '../../../base/services/LabelService';
 
 /**
- * An AngularJS service that converts a CentreState to a i18n string that can
- * be displayed to the centre.
+ * An AngularJS service that converts a {@link domain.centres.CentreState CentreState} to a *translated
+ * string* that can be displayed to the user.
  *
- * @param {object} CentreState - AngularJS constant that enumerates all the centre states.
- *
- * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
- *
- * @return {Service} The AngularJS service.
+ * @memberOf centres.services
  */
-/* @ngInject */
-function centreStateLabelService(labelService, CentreState, gettextCatalog) {
-  var labels = {};
+class CentreStateLabelService extends LabelService {
 
-  labels[CentreState.DISABLED] = () => gettextCatalog.getString('Disabled');
-  labels[CentreState.ENABLED]  = () => gettextCatalog.getString('Enabled');
+  /**
+   * @param {base.BbwebError} BbwebError - AngularJS factory for exceptions.
+   *
+   * @param {domain.centres.CentreState} CentreState - AngularJS constant that enumerates all the centre
+   * states.
+   *
+   * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
+   */
+  constructor(BbwebError, CentreState, gettextCatalog) {
+    'ngInject';
+    super(BbwebError,
+          [
+            { id: CentreState.DISABLED, label: () => gettextCatalog.getString('Disabled') },
+            { id: CentreState.ENABLED, label: () => gettextCatalog.getString('Enabled') }
+          ]);
+    Object.assign(this, { CentreState, gettextCatalog });
+  }
 
-  var service = {
-    stateToLabelFunc: stateToLabelFunc
-  };
-  return service;
-
-  //-------
-
-  function stateToLabelFunc(state) {
-    return labelService.getLabel(labels, state);
+  /**
+   * Returns the function that should be called to display the label for a {@link domain.centres.CentreState
+   * CentreState} state.
+   *
+   * @param {domain.centres.CentreState} state - the state to get a function for.
+   *
+   * @return {function} a function that returns a label that can be displayed to the user.
+   */
+  stateToLabelFunc(state) {
+    return this.getLabel(state);
   }
 
 }
 
-export default ngModule => ngModule.service('centreStateLabelService', centreStateLabelService)
+export default ngModule => ngModule.service('centreStateLabelService', CentreStateLabelService)

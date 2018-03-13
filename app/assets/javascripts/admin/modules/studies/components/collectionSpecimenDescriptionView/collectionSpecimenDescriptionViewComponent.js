@@ -1,20 +1,13 @@
 /**
+ * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
+ *
+ * @namespace admin.studies.components.collectionSpecimenDescriptionView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-var component = {
-  template: require('./collectionSpecimenDescriptionView.html'),
-  controller: CollectionSpecimenDescriptionViewController,
-  controllerAs: 'vm',
-  bindings: {
-    study:               '<',
-    collectionEventType: '<',
-    specimenDescription: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -28,7 +21,7 @@ function CollectionSpecimenDescriptionViewController($state,
                                                      CollectionSpecimenDescription,
                                                      AnatomicalSourceType,
                                                      PreservationType,
-                                                     PreservationTemperatureType,
+                                                     PreservationTemperature,
                                                      SpecimenType,
                                                      breadcrumbService) {
   var vm = this;
@@ -141,13 +134,13 @@ function CollectionSpecimenDescriptionViewController($state,
   function editPreservationTemperature() {
     modalInput.select(gettextCatalog.getString('Specimen spec preservation temperature'),
                       gettextCatalog.getString('Preservation temperature'),
-                      vm.specimenDescription.preservationTemperatureType,
+                      vm.specimenDescription.preservationTemperature,
                       {
                         required: true,
-                        selectOptions: _.values(PreservationTemperatureType)
+                        selectOptions: _.values(PreservationTemperature)
                       }).result
       .then(function (selection) {
-        vm.specimenDescription.preservationTemperatureType = selection;
+        vm.specimenDescription.preservationTemperature = selection;
         return updateCollectionEventType();
       });
   }
@@ -205,4 +198,31 @@ function CollectionSpecimenDescriptionViewController($state,
 
 }
 
-export default ngModule => ngModule.component('collectionSpecimenDescriptionView', component)
+/**
+ * An AngularJS component that component that allows the user to view a {@link
+ * domain.studies.CollectionSpecimenDescription CollectionSpecimenDescription} from a {@link
+ * domain.studies.CollectionEventType CollectionEventType}.
+ *
+ * @memberOf admin.studies.components.collectionSpecimenDescriptionView
+ *
+ * @param {domain.studies.Study} study - the *Study* the *Collection Event Type* belongs to.
+ *
+ * @param {domain.studies.CollectionEventType} collectionEventType - the *Collection Event Type* the
+ * *Specimen Description* should be added to.
+ *
+ * @param {domain.studies.CollectionSpecimenDescription} specimenDescription - The *Specimen Description* to
+ * display.
+ */
+const collectionSpecimenDescriptionViewComponent = {
+  template: require('./collectionSpecimenDescriptionView.html'),
+  controller: CollectionSpecimenDescriptionViewController,
+  controllerAs: 'vm',
+  bindings: {
+    study:               '<',
+    collectionEventType: '<',
+    specimenDescription: '<'
+  }
+};
+
+export default ngModule => ngModule.component('collectionSpecimenDescriptionView',
+                                             collectionSpecimenDescriptionViewComponent)

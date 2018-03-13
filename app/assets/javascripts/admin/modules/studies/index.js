@@ -1,8 +1,8 @@
-/**
+/*
  * Study module.
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import AdminCommonModule from '../common'
@@ -12,7 +12,28 @@ import StudiesModule     from '../../../studies'
 import UsersModule       from '../../../users'
 import angular           from 'angular';
 
-const ngModule = angular.module('biobank.admin.studies', [
+/**
+ * AngularJS components for {@link domain.studies.Study Study} administration.
+ * @namespace admin.studies
+ */
+
+/**
+ * AngularJS components for {@link domain.studies.Study Study} administration.
+ * @namespace admin.studies.components
+ */
+
+/**
+ * AngularJS services for {@link domain.studies.Study Study} administration.
+ * @namespace admin.studies.services
+ */
+
+/**
+ * A Webpack module for {@link domain.studies.Study Study} Administration.
+ *
+ * @memberOf admin.studies
+ * @type {AngularJS_Module}
+ */
+const ngAdminStudiesModule = angular.module('biobank.admin.studies', [
   AdminCommonModule,
   BaseModule,
   DomainModule,
@@ -25,7 +46,7 @@ const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.
 //console.log(context.keys())
 
 context.keys().forEach(key => {
-  context(key).default(ngModule)
+  context(key).default(ngAdminStudiesModule)
 })
 
-export default ngModule.name
+export default ngAdminStudiesModule.name

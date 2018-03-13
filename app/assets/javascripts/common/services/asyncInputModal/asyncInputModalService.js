@@ -5,7 +5,7 @@
 /**
  * This AngularJS Service allows the user to open a modal dialog box.
  *
- * @memberOf ng.common.services
+ * @memberOf common.services
  */
 class AsyncInputModalService {
 
@@ -21,7 +21,7 @@ class AsyncInputModalService {
    * in a Bootstrap Typeahead input (`uib-typeahead`).
    *
    * <p>If the user presses the **OK** button, the object returned by the modal is the object corresponding
-   * to the label selected by the user. See {@link ng.common.services.AsyncInputModalService.GetResults
+   * to the label selected by the user. See {@link common.services.AsyncInputModalService.GetResults
    * GetResults}.
    *
    * @param {string} heading the heading to display as the modal's title.
@@ -33,7 +33,7 @@ class AsyncInputModalService {
    * @param {string} noResultsMessage the message to display to the user if the input they provided does not
    * yield any results.
    *
-   * @param {ng.common.services.AsyncInputModalService.GetResults} getResults the function that is called to
+   * @param {common.services.AsyncInputModalService.GetResults} getResults the function that is called to
    * get the matching values from the server.
    *
    * @return {uibModalInstance} The instance of the modal that was opened. This is a `ui-bootstrap` class.
@@ -89,21 +89,21 @@ class AsyncInputModalService {
 }
 
 /**
- * The callback function called by component {@link ng.common.services.AsyncInputModalService
+ * The callback function called by component {@link common.services.AsyncInputModalService
  * AsyncInputModalService} to retrieve the results matching the input entered by the user.
  *
- * @callback ng.common.services.AsyncInputModalService.GetResults
+ * @callback common.services.AsyncInputModalService.GetResults
  *
  * @param {string} viewValue - the text entered by the user.
  *
- * @return {Promise<Array<ng.common.services.AsyncInputModalService.Results>>}
+ * @return {Promise<Array<common.services.AsyncInputModalService.Results>>}
  */
 
 /**
- * One of the objects that is returned by {@link ng.common.services.AsyncInputModalService.GetResults
+ * One of the objects that is returned by {@link common.services.AsyncInputModalService.GetResults
  * GetResults}.
  *
- * @typedef ng.common.services.AsyncInputModalService.Results
+ * @typedef common.services.AsyncInputModalService.Results
  *
  * @type object
  *

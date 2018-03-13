@@ -1,10 +1,22 @@
 /**
+ * UI Router states for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.states
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+/**
+ * UI Router states used for {@link domain.users.User User} Administration.
+ *
+ * @name admin.users.states.adminUsersUiRouterConfig
+ * @function
+ *
+ * @param {AngularJS_Service} $stateProvider
+ */
 /* @ngInject */
-function config($stateProvider) {
+function adminUsersUiRouterConfig($stateProvider) {
   $stateProvider
     .state('home.admin.access', {
       url: '/users',
@@ -82,9 +94,9 @@ function config($stateProvider) {
   function resolveMembership($transition$, Membership, resourceErrorService) {
     const slug = $transition$.params().slug
     return Membership.get(slug)
-      .catch(resourceErrorService.goto404(`memberhsip slug not found: ${slug}`))
+      .catch(resourceErrorService.goto404(`membership slug not found: ${slug}`))
   }
 
 }
 
-export default ngModule => ngModule.config(config)
+export default ngModule => ngModule.config(adminUsersUiRouterConfig)

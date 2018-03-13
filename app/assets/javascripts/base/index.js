@@ -1,17 +1,24 @@
 /*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import angular from 'angular';
 import angularGettext  from 'angular-gettext'
 
-const ngModule = angular.module('biobank.base', [ angularGettext ])
+/**
+ * A Webpack module for the Biobank AngularJS base layer.
+ *
+ * @memberOf base
+ * @type {AngularJS_Module}
+ */
+const ngBaseLayerModule = angular.module('biobank.base', [ angularGettext ])
 
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 
 context.keys().forEach(key => {
-  context(key).default(ngModule)
+  context(key).default(ngBaseLayerModule)
 })
 
-export default ngModule.name
+
+export default ngBaseLayerModule.name

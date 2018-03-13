@@ -1,13 +1,13 @@
 <div class="btn-group pull-right">
   <button class="btn btn-xs btn-default"
           uib-tooltip="{{addButtonTitle}}"
-          ng-if="addButtonEnabled()"
+          ng-if="vm.addButtonEnabled"
           ng-click="vm.addButtonPressed($event)">
     <i class="glyphicon glyphicon-plus"></i>
   </button>
   <button class="btn btn-xs btn-default"
           uib-tooltip="expand / collapse">
     <i class="glyphicon"
-       ng-class="panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
+       ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
   </button>
 </div>

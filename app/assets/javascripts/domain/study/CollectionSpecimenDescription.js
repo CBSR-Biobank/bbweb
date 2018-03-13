@@ -1,18 +1,24 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-/**
- *
+
+/*
+ * AngularJS Factory
  */
 /* @ngInject */
 function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
 
 
   /**
-   * @classdesc Creates a new CollectionSpecimenDescription.
    * @class
    * @memberOf domain.studies
+   *
+   * @classdesc Used to configure a *Specimen Type* used by a {@link domain.studies.Study Study}.
+   *
+   * It records ownership, summary, storage, and classification information that applies to an entire group or
+   * collection of {@link domain.participants.Specimen Specimens}. A *Specimen Description* is defined either for
+   * specimen types collected from participants, or for specimen types that are processed.
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
@@ -62,10 +68,10 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
     this.preservationType = '';
 
     /**
-     * @name domain.studies.CollectionSpecimenDescription#preservationTemperatureType
-     * @type {domain.PreservationTemperatureType}
+     * @name domain.studies.CollectionSpecimenDescription#preservationTemperature
+     * @type {domain.PreservationTemperature}
      */
-    this.preservationTemperatureType = '';
+    this.preservationTemperature = '';
 
     /**
      * @name domain.studies.CollectionSpecimenDescription#specimenType
@@ -109,7 +115,7 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
       'units':                       { 'type': 'string' },
       'anatomicalSourceType':        { 'type': 'string' },
       'preservationType':            { 'type': 'string' },
-      'preservationTemperatureType': { 'type': 'string' },
+      'preservationTemperature': { 'type': 'string' },
       'specimenType':                { 'type': 'string' },
       'maxCount':                    { 'type': 'integer', 'minimum': 1 },
       'amount':                      { 'type': 'number', 'minimum': 0 }
@@ -121,7 +127,7 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
       'units',
       'anatomicalSourceType',
       'preservationType',
-      'preservationTemperatureType',
+      'preservationTemperature',
       'specimenType',
       'maxCount',
       'amount'

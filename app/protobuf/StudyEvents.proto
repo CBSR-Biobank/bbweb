@@ -118,7 +118,7 @@ message SpecimenGroupAddedEvent {
    optional string units                       = 4;
    optional string anatomicalSourceType        = 5;
    optional string preservationType            = 6;
-   optional string preservationTemperatureType = 7;
+   optional string preservationTemperature = 7;
    optional string specimenType                = 8;
 }
 
@@ -130,7 +130,7 @@ message SpecimenGroupUpdatedEvent {
    optional string units                       = 5;
    optional string anatomicalSourceType        = 6;
    optional string preservationType            = 7;
-   optional string preservationTemperatureType = 8;
+   optional string preservationTemperature = 8;
    optional string specimenType                = 9;
 }
 

@@ -1,18 +1,13 @@
 /**
+ * AngularJS Component for {@link domain.studies.Study Study} administration.
+ *
+ * @namespace admin.studies.components.studyCollection
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-var component = {
-  template: require('./studyCollection.html'),
-  controller: StudyCollectionController,
-  controllerAs: 'vm',
-  bindings: {
-    study: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -50,4 +45,23 @@ function StudyCollectionController($scope, CollectionEventType) {
 
 }
 
-export default ngModule => ngModule.component('studyCollection', component)
+/**
+ * An AngularJS component that displays the collection aspect of the configuration for a a {@link
+ * domain.studies.Study Study}.
+ *
+ * The user can add, modify, or remove a {@link domain.studies.CollectionEventType CollectionEventTypes}.
+ *
+ * @memberOf admin.studies.components.studyCollection
+ *
+ * @param {domain.studies.Study} study - the *Study* the *Collection Event Types* belong to.
+ */
+const studyCollectionComponent = {
+  template: require('./studyCollection.html'),
+  controller: StudyCollectionController,
+  controllerAs: 'vm',
+  bindings: {
+    study: '<'
+  }
+};
+
+export default ngModule => ngModule.component('studyCollection', studyCollectionComponent)

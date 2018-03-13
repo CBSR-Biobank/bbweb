@@ -1,12 +1,12 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
  * Base class controller for components that allow adding annotation types.
  *
- * @memberOf  ng.admin.common.controllers
+ * @memberOf  admin.common.controllers
  */
 class AnnotationTypeAddController {
 

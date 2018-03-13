@@ -155,7 +155,7 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
     }
 
   def preservTempTypes: Action[Unit] = Action(parse.empty) { request =>
-      Ok(PreservationTemperatureType.values.map(x => x))
+      Ok(PreservationTemperature.values.map(x => x))
     }
 
   /** Value types used by Specimen groups.
@@ -164,10 +164,10 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
   def specimenGroupValueTypes: Action[Unit] = Action(parse.empty) { request =>
       // FIXME add container types to this response
       Ok(Map(
-           "anatomicalSourceType"        -> AnatomicalSourceType.values.map(x => x),
-           "preservationType"            -> PreservationType.values.map(x => x),
-           "preservationTemperatureType" -> PreservationTemperatureType.values.map(x => x),
-           "specimenType"                -> SpecimenType.values.map(x => x)
+           "anatomicalSourceType"    -> AnatomicalSourceType.values.map(x => x),
+           "preservationType"        -> PreservationType.values.map(x => x),
+           "preservationTemperature" -> PreservationTemperature.values.map(x => x),
+           "specimenType"            -> SpecimenType.values.map(x => x)
          ))
     }
 

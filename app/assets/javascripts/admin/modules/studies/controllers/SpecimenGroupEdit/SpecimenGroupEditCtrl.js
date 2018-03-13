@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -14,7 +14,7 @@ function SpecimenGroupEditCtrl($state,                            // eslint-disa
                                notificationsService,
                                AnatomicalSourceType,
                                PreservationType,
-                               PreservationTemperatureType,
+                               PreservationTemperature,
                                SpecimenType,
                                study,
                                specimenGroup) {
@@ -32,7 +32,7 @@ function SpecimenGroupEditCtrl($state,                            // eslint-disa
   vm.specimenGroup         = specimenGroup;
   vm.anatomicalSourceTypes = _.values(AnatomicalSourceType);
   vm.preservTypes          = _.values(PreservationType);
-  vm.preservTempTypes      = _.values(PreservationTemperatureType);
+  vm.preservTempTypes      = _.values(PreservationTemperature);
   vm.specimenTypes         = _.values(SpecimenType);
 
   vm.submit = submit;

@@ -1,13 +1,18 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /* @ngInject */
 function DomainErrorFactory($log) {
 
   /**
-   * Description
+   * @class
+   * Exception used by the {@link domain} layer when an programming error is encountered.
+   *
+   * @memberOf domain
+   *
+   * @param {string} message - the error message to associate with this exception.
    */
   function DomainError(message) {
     this.message = message;

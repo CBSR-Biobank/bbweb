@@ -1,17 +1,12 @@
 /**
+ * AngularJS Component for used in {@link domain.studies.CollectionEventType CollectionEventType}
+ * administration.
+ *
+ * @namespace admin.studies.components.ceventTypesAddAndSelect
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./ceventTypesAddAndSelect.html'),
-  controller: CeventTypesAddAndSelectController,
-  controllerAs: 'vm',
-  bindings: {
-    study:                '<',
-    collectionEventTypes: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -101,4 +96,25 @@ function CeventTypesAddAndSelectController($scope,
   }
 }
 
-export default ngModule => ngModule.component('ceventTypesAddAndSelect', component)
+/**
+ * An AngularJS component that displays all the {@link domain.studies.CollectionEventType
+ * CollectionEventTypes} for a {@link domain.studies.Study Study} and allows the user to select one.
+ *
+ * @memberOf admin.studies.components.ceventTypesAddAndSelect
+ *
+ * @param {domain.studies.Study} study - the study the collection event types belongs to.
+ *
+ * @param {Array<domain.studies.CollectionEventType>} collectionEventTypes - the collection event types the
+ * study has.
+ */
+const ceventTypesAddAndSelectComponent = {
+  template: require('./ceventTypesAddAndSelect.html'),
+  controller: CeventTypesAddAndSelectController,
+  controllerAs: 'vm',
+  bindings: {
+    study:                '<',
+    collectionEventTypes: '<'
+  }
+}
+
+export default ngModule => ngModule.component('ceventTypesAddAndSelect', ceventTypesAddAndSelectComponent)

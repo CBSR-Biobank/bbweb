@@ -1,8 +1,30 @@
 /**
- * Centres module.
+ * AngularJS components related to {@link domain.centres.Centre Centres}.
+ *
+ * @namespace centres
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
+ */
+
+/**
+ * AngularJS components related to {@link domain.centres.Centre Centres}.
+ * @namespace centres.components
+ */
+
+/**
+ * AngularJS controller base classes related to {@link domain.centres.Centre Centres}.
+ * @namespace centres.controllers
+ */
+
+/**
+ * AngularJS services related to {@link domain.centres.Centre Centres}.
+ * @namespace centres.services
+ */
+
+/**
+ * AngularJS services related to {@link domain.centres.Centre Centres}.
+ * @namespace centres.services
  */
 
 import CommonModule    from '../common'
@@ -15,15 +37,15 @@ import angularToastr   from 'angular-toastr'
 import angularUiRouter from '@uirouter/angularjs'
 import uiBootstrap     from 'angular-ui-bootstrap'
 
-const loadModules = require.context('./modules', true, /[\\\/]index\.js$/)
-const moduleNames = []
-
-loadModules.keys().forEach((key) => {
-  moduleNames.push(loadModules(key).default)
-})
-
-const ngModule = angular.module(
-  'biobank.centres', [
+/**
+ * A Webpack module for user interactions with {@link domain.centres.Centre Centres}.
+ *
+ * @memberOf centres
+ * @type {AngularJS_Module}
+ */
+const ngCentresModule = angular.module(
+  'biobank.centres',
+  [
     angularGettext,
     angularSanitize,
     angularToastr,
@@ -32,25 +54,27 @@ const ngModule = angular.module(
     CommonModule,
     DomainModule,
     HomeModule
-  ].concat(moduleNames))
+  ])
 
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 
 context.keys().forEach(key => {
-  context(key).default(ngModule)
+  context(key).default(ngCentresModule)
 })
 
-ngModule
-  .constant('SHIPMENT_SEND_PROGRESS_ITEMS', [
-    'Shipping information',
-    'Items to ship',
-    'Packed'
-  ])
-  .constant('SHIPMENT_RECEIVE_PROGRESS_ITEMS', [
-    'Sent',
-    'Received',
-    'Unpacked',
-    'Completed'
-  ])
+/**
+ * Used by componet {@link centres.shipmentsTable shipmentsTable} to specify the type of specimens it is
+ * displaying.
+ *
+ * @enum {string}
+ * @memberOf centres
+ */
+const SHIPMENT_TYPES = {
+  INCOMING:  'incoming',
+  OUTGOING:  'outgoing',
+  COMPLETED: 'completed'
+};
 
-export default ngModule.name
+ngCentresModule.constant('SHIPMENT_TYPES', SHIPMENT_TYPES);
+
+export default ngCentresModule.name

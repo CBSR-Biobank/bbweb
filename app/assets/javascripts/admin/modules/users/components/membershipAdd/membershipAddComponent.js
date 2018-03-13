@@ -1,13 +1,19 @@
 /**
- * This component allows a user to add a new {@link domain.users.Membership|Membership} to the system.
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.membershipAdd
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
 
 import _ from 'lodash'
 
 /*
  *
  */
-class Controller {
+class MembershipAddController {
 
   constructor($scope,
               $state,
@@ -199,12 +205,18 @@ class Controller {
 
 }
 
-const COMPONENT = {
+/**
+ * An AngularJS component that allows the logged in user to add {@link domain.access.Membership Memberships}
+ * to the server.
+ *
+ * @memberOf admin.users.components.membershipAdd
+*/
+const membershipAddComponent = {
   template: require('./membershipAdd.html'),
-  controller: Controller,
+  controller: MembershipAddController,
   controllerAs: 'vm',
   bindings: {
   }
-}
+};
 
-export default ngModule => ngModule.component('membershipAdd', COMPONENT)
+export default ngModule => ngModule.component('membershipAdd', membershipAddComponent)

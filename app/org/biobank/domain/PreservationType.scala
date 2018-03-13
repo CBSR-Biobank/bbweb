@@ -4,7 +4,7 @@ import play.api.libs.json._
 import org.biobank.infrastructure.EnumUtils._
 
 /** Describes how a [[Specimen]] should be preserved/stored by describing a preservation method. Also see
-  * [[PreservationTemperatureType]].
+  * [[PreservationTemperature]].
   */
 @SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object PreservationType extends Enumeration {
@@ -23,8 +23,8 @@ object PreservationType extends Enumeration {
   *
   */
 @SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
-object PreservationTemperatureType extends Enumeration {
-  type PreservationTemperatureType = Value
+object PreservationTemperature extends Enumeration {
+  type PreservationTemperature = Value
 
   val Plus4celcius: Value    = Value("4 C")
   val Minus20celcius: Value  = Value("-20 C")
@@ -32,6 +32,6 @@ object PreservationTemperatureType extends Enumeration {
   val Minus180celcius: Value = Value("-180 C")
   val RoomTemperature: Value = Value("Room Temperature")
 
-  implicit val preservatioTempTypeReads: Format[PreservationTemperatureType] =
-    enumFormat(PreservationTemperatureType)
+  implicit val preservatioTempTypeReads: Format[PreservationTemperature] =
+    enumFormat(PreservationTemperature)
 }

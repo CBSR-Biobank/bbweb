@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /*
  * Controller for this component.
@@ -21,7 +21,12 @@ class Controller {
   }
 }
 
-const component = {
+/**
+ * An AngularJS component for the **Contact Us** page.
+ *
+ * @memberOf home.components
+ */
+const contactComponent = {
   template: require('./contact.html'),
   controller: Controller,
   controllerAs: 'vm',
@@ -29,4 +34,4 @@ const component = {
   }
 };
 
-export default ngModule => ngModule.component('contact', component)
+export default ngModule => ngModule.component('contact', contactComponent)

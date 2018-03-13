@@ -1,43 +1,56 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
+import { LabelService } from '../../../base/services/LabelService';
 
 /**
- * An AngularJS service that converts a ShipmentState to a i18n string that can
- * be displayed to the user.
+ * An AngularJS service that converts a {@link domain.centres.ShipmentState ShipmentState} to a *translated
+ * string* that can be displayed to the user.
  *
- * @param {object} ShipmentState - AngularJS constant that enumerates all the shipment states.
- *
- * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
- *
- * @param {service} labelService - The service that validates the state and returns the label.
- *
- * @return {Service} The AngularJS service.
+ * @memberOf centres.services
  */
-/* @ngInject */
-function shipmentStateLabelService(ShipmentState, gettextCatalog, labelService) {
-  var labels = {};
+class ShipmentStateLabelService extends LabelService {
 
-  labels[ShipmentState.CREATED]   = () => gettextCatalog.getString('Created');
-  labels[ShipmentState.PACKED]    = () => gettextCatalog.getString('Packed');
-  labels[ShipmentState.SENT]      = () => gettextCatalog.getString('Sent');
-  labels[ShipmentState.RECEIVED]  = () => gettextCatalog.getString('Received');
-  labels[ShipmentState.UNPACKED]  = () => gettextCatalog.getString('Unpacked');
-  labels[ShipmentState.COMPLETED] = () => gettextCatalog.getString('Completed');
-  labels[ShipmentState.LOST]      = () => gettextCatalog.getString('Lost');
+  /**
+   * @param {base.BbwebError} BbwebError - AngularJS factory for exceptions.
+   *
+   * @param {domain.centres.ShipmentState} ShipmentState - AngularJS constant that enumerates all the shipment
+   * states.
+   *
+   * @param {AngularJS_Service} gettextCatalog - The service that allows strings to be translated to other
+   * languages.
+   *
+   */
+  constructor(BbwebError, ShipmentState, gettextCatalog) {
+    'ngInject';
 
-  var service = {
-    stateToLabelFunc: stateToLabelFunc
-  };
-  return service;
+    super(BbwebError,
+          [
+            { id: ShipmentState.CREATED,   label: () => gettextCatalog.getString('Created') },
+            { id: ShipmentState.PACKED,    label: () => gettextCatalog.getString('Packed') },
+            { id: ShipmentState.SENT,      label: () => gettextCatalog.getString('Sent') },
+            { id: ShipmentState.RECEIVED,  label: () => gettextCatalog.getString('Received') },
+            { id: ShipmentState.UNPACKED,  label: () => gettextCatalog.getString('Unpacked') },
+            { id: ShipmentState.COMPLETED, label: () => gettextCatalog.getString('Completed') },
+            { id: ShipmentState.LOST,      label: () => gettextCatalog.getString('Lost') }
+          ]);
+    Object.assign(this, { ShipmentState, gettextCatalog });
+  }
 
-  //-------
-
-  function stateToLabelFunc(state) {
-    return labelService.getLabel(labels, state);
+  /**
+   * Returns the function that should be called to display the label for a {@link domain.centres.ShipmentState
+   * ShipmentState}.
+   *
+   * @param {domain.centres.ShipmentState} state - the state to get a function for.
+   *
+   * @return {function} a function that returns a label that can be displayed to the user.
+   */
+  stateToLabelFunc(state) {
+    return this.getLabel(state);
   }
 
 }
 
-export default ngModule => ngModule.service('shipmentStateLabelService', shipmentStateLabelService)
+export default ngModule => ngModule.service('shipmentStateLabelService', ShipmentStateLabelService)

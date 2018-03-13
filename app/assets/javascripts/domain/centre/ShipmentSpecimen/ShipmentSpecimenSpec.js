@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -19,7 +19,6 @@ describe('ShipmentSpecimen domain object:', function() {
                               'ShipmentSpecimen',
                               'ShipmentItemState',
                               'TestUtils',
-                              'UrlService',
                               'Factory');
       // used by promise tests
       this.expectShipmentSpecimen = (entity) => {

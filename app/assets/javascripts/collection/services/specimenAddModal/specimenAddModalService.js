@@ -1,37 +1,54 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  *
  */
 
 import _ from 'lodash'
 import angular from 'angular'
 
-/*
- * An AngularJS service to open the modal.
+let service;
+
+/**
+ * An AngularJS service that lets the user open a modal dialog box.
+ *
+ * @memberOf collection.services
  */
-/* @ngInject */
 class SpecimenAddModalService {
 
-  constructor($uibModal) {
-    Object.assign(this, { $uibModal })
+  constructor($uibModal,
+              $window,
+              $timeout,
+              Specimen,
+              timeService) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $uibModal,
+                    $window,
+                    $timeout,
+                    Specimen,
+                    timeService
+                  })
+    service = this;
   }
 
   /**
-   * Creates a modal that allows the user to add one or more specimens to a collection event.
+   * Creates a modal that allows the user to add one or more {@link domain.partcipants.Specimen Specimens} to
+   * a {@link domain.partcipant.CollectionEvent CollectionEvent}.
    *
-   * @param {domain.Location[]} centreLocations - The locations belonging to the centres the specimens
-   *        can be collected at.
+   * When the user presses the `OK` button, the specimens that were added are returned as an array.
    *
-   * @param {domain.studies.CollectionSpecimenDescription[]} specimenDescriptions - the specimen
-   *        specifications belonging to the collection event these specimen belong to.
+   * @param {domain.Location[]} centreLocations - The locations belonging to the centres the specimens can be
+   * collected at.
    *
-   * @param {Date} defaultDatetime - The default date to use for the specimens <code>time collected<code>.
+   * @param {domain.studies.CollectionSpecimenDescription[]} specimenDescriptions - the *Specimen
+   *        Specifications* belonging to the *Collection Event* these specimen belong to.
    *
-   * @return {$uibModal} A modal instance.
+   * @param {Date} defaultDatetime - The default date to use for the specimen's {@link
+   * domain.participants.Specimen#timeCreated timeCreated}.
    *
-   * When running the Travis CI build, jshint did not like that this function was named "open". Therefore,
-   * it was renamed.
+   * @return {object} The "UI Bootstrap" modal instance.
    */
   open(centreLocations, specimenDescriptions, defaultDatetime) {
 
@@ -41,36 +58,30 @@ class SpecimenAddModalService {
     /* @ngInject */
     class ModalController {
 
-      constructor($scope,
-                  $window,
-                  $timeout,
-                  $uibModalInstance,
-                  Specimen,
-                  timeService) {
+      constructor($uibModalInstance, $scope) {
         'ngInject'
-        Object.assign(this, {
-          $scope,
-          $window,
-          $timeout,
-          $uibModalInstance,
-          Specimen,
-          timeService,
-          centreLocations,
-          specimenDescriptions,
-          defaultDatetime
-        }, {
-          inventoryId:                 undefined,
-          selectedSpecimenDescription: undefined,
-          selectedLocationInfo:        undefined,
-          amount:                      undefined,
-          defaultAmount:               undefined,
-          usingDefaultAmount:          true,
-          timeCollected:               defaultDatetime,
-          specimens:                   []
-        })
+        Object.assign(this,
+                      {
+                        $uibModalInstance,
+                        $scope,
+                        centreLocations,
+                        specimenDescriptions,
+                        defaultDatetime
+                      },
+                      {
+                        inventoryId:                 undefined,
+                        selectedSpecimenDescription: undefined,
+                        selectedLocationInfo:        undefined,
+                        amount:                      undefined,
+                        defaultAmount:               undefined,
+                        usingDefaultAmount:          true,
+                        timeCollected:               defaultDatetime,
+                        specimens:                   []
+                      })
 
-        $scope.$watch('this.amount', () => {
-          this.usingDefaultAmount = (_.isUndefined(this.defaultAmount) || (this.amount === this.defaultAmount));
+        this.$scope.$watch('this.amount', () => {
+          this.usingDefaultAmount =
+            (_.isUndefined(this.defaultAmount) || (this.amount === this.defaultAmount));
         });
       }
 
@@ -82,12 +93,12 @@ class SpecimenAddModalService {
           throw new Error('specimen type not selected');
         }
 
-        return new this.Specimen(
+        return new service.Specimen(
           {
             inventoryId:        this.inventoryId,
             originLocationInfo: this.selectedLocationInfo,
             locationInfo:       this.selectedLocationInfo,
-            timeCreated:        this.timeService.dateAndTimeToUtcString(this.timeCollected),
+            timeCreated:        service.timeService.dateAndTimeToUtcString(this.timeCollected),
             amount:             this.amount
           },
           this.selectedSpecimenDescription);
@@ -107,11 +118,11 @@ class SpecimenAddModalService {
       nextPressed() {
         this.specimens.push(this.createSpecimen());
 
-        this.inventoryId          = undefined;
+        this.inventoryId                 = undefined;
         this.selectedSpecimenDescription = undefined;
-        this.amount               = undefined;
-        this.defaultAmount        = undefined;
-        this.usingDefaultAmount   = true;
+        this.amount                      = undefined;
+        this.defaultAmount               = undefined;
+        this.usingDefaultAmount          = true;
         this.$scope.form.$setPristine();
 
         // Ensure focus returns to the specimen type drop down selection
@@ -120,8 +131,8 @@ class SpecimenAddModalService {
         // e.g. click events that need to run before the focus or
         // inputs elements that are in a disabled state but are enabled when those events
         // are triggered.
-        this.$timeout(() => {
-          var element = this.$window.document.getElementById('specimenDescription');
+        service.$timeout(() => {
+          const element = service.$window.document.getElementById('specimenDescription');
           if (element) { element.focus(); }
         });
       }
@@ -152,21 +163,19 @@ class SpecimenAddModalService {
       }
 
       inventoryIdUpdated() {
-        var alreadyEntered;
-
         if (!this.inventoryId) {
           this.$scope.form.inventoryId.$setValidity('inventoryIdEntered', true);
           this.$scope.form.inventoryId.$setValidity('inventoryIdTaken', true);
           return;
         }
 
-        alreadyEntered = _.find(this.specimens, { inventoryId: this.inventoryId });
+        const alreadyEntered = _.find(this.specimens, { inventoryId: this.inventoryId });
 
         this.$scope.form.inventoryId.$setValidity('inventoryIdEntered', !alreadyEntered);
 
         if (!alreadyEntered) {
           this.$scope.form.inventoryId.$setValidity('inventoryIdTaken', true);
-          this.Specimen.getByInventoryId(this.inventoryId)
+          service.Specimen.getByInventoryId(this.inventoryId)
             .then(() => {
               this.$scope.form.inventoryId.$setValidity('inventoryIdTaken', false);
             })
@@ -176,7 +185,7 @@ class SpecimenAddModalService {
 
     }
 
-    var modalInstance = this.$uibModal.open({
+    const modal = this.$uibModal.open({
       template: require('./specimenAddModal.html'),
       controller: ModalController,
       controllerAs: 'vm',
@@ -185,7 +194,7 @@ class SpecimenAddModalService {
       modalFade: true
     });
 
-    return modalInstance;
+    return modal;
   }
 }
 

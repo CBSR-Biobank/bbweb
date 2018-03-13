@@ -1,19 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.participants.CollectionEvent CollectionEvents}.
+ *
+ * @namespace collection.components.ceventsList
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-/*
- * This component lists the collection events for a participant.
- */
-var component = {
-  template: require('./ceventsList.html'),
-  controller: CeventsListController,
-  controllerAs: 'vm',
-  bindings: {
-    participant: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -39,4 +31,23 @@ function CeventsListController($q, $scope) {
 }
 
 
-export default ngModule => ngModule.component('ceventsList', component)
+/**
+ * An AngularJS component that lists the {@link domain.participants.CollectionEvent CollectionEvents} for a
+ * {@link domain.participants.Participant Participant}.
+ *
+ * @memberOf collection.components.ceventsList
+ *
+ * @param {domain.participants.Participant} participant - The participant to list *Collection Events*
+ * for.
+ *
+ */
+const ceventsListComponent = {
+  template: require('./ceventsList.html'),
+  controller: CeventsListController,
+  controllerAs: 'vm',
+  bindings: {
+    participant: '<'
+  }
+};
+
+export default ngModule => ngModule.component('ceventsList', ceventsListComponent)

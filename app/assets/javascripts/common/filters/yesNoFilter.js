@@ -1,18 +1,31 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /* @ngInject */
 function yesNoFilterFactory(gettextCatalog) {
-  return yesNoFilter;
 
   /**
-   * Converts a boolean value to "yes" or "no".
+   * An AngualrJS Filter.
+   *
+   * @memberOf common.filters
    */
-  function yesNoFilter(input) {
-    return input ? gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
+  class YesNoFilter {
+
+    /**
+     * Converts a Boolean value to either `Yes` or `No`.
+     *
+     * @param {boolean} input - the value to convert.
+     *
+     * @return {string}
+     */
+    static filter(input) {
+      return input ? gettextCatalog.getString('Yes') : gettextCatalog.getString('No');
+    }
   }
+
+  return YesNoFilter.filter;
 }
 
 export default ngModule => ngModule.filter('yesNo', yesNoFilterFactory)

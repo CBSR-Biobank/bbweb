@@ -1,11 +1,15 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentSpecimensAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import { ShipmentSpecimensController } from '../../controllers/ShipmentSpecimensController'
 
-/**
+/*
  * This controller subclasses {@link ShipmentSpecimensController}.
  */
 class ShipmentSpecimensAddController extends ShipmentSpecimensController {
@@ -114,14 +118,21 @@ class ShipmentSpecimensAddController extends ShipmentSpecimensController {
 
 }
 
-const component = {
+/**
+ * An AngularJS component for that allows the user to add {@link domain.participants.Specimen Specimens} to a
+ * {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.shipmentSpecimensAdd
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment the specimens will be added to.
+ */
+const shipmentSpecimensAddComponent = {
   template: require('./shipmentSpecimensAdd.html'),
   controller: ShipmentSpecimensAddController,
   controllerAs: 'vm',
   bindings: {
-    shipment: '<',
-    readOnly: '<'
+    shipment: '<'
   }
 }
 
-export default ngModule => ngModule.component('shipmentSpecimensAdd', component)
+export default ngModule => ngModule.component('shipmentSpecimensAdd', shipmentSpecimensAddComponent)

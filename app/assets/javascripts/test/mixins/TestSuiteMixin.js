@@ -1,29 +1,28 @@
-/**
- * A mixin for test suites.
- *
- * @mixin testSuiteMixin
- *
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/**
- * This is a mixin that can be added UserContext object of a Jasmine test suite.
- *
- * @return {object} Object containing the functions that will be mixed in.
- */
 /* @ngInject */
-function TestSuiteMixin($injector) {
+function TestSuiteMixinService($injector) {
 
-  return {
+  /**
+   * This mixin that can be added to the UserContext object of a {@link https://jasmine.github.io/ Jasmine}
+   * test suite.
+   *
+   * It provides several functions that are common in all test suites.
+   *
+   * @mixin test.mixins.TestSuiteMixin
+   */
+  const TestSuiteMixin = {
     injectDependencies,
     capitalizeFirstLetter,
     url
   };
 
-  //--
-
-  // cannot use arrow function since "arguments" is used
+  /**
+   * Used to inject AngularJS dependencies into the Jasmine test suite.
+   */
   function injectDependencies(...dependencies) {
     dependencies.forEach((dependency) => {
       if (dependency.trim() === '') {
@@ -33,18 +32,29 @@ function TestSuiteMixin($injector) {
     });
   }
 
+  /**
+   * @param {string} string - the string to be capitalized.
+   *
+   * @return {string} The string passed in but with the first letter capilatized.
+   */
   function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
 
+  /**
+   * Returns a URL with the given path and and correct prefix used by the Biobank Server's REST API.
+   *
+   * @return {string} The URL.
+   */
   function url(...paths) {
     if (paths.length <= 0) {
       throw new Error('no arguments specified');
     }
-    const allpaths = [ '/api' ].concat(paths)
-    return allpaths.join('/');
- }
+    return [ '/api' ].concat(paths).join('/');
+  }
+
+  return TestSuiteMixin;
 
 }
 
-export default ngModule => ngModule.service('TestSuiteMixin', TestSuiteMixin)
+export default ngModule => ngModule.service('TestSuiteMixin', TestSuiteMixinService)

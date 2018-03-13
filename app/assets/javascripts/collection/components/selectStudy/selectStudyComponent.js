@@ -1,26 +1,13 @@
 /**
+ * AngularJS Component for {@link domain.participants.Specimen Specimen} collection.
+ *
+ * @namespace collection.components.selectStudy
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-/*
- * This component allows the user to select a {@link Study} from the list provided by function getStudies().
- */
-var component = {
-  template: require('./selectStudy.html'),
-  controller: SelectStudyController,
-  controllerAs: 'vm',
-  bindings: {
-    header:           '@',
-    getStudies:       '&',
-    limit:            '<',
-    messageNoResults: '@',
-    icon:             '@',
-    onStudySelected:  '&'
-  }
-};
 
 /*
  * Controller for this component.
@@ -125,4 +112,64 @@ function SelectStudyController($state, gettextCatalog, modalService) {
   }
 }
 
-export default ngModule => ngModule.component('selectStudy', component)
+/**
+ * An AngularJS component that allows the user to select a {@link domain.studies.Study Study} from the list
+ * provided by function `getStudies()`.
+ *
+ * A Bootstrap *Panel* is used to display the studies.
+ *
+ * @memberOf collection.components.selectStudy
+ *
+ * @param {string} header - the string to display in the panel's header.
+ *
+ * @param {collection.components.selectStudy.GetStudies} getStudies - the function to use to retrieve
+ * studies.
+ *
+ * @param {int} limit - the default value to use in parameter `options.limit` when invoking `getStudies`.
+ *
+ * @param {string} messageNoResults - the message to display if `getStudies` returns an empty result.
+ *
+ * @param {string} icon - the name of the Bootstrap Glyphicon to display for the studies.
+ *
+ * @param {collection.components.selectStudy.StudySelected} onStudySelected - the function called by this
+ * component when the user has selected a study.
+  */
+const selectStudyComponent = {
+  template: require('./selectStudy.html'),
+  controller: SelectStudyController,
+  controllerAs: 'vm',
+  bindings: {
+    header:           '@',
+    getStudies:       '&',
+    limit:            '<',
+    messageNoResults: '@',
+    icon:             '@',
+    onStudySelected:  '&'
+  }
+};
+
+/**
+ * The callback function used by {@link collection.components.selectStudy.selectStudyComponent
+ * selectStudyComponent} to retrieve {@link domain.studies.Study Studies}.
+ *
+ * @callback collection.components.selectStudy.GetStudies
+ *
+ * @param {common.controllers.PagedListController.PagerOptions} options - the pager options used to retrieve
+ * studies.
+ *
+ * @returns {Promise<common.controllers.PagedListController.PagedResult<domain.studies.Study>>} A promise
+ * with items of type {@link domain.studies.Study Study}.
+ */
+
+/**
+ * The callback function used by {@link collection.components.selectStudy.selectStudyComponent
+ * selectStudyComponent} when the user selects a {@link domain.studies.Study Study}.
+ *
+ * @callback collection.components.selectStudy.StudySelected
+ *
+ * @param {domain.studies.Study} study - the study selected by the user.
+ *
+ * @returns {undefined}
+ */
+
+export default ngModule => ngModule.component('selectStudy', selectStudyComponent)

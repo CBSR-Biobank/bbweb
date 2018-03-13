@@ -1,24 +1,65 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
+let service;
 
 /**
- * Opens a modal that allows the user to select a centre location.
+ * An AngularJS service that allows for the creation of a modal to let the user tag a {@link
+ * domain.centres.Shipment Shipment} as {@link domain.centres.ShipmentState SENT}.
+ *
+ * @memberOf centres.services
  */
-/* @ngInject */
-function shipmentSkipToSentModalService($uibModal) {
-  var service = {
-    open: openModal
-  };
-  return service;
+class ShipmentSkipToSentModalService {
 
-  //-------
+  constructor($uibModal) {
+    'ngInject';
+    Object.assign(this, { $uibModal });
+    service = this;
+  }
 
-  function openModal() {
-    var modal;
+  /**
+   * Opens a modal to let the user tag a {@link domain.centres.Shipment Shipment} as {@link
+   * domain.centres.ShipmentState SENT}.
+   *
+   * If the user presses the `OK` button, then an object containing the time the shipment was packed and
+   * sent is returned.
+   *
+   * @return {object} The **UI Bootstrap Modal** instance.
+   */
+  open() {
+    let modal = null;
 
-    modal = $uibModal.open({
+    class ModalController {
+
+      constructor($uibModalInstance) {
+        'ngInject';
+        Object.assign(this, { $uibModalInstance });
+
+        this.timePacked = new Date();
+        this.timeSent   = new Date();
+      }
+
+      timePackedOnEdit(datetime) {
+        this.timePacked = datetime;
+      }
+
+      timeSentOnEdit(datetime) {
+        this.timeSent = datetime;
+      }
+
+      okPressed() {
+        this.$uibModalInstance.close({ timePacked: this.timePacked, timeSent: this.timeSent });
+      }
+
+      cancelPressed() {
+        this.$uibModalInstance.dismiss('cancel');
+      }
+
+    }
+
+    modal = service.$uibModal.open({
       template: require('./shipmentSkipToSentModal.html'),
       controller: ModalController,
       controllerAs: 'vm',
@@ -27,45 +68,10 @@ function shipmentSkipToSentModalService($uibModal) {
       modalFade: true
     });
 
-    ModalController.$inject = [
-      '$uibModalInstance'
-    ];
-
     return modal;
-
-    //--
-
-    function ModalController($uibModalInstance) {
-      var vm = this;
-
-      vm.timePacked       = new Date();
-      vm.timeSent         = new Date();
-      vm.timePackedOnEdit = timePackedOnEdit;
-      vm.timeSentOnEdit   = timeSentOnEdit;
-      vm.okPressed        = okPressed;
-      vm.cancelPressed    = cancelPressed;
-
-      //---
-
-      function timePackedOnEdit(datetime) {
-        vm.timePacked = datetime;
-      }
-
-      function timeSentOnEdit(datetime) {
-        vm.timeSent = datetime;
-      }
-
-      function okPressed() {
-        $uibModalInstance.close({ timePacked: vm.timePacked, timeSent: vm.timeSent });
-      }
-
-      function cancelPressed() {
-        $uibModalInstance.dismiss('cancel');
-      }
-    }
   }
 
 }
 
 export default ngModule => ngModule.service('shipmentSkipToSentModalService',
-                                           shipmentSkipToSentModalService)
+                                           ShipmentSkipToSentModalService)

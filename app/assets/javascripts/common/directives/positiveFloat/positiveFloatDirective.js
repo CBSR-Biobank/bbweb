@@ -1,37 +1,45 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/**
- * Restricts input to a postiive floating point number.
- *
- * @return {object} An AngularJS directive.
- */
-function positiveFloatDirective() {
-  const FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/,
-        directive = {
-          restrict: 'A',
-          require:  'ngModel',
-          link:     link
-        };
+import { IntegerDirective } from '../integer/integerDirective';
 
-  return directive;
+function positiveFloatDirectiveFactory() {
 
-  function link(scope, elm, attrs, ctrl) {
-    ctrl.$parsers.unshift(function (viewValue) {
-      if (FLOAT_REGEXP.test(viewValue)) {
-        var floatValue = parseFloat(viewValue);
-        if (floatValue > 0) {
-          ctrl.$setValidity('positiveFloat', true);
-          return parseFloat(viewValue.replace(',', '.'));
+  /**
+   * Restricts input to a positive floating point number.
+   *
+   * @memberOf common.directives
+   */
+  class PositiveFloatDirective extends IntegerDirective {
+
+    constructor() {
+      super();
+      this.restrict = 'A';
+
+      /** @readonly */
+      this.FLOAT_REGEXP = /^\-?\d+((\.|\,)\d+)?$/;
+    }
+
+    link(scope, elm, attrs, ctrl) {
+      ctrl.$parsers.unshift((viewValue) => {
+        let floatValue = NaN;
+
+        if (this.FLOAT_REGEXP.test(viewValue)) {
+          floatValue = parseFloat(viewValue);
+          if (!isNaN(floatValue)) {
+            floatValue = (floatValue > 0) ? parseFloat(viewValue.replace(',', '.')) : NaN;
+          }
         }
-      }
 
-      ctrl.$setValidity('positiveFloat', false);
-      return undefined;
-    });
+        ctrl.$setValidity('positiveFloat', !isNaN(floatValue));
+        return floatValue;
+      });
+    }
   }
+
+  return new PositiveFloatDirective();
 }
 
-export default ngModule => ngModule.directive('positiveFloat', positiveFloatDirective)
+export default ngModule => ngModule.directive('positiveFloat', positiveFloatDirectiveFactory)

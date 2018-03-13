@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.usersPagedList
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import { PagedListController } from '../../../../../common/controllers/PagedListController';
@@ -9,7 +13,7 @@ import _ from 'lodash';
 /*
  * Controller for this component.
  */
-class Controller extends PagedListController {
+class UsersPagedListController extends PagedListController {
 
   constructor($log,
               $state,
@@ -36,7 +40,7 @@ class Controller extends PagedListController {
           {
             nameFilter:  new NameFilter(),
             emailFilter: new EmailFilter(),
-            stateFilter: new StateFilter(true, stateData, 'all')
+            stateFilter: new StateFilter(stateData, 'all', true)
           },
           [
             { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') },
@@ -92,17 +96,22 @@ class Controller extends PagedListController {
 }
 
 /**
- * Displays studies in a panel list.
+ * An AngularJS component that displays {@link domain.access.User Users} in a panel list.
  *
- * @return {object} An AngularJS component.
+ * The list of users can be filtered and sorted by different fields. The users are displayed in a
+ * paged fashion, allowing the logged in user to page through all the users in the system.
+ *
+ * @memberOf admin.users.components.usersPagedList
+ *
+ * @param {domain.users.UserCounts} userCount - the counts of users indexed by state.
  */
-const component = {
+const usersPagedListComponent = {
   template: require('./usersPagedList.html'),
-  controller: Controller,
+  controller: UsersPagedListController,
   controllerAs: 'vm',
   bindings: {
     userCounts: '<'
   }
 };
 
-export default ngModule => ngModule.component('usersPagedList', component)
+export default ngModule => ngModule.component('usersPagedList', usersPagedListComponent)

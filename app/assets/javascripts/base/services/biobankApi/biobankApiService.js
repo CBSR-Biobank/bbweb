@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 function apiCall(method, url, config = {}) {
@@ -36,9 +36,9 @@ function apiCall(method, url, config = {}) {
  * <p> All REST responses from the server have a similar response JSON object. The methods in this service
  * return the 'data' field if the call was successful.
  *
- * @memberOf ng.base.services
+ * @memberOf base.services
  */
-class biobankApiService {
+class BiobankApiService {
 
   constructor($http, $q, $log, AppConfig) {
     'ngInject'
@@ -95,6 +95,27 @@ class biobankApiService {
     return apiCall.bind(this)('DELETE', url);
   }
 
+  /**
+   * Utility function to generate a URL from an array of strings.
+   *
+   * The Biobank Server's REST API prefix is also prepended to the result.
+   *
+   * @param {...string} paths - the path elements to the REST API (without the slash character).
+   *
+   * @return {string} The URL.
+   *
+   * @example
+   * // returns "/api/studies/study-id-1"
+   * biobankApi.url("studies", "study-id-1");
+   */
+  url(...paths) {
+    const args = [ this.AppConfig.restApiUrlPrefix ].concat(paths)
+    if (args.length <= 0) {
+      throw new Error('no arguments specified')
+    }
+    return args.join('/')
+  }
+
   // this function taken from here:
   // https://gist.github.com/mathewbyrne/1280286
   /**
@@ -110,4 +131,4 @@ class biobankApiService {
   }
 }
 
-export default ngModule => ngModule.service('biobankApi', biobankApiService)
+export default ngModule => ngModule.service('biobankApi', BiobankApiService)

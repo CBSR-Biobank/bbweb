@@ -1,24 +1,11 @@
 /**
+ * AngularJS Components used in Administration modules
+ *
+ * @namespace admin.common.components.biobankAdmin
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-/**
- * @class ng.admin.common.components.annotationTypeView
- *
- * An AngularJS component that displays the Administration Home page.
- * <p>
- * From this page the user is able to select various links that lead to other tasks.
- *
- * @memberOf ng.admin.common.components
- */
-var biobankAdmin = {
-  template: require('./biobankAdmin.html'),
-  controller: BiobankAdminController,
-  controllerAs: 'vm',
-  bindings: {
-  }
-};
 
 /*
  * Controller for this component.
@@ -53,4 +40,19 @@ function BiobankAdminController(adminService, userService, User, breadcrumbServi
   }
 }
 
-export default ngModule => ngModule.component('biobankAdmin', biobankAdmin)
+/**
+ * An AngularJS component that displays the Administration Home page.
+ * <p>
+ * From this page the user is able to select various links that lead to other tasks.
+ *
+ * @memberOf admin.common.components.biobankAdmin
+ */
+const biobankAdminComponent = {
+  template: require('./biobankAdmin.html'),
+  controller: BiobankAdminController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('biobankAdmin', biobankAdminComponent)

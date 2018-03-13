@@ -1,6 +1,12 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
  *
+ * @namespace admin.users.components.membershipsView
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
 import _ from 'lodash';
 
 class MembershipViewController {
@@ -279,7 +285,17 @@ class MembershipViewController {
 
 }
 
-var component = {
+/**
+ * An AngularJS component that allows the user to view the configuration for a {@link domain.access.Membership
+ * Membership}.
+ *
+ * The user is also allowed to modify or delete this membership.
+ *
+ * @memberOf admin.users.components.membershipsView
+ *
+ * @param {domain.access.Membership} membership - the membership to view.
+ */
+const membershipViewComponent = {
   template: require('./membershipView.html'),
   controller: MembershipViewController,
   controllerAs: 'vm',
@@ -288,4 +304,4 @@ var component = {
   }
 };
 
-export default ngModule => ngModule.component('membershipView', component)
+export default ngModule => ngModule.component('membershipView', membershipViewComponent)

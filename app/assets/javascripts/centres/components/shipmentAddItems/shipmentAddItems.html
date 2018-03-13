@@ -1,9 +1,6 @@
 <breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
 <div ng-if="vm.shipment.isCreated()">
-  <progress-tracker
-    items="vm.progressInfo.items"
-    current="vm.progressInfo.current">
-    </progress-tracker>
+  <progress-tracker task-data="vm.progressInfo"></progress-tracker>
   <div class="page-header">
     <h1>
       {{vm.shipment.courierName}}<small>: {{vm.shipment.trackingNumber}}

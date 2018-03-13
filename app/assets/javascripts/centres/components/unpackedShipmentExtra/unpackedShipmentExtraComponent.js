@@ -1,11 +1,113 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.unpackedShipmentExtra
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { UnpackBaseController } from '../../controllers/UnpackBaseController';
 import _ from 'lodash'
 
-var component = {
+/*
+ * Controller for this component.
+ */
+class UnpackedShipmentExtraController extends UnpackBaseController {
+
+  constructor($q,
+              $scope,
+              ShipmentSpecimen,
+              ShipmentItemState,
+              domainNotificationService,
+              notificationsService,
+              modalService,
+              gettextCatalog) {
+    'ngInject';
+    super(modalService, gettextCatalog);
+    Object.assign(this,
+                  {
+                    $q,
+                    $scope,
+                    ShipmentSpecimen,
+                    ShipmentItemState,
+                    domainNotificationService,
+                    notificationsService
+                  });
+  }
+
+  $onInit() {
+    this.refreshTable = 0;
+    this.actions =  [
+      {
+        id:    'tag-as-extra',
+        class: 'btn-warning',
+        title: this.gettextCatalog.getString('Remove'),
+        icon:  'glyphicon-remove'
+      }
+    ];
+    this.$scope.$emit('tabbed-page-update', 'tab-selected');
+  }
+
+  getExtraSpecimens(options) {
+    if (!this.shipment) { return this.$q.when({ items: [], maxPages: 0 }); }
+
+    options = options || {};
+    _.extend(options, { filter: 'state:in:' + this.ShipmentItemState.EXTRA });
+
+    return this.ShipmentSpecimen.list(this.shipment.id, options)
+      .then(paginatedResult => ({
+        items:    paginatedResult.items,
+        maxPages: paginatedResult.maxPages
+      }));
+  }
+
+  /*
+   * User entered inventory IDs entered to be marked as extra in this shipment.
+   */
+  onInventoryIdsSubmit() {
+    var inventoryIds = this.inventoryIds.split(',')
+        .map((nonTrimmedInventoryId) => nonTrimmedInventoryId.trim());
+    return this.tagSpecimensAsExtra(inventoryIds);
+  }
+
+  /*
+   * User wishes to remove this shipment specimen from this shipment.
+   */
+  tableActionSelected(shipmentSpecimen) {
+    const promiseFn = () =>
+          shipmentSpecimen.remove()
+          .then(() => {
+            this.refreshTable += 1;
+            this.notificationsService.success(
+              this.gettextCatalog.getString('Specimen returnted to unpacked'));
+          });
+
+    this.domainNotificationService.removeEntity(
+      promiseFn,
+      this.gettextCatalog.getString('Remove extra specimen'),
+      this.gettextCatalog.getString(
+        'Are you sure you want to remove specimen with inventory ID <strong>{{id}}</strong> ' +
+          'as an <i>Extra</i> specimen from this shipment?',
+        { id: shipmentSpecimen.specimen.inventoryId }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString(
+        'Specimen with ID {{id}} cannot be removed',
+        { id: shipmentSpecimen.specimen.inventoryId }));
+
+  }
+
+}
+
+/**
+ * An AngularJS component that shows the user the items tagged as {@link domain.centres.ShipmentItemState
+ * EXTRA} in a {@link domain.centres.Shipment Shipment}.
+ *
+ * @memberOf centres.components.unpackedShipmentExtra
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display the items for.
+ */
+const unpackedShipmentExtraComponent = {
   template: require('./unpackedShipmentExtra.html'),
   controller: UnpackedShipmentExtraController,
   controllerAs: 'vm',
@@ -14,91 +116,4 @@ var component = {
   }
 };
 
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function UnpackedShipmentExtraController($q,
-                                         $controller,
-                                         $scope,
-                                         ShipmentSpecimen,
-                                         ShipmentItemState,
-                                         modalService,
-                                         domainNotificationService,
-                                         notificationsService,
-                                         gettextCatalog) {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //----
-
-  function onInit() {
-    $controller('UnpackBaseController', { vm:             vm,
-                                          modalService:   modalService,
-                                          gettextCatalog: gettextCatalog });
-    vm.refreshTable = 0;
-
-    vm.actions =  [
-      {
-        id:    'tag-as-extra',
-        class: 'btn-warning',
-        title: gettextCatalog.getString('Remove'),
-        icon:  'glyphicon-remove'
-      }
-    ];
-
-    vm.getExtraSpecimens    = getExtraSpecimens;
-    vm.onInventoryIdsSubmit = onInventoryIdsSubmit;
-    vm.tableActionSelected  = tableActionSelected;
-
-    $scope.$emit('tabbed-page-update', 'tab-selected');
-  }
-
-  function getExtraSpecimens(options) {
-    if (!vm.shipment) { return $q.when({ items: [], maxPages: 0 }); }
-
-    options = options || {};
-    _.extend(options, { filter: 'state:in:' + ShipmentItemState.EXTRA });
-
-    return ShipmentSpecimen.list(vm.shipment.id, options)
-      .then(function (paginatedResult) {
-        return { items: paginatedResult.items, maxPages: paginatedResult.maxPages };
-      });
-  }
-
-  /*
-   * User entered inventory IDs entered to be marked as extra in this shipment.
-   */
-  function onInventoryIdsSubmit() {
-    var inventoryIds = vm.inventoryIds.split(',').map((nonTrimmedInventoryId) => nonTrimmedInventoryId.trim());
-    return vm.tagSpecimensAsExtra(inventoryIds);
-  }
-
-  /*
-   * User wishes to remove this shipment specimen from this shipment.
-   */
-  function tableActionSelected(shipmentSpecimen) {
-    domainNotificationService.removeEntity(
-      promiseFn,
-      gettextCatalog.getString('Remove extra specimen'),
-      gettextCatalog.getString(
-        'Are you sure you want to remove specimen with inventory ID <strong>{{id}}</strong> ' +
-          'as an <i>Extra</i> specimen from this shipment?',
-        { id: shipmentSpecimen.specimen.inventoryId }),
-      gettextCatalog.getString('Remove failed'),
-      gettextCatalog.getString(
-        'Specimen with ID {{id}} cannot be removed',
-        { id: shipmentSpecimen.specimen.inventoryId }));
-
-    function promiseFn() {
-      return shipmentSpecimen.remove()
-        .then(function () {
-          vm.refreshTable += 1;
-          notificationsService.success(gettextCatalog.getString('Specimen returnted to unpacked'));
-        });
-    }
-  }
-
-}
-
-export default ngModule => ngModule.component('unpackedShipmentExtra', component)
+export default ngModule => ngModule.component('unpackedShipmentExtra', unpackedShipmentExtraComponent)

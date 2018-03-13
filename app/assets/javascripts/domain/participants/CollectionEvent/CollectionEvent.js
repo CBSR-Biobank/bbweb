@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -231,8 +231,8 @@ function CollectionEventFactory($q,
    * @param {int} [options.limit=10] The total number of Collection Events to return per page. The maximum
    *        page size is 10. If a value larger than 10 is used then the response is an error.
    *
-   * @returns {Promise} A promise of {@link domain.PagedResult} with items of type {@link
-   *          domain.participants.CollectionEvent}.
+   * @returns {Promise<common.controllers.PagedListController.PagedResult>} with items of type {@link
+   * domain.participants.CollectionEvent}.
    */
   CollectionEvent.list = function (participantId, options) {
     var url = this.url('list', participantId),

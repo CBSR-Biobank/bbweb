@@ -1,5 +1,5 @@
 /**
- * Augments objects returned by the server with additional methods.
+ * Domain model for data returned by the Biobank server.
  * @namespace domain
  */
 
@@ -29,118 +29,121 @@
  */
 
 /**
- * Components used by the application.
- * <p>
- * These components use the AngularJS framework.
- * @namespace ng
+ * Filter classes used to filter search results.
+ * @namespace domain.filters
  */
 
 /**
  * AngularJS components available to the rest of the application.
- * @namespace ng.base
+ * @namespace base
  */
 
 /**
  * AngularJS services available to the rest of the application.
- * @namespace ng.base.services
- */
-
-/**
- * Common AngularJS components available to the rest of the application.
- * @namespace ng.common
- */
-
-/**
- * Common AngularJS filters available to the rest of the application.
- * @namespace ng.common.filters
+ * @namespace base.services
  */
 
 /**
  * AngularJS components used for administration.
- * @namespace ng.admin
+ * @namespace admin
  */
 
 /**
  * AngularJS administration components available to other administration modules.
- * @namespace ng.admin.common
+ * @namespace admin.common
  */
 
 /**
  * AngularJS administration common controllers that are used as base classes.
- * @namespace ng.admin.common.controllers
+ * @namespace admin.common.controllers
  */
 
 /**
  * AngularJS administration common components.
- * @namespace ng.admin.common.components
+ * @namespace admin.common.components
  */
 
 /**
- * AngularJS user administration.
- * @namespace ng.admin.users
+ * AngularJS administration common services
+ * @namespace admin.common.services
  */
 
 /**
- * AngularJS user administration services.
- * @namespace ng.admin.users.services
+ * AngularJS components for {@link domain.users.User User} administration.
+ * @namespace admin.users
+ */
+
+/**
+ * AngularJS components for {@link domain.users.User User} administration.
+ * @namespace admin.users.components
+ */
+
+/**
+ * AngularJS services for {@link domain.users.User User} administration.
+ * @namespace admin.users.services
  */
 
 /**
  * AngularJS common components.
- * @namespace ng.common.components
+ * @namespace common.components
  */
 
 /**
  * AngularJS common controllers that are used as base classes.
- * @namespace ng.common.controllers
+ * @namespace common.controllers
  */
 
 /**
  * AngularJS services that are used by the rest of the application.
- * @namespace ng.common.services
- */
-
-/**
- * AngularJS components related to centres.
- * @namespace ng.centres
- */
-
-/**
- * AngularJS components related to specimen collection.
- * @namespace ng.collection
- */
-
-/**
- * AngularJS components related to centres.
- * @namespace ng.centres.components
+ * @namespace common.services
  */
 
 /**
  * AngularJS components related to the home page.
- * @namespace ng.home
+ * @namespace home
  */
 
 /**
  * AngularJS components related to the home page.
- * @namespace ng.home.components
+ * @namespace home.components
  */
 
 /**
  * AngularJS components related to shipment specimens.
- * @namespace ng.shipmentSpecimens
+ * @namespace shipmentSpecimens
  */
 
 /**
- * AngularJS components related to studies.
- * @namespace ng.studies
+ * AngularJS components related to {@link domain.studies.Study Studies}.
+ * @namespace studies
  */
 
 /**
  * AngularJS components used for testing.
- * @namespace ng.studies
+ * @namespace test
  */
 
 /**
- * AngularJS components related to users.
- * @namespace ng.studies
+ * AngularJS components related to {@link domain.users.Users}.
+ * @namespace users
+ */
+
+/**
+ * AngularJS services related to {@link domain.users.Users}.
+ * @namespace users.services
+ */
+
+/**
+ * AngularJS components used in testing.
+ * @namespace test
+ */
+
+/**
+ * AngularJS services used in testing.
+ * @namespace test.services
+ */
+
+/**
+ * Mixins used in test suites.
+ * @namespace test.mixins
  */

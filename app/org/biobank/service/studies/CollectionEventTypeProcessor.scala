@@ -294,7 +294,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                                            cmd.units,
                                                            cmd.anatomicalSourceType,
                                                            cmd.preservationType,
-                                                           cmd.preservationTemperatureType,
+                                                           cmd.preservationTemperature,
                                                            cmd.specimenType,
                                                            cmd.maxCount,
                                                            cmd.amount)
@@ -319,7 +319,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                       cmd.units,
                                       cmd.anatomicalSourceType,
                                       cmd.preservationType,
-                                      cmd.preservationTemperatureType,
+                                      cmd.preservationTemperature,
                                       cmd.specimenType,
                                       cmd.maxCount,
                                       cmd.amount).successNel[String]

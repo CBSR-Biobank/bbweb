@@ -20,7 +20,7 @@ describe('shipmentAddItemsComponent', function() {
                               '$state',
                               'toastr',
                               'Shipment',
-                              'SHIPMENT_SEND_PROGRESS_ITEMS',
+                              'shipmentSendTasksService',
                               'modalInput',
                               'modalService',
                               'shipmentSkipToSentModalService',
@@ -43,9 +43,17 @@ describe('shipmentAddItemsComponent', function() {
     this.createController(shipment);
     expect(this.controller.shipment).toBe(shipment);
     expect(this.controller.progressInfo).toBeDefined();
-    expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_SEND_PROGRESS_ITEMS.length);
-    expect(this.controller.progressInfo.items).toContainAll(this.SHIPMENT_SEND_PROGRESS_ITEMS);
-    expect(this.controller.progressInfo.current).toBe(2);
+
+    const taskData = this.shipmentSendTasksService.getTaskData();
+    taskData[0].status = true;
+    taskData[1].status = true;
+    expect(this.controller.progressInfo).toBeArrayOfSize(Object.keys(taskData).length);
+    taskData.forEach(taskInfo => {
+      expect(this.controller.progressInfo).toContain(taskInfo);
+    });
+    expect(this.controller.progressInfo[0].status).toBeTrue();
+    expect(this.controller.progressInfo[1].status).toBeTrue();
+
     expect(this.controller.tagAsPacked).toBeFunction();
     expect(this.controller.tagAsSent).toBeFunction();
     expect(this.controller.removeShipment).toBeFunction();

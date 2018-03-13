@@ -1,11 +1,11 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
 
-/**
+/*
  * Factory for participants.
  */
 /* @ngInject */
@@ -28,11 +28,11 @@ function ParticipantFactory($q,
    * @classdesc The subject for which a set of specimens were collected from. The subject can be human or
    * non human. A participant belongs to a single [Study]{@link domain.studies.Study}.
    *
-   * @class
-   * @memberOf domain.studies
-   * @extends domain.ConcurrencySafeEntity
-   *
    * <i>To convert server side annotations to Annotation class call setAnnotationTypes().<i>
+   *
+   * @class
+   * @memberOf domain.participants
+   * @extends domain.ConcurrencySafeEntity
    *
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.

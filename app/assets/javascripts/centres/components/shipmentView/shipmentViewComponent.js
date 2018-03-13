@@ -1,16 +1,11 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentView
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./shipmentView.html'),
-  controller: ShipmentViewController,
-  controllerAs: 'vm',
-  bindings: {
-    shipment: '<'
-  }
-};
 
 /* @ngInject */
 function ShipmentViewController(gettextCatalog, ShipmentState, breadcrumbService) {
@@ -57,4 +52,21 @@ function ShipmentViewController(gettextCatalog, ShipmentState, breadcrumbService
   }
 }
 
-export default ngModule => ngModule.component('shipmentView', component)
+/**
+ * An AngularJS component that lets the user view the information for a {@link domain.centres.Shipment
+ * Shipment}.
+ *
+ * @memberOf centres.components.shipmentView
+ *
+ * @param {domain.centres.Shipment} shipment - the shipment to display.
+ */
+const shipmentViewComponent = {
+  template: require('./shipmentView.html'),
+  controller: ShipmentViewController,
+  controllerAs: 'vm',
+  bindings: {
+    shipment: '<'
+  }
+};
+
+export default ngModule => ngModule.component('shipmentView', shipmentViewComponent)

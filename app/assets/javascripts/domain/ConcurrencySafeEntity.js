@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -85,16 +85,16 @@ function ConcurrencySafeEntityFactory($q,
       {},
       ConcurrencySafeEntity.SCHEMA,
       {
-      'id': id,
-      'type': type,
-      'properties': Object.assign(
-        {},
-        ConcurrencySafeEntity.SCHEMA.properties,
-        properties
-      ),
-      'required': ConcurrencySafeEntity.SCHEMA.required.slice().concat(required)
-    }
-  );
+        'id': id,
+        'type': type,
+        'properties': Object.assign(
+          {},
+          ConcurrencySafeEntity.SCHEMA.properties,
+          properties
+        ),
+        'required': ConcurrencySafeEntity.SCHEMA.required.slice().concat(required)
+      }
+    );
   }
 
   /**

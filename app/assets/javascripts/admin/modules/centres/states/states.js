@@ -1,17 +1,28 @@
 /**
- * Configure routes of centres module.
+ * UI Router states for {@link domain.centres.Centre Centre} administration.
+ *
+ * @namespace admin.centres.states
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
 
+/**
+ * UI Router states used for {@link domain.centres.Centre Centre} Administration.
+ *
+ * @name admin.centres.states.adminCentresUiRouterConfig
+ * @function
+ *
+ * @param {AngularJS_Service} $stateProvider
+ */
 /* @ngInject */
-function config($stateProvider) {
+function adminCentresUiRouterConfig($stateProvider) {
 
   $stateProvider
     .state('home.admin.centres', {
+      /** The entry state */
       url: '/centres',
       views: {
         'main@': {
@@ -20,12 +31,14 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.centres.add', {
+      /** Adds a centre */
       url: '/add',
       views: {
         'main@': 'centreAdd'
       }
     })
     .state('home.admin.centres.centre', {
+      /** virtual state for viewing a centre */
       abstract: true,
       url: '/{centreSlug}',
       resolve: {
@@ -36,24 +49,28 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.centres.centre.summary', {
+      /** for viewing the summary for a centre */
       url: '/summary',
       views: {
         'centreDetails': 'centreSummary'
       }
     })
     .state('home.admin.centres.centre.locations', {
+      /** shows the locations for a centre */
       url: '/locations',
       views: {
         'centreDetails': 'locationsPanel'
       }
     })
     .state('home.admin.centres.centre.locations.locationAdd', {
+      /** adds a loction to a centre */
       url: '/add',
       views: {
         'main@': 'centreLocationAdd'
       }
     })
     .state('home.admin.centres.centre.locations.locationView', {
+      /** views a single location on a centre */
       url: '/view/:locationSlug',
       resolve: {
         location: resolveLocation
@@ -63,6 +80,7 @@ function config($stateProvider) {
       }
     })
     .state('home.admin.centres.centre.studies', {
+      /** shows the studies associated with a centre */
       url: '/studies',
       views: {
         'centreDetails': 'centreStudiesPanel'
@@ -86,4 +104,4 @@ function config($stateProvider) {
 
 }
 
-export default ngModule => ngModule.config(config)
+export default ngModule => ngModule.config(adminCentresUiRouterConfig)

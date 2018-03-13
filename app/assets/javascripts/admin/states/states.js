@@ -1,12 +1,20 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  *
  * Configures routes for the administration module.
  */
 
+/**
+ * UI Router states used for Biobank Administration.
+ *
+ * @name admin.adminUiRouterconfig
+ * @function
+ *
+ * @param {AngularJS_Service} $stateProvider.
+ */
 /* @ngInject */
-function config($stateProvider) {
+function adminUiRouterconfig($stateProvider) {
 
   $stateProvider.state('home.admin', {
     // this state is checked for an authorized user, see uiRouterIsAuthorized() in app.js
@@ -18,4 +26,4 @@ function config($stateProvider) {
 
 }
 
-export default ngModule => ngModule.config(config)
+export default ngModule => ngModule.config(adminUiRouterconfig)

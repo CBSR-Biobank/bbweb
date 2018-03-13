@@ -25,7 +25,7 @@ describe('centreStateLabelService', function() {
       var self = this;
 
       context.labels = _.values(this.CentreState);
-      context.toLabelFunc = this.centreStateLabelService.stateToLabelFunc;
+      context.toLabelFunc = this.centreStateLabelService.stateToLabelFunc.bind(this.centreStateLabelService);
       context.expectedLabels = [];
       _.values(this.CentreState).forEach(function (state) {
         context.expectedLabels[state] = self.capitalizeFirstLetter(state);

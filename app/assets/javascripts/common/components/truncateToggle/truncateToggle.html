@@ -1,12 +1,12 @@
 <div class="row">
   <div class="col-md-10"  ng-if="(vm.text != null) && vm.text.length > 0" >
-    <button ng-if="vm.text.length > vm.toggleLength"
+    <button ng-if="vm.toggleRequired"
             class="btn btn-xs btn-default"
             ng-click="vm.toggleText()">
       {{vm.buttonLabel}}
     </button>
   </div>
-  <div class="col-md-10" ng-if="(vm.text == null) || vm.text.length <= 0">
+  <div class="col-md-10" ng-if="vm.text.length <= 0">
     <div class="alert alert-warning" role="alert">
       <p><span class="glyphicon glyphicon-warning-sign"></span> {{vm.textEmptyWarning}}</p>
     </div>

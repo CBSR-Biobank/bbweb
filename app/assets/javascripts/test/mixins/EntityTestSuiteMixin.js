@@ -1,12 +1,15 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash';
 
 /**
  * This is a mixin that can be added UserContext object of a Jasmine test suite.
+ *
+ * @mixin
+ * @memberOf test.mixins
  *
  * @return {object} Object containing the functions that will be mixed in.
  */

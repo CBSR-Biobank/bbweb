@@ -1,24 +1,17 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.membershipAdmin
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-/*
- * Allows the logged in user to modify another user's memberships.
- */
-var component = {
-  template: require('./membershipAdmin.html'),
-  controller: MembershipAdminsController,
-  controllerAs: 'vm',
-  bindings: {
-  }
-};
 
 /*
  * Controller for this component.
  */
 /* @ngInject */
-function MembershipAdminsController(breadcrumbService) {
+function MembershipAdminController(breadcrumbService) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -35,4 +28,20 @@ function MembershipAdminsController(breadcrumbService) {
 
 }
 
-export default ngModule => ngModule.component('membershipAdmin', component)
+/**
+ * An AngularJS component that allows the logged in user to view {@link domain.access.Membership Memberships}.
+ *
+ * From this component, the logged in user is allowed to add, modify and remove {@link
+ * domain.access.Membership Memberships}.
+ *
+ * @memberOf admin.users.components.membershipAdmin
+ */
+const membershipAdminComponent = {
+  template: require('./membershipAdmin.html'),
+  controller: MembershipAdminController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('membershipAdmin', membershipAdminComponent)

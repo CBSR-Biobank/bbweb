@@ -17,7 +17,7 @@ describe('shipmentViewCompletedComponent', function() {
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
-                              'SHIPMENT_RECEIVE_PROGRESS_ITEMS',
+                              'shipmentReceiveTasksService',
                               'Factory');
       TestUtils.addCustomMatchers();
 
@@ -34,10 +34,14 @@ describe('shipmentViewCompletedComponent', function() {
     var shipment = this.createShipment();
     this.createController(shipment);
 
+    const taskData = this.shipmentReceiveTasksService.getTaskData();
+
     expect(this.controller.progressInfo).toBeDefined();
-    expect(this.controller.progressInfo.items).toBeArrayOfSize(this.SHIPMENT_RECEIVE_PROGRESS_ITEMS.length);
-    expect(this.controller.progressInfo.items).toContainAll(this.SHIPMENT_RECEIVE_PROGRESS_ITEMS);
-    expect(this.controller.progressInfo.current).toBe(4);
+    expect(this.controller.progressInfo).toBeArrayOfSize(Object.keys(taskData).length);
+    taskData.forEach(taskInfo => {
+      taskInfo.status = true;
+      expect(this.controller.progressInfo).toContain(taskInfo);
+    });
   });
 
   describe('returning to unpacked state', function() {

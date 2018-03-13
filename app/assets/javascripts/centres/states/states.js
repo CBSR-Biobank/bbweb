@@ -1,12 +1,22 @@
 /**
- * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * UI Router states used {@link domain.centres.Shipment Shipping}.
  *
- * Configures routes for the administration module.
+ * @namespace centres.states
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+/**
+ * UI Router states used {@link domain.centres.Shipment Shipping}.
+ *
+ * @name centres.states.centresUiRouterConfig
+ * @function
+ *
+ * @param {AngularJS_Service} $stateProvider
+ */
 /* @ngInject */
-function config($stateProvider) {
+function centresUiRouterConfig($stateProvider) {
 
   $stateProvider
     .state('home.shipping', {
@@ -137,4 +147,4 @@ function config($stateProvider) {
 
 }
 
-export default ngModule => ngModule.config(config)
+export default ngModule => ngModule.config(centresUiRouterConfig)

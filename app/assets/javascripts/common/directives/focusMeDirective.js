@@ -1,36 +1,42 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/**
- * the HTML5 autofocus property can be finicky when it comes to dynamically loaded templates and such with
- * AngularJS. Use this simple directive to tame this beast once and for all.
- *
- * Usage:
- * <input type="text" autofocus>
- *
- */
 /* @ngInject */
-function focusMeDirective($timeout) {
-  var directive = {
-    restrict: 'A',
-    scope : {
-      focusMe : '@'
-    },
-    link: link
-  };
-  return directive;
+function focusMeDirectiveFactory($timeout) {
 
-  function link(scope, element) {
-    scope.$watch('focusMe', function(value) {
-      if(value === 'true') {
-        $timeout(function() {
-          element[0].focus();
-        });
-      }
-    });
+  /**
+   * An AngularJS Factory for focusing on an input in an HTML Form.
+   *
+   * The HTML5 autofocus property can be finicky when it comes to dynamically loaded templates and such with
+   * AngularJS. Use this simple directive to tame this beast once and for all.
+   *
+   * @memberOf common.directives
+   *
+   * @example
+   * <input type="text" focus-me="true">
+   */
+  class FocusMeDirective {
+
+    constructor() {
+      this.restrict = 'A';
+      this.scope = { focusMe : '@' };
+    }
+
+    link(scope, element) {
+      scope.$watch('focusMe', (value) => {
+        if(value === 'true') {
+          $timeout(() => {
+            element[0].focus();
+          });
+        }
+      });
+    }
+
   }
+
+  return new FocusMeDirective();
 }
 
-export default ngModule => ngModule.directive('focusMe', focusMeDirective)
+export default ngModule => ngModule.directive('focusMe', focusMeDirectiveFactory)

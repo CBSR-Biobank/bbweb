@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -37,7 +37,7 @@ describe('Component: studyAdd', function() {
 
   it('should contain valid settings to update a study', function() {
     this.createController();
-    expect(this.controller.study).toEqual(this.study);
+    expect(this.controller.breadcrumbs).toBeNonEmptyArray();
   });
 
   it('should return to valid state on cancel', function() {

@@ -1,9 +1,23 @@
-/**
- * The Specimen collection module.
- *
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
+/**
+ * AngularJS components related to {@link domain.participants.Specimen Specimen} collection.
+ * @namespace collection
+ */
+
+/**
+ * AngularJS Components related to {@link domain.participants.Specimen Specimen} collection.
+ * @namespace collection.components
+ */
+
+/**
+ * AngularJS services related to {@link domain.participants.Specimen Specimen} collection.
+ * @namespace collection.services
+ */
+
 import DomainModule    from '../domain'
 import StudiesModule   from '../studies'
 import UsersModule     from '../users'
@@ -14,7 +28,13 @@ import angularToastr   from 'angular-toastr';
 import angularUiRouter from '@uirouter/angularjs'
 import uiBootstrap     from 'angular-ui-bootstrap'
 
-const ngModule = angular.module('biobank.collection', [
+/**
+ * A Webpack module for user specimen collection.
+ *
+ * @memberOf collection
+ * @type {AngularJS_Module}
+ */
+const ngCollectionModule = angular.module('biobank.collection', [
   angularUiRouter,
   angularGettext,
   angularSanitize,
@@ -28,7 +48,7 @@ const ngModule = angular.module('biobank.collection', [
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 
 context.keys().forEach(key => {
-  context(key).default(ngModule)
+  context(key).default(ngCollectionModule)
 })
 
-export default ngModule.name
+export default ngCollectionModule.name

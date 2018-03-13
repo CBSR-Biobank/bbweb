@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
+ *
+ * @namespace admin.studies.components.collectionEventAnnotationTypeAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import { AnnotationTypeAddController } from '../../../common/controllers/AnnotationTypeAddController'
@@ -8,7 +12,7 @@ import { AnnotationTypeAddController } from '../../../common/controllers/Annotat
 /*
  * Controller for this component.
  */
-class Controller extends AnnotationTypeAddController {
+class CollectionEventAnnotationTypeAddController extends AnnotationTypeAddController {
 
   constructor($state,
               notificationsService,
@@ -49,9 +53,20 @@ class Controller extends AnnotationTypeAddController {
   }
 }
 
-const component = {
+/**
+ * An AngularJS component that allows the user to add an {@link domain.AnnotationType AnnotationType} to a
+ * {@link domain.studies.CollectionEventType CollectionEventType}.
+ *
+ * @memberOf admin.studies.components.collectionEventAnnotationTypeAdd
+ *
+ * @param {domain.studies.Study} study - the study the *Collection Event Type* belongs to.
+ *
+ * @param {domain.studies.CollectionEventType} collectionEventType - the collection event type the
+ * *Annotation Type* should be added to.
+ */
+const collectionEventAnnotationTypeAddComponent = {
   template: require('./collectionEventAnnotationTypeAdd.html'),
-  controller: Controller,
+  controller: CollectionEventAnnotationTypeAddController,
   controllerAs: 'vm',
   bindings: {
     study:               '<',
@@ -59,4 +74,5 @@ const component = {
   }
 };
 
-export default ngModule => ngModule.component('collectionEventAnnotationTypeAdd', component)
+export default ngModule => ngModule.component('collectionEventAnnotationTypeAdd',
+                                             collectionEventAnnotationTypeAddComponent)

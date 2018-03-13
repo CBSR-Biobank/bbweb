@@ -1,17 +1,21 @@
 /**
+ * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
+ *
+ * @namespace admin.studies.components.collectionSpecimenDescriptionAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash';
 
-var returnState = 'home.admin.studies.study.collection.ceventType';
+const returnState = 'home.admin.studies.study.collection.ceventType';
 
 /*
  * Controller for this component.
  */
 /* @ngInject */
-class Controller {
+class CollectionSpecimenDescriptionAddController {
 
   constructor($state,
               gettextCatalog,
@@ -19,7 +23,7 @@ class Controller {
               notificationsService,
               AnatomicalSourceType,
               PreservationType,
-              PreservationTemperatureType,
+              PreservationTemperature,
               SpecimenType,
               breadcrumbService) {
     Object.assign(this,
@@ -30,7 +34,7 @@ class Controller {
                     notificationsService,
                     AnatomicalSourceType,
                     PreservationType,
-                    PreservationTemperatureType,
+                    PreservationTemperature,
                     SpecimenType,
                     breadcrumbService
                   });
@@ -53,7 +57,7 @@ class Controller {
 
     this.anatomicalSourceTypes = _.values(this.AnatomicalSourceType);
     this.preservTypes          = _.values(this.PreservationType);
-    this.preservTempTypes      = _.values(this.PreservationTemperatureType);
+    this.preservTempTypes      = _.values(this.PreservationTemperature);
     this.specimenTypes         = _.values(this.SpecimenType);
   }
 
@@ -72,9 +76,20 @@ class Controller {
   }
 }
 
-const component = {
+/**
+ * An AngularJS component that allows the user to add a {@link domain.studies.CollectionSpecimenDescription
+ * CollectionSpecimenDescription} to a {@link domain.studies.CollectionEventType CollectionEventType}.
+ *
+ * @memberOf admin.studies.components.collectionSpecimenDescriptionAdd
+ *
+ * @param {domain.studies.Study} study - the study the *Collection Event Type* belongs to.
+ *
+ * @param {domain.studies.CollectionEventType} collectionEventType - the collection event type the
+ * *Specimen Description* should be added to.
+*/
+const collectionSpecimenDescriptionAddComponent = {
   template: require('./collectionSpecimenDescriptionAdd.html'),
-  controller: Controller,
+  controller: CollectionSpecimenDescriptionAddController,
   controllerAs: 'vm',
   bindings: {
     study:               '<',
@@ -82,4 +97,4 @@ const component = {
   }
 };
 
-export default ngModule => ngModule.component('collectionSpecimenDescriptionAdd', component)
+export default ngModule => ngModule.component('collectionSpecimenDescriptionAdd', collectionSpecimenDescriptionAddComponent)

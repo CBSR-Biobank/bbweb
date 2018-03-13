@@ -1,16 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.studies.Study Study} administration.
+ *
+ * @namespace admin.studies.components.studyAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./studyAdd.html'),
-  controller: StudyAddController,
-  controllerAs: 'vm',
-  bindings: {
-    study: '<'
-  }
-};
 
 const returnState = 'home.admin.studies';
 
@@ -61,4 +56,19 @@ function StudyAddController($state,
   }
 }
 
-export default ngModule => ngModule.component('studyAdd', component)
+/**
+ * An AngularJS component that allows the user to add a {@link domain.study.Study Study} to the server.
+ *
+ * The component displays a form the user must fill in.
+ *
+ * @memberOf admin.studies.components.studyAdd
+ */
+const studyAddComponent = {
+  template: require('./studyAdd.html'),
+  controller: StudyAddController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('studyAdd', studyAddComponent)

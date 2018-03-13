@@ -1,15 +1,14 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import angular from 'angular'
 
 /**
- * Originally the code was taken from the URL given below, but then it was modified.
+ * The original concept for this code was taken from the URL given below.
  *
  * http://weblogs.asp.net/dwahlin/building-an-angularjs-modal-service
- *
  */
 /* @ngInject */
 function modalService($uibModal, gettextCatalog) {

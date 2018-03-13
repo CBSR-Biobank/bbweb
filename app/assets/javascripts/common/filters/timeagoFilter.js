@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import moment from 'moment';
@@ -12,18 +12,35 @@ import moment from 'moment';
  */
 /* @ngInject */
 function timeagoFilterFactory(gettextCatalog) {
-  return timeago;
 
-  /*
-   * @param time a Date
+  /**
+   * An AngualrJS Filter.
+   *
+   * @memberOf common.filters
    */
-  function timeago(time) {
-    if(!time) {
-      return gettextCatalog.getString('never');
+  class TimeagoFilter {
+
+    /**
+     * Displays the relative time for a Date.
+     *
+     * @param {Date} time a time in the past.
+     *
+     * @return {string} the amount of time from now to the time in the past.
+     *
+     * @example
+     * // returns "4 years ago"
+     * filter(new Date('January 1, 2014'));
+     */
+    static filter(time) {
+      if(!time) {
+        return gettextCatalog.getString('never');
+      }
+      return moment(time).fromNow();
     }
-    return moment(time).fromNow();
+
   }
 
+  return TimeagoFilter.filter;
 }
 
 export default ngModule => ngModule.filter('timeago', timeagoFilterFactory)

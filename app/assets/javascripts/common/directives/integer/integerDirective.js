@@ -1,34 +1,41 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
+ * Restricts input to a an integer value.
  *
+ * @memberOf common.directives
  */
-function integerDirectiveFactory() {
-  var INTEGER_REGEXP = /^\-?\d+$/;
+class IntegerDirective {
 
-  var directive = {
-    require: 'ngModel',
-    link: link
-  };
-  return directive;
+  constructor() {
+    this.require = 'ngModel';
 
-  function link(scope, element, attrs, ctrl) {
-    ctrl.$parsers.unshift(function(viewValue){
-      if (INTEGER_REGEXP.test(viewValue)) {
-        // it is valid
-        ctrl.$setValidity('integer', true);
-        return viewValue;
-      }
+    /** @readonly */
+    this.INTEGER_REGEXP = /^\-?\d+$/;
+  }
 
-      // it is invalid, return undefined (no model update)
-      ctrl.$setValidity('integer', false);
-      return undefined;
+  /**
+   * @protected
+   */
+  parse(viewValue) {
+    return this.INTEGER_REGEXP.test(viewValue) ? viewValue : undefined;
+  }
+
+  link(scope, element, attrs, ctrl) {
+    ctrl.$parsers.unshift((viewValue) => {
+      const value = this.parse(viewValue);
+      ctrl.$setValidity('integer', value !== undefined);
+      return value;
     });
-
   }
 }
 
+function integerDirectiveFactory() {
+  return new IntegerDirective();
+}
+
+export { IntegerDirective }
 export default ngModule => ngModule.directive('integer', integerDirectiveFactory)

@@ -1,28 +1,28 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
  * This class encapsulates several constants used throughout the application.
- * <p>
+ *
  * They can be changed at runtime if required.
- * <p>
+ *
  * It is configured as an AngularJS provider.
- * @memberOf ng
+ *
+ * @memberOf base
  */
 class AppConfigProvider {
 
-  // initial / default config
   constructor() {
 
     /**
      * The default configuration.
      *
      * @property {string} restApiUrlPrefix - The prefix used by the server for it's REST API.
-      * @property {string} dateFormat - The default format used to convert Date objects to strings.
-      * @property {string} dateTimeFormat - The default format used to convert DateTime objects to strings.
-      * @property {string} datepickerFormat - The default format used to the DatePicker component.
+     * @property {string} dateFormat - The default format used to convert Date objects to strings.
+     * @property {string} dateTimeFormat - The default format used to convert DateTime objects to strings.
+     * @property {string} datepickerFormat - The default format used to the DatePicker component.
      */
     this.config = {
       restApiUrlPrefix: '/api',

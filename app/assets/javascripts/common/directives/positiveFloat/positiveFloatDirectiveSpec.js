@@ -2,7 +2,7 @@
  * Jasmine test suite
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 /* global angular */
 
@@ -38,7 +38,7 @@ describe('Directive: positiveFloat', function() {
   it('should not allow a negative integer', function() {
     var anInteger = -1;
     this.scope.testForm.theNumber.$setViewValue(anInteger.toString());
-    expect(this.controller.theNumber).toBeUndefined();
+    expect(this.controller.theNumber).toBeNull();
     expect(this.scope.testForm.theNumber.$valid).toBe(false);
   });
 
@@ -52,14 +52,14 @@ describe('Directive: positiveFloat', function() {
   it('should not allow a negative floating point', function() {
     var aFloat = -1.10;
     this.scope.testForm.theNumber.$setViewValue(aFloat.toString());
-    expect(this.controller.theNumber).toBeUndefined();
+    expect(this.controller.theNumber).toBeNull();
     expect(this.scope.testForm.theNumber.$valid).toBe(false);
   });
 
   it('should not allow an alphanumeric value', function() {
     var aString = 'x1.10';
     this.scope.testForm.theNumber.$setViewValue(aString);
-    expect(this.controller.theNumber).toBeUndefined();
+    expect(this.controller.theNumber).toBeNull();
     expect(this.scope.testForm.theNumber.$valid).toBe(false);
   });
 

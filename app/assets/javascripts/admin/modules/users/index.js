@@ -2,7 +2,7 @@
  * Study module.
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import CommonModule    from '../../../common'
@@ -12,7 +12,13 @@ import angular         from 'angular'
 import angularGettext  from 'angular-gettext'
 import angularUiRouter from '@uirouter/angularjs'
 
-const ngModule = angular.module('biobank.admin.users', [
+/**
+ * A Webpack module for {@link domain.users.User User} Administration.
+ *
+ * @memberOf admin.users
+ * @type {AngularJS_Module}
+ */
+const ngAdminUsersModule = angular.module('biobank.admin.users', [
   angularGettext,
   angularUiRouter,
   CommonModule,
@@ -22,7 +28,7 @@ const ngModule = angular.module('biobank.admin.users', [
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 
 context.keys().forEach(key => {
-  context(key).default(ngModule)
+  context(key).default(ngAdminUsersModule)
 })
 
-export default ngModule.name
+export default ngAdminUsersModule.name

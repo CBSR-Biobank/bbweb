@@ -1,6 +1,10 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentsTable
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -140,13 +144,15 @@ class ShipmentsTableController {
 }
 
 /**
- * Displays the shipments originating from, or destined to, a centre.
+ * An AngularJS component that displays the shipments originating from, or destined to, a centre.
+ *
+ * @memberOf centres.components.shipmentsTable
  *
  * @param {domain.centres.Centre} centre - The centre to display shipments for.
  *
- * @param {domain.centres.ShipmentTypes} shipmentTypes - the type of shipments to display.
+ * @param {Array<centres.SHIPMENT_TYPES>} shipmentTypes - the type of shipments to display.
  */
-const COMPONENT = {
+const shipmentsTableComponent = {
   template: require('./shipmentsTable.html'),
   controller: ShipmentsTableController,
   controllerAs: 'vm',
@@ -156,4 +162,4 @@ const COMPONENT = {
   }
 };
 
-export default ngModule => ngModule.component('shipmentsTable', COMPONENT)
+export default ngModule => ngModule.component('shipmentsTable', shipmentsTableComponent)

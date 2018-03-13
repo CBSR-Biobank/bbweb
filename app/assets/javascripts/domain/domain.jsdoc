@@ -10,21 +10,3 @@
  * @property {string} [message] - A message that explains why the validation failed. The message is an empty
  * string if the validation passed all checks.
  */
-
-/**
- * Object returned by server for a paged API call.
- *
- * @typedef domain.PagedResult
- *
- * @type object
- *
- * @property {Array<domain.ConcurrencySafeEntity>} id - the items in the result set.
- *
- * @property {int} page - The page these results correspond to.
- *
- * @property {int} limit - The number of items in this result set.
- *
- * @property {int} offset - The page offset. Starts at 0.
- *
- * @property {int} total - the total elements in all pages.
- */

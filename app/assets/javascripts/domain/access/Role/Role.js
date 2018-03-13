@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -16,6 +16,7 @@ function RoleFactory($q,
                      DomainError) {
   /**
    * A Role represents the set of permissions that a user has.
+   *
    * @extends domain.access.AccessItem
    * @memberOf domain.access
    */
@@ -223,7 +224,7 @@ function RoleFactory($q,
      * @param {int} options.limit The total number of roles to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
-     * @returns {Promise<domain.PagedResult>} A promise with items of type {@link domain.access.Role}.
+     * @returns {Promise<common.controllers.PagedListController.PagedResult>} A promise with items of type {@link domain.access.Role}.
      */
     static list(options) {
       var validKeys = [ 'filter', 'page', 'limit' ],

@@ -1,16 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
+ *
+ * @namespace admin.studies.components.ceventTypeAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./ceventTypeAdd.html'),
-  controller: CeventTypeAddController,
-  controllerAs: 'vm',
-  bindings: {
-    study: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -54,4 +49,21 @@ function CeventTypeAddController($state,
 
 }
 
-export default ngModule => ngModule.component('ceventTypeAdd', component)
+/**
+ * An AngularJS component that allows the user to add a {@link domain.studies.CollectionEventType
+ * CollectionEventType} using an HTML form.
+ *
+ * @memberOf admin.studies.components.ceventTypeAdd
+ *
+ * @param {domain.studies.Study} study - the study to add the collection event type to.
+ */
+const ceventTypeAddComponent = {
+  template: require('./ceventTypeAdd.html'),
+  controller: CeventTypeAddController,
+  controllerAs: 'vm',
+  bindings: {
+    study: '<'
+  }
+};
+
+export default ngModule => ngModule.component('ceventTypeAdd', ceventTypeAddComponent)

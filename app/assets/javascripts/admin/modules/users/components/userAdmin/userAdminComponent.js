@@ -1,13 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.users.User User} administration.
+ *
+ * @namespace admin.users.components.userAdmin
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-var component = {
-  template: require('./userAdmin.html'),
-  controller: UserAdminController,
-  controllerAs: 'vm'
-};
 
 /*
  * Shows a table of users.
@@ -35,4 +33,20 @@ function UserAdminController(userService, UserCounts, breadcrumbService, resourc
   }
 }
 
-export default ngModule => ngModule.component('userAdmin', component)
+/**
+ * An AngularJS component that displays the main page for {@link domain.users.User User} Adminisrattion.
+ *
+ * This page lists all users (in a paged fashion) in the system. The logged in user can then select one of
+ * these users to configure it.
+ *
+ * @memberOf admin.users.components.userAdmin
+ */
+const userAdminComponent = {
+  template: require('./userAdmin.html'),
+  controller: UserAdminController,
+  controllerAs: 'vm',
+  bindings: {
+  }
+};
+
+export default ngModule => ngModule.component('userAdmin', userAdminComponent)

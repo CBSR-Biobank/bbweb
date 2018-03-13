@@ -1,20 +1,11 @@
 /**
+ * AngularJS Component for {@link domain.centres.Centre Centre} administration.
+ *
+ * @namespace admin.centres.components.centreSummary
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-
-/**
- * Displays the centre administrtion page, with a number of tabs. Each tab displays the configuration
- * for a different aspect of the centre.
- */
-var component = {
-  template: require('./centreSummary.html'),
-  controller: CentreSummaryController,
-  controllerAs: 'vm',
-  bindings: {
-    centre: '<'
-  }
-};
 
 /*
  * Controller for this component.
@@ -42,7 +33,7 @@ function CentreSummaryController($scope,
 
     vm.stateLabelFunc  = centreStateLabelService.stateToLabelFunc(vm.centre.state);
 
-    // updates the selected tab in 'studyViewDirective' which is the parent directive
+    // updates the selected tab in 'centreView' component which is the parent directive
     $scope.$emit('tabbed-page-update', 'tab-selected');
   }
 
@@ -110,4 +101,20 @@ function CentreSummaryController($scope,
 
 }
 
-export default ngModule => ngModule.component('centreSummary', component)
+/**
+ * An AngularJS component that displays a summary for a {@link domain.centres.Centre Centre}.
+ *
+ * @memberOf admin.centres.components.centreSummary
+ *
+ * @param {domain.centres.Centre} centre - the centre to display information for.
+ */
+const centreSummaryComponent = {
+  template: require('./centreSummary.html'),
+  controller: CentreSummaryController,
+  controllerAs: 'vm',
+  bindings: {
+    centre: '<'
+  }
+};
+
+export default ngModule => ngModule.component('centreSummary', centreSummaryComponent)

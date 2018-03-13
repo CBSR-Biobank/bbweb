@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
@@ -261,7 +261,7 @@ function SpecimenFactory($q,
    *
    * @param {number} options.limit - The maximum number of specimens returned per page.
    *
-   * @returns {Promise} A promise of {@link domain.PagedResult} with items of type [Specimen]{@link
+   * @returns {Promise<common.controllers.PagedListController.PagedResult>} with items of type [Specimen]{@link
    *          domain.Specimen}.
    */
   Specimen.list = function (ceventSlug, options) {

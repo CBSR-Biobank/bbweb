@@ -1,25 +1,24 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
 
 /**
- * A modal that allows the user to modify an SELECT annotation type.
+ * An AngularJS service that allows the creation of a modal that modifies an {@link domain.AnnotationType
+ * AnnotationType} with SELECT {@link domain.AnnotationValueType valueType}.
  *
- * @param {object} $uibModal - The "UI Bootstrap" modal service.
+ * @memberOf admin.common.services
  *
- * @return {object} An AngularJS service.
+ * @param {UI_Bootstrap_Modal} $uibModal
  */
-/* @ngInject */
-function annotationTypeUpdateModalService($uibModal) {
-  var service = {
-    openModal: openModal
-  };
-  return service;
+class AnnotationTypeUpdateModalService {
 
-  //-------
+  constructor($uibModal) {
+    'ngInject';
+    Object.assign(this, { $uibModal });
+  }
 
   /**
    * Opens a modal, where the user is allowed to add, remove, or change the options associated with a Select
@@ -29,14 +28,14 @@ function annotationTypeUpdateModalService($uibModal) {
    *
    * @return {object} The "UI Bootstrap" modal instance.
    */
-  function openModal(annotationType) {
+  openModal(annotationType) {
     var modal;
 
     if (!annotationType.isSingleSelect() && !annotationType.isMultipleSelect()) {
       throw new Error('invalid annotation type: ' + annotationType.valueType);
     }
 
-    modal = $uibModal.open({
+    modal = this.$uibModal.open({
       template: require('./annotationTypeUpdateModal.html'),
       controller: ModalController,
       controllerAs: 'vm',
@@ -100,4 +99,4 @@ function annotationTypeUpdateModalService($uibModal) {
 
 }
 
-export default ngModule => ngModule.service('annotationTypeUpdateModal', annotationTypeUpdateModalService)
+export default ngModule => ngModule.service('annotationTypeUpdateModal', AnnotationTypeUpdateModalService)

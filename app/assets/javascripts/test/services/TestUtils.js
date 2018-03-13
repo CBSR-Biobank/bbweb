@@ -1,19 +1,27 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 import _ from 'lodash';
 import faker  from 'faker';
 
 /**
+ * Various utility functions that can be used in test cases.
  *
+ * @memberOf test.services
  */
 class TestUtils {
 
+  /**
+   * @return {boolean} a random boolean.
+   */
   randomBoolean() {
     return faker.random.number() === 1;
   }
 
+  /**
+   * @return {object} An object that simulates {@link https://angular-ui.github.io/bootstrap/ UI-Bootstrap} modal.
+   */
   fakeModal() {
     return {
       result: {
@@ -34,6 +42,9 @@ class TestUtils {
     };
   }
 
+  /**
+   * Adds custom matchers to the {@link https://jasmine.github.io/ Jasmine} environment.
+   */
   addCustomMatchers() {
     jasmine.addMatchers({
       toContainAll: function(util, customEqualityTesters) {
@@ -48,6 +59,12 @@ class TestUtils {
     });
   }
 
+  /**
+   * Converts a {@link https://en.wikipedia.org/wiki/Camel_case Camel} case string to {@link
+   * https://en.wikipedia.org/wiki/Snake_case Snake} case.
+   *
+   * @return {string} The input string in Snake Case format.
+   */
   camelCaseToUnderscore(str) {
     var result;
     if (_.isUndefined(str)) {

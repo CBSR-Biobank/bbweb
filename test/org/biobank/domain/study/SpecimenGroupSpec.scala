@@ -6,7 +6,7 @@ import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain.AnatomicalSourceType
 import org.biobank.domain.PreservationType
-import org.biobank.domain.PreservationTemperatureType
+import org.biobank.domain.PreservationTemperature
 import org.biobank.domain.SpecimenType
 import scalaz.Scalaz._
 
@@ -26,7 +26,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = nameGenerator.next[SpecimenGroup]
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val preservationTemperature = PreservationTemperature.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
       val v = SpecimenGroup.create(studyId,
@@ -37,7 +37,7 @@ class SpecimenGroupSpec extends DomainSpec {
                                    units,
                                    anatomicalSourceType,
                                    preservationType,
-                                   preservationTemperatureType,
+                                   preservationTemperature,
                                    specimenType)
       v mustSucceed { specimenGroup =>
         specimenGroup mustBe a[SpecimenGroup]
@@ -51,7 +51,7 @@ class SpecimenGroupSpec extends DomainSpec {
           'units                         (units),
           'anatomicalSourceType          (anatomicalSourceType),
           'preservationType              (preservationType),
-          'preservationTemperatureType   (preservationTemperatureType),
+          'preservationTemperature   (preservationTemperature),
           'specimenType                  (specimenType)
         )
 
@@ -69,7 +69,7 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = nameGenerator.next[SpecimenGroup]
       val anatomicalSourceType = AnatomicalSourceType.Colon
       val preservationType = PreservationType.RnaLater
-      val preservationTemperatureType = PreservationTemperatureType.RoomTemperature
+      val preservationTemperature = PreservationTemperature.RoomTemperature
       val specimenType = SpecimenType.Plasma
 
       specimenGroup.update(name,
@@ -77,7 +77,7 @@ class SpecimenGroupSpec extends DomainSpec {
                            units,
                            anatomicalSourceType,
                            preservationType,
-                           preservationTemperatureType,
+                           preservationTemperature,
                            specimenType
       ).mustSucceed { updatedSg =>
         updatedSg must have (
@@ -89,7 +89,7 @@ class SpecimenGroupSpec extends DomainSpec {
           'units                       (units),
           'anatomicalSourceType        (anatomicalSourceType),
           'preservationType            (preservationType),
-          'preservationTemperatureType (preservationTemperatureType),
+          'preservationTemperature (preservationTemperature),
           'specimenType                (specimenType)
         )
 
@@ -112,12 +112,12 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = nameGenerator.next[SpecimenGroup]
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val preservationTemperature = PreservationTemperature.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType).fold(
         err => err.list.toList must (have length 1 and contain("IdRequired")),
         user => fail
       )
@@ -132,12 +132,12 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = nameGenerator.next[SpecimenGroup]
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val preservationTemperature = PreservationTemperature.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType).fold(
         err => err.list.toList must (have length 1 and contain("IdRequired")),
         user => fail
       )
@@ -152,12 +152,12 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = nameGenerator.next[SpecimenGroup]
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val preservationTemperature = PreservationTemperature.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
        val validation = SpecimenGroup.create(
          studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType)
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType)
       validation mustFail "InvalidVersion"
     }
 
@@ -170,12 +170,12 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = nameGenerator.next[SpecimenGroup]
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val preservationTemperature = PreservationTemperature.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType).fold(
         err => err.list.toList must (have length 1 and contain("NameRequired")),
         user => fail
       )
@@ -183,7 +183,7 @@ class SpecimenGroupSpec extends DomainSpec {
       name = ""
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType).fold(
         err => err.list.toList must (have length 1 and contain("NameRequired")),
         user => fail
       )
@@ -198,19 +198,19 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = nameGenerator.next[SpecimenGroup]
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val preservationTemperature = PreservationTemperature.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(
         studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType).fold(
         err => err.list.toList must (have length 1 and contain("InvalidDescription")),
         user => fail
       )
 
       description = Some("")
       SpecimenGroup.create(studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType).fold(
         err => err.list.toList must (have length 1 and contain("InvalidDescription")),
         user => fail
       )
@@ -225,11 +225,11 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = ""
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val preservationTemperature = PreservationTemperature.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType).fold(
         err => err.list.toList must (have length 1 and contain("UnitsRequired")),
         user => fail
       )
@@ -244,11 +244,11 @@ class SpecimenGroupSpec extends DomainSpec {
       val units = ""
       val anatomicalSourceType = AnatomicalSourceType.Blood
       val preservationType = PreservationType.FrozenSpecimen
-      val preservationTemperatureType = PreservationTemperatureType.Minus80celcius
+      val preservationTemperature = PreservationTemperature.Minus80celcius
       val specimenType = SpecimenType.BuffyCoat
 
       SpecimenGroup.create(studyId, id, version, name, description, units,
-        anatomicalSourceType, preservationType, preservationTemperatureType, specimenType).fold(
+        anatomicalSourceType, preservationType, preservationTemperature, specimenType).fold(
         err => {
           err.list must have length 2
           err.list.toList.head mustBe ("InvalidVersion")

@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.participants.CollectionEvent CollectionEvents}.
+ *
+ * @namespace collection.components.ceventAdd
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
@@ -97,11 +101,21 @@ class CeventAddController {
   }
 }
 
-
 /**
- * Used to add a collection event.
+ * An AngularJS component that lets the user add a {@link domain.participants.CollectionEvent
+ * CollectionEvent}.
+ *
+ * @memberOf collection.components.ceventAdd
+ *
+ * @param {domain.studies.Study} study - The study to add to this *Collection Event* to.
+ *
+ * @param {domain.participants.Participant} participant - The participant to add to this *Collection Event*
+ * to.
+ *
+ * @param {domain.studies.CollectionEventType} collectionEventType - the *Collection Event Type* for this
+ * *Collection Event*.
  */
-const component = {
+const ceventAddComponent = {
   template: require('./ceventAdd.html'),
   controller: CeventAddController,
   controllerAs: 'vm',
@@ -112,4 +126,4 @@ const component = {
   }
 };
 
-export default ngModule => ngModule.component('ceventAdd', component)
+export default ngModule => ngModule.component('ceventAdd', ceventAddComponent)

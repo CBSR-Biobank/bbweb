@@ -1066,7 +1066,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val jsonObj = (json \ "data").as[JsObject]
           (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
           (jsonObj \ "preservationType").as[List[String]].size            must be > 0
-          (jsonObj \ "preservationTemperatureType").as[List[String]].size must be > 0
+          (jsonObj \ "preservationTemperature").as[List[String]].size must be > 0
           (jsonObj \ "specimenType").as[List[String]].size                must be > 0
       }
     }

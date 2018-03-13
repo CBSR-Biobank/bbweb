@@ -1,12 +1,16 @@
 /**
+ * AngularJS Components used in {@link domain.centres.Shipment Shipping}
+ *
+ * @namespace centres.components.shipmentsIncoming
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /*
  * Controller for this component.
  */
-class Controller {
+class ShipmentsIncomingController {
 
   constructor($scope,
               Shipment,
@@ -29,15 +33,20 @@ class Controller {
 }
 
 /**
+ * An AngularJS component that displays the incoming {@link domain.centres.Shipment Shipments} to a {@link
+ * domain.centres.Centre Centre}.
  *
+ * @memberOf centres.components.shipmentsIncoming
+ *
+ * @param {domain.centres.Centre} centre - the centre to display incoming shipments for.
  */
-var COMPONENT = {
+const shipmentsIncomingComponent = {
   template: require('./shipmentsIncoming.html'),
-  controller: Controller,
+  controller: ShipmentsIncomingController,
   controllerAs: 'vm',
   bindings: {
     centre: '<'
   }
 };
 
-export default ngModule => ngModule.component('shipmentsIncoming', COMPONENT)
+export default ngModule => ngModule.component('shipmentsIncoming', shipmentsIncomingComponent)

@@ -1,39 +1,45 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-const INTEGER_REGEXP = /^-?\d+$/;
+import { IntegerDirective } from '../integer/integerDirective';
 
-/**
- * Restricts input to a positive integer greater than zero.
- */
-function naturalNumberDirective() {
-  var directive = {
-    restrict: 'A',
-    require: 'ngModel',
-    link: link
-  };
+function naturalNumberDirectiveFactory() {
 
-  return directive;
+  /**
+   * Restricts input to a positive integer greater than zero.
+   *
+   * @memberOf common.directives
+   */
+  class NaturalNumberDirective extends IntegerDirective {
 
-  function link(scope, element, attrs, ctrl) {
-    ctrl.$parsers.unshift(function(viewValue){
-      if (INTEGER_REGEXP.test(viewValue)) {
-        var intValue = parseInt(viewValue, 10);
-        if (intValue > 0) {
-          // it is valid
-          ctrl.$setValidity('naturalNumber', true);
-          return viewValue;
-        }
+    constructor() {
+      super();
+      this.restrict = 'A';
+    }
+
+    /**
+     * @protected
+     */
+    parse(viewValue) {
+      const value = super.parse(viewValue)
+      if (value === undefined) {
+        return value;
       }
+      return (parseInt(value, 10) > 0) ? viewValue : undefined;
+    }
 
-      // it is invalid, return undefined (no model update)
-      ctrl.$setValidity('naturalNumber', false);
-      return undefined;
-    });
-
+    link(scope, element, attrs, ctrl) {
+      ctrl.$parsers.unshift((viewValue) => {
+        const value = this.parse(viewValue);
+        ctrl.$setValidity('integer', !isNaN(value));
+        return value;
+      });
+    }
   }
+
+  return new NaturalNumberDirective();
 }
 
-export default ngModule => ngModule.directive('naturalNumber', naturalNumberDirective)
+export default ngModule => ngModule.directive('naturalNumber', naturalNumberDirectiveFactory)

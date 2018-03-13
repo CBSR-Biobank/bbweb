@@ -25,7 +25,8 @@ describe('userStateLabelService', function() {
       var self = this;
 
       context.labels = _.values(this.UserState);
-      context.toLabelFunc = this.userStateLabelService.stateToLabelFunc;
+      context.toLabelFunc =
+        this.userStateLabelService.stateToLabelFunc.bind(this.userStateLabelService);
       context.expectedLabels = [];
       _.values(this.UserState).forEach(function (state) {
         context.expectedLabels[state] = self.capitalizeFirstLetter(state);

@@ -1,57 +1,91 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { LabelService } from '../../../../../base/services/LabelService';
 import _ from 'lodash';
 
 /**
- * An AngularJS service that converts an annotation "value type" to a i18n string that can
- * be displayed to the user.
+ * An AngularJS service that converts an {@link domain.AnnotationType#valueType AnnotationType.valueType}
+ * to a *translated string* that can be displayed to the user.
  *
- * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
- *
- * @param {object} AnnotationValueType - AngularJS constant that enumerates all the annotation value types.
- *
- * @return {Service} The AngularJS service.
+ * @memberOf admin.common.services
  */
-/* @ngInject */
-function annotationValueTypeLabelService(gettextCatalog, AnnotationValueType, labelService) {
-  var labels = {};
+class AnnotationValueTypeLabelService extends LabelService {
 
-  labels[AnnotationValueType.TEXT]      = () => gettextCatalog.getString('Text');
-  labels[AnnotationValueType.NUMBER]    = () => gettextCatalog.getString('Number');
-  labels[AnnotationValueType.DATE_TIME] = () => gettextCatalog.getString('Date and time');
-  labels[AnnotationValueType.SELECT]    = () => gettextCatalog.getString('Select');
+  /**
+   * @param {base.BbwebError} BbwebError - AngularJS factory for exceptions.
+   *
+   * @param {AngularJS_Service} gettextCatalog
+   *
+   * @param {domain.AnnotationValueType} AnnotationValueType - value type enumeration.
+   *
+   * @param {base.services.LabelService} labelService
+   */
+  constructor(BbwebError, gettextCatalog, AnnotationValueType) {
+    'ngInject';
+    super(BbwebError,
+          [
+            { id: AnnotationValueType.TEXT, label: () => gettextCatalog.getString('Text') },
+            { id: AnnotationValueType.NUMBER, label: () => gettextCatalog.getString('Number') },
+            { id: AnnotationValueType.DATE_TIME, label: () => gettextCatalog.getString('Date and time') },
+            { id: AnnotationValueType.SELECT, label: () => gettextCatalog.getString('Select') }
+          ]);
+    Object.assign(this, { AnnotationValueType, gettextCatalog });
+  }
 
-  var service = {
-    valueTypeToLabelFunc,
-    getLabels
-  };
-  return service;
-
-  //-------
-
-  function valueTypeToLabelFunc(valueType, isSingleSelect) {
-    if (valueType === AnnotationValueType.SELECT && !_.isUndefined(isSingleSelect)) {
+  /**
+   * Returns a function that should be called to display the label for a {@link domain.AnnotationValueType
+   * AnnotationValueType}.
+   *
+   * @param {domain.AnnotationValueType} valueType - the value type to get a function for.
+   *
+   * @param {boolean} [isSingleSelect] - Set to `TRUE` to return the function for a `SINGLE SELECT` {@link
+   * domain.AnnotationType AnnotationType}. Used only when `valueType` is {@link domain.AnnotationValueType
+   * SELECT}.
+   *
+   * @return {function} a function that returns a label that can be displayed to the user.
+   */
+  valueTypeToLabelFunc(valueType, isSingleSelect) {
+    if (valueType === this.AnnotationValueType.SELECT && !_.isUndefined(isSingleSelect)) {
       if (isSingleSelect) {
-        return function () { return gettextCatalog.getString('Single Select'); };
+        return () => this.gettextCatalog.getString('Single Select');
       } else {
-        return function () { return gettextCatalog.getString('Multiple Select'); };
+        return () => this.gettextCatalog.getString('Multiple Select');
       }
     }
 
-    return labelService.getLabel(labels, valueType);
+    return this.getLabel(valueType);
   }
 
-  function getLabels() {
-    return Object.values(AnnotationValueType).map((valueType) => ({
+  /**
+   * Returns the functions for all {@link domain.AnnotationValueType AnnotationValueTypes}.
+   *
+   * @return {Array<admin.common.services.AnnotationValueTypeLabelService.LabelInfo>}
+   */
+  getLabels() {
+    return Object.values(this.AnnotationValueType).map(valueType => ({
       id:        valueType,
-      labelFunc: valueTypeToLabelFunc(valueType)
+      labelFunc: this.valueTypeToLabelFunc(valueType)
     }));
   }
 
 }
 
+/**
+ * Object that contains the function that returns the label for the currently selected language for an
+ * {@link domain.AnnotationValueType AnnotationValueType}.
+ *
+ * @typedef admin.common.services.AnnotationValueTypeLabelService.LabelInfo
+ *
+ * @type object
+ *
+ * @property {domain.AnnotationValueType} valueType - the value type for this function.
+ *
+ * @property {function} labelFunc - the function that returns the label for the value type for currently
+ * selected language.
+ */
+
 export default ngModule => ngModule.service('annotationValueTypeLabelService',
-                                           annotationValueTypeLabelService)
+                                           AnnotationValueTypeLabelService)

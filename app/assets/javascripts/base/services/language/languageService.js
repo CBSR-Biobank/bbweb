@@ -1,6 +1,12 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2017 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
+ */
+
+/**
+ * An AngularJS Service that handles the language used by the application to display information to the user.
+ *
+ * @memberOf base.services
  */
 class LanguageService {
 
@@ -9,8 +15,15 @@ class LanguageService {
     Object.assign(this, { $window, gettextCatalog });
   }
 
-  initLanguage(options) {
-    options = options || {};
+  /**
+   * Used to initialize the language used by the application.
+   *
+   * @param {object} options - various options used by this function.
+   *
+   * @param {boolean} options.debug - displays the text that has not been translated to the selected language,
+   * if any. Used to debug which text still requires translation.
+   */
+  initLanguage(options = {}) {
     var lang = this.$window.localStorage.getItem('biobankAppLang') || 'en';
     this.gettextCatalog.setCurrentLanguage(lang);
     if (lang !== 'en') {
@@ -22,6 +35,11 @@ class LanguageService {
     }
   }
 
+  /**
+   * Changes the language used by the application.
+   *
+   * @param {string} lang - the ISO 639-2 language code of the language to change to.
+   */
   setLanguage(lang) {
     this.gettextCatalog.setCurrentLanguage(lang);
     if (lang !== 'en') {

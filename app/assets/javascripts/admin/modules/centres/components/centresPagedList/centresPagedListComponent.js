@@ -1,6 +1,10 @@
 /**
+ * AngularJS Component for {@link domain.centres.Centre Centre} administration.
+ *
+ * @namespace admin.centres.components.centresPagedList
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2016 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 import { PagedListController } from '../../../../../common/controllers/PagedListController';
 import _ from 'lodash';
@@ -34,7 +38,7 @@ class Controller extends PagedListController {
           resourceErrorService,
           {
             nameFilter: new NameFilter(),
-            stateFilter: new StateFilter(true, stateData, 'all')
+            stateFilter: new StateFilter(stateData, 'all', true)
           },
           [
             { id: 'name',  labelFunc: () => gettextCatalog.getString('Name') },
@@ -91,12 +95,14 @@ class Controller extends PagedListController {
 }
 
 /**
- * Displays items in a panel list. Can only be used for collections {@link domain.study.Study} and {@link
- * domain.cnetres.Centres}.
+ * An AngularJS component that displays {@link domain.centres.Centre Centres} in a panel list.
  *
- * @return {object} An AngularJS directive.
+ * The list of centres can be filtered and sorted by different fields. The centres are displayed in a paged
+ * fashion, allowing the user to page through all the centres in the system.
+ *
+ * @memberOf admin.centres.components.centresPagedList
  */
-const component = {
+const centresPagedListComponent = {
   template: require('./centresPagedList.html'),
   controller: Controller,
   controllerAs: 'vm',
@@ -104,4 +110,4 @@ const component = {
   }
 };
 
-export default ngModule => ngModule.component('centresPagedList', component)
+export default ngModule => ngModule.component('centresPagedList', centresPagedListComponent)

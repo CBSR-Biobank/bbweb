@@ -1,19 +1,13 @@
 /**
+ * AngularJS component available to the rest of the application.
  *
+ * @namespace common.components.tagsList
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 import _ from 'lodash'
-
-/**
- * @typedef common.components.tagsList.TagsInfo
- * @type object
- *
- * @property {String} label - the label to display to the user
- *
- * @property {string} tooltip - the tooltip text to display for the label.
- *
- * @property {object} obj - the object to return when a label is selected.
- */
 
 const DefaultLabelClass = 'label-info';
 
@@ -37,17 +31,19 @@ class TagsListController {
 }
 
 /**
- * Displays a list of strings using Bootstrap tags.
+ * An AngularJS component that displays a list of strings using Bootstrap tags.
  *
- * @param {Array<common.components.tagsList.TagsInfo>} tagData - the label data.
+ * @memberOf common.components.tagsList
+ *
+ * @param {Array<common.components.tagsList.TagInfo>} tagData
  *
  * @param {string} labelClass - the class to use to display the strings. The following can be used:
- *        label-default, label-primary, label-success, label-info, label-warning, or label-danger. If no
- *        class is specified, then 'label-primary' is used.
+ *        `label-default`, `label-primary`, `label-success`, `label-info`, `label-warning`, or `label-danger`.
+ *        If no class is specified, then `label-primary` is used.
  *
- * @param {function} onTagselected - the function to invoke when a label is selected.
+ * @param {common.components.tagsList.onTagSelected} onTagSelected
  */
-const component = {
+const tagsListComponent = {
   template: require('./tagsList.html'),
   controller: TagsListController,
   controllerAs: 'vm',
@@ -58,4 +54,29 @@ const component = {
   }
 };
 
-export default ngModule => ngModule.component('tagsList', component)
+/**
+ * Used by {@link common.components.tagsList.tagsListComponent tagsListComponent} to store tag information.
+ *
+ * @typedef common.components.tagsList.TagInfo
+ * @type object
+ *
+ * @property {String} label - the function that returns the translated string to display for the tag.
+ *
+ * @property {string} tooltip - the function that returns the translated text to display for the tag's tooltip.
+ *
+ * @property {object} obj - the object to return when a tag is selected.
+ */
+
+/**
+ * The callback function called by {@link common.components.tagsList.tagsListComponent tagsListComponent}
+ * when the user selects one of the tags.
+ *
+ * @callback common.components.tagsList.onTagSelected
+ *
+ * @param {object} obj - the `obj` field of the object selected (see {@link
+ * common.components.tagsList.TagInfo TagInfo}).
+ *
+ * @returns {undefined}
+ */
+
+export default ngModule => ngModule.component('tagsList', tagsListComponent)

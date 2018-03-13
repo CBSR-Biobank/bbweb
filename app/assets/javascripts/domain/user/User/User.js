@@ -1,6 +1,6 @@
-/**
+/*
  * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2015 Canadian BioSample Repository (CBSR)
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 
@@ -38,7 +38,7 @@ function UserFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-    constructor(obj = { state: UserState.REGISTERED }) {
+    constructor(obj = { membership: undefined, state: UserState.REGISTERED }) {
       super(User.SCHEMA, obj)
 
       /**
@@ -76,7 +76,7 @@ function UserFactory($q,
        * @type {domain.users.UserState}
        */
 
-      if (obj.membership) {
+      if (obj && obj.membership) {
         this.membership = new UserMembership(obj.membership);
       }
     }
@@ -330,8 +330,8 @@ function UserFactory($q,
      * @param {int} options.limit The total number of users to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
-     * @returns {Promise<domain.PagedResult>} A promise of {@link domain.PagedResult} with
-     * items of type {@link domain.users.User}.
+     * @returns {Promise<common.controllers.PagedListController.PagedResult>} with items of type {@link
+     * domain.users.User}.
      */
     static list(options) {
       var validKeys = [ 'filter',
