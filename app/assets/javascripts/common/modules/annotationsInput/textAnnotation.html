@@ -1,13 +1,13 @@
 <div class="form-group row"
      ng-class="{ 'has-error' : annotationSubForm.annotationTextValue.$invalid &&
                !annotationSubForm.annotationTextValue.$pristine }">
-  <label class="col-md-2 form-control-label">{{annotation.annotationType.name}}</label>
+  <label class="col-md-2 form-control-label">{{vm.annotation.annotationType.name}}</label>
   <div class="col-md-10">
     <input name="annotationTextValue"
            type="text"
            class="form-control"
-           ng-model="annotation.value"
-           ng-required="annotation.required"/>
+           ng-model="vm.annotation.value"
+           ng-required="vm.annotation.required"/>
   </div>
   <div class="col-md-offset-2 col-md-10"
        ng-messages="annotationSubForm.annotationTextValue.$error"

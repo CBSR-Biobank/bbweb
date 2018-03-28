@@ -3,86 +3,112 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import angular from 'angular'
-
 /**
+ * An AngularJS Service that provides methods for opening *UI Bootstrap* modals.
+ *
  * The original concept for this code was taken from the URL given below.
  *
  * http://weblogs.asp.net/dwahlin/building-an-angularjs-modal-service
+ *
+ * @memberOf common.services
  */
-/* @ngInject */
-function modalService($uibModal, gettextCatalog) {
-  var modalDefaults = { backdrop:    true,
-                        keyboard:    true,
-                        modalFade:   true,
-                        template: require('./modal.html')
-                      },
-      modalOptions = { actionButtonText: gettextCatalog.getString('OK'),
-                       headerHtml:       gettextCatalog.getString('Proceed?'),
-                       bodyHtml:         gettextCatalog.getString('Perform this action?')
-                     };
+class ModalService {
 
-  var service = {
-    showModal:     showModal,
-    show:          show,
-    modalOk:       modalOk,
-    modalOkCancel: modalOkCancel
-  };
+  constructor($uibModal, gettextCatalog) {
+    'ngInject';
+    Object.assign(this, { $uibModal, gettextCatalog });
+    this.modalDefaults = {
+      backdrop:    true,
+      keyboard:    true,
+      modalFade:   true,
+      template: require('./modal.html')
+    };
 
-  return service;
-
-  //-------
-
-  function showModal(customModalDefaults, customModalOptions) {
-    customModalDefaults = customModalDefaults || {};
-    customModalDefaults.backdrop = 'static';
-    return show(customModalDefaults, customModalOptions);
+    this.modalOptions = {
+      actionButtonText: gettextCatalog.getString('OK'),
+      headerHtml:       gettextCatalog.getString('Proceed?'),
+      bodyHtml:         gettextCatalog.getString('Perform this action?')
+    };
   }
 
-  function show(customModalDefaults, customModalOptions) {
-    var tempModalDefaults = {},
-        tempModalOptions = {};
+  /**
+   * Opens a modal with the given options.
+   *
+   * @param {object} customModalDefaults - defaults used to open the modal.
+   *
+   * @param {object} customModalOptions - options available to the modal through the scope.
+   */
+  show(customModalDefaults, customModalOptions) {
+    const tempModalDefaults = {},
+          tempModalOptions = {};
 
-    ModalController.$inject = ['$scope', '$uibModalInstance'];
-    angular.extend(tempModalDefaults, modalDefaults, customModalDefaults);
-    angular.extend(tempModalOptions, modalOptions, customModalOptions);
+    class ModalController {
+
+      constructor($scope, $uibModalInstance) {
+        'ngInject';
+        $scope.modalOptions = tempModalOptions;
+        $scope.modalOptions.ok = (result) => {
+          $uibModalInstance.close(result);
+        };
+        $scope.modalOptions.close = () => {
+          $uibModalInstance.dismiss('cancel');
+        };
+      }
+    }
+
+    Object.assign(tempModalDefaults, this.modalDefaults, customModalDefaults);
+    Object.assign(tempModalOptions, this.modalOptions, customModalOptions);
     tempModalDefaults.controller = tempModalDefaults.controller || ModalController;
 
-    return $uibModal.open(tempModalDefaults).result;
-
-    //--
-
-    function ModalController($scope, $uibModalInstance) {
-      $scope.modalOptions = tempModalOptions;
-      $scope.modalOptions.ok = function (result) {
-        $uibModalInstance.close(result);
-      };
-      $scope.modalOptions.close = function () {
-        $uibModalInstance.dismiss('cancel');
-      };
-    }
+    return this.$uibModal.open(tempModalDefaults).result;
   }
 
-  function modalOk(headerHtml, bodyHtml) {
-    var modalDefaults = {
+  /**
+   * Opens a modal with the given options.
+   *
+   * @param {object} customModalDefaults - defaults used to open the modal.
+   *
+   * @param {object} customModalOptions - options available to the modal through the scope.
+   */
+  showModal(customModalDefaults = {}, customModalOptions) {
+    customModalDefaults.backdrop = 'static';
+    return this.show(customModalDefaults, customModalOptions);
+  }
+
+  /**
+   * Opens a modal with a single button labelled with `OK`.
+   *
+   * @param {string} headerHTML - string that may contain HTML tags shown in the modal's header.
+   *
+   * @param {string} bodyHTML - string that may contain HTML tags shown in the modal's body.
+   */
+  modalOk(headerHtml, bodyHtml) {
+    const modalDefaults = {
       template: require('./modalOk.html')
     };
-    var modalOptions = {
+    const modalOptions = {
       headerHtml: headerHtml,
       bodyHtml: bodyHtml
     };
-    return showModal(modalDefaults, modalOptions);
+    return this.showModal(modalDefaults, modalOptions);
   }
 
-  function modalOkCancel(headerHtml, bodyHtml) {
-    var modalOptions = {
-      closeButtonText: gettextCatalog.getString('Cancel'),
+  /**
+   * Opens a modal with a two buttons: labelled with `OK` and `Cancel`.
+   *
+   * @param {string} headerHTML - string that may contain HTML tags shown in the modal's header.
+   *
+   * @param {string} bodyHTML - string that may contain HTML tags shown in the modal's body.
+   */
+  modalOkCancel(headerHtml, bodyHtml) {
+    const modalOptions = {
+      closeButtonText: this.gettextCatalog.getString('Cancel'),
       headerHtml: headerHtml,
       bodyHtml: bodyHtml
     };
-    return showModal({}, modalOptions);
+    return this.showModal({}, modalOptions);
   }
 
 }
 
-export default ngModule => ngModule.service('modalService', modalService)
+export default ngModule => ngModule.service('modalService', ModalService)

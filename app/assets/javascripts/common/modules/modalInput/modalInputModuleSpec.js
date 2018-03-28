@@ -49,7 +49,9 @@ describe('modalInputModule', function() {
          defaultValue,
          title = this.title,
          label = this.label,
-         options) => {
+         options = { required: false }) => {
+           modalInputFunc = modalInputFunc.bind(this.modalInput)
+
            this.modal = modalInputFunc(title, label, defaultValue, options);
            this.modal.opened.catch(angular.noop);
            this.modal.result.catch(angular.noop);
@@ -87,7 +89,7 @@ describe('modalInputModule', function() {
       expect(this.modalElement).toHaveLabelStartWith(this.label);
       expect(this.modalElement).toHaveInputs(2);
       expect(this.modalElement).toHaveValuesInControllerScope(
-        { value: this.defaultValue, options: undefined });
+        { value: this.defaultValue, options: { required: false } });
 
       this.dismiss(this.modal, 'closed in test');
       expect(this.$document).toHaveModalsOpen(0);
@@ -100,11 +102,11 @@ describe('modalInputModule', function() {
                      this.title,
                      this.label,
                      { required: true });
-      this.scope.form.value.$setViewValue(null);
+      this.scope.form.subForm.value.$setViewValue(null);
       expect(this.scope.form.$valid).toBe(false);
 
       // check that it becomes valid
-      this.scope.form.value.$setViewValue(false);
+      this.scope.form.subForm.value.$setViewValue(false);
       expect(this.scope.form.$valid).toBe(true);
 
       this.dismiss(this.modal, 'closed in test');
@@ -133,7 +135,9 @@ describe('modalInputModule', function() {
       expect(this.modalElement).toHaveModalTitle(this.title);
       expect(this.modalElement).toHaveLabelStartWith(this.label);
       expect(this.modalElement).toHaveInputs(1);
-      expect(this.modalElement).toHaveValuesInControllerScope({ options: undefined });
+      expect(this.modalElement).toHaveValuesInControllerScope({
+        options: { required: false }
+      });
       expect(this.modalElement).not.toHaveHelpBlocks();
 
       expect(this.modalElement.scope().vm.value).toBeDate();
@@ -151,7 +155,7 @@ describe('modalInputModule', function() {
                      { required: true });
 
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
-      this.scope.form.value.$setViewValue('');
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
 
       this.dismiss(this.modal, 'closed in test');
@@ -187,13 +191,14 @@ describe('modalInputModule', function() {
     });
 
     it('form is invalid when using required option and input is empty', function() {
+      const options = { required: true };
       this.openModal(this.modalInput.email,
                      this.defaultValue,
                      this.title,
                      this.label,
-                     { required: true });
-      expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
-      this.scope.form.value.$setViewValue('');
+                     options);
+      expect(this.modalElement).toHaveValuesInControllerScope({ options });
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -206,7 +211,7 @@ describe('modalInputModule', function() {
                      this.defaultValue,
                      this.title,
                      this.label);
-      this.scope.form.value.$setViewValue('xxx');
+      this.scope.form.subForm.value.$setViewValue('xxx');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -249,7 +254,7 @@ describe('modalInputModule', function() {
                      this.label,
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
-      this.scope.form.value.$setViewValue('');
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -263,7 +268,7 @@ describe('modalInputModule', function() {
                      this.title,
                      this.label);
       expect(this.$document).toHaveModalsOpen(1);
-      this.scope.form.value.$setViewValue('-1');
+      this.scope.form.subForm.value.$setViewValue('-1');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -306,7 +311,7 @@ describe('modalInputModule', function() {
                      this.label,
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
-      this.scope.form.value.$setViewValue('');
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -319,7 +324,7 @@ describe('modalInputModule', function() {
                      this.defaultValue,
                      this.title,
                      this.label);
-      this.scope.form.value.$setViewValue('xxx');
+      this.scope.form.subForm.value.$setViewValue('xxx');
       expect(this.scope.form.$valid).toBe(false);
 
       this.dismiss(this.modal, 'closed in test');
@@ -366,8 +371,8 @@ describe('modalInputModule', function() {
                      this.defaultValue,
                      this.title,
                      this.label);
-      this.scope.form.newPassword.$setViewValue('abcabcabc');
-      this.scope.form.confirmPassword.$setViewValue('xyzxyzxyz');
+      this.scope.form.subForm.newPassword.$setViewValue('abcabcabc');
+      this.scope.form.subForm.confirmPassword.$setViewValue('xyzxyzxyz');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -410,7 +415,7 @@ describe('modalInputModule', function() {
                      this.label,
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
-      this.scope.form.value.$setViewValue('');
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -423,7 +428,7 @@ describe('modalInputModule', function() {
                      this.defaultValue,
                      this.title,
                      this.label);
-      this.scope.form.value.$setViewValue('xxx');
+      this.scope.form.subForm.value.$setViewValue('xxx');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -436,7 +441,7 @@ describe('modalInputModule', function() {
                      this.defaultValue,
                      this.title,
                      this.label);
-      this.scope.form.value.$setViewValue('-1.00');
+      this.scope.form.subForm.value.$setViewValue('-1.00');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -498,7 +503,7 @@ describe('modalInputModule', function() {
       expect(this.modalElement).toHaveLabelStartWith(this.label);
       expect(this.modalElement).toHaveValuesInControllerScope({ value: this.defaultValue });
 
-      this.scope.form.value.$setViewValue('');
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -566,7 +571,7 @@ describe('modalInputModule', function() {
         value.checked = false;
       });
       this.scope.$digest();
-      this.scope.form.selectValue.$setViewValue(false);
+      this.scope.form.subForm.selectValue.$setViewValue(false);
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -638,7 +643,7 @@ describe('modalInputModule', function() {
                      this.label,
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
-      this.scope.form.value.$setViewValue('');
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -656,7 +661,7 @@ describe('modalInputModule', function() {
                      { minLength: minLength });
 
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { minLength: minLength } });
-      this.scope.form.value.$setViewValue('x');
+      this.scope.form.subForm.value.$setViewValue('x');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -726,7 +731,7 @@ describe('modalInputModule', function() {
                      this.label,
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
-      this.scope.form.value.$setViewValue('');
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -770,7 +775,7 @@ describe('modalInputModule', function() {
                      this.label,
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
-      this.scope.form.value.$setViewValue('');
+      this.scope.form.subForm.value.$setViewValue('');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 
@@ -783,7 +788,7 @@ describe('modalInputModule', function() {
                      this.defaultValue,
                      this.title,
                      this.label);
-      this.scope.form.value.$setViewValue('xxx');
+      this.scope.form.subForm.value.$setViewValue('xxx');
       expect(this.scope.form.$valid).toBe(false);
       expect(this.modalElement).toHaveHelpBlocks();
 

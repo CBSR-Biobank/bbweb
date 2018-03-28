@@ -4,16 +4,43 @@
  */
 
 import DomainModule from '../../../domain'
-import _            from 'lodash'
 import angular      from 'angular'
 
 /**
- * Creates a module with one main directives and child directives.
+ * AngularJS Module related to {@link domain.Annotation Annotations}.
+ * @namespace common.modules.annotationsInput
  */
-const ngModule = angular.module('biobank.annotationsInput', [ DomainModule ])
-export default ngModule.name
 
-ngModule.directive('annotationsInput', annotationsInputDirective)
+/**
+ * Creates a module with one main component, {@link common.modules.annotationsInput.annotationsInputComponent
+ * annotationsInputComponent}, and various child components that are customized for the different {@link
+ * domain.AnnotationValueType AnnotationValueTypes} an {@link domain.Annotation Annotation} can have.
+ *
+ * @memberOf common.modules.annotationsInput
+ */
+const ngAnnotationsInputModule = angular.module('biobank.annotationsInput', [ DomainModule ])
+
+class AnnotationsInputController {}
+
+/**
+ * An AngularJS Component that can be used in an HTML form to input information for an array of {@link
+ * domain.Annotation Annotations}.
+ *
+ * The fields that are displayed in the form depend on the {@link domain.Annotation Annotation's} `valueType`.
+ *
+ * @memberOf common.modules.annotationsInput
+ *
+ * @param {Array<domain.Annotation>} Annotations - the annotations to display. They must contain an attribute
+ * named `annotationType` with the {@link domain.AnnotationType AnnotationType's} information.
+ */
+const annotationsInputComponent = {
+  bindings: {
+    annotations: '<'
+  },
+  template: require('./annotationsInput.html'),
+  controller: AnnotationsInputController,
+  controllerAs: 'vm'
+};
 
 const annotations = [
   'text',
@@ -23,66 +50,38 @@ const annotations = [
   'multipleSelect'
 ]
 
-init()
+class AnnotationController {
 
-/**
+  dateTimeOnEdit(datetime) {
+    this.annotation.value = datetime
+  }
+}
+
+/*
  * Creates the child directives.
  */
 function init() {
+  ngAnnotationsInputModule.component('annotationsInput', annotationsInputComponent);
   annotations.forEach((annotation) => {
-    var name = annotation + 'Annotation',
-        directive = directiveGenerator(name)
-    ngModule.directive(name, directive)
+    const name = annotation + 'Annotation',
+          component = componentGenerator(name)
+    ngAnnotationsInputModule.component(name, component)
   })
 }
 
-function directiveGenerator(name) {
-  return function () {
-    var directive = {
-      restrict: 'E',
-      template : require('./' + name + '.html')
-    }
-
-    if (name === 'dateTimeAnnotation') {
-      _.extend(directive,
-               {
-                 bindToController: { annotation: '=' },
-                 controller: DateTimeController,
-                 controllerAs: 'vm'
-               })
-    }
-
-    return directive
-  }
-
-  function DateTimeController() {
-    var vm = this
-
-    vm.dateTimeOnEdit = dateTimeOnEdit
-
-    function dateTimeOnEdit(datetime) {
-      vm.annotation.value = datetime
+function componentGenerator(name) {
+  const component = {
+    template : require('./' + name + '.html'),
+    controller: AnnotationController,
+    controllerAs: 'vm',
+    bindings: {
+      annotation: '='
     }
   }
+
+  return component;
 }
 
-class AnnotationsInputCtrl {
-}
+init()
 
-/**
- * Annotations must contain an attribute named 'annotationType' with the annotation type's information.
- */
-function annotationsInputDirective() {
-  var directive = {
-    restrict: 'E',
-    scope: {},
-    bindToController: {
-      annotations: '='
-    },
-    template : require('./annotationsInput.html'),
-    controller: AnnotationsInputCtrl,
-    controllerAs: 'vm'
-  }
-
-  return directive
-}
+export default ngAnnotationsInputModule.name

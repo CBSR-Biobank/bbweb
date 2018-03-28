@@ -87,7 +87,7 @@ export default function modalInputMatcher () {
 
           expected = expected || {};
           pass = _.chain(expected).keys().every(checkScopeValue).value();
-          message = `Expected modal controller scope "${angular.mock.dump(scope)}" ${pass ? 'not to' : 'to'} have a values "${expected}"`;
+          message = `Expected modal controller scope "${angular.mock.dump(scope)}" ${pass ? 'not to' : 'to'} have a values "${angular.mock.dump(expected)}"`;
 
           return { pass: pass, message: message };
 

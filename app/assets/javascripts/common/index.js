@@ -30,6 +30,11 @@ import angularUiRouter from '@uirouter/angularjs'
  * @namespace common.filters
  */
 
+/**
+ * AngularJS Module related to  {@link domain.Annotation Annotation}s.
+ * @namespace common.modules
+ */
+
 const loadModules = require.context('./modules', true, /[\\\/]index\.js$/)
 
 const moduleNames = []

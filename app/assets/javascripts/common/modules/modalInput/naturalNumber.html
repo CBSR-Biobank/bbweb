@@ -1,22 +1,24 @@
-<div class="form-group row"
-     ng-class="{ 'has-error' : form.value.$invalid && !form.value.$pristine }">
-  <label for="value" class="col-md-3 form-control-label">{{vm.label}}:</label>
-  <div class="col-md-9">
-    <input name="value"
-           type="number"
-           class="form-control"
-           ng-model="vm.value"
-           focus-me="true"
-           natural-number
-           ng-required="vm.options.required" />
-  </div>
-  <div class="col-md-offset-3 col-md-9"
-       ng-messages="form.value.$error"
-       ng-if="form.value.$dirty"
-       role="alert">
-    <div ng-message="required" class="help-block" translate>A number is required</div>
-    <div ng-message="naturalNumber" class="help-block" translate>
-      Value must be a positive whole number greater than zero
+<ng-form name="subForm">
+  <div class="form-group row"
+       ng-class="{ 'has-error' : subForm.value.$invalid && !subForm.value.$pristine }">
+    <label for="value" class="col-md-3 form-control-label">{{vm.label}}:</label>
+    <div class="col-md-9">
+      <input name="value"
+             type="number"
+             class="form-control"
+             ng-model="vm.value"
+             focus-me="true"
+             natural-number
+             ng-required="vm.options.required" />
+    </div>
+    <div class="col-md-offset-3 col-md-9"
+         ng-messages="subForm.value.$error"
+         ng-if="subForm.value.$dirty"
+         role="alert">
+      <div ng-message="required" class="help-block" translate>A number is required</div>
+      <div ng-message="naturalNumber" class="help-block" translate>
+        Value must be a positive whole number greater than zero
+      </div>
     </div>
   </div>
-</div>
+</ng-form>

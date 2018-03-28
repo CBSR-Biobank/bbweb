@@ -14,7 +14,7 @@ describe('annotationsInputModule', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function (TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+      Object.assign(this, TestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -49,8 +49,8 @@ describe('annotationsInputModule', function() {
   });
 
   it('works for a TEXT annotation', function() {
-    var annotationValue = this.Factory.stringNext(),
-        annotations = [ this.createAnnotation(this.AnnotationValueType.TEXT) ];
+    const annotationValue = this.Factory.stringNext(),
+          annotations = [ this.createAnnotation(this.AnnotationValueType.TEXT) ];
 
     this.createController(annotations);
     expect(this.element.find('input').length).toBe(1);
@@ -61,8 +61,8 @@ describe('annotationsInputModule', function() {
   });
 
   it('works for a NUMBER annotation and a valid number', function() {
-    var annotationValue = 123.01,
-        annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
+    const annotationValue = 123.01,
+          annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
 
     this.createController(annotations);
     expect(this.element.find('input').length).toBe(1);
@@ -73,8 +73,8 @@ describe('annotationsInputModule', function() {
   });
 
   it('validation fails for a NUMBER annotation and an invalid number', function() {
-    var annotationValue = this.Factory.stringNext(),
-        annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
+    const annotationValue = this.Factory.stringNext(),
+          annotations = [ this.createAnnotation(this.AnnotationValueType.NUMBER) ];
 
     this.createController(annotations);
     expect(this.element.find('input').length).toBe(1);
@@ -85,9 +85,9 @@ describe('annotationsInputModule', function() {
   });
 
   it('works for a DATE_TIME annotation and a valid date', function() {
-    var dateStr = '2010-01-10 00:00',
-        annotation = this.createAnnotation(this.AnnotationValueType.DATE_TIME),
-        annotations = [ annotation ];
+    const dateStr = '2010-01-10 00:00',
+          annotation = this.createAnnotation(this.AnnotationValueType.DATE_TIME),
+          annotations = [ annotation ];
 
     this.createController(annotations);
     expect(this.element.find('input').length).toBe(1);
@@ -100,44 +100,39 @@ describe('annotationsInputModule', function() {
   });
 
   it('works for a SELECT single annotation', function() {
-    var self = this,
-        annotationType, annotations;
-
-    annotationType = new self.AnnotationType(
-      self.Factory.annotationType({
-        valueType:     self.AnnotationValueType.SELECT,
-        maxValueCount: self.AnnotationMaxValueCount.SELECT_SINGLE,
+    const annotationType = new this.AnnotationType(
+      this.Factory.annotationType({
+        valueType:     this.AnnotationValueType.SELECT,
+        maxValueCount: this.AnnotationMaxValueCount.SELECT_SINGLE,
         options:       [ 'option1', 'option2' ],
         required:      true
       }));
 
-    annotations = [ self.annotationFactory.create(undefined, annotationType) ];
+    const annotations = [ this.annotationFactory.create(undefined, annotationType) ];
 
     this.createController(annotations);
-    expect(self.element.find('select').length).toBe(1);
+    expect(this.element.find('select').length).toBe(1);
 
     // number of options is the number of annotationType options plus one for the '-- make a selection --'
     // option
-    expect(self.element.find('select option').length).toBe(annotationType.options.length + 1);
+    expect(this.element.find('select option').length).toBe(annotationType.options.length + 1);
 
     annotationType.options.forEach((option) => {
-      self.scope.form.annotationSubForm.annotationSelectValue.$setViewValue(option);
-      expect(self.scope.vm.annotations[0].value).toBe(option);
-      expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
+      this.scope.form.annotationSubForm.annotationSelectValue.$setViewValue(option);
+      expect(this.scope.vm.annotations[0].value).toBe(option);
+      expect(this.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
     });
   });
 
   it('works for a SELECT multiple annotation', function() {
-    var annotationType, annotation;
-
-    annotationType = new this.AnnotationType(
+    const annotationType = new this.AnnotationType(
       this.Factory.annotationType({
         valueType: this.AnnotationValueType.SELECT,
         maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE,
         options: [ 'option1', 'option2', 'option3' ],
         required: true }));
 
-    annotation = this.annotationFactory.create(undefined, annotationType);
+    const annotation = this.annotationFactory.create(undefined, annotationType);
 
     this.createController([ annotation ]);
 
@@ -152,29 +147,26 @@ describe('annotationsInputModule', function() {
   // For a required SELECT MULTIPLE annotation type
   it('selecting and unselecting an option for a required SELECT MULTIPLE makes the form invalid',
      function() {
-       var self = this,
-           annotationType, annotation;
-
-       annotationType = new self.AnnotationType(
-         self.Factory.annotationType({
-           valueType:     self.AnnotationValueType.SELECT,
-           maxValueCount: self.AnnotationMaxValueCount.SELECT_MULTIPLE,
+       const annotationType = new this.AnnotationType(
+         this.Factory.annotationType({
+           valueType:     this.AnnotationValueType.SELECT,
+           maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE,
            options:       [ 'option1', 'option2', 'option3' ],
            required:      true
          }));
 
-       annotation = self.annotationFactory.create(undefined, annotationType);
+       const annotation = this.annotationFactory.create(undefined, annotationType);
 
        this.createController([ annotation ]);
 
        // has the right number of check boxes
-       expect(self.element.find('input').length).toBe(annotationType.options.length);
+       expect(this.element.find('input').length).toBe(annotationType.options.length);
 
        _.range(annotationType.options.length).forEach((inputNum) => {
-         self.element.find('input').eq(inputNum).click();
-         expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
-         self.element.find('input').eq(inputNum).click();
-         expect(self.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(false);
+         this.element.find('input').eq(inputNum).click();
+         expect(this.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
+         this.element.find('input').eq(inputNum).click();
+         expect(this.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(false);
        });
      });
 

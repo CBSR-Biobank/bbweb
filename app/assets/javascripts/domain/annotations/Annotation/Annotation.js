@@ -9,7 +9,11 @@ import _ from 'lodash'
 function AnnotationFactory($log, AnnotationValueType, DomainEntity, DomainError) {
 
   /**
-   * Please use annotationFactory.create to create annotation objects.
+   * @class
+   * @classdesc Annotations allow the system to collect custom named and defined pieces of data.
+   * @memberOf domain
+   *
+   * @note Please use annotationFactory.create to create annotation objects.
    */
   function Annotation(obj, annotationType) {
     // FIXME: jsdoc for this classes members is needed

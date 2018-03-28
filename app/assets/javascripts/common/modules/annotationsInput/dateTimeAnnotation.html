@@ -1,5 +1,5 @@
 <date-time-picker label="{{vm.annotation.annotationType.name}}"
                   default-value="vm.annotation.value"
                   required="vm.annotation.required"
-                  on-edit="vm.dateTimeOnEdit">
+                  on-edit="vm.dateTimeOnEdit.bind(vm)">
 </date-time-picker>

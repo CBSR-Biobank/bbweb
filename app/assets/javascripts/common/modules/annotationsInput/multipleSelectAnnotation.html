@@ -1,16 +1,16 @@
 <div class="form-group row"
      ng-class="{ 'has-error' : annotationSubForm.annotationSelectValue.$invalid &&
                !annotationSubForm.$pristine }">
-  <label class="col-md-2 form-control-label">{{annotation.annotationType.name}}</label>
+  <label class="col-md-2 form-control-label">{{vm.annotation.annotationType.name}}</label>
   <div class="col-md-10">
-    <div ng-repeat="value in annotation.values">
+    <div ng-repeat="value in vm.annotation.values">
       <label>
         <input type="checkbox"
                name="annotationSelectValue"
-               ng-model="value.checked"
+               ng-model="vm.value.checked"
                ng-true-value="true"
                ng-false-value="false"
-               ng-required="annotation.required && !annotation.someSelected()">
+               ng-required="vm.annotation.required && !vm.annotation.someSelected()">
         <span>{{value.name}}</span>
       </label>
     </div>

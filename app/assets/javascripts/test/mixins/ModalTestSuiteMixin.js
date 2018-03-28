@@ -60,7 +60,7 @@ function ModalTestSuiteMixin($rootScope, $document, $animate, TestSuiteMixin) {
           compare: function(actual, expected) {
             var element = actual.find('.modal-title'),
                 pass    = util.equals(element.text(), expected, customEqualityTesters),
-                message = `Expected "${angular.mock.dump(element)}" ${pass ? 'not to' : 'to'} have title be "${expected}"`;
+                message = `Expected "${angular.mock.dump(element)}" ${pass ? 'not to' : 'to'} have title be "${angular.mock.dump(expected)}"`;
 
             return { pass: pass, message: message };
           }
@@ -71,7 +71,7 @@ function ModalTestSuiteMixin($rootScope, $document, $animate, TestSuiteMixin) {
           compare: function(actual, expected) {
             var element = actual.find('.modal-body > div'),
                 pass    = util.equals(element.text(), expected, customEqualityTesters),
-                message = `Expected "${angular.mock.dump(element)}" ${pass ? 'not to' : 'to'} be "${expected}"`;
+                message = `Expected "${angular.mock.dump(element)}" ${pass ? 'not to' : 'to'} be "${angular.mock.dump(expected)}"`;
 
             return { pass: pass, message: message };
           }

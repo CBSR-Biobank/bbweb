@@ -22,11 +22,6 @@
  * @namespace centres.services
  */
 
-/**
- * AngularJS services related to {@link domain.centres.Centre Centres}.
- * @namespace centres.services
- */
-
 import CommonModule    from '../common'
 import DomainModule    from '../domain'
 import HomeModule      from '../home'

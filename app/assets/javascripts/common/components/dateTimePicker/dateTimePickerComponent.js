@@ -43,7 +43,7 @@ function DateTimePickerController(AppConfig) {
  *
  * @param {Date} defaultValue - The initial value to display.
  *
- * @param {boolean} required - Set to *TRUE* if a value is required.
+ * @param {boolean} required - Set to `TRUE` if a value is required.
  *
  * @param {common.components.dateTimePicker.onEdit} onEdit -The function that is called after the user has
  * entered a new value.

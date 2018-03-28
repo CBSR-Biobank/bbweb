@@ -1,5 +1,6 @@
-/**
- *
+/*
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
@@ -17,10 +18,10 @@ class AsyncInputModalService {
   /**
    * Opens a modal that allows the user to enter some text and then select a matching value.
    *
-   * <p>Matches for this text are then retrieved asynchronously from the server, and the matches are displayed
+   * Matches for this text are then retrieved asynchronously from the server, and the matches are displayed
    * in a Bootstrap Typeahead input (`uib-typeahead`).
    *
-   * <p>If the user presses the **OK** button, the object returned by the modal is the object corresponding
+   * If the user presses the **OK** button, the object returned by the modal is the object corresponding
    * to the label selected by the user. See {@link common.services.AsyncInputModalService.GetResults
    * GetResults}.
    *

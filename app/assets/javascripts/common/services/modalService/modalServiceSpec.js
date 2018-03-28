@@ -30,6 +30,7 @@ describe('modalService', function() {
       }
 
       this.openModal = (modalOpenFunc, modalDefaults, modalOptions) => {
+        modalOpenFunc = modalOpenFunc.bind(this.modalService)
         modalOpenFunc(modalDefaults, modalOptions).then(angular.noop, angular.noop);
         openCommon.call(this);
       };

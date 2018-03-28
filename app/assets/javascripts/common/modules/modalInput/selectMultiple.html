@@ -1,23 +1,25 @@
-<div class="form-group row"
-     ng-class="{ 'has-error' : form.selectValue.$invalid && !form.$pristine }">
-  <label for="selectValue" class="col-md-2 form-control-label">{{vm.label}}:</label>
-  <div class="col-md-10">
-    <div ng-repeat="value in vm.value">
-      <label>
-        <input type="checkbox"
-               name="selectValue"
-               ng-model="value.checked"
-               ng-true-value="true"
-               ng-false-value="false"
-               ng-required="vm.options.required && !vm.multipleSelectSomeSelected()">
-        {{value.name}}
-      </label>
+<ng-form name="subForm">
+  <div class="form-group row"
+       ng-class="{ 'has-error' : subForm.selectValue.$invalid && !subForm.$pristine }">
+    <label for="selectValue" class="col-md-2 form-control-label">{{vm.label}}:</label>
+    <div class="col-md-10">
+      <div ng-repeat="value in vm.value">
+        <label>
+          <input type="checkbox"
+                 name="selectValue"
+                 ng-model="value.checked"
+                 ng-true-value="true"
+                 ng-false-value="false"
+                 ng-required="vm.options.required && !vm.multipleSelectSomeSelected()">
+          {{value.name}}
+        </label>
+      </div>
+    </div>
+    <!-- DO NOT USE ng-if here for ng-messages, instead always display the help block -->
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="subForm.selectValue.$error"
+         role="alert">
+      <div ng-message="required" class="help-block" translate>A selection is required</div>
     </div>
   </div>
-  <!-- DO NOT USE ng-if here for ng-messages, instead always display the help block -->
-  <div class="col-md-offset-2 col-md-10"
-       ng-messages="form.selectValue.$error"
-       role="alert">
-    <div ng-message="required" class="help-block" translate>A selection is required</div>
-  </div>
-</div>
+</ng-form>

@@ -87,9 +87,11 @@ class UserProfileController {
   }
 
   updateError(err) {
-    this.notificationsService.updateError(
-      this.gettextCatalog.getString('Your change could not be saved: ') + err.data.message,
-      this.gettextCatalog.getString('Cannot apply your change'));
+    if (err.data) {
+      this.notificationsService.updateError(
+        this.gettextCatalog.getString('Your change could not be saved: ') + err.data.message,
+        this.gettextCatalog.getString('Cannot apply your change'));
+    }
   }
 
   postUpdate(message, title, timeout) {

@@ -4,68 +4,80 @@
  */
 
 /**
- * Used to update the value of an annotation.
+ * Used to update the value of an {@link domain.Annotation Annotation}.
  *
- * A modal is presented the user where the value can be changed.
- *
- * @return {domain.annotations.Annotation} The annotation with the new value.
+ * @memberOf common.services
  */
-/* @ngInject */
-function annotationUpdateService(modalInput,
-                                 DateTimeAnnotation,
-                                 MultipleSelectAnnotation,
-                                 NumberAnnotation,
-                                 SingleSelectAnnotation,
-                                 TextAnnotation) {
-  var service = {
-    update: update
-  };
+class AnnotationUpdateService {
 
-  return service;
+  constructor(modalInput,
+              DateTimeAnnotation,
+              MultipleSelectAnnotation,
+              NumberAnnotation,
+              SingleSelectAnnotation,
+              TextAnnotation) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    modalInput,
+                    DateTimeAnnotation,
+                    MultipleSelectAnnotation,
+                    NumberAnnotation,
+                    SingleSelectAnnotation,
+                    TextAnnotation
+                  });
+  }
 
-  //-------
-
-  function update(annotation, title) {
+  /**
+   * Opens a modal where the user an change the value of an {@link domain.Annotation Annotation}.
+   *
+   * @param {domain.Annotation} annotation - the annotation to update.
+   *
+   * @param {string} title - the text to display in the modal's title area.
+   *
+   * @return {domain.annotations.Annotation} The annotation with the new value.
+   */
+  update(annotation, title) {
     if (!title) {
       title = 'Update ' + annotation.annotationType.name;
     }
 
-    if (annotation instanceof DateTimeAnnotation) {
-      return modalInput.dateTime(title,
-                                 annotation.annotationType.name,
-                                 annotation.stringValue,
-                                 { required: annotation.required }
-                                ).result.then(assignNewValue);
-    } else if (annotation instanceof MultipleSelectAnnotation) {
-      return modalInput.selectMultiple(title,
-                                       annotation.annotationType.name,
-                                       annotation.getValue(),
-                                       {
-                                         required: annotation.required,
-                                         selectOptions: annotation.annotationType.options
-                                       })
+    if (annotation instanceof this.DateTimeAnnotation) {
+      return this.modalInput.dateTime(title,
+                                      annotation.annotationType.name,
+                                      annotation.stringValue,
+                                      { required: annotation.required }
+                                     ).result.then(assignNewValue);
+    } else if (annotation instanceof this.MultipleSelectAnnotation) {
+      return this.modalInput.selectMultiple(title,
+                                            annotation.annotationType.name,
+                                            annotation.getValue(),
+                                            {
+                                              required: annotation.required,
+                                              selectOptions: annotation.annotationType.options
+                                            })
         .result.then(assignNewValue);
-    } else if (annotation instanceof NumberAnnotation) {
-      return modalInput.number(title,
-                               annotation.annotationType.name,
-                               annotation.getValue(),
-                               { required: annotation.required }
-                              ).result.then(assignNewValue);
-    } else if (annotation instanceof SingleSelectAnnotation) {
-      return modalInput.select(title,
-                               annotation.annotationType.name,
-                               annotation.getValue(),
-                               {
-                                 required: annotation.required,
-                                 selectOptions: annotation.annotationType.options
-                               }
-                              ).result.then(assignNewValue);
-    } else if (annotation instanceof TextAnnotation) {
-      return modalInput.text(title,
-                             annotation.annotationType.name,
-                             annotation.stringValue,
-                             { required: annotation.required }
-                            ).result.then(assignNewValue);
+    } else if (annotation instanceof this.NumberAnnotation) {
+      return this.modalInput.number(title,
+                                    annotation.annotationType.name,
+                                    annotation.getValue(),
+                                    { required: annotation.required }
+                                   ).result.then(assignNewValue);
+    } else if (annotation instanceof this.SingleSelectAnnotation) {
+      return this.modalInput.select(title,
+                                    annotation.annotationType.name,
+                                    annotation.getValue(),
+                                    {
+                                      required: annotation.required,
+                                      selectOptions: annotation.annotationType.options
+                                    }
+                                   ).result.then(assignNewValue);
+    } else if (annotation instanceof this.TextAnnotation) {
+      return this.modalInput.text(title,
+                                  annotation.annotationType.name,
+                                  annotation.stringValue,
+                                  { required: annotation.required }
+                                 ).result.then(assignNewValue);
     } else {
       throw new Error('invalid annotation type: ' + annotation);
     }
@@ -78,4 +90,4 @@ function annotationUpdateService(modalInput,
 
 }
 
-export default ngModule => ngModule.service('annotationUpdate', annotationUpdateService)
+export default ngModule => ngModule.service('annotationUpdate', AnnotationUpdateService)

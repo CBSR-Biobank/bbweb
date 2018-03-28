@@ -1,13 +1,13 @@
 <div class="form-group row"
      ng-class="{ 'has-error' : annotationSubForm.annotationSelectValue.$invalid &&
                !annotationSubForm.annotationSelectValue.$pristine }">
-  <label class="col-md-2 form-control-label">{{annotation.annotationType.name}}</label>
+  <label class="col-md-2 form-control-label">{{vm.annotation.annotationType.name}}</label>
   <div class="col-md-10">
     <select name="annotationSelectValue"
             class="form-control"
-            ng-model="annotation.value"
-            ng-options="option for option in annotation.annotationType.options"
-            ng-required="annotation.required">
+            ng-model="vm.annotation.value"
+            ng-options="option for option in vm.annotation.annotationType.options"
+            ng-required="vm.annotation.required">
       <option value="">-- make a selection --</option>
     </select>
   </div>

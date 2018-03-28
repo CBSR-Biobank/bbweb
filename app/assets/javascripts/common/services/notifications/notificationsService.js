@@ -21,7 +21,7 @@ class NotificationsService {
 
   /**
    * Displays an success in the browser as a temporary popup dialog box.
-   * <p>
+   *
    * Success messages have a green background.
    *
    * @param {string} message The message to display.
@@ -42,7 +42,7 @@ class NotificationsService {
 
   /**
    * Displays an error in the browser as a temporary popup dialog box.
-   * <p>
+   *
    * Error messages have a red background.
    *
    * @param {string} message The message to display.
@@ -64,7 +64,7 @@ class NotificationsService {
 
   /**
    * Displays an error in the browser as a temporary popup dialog box.
-   * <p>
+   *
    * Meant to be called when a change to a domain entity fails.
    *
    * @param {string} err The error message to display.
