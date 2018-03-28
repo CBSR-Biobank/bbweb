@@ -10,6 +10,22 @@ function AnnotationTypeFactory($log,
                                AnnotationValueType,
                                AnnotationMaxValueCount) {
 
+  const SCHEMA = {
+    'id': 'AnnotationType',
+    'type': 'object',
+    'properties': {
+      'id':            { 'type': 'string'  },
+      'slug':          { 'type': 'string'  },
+      'name':          { 'type': 'string'  },
+      'description':   { 'type': [ 'string', 'null' ] },
+      'valueType':     { 'type': 'string'  },
+      'maxValueCount': { 'type': [ 'number', 'null' ] },
+      'options':       { 'type': 'array'   },
+      'required':      { 'type': 'boolean' }
+    },
+    'required': [ 'id', 'slug', 'name', 'valueType', 'required' ]
+  };
+
   /**
    * Information for the format of an annotation.
    * @memberOf domain
@@ -19,58 +35,48 @@ function AnnotationTypeFactory($log,
   class AnnotationType extends DomainEntity {
 
     /**
+     * A short identifying name that is unique.
      *
-     *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
+     * @name domain.AnnotationType#name
+     * @type {string}
      */
-    constructor(obj) {
-      /**
-       * A short identifying name that is unique.
-       *
-       * @name domain.AnnotationType#name
-       * @type {string}
-       */
 
-      /**
-       * An optional description that can provide additional details on the name.
-       *
-       * @name domain.AnnotationType#description
-       * @type {string}
-       */
+    /**
+     * An optional description that can provide additional details on the name.
+     *
+     * @name domain.AnnotationType#description
+     * @type {string}
+     */
 
-      /**
-       * The type of information stored by the annotation.
-       *
-       * @name domain.AnnotationType#valueType
-       * @type {domain.AnnotationValueType}
-       */
+    /**
+     * The type of information stored by the annotation.
+     *
+     * @name domain.AnnotationType#valueType
+     * @type {domain.AnnotationValueType}
+     */
 
-      /**
-       * When `valueType` is {@link domain.AnnotationValueType.SELECT}, this is the number of items allowed to
-       * be selected. If the value is greater than 1 then any number of values can be selected.
-       *
-       * @name domain.AnnotationType#maxValueCount
-       * @type {domain.AnnotationMaxValueCount}
-       */
+    /**
+     * When `valueType` is {@link domain.AnnotationValueType.SELECT}, this is the number of items allowed to
+     * be selected. If the value is greater than 1 then any number of values can be selected.
+     *
+     * @name domain.AnnotationType#maxValueCount
+     * @type {domain.AnnotationMaxValueCount}
+     */
 
-      /**
-       * When true, the user must enter a value for this annotation.
-       *
-       * @name domain.AnnotationType#required
-       * @type {boolean}
-       */
+    /**
+     * When true, the user must enter a value for this annotation.
+     *
+     * @name domain.AnnotationType#required
+     * @type {boolean}
+     */
 
-      /**
-       * When `valueType` is {@link domain.AnnotationValueType.SELECT}, these are the values allowed to be
-       * selected.
-       *
-       * @name domain.AnnotationType#options
-       * @type {string[]}
-       */
-
-      super(AnnotationType.SCHEMA, obj);
-    }
+    /**
+     * When `valueType` is {@link domain.AnnotationValueType.SELECT}, these are the values allowed to be
+     * selected.
+     *
+     * @name domain.AnnotationType#options
+     * @type {string[]}
+     */
 
     isValueTypeText() {
       return (this.valueType === AnnotationValueType.TEXT);
@@ -148,36 +154,31 @@ function AnnotationTypeFactory($log,
       return options.reduce((memo, option) =>  memo && this.options.includes(option), true);
     }
 
-    static isValid(obj) {
-      return super.isValid(AnnotationType.SCHEMA, null, obj);
+    /**
+     * @private
+     * @return {object} The JSON schema for this class.
+     */
+    static schema() {
+      return SCHEMA;
+    }
+
+    /**
+     * @private
+     */
+    static additionalSchemas() {
+      return [];
     }
 
     static create(obj) {
       var validation = AnnotationType.isValid(obj);
 
       if (!validation.valid) {
-        $log.error('invalid object from server: ' + validation.error);
-        throw new DomainError('invalid object from server: ' + validation.error);
+        $log.error('invalid object from server: ' + validation.message);
+        throw new DomainError('invalid object from server: ' + validation.message);
       }
       return new AnnotationType(obj);
     }
   }
-
-  AnnotationType.SCHEMA = {
-    'id': 'AnnotationType',
-    'type': 'object',
-    'properties': {
-      'id':            { 'type': 'string'  },
-      'slug':          { 'type': 'string'  },
-      'name':          { 'type': 'string'  },
-      'description':   { 'type': [ 'string', 'null' ] },
-      'valueType':     { 'type': 'string'  },
-      'maxValueCount': { 'type': [ 'number', 'null' ] },
-      'options':       { 'type': 'array'   },
-      'required':      { 'type': 'boolean' }
-    },
-    'required': [ 'id', 'slug', 'name', 'valueType', 'required' ]
-  };
 
   return AnnotationType;
 }

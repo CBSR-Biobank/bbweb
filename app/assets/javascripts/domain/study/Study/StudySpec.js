@@ -29,13 +29,9 @@ describe('Study', function() {
         expect(entity).toEqual(jasmine.any(this.Study));
       };
 
-      this.url = url;
-
-      //---
-
-      function url() {
-        const args = [ 'studies' ].concat(_.toArray(arguments));
-        return EntityTestSuiteMixin.url.apply(null, args);
+      this.url = (...paths) => {
+        const args = [ 'studies' ].concat(paths);
+        return EntityTestSuiteMixin.url(...args);
       }
     });
   });

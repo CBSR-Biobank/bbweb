@@ -12,6 +12,17 @@ function EntityInfoFactory($q,
                            DomainError,
                            biobankApi) {
 
+  const SCHEMA = {
+    'id': 'EntityInfo',
+    'type': 'object',
+    'properties': {
+      'id':   { 'type': 'string' },
+      'slug': { 'type': 'string' },
+      'name': { 'type': 'string' }
+    },
+    'required': [ 'id', 'slug', 'name' ]
+  };
+
   /**
    * A base class for domain entity info objects.
    * @extends domain.DomainEntity
@@ -19,27 +30,31 @@ function EntityInfoFactory($q,
    */
   class EntityInfo extends DomainEntity {
 
-    constructor(obj) {
+    /**
+     * An ID for this entity that can be used in URLs.
+     *
+     * @name domain.EntityInfo#slug
+     * @type {string}
+     */
 
-      /**
-       * An ID for this entity that can be used in URLs.
-       *
-       * @name domain.EntityInfo#slug
-       * @type {string}
-       */
+    /**
+     * A short identifying name.
+     *
+     * @name domain.EntityInfo#name
+     * @type {string}
+     */
 
-      /**
-       * A short identifying name.
-       *
-       * @name domain.EntityInfo#name
-       * @type {string}
-       */
-
-      super(EntityInfo.SCHEMA, obj);
+    /**
+     * @private
+     * @return {object} The JSON schema for this class.
+     */
+    static schema() {
+      return SCHEMA;
     }
 
-    static isValid(obj) {
-      return super.isValid(EntityInfo.SCHEMA, [], obj);
+    /** @private */
+    static additionalSchemas() {
+      return [];
     }
 
     static create(obj) {
@@ -118,17 +133,6 @@ function EntityInfoFactory($q,
       }
     }
   }
-
-  EntityInfo.SCHEMA = {
-    'id': 'EntityInfo',
-    'type': 'object',
-    'properties': {
-      'id':   { 'type': 'string' },
-      'slug': { 'type': 'string' },
-      'name': { 'type': 'string' }
-    },
-    'required': [ 'id', 'slug', 'name' ]
-  };
 
   return EntityInfo;
 }

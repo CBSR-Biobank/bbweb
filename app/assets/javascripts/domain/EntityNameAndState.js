@@ -15,6 +15,21 @@ function EntityNameAndStateFactory($q,
                                    DomainEntity,
                                    DomainError) {
 
+  /*
+   * Used for validating plain objects.
+   */
+  const SCHEMA = {
+    'id': 'EntityNameAndState',
+    'type': 'object',
+    'properties': {
+      'id':    { 'type': 'string' },
+      'slug':  { 'type': 'string' },
+      'name':  { 'type': 'string' },
+      'state': { 'type': 'string' }
+    },
+    'required': [ 'id', 'name', 'state' ]
+  };
+
   /**
    * A base class for domain entity name objects.
    * @extends domain.DomainEntity
@@ -23,55 +38,34 @@ function EntityNameAndStateFactory($q,
   class EntityNameAndState extends DomainEntity {
 
     /**
-     * Please do not use this constructor. It is meant for internal use.
+     * An ID for this entity that can be used in URLs.
      *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
+     * @name domain.EntityNameAndState#slug
+     * @type {string}
      */
-    constructor(obj) {
-
-      /**
-       * The unique ID that identifies an object of this type.
-       * @name domain.EntitNamey#id
-       * @type string
-       * @protected
-       */
-
-      /**
-       * An ID for this entity that can be used in URLs.
-       *
-       * @name domain.EntityNameAndState#slug
-       * @type {string}
-       */
-
-      /**
-       * A short identifying name.
-       *
-       * @name domain.EntityNameAndState#name
-       * @type {string}
-       */
-
-      /**
-       * This entity's current state.
-       *
-       * @name domain.EntityNameAndState#state
-       * @type {string}
-       */
-
-      super(EntityNameAndState.SCHEMA, obj);
-    }
 
     /**
-     * Checks if `obj` has valid properties to construct a {@link
-     * domain.EntityNameAndState|EntityNameAndState}.
+     * A short identifying name.
      *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
-     *
-     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
+     * @name domain.EntityNameAndState#name
+     * @type {string}
      */
-    static isValid(obj) {
-      return super.isValid(EntityNameAndState.SCHEMA, [], obj);
+
+    /**
+     * This entity's current state.
+     *
+     * @name domain.EntityNameAndState#state
+     * @type {string}
+     */
+
+    /** @private */
+    static schema() {
+      return SCHEMA;
+    }
+
+    /** @private */
+    static additionalSchemas() {
+      return [];
     }
 
     /**
@@ -130,21 +124,6 @@ function EntityNameAndStateFactory($q,
         });
     }
   }
-
-  /**
-   * Used for validating plain objects.
-   */
-  EntityNameAndState.SCHEMA = {
-    'id': 'EntityNameAndState',
-    'type': 'object',
-    'properties': {
-      'id':    { 'type': 'string' },
-      'slug':  { 'type': 'string' },
-      'name':  { 'type': 'string' },
-      'state': { 'type': 'string' }
-    },
-    'required': [ 'id', 'name', 'state' ]
-  };
 
   return EntityNameAndState;
 }

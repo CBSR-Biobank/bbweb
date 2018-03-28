@@ -32,13 +32,9 @@ describe('Shipment domain object:', function() {
         expect(entity).toEqual(jasmine.any(this.Shipment));
       };
 
-      this.url = url;
-
-      //---
-
-      function url() {
-        const args = [ 'shipments' ].concat(_.toArray(arguments));
-        return EntityTestSuiteMixin.url.apply(null, args);
+      this.url = (...paths) => {
+        const args = [ 'shipments' ].concat(paths);
+        return EntityTestSuiteMixin.url(...args);
       }
     });
   });

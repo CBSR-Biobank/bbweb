@@ -11,6 +11,25 @@ function UserRoleFactory($q,
                          ConcurrencySafeEntity,
                          EntityInfo,
                          DomainError) {
+
+  const SCHEMA = {
+    id: 'UserRole',
+    type: 'object',
+    properties: {
+      'id':           { 'type': 'string'},
+      'version':      { 'type': 'integer', 'minimum': 0},
+      'slug':         { 'type': 'string' },
+      'name':         { 'type': 'string' },
+      'description':  { 'type': [ 'string', 'null' ] },
+      'childData':    { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
+    },
+    required: [
+      'slug',
+      'name',
+      'childData'
+    ]
+  };
+
   /**
    * A Role represents the set of permissions that a user has.
    * @extends domain.access.AccessItem
@@ -18,32 +37,17 @@ function UserRoleFactory($q,
    */
   class UserRole extends DomainEntity {
 
-    constructor(obj = {}) {
-      super(UserRole.SCHEMA, obj)
-    }
-
     /**
-     * Creates a Role from a server reply but first validates that it has a valid schema.
-     *
-     * <i>A wrapper for {@link domain.access.Role#asyncCreate}.</i>
-     *
-     * @see {@link domain.ConcurrencySafeEntity#update}
+     * @private
+     * @return {object} The JSON schema for this class.
      */
-    asyncCreate(obj) {
-      return UserRole.asyncCreate(obj);
+    static schema() {
+      return SCHEMA;
     }
 
-    /*
-     * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.access.Role|Role}.
-     *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
-     *
-     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
-     */
-    /** @protected */
-    static isValid(obj) {
-      return ConcurrencySafeEntity.isValid(UserRole.SCHEMA, [ EntityInfo.SCHEMA ], obj);
+    /** @private */
+    static additionalSchemas() {
+      return [ EntityInfo.schema() ];
     }
 
     /**
@@ -89,24 +93,6 @@ function UserRoleFactory($q,
     }
 
   }
-
-  UserRole.SCHEMA = {
-    id: 'UserRole',
-    type: 'object',
-    properties: {
-      'id':           { 'type': 'string'},
-      'version':      { 'type': 'integer', 'minimum': 0},
-      'slug':         { 'type': 'string' },
-      'name':         { 'type': 'string' },
-      'description':  { 'type': [ 'string', 'null' ] },
-      'childData':    { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
-    },
-    required: [
-      'slug',
-      'name',
-      'childData'
-    ]
-  };
 
   return UserRole;
 }

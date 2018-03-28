@@ -3,56 +3,58 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
+//import _ from 'lodash'
 
 /**
  *
  */
 /* @ngInject */
-function SpecimenLinkAnnotationTypeFactory(StudyAnnotationType,
-                                           studyAnnotationTypeValidation,
-                                           spcLinkAnnotationTypesService) {
+function SpecimenLinkAnnotationTypeFactory(
+  //studyAnnotationTypeValidation,
+  //StudyAnnotationType,
+  //spcLinkAnnotationTypesService
+) {
 
-  function SpecimenLinkAnnotationType(obj) {
-    obj = obj || {};
-    StudyAnnotationType.call(this, obj);
+  function SpecimenLinkAnnotationType(/* obj */) {
+    // obj = obj || {};
+    // StudyAnnotationType.call(this, obj);
 
-    this._service = spcLinkAnnotationTypesService;
+    // this._service = spcLinkAnnotationTypesService;
   }
 
-  SpecimenLinkAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);
+  // SpecimenLinkAnnotationType.prototype = Object.create(StudyAnnotationType.prototype);
 
-  SpecimenLinkAnnotationType.prototype.constructor = SpecimenLinkAnnotationType;
+  // SpecimenLinkAnnotationType.prototype.constructor = SpecimenLinkAnnotationType;
 
-  SpecimenLinkAnnotationType.create = function(obj) {
-    var annotationType = StudyAnnotationType.create(obj);
-    if (!_.isObject(annotationType)) {
-      return annotationType;
-    }
-    return new SpecimenLinkAnnotationType(obj);
-  };
+  // SpecimenLinkAnnotationType.create = function(obj) {
+  //   var annotationType = StudyAnnotationType.create(obj);
+  //   if (!_.isObject(annotationType)) {
+  //     return annotationType;
+  //   }
+  //   return new SpecimenLinkAnnotationType(obj);
+  // };
 
-  SpecimenLinkAnnotationType.list = function(studyId) {
-    return StudyAnnotationType.list(studyAnnotationTypeValidation.validateObj,
-                                    SpecimenLinkAnnotationType.create,
-                                    'slannottypes',
-                                    studyId);
-  };
+  // SpecimenLinkAnnotationType.list = function(studyId) {
+  //   return StudyAnnotationType.list(studyAnnotationTypeValidation.validateObj,
+  //                                   SpecimenLinkAnnotationType.create,
+  //                                   'slannottypes',
+  //                                   studyId);
+  // };
 
-  SpecimenLinkAnnotationType.get = function(studyId, annotationTypeId) {
-    return StudyAnnotationType.get(studyAnnotationTypeValidation.validateObj,
-                                   SpecimenLinkAnnotationType.create,
-                                   'slannottypes',
-                                   studyId,
-                                   annotationTypeId);
-  };
+  // SpecimenLinkAnnotationType.get = function(studyId, annotationTypeId) {
+  //   return StudyAnnotationType.get(studyAnnotationTypeValidation.validateObj,
+  //                                  SpecimenLinkAnnotationType.create,
+  //                                  'slannottypes',
+  //                                  studyId,
+  //                                  annotationTypeId);
+  // };
 
-  SpecimenLinkAnnotationType.prototype.addOrUpdate = function () {
-    return StudyAnnotationType.prototype
-      .addOrUpdate.call(this,
-                        studyAnnotationTypeValidation.validateObj,
-                        SpecimenLinkAnnotationType.create);
-  };
+  // SpecimenLinkAnnotationType.prototype.addOrUpdate = function () {
+  //   return StudyAnnotationType.prototype
+  //     .addOrUpdate.call(this,
+  //                       studyAnnotationTypeValidation.validateObj,
+  //                       SpecimenLinkAnnotationType.create);
+  // };
 
   return SpecimenLinkAnnotationType;
 }

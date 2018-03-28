@@ -117,7 +117,7 @@ describe('Role', function() {
     })
 
     it('fails when getting a role and it has a bad format', function() {
-      this.Role.SCHEMA.required.forEach((property) => {
+      this.Role.schema().required.forEach((property) => {
         const json = this.Factory.role(),
               badJson = _.omit(json, property)
         this.$httpBackend.whenGET(this.url(json.id)).respond(this.reply(badJson))

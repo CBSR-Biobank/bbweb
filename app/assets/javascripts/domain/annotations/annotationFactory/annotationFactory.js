@@ -5,85 +5,78 @@
 
 import _ from 'lodash';
 
-/* @ngInject */
-function AnnotationFactory(Annotation,
-                           AnnotationValueType,
-                           DateTimeAnnotation,
-                           MultipleSelectAnnotation,
-                           NumberAnnotation,
-                           SingleSelectAnnotation,
-                           TextAnnotation,
-                           DomainError) {
+/**
+ * An AngularJS service for {@link domain.Annotation Annotations}.
+ *
+ * @memberOf domain
+ */
+class AnnotationFactory {
 
-  var service = {
-    create
-  };
-  return service;
-
-  //--
+  constructor(Annotation,
+              AnnotationValueType,
+              DateTimeAnnotation,
+              MultipleSelectAnnotation,
+              NumberAnnotation,
+              SingleSelectAnnotation,
+              TextAnnotation,
+              DomainError) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    Annotation,
+                    AnnotationValueType,
+                    DateTimeAnnotation,
+                    MultipleSelectAnnotation,
+                    NumberAnnotation,
+                    SingleSelectAnnotation,
+                    TextAnnotation,
+                    DomainError
+                  });
+  }
 
   /**
-   * These objects are used by HTML form code to manage annotation information. It differs from the
-   * server representation in order to make setting the information via an HTML simpler.
+   * A factory function for {@link domain.Annotation Annotations}.
    *
-   * This static method should be used instead of the constructor when creating an annotation from a server
-   * response, since it validates that the required fields are present.
+   * Creates an {@link domain.Annotation Annotations} from a reply from the server.
    *
-   * @param {Object} obj - the server side entity
+   * @param {Object} obj={} - the JSON response for an Annotation from the server.
    *
-   * @param {AnnotationType} annotationType the annotation type this annotation is based from
-   *
-   * @param {boolean} required set only if annotationType does not have a 'required' attribute.
+   * @param {domain.AnnotationType} annotationType - the annotation type this annotation is based from
    */
-  function create(obj, annotationType) {
-    var validation, annotation;
+  create(obj = {}, annotationType) {
+    let annotation;
 
     if (_.isUndefined(annotationType)) {
-      throw new DomainError('annotation type is undefined: ' + obj.annotationTypeId);
-    }
-
-    if (obj) {
-      validation = Annotation.isValid(obj);
-      if (!validation.valid) {
-        throw new DomainError('invalid annotation from server: ' + validation.error);
-      }
-
-      if (obj.selectedValues) {
-        validation.valid = annotationType.validOptions(obj.selectedValues);
-      }
-
-      if (!validation.valid) {
-        throw new DomainError('invalid selected values in object from server');
-      }
+      throw new this.DomainError('annotation type is undefined: ' + obj.annotationTypeId);
     }
 
     switch (annotationType.valueType) {
 
-    case AnnotationValueType.TEXT:
-      annotation = new TextAnnotation(obj, annotationType);
+    case this.AnnotationValueType.TEXT:
+      annotation = this.TextAnnotation.create(obj, annotationType);
       break;
 
-    case AnnotationValueType.NUMBER:
-      annotation = new NumberAnnotation(obj, annotationType);
+    case this.AnnotationValueType.NUMBER:
+      annotation = this.NumberAnnotation.create(obj, annotationType);
       break;
 
-    case AnnotationValueType.DATE_TIME:
-      annotation = new DateTimeAnnotation(obj, annotationType);
+    case this.AnnotationValueType.DATE_TIME:
+      annotation = this.DateTimeAnnotation.create(obj, annotationType);
       break;
 
-    case AnnotationValueType.SELECT:
+    case this.AnnotationValueType.SELECT:
       if (annotationType.isSingleSelect()) {
-        annotation = new SingleSelectAnnotation(obj, annotationType);
+        annotation = this.SingleSelectAnnotation.create(obj, annotationType);
       } else if (annotationType.isMultipleSelect()) {
-        annotation = new MultipleSelectAnnotation(obj, annotationType);
+        annotation = this.MultipleSelectAnnotation.create(obj, annotationType);
       } else {
-        throw new DomainError('invalid select annotation: ' + annotationType.maxValueCount);
+        throw new this.DomainError('invalid select annotation: ' + annotationType.maxValueCount);
       }
       break;
 
     default:
-      // should never happen since this is checked for in the constructor, but just in case
-      throw new DomainError('value type is invalid: ' + annotationType.valueType);
+      // should never happen since this is checked for in the create method, but just in case
+      throw new this.DomainError('value type is invalid: ' + annotationType.valueType);
     }
 
     return annotation;

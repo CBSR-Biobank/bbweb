@@ -117,7 +117,7 @@ describe('Permission', function() {
     })
 
     it('fails when getting a permission and it has a bad format', function() {
-      this.Permission.SCHEMA.required.forEach((property) => {
+      this.Permission.schema().required.forEach((property) => {
         const json = this.Factory.permission(),
               badJson = _.omit(json, property)
         this.$httpBackend.whenGET(this.url(json.id)).respond(this.reply(badJson))

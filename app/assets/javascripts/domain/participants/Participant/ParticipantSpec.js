@@ -171,10 +171,9 @@ describe('Participant', function() {
   describe('when creating', function() {
 
     it('fails when creating from a non object', function() {
-      var self = this;
-      expect(function () {
-        self.Participant.create(1);
-      }).toThrowError(/Invalid type/);
+      expect(
+        () => this.Participant.create(1)
+      ).toThrowError(/Invalid type/);
     });
 
     it('fails when creating from an object with invalid keys', function() {
@@ -218,9 +217,10 @@ describe('Participant', function() {
     this.$httpBackend.whenGET(this.url('participants', participant.slug))
       .respond(this.reply(participant));
 
-    this.Participant.get(participant.slug).then((reply) => {
-      expect(reply).toEqual(jasmine.any(this.Participant));
-    });
+    this.Participant.get(participant.slug)
+      .then((reply) => {
+        expect(reply).toEqual(jasmine.any(this.Participant));
+      });
     this.$httpBackend.flush();
   });
 
@@ -259,9 +259,10 @@ describe('Participant', function() {
     this.$httpBackend.expectPOST(this.url('participants', entities.jsonStudy.id), reqJson)
       .respond(this.reply(entities.jsonParticipant));
 
-    entities.participant.add().then((replyParticipant) => {
-      expect(replyParticipant.id).toEqual(entities.jsonParticipant.id);
-    });
+    entities.participant.add()
+      .then((replyParticipant) => {
+        expect(replyParticipant.id).toEqual(entities.jsonParticipant.id);
+      });
     this.$httpBackend.flush();
   });
 

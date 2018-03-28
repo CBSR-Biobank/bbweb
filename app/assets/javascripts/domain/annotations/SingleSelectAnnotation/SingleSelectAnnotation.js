@@ -3,61 +3,56 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-var _ = require('lodash');
+import _ from 'lodash';
 
 /* @ngInject */
-function DateTimeAnnotationFactory(Annotation, timeService) {
+function SingleSelectAnnotationFactory(Annotation, DomainError) {
+
+  const SCHEMA = Object.assign({},
+                               Annotation.schema(),
+                               { properties: { value: { type: [ 'array', 'null' ] } } });
 
   /**
-   * An {@link domain.Annotation Annotation} that holds a Date value.
+   * An {@link domain.Annotation Annotation} that holds a number value.
    *
    * Please use {@link domain.AnnotationFactory#create AnnotationFactory.create()} to create annotation
    * objects.
-   *
-   * @memberOf domain
    */
-  class DateTimeAnnotation extends Annotation {
+  class SingleSelectAnnotation extends Annotation {
 
     constructor(obj = {}, annotationType) {
       super(obj, annotationType);
-      this.valueType = 'DateTime';
+      this.valueType = 'SingleSelect';
 
-      if (obj.value) {
-        this.value = new Date(obj.value);
-      } else {
-        this.value = null;
+      if (!_.isUndefined(obj.value)) {
+        if (obj.value.length === 0) {
+          this.value = null;
+        } else if (obj.value.length === 1) {
+          this.value = obj.value[0];
+        } else {
+          throw new DomainError('invalid value for selected values');
+        }
       }
-    }
-
-    /**
-     * @return {Date} The date stored in this annotation.
-     */
-    getValue() {
-      return _.isNull(this.value) ? null :timeService.dateToDisplayString(this.value);
     }
 
     /**
      * Assigns a value to this annotation.
      *
-     * @param {Date} value - the value to assign to this annotation.
+     * @param {string} value - the value to assign to this annotation.
      */
     setValue(value) {
-      if (typeof value === 'string') {
-        this.value = new Date(value);
-      } else {
-        this.value = value;
-      }
+      this.value = value;
     }
 
-    /**
-     * @return {object} An object that can be sent to the server to save this annotation.
-     */
     getServerAnnotation() {
       return {
         annotationTypeId: this.getAnnotationTypeId(),
-        stringValue:      this.value ? timeService.dateAndTimeToUtcString(this.value) : '',
-        selectedValues:   []
+        selectedValues:   this.value ? [ this.value ] : []
       };
+    }
+
+    static schema() {
+      return SCHEMA;
     }
 
     /**
@@ -69,21 +64,21 @@ function DateTimeAnnotationFactory(Annotation, timeService) {
      * @param {domain.AnnotationType} annotationType - the object containing the type information for this
      * annotation.
      *
-     * @returns {domain.DateTimeAnnotation} An annotation created from the given object.
+     * @returns {domain.SingleSelectAnnotation} An annotation created from the given object.
      */
     static create(obj = {}, annotationType) {
       const clientObj = super.create(obj,
                                      annotationType,
                                      (obj) => ({
                                        annotationTypeId: annotationType.id,
-                                       value: obj.stringValue || null
+                                       value: obj.selectedValues || []
                                      }));
-      return new DateTimeAnnotation(clientObj, annotationType);
-   }
+      return new SingleSelectAnnotation(clientObj, annotationType);
+    }
 
   }
 
-  return DateTimeAnnotation;
+  return SingleSelectAnnotation;
 }
 
-export default ngModule => ngModule.factory('DateTimeAnnotation', DateTimeAnnotationFactory)
+export default ngModule => ngModule.factory('SingleSelectAnnotation', SingleSelectAnnotationFactory)

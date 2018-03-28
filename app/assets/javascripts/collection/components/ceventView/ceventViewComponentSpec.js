@@ -80,8 +80,9 @@ describe('Component: ceventView', function() {
   });
 
   it('has valid scope', function() {
-    const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                               this.AnnotationMaxValueCount.SELECT_MULTIPLE),
+    const collectionEvent =
+          this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
+                                             this.AnnotationMaxValueCount.SELECT_MULTIPLE),
           collectionEventType = collectionEvent.collectionEventType,
           participant = this.Participant.create(this.Factory.participant()),
           study = this.Study.create(this.Factory.defaultStudy());

@@ -12,11 +12,20 @@ function EntitySetFactory($q,
                           DomainError,
                           EntityInfo) {
 
+  const SCHEMA = {
+    'id': 'EntitySet',
+    'type': 'object',
+    'properties': {
+      'allEntities': { 'type': 'boolean' },
+      'entityData':  { 'type': 'array',  'items': { '$ref': 'EntityInfo' } }
+    },
+    'required': [ 'allEntities', 'entityData' ]
+  };
+
   class EntitySet extends DomainEntity {
 
     constructor(obj) {
-      super(EntitySet.SCHEMA,
-            Object.assign(
+      super(Object.assign(
               {
                 allEntities: false,
                 entityData:  []
@@ -56,8 +65,17 @@ function EntitySetFactory($q,
       });
     }
 
-    static isValid(obj) {
-      return DomainEntity.isValid(EntitySet.SCHEMA, [ EntityInfo.SCHEMA ], obj);
+    /**
+     * @private
+     * @return {object} The JSON schema for this class.
+     */
+    static schema() {
+      return SCHEMA;
+    }
+
+    /** @private */
+    static additionalSchemas() {
+      return [ EntityInfo.schema() ];
     }
 
     static create(obj) {
@@ -83,16 +101,6 @@ function EntitySetFactory($q,
       }
     }
   }
-
-  EntitySet.SCHEMA = {
-    'id': 'EntitySet',
-    'type': 'object',
-    'properties': {
-      'allEntities': { 'type': 'boolean' },
-      'entityData':  { 'type': 'array',  'items': { '$ref': 'EntityInfo' } }
-    },
-    'required': [ 'allEntities', 'entityData' ]
-  };
 
   return EntitySet;
 }

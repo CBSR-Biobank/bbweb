@@ -13,6 +13,19 @@ function MembershipBaseFactory($q,
                                EntityInfo,
                                EntitySet) {
 
+
+  const SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'MembershipBase',
+    properties: {
+      'slug':         { 'type': 'string' },
+      'name':         { 'type': 'string' },
+      'description':  { 'type': [ 'string', 'null' ] },
+      'studyData':    { '$ref': 'EntitySet' },
+      'centreData':   { '$ref': 'EntitySet' }
+    },
+    required: [ 'id', 'version', 'timeAdded', 'studyData', 'centreData' ]
+  });
+
   /**
    * Do not use this constructor. Use {@link domain.access.Membership} or {@link
    * domain.access.UserMembership} instead.
@@ -26,91 +39,83 @@ function MembershipBaseFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-  function MembershipBase(obj) {
-    /**
-     * A short identifying name that is unique.
-     *
-     * @name domain.access.MembershipBase#name
-     * @type {string}
-     */
-    this.name = '';
+  class MembershipBase extends ConcurrencySafeEntity {
 
-    /**
-     * An optional description that can provide additional details on the name.
-     *
-     * @name domain.access.MembershipBase#description
-     * @type {string}
-     * @default null
-     */
+    constructor(obj) {
+      /**
+       * A short identifying name that is unique.
+       *
+       * @name domain.access.MembershipBase#name
+       * @type {string}
+       */
 
-    /**
-     * The studies this membership is for.
-     *
-     * @name domain.access.MembershipBase#studyData
-     * @type {Array<string>}
-     */
-    this.studyData = [];
+      /**
+       * An optional description that can provide additional details on the name.
+       *
+       * @name domain.access.MembershipBase#description
+       * @type {string}
+       * @default null
+       */
 
-    /**
-     * The centres this membership is for.
-     *
-     * @name domain.users.MembershipBase#centreData
-     * @type {Array<string>}
-     */
-    this.centreData = [];
+      /**
+       * The studies this membership is for.
+       *
+       * @name domain.access.MembershipBase#studyData
+       * @type {Array<string>}
+       */
 
-    ConcurrencySafeEntity.call(this, MembershipBase.SCHEMA, obj);
-    this.studyData = new EntitySet(_.get(obj, 'studyData', {}));
-    this.centreData = new EntitySet(_.get(obj, 'centreData', {}));
+      /**
+       * The centres this membership is for.
+       *
+       * @name domain.users.MembershipBase#centreData
+       * @type {Array<string>}
+       */
+
+      super(Object.assign(
+        {
+          name:  '',
+          studyData:  [],
+          centreData:  []
+        },
+        obj))
+
+      this.studyData = new EntitySet(_.get(obj, 'studyData', {}));
+      this.centreData = new EntitySet(_.get(obj, 'centreData', {}));
+    }
+
+    isForAllStudies() {
+      return this.studyData.isForAllEntities();
+    }
+
+    isMemberOfStudy(name) {
+      return this.studyData.isMemberOf(name);
+    }
+
+    isForAllCentres() {
+      return this.centreData.isForAllEntities();
+    }
+
+    isMemberOfCentre(name) {
+      return this.centreData.isMemberOf(name);
+    }
+
+    static createDerivedSchema({ id, type = 'object', properties = {}, required = [] } = {}) {
+      return Object.assign(
+        {},
+        SCHEMA,
+        {
+          id: id,
+          type: type,
+          properties: Object.assign(
+            {},
+            SCHEMA.properties,
+            properties
+          ),
+          required: SCHEMA.required.slice().concat(required)
+        }
+      );
+    }
   }
-
-  MembershipBase.prototype = Object.create(ConcurrencySafeEntity.prototype);
-  MembershipBase.prototype.constructor = MembershipBase;
-
-  MembershipBase.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
-    id: 'MembershipBase',
-    properties: {
-      'slug':         { 'type': 'string' },
-      'name':         { 'type': 'string' },
-      'description':  { 'type': [ 'string', 'null' ] },
-      'studyData':    { '$ref': 'EntitySet' },
-      'centreData':   { '$ref': 'EntitySet' }
-    },
-    required: [ 'id', 'version', 'timeAdded', 'studyData', 'centreData' ]
-  });
-
-  MembershipBase.createDerivedSchema = function ({ id, type = 'object', properties = {}, required = [] } = {}) {
-    return Object.assign(
-      {},
-      MembershipBase.SCHEMA,
-      {
-        id: id,
-        type: type,
-        properties: Object.assign(
-          {},
-          MembershipBase.SCHEMA.properties,
-          properties
-        ),
-        required: MembershipBase.SCHEMA.required.slice().concat(required)
-      }
-    );
-  }
-
-  MembershipBase.prototype.isForAllStudies = function () {
-    return this.studyData.isForAllEntities();
-  };
-
-  MembershipBase.prototype.isMemberOfStudy = function (name) {
-    return this.studyData.isMemberOf(name);
-  };
-
-  MembershipBase.prototype.isForAllCentres = function () {
-    return this.centreData.isForAllEntities();
-  };
-
-  MembershipBase.prototype.isMemberOfCentre = function (name) {
-    return this.centreData.isMemberOf(name);
-  };
 
   return MembershipBase;
 }

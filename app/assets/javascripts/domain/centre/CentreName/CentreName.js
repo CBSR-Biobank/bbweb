@@ -15,6 +15,8 @@ function CentreNameFactory($q,
                            DomainError,
                            CentreState) {
 
+  const SCHEMA = Object.assign(EntityNameAndState.schema(), { id: 'CentreName'});
+
   /**
    * Summary information for a {@link domain.centres.Centre}.
    *
@@ -65,6 +67,16 @@ function CentreNameFactory($q,
       return super.url(...allPaths);
     }
 
+    /** @private */
+    static schema() {
+      return SCHEMA;
+    }
+
+    /** @private */
+    static additionalSchemas() {
+      return [];
+    }
+
     /**
      * Creates a CentreName, but first it validates <code>obj</code> to ensure that it has a valid schema.
      *
@@ -77,7 +89,7 @@ function CentreNameFactory($q,
      * a Centre within asynchronous code.
      */
     static create(obj) {
-      var validation = EntityNameAndState.isValid(obj);
+      var validation = CentreName.isValid(obj);
       if (!validation.valid) {
         $log.error(validation.message);
         throw new DomainError(validation.message);

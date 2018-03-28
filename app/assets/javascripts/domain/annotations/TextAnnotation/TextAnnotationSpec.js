@@ -15,41 +15,30 @@ import ngModule from '../../index'
  *
  * These test cases provide additional code coverage to the ones in AnnotationSpec.js.
  */
-describe('DateTimeAnnotation', function() {
+describe('TextAnnotation', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(EntityTestSuiteMixin) {
       _.extend(this, EntityTestSuiteMixin);
-      this.injectDependencies('DateTimeAnnotation',
+      this.injectDependencies('TextAnnotation',
                               'AnnotationType',
                               'AnnotationValueType',
-                              'timeService',
                               'Factory');
     });
-  });
-
-  it('set value can be assigned a string', function() {
-    var jsonAnnotationType = this.Factory.annotationType({ valueType: this.AnnotationValueType.DATE_TIME }),
-        jsonAnnotation = this.Factory.annotation({}, jsonAnnotationType),
-        annotationType = new this.AnnotationType(jsonAnnotationType),
-        annotation = new this.DateTimeAnnotation(jsonAnnotation, annotationType);
-
-    annotation.setValue('1990-01-01 12:00');
-    expect(annotation.value).toBeDate();
   });
 
   describe('shared behaviour', function() {
     const context = {};
 
     beforeEach(function() {
-      context.classType = this.DateTimeAnnotation;
+      context.classType = this.TextAnnotation;
       context.annotationTypeJson =
         (options = {}) => this.Factory.annotationType(Object.assign(
-          options, { valueType: this.AnnotationValueType.DATE_TIME }))
+          options, { valueType: this.AnnotationValueType.TEXT }))
       context.annotationJson =
         (options, annotationTypeJson) => this.Factory.annotation(options, annotationTypeJson)
-      context.createAnnotation = this.DateTimeAnnotation.create.bind(this.DateTimeAnnotation);
+      context.createAnnotation = this.TextAnnotation.create.bind(this.TextAnnotation);
     });
 
     annotationSharedBehaviour(context);

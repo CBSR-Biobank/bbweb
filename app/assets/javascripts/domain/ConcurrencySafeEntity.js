@@ -14,58 +14,8 @@ function ConcurrencySafeEntityFactory($q,
                                       DomainError,
                                       biobankApi) {
 
-  /**
-   * @classdesc Used to manage surrogate identity and optimistic concurrency versioning.
-   *
-   * @class
-   * @memberOf domain
-   */
-  function ConcurrencySafeEntity(schema, obj) {
-    /**
-     * The unique ID that identifies an object of this type.
-     * @name domain.ConcurrencySafeEntity#id
-     * @type string
-     * @protected
-     */
 
-    /**
-     * The current version for the object. Used for optimistic concurrency versioning.
-     * @name domain.ConcurrencySafeEntity#version
-     * @type number
-     * @protected
-     */
-
-    /**
-     * The date and time, in ISO time format, when this entity was added to the system.
-     * @name domain.ConcurrencySafeEntity#timeAdded
-     * @type Date
-     * @protected
-     */
-
-    /**
-     * The date and time, in ISO time format, when this entity was last updated.
-     * @name domain.ConcurrencySafeEntity#timeModified
-     * @type Date
-     * @protected
-     */
-
-    obj = Object.assign({ id: null, version: 0 }, obj)
-
-    DomainEntity.call(this, schema, obj);
-
-    obj = obj || {};
-    if (obj.timeAdded) {
-      this.timeAdded = new Date(obj.timeAdded);
-    }
-    if (obj.timeModified) {
-      this.timeModified = new Date(obj.timeModified);
-    }
-  }
-
-  ConcurrencySafeEntity.prototype = Object.create(DomainEntity.prototype);
-  ConcurrencySafeEntity.prototype.constructor = ConcurrencySafeEntity;
-
-  ConcurrencySafeEntity.SCHEMA = {
+  const SCHEMA = {
     'id': 'ConcurrencySafeEntity',
     'type': 'object',
     'properties': {
@@ -77,54 +27,110 @@ function ConcurrencySafeEntityFactory($q,
     'required': [ 'id', 'version', 'timeAdded' ]
   };
 
-  ConcurrencySafeEntity.createDerivedSchema = function ({ id,
-                                                          type = 'object',
-                                                          properties = {},
-                                                          required = [] } = {}) {
-    return Object.assign(
-      {},
-      ConcurrencySafeEntity.SCHEMA,
-      {
-        'id': id,
-        'type': type,
-        'properties': Object.assign(
-          {},
-          ConcurrencySafeEntity.SCHEMA.properties,
-          properties
-        ),
-        'required': ConcurrencySafeEntity.SCHEMA.required.slice().concat(required)
-      }
-    );
-  }
-
   /**
-   * If the object does not have an ID it is new and is not yet present in the system.
+   * @classdesc Used to manage surrogate identity and optimistic concurrency versioning.
    *
-   * @returns {boolean}
+   * @class
+   * @memberOf domain
    */
-  ConcurrencySafeEntity.prototype.isNew = function() {
-    return (this.id === null);
-  };
+  class ConcurrencySafeEntity extends DomainEntity {
 
-  /**
-   * Checks if `obj` has valid properties to construct an object with the given schemas.
-   */
-  ConcurrencySafeEntity.isValid = function(schema, additionalSchemas, obj) {
-    return DomainEntity.isValid(schema, additionalSchemas, obj);
-  };
+    /**
+     * @param {object} obj={} the plain object to copy properties from.
+     */
+    constructor(obj = {}) {
+      /**
+       * The unique ID that identifies an object of this type.
+       * @name domain.ConcurrencySafeEntity#id
+       * @type string
+       * @protected
+       */
 
+      /**
+       * The current version for the object. Used for optimistic concurrency versioning.
+       * @name domain.ConcurrencySafeEntity#version
+       * @type number
+       * @protected
+       */
 
-  /** @protected */
-  /*
-   * Sends a request to the server to update this entity.
-   */
-  ConcurrencySafeEntity.prototype.update = function (url, additionalJson = {}) {
-    if (_.isNil(this.id)) {
-      throw new DomainError('entity has not been persisted');
+      /**
+       * The date and time, in ISO time format, when this entity was added to the system.
+       * @name domain.ConcurrencySafeEntity#timeAdded
+       * @type Date
+       * @protected
+       */
+
+      /**
+       * The date and time, in ISO time format, when this entity was last updated.
+       * @name domain.ConcurrencySafeEntity#timeModified
+       * @type Date
+       * @protected
+       */
+
+      super(Object.assign({ id: null, version: 0 }, obj));
+
+      if (obj) {
+        if (obj.timeAdded) {
+          this.timeAdded = new Date(obj.timeAdded);
+        }
+        if (obj.timeModified) {
+          this.timeModified = new Date(obj.timeModified);
+        }
+      }
     }
-    const json = _.extend({ expectedVersion: this.version }, additionalJson);
-    return biobankApi.post(url, json);
-  };
+
+    /**
+     * Used to create a JSON schema for a derived class.
+     *
+     * @protected
+     */
+    static createDerivedSchema({ id,
+                                 type = 'object',
+                                 properties = {},
+                                 required = [] } = {}) {
+      return Object.assign(
+        {},
+        SCHEMA,
+        {
+          'id': id,
+          'type': type,
+          'properties': Object.assign(
+            {},
+            SCHEMA.properties,
+            properties
+          ),
+          'required': SCHEMA.required.slice().concat(required)
+        }
+      );
+    }
+
+    /**
+     * If the object does not have an ID it is new and is not yet present in the system.
+     *
+     * @returns {boolean}
+     */
+    isNew() {
+      return (this.id === null);
+    }
+
+
+    /**
+     * Sends a request to the server to update this entity.
+     *
+     * @param {string} url - the REST API url.
+     *
+     * @param {object} additionalJson - the JSON to send with the update request.
+     *
+     * @protected
+     */
+    update(url, additionalJson = {}) {
+      if (_.isNil(this.id)) {
+        throw new DomainError('entity has not been persisted');
+      }
+      const json = _.extend({ expectedVersion: this.version }, additionalJson);
+      return biobankApi.post(url, json);
+    }
+  }
 
   return ConcurrencySafeEntity;
 }

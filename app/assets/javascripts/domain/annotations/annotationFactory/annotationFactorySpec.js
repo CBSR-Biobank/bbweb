@@ -7,6 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
+import moment from 'moment';
 import ngModule from '../../index'
 
 /*
@@ -18,8 +19,8 @@ describe('MultipleSelectAnnotation', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin) {
-      _.extend(this, EntityTestSuiteMixin);
+    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin) {
+      _.extend(this, AnnotationsEntityTestSuiteMixin);
       this.injectDependencies('annotationFactory',
                               'AnnotationType',
                               'AnnotationValueType',
@@ -28,20 +29,67 @@ describe('MultipleSelectAnnotation', function() {
     });
   });
 
-  it('cannot be created with invalid selected values', function() {
-    var jsonAnnotationType = this.Factory.annotationType({
-          valueType:     this.AnnotationValueType.SELECT,
-          maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE,
-          options:       [ 'option1', 'option2' ],
-          required:      true
-        }),
-        annotationType = new this.AnnotationType(jsonAnnotationType),
-        jsonAnnotation = this.Factory.annotation({ selectedValues: [ this.Factory.stringNext() ] },
-                                                 jsonAnnotationType);
+  it('can create an annotation of each value type', function() {
+    Object.values(this.annotationTypesForAllValueTypes()).forEach((options) => {
+      const entities = this.getAnnotationAndType(options);
+      const annotation = this.annotationFactory.create(entities.serverAnnotation, entities.annotationType);
+
+      switch (entities.annotationType.valueType) {
+
+      case this.AnnotationValueType.TEXT:
+        expect(annotation.value).toBe(entities.serverAnnotation.stringValue);
+        break;
+
+      case this.AnnotationValueType.NUMBER:
+        expect(annotation.value).toBe(parseFloat(entities.serverAnnotation.numberValue));
+        break;
+
+      case this.AnnotationValueType.DATE_TIME:
+          expect(moment(annotation.value).utc().format()).toBe(entities.serverAnnotation.stringValue);
+        break;
+
+      case this.AnnotationValueType.SELECT:
+        if (entities.annotationType.isSingleSelect()) {
+          expect(annotation.value).toBe(entities.serverAnnotation.selectedValues[0]);
+        } else if (entities.annotationType.isMultipleSelect()) {
+          annotation.value.forEach((option) => {
+            expect(entities.serverAnnotation.selectedValues).toContain(option.name);
+          });
+        }
+        break;
+
+      default:
+        // should never happen since this is checked for in the create method, but just in case
+        fail('value type is invalid: ' + entities.annotationType.valueType);
+      }
+    });
+  })
+
+  it('cannot be created without an annotation type', function() {
+    expect(() => {
+      this.annotationFactory.create({});
+    }).toThrowError(/annotation type is undefined/);
+  });
+
+  it('cannot be created with invalid value type', function() {
+    const jsonAnnotationType = this.Factory.annotationType(),
+          annotationType = new this.AnnotationType(jsonAnnotationType);
+
+    annotationType.valueType = this.Factory.stringNext();
 
     expect(() => {
-      this.annotationFactory.create(jsonAnnotation, annotationType);
-    }).toThrowError('invalid selected values in object from server');
+      this.annotationFactory.create({}, annotationType);
+    }).toThrowError(/value type is invalid/);
   });
+
+  it('attempt to create a select annotation with invalid max value count throws an error', function() {
+    const jsonAnnotationType = this.Factory.annotationType({ valueType: this.AnnotationValueType.SELECT}),
+          annotationType = new this.AnnotationType(jsonAnnotationType);
+    annotationType.maxValueCount = -1;
+
+    expect(() => {
+      this.annotationFactory.create({}, annotationType);
+    }).toThrowError(/invalid select annotation/);
+  })
 
 });

@@ -158,7 +158,7 @@ describe('Membership', function() {
     });
 
     it('fails when getting a membership and it has a bad format', function() {
-      this.Membership.SCHEMA.required.forEach((property) => {
+      this.Membership.schema().required.forEach((property) => {
         var json = this.Factory.membership(),
             badJson = _.omit(json, property);
         this.$httpBackend.whenGET(this.url(json.id)).respond(this.reply(badJson));

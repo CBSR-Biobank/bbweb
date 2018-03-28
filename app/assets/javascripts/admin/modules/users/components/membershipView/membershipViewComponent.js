@@ -44,10 +44,6 @@ class MembershipViewController {
                     CentreName,
                     matchingUserNames
                   });
-
-    this.onUserLabelSelected   = this.userLabelSelected.bind(this);
-    this.onStudyLabelSelected  = this.studyLabelSelected.bind(this);
-    this.onCentreLabelSelected = this.centreLabelSelected.bind(this);
   }
 
   $onInit() {

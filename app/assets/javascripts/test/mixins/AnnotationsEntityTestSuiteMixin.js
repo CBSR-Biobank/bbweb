@@ -10,14 +10,23 @@
 function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
                                          AnnotationType,
                                          AnnotationValueType,
+                                         AnnotationMaxValueCount,
                                          TextAnnotation,
                                          DateTimeAnnotation,
                                          NumberAnnotation,
                                          SingleSelectAnnotation,
                                          MultipleSelectAnnotation,
+                                         annotationFactory,
                                          Factory) {
 
-  return Object.assign({ jsonAnnotationData, validateAnnotationClass }, EntityTestSuiteMixin);
+  return Object.assign(
+    {
+      jsonAnnotationData,
+      validateAnnotationClass,
+      getAnnotationAndType,
+      annotationTypesForAllValueTypes
+    },
+    EntityTestSuiteMixin);
 
   function jsonAnnotationData() {
     var annotationTypes = Factory.allAnnotationTypes();
@@ -31,6 +40,37 @@ function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
         annotation:     annotation
       };
     });
+  }
+
+  /**
+   * @param {object} annotTypeOptions - The options passed to the {@link test.Factory Factory} when creating
+   * the *Annotation Type*.
+   */
+  function getAnnotationAndType(annotTypeOptions = {}) {
+    const annotationType   = AnnotationType.create(Factory.annotationType(annotTypeOptions)),
+          value            = Factory.valueForAnnotation(annotationType),
+          jsonAnnotation   = Factory.annotation({ value }, annotationType),
+          annotation       = annotationFactory.create(jsonAnnotation, annotationType);
+
+    return {
+      annotationType:   annotationType,
+      serverAnnotation: jsonAnnotation,
+      annotation:       annotation
+    };
+  }
+  /*
+   * Creates *Annotation Type* options to create an annotation of each type of object.
+   *
+   * @see test.Factory.annotationType
+   */
+  function annotationTypesForAllValueTypes() {
+    const result = Object.values(AnnotationValueType).map((valueType) => ({ valueType: valueType }));
+    result.push({
+      valueType:     AnnotationValueType.SELECT,
+      maxValueCount: AnnotationMaxValueCount.SELECT_MULTIPLE,
+      options:       [ 'opt1', 'opt2', 'opt3' ]
+    });
+    return result;
   }
 
   /**

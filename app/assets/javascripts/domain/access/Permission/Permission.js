@@ -15,6 +15,9 @@ function PermissionFactory($q,
                            AccessItem,
                            EntityInfo,
                            DomainError) {
+
+  const SCHEMA = AccessItem.createDerivedSchema({ 'id': 'Permission' });
+
   /**
    * A Permission allows a user to perform a certain task in the system.
    * <p>
@@ -25,25 +28,16 @@ function PermissionFactory($q,
    */
   class Permission extends AccessItem {
 
-    constructor(obj = {}) {
-      super(Permission.SCHEMA, obj)
+    /**
+     * @return {object} The JSON schema for this class.
+     */
+    static schema() {
+      return SCHEMA;
     }
 
     static url(...pathItems) {
-      return DomainEntity.url.apply(null, [ 'access/permissions' ].concat(pathItems));
-    }
-
-    /*
-     * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.access.Permission|Permission}.
-     *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
-     *
-     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
-     */
-    /** @protected */
-    static isValid(obj) {
-      return ConcurrencySafeEntity.isValid(Permission.SCHEMA, [ EntityInfo.SCHEMA ], obj);
+      const allPaths = [ 'access/permissions' ].concat(pathItems);
+      return super.url(...allPaths);
     }
 
     /**
@@ -101,8 +95,6 @@ function PermissionFactory($q,
     }
 
   }
-
-  Permission.SCHEMA = AccessItem.createDerivedSchema({ 'id': 'Permission' });
 
   return Permission;
 }

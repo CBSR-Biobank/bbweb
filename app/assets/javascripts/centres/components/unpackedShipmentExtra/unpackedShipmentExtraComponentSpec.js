@@ -60,7 +60,7 @@ describe('unpackedShipmentExtraComponent', function() {
     it('retrieves extra specimens', function() {
       var self = this,
           shipment = this.createShipment(),
-          shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
+          shipmentSpecimens = [ this.ShipmentSpecimen.create(this.Factory.shipmentSpecimen()) ],
           promiseSucceeded = false,
           args;
 
@@ -81,7 +81,7 @@ describe('unpackedShipmentExtraComponent', function() {
     });
 
     it('returns empty array if shipment is undefined', function() {
-      var shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
+      var shipmentSpecimens = [ this.ShipmentSpecimen.create(this.Factory.shipmentSpecimen()) ],
           promiseSucceeded = false;
 
       spyOn(this.ShipmentSpecimen, 'list')
@@ -161,13 +161,12 @@ describe('unpackedShipmentExtraComponent', function() {
     beforeEach(function() {
       this.shipment = this.createShipment();
       this.specimen = this.Factory.specimen();
-      this.shipmentSpecimen = new this.ShipmentSpecimen(
+      this.shipmentSpecimen = this.ShipmentSpecimen.create(
         this.Factory.shipmentSpecimen({ specimen: this.specimen }));
 
       spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
       spyOn(this.notificationsService, 'success').and.returnValue(null);
     });
-
 
     it('a specimen can be removed', function() {
       var tableRefreshCount;

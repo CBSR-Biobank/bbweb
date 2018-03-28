@@ -15,6 +15,13 @@ function DomainEntityFactory($log, biobankApi) {
 
   /**
    * An abstract class for an entity in the domain.
+   *
+   * Every derived class must have a following static methods
+   *
+   * - a method named `schema` that returns the JSON Schema for the class.
+   *
+   * - a method named `additionalSchemas` that returns the JSON Schema's for the subclasses.
+   *
    * @memberOf domain
    */
   class DomainEntity {
@@ -26,7 +33,7 @@ function DomainEntityFactory($log, biobankApi) {
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * the derived class. Objects of this type are usually returned by the server's REST API.
      */
-    constructor(schema, obj = {}) {
+    constructor(obj = {}) {
       /**
        * The unique ID that identifies an object of this type.
        * @name domain.DomainEntity#id
@@ -34,10 +41,11 @@ function DomainEntityFactory($log, biobankApi) {
        * @protected
        */
 
-      Object.assign(this, _.pick(obj, _.keys(schema.properties)));
+      Object.assign(this, _.pick(obj, _.keys(this.constructor.schema().properties)));
     }
 
     /**
+     * @protected
      *
      * @param {object} schema - the tv4 schema for this class.
      *
@@ -48,15 +56,18 @@ function DomainEntityFactory($log, biobankApi) {
      *
      * @return {domain.Validation} A validation object.
      */
-    static isValid(schema, additionalSchemas, obj) {
-      if (additionalSchemas) {
-        additionalSchemas.forEach(schema => {
-          tv4.addSchema(schema.id, schema);
-        });
+    static isValid(obj) {
+      if (!this.additionalSchemas()) {
+        return { valid: false, message: 'additional schemas not defined'};
       }
 
-      if (!tv4.validate(obj, schema)) {
-        $log.error('validation error:', schema.id, tv4.error.dataPath + ':' + tv4.error.message);
+      this.additionalSchemas().forEach(schema => {
+        tv4.addSchema(schema.id, schema);
+      });
+
+      if (!tv4.validate(obj, this.schema())) {
+        $log.error('validation error:',
+                   this.schema().id, tv4.error.dataPath + ':' + tv4.error.message);
         return { valid: false, message: tv4.error.dataPath + ':' + tv4.error.message};
       }
       return { valid: true, message: null };
@@ -64,6 +75,8 @@ function DomainEntityFactory($log, biobankApi) {
 
     /**
      * A utility function that builds a URL to the REST API for the server.
+     *
+     * @protected
      *
      * @param {string[]} paths - The paths to the REST API URL.
      *

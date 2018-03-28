@@ -107,7 +107,7 @@ describe('shipmentSpecimensAddComponent', function() {
 
     it('can remove a shipment', function() {
       var shipment = this.createShipment(),
-          shipmentSpecimen = new this.ShipmentSpecimen(
+          shipmentSpecimen = this.ShipmentSpecimen.create(
             this.Factory.shipmentSpecimen({ shipmentId: shipment.id })),
           refreshCount;
 
@@ -128,7 +128,7 @@ describe('shipmentSpecimensAddComponent', function() {
 
     it('removal of a shipment can be cancelled', function() {
       var shipment = this.createShipment(),
-          shipmentSpecimen = new this.ShipmentSpecimen(
+          shipmentSpecimen = this.ShipmentSpecimen.create(
             this.Factory.shipmentSpecimen({ shipmentId: shipment.id })),
           refreshCount;
 

@@ -15,6 +15,8 @@ function UserNameFactory($q,
                          DomainError,
                          UserState) {
 
+  const SCHEMA = Object.assign(EntityNameAndState.schema(), { id: 'UserName'});
+
   /**
    * Summary information for a {@link domain.users.User}.
    *
@@ -84,12 +86,22 @@ function UserNameFactory($q,
      * a User within asynchronous code.
      */
     static create(obj) {
-      var validation = EntityNameAndState.isValid(obj);
+      var validation = UserName.isValid(obj);
       if (!validation.valid) {
         $log.error(validation.message);
         throw new DomainError(validation.message);
       }
       return new UserName(obj);
+    }
+
+    /** @private */
+    static schema() {
+      return SCHEMA;
+    }
+
+    /** @private */
+    static additionalSchemas() {
+      return [];
     }
 
     /**

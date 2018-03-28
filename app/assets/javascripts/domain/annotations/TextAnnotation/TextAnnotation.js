@@ -3,59 +3,37 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-var _ = require('lodash');
-
 /* @ngInject */
-function DateTimeAnnotationFactory(Annotation, timeService) {
+function TextAnnotationFactory($log, Annotation) {
 
   /**
-   * An {@link domain.Annotation Annotation} that holds a Date value.
+   * An {@link domain.Annotation Annotation} that holds a string value.
    *
    * Please use {@link domain.AnnotationFactory#create AnnotationFactory.create()} to create annotation
    * objects.
    *
    * @memberOf domain
    */
-  class DateTimeAnnotation extends Annotation {
+  class TextAnnotation extends Annotation {
 
     constructor(obj = {}, annotationType) {
       super(obj, annotationType);
-      this.valueType = 'DateTime';
-
-      if (obj.value) {
-        this.value = new Date(obj.value);
-      } else {
-        this.value = null;
-      }
-    }
-
-    /**
-     * @return {Date} The date stored in this annotation.
-     */
-    getValue() {
-      return _.isNull(this.value) ? null :timeService.dateToDisplayString(this.value);
+      this.valueType = 'Text';
     }
 
     /**
      * Assigns a value to this annotation.
      *
-     * @param {Date} value - the value to assign to this annotation.
+     * @param {string} value - the value to assign to this annotation.
      */
     setValue(value) {
-      if (typeof value === 'string') {
-        this.value = new Date(value);
-      } else {
-        this.value = value;
-      }
+      this.value = value;
     }
 
-    /**
-     * @return {object} An object that can be sent to the server to save this annotation.
-     */
     getServerAnnotation() {
       return {
         annotationTypeId: this.getAnnotationTypeId(),
-        stringValue:      this.value ? timeService.dateAndTimeToUtcString(this.value) : '',
+        stringValue:      this.value || '',
         selectedValues:   []
       };
     }
@@ -69,7 +47,7 @@ function DateTimeAnnotationFactory(Annotation, timeService) {
      * @param {domain.AnnotationType} annotationType - the object containing the type information for this
      * annotation.
      *
-     * @returns {domain.DateTimeAnnotation} An annotation created from the given object.
+     * @returns {domain.TextAnnotation} An annotation created from the given object.
      */
     static create(obj = {}, annotationType) {
       const clientObj = super.create(obj,
@@ -78,12 +56,11 @@ function DateTimeAnnotationFactory(Annotation, timeService) {
                                        annotationTypeId: annotationType.id,
                                        value: obj.stringValue || null
                                      }));
-      return new DateTimeAnnotation(clientObj, annotationType);
-   }
-
+      return new TextAnnotation(clientObj, annotationType);
+    }
   }
 
-  return DateTimeAnnotation;
+  return TextAnnotation;
 }
 
-export default ngModule => ngModule.factory('DateTimeAnnotation', DateTimeAnnotationFactory)
+export default ngModule => ngModule.factory('TextAnnotation', TextAnnotationFactory)

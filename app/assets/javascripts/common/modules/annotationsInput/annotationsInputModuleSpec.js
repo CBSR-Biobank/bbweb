@@ -124,7 +124,7 @@ describe('annotationsInputModule', function() {
     });
   });
 
-  it('works for a SELECT multiple annotation', function() {
+  it('works for a MULTIPLE SELECT annotation', function() {
     const annotationType = new this.AnnotationType(
       this.Factory.annotationType({
         valueType: this.AnnotationValueType.SELECT,

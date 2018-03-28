@@ -33,7 +33,7 @@ define(function (require) {
     });
 
     it('fails when creating from an invalid object', function() {
-      this.EntityNameAndState.SCHEMA.required.forEach(function (field) {
+      this.EntityNameAndState.schema().required.forEach(function (field) {
         var badEntityJson = _.omit(context.factoryFunc(), field);
 
         expect(function () {

@@ -33,7 +33,7 @@ function entityInfoCreateSharedBehaviour(context) {
   });
 
   it('fails when creating from an invalid object', function() {
-    this.EntityInfo.SCHEMA.required.forEach(function (field) {
+    this.EntityInfo.schema().required.forEach(function (field) {
       var badEntityJson = _.omit(context.jsonFactoryFunc(), field);
 
       expect(function () {

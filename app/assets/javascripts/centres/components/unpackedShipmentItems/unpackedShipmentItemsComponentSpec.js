@@ -106,7 +106,7 @@ describe('unpackedShipmentItemsComponent', function() {
 
     beforeEach(function() {
       this.shipment = this.createShipment();
-      this.shipmentSpecimen = new this.ShipmentSpecimen(this.Factory.shipmentSpecimen());
+      this.shipmentSpecimen = this.ShipmentSpecimen.create(this.Factory.shipmentSpecimen());
 
       spyOn(this.Shipment.prototype, 'tagSpecimensAsPresent').and.returnValue(this.$q.when(this.shipment));
       this.createController(this.shipment, this.ShipmentItemState.RECEIVED);
@@ -142,7 +142,7 @@ describe('unpackedShipmentItemsComponent', function() {
 
       it('retrieves extra specimens', function() {
         var self = this,
-            shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
+            shipmentSpecimens = [ this.ShipmentSpecimen.create(this.Factory.shipmentSpecimen()) ],
             promiseSucceeded = false;
 
         spyOn(this.ShipmentSpecimen, 'list')
@@ -160,7 +160,7 @@ describe('unpackedShipmentItemsComponent', function() {
       });
 
       it('returns empty array if shipment is undefined', function() {
-        var shipmentSpecimens = [ new this.ShipmentSpecimen(this.Factory.shipmentSpecimen()) ],
+        var shipmentSpecimens = [ this.ShipmentSpecimen.create(this.Factory.shipmentSpecimen()) ],
             promiseSucceeded = false;
 
         spyOn(this.ShipmentSpecimen, 'list')

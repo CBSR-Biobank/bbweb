@@ -67,21 +67,15 @@ describe('Component: userProfile', function() {
   it('correct display when user has membership to some studies and centres', function() {
     var studyName = this.Factory.stringNext(),
         centreName = this.Factory.stringNext(),
-        user = new this.User(this.Factory.user({
+        user = this.User.create(this.Factory.user({
           membership: {
             studyData: {
               allEntities: false,
-              entityData: [{
-                id: this.Factory.stringNext(),
-                name: studyName
-              }]
+              entityData: [ this.Factory.studyNameDto({ name: studyName }) ]
             },
             centreData: {
               allEntities: false,
-              entityData: [{
-                id: this.Factory.stringNext(),
-                name: centreName
-              }]
+              entityData:  [ this.Factory.centreNameDto({ name: centreName }) ]
             }
           }
         }));

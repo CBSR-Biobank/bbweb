@@ -51,7 +51,7 @@ describe('EntityInfo', function() {
     })
 
     it('fails when required fields are missing', function() {
-      this.missingFieldsTest(this.EntityInfo.SCHEMA.required,
+      this.missingFieldsTest(this.EntityInfo.schema().required,
                              (requiredField) => _.omit(this.Factory.entityInfo(), requiredField),
                              this.EntityInfo.create)
     })
@@ -74,7 +74,7 @@ describe('EntityInfo', function() {
     })
 
     it('fails when required fields are missing', function() {
-      this.missingFieldsTestAsync(this.EntityInfo.SCHEMA.required,
+      this.missingFieldsTestAsync(this.EntityInfo.schema().required,
                                   (requiredField) => _.omit(this.Factory.entityInfo(), requiredField),
                                   this.EntityInfo.asyncCreate)
       this.$rootScope.$digest()

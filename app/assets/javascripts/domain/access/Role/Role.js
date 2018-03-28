@@ -14,6 +14,14 @@ function RoleFactory($q,
                      AccessItem,
                      EntityInfo,
                      DomainError) {
+
+  const SCHEMA = AccessItem.createDerivedSchema({
+    id: 'Role',
+    properties: {
+      'userData': { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
+    },
+    required: [ 'userData' ]
+  });
   /**
    * A Role represents the set of permissions that a user has.
    *
@@ -23,7 +31,6 @@ function RoleFactory($q,
   class Role extends AccessItem {
 
     constructor(obj = {}) {
-      super(Role.SCHEMA, obj)
 
       /**
        * The users that have this role.
@@ -31,22 +38,15 @@ function RoleFactory($q,
        * @name domain.access.Role#userData
        * @type {Array<EntityInfo>}
        */
-      this.userData = []
+      super(Object.assign(
+        {
+          userData: []
+        },
+        obj));
 
       if (obj.userData) {
         this.userData = obj.userData.map(info => new EntityInfo(info))
       }
-    }
-
-    /**
-     * Creates a Role from a server reply but first validates that it has a valid schema.
-     *
-     * <i>A wrapper for {@link domain.access.Role#asyncCreate}.</i>
-     *
-     * @see {@link domain.ConcurrencySafeEntity#update}
-     */
-    asyncCreate(obj) {
-      return Role.asyncCreate(obj);
     }
 
     /**
@@ -145,17 +145,12 @@ function RoleFactory($q,
       return DomainEntity.url.apply(null, [ 'access/roles' ].concat(pathItems));
     }
 
-    /*
-     * Checks if <tt>obj</tt> has valid properties to construct a {@link domain.access.Role|Role}.
-     *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
-     *
-     * @returns {domain.Validation} The validation passes if <tt>obj</tt> has a valid schema.
+    /**
+     * @private
+     * @return {object} The JSON schema for this class.
      */
-    /** @protected */
-    static isValid(obj) {
-      return ConcurrencySafeEntity.isValid(Role.SCHEMA, [ EntityInfo.SCHEMA ], obj);
+    static schema() {
+      return SCHEMA;
     }
 
     /**
@@ -224,7 +219,8 @@ function RoleFactory($q,
      * @param {int} options.limit The total number of roles to return per page. The maximum page size is
      * 10. If a value larger than 10 is used then the response is an error.
      *
-     * @returns {Promise<common.controllers.PagedListController.PagedResult>} A promise with items of type {@link domain.access.Role}.
+     * @returns {Promise<common.controllers.PagedListController.PagedResult>} A promise with items of type
+     * {@link domain.access.Role}.
      */
     static list(options) {
       var validKeys = [ 'filter', 'page', 'limit' ],
@@ -233,7 +229,7 @@ function RoleFactory($q,
       options = options || {}
       params = _.omitBy(_.pick(options, validKeys), (value) => value === '');
 
-      return biobankApi.get(Role.url(), params).then(function(reply) {
+      return biobankApi.get(Role.url(), params).then((reply) => {
         // reply is a paged result
         var deferred = $q.defer();
         try {
@@ -247,14 +243,6 @@ function RoleFactory($q,
     }
 
   }
-
-  Role.SCHEMA = AccessItem.createDerivedSchema({
-    id: 'Role',
-    properties: {
-      'userData': { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
-    },
-    required: [ 'userData' ]
-  });
 
   return Role;
 }

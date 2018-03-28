@@ -23,6 +23,26 @@ function UserFactory($q,
                      EntitySet,
                      EntityInfo) {
 
+
+  const SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'User',
+    properties: {
+      'slug':         { 'type': 'string' },
+      'name':         { 'type': 'string' },
+      'email':        { 'type': 'string' },
+      'avatarUrl':    { 'type': [ 'string', 'null' ] },
+      'state':        { 'type': 'string' },
+      'roles':        { 'type': 'array', 'items': { '$ref': 'UserRole' } },
+      'membership':   {
+        'oneOf': [
+          { 'type': 'null' },
+          { '$ref': 'UserMembership' }
+        ]
+      }
+    },
+    required: [ 'slug', 'name', 'state', 'email', 'roles' ]
+  });
+
   /**
    * Information for a user of the system.
    * @extends domain.ConcurrencySafeEntity
@@ -34,13 +54,11 @@ function UserFactory($q,
      * Use this contructor to create a new User to be persited on the server. Use {@link
      * domain.users.User.create|create()} or {@link domain.users.User.asyncCreate|asyncCreate()} to create
      * objects returned by the server.
-   *
-   * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-   * this class. Objects of this type are usually returned by the server's REST API.
-   */
+     *
+     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     */
     constructor(obj = { membership: undefined, state: UserState.REGISTERED }) {
-      super(User.SCHEMA, obj)
-
       /**
        * The user's full name.
        *
@@ -76,6 +94,7 @@ function UserFactory($q,
        * @type {domain.users.UserState}
        */
 
+      super(obj)
       if (obj && obj.membership) {
         this.membership = new UserMembership(obj.membership);
       }
@@ -246,19 +265,25 @@ function UserFactory($q,
     }
 
     static url (...paths){
-      return DomainEntity.url.apply(null, [ 'users' ].concat(paths));
+      const allPaths = [ 'users' ].concat(paths);
+      return super.url(...allPaths);
     }
 
-    /** @protected */
-    static isValid(obj) {
-      return super.isValid(User.SCHEMA,
-                           [
-                             UserRole.SCHEMA,
-                             UserMembership.SCHEMA,
-                             EntitySet.SCHEMA,
-                             EntityInfo.SCHEMA
-                           ],
-                           obj);
+    /**
+     * @return {object} The JSON schema for this class.
+     */
+    static schema() {
+      return SCHEMA;
+    }
+
+    /** @private */
+    static additionalSchemas() {
+      return [
+        UserRole.schema(),
+        UserMembership.schema(),
+        EntitySet.schema(),
+        EntityInfo.schema()
+      ];
     }
 
     /**
@@ -359,26 +384,6 @@ function UserFactory($q,
       });
     }
   }
-
-
-  User.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
-    id: 'User',
-    properties: {
-      'slug':         { 'type': 'string' },
-      'name':         { 'type': 'string' },
-      'email':        { 'type': 'string' },
-      'avatarUrl':    { 'type': [ 'string', 'null' ] },
-      'state':        { 'type': 'string' },
-      'roles':        { 'type': 'array', 'items': { '$ref': 'UserRole' } },
-      'membership':   {
-        'oneOf': [
-          { 'type': 'null' },
-          { '$ref': 'UserMembership' }
-        ]
-      }
-    },
-    required: [ 'slug', 'name', 'state', 'email', 'roles' ]
-  });
 
   return User;
 }

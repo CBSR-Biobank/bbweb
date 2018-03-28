@@ -9,6 +9,32 @@
 /* @ngInject */
 function LocationFactory($log, DomainEntity, DomainError) {
 
+  const SCHEMA = {
+    'id': 'Location',
+    'type': 'object',
+    'properties': {
+      'id':             { 'type': 'string'},
+      'slug':           { 'type': 'string'},
+      'name':           { 'type': 'string'},
+      'street':         { 'type': 'string'},
+      'city':           { 'type': 'string'},
+      'province':       { 'type': 'string'},
+      'postalCode':     { 'type': 'string'},
+      'poBoxNumber':    { 'type': 'string'},
+      'countryIsoCode': { 'type': 'string'}
+    },
+    'required': [
+      'id',
+      'slug',
+      'name',
+      'street',
+      'city',
+      'province',
+      'postalCode',
+      'countryIsoCode',
+    ]
+  };
+
   /**
    * Represents a location for an entity in the real world.
    *
@@ -55,54 +81,51 @@ function LocationFactory($log, DomainEntity, DomainError) {
        * @type {string}
        */
 
-       /**
+      /**
        * The postal code for the location.
        *
        * @name domain.Location#postalCode
        * @type {string}
        */
 
-       /**
+      /**
        * The postal office box number this location receives mail at.
        *
        * @name domain.Location#poBoxNumber
        * @type {string}
        */
 
-       /**
+      /**
        * The ISO country code for the country the location is in.
        *
        * @name domain.Location#countryIsoCode
        * @type {string}
        */
 
-
-      const defaults = {
-        id :             null,
-        name :           '',
-        street :         '',
-        city :           '',
-        province :       '',
-        postalCode :     '',
-        poBoxNumber :    null,
-        countryIsoCode : ''
-      };
-
-      obj = Object.assign({}, defaults, obj)
-
-      super(Location.SCHEMA, obj);
+      super(Object.assign(
+        {
+          id :             null,
+          name :           '',
+          street :         '',
+          city :           '',
+          province :       '',
+          postalCode :     '',
+          poBoxNumber :    null,
+          countryIsoCode : ''
+        },
+        obj));
     }
 
     /**
-     * Checks if `obj` has valid properties to construct a {@link domain.Location Location}.
-     *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
-     *
-     * @returns {domain.Validation} The validation passes if `obj` has a valid schema.
+     * @return {object} The JSON schema for this class.
      */
-    static isValid(obj) {
-      return super.isValid(Location.SCHEMA, null, obj);
+    static schema() {
+      return SCHEMA;
+    }
+
+    /** @private */
+    static additionalSchemas() {
+      return [];
     }
 
     /**
@@ -125,32 +148,6 @@ function LocationFactory($log, DomainEntity, DomainError) {
       return new Location(obj);
     }
   }
-
-  Location.SCHEMA = {
-    'id': 'Location',
-    'type': 'object',
-    'properties': {
-      'id':             { 'type': 'string'},
-      'slug':           { 'type': 'string'},
-      'name':           { 'type': 'string'},
-      'street':         { 'type': 'string'},
-      'city':           { 'type': 'string'},
-      'province':       { 'type': 'string'},
-      'postalCode':     { 'type': 'string'},
-      'poBoxNumber':    { 'type': 'string'},
-      'countryIsoCode': { 'type': 'string'}
-    },
-    'required': [
-      'id',
-      'slug',
-      'name',
-      'street',
-      'city',
-      'province',
-      'postalCode',
-      'countryIsoCode',
-    ]
-  };
 
   return Location;
 }

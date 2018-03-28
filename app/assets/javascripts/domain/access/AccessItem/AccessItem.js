@@ -13,14 +13,31 @@ function AccessItemFactory($q,
                            DomainEntity,
                            ConcurrencySafeEntity,
                            EntityInfo) {
+
+  const SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
+    id: 'AccessItem',
+    properties: {
+      'slug':         { 'type': 'string' },
+      'name':         { 'type': 'string' },
+      'description':  { 'type': [ 'string', 'null' ] },
+      'parentData':   { 'type': 'array', 'items': { '$ref': 'EntityInfo' } },
+      'childData':    { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
+    },
+    required: [
+      'slug',
+      'name',
+      'parentData',
+      'childData'
+    ]
+  });
+
   /**
    * A base class for User Access Management objects.
    * @memberOf domain.access
    */
   class AccessItem extends ConcurrencySafeEntity {
 
-    constructor(schema = AccessItem.SCHEMA, obj = {}) {
-      super(schema, obj)
+    constructor(obj = {}) {
 
       /**
        * A short identifying name that is unique.
@@ -43,10 +60,6 @@ function AccessItemFactory($q,
        * @name domain.access.AccessItem#parentData
        * @type {Array<EntityInfo>}
        */
-      this.parentData = []
-      if (obj.parentData) {
-        this.parentData = obj.parentData.map(info => new EntityInfo(info))
-      }
 
       /**
        * This AccessItem's children.
@@ -54,47 +67,45 @@ function AccessItemFactory($q,
        * @name domain.access.AccessItem#userData
        * @type {Array<EntityInfo>}
        */
-      this.childData = []
+
+      super(Object.assign(
+        {
+          parentData: [],
+          childData: []
+        },
+        obj))
+
+      if (obj.parentData) {
+        this.parentData = obj.parentData.map(info => new EntityInfo(info))
+      }
       if (obj.childData) {
         this.childData = obj.childData.map(info => new EntityInfo(info))
       }
     }
 
+    /** @private */
+    static additionalSchemas() {
+      return [ EntityInfo.schema() ];
+    }
+
     static createDerivedSchema({ id, type = 'object', properties = {}, required = [] } = {}) {
       return Object.assign(
         {},
-        AccessItem.SCHEMA,
+        SCHEMA,
         {
           id: id,
           type: type,
           properties: Object.assign(
             {},
-            AccessItem.SCHEMA.properties,
+            SCHEMA.properties,
             properties
           ),
-          required: AccessItem.SCHEMA.required.slice().concat(required)
+          required: SCHEMA.required.slice().concat(required)
         }
       );
     }
 
   }
-
-  AccessItem.SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
-    id: 'AccessItem',
-    properties: {
-      'slug':         { 'type': 'string' },
-      'name':         { 'type': 'string' },
-      'description':  { 'type': [ 'string', 'null' ] },
-      'parentData':   { 'type': 'array', 'items': { '$ref': 'EntityInfo' } },
-      'childData':    { 'type': 'array', 'items': { '$ref': 'EntityInfo' } }
-    },
-    required: [
-      'slug',
-      'name',
-      'parentData',
-      'childData'
-    ]
-  });
 
   return AccessItem;
 }

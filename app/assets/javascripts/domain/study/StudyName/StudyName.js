@@ -15,6 +15,9 @@ function StudyNameFactory($q,
                           DomainError,
                           StudyState) {
 
+
+  const SCHEMA = Object.assign(EntityNameAndState.schema(), { id: 'StudyName'});
+
   /**
    * Summary information for a {@link domain.studies.Study}.
    *
@@ -31,7 +34,7 @@ function StudyNameFactory($q,
      */
     constructor(obj = { state: StudyState.DISABLED }) {
       /**
-       * The state can be one of: enabled, disabled, or retired.
+       * The state can be one of: `enabled`, `disabled`, or `retired`.
        *
        * @name domain.studies.StudyName#state
        * @type {domain.studies.StudyState}
@@ -41,6 +44,19 @@ function StudyNameFactory($q,
     }
 
     /**
+     * @private
+     * @return {object} The JSON schema for this class.
+     */
+    static schema() {
+      return SCHEMA;
+    }
+
+    /** @private */
+    static additionalSchemas() {
+      return [];
+    }
+
+     /**
      * Used to query the study's current state.
      *
      * @returns {boolean} <code>true</code> if the study is in <code>disabled</code> state.
@@ -72,7 +88,7 @@ function StudyNameFactory($q,
       return super.url(...allPaths);
     }
 
-    /**
+   /**
      * Creates a StudyName, but first it validates <code>obj</code> to ensure that it has a valid schema.
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
@@ -84,7 +100,7 @@ function StudyNameFactory($q,
      * a study within asynchronous code.
      */
     static create(obj) {
-      var validation = EntityNameAndState.isValid(obj);
+      var validation = StudyName.isValid(obj);
       if (!validation.valid) {
         $log.error(validation.message);
         throw new DomainError(validation.message);
@@ -114,8 +130,6 @@ function StudyNameFactory($q,
         .then(entities => entities.map(entity => StudyName.create(entity)));
     }
   }
-
-  StudyName.SCHEMA = Object.assign(EntityNameAndState.SCHEMA, { id: 'StudyName'});
 
   return StudyName;
 }

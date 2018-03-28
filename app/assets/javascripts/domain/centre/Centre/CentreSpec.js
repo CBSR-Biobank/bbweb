@@ -78,8 +78,9 @@ describe('Centre', function() {
   it('fails when creating from a non object', function() {
     var badCentreJson = _.omit(this.Factory.centre(), 'name');
 
-    expect(() => { this.Centre.create(badCentreJson); })
-      .toThrowError(/invalid object from server/);
+    expect(
+      () => { this.Centre.create(badCentreJson); }
+    ).toThrowError(/invalid object from server/);
   });
 
   it('can be created with a location', function() {
