@@ -9,15 +9,31 @@ import CommonModule   from '../common'
 import angular        from 'angular'
 import angularCookies from 'angular-cookies'
 
-const ngModule = angular.module('biobank.users', [
-  angularCookies,
-  CommonModule
-])
+/**
+ * AngularJS components related to {@link domain.users.Users}.
+ * @namespace users
+ */
+
+/**
+ * AngularJS services related to {@link domain.users.Users}.
+ * @namespace users.services
+ */
+
+/**
+ * A Webpack module for the Biobank AngularJS *users* layer.
+ *
+ * @memberOf users
+ */
+const ngUsersModule = angular.module('biobank.users',
+                                     [
+                                       angularCookies,
+                                       CommonModule
+                                     ]);
 
 const context = require.context('./', true, /^(.(?!index|Spec))*\.js$/)
 
 context.keys().forEach(key => {
-  context(key).default(ngModule)
+  context(key).default(ngUsersModule)
 })
 
-export default ngModule.name
+export default ngUsersModule.name

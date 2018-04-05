@@ -42,7 +42,12 @@ loadModules.keys().forEach((key) => {
   moduleNames.push(loadModules(key).default)
 })
 
-const ngModule = angular.module('biobank.common', [
+/**
+ * A Webpack module for the Biobank AngularJS common layer.
+ *
+ * @memberOf common
+ */
+const ngCommonModule = angular.module('biobank.common', [
   angularGettext,
   angularSanitize,
   angularToastr,
@@ -50,7 +55,7 @@ const ngModule = angular.module('biobank.common', [
   DomainModule
 ].concat(moduleNames))
 
-ngModule.run(loadTemplates)
+ngCommonModule.run(loadTemplates)
 
 /* @ngInject */
 function loadTemplates($templateCache) {
@@ -62,7 +67,22 @@ const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.
 //console.log(context.keys())
 
 context.keys().forEach(key => {
-  context(key).default(ngModule)
+  context(key).default(ngCommonModule)
 })
 
-export default ngModule.name
+/**
+ * AngularJS common components.
+ * @namespace common.components
+ */
+
+/**
+ * AngularJS common controllers that are used as base classes.
+ * @namespace common.controllers
+ */
+
+/**
+ * AngularJS services that are used by the rest of the application.
+ * @namespace common.services
+ */
+
+export default ngCommonModule.name

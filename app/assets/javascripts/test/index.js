@@ -9,6 +9,26 @@
 
 import angular from 'angular';
 
+/**
+ * AngularJS components used for testing.
+ * @namespace test
+ */
+
+/**
+ * AngularJS services used in testing.
+ * @namespace test.services
+ */
+
+/**
+ * Mixins used in test suites.
+ * @namespace test.mixins
+ */
+
+/**
+ * A Webpack module for the Biobank AngularJS *test* layer.
+ *
+ * @memberOf test
+ */
 const ngModule = angular.module('biobank.test', [])
 
 const contextList = [

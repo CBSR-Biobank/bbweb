@@ -10,6 +10,11 @@ import angular      from 'angular';
 import uiBootstrap     from 'angular-ui-bootstrap'
 
 /**
+ * AngularJS administration components available to other administration modules.
+ * @namespace admin.common
+ */
+
+/**
  * A Webpack module with common Biobank Administration functionality.
  *
  * @memberOf admin.common
@@ -26,5 +31,20 @@ const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.
 context.keys().forEach(key => {
   context(key).default(ngAdminCommonModule)
 })
+
+/**
+ * AngularJS administration common controllers that are used as base classes.
+ * @namespace admin.common.controllers
+ */
+
+/**
+ * AngularJS administration common components.
+ * @namespace admin.common.components
+ */
+
+/**
+ * AngularJS administration common services
+ * @namespace admin.common.services
+ */
 
 export default ngAdminCommonModule.name

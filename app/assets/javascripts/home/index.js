@@ -12,7 +12,22 @@ import UsersModule     from '../users'
 import angular         from 'angular'
 import angularUiRouter from '@uirouter/angularjs'
 
-const ngModule = angular.module('biobank.home', [
+/**
+ * AngularJS components related to the home page.
+ * @namespace home
+ */
+
+/**
+ * AngularJS components related to the home page.
+ * @namespace home.components
+ */
+
+/**
+ * A Webpack module for the Biobank AngularJS *home* layer.
+ *
+ * @memberOf home
+ */
+const ngHomeModule = angular.module('biobank.home', [
   CommonModule,
   UsersModule,
   angularUiRouter
@@ -21,7 +36,7 @@ const ngModule = angular.module('biobank.home', [
 const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.js|Spec\.js))*\.js$/)
 
 context.keys().forEach(key => {
-  context(key).default(ngModule)
+  context(key).default(ngHomeModule)
 })
 
-export default ngModule.name
+export default ngHomeModule.name

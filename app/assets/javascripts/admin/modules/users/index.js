@@ -13,6 +13,11 @@ import angularGettext  from 'angular-gettext'
 import angularUiRouter from '@uirouter/angularjs'
 
 /**
+ * AngularJS components for {@link domain.users.User User} administration.
+ * @namespace admin.users
+ */
+
+/**
  * A Webpack module for {@link domain.users.User User} Administration.
  *
  * @memberOf admin.users
@@ -30,5 +35,15 @@ const context = require.context('./', true, /^(?:.(?![\\\/]modules[\\\/]|index\.
 context.keys().forEach(key => {
   context(key).default(ngAdminUsersModule)
 })
+
+/**
+ * AngularJS components for {@link domain.users.User User} administration.
+ * @namespace admin.users.components
+ */
+
+/**
+ * AngularJS services for {@link domain.users.User User} administration.
+ * @namespace admin.users.services
+ */
 
 export default ngAdminUsersModule.name

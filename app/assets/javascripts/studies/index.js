@@ -9,7 +9,22 @@ import DomainModule    from '../domain'
 import angular from 'angular';
 import angularGettext  from 'angular-gettext'
 
-const ngModule = angular.module('biobank.studies', [
+/**
+ * AngularJS components related to {@link domain.studies.Study Studies}.
+ * @namespace studies
+ */
+
+/**
+ * AngularJS services related to {@link domain.studies.Study Studies}.
+ * @namespace studies.services
+ */
+
+/**
+ * A Webpack module for the Biobank AngularJS *studies* layer.
+ *
+ * @memberOf studies
+ */
+const ngStudiesModule = angular.module('biobank.studies', [
   DomainModule,
   angularGettext
 ])
@@ -23,7 +38,7 @@ contextList
     deps.concat(context.keys().map(context))
   ), [])
   .forEach(dep => {
-    dep.default(ngModule)
+    dep.default(ngStudiesModule)
   })
 
-export default ngModule.name
+export default ngStudiesModule.name

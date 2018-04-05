@@ -1,4 +1,8 @@
-/*
+/**
+ * UI Router configuration
+ *
+ * @namespace admin.states
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  *
@@ -8,13 +12,13 @@
 /**
  * UI Router states used for Biobank Administration.
  *
- * @name admin.adminUiRouterconfig
+ * @name admin.states.adminUiRouterConfig
  * @function
  *
- * @param {AngularJS_Service} $stateProvider.
+ * @param {AngularJS_Service} $stateProvider
  */
 /* @ngInject */
-function adminUiRouterconfig($stateProvider) {
+function adminUiRouterConfig($stateProvider) {
 
   $stateProvider.state('home.admin', {
     // this state is checked for an authorized user, see uiRouterIsAuthorized() in app.js
@@ -26,4 +30,4 @@ function adminUiRouterconfig($stateProvider) {
 
 }
 
-export default ngModule => ngModule.config(adminUiRouterconfig)
+export default ngModule => ngModule.config(adminUiRouterConfig)

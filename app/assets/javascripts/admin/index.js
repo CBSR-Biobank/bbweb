@@ -6,6 +6,11 @@ import CentresModule from '../centres';
 import CommonModule  from '../common';
 import angular       from 'angular';
 
+/**
+ * AngularJS components used for administration.
+ * @namespace admin
+ */
+
 const loadModules = require.context('./modules', true, /[\\\/]index\.js$/)
 
 const moduleNames = []
