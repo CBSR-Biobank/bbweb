@@ -6,7 +6,7 @@
 import _ from 'lodash'
 
 /**
- * An AngularJS service that allows the creation of a modal that modifies an {@link domain.AnnotationType
+ * An AngularJS service that allows the creation of a modal that modifies an {@link domain.annotations.AnnotationType
  * AnnotationType} with SELECT {@link domain.AnnotationValueType valueType}.
  *
  * @memberOf admin.common.services

@@ -7,7 +7,7 @@ import { LabelService } from '../../../../../base/services/LabelService';
 import _ from 'lodash';
 
 /**
- * An AngularJS service that converts an {@link domain.AnnotationType#valueType AnnotationType.valueType}
+ * An AngularJS service that converts an {@link domain.annotations.AnnotationType#valueType AnnotationType.valueType}
  * to a *translated string* that can be displayed to the user.
  *
  * @memberOf admin.common.services
@@ -42,7 +42,7 @@ class AnnotationValueTypeLabelService extends LabelService {
    * @param {domain.AnnotationValueType} valueType - the value type to get a function for.
    *
    * @param {boolean} [isSingleSelect] - Set to `TRUE` to return the function for a `SINGLE SELECT` {@link
-   * domain.AnnotationType AnnotationType}. Used only when `valueType` is {@link domain.AnnotationValueType
+   * domain.annotations.AnnotationType AnnotationType}. Used only when `valueType` is {@link domain.annotations.AnnotationValueType
    * SELECT}.
    *
    * @return {function} a function that returns a label that can be displayed to the user.

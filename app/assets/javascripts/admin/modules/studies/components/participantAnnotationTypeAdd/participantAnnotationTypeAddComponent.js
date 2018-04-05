@@ -1,5 +1,5 @@
 /**
- * AngularJS Component for {@link domain.participants.Participant Participant} {@link domain.AnnotationType
+ * AngularJS Component for {@link domain.annotations.participants.Participant Participant} {@link domain.annotations.AnnotationType
  * AnnotationType} administration.
  *
  * @namespace admin.studies.components.participantAnnotationTypeAdd
@@ -38,7 +38,7 @@ class ParticipantAnnotationTypeAddController extends AnnotationTypeAddController
 
 /**
  * An AngularJS component that allows the user to add a {@link domain.participants.Participant Participant}
- * {@link domain.AnnotationType AnnotationType} to a {@link domain.studies.Study Study}.
+ * {@link domain.annotations.AnnotationType AnnotationType} to a {@link domain.annotations.studies.Study Study}.
  *
  * @memberOf admin.studies.components.participantAnnotationTypeAdd
  *

@@ -14,15 +14,17 @@ function MultipleSelectAnnotationFactory(Annotation, DomainError) {
 
 
   /**
-   * An {@link domain.Annotation Annotation} that holds values selected by the user.
+   * An {@link domain.annotations.Annotation Annotation} that holds values selected by the user.
    *
    * Please use {@link domain.AnnotationFactory#create AnnotationFactory.create()} to create annotation
    * objects.
    *
-   * @memberOf domain
+   * @memberOf domain.annotations
+   * @extends domain.annotations.Annotation
    */
   class MultipleSelectAnnotation extends Annotation {
 
+    /** @inheritdoc */
     constructor(obj = {}, annotationType) {
       super(obj, annotationType);
       this.valueType = 'MultipleSelect';
@@ -108,7 +110,7 @@ function MultipleSelectAnnotationFactory(Annotation, DomainError) {
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {domain.AnnotationType} annotationType - the object containing the type information for this
+     * @param {domain.annotations.AnnotationType} annotationType - the object containing the type information for this
      * annotation.
      *
      * @returns {domain.MultipleSelectAnnotation} An annotation created from the given object.

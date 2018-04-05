@@ -31,7 +31,7 @@ import angularUiRouter from '@uirouter/angularjs'
  */
 
 /**
- * AngularJS Module related to  {@link domain.Annotation Annotation}s.
+ * AngularJS Module related to  {@link domain.annotations.Annotation Annotation}s.
  * @namespace common.modules
  */
 

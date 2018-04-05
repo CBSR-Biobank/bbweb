@@ -1,5 +1,5 @@
 /**
- * AngularJS Component for {@link domain.participants.Participant Participant} {@link domain.AnnotationType
+ * AngularJS Component for {@link domain.annotations.participants.Participant Participant} {@link domain.annotations.AnnotationType
  * AnnotationType} administration.
  *
  * @namespace admin.studies.components.participantAnnotationTypeView
@@ -80,14 +80,14 @@ function ParticipantAnnotationTypeViewController($q,
 }
 
 /**
- * An AngularJS component that allows the user to display an {@link domain.AnnotationType AnnotationType} that
+ * An AngularJS component that allows the user to display an {@link domain.annotations.AnnotationType AnnotationType} that
  * belongs to a {@link domain.studies.Study Study} for a {@link domain.participants.Participant Participant}.
  *
  * @memberOf admin.studies.components.participantAnnotationTypeView
  *
  * @param {domain.studies.Study} study - the *Study* the *Annotation Type* belongs to.
  *
- * @param {domain.AnnotationType} annotationType - the *Annotation Type* to display.
+ * @param {domain.annotations.AnnotationType} annotationType - the *Annotation Type* to display.
  */
 const participantAnnotationTypeViewComponent = {
   template: require('./participantAnnotationTypeView.html'),

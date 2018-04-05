@@ -12,7 +12,7 @@ function AnnotationTypeRemoveFactory(gettextCatalog,
                                      domainNotificationService) {
 
   /**
-   * A base class that provides functions to create modals associated to removing {@link domain.AnnotationType
+   * A base class that provides functions to create modals associated to removing {@link domain.annotations.AnnotationType
    * AnnotationTypes}.
    *
    * **This is an abstract base class and should should only be extended**. Instead use one of the following:
@@ -34,7 +34,7 @@ function AnnotationTypeRemoveFactory(gettextCatalog,
     }
 
     /**
-     * Displays a modal with only an `OK` button stating that the {@link domain.AnnotationType AnnotationType}
+     * Displays a modal with only an `OK` button stating that the {@link domain.annotations.AnnotationType AnnotationType}
      * cannot be removed.
      */
     removeInUseModal() {
@@ -45,11 +45,11 @@ function AnnotationTypeRemoveFactory(gettextCatalog,
     /**
      * Displays 2 modals, one after the other:
      *
-     * - The first modal asks the user to confirm that they wish to delete an {@link domain.AnnotationType
+     * - The first modal asks the user to confirm that they wish to delete an {@link domain.annotations.AnnotationType
      *   AnnotationType}.
      *
      * - The second modal is displayed if the user confirms the deletion and the server rejects the request to
-     *   delete the {@link domain.AnnotationType AnnotationType}.
+     *   delete the {@link domain.annotations.AnnotationType AnnotationType}.
      *
      * @param {type} comment.
      */

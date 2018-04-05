@@ -99,7 +99,7 @@ function CollectionEventFactory($q,
        * The annotations assigned to this collection event.
        *
        * @name domain.participants.CollectionEvent#annotations
-       * @type {Array<domain.AnnotationType>}
+       * @type {Array<domain.annotations.AnnotationType>}
        */
 
       super(Object.assign(

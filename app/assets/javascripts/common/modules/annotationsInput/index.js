@@ -7,14 +7,14 @@ import DomainModule from '../../../domain'
 import angular      from 'angular'
 
 /**
- * AngularJS Module related to {@link domain.Annotation Annotations}.
+ * AngularJS Module related to {@link domain.annotations.Annotation Annotations}.
  * @namespace common.modules.annotationsInput
  */
 
 /**
  * Creates a module with one main component, {@link common.modules.annotationsInput.annotationsInputComponent
  * annotationsInputComponent}, and various child components that are customized for the different {@link
- * domain.AnnotationValueType AnnotationValueTypes} an {@link domain.Annotation Annotation} can have.
+ * domain.annotations.AnnotationValueType AnnotationValueTypes} an {@link domain.annotations.Annotation Annotation} can have.
  *
  * @memberOf common.modules.annotationsInput
  */
@@ -24,14 +24,14 @@ class AnnotationsInputController {}
 
 /**
  * An AngularJS Component that can be used in an HTML form to input information for an array of {@link
- * domain.Annotation Annotations}.
+ * domain.annotations.Annotation Annotations}.
  *
- * The fields that are displayed in the form depend on the {@link domain.Annotation Annotation's} `valueType`.
+ * The fields that are displayed in the form depend on the {@link domain.annotations.Annotation Annotation's} `valueType`.
  *
  * @memberOf common.modules.annotationsInput
  *
- * @param {Array<domain.Annotation>} Annotations - the annotations to display. They must contain an attribute
- * named `annotationType` with the {@link domain.AnnotationType AnnotationType's} information.
+ * @param {Array<domain.annotations.Annotation>} Annotations - the annotations to display. They must contain an attribute
+ * named `annotationType` with the {@link domain.annotations.AnnotationType AnnotationType's} information.
  */
 const annotationsInputComponent = {
   bindings: {

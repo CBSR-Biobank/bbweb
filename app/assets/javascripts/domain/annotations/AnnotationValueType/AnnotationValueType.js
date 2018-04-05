@@ -1,13 +1,17 @@
-/*
+/**
+ * AngularJS Constants used for defining specimen types.
+ *
+ * @namespace domain.annotations.AnnotationValueType
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
- * The types allowed for an {@link domain.AnnotationType AnnotationType}'s valueType.
+ * The types allowed for an {@link domain.annotations.AnnotationType AnnotationType}'s valueType.
  *
  * @enum {string}
- * @memberOf domain
+ * @memberOf domain.annotations.AnnotationValueType
  */
 const AnnotationValueType = {
   /**

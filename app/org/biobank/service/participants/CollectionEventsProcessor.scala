@@ -9,7 +9,7 @@ import javax.inject.Inject
 import org.biobank.domain.AnnotationTypeId
 import org.biobank.domain.participants._
 import org.biobank.domain.study._
-import org.biobank.domain.Annotation
+import org.biobank.domain.annotations.Annotation
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.infrastructure.event.CommonEvents._

@@ -28,7 +28,7 @@ function AnnotationTypeFactory($log,
 
   /**
    * Information for the format of an annotation.
-   * @memberOf domain
+   * @memberOf domain.annotations
    * @extends domain.DomainEntity
    *
    */
@@ -37,21 +37,21 @@ function AnnotationTypeFactory($log,
     /**
      * A short identifying name that is unique.
      *
-     * @name domain.AnnotationType#name
+     * @name domain.annotations.AnnotationType#name
      * @type {string}
      */
 
     /**
      * An optional description that can provide additional details on the name.
      *
-     * @name domain.AnnotationType#description
+     * @name domain.annotations.AnnotationType#description
      * @type {string}
      */
 
     /**
      * The type of information stored by the annotation.
      *
-     * @name domain.AnnotationType#valueType
+     * @name domain.annotations.AnnotationType#valueType
      * @type {domain.AnnotationValueType}
      */
 
@@ -59,14 +59,14 @@ function AnnotationTypeFactory($log,
      * When `valueType` is {@link domain.AnnotationValueType.SELECT}, this is the number of items allowed to
      * be selected. If the value is greater than 1 then any number of values can be selected.
      *
-     * @name domain.AnnotationType#maxValueCount
+     * @name domain.annotations.AnnotationType#maxValueCount
      * @type {domain.AnnotationMaxValueCount}
      */
 
     /**
      * When true, the user must enter a value for this annotation.
      *
-     * @name domain.AnnotationType#required
+     * @name domain.annotations.AnnotationType#required
      * @type {boolean}
      */
 
@@ -74,7 +74,7 @@ function AnnotationTypeFactory($log,
      * When `valueType` is {@link domain.AnnotationValueType.SELECT}, these are the values allowed to be
      * selected.
      *
-     * @name domain.AnnotationType#options
+     * @name domain.annotations.AnnotationType#options
      * @type {string[]}
      */
 

@@ -1,39 +1,4 @@
 /**
- * Domain model for data returned by the Biobank server.
- * @namespace domain
- */
-
-/**
- * Domain entities related to user access management.
- * @namespace domain.access
- */
-
-/**
- * Domain entities related to users.
- * @namespace domain.users
- */
-
-/**
- * Domain entities related to studies.
- * @namespace domain.studies
- */
-
-/**
- * Domain entities related to participants.
- * @namespace domain.participants
- */
-
-/**
- * Domain entities related to centres.
- * @namespace domain.centres
- */
-
-/**
- * Filter classes used to filter search results.
- * @namespace domain.filters
- */
-
-/**
  * AngularJS components available to the rest of the application.
  * @namespace base
  */

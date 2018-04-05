@@ -9,15 +9,17 @@ var _ = require('lodash');
 function DateTimeAnnotationFactory(Annotation, timeService) {
 
   /**
-   * An {@link domain.Annotation Annotation} that holds a Date value.
+   * An {@link domain.annotations.Annotation Annotation} that holds a Date value.
    *
    * Please use {@link domain.AnnotationFactory#create AnnotationFactory.create()} to create annotation
    * objects.
    *
-   * @memberOf domain
+   * @memberOf domain.annotations
+   * @extends domain.annotations.Annotation
    */
   class DateTimeAnnotation extends Annotation {
 
+    /** @inheritdoc */
     constructor(obj = {}, annotationType) {
       super(obj, annotationType);
       this.valueType = 'DateTime';
@@ -66,8 +68,8 @@ function DateTimeAnnotationFactory(Annotation, timeService) {
      * @param {object} obj={} - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {domain.AnnotationType} annotationType - the object containing the type information for this
-     * annotation.
+     * @param {domain.annotations.AnnotationType} annotationType - the object containing the type information
+     * for this annotation.
      *
      * @returns {domain.DateTimeAnnotation} An annotation created from the given object.
      */

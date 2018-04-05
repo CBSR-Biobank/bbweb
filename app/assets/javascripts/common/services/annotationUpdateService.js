@@ -4,7 +4,7 @@
  */
 
 /**
- * Used to update the value of an {@link domain.Annotation Annotation}.
+ * Used to update the value of an {@link domain.annotations.Annotation Annotation}.
  *
  * @memberOf common.services
  */
@@ -29,9 +29,9 @@ class AnnotationUpdateService {
   }
 
   /**
-   * Opens a modal where the user an change the value of an {@link domain.Annotation Annotation}.
+   * Opens a modal where the user an change the value of an {@link domain.annotations.Annotation Annotation}.
    *
-   * @param {domain.Annotation} annotation - the annotation to update.
+   * @param {domain.annotations.Annotation} annotation - the annotation to update.
    *
    * @param {string} title - the text to display in the modal's title area.
    *

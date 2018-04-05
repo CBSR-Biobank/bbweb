@@ -46,7 +46,7 @@ class AnnotationTypeAddController {
    * This function should be overriden and is invoked to add the annotation type to the parent domain entity.
    * @abstract
    *
-   * @param {domain.AnnotationType} annotationType - The annotation type to be persisted.
+   * @param {domain.annotations.AnnotationType} annotationType - The annotation type to be persisted.
    */
   addAnnotationType(annotationType) { // eslint-disable-line no-unused-vars
     throw new Error('subclass should override this function')
@@ -57,7 +57,7 @@ class AnnotationTypeAddController {
    * <p>
    * Usually called when the user presses the button to submit the form.
    *
-   * @param {domain.AnnotationType} annotationType - The annotation type to be persisted.
+   * @param {domain.annotations.AnnotationType} annotationType - The annotation type to be persisted.
    */
   submit(annotationType) {
     this.addAnnotationType(annotationType)

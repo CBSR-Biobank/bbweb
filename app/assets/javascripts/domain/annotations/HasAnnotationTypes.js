@@ -6,14 +6,16 @@
 import _ from 'lodash/core';
 
 /**
- * Maintains an array of annotation types.
+ * A mixin for classes that hold {@link domain.annotations.AnnotationType AnnotationTypes}.
  *
- * This is a mixin.
+ * @exports domain.annotations.HasAnnotationTypesMixin
  */
-const hasAnnotationTypesMixin = Base => class extends Base {
+const HasAnnotationTypesMixin = Base => class extends Base {
 
   /**
-   * The entity that includes this mixin needs to implement 'asyncCreate'.
+   * Removes an Annotation Type from the parent entity.
+   *
+   * @return {Promise<object>} returns the parent entity in a plain object returned by the server.
    */
   removeAnnotationType(annotationType, url) {
     const found = _.find(this.annotationTypes, { id: annotationType.id });
@@ -26,5 +28,5 @@ const hasAnnotationTypesMixin = Base => class extends Base {
   }
 }
 
-export { hasAnnotationTypesMixin }
+export { HasAnnotationTypesMixin }
 export default () => {}

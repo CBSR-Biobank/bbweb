@@ -6,9 +6,9 @@
 import _ from 'lodash';
 
 /**
- * An AngularJS service for {@link domain.Annotation Annotations}.
+ * An AngularJS service for {@link domain.annotations.Annotation Annotations}.
  *
- * @memberOf domain
+ * @memberOf domain.annotations
  */
 class AnnotationFactory {
 
@@ -35,13 +35,13 @@ class AnnotationFactory {
   }
 
   /**
-   * A factory function for {@link domain.Annotation Annotations}.
+   * A factory function for {@link domain.annotations.Annotation Annotations}.
    *
-   * Creates an {@link domain.Annotation Annotations} from a reply from the server.
+   * Creates an {@link domain.annotations.Annotation Annotations} from a reply from the server.
    *
    * @param {Object} obj={} - the JSON response for an Annotation from the server.
    *
-   * @param {domain.AnnotationType} annotationType - the annotation type this annotation is based from
+   * @param {domain.annotations.AnnotationType} annotationType - the annotation type this annotation is based from
    */
   create(obj = {}, annotationType) {
     let annotation;

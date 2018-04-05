@@ -3,9 +3,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { HasAnnotationTypesMixin } from '../../annotations/HasAnnotationTypes';
 import _ from 'lodash'
-
-import { hasAnnotationTypesMixin } from '../../annotations/hasAnnotationTypes';
 
 /**
  * Angular factory for collectionEventTypes.
@@ -49,7 +48,7 @@ function CollectionEventTypeFactory($q,
    *
    * @param {Study} options.study the study this collection even type belongs to.
    */
-  class CollectionEventType extends hasAnnotationTypesMixin(ConcurrencySafeEntity) {
+  class CollectionEventType extends HasAnnotationTypesMixin(ConcurrencySafeEntity) {
 
     constructor(obj = {}, options = { specimenDescriptions: [], annotationTypes: [] }) {
       /**
@@ -92,7 +91,7 @@ function CollectionEventTypeFactory($q,
        * The annotation types that are collected for this collection event type.
        *
        * @name domain.studies.CollectionEventType#annotationTypes
-       * @type {Array<domain.AnnotationType>}
+       * @type {Array<domain.annotations.AnnotationType>}
        */
 
       super(Object.assign(

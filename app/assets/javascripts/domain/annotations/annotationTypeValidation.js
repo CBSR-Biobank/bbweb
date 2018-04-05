@@ -2,8 +2,9 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
 /**
- *
+ * @deprecated
  */
 function annotationTypeValidation() {
   var requiredKeys = ['name', 'valueType', 'options'];

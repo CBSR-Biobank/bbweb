@@ -12,7 +12,7 @@ function SpecimenLinkAnnotationTypeRemoveFactory(gettextCatalog,
 
   /**
    * An AngularJS factory used to remove {@link domain.studies.SpecimenLinkType SpecimenLinkType} {@link
-   * domain.AnnotationType AnnotationTypes}.
+   * domain.annotations.AnnotationType AnnotationTypes}.
    *
    * @memberOf admin.studies.services
    * @augments admin.common.services.AnnotationTypeRemove

@@ -16,7 +16,7 @@ function ParticipAntannotationTypeRemoveFactory(gettextCatalog,
 
   /**
    * An AngularJS factory used to remove {@link domain.collection.Participant Participant} {@link
-   * domain.AnnotationType AnnotationTypes}.
+   * domain.annotations.AnnotationType AnnotationTypes}.
    *
    * @memberOf admin.studies.services
    * @augments admin.common.services.AnnotationTypeRemove

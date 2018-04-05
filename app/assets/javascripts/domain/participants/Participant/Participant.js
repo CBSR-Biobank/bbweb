@@ -69,10 +69,10 @@ function ParticipantFactory($q,
        */
 
       /**
-       * The values of the {@link domain.Annotation|Annotations} collected for this participant.
+       * The values of the {@link domain.annotations.Annotation|Annotations} collected for this participant.
        *
        * @name domain.studies.Participant#annotations
-       * @type {Array<domain.Annotation>}
+       * @type {Array<domain.annotations.Annotation>}
        */
 
       super(Object.assign(

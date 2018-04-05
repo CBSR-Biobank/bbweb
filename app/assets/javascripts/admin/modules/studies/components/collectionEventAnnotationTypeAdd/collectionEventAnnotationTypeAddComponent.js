@@ -54,7 +54,7 @@ class CollectionEventAnnotationTypeAddController extends AnnotationTypeAddContro
 }
 
 /**
- * An AngularJS component that allows the user to add an {@link domain.AnnotationType AnnotationType} to a
+ * An AngularJS component that allows the user to add an {@link domain.annotations.AnnotationType AnnotationType} to a
  * {@link domain.studies.CollectionEventType CollectionEventType}.
  *
  * @memberOf admin.studies.components.collectionEventAnnotationTypeAdd

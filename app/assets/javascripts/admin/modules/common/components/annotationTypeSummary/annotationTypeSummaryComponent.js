@@ -8,12 +8,12 @@
  */
 
 /**
- * An AngularJS component that displays summary information about an {@link domain.AnnotationType} in
+ * An AngularJS component that displays summary information about an {@link domain.annotations.AnnotationType} in
  * a list item within a Bootstrap panel.
  *
  * @memberOf admin.common.components.annotationTypeSummary
  *
- * @param {domain.AnnotationType} annotationType the Annotation type summary to display.
+ * @param {domain.annotations.AnnotationType} annotationType the Annotation type summary to display.
  */
 const annotationTypeSummaryComponent = {
   template: require('./annotationTypeSummary.html'),

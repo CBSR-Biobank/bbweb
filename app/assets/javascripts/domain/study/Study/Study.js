@@ -3,8 +3,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { HasAnnotationTypesMixin } from '../../annotations/HasAnnotationTypes';
 import _ from 'lodash'
-import { hasAnnotationTypesMixin } from '../../annotations/hasAnnotationTypes';
 
 /*
  * Angular factory for Studies.
@@ -49,7 +49,7 @@ function StudyFactory($q,
    * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
    * this class. Objects of this type are usually returned by the server's REST API.
    */
-  class Study extends hasAnnotationTypesMixin(ConcurrencySafeEntity) {
+  class Study extends HasAnnotationTypesMixin(ConcurrencySafeEntity) {
 
     constructor(obj, annotationTypes) {
 
@@ -72,7 +72,7 @@ function StudyFactory($q,
        * The annotation types associated with participants of this study.
        *
        * @name domain.studies.Study#annotationTypes
-       * @type {Array<domain.AnnotationType>}
+       * @type {Array<domain.annotations.AnnotationType>}
        */
 
       /**
@@ -320,7 +320,7 @@ function StudyFactory($q,
     /**
      * Adds an annotation type to be used on participants of this study.
      *
-     * @param {domain.AnnotationType} annotationType - the annotation type to add to this study.
+     * @param {domain.annotations.AnnotationType} annotationType - the annotation type to add to this study.
      *
      * @returns {Promise<domain.studies.Study>} A promise containing the study with the new annotation type.
      */
@@ -331,7 +331,7 @@ function StudyFactory($q,
     /**
      * Updates an existing annotation type for a participant.
      *
-     * @param {domain.AnnotationType} annotationType - the annotation type with the new values.
+     * @param {domain.annotations.AnnotationType} annotationType - the annotation type with the new values.
      *
      * @returns {Promise<domain.studies.Study>} A promise containing the study with the updated annotation
      * type.
@@ -343,7 +343,7 @@ function StudyFactory($q,
     /**
      * Removes an existing annotation type for a participant.
      *
-     * @param {domain.AnnotationType} annotationType - the annotation type to remove.
+     * @param {domain.annotations.AnnotationType} annotationType - the annotation type to remove.
      *
      * @returns {Promise<domain.studies.Study>} A promise containing the study with the removed annotation
      * type.

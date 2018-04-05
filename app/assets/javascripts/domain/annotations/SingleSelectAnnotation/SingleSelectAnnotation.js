@@ -13,13 +13,20 @@ function SingleSelectAnnotationFactory(Annotation, DomainError) {
                                { properties: { value: { type: [ 'array', 'null' ] } } });
 
   /**
-   * An {@link domain.Annotation Annotation} that holds a number value.
+   * An {@link domain.annotations.Annotation Annotation} that holds values for a {@link
+   * domain.annotations.AnnotationType AnnotationType} of value type {@link
+   * domain.annotations.AnnotationValueType SELECT} with max value count {@link
+   * domain.annotations.AnnotationType#maxValueCount SINGLE_SELECT}.
    *
    * Please use {@link domain.AnnotationFactory#create AnnotationFactory.create()} to create annotation
    * objects.
+   *
+   * @memberOf domain.annotations
+   * @extends domain.annotations.Annotation
    */
   class SingleSelectAnnotation extends Annotation {
 
+    /** @inheritdoc */
     constructor(obj = {}, annotationType) {
       super(obj, annotationType);
       this.valueType = 'SingleSelect';
@@ -61,7 +68,7 @@ function SingleSelectAnnotationFactory(Annotation, DomainError) {
      * @param {object} obj={} - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {domain.AnnotationType} annotationType - the object containing the type information for this
+     * @param {domain.annotations.AnnotationType} annotationType - the object containing the type information for this
      * annotation.
      *
      * @returns {domain.SingleSelectAnnotation} An annotation created from the given object.

@@ -89,7 +89,7 @@ function CollectionEventAnnotationTypeViewController($q,
 }
 
 /**
- * An AngularJS component that allows the user to display an {@link domain.AnnotationType AnnotationType} that
+ * An AngularJS component that allows the user to display an {@link domain.annotations.AnnotationType AnnotationType} that
  * belongs to a {@link domain.studies.CollectionEventType CollectionEventType}.
  *
  * @memberOf admin.studies.components.collectionEventAnnotationTypeView
@@ -99,7 +99,7 @@ function CollectionEventAnnotationTypeViewController($q,
  * @param {domain.studies.CollectionEventType} collectionEventType - the collection event type the
  * annotation type belongs to.
  *
- * @param {domain.AnnotationType} annotationType - the annotation type to display.
+ * @param {domain.annotations.AnnotationType} annotationType - the annotation type to display.
  */
 const collectionEventAnnotationTypeViewComponent = {
   template: require('./collectionEventAnnotationTypeView.html'),

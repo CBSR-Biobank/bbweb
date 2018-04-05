@@ -15,19 +15,28 @@ function hasAnnotationsFactory($q,
                                annotationFactory) {
 
   /**
-   * A base class for {@link domain.ConcurrencySafeEntity|Domain Entities} that have {@link domain.Annotation
-   * Annotations}.
+   * A base class for {@link domain.annotations.ConcurrencySafeEntity|Domain Entities} that contain {@link
+   * domain.annotations.Annotation Annotations}.
    *
    * Maintains an array of annotations.
+   *
+   * @memberOf domain.annotations
    */
   class HasAnnotations extends ConcurrencySafeEntity {
 
+    /**
+     * Adds an annotation to the parent entity.
+     *
+     * @return {Promise<object>} returns the parent entity in a plain object returned by the server.
+     */
     addAnnotation(annotation, url) {
       return super.update(url, annotation.getServerAnnotation());
     }
 
     /**
-     * The entity that includes this mixin needs to implement 'asyncCreate'.
+     * Removes an annotation from the parent entity.
+     *
+     * @return {Promise<object>} returns the parent entity in a plain object returned by the server.
      */
     removeAnnotation(annotation, url) {
       var found = _.find(this.annotations,  { annotationTypeId: annotation.annotationTypeId });
@@ -38,15 +47,25 @@ function hasAnnotationsFactory($q,
       return biobankApi.del(url);
     }
 
+    /**
+     * Assigns the {@link domain.annotations.AnnotationType AnnotationType} to the parent entity and converts
+     * the annotations to the matching objects derived from {@link domain.annotations.Annotation Annotation}.
+     *
+     * @see domain.annotations.DateTimeAnnotation
+     * @see domain.annotations.MultipleSelectAnnotation
+     * @see domain.annotations.NumberAnnotation
+     * @see domain.annotations.SingleSelectAnnotation
+     * @see domain.annotations.TextAnnotation
+     *
+     * @return {undefined}
+     */
     setAnnotationTypes(annotationTypes) {
-      var differentIds;
-
       annotationTypes = annotationTypes || [];
       this.annotations = this.annotations || [];
 
       // make sure the annotations ids match up with the corresponding annotation types
-      differentIds = _.difference(_.map(this.annotations, 'annotationTypeId'),
-                                  _.map(annotationTypes, 'id'));
+      const differentIds = _.difference(_.map(this.annotations, 'annotationTypeId'),
+                                        _.map(annotationTypes, 'id'));
 
       if (differentIds.length > 0) {
         throw new DomainError('annotation types not found: ' + differentIds);

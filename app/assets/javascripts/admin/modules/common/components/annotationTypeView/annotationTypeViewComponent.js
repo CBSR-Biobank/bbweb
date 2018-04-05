@@ -78,11 +78,11 @@ function AnnotationTypeViewController($state,
 }
 
 /**
- * An AngularJS component that allows the user to view a {@link domain.AnnotationType}.
+ * An AngularJS component that allows the user to view a {@link domain.annotations.AnnotationType}.
  *
  * @memberOf admin.common.components.annotationTypeView
  *
- * @param {domain.AnnotationType} annotationType the Annotation type to display.
+ * @param {domain.annotations.AnnotationType} annotationType the Annotation type to display.
  *
  * @param {boolean} readOnly When *FALSE*, user is allowed to make changes to the annotation type.
  *
@@ -107,7 +107,7 @@ const annotationTypeViewComponent = {
  *
  * @callback admin.common.components.annotationTypeView.onUpdate
  * @param {string} attribute - the attribute that was modified
- * @param {domain.AnnotationType} annotationType - the updated annotation type.
+ * @param {domain.annotations.AnnotationType} annotationType - the updated annotation type.
  */
 
 export default ngModule => ngModule.component('annotationTypeView', annotationTypeViewComponent)

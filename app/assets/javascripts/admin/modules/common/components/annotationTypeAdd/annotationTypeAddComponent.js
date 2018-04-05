@@ -8,7 +8,7 @@
  */
 
 /**
- * An AngularJS component that allows the user to add an {@link domain.AnnotationType AnnotationType} using an
+ * An AngularJS component that allows the user to add an {@link domain.annotations.AnnotationType AnnotationType} using an
  * HTML form. The annotation type can then be added to one of these domain entities:
  *
  * - {@link domain.studies.CollectionEventType CollectionEventType}
@@ -39,7 +39,7 @@ const annotationTypeAddComponent = {
  * the user presses the *Submit* button in the component's HTML form.
  *
  * @callback admin.common.components.annotationTypeAdd.onSubmit
- * @param {domain.AnnotationType} annotationType - the annotation type with the values entered by the user.
+ * @param {domain.annotations.AnnotationType} annotationType - the annotation type with the values entered by the user.
  */
 
 /**

@@ -23,7 +23,8 @@ function AnnotationFactory($log, AnnotationValueType, DomainEntity, DomainError)
   /**
    * Annotations allow the system to collect custom named and defined pieces of data.
    *
-   * The type information for an Annotation is stored in an {@link domain.AnnotationType AnnotationType}.
+   * The type information for an Annotation is stored in an {@link domain.annotations.AnnotationType
+   * AnnotationType}.
    *
    * Please use {@link domain.AnnotationFactory#create AnnotationFactory.create()} to create annotation
    * objects.
@@ -31,22 +32,28 @@ function AnnotationFactory($log, AnnotationValueType, DomainEntity, DomainError)
    * Objects of this type are used in HTML form code to manage annotation information. It differs from the
    * server representation in order to make setting the information via an HTML simpler.
    *
-   * @memberOf domain
+   * @memberOf domain.annotations
    */
   class Annotation extends DomainEntity {
 
+    /**
+     * @param {object} obj={} - An initialization object whose properties are the same as the members from
+     *        this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @param {domain.annotations.AnnotationType} annotationType - the Annotation Type for this Annotation.
+     */
     constructor(obj, annotationType) {
       /**
-       * The {@link domain.AnnotationType| AnnotationType ID} for this annotation's type.
+       * The {@link domain.annotations.AnnotationType| AnnotationType ID} for this annotation's type.
        *
-       * @name domain.Annotation#annotationTypeId
+       * @name domain.annotations.Annotation#annotationTypeId
        * @type {string}
        */
 
       /**
        * The value stored in this annotation.
        *
-       * @name domain.Annotation#value
+       * @name domain.annotations.Annotation#value
        * @type {(string|Array<string>)}
        */
 
@@ -75,7 +82,7 @@ function AnnotationFactory($log, AnnotationValueType, DomainEntity, DomainError)
     }
 
     /**
-     * @return {string} the ID of the {@link domain.AnnotationType AnnotationType} for this annotation.
+     * @return {string} the ID of the {@link domain.annotations.AnnotationType AnnotationType} for this annotation.
      */
     getAnnotationTypeId() {
       if (_.isUndefined(this.annotationType)) {
@@ -85,7 +92,7 @@ function AnnotationFactory($log, AnnotationValueType, DomainEntity, DomainError)
     }
 
     /**
-     * @return {string} the `valueType` of the {@link domain.AnnotationType AnnotationType} for this
+     * @return {string} the `valueType` of the {@link domain.annotations.AnnotationType AnnotationType} for this
      * annotation.
      */
     getValueType() {

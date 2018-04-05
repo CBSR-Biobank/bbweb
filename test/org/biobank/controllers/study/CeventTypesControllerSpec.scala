@@ -2,7 +2,7 @@ package org.biobank.controllers.study
 
 import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.domain.AnnotationType
+import org.biobank.domain.annotations.AnnotationType
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.study._
 import org.biobank.domain.study.{ CollectionEventType, Study }
