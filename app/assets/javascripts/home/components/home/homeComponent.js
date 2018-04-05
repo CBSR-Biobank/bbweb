@@ -1,4 +1,8 @@
-/*
+/**
+ * AngularJS Component used in the home page.
+ *
+ * @namespace home.components.home
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
@@ -38,9 +42,9 @@ class HomeController {
 }
 
 /**
- * An AngularJS component for the home page.
+ * An AngularJS component for the *Home* page.
  *
- * @memberOf home.components
+ * @memberOf home.components.home
  */
 const homeComponent = {
   template: require('./home.html'),

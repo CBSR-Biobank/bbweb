@@ -1,4 +1,8 @@
-/*
+/**
+ * AngularJS Component used in the home page.
+ *
+ * @namespace home.components.contact
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
@@ -8,9 +12,8 @@
 class Controller {
 
   constructor(breadcrumbService) {
-    'ngInject'
-
-    Object.assign(this, { breadcrumbService })
+    'ngInject';
+    Object.assign(this, { breadcrumbService });
   }
 
   $onInit() {
@@ -22,9 +25,9 @@ class Controller {
 }
 
 /**
- * An AngularJS component for the **Contact Us** page.
+ * An AngularJS component for the *Contact Us* page.
  *
- * @memberOf home.components
+ * @memberOf home.components.contact
  */
 const contactComponent = {
   template: require('./contact.html'),

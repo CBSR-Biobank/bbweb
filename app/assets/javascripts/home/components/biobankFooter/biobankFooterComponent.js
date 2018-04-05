@@ -1,21 +1,19 @@
-/*
+/**
+ * AngularJS Component used in the home page.
+ *
+ * @namespace home.components.biobankFooter
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-/*
- * Controller for this component.
- */
-function BiobankFooterCompnent() {
-}
 
 /**
  * An AngularJS component for the page footer.
  *
- * @memberOf home.components
+ * @memberOf home.components.biobankFooter
  */
 const biboankFooterComponent = {
   template: '',
-  controller: BiobankFooterCompnent,
   controllerAs: 'vm',
   bindings: {
   }

@@ -1,62 +1,70 @@
-/*
+/**
+ * AngularJS Component used in the home page.
+ *
+ * @namespace home.components.biobankHeader
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/*
- * Controller for this component.
- */
 /* @ngInject */
-function BiobankHeaderController($scope,
-                                 $state,
-                                 $log,
-                                 languageService,
-                                 userService) {
-  var vm = this;
-  vm.$onInit = onInit;
-  this.navCollapsed = true;
+class BiobankHeaderController {
 
-  //--
+  constructor($scope,
+              $state,
+              $log,
+              languageService,
+              userService) {
+    Object.assign(this,
+                  {
+                    $scope,
+                    $state,
+                    $log,
+                    languageService,
+                    userService
+                  });
+  }
 
-  function onInit() {
-    vm.navCollapsed = true;
-    vm.logout = logout;
-    vm.user = undefined;
-    vm.changeLanguage = changeLanguage;
+  $onInit() {
+    this.navCollapsed = true;
+    this.user = undefined;
 
     // Wrap the current user from the service in a watch expression to display the user's name in
     // the navigation bar
-    $scope.$watch(function() {
-      var user = userService.getCurrentUser();
-      return user;
-    }, function(user) {
-      vm.user = user;
-    }, true);
+    this.$scope
+      .$watch(
+        () => {
+          const user = this.userService.getCurrentUser();
+          return user;
+        },
+        (user) => {
+          this.user = user;
+        },
+        true);
   }
 
-  function logout() {
-    userService.logout().then(goHome).catch(goHomeError);
+  logout() {
+    const goHome = () => {
+      this.$state.go('home', {}, { reload: true });
+    };
 
-    function goHome() {
-      $state.go('home', {}, { reload: true });
-    }
-
-    function goHomeError(error) {
-      $log.error('logout failed:', error);
-      goHome();
-    }
+    this.userService.logout()
+      .then(goHome)
+      .catch((error) => {
+        this.$log.error('logout failed:', error);
+        goHome();
+      });
   }
 
-  function changeLanguage(lang) {
-    languageService.setLanguage(lang);
+  changeLanguage(lang) {
+    this.languageService.setLanguage(lang);
   }
 }
-
 
 /**
  * An AngularJS component for the page header.
  *
- * @memberOf home.components
+ * @memberOf home.components.biobankHeader
  */
 const biobankHeaderComponent = {
   template: require('./biobankHeader.html'),
