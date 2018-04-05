@@ -14,9 +14,9 @@ import { LabelService } from '../../../base/services/LabelService';
 class userStateLabelService extends LabelService {
 
   /**
-   * @param {base.BbwebError} BbwebError - AngularJS factory for exceptions.
+   * @param {base.BbwebError} BbwebError
    *
-   * @param {object} UserState - AngularJS constant that enumerates all the user states.
+   * @param {domain.users.UserState.UserState} UserState
    *
    * @param {object} gettextCatalog - The service that allows strings to be translated to other languages.
    */
@@ -31,6 +31,14 @@ class userStateLabelService extends LabelService {
     Object.assign(this, { UserState, gettextCatalog });
   }
 
+  /**
+   * Returns the function that should be called to display the label for a {@link
+   * domain.users.UserState.UserState UserState}.
+   *
+   * @param {domain.users.UserState.UserState} state - the state to get a function for.
+   *
+   * @return {function} a function that returns a label that can be displayed to the user.
+   */
   stateToLabelFunc(state) {
     return this.getLabel(state);
   }

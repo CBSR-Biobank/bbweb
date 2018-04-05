@@ -15,6 +15,16 @@ import angularCookies from 'angular-cookies'
  */
 
 /**
+ * AngularJS components related to logging in and out.
+ * @namespace users.components
+ */
+
+/**
+ * AngularJS Directives used for user login and logout.
+ * @namespace users.directives
+ */
+
+/**
  * AngularJS services related to {@link domain.users.Users}.
  * @namespace users.services
  */

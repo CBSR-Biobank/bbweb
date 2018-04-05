@@ -33,7 +33,7 @@ class CentreStateLabelService extends LabelService {
 
   /**
    * Returns the function that should be called to display the label for a {@link domain.centres.CentreState
-   * CentreState} state.
+   * CentreState}.
    *
    * @param {domain.centres.CentreState} state - the state to get a function for.
    *
