@@ -1,4 +1,8 @@
-/*
+/**
+ * AngularJS Constants used for defining specimen types.
+ *
+ * @namespace domain.PreservationTemperature
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
@@ -9,8 +13,8 @@
    * domain.PreservationType PreservationType}).
    *
    * @enum {string}
-   * @memberOf domain
-   * @see domain.PreservationType
+   * @memberOf domain.PreservationTemperature
+   * @see domain.PreservationType.PreservationType
    */
 const PreservationTemperature = {
     PLUS_4_CELCIUS:    '4 C',

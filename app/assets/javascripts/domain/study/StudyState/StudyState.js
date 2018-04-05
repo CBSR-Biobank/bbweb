@@ -1,7 +1,7 @@
 /**
- * Domain Entities related to {@link domain.studies.Study Studies}.
+ * Enumeration related to {@link domain.studies.Study Studies}.
  *
- * @namespace domain.studies.studyState
+ * @namespace domain.studies.StudyState
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -12,7 +12,7 @@
  *
  *
  * @enum {string}
- * @memberOf domain.studies.studyState
+ * @memberOf domain.studies.StudyState
  * @see studies.service.StudyStateLabelService
  */
 const StudyState = {

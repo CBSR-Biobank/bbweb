@@ -6,7 +6,7 @@
 import { LabelService } from '../../../base/services/LabelService';
 
 /**
- * An AngularJS service that converts a {@link domain.users.userStates.UserState UserState} to a *translated
+ * An AngularJS service that converts a {@link domain.users.UserState.UserState UserState} to a *translated
  * string* that can be displayed to the user.
  *
  * @memberOf users.services

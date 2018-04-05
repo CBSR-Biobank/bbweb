@@ -5,21 +5,6 @@
 
 import _ from 'lodash';
 
-/**
- * Factory for Centres.
- *
- * @param {$q} $q - AngularJS service for asynchronous functions.
- *
- * @param {biobankApi} biobankApi - service that communicates with the Biobank server.
- *
- * @param {ConcurrencySafeEntity} ConcurrencySafeEntity - Base class for domain objects.
- *
- * @param {CentreState} CenterState - The enumerated type for the state of a centre.
- *
- * @param {Location} Location -
- *
- * @returns {Factory} The AngularJS factory function.
- */
 /* @ngInject */
 function CentreFactory($q,
                        $log,
@@ -122,6 +107,7 @@ function CentreFactory($q,
         obj));
     }
 
+    /** @private */
     static url(...paths) {
       const args = [ 'centres' ].concat(paths);
       return super.url(...args);
@@ -139,6 +125,7 @@ function CentreFactory($q,
         .then((reply) => Centre.asyncCreate(reply));
     }
 
+    /** @private */
     update(url, additionalJson) {
       return super.update(url, additionalJson).then(Centre.asyncCreate);
     }
@@ -366,7 +353,7 @@ function CentreFactory($q,
     /**
      * Returns the names for all centres.
      *
-     * @returns {Array.<domain.centres.CentreDto>} The name of all the centres.
+     * @returns {Array.<domain.centres.CentreName>} The name of all the centres.
      */
     static allNames() {
       return biobankApi.get('/centres/names');
@@ -377,7 +364,7 @@ function CentreFactory($q,
      *
      * @param {string} filter - the string to match.
      *
-     * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
+     * @returns {Promise<Array<domain.centres.Centre.CentreLocationDto>>}
      */
     static locationsSearch(filter = '') {
       return biobankApi.post(this.url('locations'),
@@ -393,7 +380,7 @@ function CentreFactory($q,
      *
      * @param {domain.centres.CentreLocationDto} centreLocations - the locations returned from the server.
      *
-     * @returns {Promise<Array<domain.centres.CentreLocationName>>} A promise.
+     * @returns {Promise<Array<domain.centres.CentreLocationName>>}
      */
     static centreLocationToNames(centreLocations) {
       return centreLocations
@@ -474,5 +461,19 @@ function CentreFactory($q,
 
   return Centre;
 }
+
+/**
+ * @typedef domain.centres.Centre.CentreLocationDto
+ *
+ * @type object
+ *
+ * @property {string} centreId - the ID that identifies the centre.
+ *
+ * @property {string} locationId - the ID that identifies the location.
+ *
+ * @property {string} centreName - the centre's name.
+ *
+ * @property {string} locationName - the location's name.
+ */
 
 export default ngModule => ngModule.factory('Centre', CentreFactory)

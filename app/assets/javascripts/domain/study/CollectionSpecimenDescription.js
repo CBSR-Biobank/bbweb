@@ -43,20 +43,20 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
   }
 
   /**
-   * @class
-   * @memberOf domain.studies
-   *
-   * @classdesc Used to configure a *Specimen Type* used by a {@link domain.studies.Study Study}.
+   * Used to configure a *Specimen Type* used by a {@link domain.studies.Study Study}.
    *
    * It records ownership, summary, storage, and classification information that applies to an entire group or
-   * collection of {@link domain.participants.Specimen Specimens}. A *Specimen Description* is defined either for
-   * specimen types collected from participants, or for specimen types that are processed.
+   * collection of {@link domain.participants.Specimen Specimens}. A *Collection Specimen Description* is
+   * defined for specimen types collected from participants.
    *
-   * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-   * this class. Objects of this type are usually returned by the server's REST API.
+   * @memberOf domain.studies
    */
   class CollectionSpecimenDescription extends DomainEntity {
 
+    /**
+     * @param {object} obj - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     */
     constructor(obj) {
       /**
        * A short identifying name.
@@ -72,36 +72,36 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
 
       /**
        * @name domain.studies.CollectionSpecimenDescription#anatomicalSourceType
-       * @type {domain.AnatomicalSourceType}
+       * @type {domain.AnatomicalSourceType.AnatomicalSourceType}
        */
 
       /**
        * @name domain.studies.CollectionSpecimenDescription#preservationType
-       * @type {domain.PreservationType}
+       * @type {domain.PreservationType.PreservationType}
        */
 
       /**
        * @name domain.studies.CollectionSpecimenDescription#preservationTemperature
-       * @type {domain.PreservationTemperature}
+       * @type {domain.PreservationTemperature.PreservationTemperature}
        */
 
       /**
        * @name domain.studies.CollectionSpecimenDescription#specimenType
-       * @type {domain.SpecimenType}
+       * @type {domain.studies.SpecimenType.SpecimenType}
        */
 
       /**
        * The amount per specimen, measured in units, to be collected.
        * @name domain.studies.CollectionSpecimenDescription#amount
        * @type {number}
-       * @see domain.studies.CollectionSpecimenDescription#units
+       * @see #units
        */
 
       /**
        * The number of specimens to be collected.
        * @name domain.studies.CollectionSpecimenDescription#maxCount
        * @type {number}
-       * @see domain.studies.CollectionSpecimenDescription.units
+       * @see #units
        */
 
       super(Object.assign(

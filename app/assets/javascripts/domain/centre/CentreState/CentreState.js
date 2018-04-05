@@ -1,5 +1,5 @@
 /**
- * Domain Entities related to {@link domain.centres.Centre Centres}.
+ * Enumerated type related to {@link domain.centres.Centre Centres}.
  *
  * @namespace domain.centres.centreStates
  *

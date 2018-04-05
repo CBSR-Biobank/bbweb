@@ -1,12 +1,17 @@
-/*
+/**
+ * AngularJS Constants used for defining specimen types.
+ *
+ * @namespace domain.AnatomicalSourceType
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
  * Anatomical sources where a specimen is collected from.
+ *
  * @enum {string}
- * @memberOf domain
+ * @memberOf domain.AnatomicalSourceType
  */
 const AnatomicalSourceType = {
   BLOOD:            'Blood',

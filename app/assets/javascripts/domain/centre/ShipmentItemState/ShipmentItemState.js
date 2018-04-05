@@ -1,5 +1,5 @@
 /**
- * Domain Entities related to {@link domain.centres.Centre Centres} and {@link domain.centres.Shipment
+ * Enumerated type related to {@link domain.centres.Centre Centres} and {@link domain.centres.Shipment
  * Shipping}.
  *
  * @namespace domain.centres.shipmentItemStates

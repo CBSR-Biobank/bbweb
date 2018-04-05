@@ -147,27 +147,4 @@ describe('EntitySet', function() {
 
   });
 
-  it('addEntity adds an entity', function() {
-    var id        = this.Factory.stringNext(),
-        name      = this.Factory.stringNext(),
-        entitySet = new this.EntitySet();
-    expect(entitySet.allEntities).toBeFalse();
-    expect(entitySet.entityData).toBeEmptyArray();
-    entitySet.addEntity(id, name);
-    expect(entitySet.entityData).toBeNonEmptyArray();
-    expect(entitySet.entityData).toContain({ id: id, name: name});
-  });
-
-  it('removeEntity removes an entity by name', function() {
-      var entityInfo = this.Factory.entityInfo(),
-          entitySet = this.EntitySet.create({
-            allEntities: false,
-            entityData: [ entityInfo ]
-          });
-    expect(entitySet.allEntities).toBeFalse();
-    expect(entitySet.entityData).toBeNonEmptyArray();
-    entitySet.removeEntity(entityInfo.name);
-    expect(entitySet.entityData).toBeEmptyArray();
-  });
-
 });

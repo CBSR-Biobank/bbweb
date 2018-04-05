@@ -1,5 +1,5 @@
 /**
- * Domain Entities used in {@link domain.participants.Specimen Specimen} collection.
+ * Constant used in {@link domain.participants.Specimen Specimen} collection.
  *
  * @namespace domain.participants.specimenStates
  *

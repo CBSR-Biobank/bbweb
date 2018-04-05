@@ -184,7 +184,7 @@ function SpecimenFactory($q,
     /**
      * Creates a Specimen, but first it validates #obj to ensure that it has a valid schema.
      *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
+     * @param {object} obj={} - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
      * @param {CollectionSpecimenDescription} [specimenDescription] - The specimen spec from the collection

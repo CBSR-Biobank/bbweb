@@ -22,23 +22,51 @@ function EntitySetFactory($q,
     'required': [ 'allEntities', 'entityData' ]
   };
 
+  /**
+   * A base class for domain entity set objects.
+   * @extends domain.DomainEntity
+   * @memberOf domain
+   */
   class EntitySet extends DomainEntity {
 
     constructor(obj) {
+
+      /**
+       * When `TRUE` this entity set is for all entities in the system.
+       *
+       * @name domain.EntitySet#allEntities
+       * @type {boolean}
+       */
+
+      /**
+       * When `allEntities` is `FALSE` this array holds the entities this set is for.
+       *
+       * @name domain.EntitySet#name
+       * @type {Array<domain.EntityInfo>}
+       */
+
       super(Object.assign(
-              {
-                allEntities: false,
-                entityData:  []
-              },
-              obj
-            )
-           );
+        {
+          allEntities: false,
+          entityData:  []
+        },
+        obj
+      ));
     }
 
+    /**
+     * @return {boolean} `TRUE` this entity set is for all entities in the system.
+     */
     isForAllEntities() {
       return this.allEntities;
     }
 
+    /**
+     * @param {string} name - the name of the entity.
+     *
+     * @return {boolean} `TRUE` when `allEntities` is `TRUE`, or the entity named `name` is present in the
+     * set.
+     */
     isMemberOf(name) {
       if (this.allEntities) {
         return true;
@@ -49,20 +77,8 @@ function EntitySetFactory($q,
       return !_.isUndefined(result);
     }
 
-    addEntity(id, name) {
-      this.entityData.push({ id: id, name: name});
-    }
-
-    removeEntity(name) {
-      _.remove(this.entityData, function (info) {
-        return info.name === name;
-      });
-    }
-
     getEntityIds() {
-      return this.entityData.map(function (entityInfo) {
-        return entityInfo.id;
-      });
+      return this.entityData.map((entityInfo) =>  entityInfo.id);
     }
 
     /**
@@ -78,6 +94,14 @@ function EntitySetFactory($q,
       return [ EntityInfo.schema() ];
     }
 
+    /**
+     * Creates an object of thsi type, but first it validates #obj to ensure that it has a valid schema.
+     *
+     * @param {object} obj={} - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {domain.EntitySet}
+     */
     static create(obj) {
       const validation = EntitySet.isValid(obj);
       if (!validation.valid) {
@@ -90,12 +114,17 @@ function EntitySetFactory($q,
       return new EntitySet(obj);
     }
 
+    /**
+     * Creates an object of thsi type, but first it validates #obj to ensure that it has a valid schema.
+     *
+     * @param {object} obj={} - An initialization object whose properties are the same as the members from
+     * this class. Objects of this type are usually returned by the server's REST API.
+     *
+     * @returns {Promise<domain.EntitySet>}
+     */
     static asyncCreate(obj) {
-      var result;
-
       try {
-        result = EntitySet.create(obj);
-        return $q.when(result);
+        return $q.when(EntitySet.create(obj));
       } catch (e) {
         return $q.reject(e);
       }

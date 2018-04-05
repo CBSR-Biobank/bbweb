@@ -1,13 +1,17 @@
-/*
+/**
+ * AngularJS Constants used for defining specimen types.
+ *
+ * @namespace domain.access.RoleIds
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
- * The statuses a {@link domain.centres.Centre Centre} can have.
+ * The {@link domain.access.Role Role} a {@link domain.users.User User} can have.
  *
  * @enum {string}
- * @memberOf domain.centres
+ * @memberOf domain.access.RoleIds
  */
 const RoleIds = {
   WebsiteAdministrator:  'website-administrator',

@@ -1,12 +1,17 @@
-/*
+/**
+ * Constant related to {@link domain.centres.Centre Centres}.
+ *
+ * @namespace domain.centres.centreLocationInfo
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
- * @typedef domain.centres.CentreLocationInfo
+ * @typedef domain.centres.centreLocationInfo.CentreLocationInfo
  *
  * @type object
+ * @memberOf domain.centres.centreLocationInfo
  *
  * @property {string} centreId - the ID that identifies the centre.
  *
@@ -14,7 +19,6 @@
  *
  * @property {string} name - the centre's name concatenated with the location name.
  */
-
 const centreLocationInfoSchema = {
   'id': 'CentreLocationInfo',
   'type': 'object',

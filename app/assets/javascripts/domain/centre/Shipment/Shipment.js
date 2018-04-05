@@ -72,7 +72,6 @@ function ShipmentFactory($q,
   class Shipment extends ConcurrencySafeEntity {
 
     constructor(obj = {}) {
-
       /**
        * The state this shipment is in.
        *
@@ -149,12 +148,14 @@ function ShipmentFactory($q,
         obj))
     }
 
+    /** @private */
     static url(...paths) {
       const allPaths = [ 'shipments' ].concat(paths);
       return super.url(...allPaths);
     }
 
     /**
+     * @private
      * @return {object} The JSON schema for this class.
      */
     static schema() {

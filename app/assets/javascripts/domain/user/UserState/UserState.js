@@ -1,7 +1,7 @@
 /**
- * Domain Entities related to {@link domain.users.User User}.
+ * Enumeration related to {@link domain.users.User Users}.
  *
- * @namespace domain.users.userStates
+ * @namespace domain.users.UserState
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -11,7 +11,7 @@
  * A {@link domain.users.User User} can be in one of these states.
  *
  * @enum {string}
- * @memberOf domain.users.userStates
+ * @memberOf domain.users.UserState
  */
 const UserState = {
   /**

@@ -1,4 +1,8 @@
-/*
+/**
+ * Enumeration related to {@link domain.studies.Study Studies}.
+ *
+ * @namespace domain.studies.SpecimenType
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
@@ -8,7 +12,7 @@
  * Specimen} is. Potential examples include: urine, whole blood, plasma, nail, protein, etc.
  *
  * @enum {string}
- * @memberOf domain.studies
+ * @memberOf domain.studies.SpecimenType
  */
 const SpecimenType = {
   BUFFY_COAT:                   'Buffy coat',
