@@ -9,7 +9,7 @@ import { LabelService } from '../../../base/services/LabelService';
  * An AngularJS service that converts a StudyState to a i18n string that can
  * be displayed to the study.
  *
- * @memberof studies.service
+ * @memberof studies.services
  */
 class StudyStateLabelService extends LabelService {
 

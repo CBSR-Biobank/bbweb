@@ -5,6 +5,7 @@
 
 import _ from 'lodash';
 
+/** @deprecated */
 /* @ngInject */
 function StudyAnnotationTypesServiceFactory(biobankApi) {
 

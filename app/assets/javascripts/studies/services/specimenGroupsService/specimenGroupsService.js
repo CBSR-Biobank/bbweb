@@ -3,9 +3,7 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/**
- * Service to access specimen groups.
- */
+/** @deprecated */
 /* @ngInject */
 function specimenGroupsServiceFactory(biobankApi) {
   var service = {
