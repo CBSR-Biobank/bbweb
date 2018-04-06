@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import entityUpdateSharedSpec from '../../../../../test/behaviours/entityUpdateSharedSpec';
+import entityUpdateSharedBehaviour from '../../../../../test/behaviours/entityUpdateSharedBehaviour';
 import ngModule from '../../index'
 
 describe('ceventTypeViewComponent', function() {
@@ -101,7 +101,7 @@ describe('ceventTypeViewComponent', function() {
       context.newValue           = this.Factory.stringNext();
     });
 
-    entityUpdateSharedSpec(context);
+    entityUpdateSharedBehaviour(context);
 
   });
 
@@ -119,7 +119,7 @@ describe('ceventTypeViewComponent', function() {
       context.newValue           = this.Factory.stringNext();
     });
 
-    entityUpdateSharedSpec(context);
+    entityUpdateSharedBehaviour(context);
 
   });
 
@@ -137,7 +137,7 @@ describe('ceventTypeViewComponent', function() {
       context.newValue           = false;
     });
 
-    entityUpdateSharedSpec(context);
+    entityUpdateSharedBehaviour(context);
 
   });
 

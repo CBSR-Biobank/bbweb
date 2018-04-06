@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import ngModule from '../../index'
-import sharedSpec from '../../../../../test/behaviours/annotationTypeViewComponentSharedSpec';
+import sharedBehaviour from '../../../../../test/behaviours/annotationTypeViewComponentSharedBehaviour';
 
 describe('Component: collectionEventAnnotationTypeView', function() {
 
@@ -89,7 +89,7 @@ describe('Component: collectionEventAnnotationTypeView', function() {
       };
     });
 
-    sharedSpec(context);
+    sharedBehaviour(context);
 
   });
 

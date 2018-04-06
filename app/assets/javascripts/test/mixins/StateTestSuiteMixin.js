@@ -3,35 +3,58 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
+
 /**
- * This is a mixin that can be added UserContext object of a Jasmine test suite.
+ * This is a mixin that can be added UserContext object of a Jasmine *UI Router* state definition test suite.
  *
- * @return {object} Object containing the functions that will be mixed in.
+ * @exports test.mixins.StateTestSuiteMixin
  */
-/* @ngInject */
-function StateTestSuiteMixin($q, $state, $injector, userService, TestSuiteMixin, Factory) {
+let StateTestSuiteMixin = {
 
-  return Object.assign({ initAuthentication, gotoUrl, resolve }, TestSuiteMixin);
+  /**
+   * Used to inject AngularJS dependencies into the test suite.
+   *
+   * Also injects dependencies required by this mixin.
+   *
+   * @param {...string} dependencies - the AngularJS dependencies to inject.
+   *
+   * @return {undefined}
+   */
+  injectDependencies: function (...dependencies) {
+    const allDependencies = dependencies.concat([
+      '$q',
+      '$location',
+      '$rootScope',
+      'userService',
+      'Factory'])
+    TestSuiteMixin.injectDependencies.call(this, ...allDependencies);
+  },
 
-  function initAuthentication() {
-    const user = Factory.user()
-    userService.requestCurrentUser = jasmine.createSpy().and.returnValue($q.when(user))
-  }
+  /**
+   * Configures the test app to pretend the user has logged in.
+   *
+   * @modifies {users.services.userService#requestCurrentUser} to be a Jasmine spy that returns a dummy
+   * {@link domain.users.User User}.
+   */
+  initAuthentication: function  () {
+    const user = this.Factory.user();
+    this.userService.requestCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(user));
+  },
 
-  function gotoUrl(url) {
+  /**
+   * Changes state corresponding to the URL passed in.
+   *
+   * @param {string} url - the URL to change state to.
+   */
+  gotoUrl: function (url) {
     this.$location.url(url);
     this.$rootScope.$digest();
   }
 
-  function resolve(value) {
-    return {
-      forStateAndView: function (state, view) {
-        var viewDefinition = view ? $state.get(state).views[view] : $state.get(state);
-        return $injector.invoke(viewDefinition.resolve[value]);
-      }
-    };
-  }
+};
 
-}
+StateTestSuiteMixin = Object.assign({}, TestSuiteMixin, StateTestSuiteMixin);
 
-export default ngModule => ngModule.service('StateTestSuiteMixin', StateTestSuiteMixin)
+export { StateTestSuiteMixin };
+export default () => {};

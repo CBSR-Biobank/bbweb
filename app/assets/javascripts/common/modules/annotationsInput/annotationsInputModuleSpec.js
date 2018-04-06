@@ -6,14 +6,15 @@
  */
 /* global angular */
 
-import _           from 'lodash';
-import ngModule    from '../../index'  // needs components from common module for this test suite
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
+import _ from 'lodash';
+import ngModule from '../../index'  // needs components from common module for this test suite
 
 describe('annotationsInputModule', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (TestSuiteMixin) {
+    angular.mock.inject(function () {
       Object.assign(this, TestSuiteMixin);
 
       this.injectDependencies('$rootScope',

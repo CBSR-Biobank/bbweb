@@ -8,7 +8,7 @@
 
 import _ from 'lodash';
 import ngModule from '../../index'
-import sharedSpec from '../../../../../test/behaviours/annotationTypeViewComponentSharedSpec';
+import sharedBehaviour from '../../../../../test/behaviours/annotationTypeViewComponentSharedBehaviour';
 
 describe('Component: participantAnnotationTypeView', function() {
 
@@ -64,7 +64,7 @@ describe('Component: participantAnnotationTypeView', function() {
       context.createController             = this.createController;
     });
 
-    sharedSpec(context);
+    sharedBehaviour(context);
 
   });
 

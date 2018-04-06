@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import entityUpdateSharedSpec from '../../../../../test/behaviours/entityUpdateSharedSpec';
+import entityUpdateSharedBehaviour from '../../../../../test/behaviours/entityUpdateSharedBehaviour';
 import ngModule from '../../index'
 
 describe('Component: studySummary', function() {
@@ -88,7 +88,7 @@ describe('Component: studySummary', function() {
       context.modalInputFuncName = 'text';
     });
 
-    entityUpdateSharedSpec(context);
+    entityUpdateSharedBehaviour(context);
 
   });
 
@@ -103,7 +103,7 @@ describe('Component: studySummary', function() {
       context.modalInputFuncName = 'textArea';
     });
 
-    entityUpdateSharedSpec(context);
+    entityUpdateSharedBehaviour(context);
 
   });
 

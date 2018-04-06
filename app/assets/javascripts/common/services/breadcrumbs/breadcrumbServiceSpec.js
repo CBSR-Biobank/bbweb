@@ -4,13 +4,14 @@
  */
 /* global angular */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import ngModule from '../../index'
 
 describe('breadcrumbService', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(TestSuiteMixin) {
+    angular.mock.inject(function() {
       Object.assign(this, TestSuiteMixin)
 
       this.injectDependencies('breadcrumbService', 'Factory')

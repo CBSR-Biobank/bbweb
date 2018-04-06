@@ -3,9 +3,10 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
+
 /* @ngInject */
 function ShippingComponentTestSuiteMixin($q,
-                                         ComponentTestSuiteMixin,
                                          Shipment,
                                          ShipmentSpecimen,
                                          Factory) {

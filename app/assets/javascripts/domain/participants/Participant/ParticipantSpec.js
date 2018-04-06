@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import annotationsSharedSpec from '../../../test/behaviours/entityWithAnnotationsSharedSpec';
+import annotationsSharedBehaviour from '../../../test/behaviours/entityWithAnnotationsSharedBehaviour';
 import ngModule from '../../index'
 
 describe('Participant', function() {
@@ -344,7 +344,7 @@ describe('Participant', function() {
       context.response       = jsonParticipant;
     });
 
-    annotationsSharedSpec(context);
+    annotationsSharedBehaviour(context);
 
   });
 

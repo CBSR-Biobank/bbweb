@@ -6,7 +6,7 @@
  */
 
 import angular from 'angular';
-import sharedSpec from '../../../test/behaviours/studyAnnotationTypeSharedSpec';
+import sharedBehaviour from '../../../test/behaviours/studyAnnotationTypeSharedBehaviour';
 
 const ngModule = 'FIXME'
 
@@ -41,6 +41,6 @@ xdescribe('SpecimenLinkAnnotationType', function() {
     return new SpecimenLinkAnnotationType(obj);
   }
 
-  sharedSpec(context);
+  sharedBehaviour(context);
 
 });

@@ -4,6 +4,7 @@
  */
 /* global angular */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -11,8 +12,8 @@ describe('shippingHomeComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -20,6 +21,7 @@ describe('shippingHomeComponent', function() {
                               '$state',
                               'Centre',
                               'Factory');
+      this.injectDependencies(...TestSuiteMixin.dependencies());
       this.createController = () => {
         this.element = angular.element('<shipping-home><shipping-home>');
         this.scope = this.$rootScope.$new();

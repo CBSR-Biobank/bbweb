@@ -5,7 +5,7 @@
 
 import _ from 'lodash';
 import ngModule from '../../index'
-import sharedSpec from '../../../../../test/behaviours/annotationTypeAddComponentSharedSpec';
+import sharedBehaviour from '../../../../../test/behaviours/annotationTypeAddComponentSharedBehaviour';
 
 describe('Component: participantAnnotationTypeAdd', function() {
 
@@ -51,7 +51,7 @@ describe('Component: participantAnnotationTypeAdd', function() {
       context.returnState               = 'home.admin.studies.study.participants';
     });
 
-    sharedSpec(context);
+    sharedBehaviour(context);
   });
 
 });

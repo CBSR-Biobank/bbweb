@@ -82,6 +82,9 @@ const config = {
     ]
   },
   resolve: {
+    alias: {
+      test: path.resolve(__dirname, 'app/assets/javascripts/test/')
+    },
     modules: ['node_modules']
   },
   plugins : [

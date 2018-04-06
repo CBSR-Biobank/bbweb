@@ -3,97 +3,119 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+
 /**
- * A mixin for test suites for annotation domain entities.
+ * A mixin for test suites for {@link domain.annotations.Annotation Annotations}.
+ *
+ * @exports test.mixins.AnnotationsEntityTestSuiteMixin
  */
-/* @ngInject */
-function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
-                                         AnnotationType,
-                                         AnnotationValueType,
-                                         AnnotationMaxValueCount,
-                                         TextAnnotation,
-                                         DateTimeAnnotation,
-                                         NumberAnnotation,
-                                         SingleSelectAnnotation,
-                                         MultipleSelectAnnotation,
-                                         annotationFactory,
-                                         Factory) {
+let AnnotationsEntityTestSuiteMixin = {
 
-  return Object.assign(
-    {
-      jsonAnnotationData,
-      validateAnnotationClass,
-      getAnnotationAndType,
-      annotationTypesForAllValueTypes
-    },
-    EntityTestSuiteMixin);
+  /**
+   * Used to inject AngularJS dependencies into the test suite.
+   *
+   * Also injects dependencies required by this mixin.
+   *
+   * @param {...string} dependencies - the AngularJS dependencies to inject.
+   *
+   * @return {undefined}
+   */
+  injectDependencies: function (...dependencies) {
+    const allDependencies = dependencies.concat([
+      'EntityTestSuiteMixin',
+      'AnnotationType',
+      'AnnotationValueType',
+      'AnnotationMaxValueCount',
+      'TextAnnotation',
+      'DateTimeAnnotation',
+      'NumberAnnotation',
+      'SingleSelectAnnotation',
+      'MultipleSelectAnnotation',
+      'annotationFactory',
+      'Factory'
+    ]);
+    EntityTestSuiteMixin.injectDependencies.call(this, ...allDependencies);
+  },
 
-  function jsonAnnotationData() {
-    var annotationTypes = Factory.allAnnotationTypes();
+  /**
+   * Creates Annotations Types and Annotations for each value type.
+
+   * @return {Array<object>} an array of objects containing: an {@link domain.annotations.AnnotationType
+   * AnnotationType}, and a corresponding {@link domain.annotations.Annotation Annotation}.
+   */
+  jsonAnnotationData: function () {
+    var annotationTypes = this.Factory.allAnnotationTypes();
 
     return annotationTypes.map((annotationType) => {
-      var value = Factory.valueForAnnotation(annotationType);
-      var annotation = Factory.annotation(value, annotationType);
+      var value = this.Factory.valueForAnnotation(annotationType);
+      var annotation = this.Factory.annotation(value, annotationType);
 
       return {
         annotationType: annotationType,
         annotation:     annotation
       };
     });
-  }
+  },
 
   /**
    * @param {object} annotTypeOptions - The options passed to the {@link test.Factory Factory} when creating
    * the *Annotation Type*.
+   *
+   * @return {object} an object containing: an {@link domain.annotations.AnnotationType AnnotationType}, an
+   * annotation as a plain object, and an {@link domain.annotations.Annotation Annotation}.
    */
-  function getAnnotationAndType(annotTypeOptions = {}) {
-    const annotationType   = AnnotationType.create(Factory.annotationType(annotTypeOptions)),
-          value            = Factory.valueForAnnotation(annotationType),
-          jsonAnnotation   = Factory.annotation({ value }, annotationType),
-          annotation       = annotationFactory.create(jsonAnnotation, annotationType);
+  getAnnotationAndType: function (annotTypeOptions = {}) {
+    const annotationType   = this.AnnotationType.create(this.Factory.annotationType(annotTypeOptions)),
+          value            = this.Factory.valueForAnnotation(annotationType),
+          jsonAnnotation   = this.Factory.annotation({ value }, annotationType),
+          annotation       = this.annotationFactory.create(jsonAnnotation, annotationType);
 
     return {
-      annotationType:   annotationType,
-      serverAnnotation: jsonAnnotation,
-      annotation:       annotation
+      annotationType,
+      jsonAnnotation,
+      annotation
     };
-  }
+  },
+
   /*
    * Creates *Annotation Type* options to create an annotation of each type of object.
    *
    * @see test.Factory.annotationType
    */
-  function annotationTypesForAllValueTypes() {
-    const result = Object.values(AnnotationValueType).map((valueType) => ({ valueType: valueType }));
+  annotationTypesForAllValueTypes: function () {
+    const result = Object.values(this.AnnotationValueType).map((valueType) => ({ valueType: valueType }));
     result.push({
-      valueType:     AnnotationValueType.SELECT,
-      maxValueCount: AnnotationMaxValueCount.SELECT_MULTIPLE,
+      valueType:     this.AnnotationValueType.SELECT,
+      maxValueCount: this.AnnotationMaxValueCount.SELECT_MULTIPLE,
       options:       [ 'opt1', 'opt2', 'opt3' ]
     });
     return result;
-  }
+  },
 
   /**
+   * A function that tests the type of an Annotation object.
+   *
    * @param {AnnotationType} annotationType the AnnotationType this annotion is based on.
    *
    * @param {Annotation} the annotation.
    */
-  function validateAnnotationClass(annotationType, annotation) {
+  validateAnnotationClass: function (annotationType, annotation) {
     switch (annotationType.valueType) {
-    case AnnotationValueType.TEXT:
-      expect(annotation).toEqual(jasmine.any(TextAnnotation));
+    case this.AnnotationValueType.TEXT:
+      expect(annotation).toEqual(jasmine.any(this.TextAnnotation));
       break;
-    case AnnotationValueType.DATE_TIME:
-      expect(annotation).toEqual(jasmine.any(DateTimeAnnotation));
+    case this.AnnotationValueType.DATE_TIME:
+      expect(annotation).toEqual(jasmine.any(this.DateTimeAnnotation));
       break;
-    case AnnotationValueType.NUMBER:
-      expect(annotation).toEqual(jasmine.any(NumberAnnotation));
+    case this.AnnotationValueType.NUMBER:
+      expect(annotation).toEqual(jasmine.any(this.NumberAnnotation));
       break;
-    case AnnotationValueType.SELECT:
+    case this.AnnotationValueType.SELECT:
       if (annotationType.isSingleSelect()) {
-        expect(annotation).toEqual(jasmine.any(SingleSelectAnnotation));
+        expect(annotation).toEqual(jasmine.any(this.SingleSelectAnnotation));
       } else {
-        expect(annotation).toEqual(jasmine.any(MultipleSelectAnnotation));
+        expect(annotation).toEqual(jasmine.any(this.MultipleSelectAnnotation));
       }
       break;
 
@@ -104,4 +126,7 @@ function AnnotationsEntityTestSuiteMixin(EntityTestSuiteMixin,
 
 }
 
-export default ngModule => ngModule.service('AnnotationsEntityTestSuiteMixin', AnnotationsEntityTestSuiteMixin)
+AnnotationsEntityTestSuiteMixin = Object.assign({}, EntityTestSuiteMixin, AnnotationsEntityTestSuiteMixin);
+
+export { AnnotationsEntityTestSuiteMixin };
+export default () => {};

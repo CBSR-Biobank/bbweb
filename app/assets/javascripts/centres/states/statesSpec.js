@@ -4,9 +4,10 @@
  */
 /* global angular */
 
+import { StateTestSuiteMixin } from 'test/mixins/StateTestSuiteMixin';
 import ngModule from '../../app'  // the whole appliction has to be loaded for these states
 
-describe('centre states', function() {
+fdescribe('centre states', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test', function ($qProvider) {
@@ -14,7 +15,7 @@ describe('centre states', function() {
       $qProvider.errorOnUnhandledRejections(false);
     })
 
-    angular.mock.inject(function(StateTestSuiteMixin) {
+    angular.mock.inject(function () {
       Object.assign(this, StateTestSuiteMixin)
 
       this.injectDependencies('$q',

@@ -1,5 +1,7 @@
 /**
- * Jasmine shared behaviour
+ * Jasmine shared behaviour.
+ *
+ * @namespace test.behaviours.annotationSharedBehaviour
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -9,7 +11,36 @@
 import _ from 'lodash';
 
 /**
+ * Context object to share information between the test suite and this shared behaviour.
  *
+ * @typedef test.behaviours.annotationSharedBehaviour.Context
+ * @type object
+ *
+ * @param {class} classType - the class of annotation being tested.
+ *
+ * @param {function} annotationTypeJson - a function that returns a plain object containing {@link
+ * domain.annotations.AnnotationType AnnotationType} information.
+ *
+ * @param {function} annotationJson - a function that returns a plain object containing {@link
+ * domain.annotations.Annotation Annotation} information.
+ *
+ * @param {function} createAannotation - a function that returns an object derived from {@link
+ * domain.annotations.Annotation Annotation}.
+ *
+ * @see domain.annotations.DateTimeAnnotation
+ * @see domain.annotations.MultipleSelectAnnotation
+ * @see domain.annotations.NumberAnnotation
+ * @see domain.annotations.SingleSelectAnnotation
+ * @see domain.annotations.TextAnnotation
+ */
+
+/**
+ * Common behaviour for test suites that test {@link domain.annotations.Annotation Annotations}.
+ *
+ * @function annotationSharedBehaviour
+ * @memberOf test.behaviours.annotationSharedBehaviour
+ *
+ * @param {test.behaviours.annotationSharedBehaviour.Context} context
  */
 export default function annotationSharedBehaviour(context) {
 

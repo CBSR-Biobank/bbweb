@@ -1,22 +1,37 @@
 /**
- * Jasmine shared behaviour
+ * Jasmine shared behaviour.
+ *
+ * @namespace test.behaviours.annotationTypeAddComponentSharedBehaviour
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
 /**
+ * Context object to share information between the test suite and this shared behaviour.
  *
- * @param {function } context.createController is a function that creates the controller and scope:
- * this.controller, and this.scope.
+ * @typedef test.behaviours.annotationTypeAddComponentSharedBehaviour.Context
+ * @type object
  *
- * @param {object} context.entity is the domain entity to which the annotation type will be added to.
+ * @param {function } createController is a function that creates the component's controller and scope.
  *
- * @param {string} context.addAnnotationTypeFuncName is the name of the function on context.entity which
+ * @param {class} entity is the domain entity to which the annotation type will be added to.
+ *
+ * @param {string} addAnnotationTypeFuncName is the name of the function on entity which
  * adds the annotation type.
  *
- * @param {string} context.returnState the state to return after a successful add or when cancel is pressed.
- *
- * NOTE: requires that the test suite be extended with TestSuiteMixin.
+ * @param {string} returnState the state to return after a successful add or when cancel is pressed.
  */
-export default function annotationTypeAddComponentSharedSpec(context) {
+
+/**
+ * Common behaviour for test suites that test {@link domain.annotations.Annotation Annotations}.
+ *
+ * @function annotationTypeAddComponentSharedBehaviour
+ * @memberOf test.behaviours.annotationTypeAddComponentSharedBehaviour
+ *
+ * @param {test.behaviours.annotationTypeAddComponentSharedBehaviour.Context} context
+ */
+export default function annotationTypeAddComponentSharedBehaviour(context) {
 
   describe('(shared) tests', function() {
 

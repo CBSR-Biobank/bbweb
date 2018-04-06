@@ -7,7 +7,7 @@
 /* global angular */
 
 import _ from 'lodash';
-import annotationsSharedSpec from '../../../test/behaviours/entityWithAnnotationsSharedSpec';
+import annotationsSharedBehaviour from '../../../test/behaviours/entityWithAnnotationsSharedBehaviour';
 import ngModule from '../../index'
 
 describe('CollectionEvent', function() {
@@ -542,7 +542,7 @@ describe('CollectionEvent', function() {
       context.response       = jsonCevent;
     });
 
-    annotationsSharedSpec(context);
+    annotationsSharedBehaviour(context);
 
   });
 

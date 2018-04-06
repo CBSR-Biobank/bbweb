@@ -4,8 +4,8 @@
 /* global angular */
 
 import _ from 'lodash';
-import annotationTypeAddComponentSharedSpec from '../../../../../test/behaviours/annotationTypeAddComponentSharedSpec';
 import ngModule from '../../index'
+import sharedBehaviour from '../../../../../test/behaviours/annotationTypeAddComponentSharedBehaviour';
 
 describe('Component: collectionEventAnnotationTypeAdd', function() {
 
@@ -55,7 +55,7 @@ describe('Component: collectionEventAnnotationTypeAdd', function() {
       context.returnState               = 'home.admin.studies.study.collection.ceventType';
     });
 
-    annotationTypeAddComponentSharedSpec(context);
+    sharedBehaviour(context);
   });
 
 });

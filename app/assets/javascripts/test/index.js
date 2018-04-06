@@ -15,8 +15,13 @@ import angular from 'angular';
  */
 
 /**
- * AngularJS services used in testing.
- * @namespace test.services
+ * Behaviours sahred by test suites.
+ * @namespace test.behaviours
+ */
+
+/**
+ * Jasmine matchers used in test suites.
+ * @namespace test.matchers
  */
 
 /**
@@ -25,11 +30,16 @@ import angular from 'angular';
  */
 
 /**
+ * AngularJS services used in testing.
+ * @namespace test.services
+ */
+
+/**
  * A Webpack module for the Biobank AngularJS *test* layer.
  *
  * @memberOf test
  */
-const ngModule = angular.module('biobank.test', [])
+const ngTestModule = angular.module('biobank.test', [])
 
 const contextList = [
   require.context('./mixins', true, /\.js$/),
@@ -41,7 +51,7 @@ contextList
     deps.concat(context.keys().map(context))
   ), [])
   .forEach(dep => {
-    dep.default(ngModule)
+    dep.default(ngTestModule)
   })
 
-export default ngModule.name
+export default ngTestModule.name
