@@ -86,10 +86,9 @@ describe('Membership', function() {
                               'Membership',
                               'EntitySet',
                               'EntityInfo',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
-      this.TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
 
       // used by promise tests
       this.expectMembership = (entity) => {

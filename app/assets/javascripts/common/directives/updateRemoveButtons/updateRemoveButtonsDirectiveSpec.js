@@ -13,12 +13,12 @@ import ngModule from '../../index'
 describe('Directive: updateRemoveButtons', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (TestUtils) {
+    angular.mock.inject(function () {
       Object.assign(this, DirectiveTestSuiteMixin);
 
       this.injectDependencies('$rootScope', '$compile');
 
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
 
       this.createController = (options) => {
         options = options || {};

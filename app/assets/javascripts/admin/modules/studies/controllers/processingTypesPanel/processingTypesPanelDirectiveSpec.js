@@ -19,12 +19,12 @@ xdescribe('Directive: processingTypesPanelDirective', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (TestUtils) {
+    angular.mock.inject(function () {
       Object.assign(this, TestSuiteMixin);
 
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
     });
   });
 

@@ -17,10 +17,9 @@ describe('EntitySet', function() {
 
       this.injectDependencies('$rootScope',
                               'EntitySet',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
-      this.TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
       this.createEntitySetFrom = (obj) => new this.EntitySet(obj);
       this.createEntitySet = () => new this.EntitySet(this.Factory.entitySet());
 

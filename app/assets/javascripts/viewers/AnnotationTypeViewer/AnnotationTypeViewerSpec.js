@@ -22,8 +22,7 @@ xdescribe('AnnotationTypeViewer', function() {
                               'AnnotationType',
                               'AnnotationValueType',
                               'AnnotationTypeViewer',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
       this.study = new this.Study(this.Factory.study());
 
@@ -41,7 +40,7 @@ xdescribe('AnnotationTypeViewer', function() {
     var self = this,
         count = 0;
 
-    spyOn(self.$uibModal, 'open').and.returnValue(this.TestUtils.fakeModal());
+    spyOn(self.$uibModal, 'open').and.returnValue(this.fakeModal());
 
     this.annotatationTypeOptions.forEach((options) => {
       // jshint unused:false

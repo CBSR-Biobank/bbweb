@@ -24,13 +24,12 @@ describe('CollectionEventType', function() {
                               '$httpBackend',
                               'Study',
                               'CollectionEventType',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
       this.jsonCet   = this.Factory.collectionEventType();
       this.jsonStudy = this.Factory.defaultStudy();
 
-      this.TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
       CollectionEventType = this.CollectionEventType;
 
       // used by promise tests

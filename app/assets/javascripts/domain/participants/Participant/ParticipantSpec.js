@@ -35,10 +35,9 @@ describe('Participant', function() {
                               'TextAnnotation',
                               'AnnotationValueType',
                               'AnnotationType',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
-      this.TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
 
       this.getParticipantEntities = (isNew) => {
         var jsonAnnotationTypes = this.Factory.allAnnotationTypes(),

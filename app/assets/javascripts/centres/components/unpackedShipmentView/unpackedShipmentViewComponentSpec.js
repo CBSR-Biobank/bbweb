@@ -12,7 +12,7 @@ describe('unpackedShipmentViewComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
       var self = this;
 
       Object.assign(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
@@ -36,7 +36,7 @@ describe('unpackedShipmentViewComponent', function() {
           'unpackedShipmentView');
       };
 
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
     });
   });
 

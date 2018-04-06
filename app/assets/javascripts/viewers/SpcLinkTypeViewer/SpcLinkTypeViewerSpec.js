@@ -10,18 +10,16 @@ const ngModule = 'FIXME'
 
 xdescribe('SpcLinkTypeViewer', function() {
 
-  var SpcLinkTypeViewer, SpecimenLinkType, Factory, TestUtils;
+  var SpcLinkTypeViewer, SpecimenLinkType, Factory;
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(_SpcLinkTypeViewer_,
                                  _SpecimenLinkType_,
-                                 _TestUtils_,
                                  _Factory_) {
       SpcLinkTypeViewer = _SpcLinkTypeViewer_;
       SpecimenLinkType  = _SpecimenLinkType_;
       Factory           = _Factory_;
-      TestUtils         = _TestUtils_;
     });
   });
 
@@ -68,7 +66,7 @@ xdescribe('SpcLinkTypeViewer', function() {
         viewer;                                 // eslint-disable-line no-unused-vars
 
     spyOn(modal, 'open').and.callFake(function () {
-      return TestUtils.fakeModal();
+      return this.fakeModal();
     });
 
     // jshint unused:false

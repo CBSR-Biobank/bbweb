@@ -11,7 +11,7 @@ describe('annotationTypeUpdateModalService', function() {
 
   beforeEach(() => {
     angular.mock.module('ngAnimateMock', ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
       Object.assign(this, ModalTestSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
@@ -23,7 +23,7 @@ describe('annotationTypeUpdateModalService', function() {
                               'Factory');
 
       this.addModalMatchers();
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
 
       this.openModal = (annotationType) => {
         this.modal = this.annotationTypeUpdateModal.openModal(annotationType);

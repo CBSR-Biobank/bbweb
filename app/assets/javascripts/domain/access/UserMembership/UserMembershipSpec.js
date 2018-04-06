@@ -76,10 +76,9 @@ describe('UserMembership', function() {
       this.injectDependencies('$rootScope',
                               'UserMembership',
                               'EntitySet',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
-      this.TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
     });
   });
 

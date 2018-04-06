@@ -12,7 +12,7 @@ describe('shipmentViewPackedComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
       Object.assign(this, ShippingComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
@@ -26,7 +26,7 @@ describe('shipmentViewPackedComponent', function() {
                               'notificationsService',
                               'modalService',
                               'Factory');
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
       this.createController = (shipment) =>
         ShippingComponentTestSuiteMixin.createController.call(
           this,

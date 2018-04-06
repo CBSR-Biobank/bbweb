@@ -14,7 +14,7 @@ describe('Component: centreStudiesPanel', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
       Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
@@ -27,7 +27,7 @@ describe('Component: centreStudiesPanel', function() {
                               'modalService',
                               'Factory');
 
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
 
       this.createScope = (scopeVars) => {
         var scope = ComponentTestSuiteMixin.createScope.call(this, scopeVars);

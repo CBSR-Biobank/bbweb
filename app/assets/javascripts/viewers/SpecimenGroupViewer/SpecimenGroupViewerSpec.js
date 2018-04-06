@@ -10,16 +10,14 @@ const ngModule = 'FIXME'
 
 xdescribe('SpecimenGroupViewer', function() {
 
-  var SpecimenGroupViewer, Factory, TestUtils;
+  var SpecimenGroupViewer, Factory;
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(_SpecimenGroupViewer_,
-                                 _TestUtils_,
                                  _Factory_) {
       SpecimenGroupViewer = _SpecimenGroupViewer_;
       Factory   = _Factory_;
-      TestUtils = _TestUtils_;
     });
   });
 
@@ -30,7 +28,7 @@ xdescribe('SpecimenGroupViewer', function() {
         viewer;                                 // eslint-disable-line no-unused-vars
 
     spyOn(modal, 'open').and.callFake(function () {
-      return TestUtils.fakeModal();
+      return this.fakeModal();
     });
 
     // jshint unused:false

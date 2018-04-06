@@ -21,7 +21,6 @@ describe('Centre', function() {
                               'Centre',
                               'CentreState',
                               'Location',
-                              'TestUtils',
                               'Factory');
 
       // used by promise tests

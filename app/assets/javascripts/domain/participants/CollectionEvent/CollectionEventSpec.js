@@ -18,8 +18,7 @@ describe('CollectionEvent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(
-                                 TestUtils) {
+    angular.mock.inject(function() {
       Object.assign(this,
                     AnnotationsEntityTestSuiteMixin,
                     ServerReplyMixin);
@@ -34,10 +33,9 @@ describe('CollectionEvent', function() {
                               'AnnotationValueType',
                               'AnnotationType',
                               'annotationFactory',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
 
       this.jsonStudy = this.Factory.study();
       this.jsonCet = this.Factory.collectionEventType();

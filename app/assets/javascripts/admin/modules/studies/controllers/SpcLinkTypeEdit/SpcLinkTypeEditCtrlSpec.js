@@ -17,12 +17,12 @@ xdescribe('Controller: SpcLinkTypeEditCtrl', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
       createEntities   = setupEntities(this.$injector);
       createController = setupController(this.$injector);
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
       factory     = this.$injector.get('Factory');
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
     });
   });
 

@@ -43,7 +43,7 @@ xdescribe('Controller: SpecimenGroupEditCtrl', function() {
 
     describe('(shared)', function() {
 
-      beforeEach(angular.inject(function(TestUtils) {
+      beforeEach(function() {
         this.createEntities   = setupEntities(this);
         this.createController = setupController(this);
         this.context          = context;
@@ -53,8 +53,8 @@ xdescribe('Controller: SpecimenGroupEditCtrl', function() {
         this.PreservationTemperature = this.$injector.get('PreservationTemperature');
         this.SpecimenType                = this.$injector.get('SpecimenType');
 
-        TestUtils.addCustomMatchers();
-      }));
+        this.addCustomMatchers();
+      });
 
       function setupEntities(userContext) {
         var Study         = userContext.$injector.get('Study'),

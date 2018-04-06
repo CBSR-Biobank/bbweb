@@ -17,10 +17,9 @@ describe('EntityInfo', function() {
 
       this.injectDependencies('$rootScope',
                               'EntityInfo',
-                              'Factory',
-                              'TestUtils')
+                              'Factory')
 
-      this.TestUtils.addCustomMatchers()
+      this.addCustomMatchers()
       this.createEntityInfoFrom = (obj) => new this.EntityInfo(obj)
       this.createEntityInfo = () => this.EntityInfo.ceate(this.Factory.entityInfo())
     })

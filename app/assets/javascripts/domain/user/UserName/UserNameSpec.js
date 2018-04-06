@@ -25,7 +25,7 @@ describe('UserName', function() {
                               'UserState',
                               'Factory');
 
-      //this.TestUtils.addCustomMatchers();
+      //this.addCustomMatchers();
       this.jsonUserName = this.Factory.userNameDto();
 
       this.expectUser = (entity) => {

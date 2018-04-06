@@ -23,7 +23,7 @@ describe('StudyName', function() {
                               'StudyState',
                               'Factory');
 
-      //this.TestUtils.addCustomMatchers();
+      //this.addCustomMatchers();
       this.jsonStudyName = this.Factory.studyNameDto();
 
       // used by promise tests

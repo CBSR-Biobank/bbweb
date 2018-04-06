@@ -15,7 +15,7 @@ describe('Specimen', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
 
       Object.assign(this,
                     AnnotationsEntityTestSuiteMixin,
@@ -27,10 +27,9 @@ describe('Specimen', function() {
                               'CollectionEventType',
                               'CollectionEvent',
                               'Specimen',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
       this.jsonSpecimen = this.Factory.specimen();
 
       // used by promise tests

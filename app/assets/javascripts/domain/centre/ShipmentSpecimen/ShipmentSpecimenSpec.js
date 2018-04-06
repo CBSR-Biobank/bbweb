@@ -20,7 +20,6 @@ describe('ShipmentSpecimen domain object:', function() {
                               '$httpParamSerializer',
                               'ShipmentSpecimen',
                               'ShipmentItemState',
-                              'TestUtils',
                               'Factory');
       // used by promise tests
       this.expectShipmentSpecimen = (entity) => {

@@ -11,14 +11,14 @@ describe('Component: specimenTableAction', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
       Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
                               'Factory');
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
 
       this.createController = (action, onActionSelected) => {
         ComponentTestSuiteMixin.createController.call(

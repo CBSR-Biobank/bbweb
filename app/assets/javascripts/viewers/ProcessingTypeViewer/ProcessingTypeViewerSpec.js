@@ -12,16 +12,14 @@ const ngModule = 'FIXME'
 
 xdescribe('ProcessingTypeViewer', function() {
 
-  var ProcessingTypeViewer, Factory, TestUtils;
+  var ProcessingTypeViewer, Factory;
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function(_ProcessingTypeViewer_,
-                                 _Factory_,
-                                 _TestUtils_) {
+                                 _Factory_) {
       ProcessingTypeViewer = _ProcessingTypeViewer_;
       Factory   = _Factory_;
-      TestUtils = _TestUtils_;
     });
   });
 
@@ -32,7 +30,7 @@ xdescribe('ProcessingTypeViewer', function() {
         viewer;              // eslint-disable-line no-unused-vars
 
     spyOn(modal, 'open').and.callFake(function () {
-      return TestUtils.fakeModal();
+      return this.fakeModal();
     });
 
     // jshint unused:false

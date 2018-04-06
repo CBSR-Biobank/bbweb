@@ -13,7 +13,7 @@ describe('Annotation', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
       Object.assign(this, AnnotationsEntityTestSuiteMixin);
       this.injectDependencies('Study',
                               'AnnotationType',
@@ -21,7 +21,7 @@ describe('Annotation', function() {
                               'Annotation',
                               'Factory');
 
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
 
       this.createAnnotationType =
         (options = {}) => this.AnnotationType.create(this.Factory.annotationType(options));

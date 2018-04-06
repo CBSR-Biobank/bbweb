@@ -7,11 +7,11 @@
 /* global angular */
 
 import { ModalTestSuiteMixin } from 'test/mixins/ModalTestSuiteMixin';
-import _                  from 'lodash';
-import faker              from 'faker';
-import modalInputMatchers from 'test/matchers/modalInputMatchers';
-import moment             from 'moment';
-import ngModule           from '../../index'  // need filters from common module for this test suite
+import _                       from 'lodash';
+import faker                   from 'faker';
+import modalInputMatchers      from 'test/matchers/modalInputMatchers';
+import moment                  from 'moment';
+import ngModule                from '../../index'  // need filters from common module for this test suite
 
 describe('modalInputModule', function() {
 

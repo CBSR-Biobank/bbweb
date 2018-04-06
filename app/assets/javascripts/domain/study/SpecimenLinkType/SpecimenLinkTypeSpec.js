@@ -18,12 +18,12 @@ xdescribe('SpecimenLinkType', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestUtils) {
+    angular.mock.inject(function() {
       Object.assign(this, ServerReplyMixin);
       httpBackend      = this.$injector.get('$httpBackend');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
       factory          = this.$injector.get('Factory');
-      TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
     });
   });
 

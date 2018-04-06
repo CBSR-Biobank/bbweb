@@ -19,10 +19,9 @@ describe('Study', function() {
                               '$httpParamSerializer',
                               'Study',
                               'StudyState',
-                              'Factory',
-                              'TestUtils');
+                              'Factory');
 
-      this.TestUtils.addCustomMatchers();
+      this.addCustomMatchers();
       this.jsonStudy = this.Factory.study();
 
       // used by promise tests
