@@ -30,7 +30,7 @@ const STRING_SYMBOL                     = Symbol('string'),
 
 const defaultEntities = new Map();
 
-/**
+/*
  * Generates a unique name for a domain entity type. If domain entity type is undefined, then a unique
  * string is generated.
  *
@@ -95,11 +95,13 @@ function entityNameAndStateDto(createFunc, options = {}) {
   return _.pick(c, ['id', 'slug', 'name', 'state']);
 }
 
-/*
- * Generates JSON domain entities as if returned by the server.
+/**
+ * Generates plain objects for {@link domain|Domain Entities} simulating what is returned by the server.
  *
  * This has to be an AngularJS service so that it's dependencies from the real application
- * can be injected (i.e. AnnotationValueType).
+ * can be injected.
+ *
+ * @memberOf test.services
  */
 class Factory {
 
@@ -298,6 +300,9 @@ class Factory {
     return s;
   }
 
+  /**
+   * Returns the last {@link domain.studies.Study Study} plain object created by this factory.
+   */
   defaultStudy() {
     return this.defaultEntity(ENTITY_NAME_STUDY, this.study);
   }
@@ -331,8 +336,8 @@ class Factory {
   }
 
   /**
-   * If this.defaultStudy has annotation types, then participant will have annotations based on the study's,
-   * unless options.annotationTypes is defined.
+   * If {@link test.services.Factory#defaultStudy defaultStudy} has annotation types, then participant will
+   * have annotations based on the study's, unless options.annotationTypes is defined.
    */
   participant(options = {}) {
     var study = this.defaultStudy(),
