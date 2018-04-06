@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -17,8 +18,8 @@ xdescribe('SpecimenLinkType', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ServerReplyMixin, TestUtils) {
-      _.extend(this, ServerReplyMixin);
+    angular.mock.inject(function(TestUtils) {
+      Object.assign(this, ServerReplyMixin);
       httpBackend      = this.$injector.get('$httpBackend');
       SpecimenLinkType = this.$injector.get('SpecimenLinkType');
       factory          = this.$injector.get('Factory');
@@ -65,7 +66,7 @@ xdescribe('SpecimenLinkType', function() {
       studySpecimenGroups: entities.specimenGroups,
       studyAnnotationTypes: entities.annotationTypes
     });
-    return _.extend(entities, { slt: slt });
+    return Object.assign(entities, { slt: slt });
   }
 
   it('constructor with no parameters has default values', function() {
@@ -209,7 +210,7 @@ xdescribe('SpecimenLinkType', function() {
      });
 
   // function sltToAddCommand(slt) {
-  //   var cmd =  _.extend(_.pick(slt,
+  //   var cmd =  Object.assign(_.pick(slt,
   //                              'processingTypeId',
   //                              'expectedInputChange',
   //                              'expectedOutputChange',
@@ -225,7 +226,7 @@ xdescribe('SpecimenLinkType', function() {
   // }
 
   // function sltToUpdateCommand(ceventType) {
-  //   return _.extend(sltToAddCommand(ceventType), {
+  //   return Object.assign(sltToAddCommand(ceventType), {
   //     id: ceventType.id,
   //     expectedVersion: ceventType.version
   //   });

@@ -140,7 +140,7 @@ function ParticipantFactory($q,
      * Sets the collection event type after an update.
      */
     update(path, reqJson) {
-      return ConcurrencySafeEntity.prototype.update.call(this, Participant.url(path, this.id), reqJson)
+      return super.update(Participant.url(path, this.id), reqJson)
         .then(Participant.asyncCreate)
         .then(updatedParticipant => {
           if (this.study) {

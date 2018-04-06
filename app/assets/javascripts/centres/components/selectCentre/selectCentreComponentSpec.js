@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -15,8 +16,8 @@ describe('selectCentreComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
       this.createController = (options) => {
@@ -29,7 +30,7 @@ describe('selectCentreComponent', function() {
                           message-no-results="No results match the criteria."
                           icon="glyphicon-ok-circle">
            </select-centre>`,
-          _.extend({ panelHeader:  panelHeader }, options),
+          Object.assign({ panelHeader:  panelHeader }, options),
           'selectCentre');
       };
 

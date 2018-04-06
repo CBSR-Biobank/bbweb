@@ -3,30 +3,42 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import angular from 'angular';
 
 /**
  * This is a mixin that can be added UserContext object of a Jasmine test suite.
  *
- * @return {object} Object containing the functions that will be mixed in.
+ * @exports test.mixins.ComponentTestSuiteMixin
  */
-/* @ngInject */
-function ComponentTestSuiteMixin(TestSuiteMixin, $rootScope, $compile) {
+let ComponentTestSuiteMixin = {
 
-  return Object.assign({ createScope, createController }, TestSuiteMixin);
+  /**
+   * Used to inject AngularJS dependencies into the test suite.
+   *
+   * Also injects dependencies required by this mixin.
+   *
+   * @param {...string} dependencies - the AngularJS dependencies to inject.
+   *
+   * @return {undefined}
+   */
+  injectDependencies: function (...dependencies) {
+    const allDependencies = dependencies.concat([ '$rootScope', '$compile' ]);
+    TestSuiteMixin.injectDependencies.call(this, ...allDependencies);
+  },
 
-  function createScope(scopeVars) {
-    var scope = $rootScope.$new();
+  createScope: function (scopeVars) {
+    var scope = this.$rootScope.$new();
     if (scopeVars) {
       scope.vm = scopeVars;
     }
     return scope;
-  }
+  },
 
-  function createController(htmlElement, scopeVars, controllerName) {
+  createController: function (htmlElement, scopeVars, controllerName) {
     this.element = angular.element(htmlElement);
     this.scope = this.createScope(scopeVars);
-    $compile(this.element)(this.scope);
+    this.$compile(this.element)(this.scope);
     this.scope.$digest();
     if (controllerName) {
       this.controller = this.element.controller(controllerName);
@@ -35,4 +47,9 @@ function ComponentTestSuiteMixin(TestSuiteMixin, $rootScope, $compile) {
 
 }
 
-export default ngModule => ngModule.service('ComponentTestSuiteMixin', ComponentTestSuiteMixin)
+ComponentTestSuiteMixin = Object.assign({},
+                                        TestSuiteMixin,
+                                        ComponentTestSuiteMixin);
+
+export { ComponentTestSuiteMixin };
+export default () => {};

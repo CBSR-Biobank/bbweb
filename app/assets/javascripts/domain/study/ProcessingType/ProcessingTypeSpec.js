@@ -20,7 +20,7 @@ xdescribe('ProcessingType', function() {
     angular.mock.inject(function($httpBackend,
                                  _ProcessingType_,
                                  ServerReplyMixin) {
-      _.extend(this, ServerReplyMixin);
+      Object.assign(this, ServerReplyMixin);
       httpBackend    = $httpBackend;
       ProcessingType = _ProcessingType_;
     });
@@ -132,7 +132,7 @@ xdescribe('ProcessingType', function() {
   // }
 
   // function processingTypeToUpdateCommand(processingType) {
-  //   return _.extend(processingTypeToAddCommand(processingType), {
+  //   return Object.assign(processingTypeToAddCommand(processingType), {
   //     id: processingType.id,
   //     expectedVersion: processingType.version
   //   });

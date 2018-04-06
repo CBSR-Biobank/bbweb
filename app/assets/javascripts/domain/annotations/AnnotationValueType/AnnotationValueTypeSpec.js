@@ -6,7 +6,6 @@
  */
 /* global angular */
 
-import _ from 'lodash';
 import ngModule from '../../index'
 
 describe('AnnotationValueType', function() {
@@ -19,7 +18,7 @@ describe('AnnotationValueType', function() {
   });
 
   it('should have values', function () {
-    expect(_.keys(this.AnnotationValueType)).not.toBeEmptyArray();
+    expect(Object.keys(this.AnnotationValueType)).not.toBeEmptyArray();
   });
 
 });

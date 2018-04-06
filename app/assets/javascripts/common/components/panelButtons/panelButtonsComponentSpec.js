@@ -6,7 +6,7 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
 import ngModule from '../../index'
 
 /**
@@ -16,8 +16,8 @@ describe('Component: panelButtons', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (DirectiveTestSuiteMixin) {
-      _.extend(this, DirectiveTestSuiteMixin);
+    angular.mock.inject(function () {
+      Object.assign(this, DirectiveTestSuiteMixin);
 
       this.injectDependencies('$rootScope', '$compile');
 

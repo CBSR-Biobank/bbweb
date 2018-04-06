@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -17,8 +18,8 @@ xdescribe('ProcessingDto', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ServerReplyMixin, TestUtils) {
-      _.extend(this, ServerReplyMixin);
+    angular.mock.inject(function(TestUtils) {
+      Object.assign(this, ServerReplyMixin);
 
       httpBackend   = this.$injector.get('$httpBackend');
       ProcessingDto = this.$injector.get('ProcessingDto');
@@ -40,7 +41,7 @@ xdescribe('ProcessingDto', function() {
       entities.study = factory.study();
       entities.processingTypes = _.range(2).map(() => factory.processingType(entities.study));
       entities.specimenGroups  = _.range(2).map(() => factory.specimenGroup(entities.study));
-      entities.specimenLinkAnnotationTypes = _.values(AnnotationValueType)
+      entities.specimenLinkAnnotationTypes = Object.values(AnnotationValueType)
         .map((valueType) => factory.studyAnnotationType(entities.study, {
           valueType: valueType
         }));

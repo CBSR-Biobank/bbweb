@@ -4,18 +4,19 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/entityNameAndStateSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/entityNameAndStateSharedBehaviour';
 
 describe('UserName', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin,
-                                 ServerReplyMixin) {
+    angular.mock.inject(function() {
 
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
@@ -65,7 +66,7 @@ describe('UserName', function() {
 
   it('state predicates return valid results', function() {
     var self = this;
-    _.values(self.UserState).forEach((state) => {
+    Object.values(self.UserState).forEach((state) => {
       var userName = self.UserName.create(self.Factory.userNameDto({ state: state }));
       expect(userName.isRegistered()).toBe(state === self.UserState.REGISTERED);
       expect(userName.isActive()).toBe(state === self.UserState.ACTIVE);

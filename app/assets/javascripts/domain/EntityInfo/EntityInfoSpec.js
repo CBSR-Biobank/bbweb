@@ -4,6 +4,7 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
 import _ from 'lodash'
 import ngModule from '../index'
 
@@ -11,8 +12,8 @@ describe('EntityInfo', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(EntityTestSuiteMixin) {
-      _.extend(this, EntityTestSuiteMixin)
+    angular.mock.inject(function() {
+      Object.assign(this, EntityTestSuiteMixin)
 
       this.injectDependencies('$rootScope',
                               'EntityInfo',
@@ -45,13 +46,13 @@ describe('EntityInfo', function() {
         { id: 1 },
         { name: 1 }
       ]
-      this.invalidFieldsTest(invalidFields,
+      this.invalidPropertiesTest(invalidFields,
                              invalidField => Object.assign(this.Factory.entityInfo(), invalidField),
                              this.EntityInfo.create)
     })
 
     it('fails when required fields are missing', function() {
-      this.missingFieldsTest(this.EntityInfo.schema().required,
+      this.missingPropertiesTest(this.EntityInfo.schema().required,
                              (requiredField) => _.omit(this.Factory.entityInfo(), requiredField),
                              this.EntityInfo.create)
     })
@@ -74,7 +75,7 @@ describe('EntityInfo', function() {
     })
 
     it('fails when required fields are missing', function() {
-      this.missingFieldsTestAsync(this.EntityInfo.schema().required,
+      this.missingPropertiesTestAsync(this.EntityInfo.schema().required,
                                   (requiredField) => _.omit(this.Factory.entityInfo(), requiredField),
                                   this.EntityInfo.asyncCreate)
       this.$rootScope.$digest()

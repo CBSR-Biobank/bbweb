@@ -6,7 +6,6 @@
  */
 /* global angular */
 
-import _ from 'lodash';
 import ngModule from '../index'
 
 describe('PreservationTemperature', function() {
@@ -19,7 +18,7 @@ describe('PreservationTemperature', function() {
   });
 
   it('should have values', function () {
-    expect(_.keys(this.PreservationTemperature)).not.toBeEmptyArray();
+    expect(Object.keys(this.PreservationTemperature)).not.toBeEmptyArray();
   });
 
 });

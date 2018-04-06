@@ -7,8 +7,6 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 /* @ngInject */
 function ShippingHomeController($state,
                                 gettextCatalog,
@@ -41,7 +39,7 @@ function ShippingHomeController($state,
   }
 
   function updateCentres(options) {
-    var optCopy = _.extend({}, options);
+    var optCopy = Object.assign({}, options);
     if (optCopy.filter !== '') {
       optCopy.filter += ';';
     }

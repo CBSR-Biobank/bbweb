@@ -6,7 +6,6 @@
  */
 /* global angular */
 
-import _ from 'lodash';
 import ngModule from '../../index'
 
 describe('UserState', function() {
@@ -19,7 +18,7 @@ describe('UserState', function() {
   });
 
   it('should have values', function () {
-    expect(_.keys(this.UserState)).not.toBeEmptyArray();
+    expect(Object.keys(this.UserState)).not.toBeEmptyArray();
   });
 
 });

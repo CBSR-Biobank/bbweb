@@ -4,14 +4,16 @@
  */
 /* global angular */
 
-import * as sharedBehaviour from '../../../test/behaviours/entityInfoSharedBehaviour'
-import ngModule from '../../index'
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
+import { entityInfoListSharedBehaviour } from 'test/behaviours/entityInfoSharedBehaviour';
+import ngModule from '../../index';
 
 describe('accessItemNameFactory', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
+    angular.mock.inject(function() {
       Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin)
 
       this.injectDependencies('$httpBackend',
@@ -48,7 +50,7 @@ describe('accessItemNameFactory', function() {
       context.listFunc = (options) => this.accessItemNameFactory.list(options)
     })
 
-    sharedBehaviour.entityInfoListSharedBehaviour(context)
+    entityInfoListSharedBehaviour(context)
 
   })
 

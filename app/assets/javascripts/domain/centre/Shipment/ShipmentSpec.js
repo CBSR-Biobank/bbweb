@@ -4,6 +4,8 @@
  */
 /* global angular, inject */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _      from 'lodash';
 import faker  from 'faker';
 import moment from 'moment';
@@ -16,8 +18,8 @@ describe('Shipment domain object:', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (ServerReplyMixin, EntityTestSuiteMixin) {
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function () {
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
@@ -206,7 +208,7 @@ describe('Shipment domain object:', function() {
     it('can add a shipment', function() {
       var jsonShipment = this.Factory.shipment(),
           shipment = new this.Shipment(_.omit(jsonShipment, 'id')),
-          json = _.extend(_.pick(shipment, 'courierName', 'trackingNumber'),
+          json = Object.assign(_.pick(shipment, 'courierName', 'trackingNumber'),
                           {
                             fromLocationId: shipment.fromLocationInfo.locationId,
                             toLocationId:   shipment.toLocationInfo.locationId
@@ -621,7 +623,7 @@ describe('Shipment domain object:', function() {
 
         if (context.stateChangeTime) {
           updateParams.push(context.stateChangeTime);
-          json = _.extend(json, { datetime: context.stateChangeTime });
+          json = Object.assign(json, { datetime: context.stateChangeTime });
         }
 
         this.updateEntity(shipment,

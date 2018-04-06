@@ -4,6 +4,7 @@
  */
 /* global angular */
 
+import { StateTestSuiteMixin } from 'test/mixins/StateTestSuiteMixin';
 import ngModule from '../../../../app'  // the whole appliction has to be loaded for these states
 
 describe('study admin collection states', function() {
@@ -14,7 +15,7 @@ describe('study admin collection states', function() {
       $qProvider.errorOnUnhandledRejections(false);
     })
 
-    angular.mock.inject(function(StateTestSuiteMixin) {
+    angular.mock.inject(function() {
       Object.assign(this, StateTestSuiteMixin)
 
       this.injectDependencies('$q',

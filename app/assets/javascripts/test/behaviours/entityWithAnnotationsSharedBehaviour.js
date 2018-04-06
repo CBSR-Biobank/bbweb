@@ -61,7 +61,7 @@ define(['lodash'], function (_) {
       });
 
       it('fails when removing an invalid annotation', function () {
-        var annotation = _.extend({}, context.annotation, { annotationTypeId: this.Factory.stringNext() });
+        var annotation = Object.assign({}, context.annotation, { annotationTypeId: this.Factory.stringNext() });
         context.entity[context.removeFuncName](annotation)
           .catch(function (err) {
             expect(err).toStartWith('annotation with annotation type ID not present:');

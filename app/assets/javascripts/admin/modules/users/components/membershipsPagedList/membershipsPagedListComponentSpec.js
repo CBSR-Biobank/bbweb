@@ -4,16 +4,17 @@
  */
 /* global angular */
 
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash'
 import ngModule from '../../index'
-import sharedBehaviour from '../../../../../test/behaviours/EntityPagedListSharedBehaviourSpec';
+import sharedBehaviour from 'test/behaviours/EntityPagedListSharedBehaviourSpec';
 
 describe('membershipsPagedListComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ComponentTestSuiteMixin);
       this.injectDependencies('$q',
                               'Membership',
                               'NameFilter',

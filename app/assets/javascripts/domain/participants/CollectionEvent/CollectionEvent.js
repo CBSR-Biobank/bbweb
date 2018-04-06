@@ -117,7 +117,7 @@ function CollectionEventFactory($q,
       }
 
       annotations = annotations || [];
-      _.extend(this, { annotations: annotations });
+      Object.assign(this, { annotations: annotations });
 
       if (collectionEventType) {
         this.setCollectionEventType(collectionEventType);

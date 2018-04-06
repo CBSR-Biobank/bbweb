@@ -7,8 +7,6 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 /*
  * Controller for this component.
  */
@@ -109,7 +107,7 @@ function CollectionSpecimenDescriptionViewController($state,
                       vm.specimenDescription.anatomicalSourceType,
                       {
                         required: true,
-                        selectOptions: _.values(AnatomicalSourceType)
+                        selectOptions: Object.values(AnatomicalSourceType)
                       }).result
       .then(function (selection) {
         vm.specimenDescription.anatomicalSourceType = selection;
@@ -123,7 +121,7 @@ function CollectionSpecimenDescriptionViewController($state,
                       vm.specimenDescription.preservationType,
                       {
                         required: true,
-                        selectOptions: _.values(PreservationType)
+                        selectOptions: Object.values(PreservationType)
                       }).result
       .then(function (selection) {
         vm.specimenDescription.preservationType = selection;
@@ -137,7 +135,7 @@ function CollectionSpecimenDescriptionViewController($state,
                       vm.specimenDescription.preservationTemperature,
                       {
                         required: true,
-                        selectOptions: _.values(PreservationTemperature)
+                        selectOptions: Object.values(PreservationTemperature)
                       }).result
       .then(function (selection) {
         vm.specimenDescription.preservationTemperature = selection;
@@ -151,7 +149,7 @@ function CollectionSpecimenDescriptionViewController($state,
                       vm.specimenDescription.specimenType,
                       {
                         required: true,
-                        selectOptions: _.values(SpecimenType)
+                        selectOptions: Object.values(SpecimenType)
                       }).result
       .then(function (selection) {
         vm.specimenDescription.specimenType = selection;

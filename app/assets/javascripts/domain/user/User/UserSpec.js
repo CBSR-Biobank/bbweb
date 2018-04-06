@@ -4,6 +4,8 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -11,8 +13,8 @@ describe('User', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               'User',
@@ -294,7 +296,7 @@ describe('User', function() {
   });
 
   it('state predicates are valid valid', function() {
-    _.values(this.UserState).forEach((state) => {
+    Object.values(this.UserState).forEach((state) => {
       const rawUser = this.Factory.user({ state: state }),
             user     = new this.User(rawUser);
 
@@ -367,7 +369,7 @@ describe('User', function() {
   });
 
   function registerCommand(user, password) {
-    return _.extend(_.pick(user, 'name', 'email', 'avatarUrl'), { password: password || '' });
+    return Object.assign(_.pick(user, 'name', 'email', 'avatarUrl'), { password: password || '' });
   }
 
   // used by promise tests

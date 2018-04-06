@@ -4,16 +4,16 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/labelServiceSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/labelServiceSharedBehaviour';
 
 describe('specimenStateLabelService', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin);
       this.injectDependencies('specimenStateLabelService',
                               'SpecimenState');
     });
@@ -24,11 +24,11 @@ describe('specimenStateLabelService', function() {
     beforeEach(function() {
       var self = this;
 
-      context.labels = _.values(this.SpecimenState);
+      context.labels = Object.values(this.SpecimenState);
       context.toLabelFunc =
         this.specimenStateLabelService.stateToLabelFunc.bind(this.specimenStateLabelService);
       context.expectedLabels = [];
-      _.values(this.SpecimenState).forEach(function (state) {
+      Object.values(this.SpecimenState).forEach(function (state) {
         context.expectedLabels[state] = self.capitalizeFirstLetter(state);
       });
     });

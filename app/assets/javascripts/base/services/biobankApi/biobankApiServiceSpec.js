@@ -6,15 +6,16 @@
  */
 /* global angular */
 
-import _        from 'lodash';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import ngModule from '../../index'
 
 describe('biobankApi service', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, TestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin, ServerReplyMixin);
       this.injectDependencies('$q', '$httpBackend', 'biobankApi');
     });
   });

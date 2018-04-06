@@ -6,7 +6,6 @@
  */
 /* global angular */
 
-import _ from 'lodash';
 import ngModule from '../../index'
 
 describe('SpecimenType', function() {
@@ -19,7 +18,7 @@ describe('SpecimenType', function() {
   });
 
   it('should have values', function () {
-    expect(_.keys(this.SpecimenType)).not.toBeEmptyArray();
+    expect(Object.keys(this.SpecimenType)).not.toBeEmptyArray();
   });
 
 });

@@ -21,7 +21,7 @@ describe('shippingHomeComponent', function() {
                               '$state',
                               'Centre',
                               'Factory');
-      this.injectDependencies(...TestSuiteMixin.dependencies());
+
       this.createController = () => {
         this.element = angular.element('<shipping-home><shipping-home>');
         this.scope = this.$rootScope.$new();

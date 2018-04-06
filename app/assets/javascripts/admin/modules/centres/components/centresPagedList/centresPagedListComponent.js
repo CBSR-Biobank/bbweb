@@ -6,8 +6,8 @@
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
+
 import { PagedListController } from '../../../../../common/controllers/PagedListController';
-import _ from 'lodash';
 
 /*
  * Controller for this component.
@@ -27,7 +27,7 @@ class Controller extends PagedListController {
               resourceErrorService) {
     'ngInject';
 
-    const stateData = _.values(CentreState).map((state) => ({
+    const stateData = Object.values(CentreState).map((state) => ({
       id: state,
       label: centreStateLabelService.stateToLabelFunc(state)
     }));
@@ -59,7 +59,7 @@ class Controller extends PagedListController {
                   });
 
     this.stateLabelFuncs = {};
-    _.values(this.CentreState).forEach((state) => {
+    Object.values(this.CentreState).forEach((state) => {
       this.stateLabelFuncs[state] = this.centreStateLabelService.stateToLabelFunc(state);
     });
   }

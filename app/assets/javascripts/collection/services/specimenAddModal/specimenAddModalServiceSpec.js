@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { ModalTestSuiteMixin } from 'test/mixins/ModalTestSuiteMixin';
 import _ from 'lodash';
 import faker  from 'faker';
 import ngModule from '../../index'
@@ -14,8 +15,8 @@ describe('Service: specimenAddModal', function() {
 
   beforeEach(() => {
     angular.mock.module('ngAnimateMock', ngModule, 'biobank.test');
-    angular.mock.inject(function(ModalTestSuiteMixin) {
-      _.extend(this, ModalTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ModalTestSuiteMixin);
 
       this.injectDependencies('$uibModal',
                               '$q',

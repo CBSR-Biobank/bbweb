@@ -6,7 +6,7 @@
  */
 
 import angular from 'angular';
-import sharedBehaviour from '../../../test/behaviours/studyAnnotationTypeSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/studyAnnotationTypeSharedBehaviour';
 
 const ngModule = 'FIXME'
 

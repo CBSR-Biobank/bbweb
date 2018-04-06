@@ -7,8 +7,6 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 /*
  * Controller for this component.
  */
@@ -62,7 +60,7 @@ function CentreAddDirective($state,
   }
 
   function cancel() {
-    gotoReturnState(_.extend({}, vm.returnState, { options:{ reload: false } }));
+    gotoReturnState(Object.assign({}, vm.returnState, { options:{ reload: false } }));
   }
 }
 

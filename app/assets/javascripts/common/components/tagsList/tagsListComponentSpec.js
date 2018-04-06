@@ -4,6 +4,7 @@
  */
 /* global angular */
 
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash'
 import ngModule from '../../index'
 
@@ -11,7 +12,7 @@ describe('tagsListComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
+    angular.mock.inject(function() {
       Object.assign(this, ComponentTestSuiteMixin)
 
       this.injectDependencies('Factory')

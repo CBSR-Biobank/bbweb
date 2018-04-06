@@ -6,7 +6,7 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 
 const ngModule = 'FIXME'
 
@@ -14,8 +14,8 @@ xdescribe('StudyViewer', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin);
       this.injectDependencies('StudyViewer',
                               'Study',
                               'TestUtils',

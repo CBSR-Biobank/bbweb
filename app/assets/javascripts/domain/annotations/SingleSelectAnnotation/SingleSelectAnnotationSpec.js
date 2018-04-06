@@ -6,8 +6,8 @@
  */
 /* global angular */
 
-import _ from 'lodash';
-import annotationSharedBehaviour from '../../../test/behaviours/annotationSharedBehaviour';
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import annotationSharedBehaviour from 'test/behaviours/annotationSharedBehaviour';
 import ngModule from '../../index'
 
 /*
@@ -19,8 +19,8 @@ describe('SingleSelectAnnotation', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin) {
-      _.extend(this, EntityTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, EntityTestSuiteMixin);
       this.injectDependencies('SingleSelectAnnotation',
                               'AnnotationType',
                               'AnnotationMaxValueCount',

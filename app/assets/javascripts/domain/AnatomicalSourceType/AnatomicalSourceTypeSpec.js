@@ -6,7 +6,6 @@
  */
 /* global angular */
 
-import _ from 'lodash';
 import ngModule from '../index'
 
 describe('AnatomicalSourceType', function() {
@@ -19,7 +18,7 @@ describe('AnatomicalSourceType', function() {
   });
 
   it('should have values', function() {
-    expect(_.keys(this.AnatomicalSourceType)).not.toBeEmptyArray();
+    expect(Object.keys(this.AnatomicalSourceType)).not.toBeEmptyArray();
   });
 
 });

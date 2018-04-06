@@ -127,7 +127,7 @@ function ConcurrencySafeEntityFactory($q,
       if (_.isNil(this.id)) {
         throw new DomainError('entity has not been persisted');
       }
-      const json = _.extend({ expectedVersion: this.version }, additionalJson);
+      const json = Object.assign({ expectedVersion: this.version }, additionalJson);
       return biobankApi.post(url, json);
     }
   }

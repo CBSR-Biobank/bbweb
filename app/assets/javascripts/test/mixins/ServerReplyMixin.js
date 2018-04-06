@@ -6,24 +6,29 @@
 /**
  * This is a mixin that can be added UserContext object of a Jasmine test suite.
  *
- * @return {object} Object containing the functions that will be mixed in.
+ * @exports test.mixins.ServerReplyMixin
  */
-function ServerReplyMixin () {
+const ServerReplyMixin = {
 
-  return {
-    reply: reply,
-    errorReply: errorReply
-  };
-
-  function reply(obj = {}) {
+  /**
+   * Returns a plain object that simulates a reply from the server.
+   *
+   * @param {object} obj - the object to return in the `data` property.
+   */
+  reply: function (obj = {}) {
     return { status: 'success', data: obj };
-  }
+  },
 
-  function errorReply(message = 'error') {
+  /**
+   * Returns a plain object that simulates an error reply from the server.
+   *
+   * @param {string} message - the error message to return.
+   */
+  errorReply: function (message = 'error') {
     return { status: 'error', message: message };
   }
 
 }
 
-
-export default ngModule => ngModule.service('ServerReplyMixin', ServerReplyMixin)
+export { ServerReplyMixin };
+export default () => {};

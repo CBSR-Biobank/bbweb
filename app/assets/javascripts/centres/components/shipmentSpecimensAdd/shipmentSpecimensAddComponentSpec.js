@@ -4,16 +4,17 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
+import { ShippingComponentTestSuiteMixin } from 'test/mixins/ShippingComponentTestSuiteMixin';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/shipmentSpecimensControllerSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/shipmentSpecimensControllerSharedBehaviour';
 
 describe('shipmentSpecimensAddComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$q',
                               '$state',

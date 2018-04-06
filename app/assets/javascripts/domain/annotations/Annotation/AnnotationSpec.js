@@ -6,15 +6,15 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { AnnotationsEntityTestSuiteMixin } from 'test/mixins/AnnotationsEntityTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('Annotation', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin, TestUtils) {
-      _.extend(this, AnnotationsEntityTestSuiteMixin);
+    angular.mock.inject(function(TestUtils) {
+      Object.assign(this, AnnotationsEntityTestSuiteMixin);
       this.injectDependencies('Study',
                               'AnnotationType',
                               'annotationFactory',

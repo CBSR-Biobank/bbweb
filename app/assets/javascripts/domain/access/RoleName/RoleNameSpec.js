@@ -4,14 +4,17 @@
  */
 /* global angular */
 
-import * as sharedBehaviour from '../../../test/behaviours/entityInfoSharedBehaviour'
-import ngModule from '../../index'
+import { entityInfoCreateSharedBehaviour,
+         entityInfoListSharedBehaviour } from 'test/behaviours/entityInfoSharedBehaviour';
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
+import ngModule from '../../index';
 
 describe('RoleName', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
+    angular.mock.inject(function() {
       Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin)
 
       this.injectDependencies('$httpBackend',
@@ -40,7 +43,7 @@ describe('RoleName', function() {
       context.listFunc = (options) => this.RoleName.list(options)
     })
 
-    sharedBehaviour.entityInfoCreateSharedBehaviour(context)
+    entityInfoCreateSharedBehaviour(context)
 
   })
 
@@ -55,7 +58,7 @@ describe('RoleName', function() {
       context.listFunc = (options) => this.RoleName.list(options)
     })
 
-    sharedBehaviour.entityInfoListSharedBehaviour(context)
+    entityInfoListSharedBehaviour(context)
 
   })
 

@@ -16,7 +16,8 @@ const TestSuiteMixin = {
   /**
    * Used to inject AngularJS dependencies into the test suite.
    *
-   * @param {...string} dependencies - the AngularJS dependencies to inject.
+   * @param {...string} dependencies - the AngularJS dependencies to inject. Duplicates in this array are
+   * allowed, but the dependency will only be injected once.
    *
    * @return {undefined}
    */
@@ -25,7 +26,11 @@ const TestSuiteMixin = {
       if (dependency.trim() === '') {
         throw new Error('invalid dependency, cannot inject')
       }
-      this[dependency] = this.$injector.get(dependency);
+
+      // omit duplicates
+      if (!this[dependency]) {
+        this[dependency] = this.$injector.get(dependency);
+      }
     });
   },
 

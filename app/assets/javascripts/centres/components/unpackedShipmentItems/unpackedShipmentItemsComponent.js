@@ -7,8 +7,6 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 /*
  * Loads all Shipment Specimens in PRESENT state.
  */
@@ -54,10 +52,10 @@ function UnpackedShipmentItemsController($q,
     }
   }
 
-  function getSpecimens(options) {
+  function getSpecimens(options = {}) {
     if (!vm.shipment) { return $q.when({ items: [], maxPages: 0 }); }
 
-    _.extend(options, { filter: 'state:in:' + vm.itemState });
+    Object.assign(options, { filter: 'state:in:' + vm.itemState });
 
     return ShipmentSpecimen.list(vm.shipment.id, options)
       .then(function (paginatedResult) {

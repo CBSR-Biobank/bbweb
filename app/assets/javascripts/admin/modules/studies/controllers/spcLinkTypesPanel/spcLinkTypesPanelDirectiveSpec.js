@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -17,8 +18,8 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (TestSuiteMixin, TestUtils) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function (TestUtils) {
+      Object.assign(this, TestSuiteMixin);
 
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);
@@ -56,7 +57,7 @@ xdescribe('Directive: spcLinkTypesPanelDirective', function() {
       }
 
       if (options.studyHasAnnotationTypes) {
-        entities.annotationTypes = _.values(AnnotationValueType)
+        entities.annotationTypes = Object.values(AnnotationValueType)
           .map((valueType) => new SpecimenLinkAnnotationType(
             Factory.annotationType({ valueType: valueType })
           ));

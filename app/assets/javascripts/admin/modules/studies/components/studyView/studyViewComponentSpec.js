@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -13,8 +14,8 @@ describe('Component: studyView', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function($window, ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin);
+    angular.mock.inject(function($window) {
+      Object.assign(this, ComponentTestSuiteMixin);
 
       $window.localStorage.setItem = jasmine.createSpy().and.returnValue(null);
       $window.localStorage.getItem = jasmine.createSpy().and.returnValue(null);

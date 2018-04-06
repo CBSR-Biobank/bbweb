@@ -66,9 +66,10 @@ class ShipmentsTableController {
     }
 
     this.states = [{ label: 'any',  value: '' }].concat(
-      this.statesToDisplay.map(function (state) {
-        return { label: state, value: state };
-      }));
+      this.statesToDisplay.map((state) => ({
+        label: state,
+        value: state
+      })));
     this.stateFilter = this.states[0].value;
   }
 

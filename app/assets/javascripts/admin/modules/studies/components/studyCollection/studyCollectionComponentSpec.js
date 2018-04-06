@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -13,10 +14,10 @@ describe('studyCollectionComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin) {
+    angular.mock.inject(function() {
       var jsonStudy, jsonCet;
 
-      _.extend(this, TestSuiteMixin);
+      Object.assign(this, TestSuiteMixin);
       this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',

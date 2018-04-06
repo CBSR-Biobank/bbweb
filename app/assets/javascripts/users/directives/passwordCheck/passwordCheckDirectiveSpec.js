@@ -6,16 +6,17 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('Directive: passwordCheck', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (DirectiveTestSuiteMixin) {
-      _.extend(this, DirectiveTestSuiteMixin);
+    angular.mock.inject(function () {
+      Object.assign(this, DirectiveTestSuiteMixin);
 
+      this.injectDependencies();
       DirectiveTestSuiteMixin.createController.call(
         this,
         `<form name="form">

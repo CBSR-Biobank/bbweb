@@ -4,16 +4,16 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/labelServiceSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/labelServiceSharedBehaviour';
 
 describe('centreStateLabelService', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin);
       this.injectDependencies('centreStateLabelService',
                               'CentreState');
     });
@@ -22,13 +22,11 @@ describe('centreStateLabelService', function() {
   describe('shared behaviour', function() {
     var context = {};
     beforeEach(function() {
-      var self = this;
-
-      context.labels = _.values(this.CentreState);
+      context.labels = Object.values(this.CentreState);
       context.toLabelFunc = this.centreStateLabelService.stateToLabelFunc.bind(this.centreStateLabelService);
       context.expectedLabels = [];
-      _.values(this.CentreState).forEach(function (state) {
-        context.expectedLabels[state] = self.capitalizeFirstLetter(state);
+      Object.values(this.CentreState).forEach((state) => {
+        context.expectedLabels[state] = this.capitalizeFirstLetter(state);
       });
     });
     sharedBehaviour(context);

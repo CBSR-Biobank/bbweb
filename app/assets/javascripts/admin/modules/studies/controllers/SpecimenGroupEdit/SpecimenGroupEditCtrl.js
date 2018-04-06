@@ -30,10 +30,10 @@ function SpecimenGroupEditCtrl($state,                            // eslint-disa
   vm.title                 = (specimenGroup.isNew() ? 'Add' : 'Update') + ' Specimen Group';
   vm.study                 = study;
   vm.specimenGroup         = specimenGroup;
-  vm.anatomicalSourceTypes = _.values(AnatomicalSourceType);
-  vm.preservTypes          = _.values(PreservationType);
-  vm.preservTempTypes      = _.values(PreservationTemperature);
-  vm.specimenTypes         = _.values(SpecimenType);
+  vm.anatomicalSourceTypes = Object.values(AnatomicalSourceType);
+  vm.preservTypes          = Object.values(PreservationType);
+  vm.preservTempTypes      = Object.values(PreservationTemperature);
+  vm.specimenTypes         = Object.values(SpecimenType);
 
   vm.submit = submit;
   vm.cancel = cancel;

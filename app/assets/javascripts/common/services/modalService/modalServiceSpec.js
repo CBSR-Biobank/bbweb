@@ -6,15 +6,15 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { ModalTestSuiteMixin } from 'test/mixins/ModalTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('modalService', function() {
 
   beforeEach(() => {
     angular.mock.module('ngAnimateMock', ngModule, 'biobank.test');
-    angular.mock.inject(function(ModalTestSuiteMixin) {
-      _.extend(this, ModalTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ModalTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$animate',

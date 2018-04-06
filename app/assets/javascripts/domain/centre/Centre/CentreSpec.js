@@ -4,6 +4,8 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -11,8 +13,8 @@ describe('Centre', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (ServerReplyMixin, EntityTestSuiteMixin) {
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function () {
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
@@ -108,7 +110,7 @@ describe('Centre', function() {
   });
 
   it('state predicates return valid results', function() {
-    _.values(this.CentreState).forEach((state) => {
+    Object.values(this.CentreState).forEach((state) => {
       var centre = new this.Centre(this.Factory.centre({ state: state }));
       expect(centre.isDisabled()).toBe(state === this.CentreState.DISABLED);
       expect(centre.isEnabled()).toBe(state === this.CentreState.ENABLED);
@@ -400,7 +402,7 @@ describe('Centre', function() {
 
   function replyCentre(centre, newValues) {
     newValues = newValues || {};
-    return _.extend({}, centre, newValues, {version: centre.version + 1});
+    return Object.assign({}, centre, newValues, {version: centre.version + 1});
   }
 
   function shouldNotFail() {

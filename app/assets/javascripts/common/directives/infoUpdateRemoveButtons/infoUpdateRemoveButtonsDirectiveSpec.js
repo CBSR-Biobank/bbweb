@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -13,18 +14,19 @@ describe('Directive: infoUpdateRemoveButtons', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (DirectiveTestSuiteMixin) {
+    angular.mock.inject(function () {
       Object.assign(this, DirectiveTestSuiteMixin);
+
+      this.injectDependencies();
 
       this.createController = (options = {}) => {
         DirectiveTestSuiteMixin.createController.call(
           this,
-          `<info-update-remove-buttons
-              on-info="vm.information()"
-              on-update="vm.update()"
-              on-remove="vm.remove()"
-              update-button-enabled="vm.updateAllowed"
-              remove-button-enabled="vm.removeAllowed">
+          `<info-update-remove-buttons on-info="vm.information()"
+                                       on-update="vm.update()"
+                                       on-remove="vm.remove()"
+                                       update-button-enabled="vm.updateAllowed"
+                                       remove-button-enabled="vm.removeAllowed">
            </info-update-remove-buttons>`,
           {
             information: jasmine.createSpy().and.returnValue(null),

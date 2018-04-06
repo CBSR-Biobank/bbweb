@@ -6,26 +6,26 @@
  */
 /* global angular */
 
+import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('Directive: str2integer', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function ($rootScope, $compile) {
-      this.element = angular.element(
+    angular.mock.inject(function () {
+      Object.assign(this, DirectiveTestSuiteMixin);
+      this.injectDependencies();
+      DirectiveTestSuiteMixin.createController.call(
+        this,
         `<form name="testForm">
           <input type="number"
                  name="theNumber"
                  ng-model="vm.theNumber"
                  str2integer
                  required />
-        </form>`);
-
-      this.scope = $rootScope.$new();
-      this.scope.vm = { theNumber: null };
-      $compile(this.element)(this.scope);
-      this.scope.$digest();
+         </form>`,
+        { theNumber: null  });
     });
   });
 

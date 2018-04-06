@@ -566,7 +566,7 @@ function ShipmentFactory($q,
       }
       var reqJson = { specimenInventoryIds: specimenInventoryIds };
       if (shipmentContainerId) {
-        _.extend(reqJson, { shipmentContainerId: shipmentContainerId });
+        Object.assign(reqJson, { shipmentContainerId: shipmentContainerId });
       }
       return biobankApi.post(Shipment.url('specimens', this.id), reqJson).then(function(reply) {
         return Shipment.asyncCreate(reply);
@@ -597,7 +597,7 @@ function ShipmentFactory($q,
         }))
       };
       if (shipmentContainerId) {
-        _.extend(reqJson, { shipmentContainerId: shipmentContainerId });
+        Object.assign(reqJson, { shipmentContainerId: shipmentContainerId });
       }
       return biobankApi.post(Shipment.url('specimens/container', this.id), reqJson).then(function(reply) {
         return Shipment.asyncCreate(reply);

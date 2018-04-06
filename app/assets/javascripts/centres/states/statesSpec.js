@@ -7,7 +7,7 @@
 import { StateTestSuiteMixin } from 'test/mixins/StateTestSuiteMixin';
 import ngModule from '../../app'  // the whole appliction has to be loaded for these states
 
-fdescribe('centre states', function() {
+describe('centre states', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test', function ($qProvider) {

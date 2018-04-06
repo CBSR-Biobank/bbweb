@@ -6,14 +6,15 @@
  */
 /* global angular */
 
+import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
 describe('Directive: updateRemoveButtons', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (DirectiveTestSuiteMixin, TestUtils) {
-      _.extend(this, DirectiveTestSuiteMixin);
+    angular.mock.inject(function (TestUtils) {
+      Object.assign(this, DirectiveTestSuiteMixin);
 
       this.injectDependencies('$rootScope', '$compile');
 

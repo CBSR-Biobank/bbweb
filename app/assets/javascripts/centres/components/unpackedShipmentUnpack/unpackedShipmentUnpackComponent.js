@@ -51,7 +51,7 @@ class UnpackedShipmentUnpackController extends UnpackBaseController {
     if (!this.shipment) { return this.$q.when({ items: [], maxPages: 0 }); }
 
     options = options || {};
-    _.extend(options, { filter: 'state:in:' + this.ShipmentItemState.PRESENT });
+    Object.assign(options, { filter: 'state:in:' + this.ShipmentItemState.PRESENT });
 
     return this.ShipmentSpecimen.list(this.shipment.id, options)
       .then(paginatedResult => ({

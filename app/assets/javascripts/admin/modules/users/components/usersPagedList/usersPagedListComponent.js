@@ -8,7 +8,6 @@
  */
 
 import { PagedListController } from '../../../../../common/controllers/PagedListController';
-import _ from 'lodash';
 
 /*
  * Controller for this component.
@@ -28,7 +27,7 @@ class UsersPagedListController extends PagedListController {
               resourceErrorService) {
     'ngInject';
 
-    const stateData = _.values(UserState).map((state) => ({
+    const stateData = Object.values(UserState).map((state) => ({
       id: state,
       label: userStateLabelService.stateToLabelFunc(state)
     }));
@@ -62,7 +61,7 @@ class UsersPagedListController extends PagedListController {
                   });
 
     this.stateLabelFuncs = {};
-    _.values(UserState).forEach((state) => {
+    Object.values(UserState).forEach((state) => {
       this.stateLabelFuncs[state] = userStateLabelService.stateToLabelFunc(state);
     });
   }

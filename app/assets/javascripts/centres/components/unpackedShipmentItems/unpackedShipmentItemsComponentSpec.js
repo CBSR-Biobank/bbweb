@@ -4,15 +4,16 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
+import { ShippingComponentTestSuiteMixin } from 'test/mixins/ShippingComponentTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('unpackedShipmentItemsComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ShippingComponentTestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -27,8 +28,9 @@ describe('unpackedShipmentItemsComponent', function() {
       this.createController = (shipment, itemState) =>
         ShippingComponentTestSuiteMixin.createController.call(
           this,
-          '<unpacked-shipment-items shipment="vm.shipment" item-state="' +
-            itemState + '"><unpacked-shipment-items>',
+          `<unpacked-shipment-items shipment="vm.shipment"
+                                    item-state="${itemState}">
+           <unpacked-shipment-items>`,
           { shipment:  shipment },
           'unpackedShipmentItems');
     });
@@ -53,12 +55,11 @@ describe('unpackedShipmentItemsComponent', function() {
   });
 
   it('has valid scope for shipment item state not in RECEIVED or MISSING', function() {
-    var self = this,
-        shipment = this.createShipment();
+    var shipment = this.createShipment();
 
-    expect(function () {
-      self.createController(shipment, self.ShipmentItemState.EXTRA);
-    }).toThrowError(/invalid item state/);
+    expect(
+      () => this.createController(shipment, this.ShipmentItemState.EXTRA)
+    ).toThrowError(/invalid item state/);
   });
 
   it('emits event when created', function() {

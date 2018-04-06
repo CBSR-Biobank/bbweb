@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import _ from 'lodash';
 
 const ngModule = 'FIXME'
@@ -18,8 +19,8 @@ xdescribe('Directive: processingTypesPanelDirective', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (TestSuiteMixin, TestUtils) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function (TestUtils) {
+      Object.assign(this, TestSuiteMixin);
 
       createEntities = setupEntities(this.$injector);
       createController = setupController(this.$injector);

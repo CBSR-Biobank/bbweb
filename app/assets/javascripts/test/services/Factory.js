@@ -244,19 +244,19 @@ class Factory {
   }
 
   randomAnatomicalSourceType() {
-    return faker.random.arrayElement(_.values(this.AnatomicalSourceType));
+    return faker.random.arrayElement(Object.values(this.AnatomicalSourceType));
   }
 
   randomPreservationType() {
-    return faker.random.arrayElement(_.values(this.PreservationType));
+    return faker.random.arrayElement(Object.values(this.PreservationType));
   }
 
   randomPreservationTemperature() {
-    return faker.random.arrayElement(_.values(this.PreservationTemperature));
+    return faker.random.arrayElement(Object.values(this.PreservationTemperature));
   }
 
   randomSpecimenType() {
-    return faker.random.arrayElement(_.values(this.SpecimenType));
+    return faker.random.arrayElement(Object.values(this.SpecimenType));
   }
 
   specimenGroup(options = {}) {
@@ -584,7 +584,7 @@ class Factory {
   }
 
   allAnnotationTypes() {
-    var annotationTypes = _.values(this.AnnotationValueType)
+    var annotationTypes = Object.values(this.AnnotationValueType)
         .map((valueType) => this.annotationType({ valueType: valueType }));
     annotationTypes.push(this.annotationType({
       valueType:     this.AnnotationValueType.SELECT,

@@ -6,15 +6,15 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import ngModule from '../../index'
 
 describe('Service: domainNotificationService', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function () {
+      Object.assign(this, TestSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
                               'gettext',

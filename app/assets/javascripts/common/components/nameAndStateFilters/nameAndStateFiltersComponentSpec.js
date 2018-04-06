@@ -6,16 +6,16 @@
  */
 /* global angular */
 
-import _ from 'lodash';
-import filtersSharedBehaviour from '../../../test/behaviours/filtersSharedBehaviour';
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
+import filtersSharedBehaviour from 'test/behaviours/filtersSharedBehaviour';
 import ngModule from '../../index'
 
 describe('nameAndStateFiltersComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ComponentTestSuiteMixin);
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
 
       this.createController = (bindings) => {
@@ -33,7 +33,7 @@ describe('nameAndStateFiltersComponent', function() {
           onFiltersCleared:     this.filtersCleared
         };
 
-        _.extend(actualBindings, defaultBindings, bindings);
+        Object.assign(actualBindings, defaultBindings, bindings);
 
         ComponentTestSuiteMixin.createController.call(
           this,

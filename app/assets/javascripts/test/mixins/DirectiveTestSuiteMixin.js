@@ -3,20 +3,25 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
+
 /**
  * This is a mixin that can be added UserContext object of a Jasmine test suite.
  *
- * @return {object} Object containing the functions that will be mixed in.
+ * @exports test.mixins.DirectiveTestSuiteMixin
  */
-/* @ngInject */
-function DirectiveTestSuiteMixin(ComponentTestSuiteMixin) {
+let DirectiveTestSuiteMixin = {
 
-  return Object.assign({}, ComponentTestSuiteMixin, { createController });
-
-  function createController(htmlElement, scopeVars) {
+  createController: function (htmlElement, scopeVars) {
     ComponentTestSuiteMixin.createController.call(this, htmlElement, scopeVars, undefined);
     this.controller = this.element.scope().vm;
   }
 
 }
-export default ngModule => ngModule.service('DirectiveTestSuiteMixin', DirectiveTestSuiteMixin)
+
+DirectiveTestSuiteMixin = Object.assign({},
+                                        ComponentTestSuiteMixin,
+                                        DirectiveTestSuiteMixin);
+
+export { DirectiveTestSuiteMixin };
+export default () => {};

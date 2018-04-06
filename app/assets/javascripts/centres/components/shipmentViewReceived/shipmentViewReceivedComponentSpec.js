@@ -4,7 +4,7 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { ShippingComponentTestSuiteMixin } from 'test/mixins/ShippingComponentTestSuiteMixin';
 import moment from 'moment';
 import ngModule from '../../index'
 
@@ -12,8 +12,8 @@ describe('shipmentViewReceivedComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ShippingComponentTestSuiteMixin, TestUtils) {
-      _.extend(this, ShippingComponentTestSuiteMixin);
+    angular.mock.inject(function(TestUtils) {
+      Object.assign(this, ShippingComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',

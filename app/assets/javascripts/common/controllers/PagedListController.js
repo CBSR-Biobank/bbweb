@@ -99,7 +99,7 @@ class PagedListController {
 
   updateItems() {
     var filters = this.getFilters();
-    _.extend(this.pagerOptions, { filter: filters.join(';') });
+    Object.assign(this.pagerOptions, { filter: filters.join(';') });
 
     this.getItems(this.pagerOptions)
       .then((pagedResult) => {
@@ -141,7 +141,7 @@ class PagedListController {
   }
 
   getFilters() {
-    return _.values(this.filters)
+    return Object.values(this.filters)
       .map((filter) => filter.getValue())
       .filter((value) => value !== '');
   }
@@ -157,7 +157,7 @@ class PagedListController {
   }
 
   filtersCleared() {
-    _.values(this.filters).forEach((filter) => {
+    Object.values(this.filters).forEach((filter) => {
       filter.clearValue();
     });
     this.updateItems();

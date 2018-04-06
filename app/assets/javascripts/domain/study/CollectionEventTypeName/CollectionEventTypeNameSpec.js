@@ -4,14 +4,17 @@
  */
 /* global angular */
 
-import * as sharedBehaviour from '../../../test/behaviours/entityInfoSharedBehaviour'
+import { entityInfoCreateSharedBehaviour,
+         entityInfoListSharedBehaviour } from 'test/behaviours/entityInfoSharedBehaviour';
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import ngModule from '../../index'
 
 describe('CollectionEventTypeName', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
+    angular.mock.inject(function() {
       Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin)
 
       this.injectDependencies('$httpBackend',
@@ -49,7 +52,7 @@ describe('CollectionEventTypeName', function() {
       context.listFunc = (options) => this.CollectionEventTypeName.list(eventType.studyId, options);
     });
 
-    sharedBehaviour.entityInfoCreateSharedBehaviour(context)
+    entityInfoCreateSharedBehaviour(context)
 
   });
 
@@ -70,7 +73,7 @@ describe('CollectionEventTypeName', function() {
       context.listFunc = (options) => this.CollectionEventTypeName.list(eventType.studyId, options);
     });
 
-    sharedBehaviour.entityInfoListSharedBehaviour(context)
+entityInfoListSharedBehaviour(context)
 
   });
 

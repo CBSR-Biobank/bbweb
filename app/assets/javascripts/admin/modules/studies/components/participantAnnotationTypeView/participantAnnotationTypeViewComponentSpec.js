@@ -6,18 +6,18 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../../../test/behaviours/annotationTypeViewComponentSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/annotationTypeViewComponentSharedBehaviour';
 
 describe('Component: participantAnnotationTypeView', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
+    angular.mock.inject(function() {
       var jsonAnnotType;
 
-      _.extend(this, ComponentTestSuiteMixin);
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -28,7 +28,7 @@ describe('Component: participantAnnotationTypeView', function() {
                               'Factory');
 
       jsonAnnotType = this.Factory.annotationType();
-      this.study = this.Study.create(_.extend(this.Factory.study(),
+      this.study = this.Study.create(Object.assign(this.Factory.study(),
                                               { annotationTypes: [ jsonAnnotType ]}));
       this.annotationType = new this.AnnotationType(jsonAnnotType);
 

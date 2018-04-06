@@ -6,16 +6,19 @@
  */
 /* global angular */
 
+import { AnnotationsEntityTestSuiteMixin } from 'test/mixins/AnnotationsEntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
-import annotationsSharedBehaviour from '../../../test/behaviours/entityWithAnnotationsSharedBehaviour';
+import annotationsSharedBehaviour from 'test/behaviours/entityWithAnnotationsSharedBehaviour';
+import faker  from 'faker';
+import moment from 'moment';
 import ngModule from '../../index'
 
 describe('CollectionEvent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin,
-                                 ServerReplyMixin,
+    angular.mock.inject(function(
                                  TestUtils) {
       Object.assign(this,
                     AnnotationsEntityTestSuiteMixin,
@@ -54,10 +57,10 @@ describe('CollectionEvent', function() {
         collectionEvent = new this.CollectionEvent(initServerCollectionEvent, collectionEventType);
 
         return {
-          jsonAnnotationTypes:   jsonAnnotationTypes,
-          collectionEventType:   collectionEventType,
-          collectionEvent:       collectionEvent,
-          serverCollectionEvent: jsonCevent
+          jsonAnnotationTypes,
+          collectionEventType,
+          collectionEvent,
+          jsonCevent
         };
       };
 
@@ -157,7 +160,7 @@ describe('CollectionEvent', function() {
     var annotationType = this.AnnotationType.create(this.Factory.annotationType());
 
     // put an invalid value in jsonAnnotation.annotationTypeId
-    _.extend(
+    Object.assign(
       jsonAnnotation,
       this.Factory.annotation(this.Factory.valueForAnnotation(annotationType), annotationType),
       { annotationTypeId: this.Factory.stringNext() });
@@ -169,7 +172,7 @@ describe('CollectionEvent', function() {
 
     expect(() =>
            this.CollectionEvent.create(
-             _.extend(jsonCevent, {
+             Object.assign(jsonCevent, {
                collectionEventType: jsonCet,
                annotations: [ jsonAnnotation ]
              }))
@@ -439,16 +442,16 @@ describe('CollectionEvent', function() {
         cmd      = addJson(entities.collectionEvent);
 
     this.$httpBackend.expectPOST(this.url(entities.collectionEvent.participantId), cmd)
-      .respond(this.reply(entities.serverCollectionEvent));
+      .respond(this.reply(entities.jsonCevent));
 
-    entities.collectionEvent.add().then(function(reply) {
-      expect(reply.id).toEqual(entities.serverCollectionEvent.id);
+    entities.collectionEvent.add().then((reply) => {
+      expect(reply.id).toEqual(entities.jsonCevent.id);
       expect(reply.version).toEqual(0);
-      expect(reply.participantId).toEqual(entities.serverCollectionEvent.participantId);
-      expect(reply.timeCompleted).toEqual(entities.serverCollectionEvent.timeCompleted);
-      expect(reply.visitNumber).toEqual(entities.serverCollectionEvent.visitNumber);
+      expect(reply.participantId).toEqual(entities.jsonCevent.participantId);
+      expect(reply.timeCompleted).toEqual(entities.jsonCevent.timeCompleted);
+      expect(reply.visitNumber).toEqual(entities.jsonCevent.visitNumber);
       expect(reply.annotations)
-        .toBeArrayOfSize(entities.serverCollectionEvent.annotations.length);
+        .toBeArrayOfSize(entities.jsonCevent.annotations.length);
     });
     this.$httpBackend.flush();
   });
@@ -479,31 +482,51 @@ describe('CollectionEvent', function() {
   });
 
   it('can update the visit number on a collectionEvent', function() {
-    var entities = this.getCollectionEventEntities(false),
-        cevent   = entities.collectionEvent;
+    const entities = this.getCollectionEventEntities(false);
+    const cevent   = entities.collectionEvent;
+    const newVisitNumber = cevent.visitNumber + 10;
+    const serverReply = Object.assign({}, entities.jsonCevent, { visitNumber: newVisitNumber } );
 
-    this.updateEntity(cevent,
-                      'updateVisitNumber',
-                      cevent.visitNumber,
-                      this.url('visitNumber', cevent.id),
-                      { visitNumber: cevent.visitNumber },
-                      this.Factory.defaultCollectionEvent(),
-                      this.expectCevent,
-                      this.failTest);
+    const updateFunc = () => {
+      cevent.updateVisitNumber(newVisitNumber)
+        .then((updatedCevent) => {
+          this.expectCevent(updatedCevent);
+          expect(updatedCevent.visitNumber).toEqual(newVisitNumber);
+        })
+        .catch(this.failTest);
+    };
+
+    this.updateEntityWithCallback(updateFunc,
+                            this.url('visitNumber', cevent.id),
+                            {
+                              visitNumber: newVisitNumber,
+                              expectedVersion: cevent.version
+                            },
+                            serverReply);
   });
 
   it('can update the time completed on a collectionEvent', function() {
-    var entities = this.getCollectionEventEntities(false),
-        cevent   = entities.collectionEvent;
+    const entities = this.getCollectionEventEntities(false);
+    const cevent   = entities.collectionEvent;
+    const newTimeCompleted = moment(faker.date.recent(10)).format();
+    const serverReply = Object.assign({}, entities.jsonCevent, { timeCompleted: newTimeCompleted } );
 
-    this.updateEntity(cevent,
-                      'updateTimeCompleted',
-                      cevent.timeCompleted,
-                      this.url('timeCompleted', cevent.id),
-                      { timeCompleted: cevent.timeCompleted },
-                      this.Factory.defaultCollectionEvent(),
-                      this.expectCevent,
-                      this.failTest);
+    const updateFunc = () => {
+      cevent.updateTimeCompleted(newTimeCompleted)
+        .then((updatedCevent) => {
+          this.expectCevent(updatedCevent);
+          expect(updatedCevent.timeCompleted).toEqual(newTimeCompleted);
+        })
+        .catch(this.failTest);
+    };
+
+    this.updateEntityWithCallback(updateFunc,
+                            this.url('timeCompleted', cevent.id),
+                            {
+                              timeCompleted: newTimeCompleted,
+                              expectedVersion: cevent.version
+                            },
+                            serverReply);
   });
 
   it('should be able to remove a collection event', function() {
@@ -554,7 +577,7 @@ describe('CollectionEvent', function() {
   ];
 
   function addJson(collectionEvent) {
-    return _.extend(_.pick(collectionEvent, addJsonKeys),
+    return Object.assign(_.pick(collectionEvent, addJsonKeys),
                     { annotations: annotationsForJson(collectionEvent) } );
   }
 

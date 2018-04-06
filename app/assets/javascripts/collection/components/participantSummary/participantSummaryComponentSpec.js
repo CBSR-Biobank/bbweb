@@ -6,8 +6,8 @@
  */
 /* global angular */
 
-import _ from 'lodash';
-import annotationUpdateSharedBehaviour from '../../../test/behaviours/annotationUpdateSharedBehaviour';
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
+import annotationUpdateSharedBehaviour from 'test/behaviours/annotationUpdateSharedBehaviour';
 import faker  from 'faker';
 import ngModule from '../../index'
 
@@ -15,8 +15,8 @@ describe('Component: participantSummary', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',

@@ -4,6 +4,8 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -11,9 +13,8 @@ describe('Study', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin,
-                                 ServerReplyMixin) {
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
                               'Study',
@@ -77,7 +78,7 @@ describe('Study', function() {
   });
 
   it('state predicates return valid results', function() {
-    _.values(this.StudyState).forEach((state) => {
+    Object.values(this.StudyState).forEach((state) => {
       var study = new this.Study(this.Factory.study({ state: state }));
       expect(study.isDisabled()).toBe(state === this.StudyState.DISABLED);
       expect(study.isEnabled()).toBe(state === this.StudyState.ENABLED);
@@ -407,7 +408,7 @@ describe('Study', function() {
 
       function replyStudy(study, newValues) {
         newValues = newValues || {};
-        return _.extend({}, study, newValues);
+        return Object.assign({}, study, newValues);
       }
     });
 

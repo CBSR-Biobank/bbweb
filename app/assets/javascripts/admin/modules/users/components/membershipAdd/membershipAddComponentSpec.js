@@ -4,16 +4,20 @@
  */
 /* global angular */
 
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
+import { MembershipTestSuiteMixin } from 'test/mixins/MembershipTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('membershipAddComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(ComponentTestSuiteMixin, MembershipSpecCommon) {
-      Object.assign(this, ComponentTestSuiteMixin, MembershipSpecCommon)
+    angular.mock.inject(function () {
+      Object.assign(this, ComponentTestSuiteMixin, MembershipTestSuiteMixin)
 
-      this.injectDependencies('$q',
+      this.injectDependencies('$rootScope',
+                              '$compile',
+                              '$q',
                               '$state',
                               'biobankApi',
                               'notificationsService',

@@ -50,7 +50,7 @@ function SpecimenGroupFactory(funutils,
 
     obj = obj || {};
     ConcurrencySafeEntity.call(self, obj);
-    _.extend(this, defaults, _.pick(obj, _.keys(defaults)));
+    Object.assign(this, defaults, _.pick(obj, Object.keys(defaults)));
   }
 
   SpecimenGroup.prototype = Object.create(ConcurrencySafeEntity.prototype);
@@ -80,7 +80,7 @@ function SpecimenGroupFactory(funutils,
 
   SpecimenGroup.prototype.addOrUpdate = function () {
     var self = this,
-        cmd = _.extend(_.pick(self,
+        cmd = Object.assign(_.pick(self,
                               'studyId',
                               'name',
                               'units',
@@ -100,7 +100,7 @@ function SpecimenGroupFactory(funutils,
       if (self.isNew()) {
         return biobankApi.post(uri(self.studyId), cmd);
       }
-      _.extend(cmd, { id: self.id, expectedVersion: self.version });
+      Object.assign(cmd, { id: self.id, expectedVersion: self.version });
       return biobankApi.put(uri(self.studyId, self.id), cmd);
     }
   };

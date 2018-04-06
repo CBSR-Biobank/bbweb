@@ -6,7 +6,6 @@
  */
 /* global angular */
 
-import _ from 'lodash';
 import ngModule from '../index'
 
 describe('PreservationType', function() {
@@ -19,7 +18,7 @@ describe('PreservationType', function() {
   });
 
   it('should have values', function () {
-    expect(_.keys(this.PreservationType)).not.toBeEmptyArray();
+    expect(Object.keys(this.PreservationType)).not.toBeEmptyArray();
   });
 
 });

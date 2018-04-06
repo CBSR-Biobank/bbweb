@@ -180,7 +180,7 @@ function sharedBehaviourForStudyAnnotationTypes(context) {
     }
 
     function getUpdateCommand(annotationType) {
-      return _.extend(getAddCommand(annotationType), { expectedVersion: annotationType.version });
+      return Object.assign(getAddCommand(annotationType), { expectedVersion: annotationType.version });
     }
 
   });

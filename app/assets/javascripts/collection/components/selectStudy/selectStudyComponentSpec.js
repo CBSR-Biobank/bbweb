@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -15,8 +16,8 @@ describe('Component: selectStudy', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'Study', 'Factory');
 
@@ -39,7 +40,7 @@ describe('Component: selectStudy', function() {
         _.range(numStudies).map(() => this.Study.create(this.Factory.study()));
 
       this.createGetStudiesFn = (studies) =>
-        (pagerOptions) => this.$q.when(_.extend(this.Factory.pagedResult(studies, pagerOptions),
+        (pagerOptions) => this.$q.when(Object.assign(this.Factory.pagedResult(studies, pagerOptions),
                                                { items: studies.slice(0, pagerOptions.limit) }));
     });
   });

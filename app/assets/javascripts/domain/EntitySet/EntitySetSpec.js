@@ -4,6 +4,7 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../index'
 
@@ -11,8 +12,8 @@ describe('EntitySet', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin) {
-      _.extend(this, EntityTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, EntityTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               'EntitySet',
@@ -44,7 +45,7 @@ describe('EntitySet', function() {
     it('fails when required fields are missing', function() {
       var self = this,
           json = this.Factory.entitySet();
-      _.keys(json).forEach(function (key) {
+      Object.keys(json).forEach(function (key) {
         var badJson = _.omit(json, [key]);
         expect(function () {
           self.EntitySet.create(badJson);
@@ -55,7 +56,7 @@ describe('EntitySet', function() {
     it('fails when required fields on sub objects are missing', function() {
       var self = this,
           json = this.Factory.entitySet();
-      _.keys(json.entityData[0]).forEach(function (key) {
+      Object.keys(json.entityData[0]).forEach(function (key) {
         var badJson = _.clone(json);
         badJson.entityData = json.entityData.map(function (info) {
           return _.omit(info, [ key ]);
@@ -86,7 +87,7 @@ describe('EntitySet', function() {
     it('fails when required fields are missing', function() {
       var self = this,
           json = this.Factory.entitySet();
-      _.keys(json).forEach(function (key) {
+      Object.keys(json).forEach(function (key) {
         var badJson = _.omit(json, [key]);
         self.EntitySet.asyncCreate(badJson)
           .then(function () {

@@ -4,6 +4,8 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -11,8 +13,8 @@ describe('ShipmentSpecimen domain object:', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function (ServerReplyMixin, EntityTestSuiteMixin) {
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function () {
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
@@ -25,13 +27,9 @@ describe('ShipmentSpecimen domain object:', function() {
         expect(entity).toEqual(jasmine.any(this.ShipmentSpecimen));
       };
 
-      this.url = url;
-
-      //---
-
-      function url() {
-        const args = [ 'shipments' ].concat(_.toArray(arguments));
-        return EntityTestSuiteMixin.url.apply(null, args);
+      this.url = (...paths) => {
+        const args = [ 'shipments' ].concat(paths);
+        return EntityTestSuiteMixin.url(...args);
       }
     });
   });

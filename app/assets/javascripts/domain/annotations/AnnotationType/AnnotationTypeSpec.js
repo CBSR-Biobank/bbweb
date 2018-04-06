@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -13,8 +14,8 @@ describe('AnnotationType', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin);
       this.injectDependencies('AnnotationType',
                               'AnnotationValueType',
                               'AnnotationMaxValueCount',
@@ -69,7 +70,7 @@ describe('AnnotationType', function() {
   it('valueType predicates return valid results', function() {
     var self = this;
 
-    _.values(self.AnnotationValueType).forEach((valueType) => {
+    Object.values(self.AnnotationValueType).forEach((valueType) => {
       var annotationType = new self.AnnotationType(
         self.Factory.annotationType({ valueType: valueType }));
 
@@ -139,7 +140,7 @@ describe('AnnotationType', function() {
 
   it('addOption throws an error if value type is not SELECT', function() {
     var self = this,
-        valueTypesNoSelect = _.reject(_.values(self.AnnotationValueType), function (valueType) {
+        valueTypesNoSelect = _.reject(Object.values(self.AnnotationValueType), function (valueType) {
           return valueType === self.AnnotationValueType.SELECT;
         });
 

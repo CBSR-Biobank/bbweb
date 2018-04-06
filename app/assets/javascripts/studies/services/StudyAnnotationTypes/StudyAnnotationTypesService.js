@@ -75,7 +75,7 @@ function StudyAnnotationTypesServiceFactory(biobankApi) {
   }
 
   function getUpdateCommand (annotationType) {
-    return _.extend(getAddCommand(annotationType), {
+    return Object.assign(getAddCommand(annotationType), {
       id:              annotationType.id,
       expectedVersion: annotationType.version
     });

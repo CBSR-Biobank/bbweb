@@ -4,6 +4,7 @@
  */
 /* global angular */
 
+import { ShippingComponentTestSuiteMixin } from 'test/mixins/ShippingComponentTestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -11,8 +12,8 @@ describe('shipmentsTableComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ShippingComponentTestSuiteMixin) {
-      _.extend(this, ShippingComponentTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ShippingComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$state',
@@ -70,9 +71,16 @@ describe('shipmentsTableComponent', function() {
     expect(this.controller.tableDataLoading).toBeTrue();
     expect(_.map(this.controller.states, 'label')).toContain('any');
 
-    _.values(this.ShipmentStates).forEach((state) => {
-      expect(this.controller.states).toContain({ label: state, value: state.toLowerCase() });
-    });
+    const stateInfo = Object.values(this.ShipmentState).map((state) => ({
+      label: state,
+      value: state
+    }));
+
+    this.controller.states.forEach((state) => {
+      if (state.label !== 'any') {
+        expect(stateInfo).toContain({ label: state.label, value: state.value });
+      }
+    })
   });
 
   it('table reloads correctly with different search predicates and reverse order', function() {
@@ -112,7 +120,7 @@ describe('shipmentsTableComponent', function() {
     spyOn(this.$state, 'go').and.returnValue(null);
 
     this.createController(this.centre);
-    _.keys(this.ShipmentState).forEach((state) => {
+    Object.keys(this.ShipmentState).forEach((state) => {
       var shipment = this.Factory.shipment({ state: state }),
           args;
 

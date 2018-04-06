@@ -22,7 +22,7 @@ xdescribe('SpecimenGroup', function() {
                                  _SpecimenGroup_,
                                  _Factory_,
                                  ServerReplyMixin) {
-      _.extend(this, ServerReplyMixin);
+      Object.assign(this, ServerReplyMixin);
       httpBackend   = $httpBackend;
       SpecimenGroup = _SpecimenGroup_;
       Factory       = _Factory_;
@@ -130,7 +130,7 @@ xdescribe('SpecimenGroup', function() {
   });
 
   // function specimenGroupToAddCommand(specimenGroup) {
-  //   return _.extend(_.pick(specimenGroup,
+  //   return Object.assign(_.pick(specimenGroup,
   //                          'studyId',
   //                          'name',
   //                          'units',
@@ -142,7 +142,7 @@ xdescribe('SpecimenGroup', function() {
   // }
 
   // function specimenGroupToUpdateCommand(specimenGroup) {
-  //   return _.extend(specimenGroupToAddCommand(specimenGroup), {
+  //   return Object.assign(specimenGroupToAddCommand(specimenGroup), {
   //     id: specimenGroup.id,
   //     expectedVersion: specimenGroup.version
   //   });

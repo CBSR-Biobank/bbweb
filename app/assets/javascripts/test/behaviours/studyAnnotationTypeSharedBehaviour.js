@@ -33,7 +33,7 @@ export default function studyAnnotationTypeSharedSpec(context) {
                                    _AnnotationValueType_,
                                    _AnnotationMaxValueCount_,
                                    ServerReplyMixin) {
-        _.extend(this, ServerReplyMixin);
+        Object.assign(this, ServerReplyMixin);
         httpBackend                  = $httpBackend;
         funutils                     = _funutils_;
         AnnotationValueType          = _AnnotationValueType_;
@@ -252,18 +252,18 @@ export default function studyAnnotationTypeSharedSpec(context) {
     }
 
     function addCommand(annotationType) {
-      return _.extend(
+      return Object.assign(
         _.pick(annotationType, 'studyId', 'name', 'valueType', 'options', 'required'),
         funutils.pickOptional(annotationType, 'description', 'maxValueCount'));
     }
 
     function updateCommand(annotationType) {
-      return _.extend(addCommand(annotationType),
+      return Object.assign(addCommand(annotationType),
                       { id: annotationType.id, expectedVersion: annotationType.version });
     }
 
     function replyAnnotationType(annotationType, newValues = {}) {
-      return createAnnotationTypeFn(_.extend({},
+      return createAnnotationTypeFn(Object.assign({},
                                              annotationType,
                                              newValues,
                                              {version: annotationType.version + 1}));

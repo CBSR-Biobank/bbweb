@@ -41,7 +41,7 @@ function DomainEntityFactory($log, biobankApi) {
        * @protected
        */
 
-      Object.assign(this, _.pick(obj, _.keys(this.constructor.schema().properties)));
+      Object.assign(this, _.pick(obj, Object.keys(this.constructor.schema().properties)));
     }
 
     /**

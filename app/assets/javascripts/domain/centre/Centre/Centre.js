@@ -385,7 +385,7 @@ function CentreFactory($q,
     static centreLocationToNames(centreLocations) {
       return centreLocations
         .map(centreLocation =>
-             _.extend({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
+             Object.assign({ name: centreLocation.centreName + ': ' + centreLocation.locationName },
                       _.pick(centreLocation, 'centreId', 'locationId')));
     }
 

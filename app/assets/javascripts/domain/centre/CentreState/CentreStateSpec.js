@@ -6,7 +6,6 @@
  */
 /* global angular */
 
-import _ from 'lodash';
 import ngModule from '../../index'
 
 describe('CentreState', function() {
@@ -19,7 +18,7 @@ describe('CentreState', function() {
   });
 
   it('should have values', function () {
-    expect(_.keys(this.CentreState)).not.toBeEmptyArray();
+    expect(Object.keys(this.CentreState)).not.toBeEmptyArray();
   });
 
 });

@@ -6,6 +6,8 @@
  */
 /* global angular */
 
+import { AnnotationsEntityTestSuiteMixin } from 'test/mixins/AnnotationsEntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -13,12 +15,11 @@ describe('Specimen', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin,
-                                 ServerReplyMixin,
-                                 TestUtils) {
-      _.extend(this,
-               AnnotationsEntityTestSuiteMixin,
-               ServerReplyMixin);
+    angular.mock.inject(function(TestUtils) {
+
+      Object.assign(this,
+                    AnnotationsEntityTestSuiteMixin,
+                    ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$rootScope',

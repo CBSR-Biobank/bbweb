@@ -8,7 +8,6 @@
  */
 
 import { UnpackBaseController } from '../../controllers/UnpackBaseController';
-import _ from 'lodash'
 
 /*
  * Controller for this component.
@@ -53,7 +52,7 @@ class UnpackedShipmentExtraController extends UnpackBaseController {
     if (!this.shipment) { return this.$q.when({ items: [], maxPages: 0 }); }
 
     options = options || {};
-    _.extend(options, { filter: 'state:in:' + this.ShipmentItemState.EXTRA });
+    Object.assign(options, { filter: 'state:in:' + this.ShipmentItemState.EXTRA });
 
     return this.ShipmentSpecimen.list(this.shipment.id, options)
       .then(paginatedResult => ({

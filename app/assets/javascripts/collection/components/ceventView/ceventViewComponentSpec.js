@@ -6,17 +6,17 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import faker  from 'faker';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/annotationUpdateSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/annotationUpdateSharedBehaviour';
 
 describe('Component: ceventView', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',

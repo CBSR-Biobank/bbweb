@@ -4,16 +4,17 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../test/behaviours/entityNameAndStateSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/entityNameAndStateSharedBehaviour';
 
 describe('StudyName', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$httpBackend',
                               '$httpParamSerializer',
@@ -59,7 +60,7 @@ describe('StudyName', function() {
   });
 
   it('state predicates return valid results', function() {
-    _.values(this.StudyState).forEach((state) => {
+    Object.values(this.StudyState).forEach((state) => {
       var studyName = this.StudyName.create(this.Factory.studyNameDto({ state: state }));
       expect(studyName.isDisabled()).toBe(state === this.StudyState.DISABLED);
       expect(studyName.isEnabled()).toBe(state === this.StudyState.ENABLED);

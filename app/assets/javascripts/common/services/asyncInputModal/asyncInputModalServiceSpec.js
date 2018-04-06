@@ -4,13 +4,14 @@
  */
 /* global angular */
 
+import { ModalTestSuiteMixin } from 'test/mixins/ModalTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('asyncInputModalService', function() {
 
   beforeEach(() => {
     angular.mock.module('ngAnimateMock', ngModule, 'biobank.test')
-    angular.mock.inject(function(ModalTestSuiteMixin) {
+    angular.mock.inject(function() {
       Object.assign(this, ModalTestSuiteMixin)
 
       this.injectDependencies('$q',

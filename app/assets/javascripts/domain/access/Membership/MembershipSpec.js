@@ -4,84 +4,68 @@
  */
 /* global angular */
 
+import { MembershipTestSuiteMixin } from 'test/mixins/MembershipTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
-import membershipCommonBehaviour from '../../../test/behaviours/membershipCommonBehaviourSpec';
+import membershipCommonBehaviour from 'test/behaviours/membershipCommonBehaviourSpec';
 import ngModule from '../../index'
 
 describe('Membership', function() {
 
-  function SuiteMixin(MembershipSpecCommon, ServerReplyMixin) {
+  const SuiteMixin = {
 
-    return _.extend({},
-                    MembershipSpecCommon,
-                    ServerReplyMixin,
-                    {
-                      jsonObj,
-                      jsonObjWithEntities,
-                      membershipFromConstructor,
-                      membershipFromJson,
-                      membershipFromJsonAsync,
-                      jsonMembershipWithAllStudies,
-                      jsonMembershipWithStudy,
-                      jsonMembershipWithAllCentres,
-                      jsonMembershipWithCentre,
-                      jsonMembershipWithEntities,
-                      fixtures
-                    }
-                   );
-
-    function jsonObj() {
+    jsonObj: function () {
       return this.Factory.membership();
-    }
+    },
 
-    function jsonObjWithEntities(studyEntityData, centreEntityData) {
-      return _.extend(
-        MembershipSpecCommon.jsonObjWithEntities.call(this, studyEntityData, centreEntityData),
+    jsonObjWithEntities: function (studyEntityData, centreEntityData) {
+      return Object.assign(
+        MembershipTestSuiteMixin.jsonObjWithEntities.call(this, studyEntityData, centreEntityData),
         { userData: [] });
-    }
+    },
 
-    function membershipFromConstructor() {
+    membershipFromConstructor: function () {
       return new this.Membership();
-    }
+    },
 
-    function membershipFromJson(json) {
+    membershipFromJson: function (json) {
       return this.Membership.create(json);
-    }
+    },
 
-    function membershipFromJsonAsync(json) {
+    membershipFromJsonAsync: function (json) {
       return this.Membership.asyncCreate(json);
-    }
+    },
 
-    function jsonMembershipWithAllStudies() {
+    jsonMembershipWithAllStudies: function () {
       var json = this.Factory.membership();
       json.studyData.allEntities = true;
       return json;
-    }
+    },
 
-    function jsonMembershipWithStudy(id, name) {
+    jsonMembershipWithStudy: function (id, name) {
       var json = this.Factory.membership();
       json.studyData.entityData = [ Object.assign(this.Factory.entityInfo(), { id: id, name: name}) ];
       return json;
-    }
+    },
 
-    function jsonMembershipWithAllCentres() {
+    jsonMembershipWithAllCentres: function () {
       var json = this.Factory.membership();
       json.centreData.allEntities = true;
       return json;
-    }
+    },
 
-    function jsonMembershipWithCentre(id, name) {
+    jsonMembershipWithCentre: function (id, name) {
       var json = this.Factory.membership();
       json.centreData.entityData = [ Object.assign(this.Factory.entityInfo(), { id: id, name: name}) ];
       return json;
-    }
+    },
 
-    function jsonMembershipWithEntities() {
+    jsonMembershipWithEntities: function () {
       var entityData = [ this.jsonEntityData() ];
       return this.jsonObjWithEntities(entityData, entityData);
-    }
+    },
 
-    function fixtures(options) {
+    fixtures: function (options) {
       var jsonMembership = this.Factory.membership(options),
           membership     = this.Membership.create(jsonMembership);
       return {
@@ -93,8 +77,8 @@ describe('Membership', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(MembershipSpecCommon, ServerReplyMixin) {
-      _.extend(this, SuiteMixin(MembershipSpecCommon, ServerReplyMixin));
+    angular.mock.inject(function() {
+      Object.assign(this, MembershipTestSuiteMixin, SuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',
@@ -114,7 +98,7 @@ describe('Membership', function() {
 
       this.url = (...pathItems) => {
         const args = [ 'access/memberships' ].concat(pathItems);
-        return MembershipSpecCommon.url.apply(null, args);
+        return MembershipTestSuiteMixin.url(...args);
       }
     });
   });
@@ -167,7 +151,7 @@ describe('Membership', function() {
       });
 
       function shouldNotFail() {
-        fail('function should not be called');
+        fail('should not be called');
       }
 
       function shouldFail(error) {
@@ -241,7 +225,7 @@ describe('Membership', function() {
       this.$httpBackend.flush();
 
       function listFail() {
-        fail('function should not be called');
+        fail('should not be called');
       }
 
       function shouldFail(error) {

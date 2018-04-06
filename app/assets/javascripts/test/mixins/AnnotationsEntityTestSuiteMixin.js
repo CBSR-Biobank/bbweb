@@ -23,7 +23,6 @@ let AnnotationsEntityTestSuiteMixin = {
    */
   injectDependencies: function (...dependencies) {
     const allDependencies = dependencies.concat([
-      'EntityTestSuiteMixin',
       'AnnotationType',
       'AnnotationValueType',
       'AnnotationMaxValueCount',

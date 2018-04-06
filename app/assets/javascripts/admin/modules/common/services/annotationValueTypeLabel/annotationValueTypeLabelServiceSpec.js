@@ -4,16 +4,17 @@
  */
 /* global angular */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
-import sharedBehaviour from '../../../../../test/behaviours/labelServiceSharedBehaviour';
+import sharedBehaviour from 'test/behaviours/labelServiceSharedBehaviour';
 
 describe('annotationValueTypeLabelService', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin);
       this.injectDependencies('annotationValueTypeLabelService',
                               'AnnotationValueType');
     });
@@ -22,7 +23,7 @@ describe('annotationValueTypeLabelService', function() {
   describe('shared behaviour', function() {
     const context = {};
     beforeEach(function() {
-      context.labels = _.values(this.AnnotationValueType);
+      context.labels = Object.values(this.AnnotationValueType);
       context.toLabelFunc =
         this.annotationValueTypeLabelService.valueTypeToLabelFunc.bind(this.annotationValueTypeLabelService);
       context.expectedLabels = [];
@@ -41,7 +42,7 @@ describe('annotationValueTypeLabelService', function() {
   it('has valid enumeration values', function() {
     var labels = this.annotationValueTypeLabelService.getLabels(),
         labelIds = _.map(labels, 'id');
-    expect(labels.length).toBe(_.keys(this.AnnotationValueType).length);
+    expect(labels.length).toBe(Object.keys(this.AnnotationValueType).length);
     Object.values(this.AnnotationValueType).forEach(valueType => {
       expect(labelIds).toContain(valueType);
     });

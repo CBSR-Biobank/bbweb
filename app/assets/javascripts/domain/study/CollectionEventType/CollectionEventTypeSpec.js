@@ -6,6 +6,8 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
 import ngModule from '../../index'
 
@@ -15,8 +17,8 @@ describe('CollectionEventType', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$rootScope',
                               '$httpBackend',
@@ -99,7 +101,7 @@ describe('CollectionEventType', function() {
 
   it('fails when creating from a bad json specimen spec', function() {
     var jsonSpec = _.omit(this.Factory.collectionSpecimenDescription(), 'name'),
-        badJsonCet = _.extend(this.Factory.collectionEventType(this.jsonStudy),
+        badJsonCet = Object.assign(this.Factory.collectionEventType(this.jsonStudy),
                               { specimenDescriptions: [ jsonSpec ] });
 
     expect(() => CollectionEventType.create(badJsonCet))
@@ -108,7 +110,7 @@ describe('CollectionEventType', function() {
 
   it('fails when creating from bad json annotation type data', function() {
     var jsonAnnotType = _.omit(this.Factory.annotationType(), 'name'),
-        badJsonCet = _.extend(this.Factory.collectionEventType(this.jsonStudy),
+        badJsonCet = Object.assign(this.Factory.collectionEventType(this.jsonStudy),
                               { annotationTypes: [ jsonAnnotType ] });
 
     expect(() => CollectionEventType.create(badJsonCet))
@@ -270,7 +272,7 @@ describe('CollectionEventType', function() {
                         'addSpecimenDescription',
                         _.omit(this.jsonSpec, 'id'),
                         this.url('spcdesc', this.cet.id),
-                        _.extend(_.omit(this.jsonSpec, 'id'), { studyId: this.cet.studyId }),
+                        Object.assign(_.omit(this.jsonSpec, 'id'), { studyId: this.cet.studyId }),
                         this.jsonCet,
                         this.expectCet.bind(this),
                         this.failTest.bind(this));
@@ -308,7 +310,7 @@ describe('CollectionEventType', function() {
                              'addAnnotationType',
                              _.omit(this.jsonAnnotType, 'id'),
                              this.url('annottype', this.cet.id),
-                             _.extend(_.omit(this.jsonAnnotType, 'id'),
+                             Object.assign(_.omit(this.jsonAnnotType, 'id'),
                                       { studyId: this.cet.studyId }),
                              this.jsonCet,
                              this.expectCet,
@@ -331,7 +333,7 @@ describe('CollectionEventType', function() {
       });
 
       it('fails when removing an invalid annotation type', function() {
-        var jsonAnnotType = _.extend({}, this.jsonAnnotType, { id: this.Factory.stringNext() });
+        var jsonAnnotType = Object.assign({}, this.jsonAnnotType, { id: this.Factory.stringNext() });
         this.cet.removeAnnotationType(jsonAnnotType)
           .catch((err) => {
             expect(err.message).toContain('annotation type with ID not present:');

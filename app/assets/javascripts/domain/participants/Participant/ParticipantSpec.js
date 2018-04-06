@@ -6,19 +6,20 @@
  */
 /* global angular */
 
+import { AnnotationsEntityTestSuiteMixin } from 'test/mixins/AnnotationsEntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash';
-import annotationsSharedBehaviour from '../../../test/behaviours/entityWithAnnotationsSharedBehaviour';
+import annotationsSharedBehaviour from 'test/behaviours/entityWithAnnotationsSharedBehaviour';
 import ngModule from '../../index'
 
 describe('Participant', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin,
-                                 ServerReplyMixin) {
-      _.extend(this,
-               AnnotationsEntityTestSuiteMixin,
-               ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this,
+                    AnnotationsEntityTestSuiteMixin,
+                    ServerReplyMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -161,7 +162,7 @@ describe('Participant', function() {
         annotation;
 
     // put an invalid value in serverAnnotation.annotationTypeId
-    annotation = _.extend(this.annotationFactory.create(serverAnnotation, annotationType),
+    annotation = Object.assign(this.annotationFactory.create(serverAnnotation, annotationType),
                           { annotationTypeId: self.Factory.stringNext() });
     expect(function () {
       return new self.Participant({}, study, [ annotation ]);
@@ -302,18 +303,28 @@ describe('Participant', function() {
   });
 
   it('can update the unique ID on a participant', function() {
-    var study = this.Factory.study(),
-        jsonParticipant = this.Factory.participant({ studyId: study.id }),
-        participant = new this.Participant(jsonParticipant);
+    const study = this.Factory.study();
+    const jsonParticipant = this.Factory.participant({ studyId: study.id });
+    const participant = new this.Participant(jsonParticipant);
+    const newUniqueId = this.Factory.stringNext();
+    const serverReply = Object.assign({}, jsonParticipant, { uniqueId: newUniqueId } );
 
-    this.updateEntity(participant,
-                      'updateUniqueId',
-                      participant.uniqueId,
-                      this.url('participants/uniqueId', participant.id),
-                      { uniqueId: participant.uniqueId },
-                      jsonParticipant,
-                      this.expectParticipant.bind(this),
-                      this.failTest.bind(this));
+    const updateFunc = () => {
+      participant.updateUniqueId(newUniqueId)
+        .then((updatedParticipant) => {
+          this.expectParticipant(updatedParticipant);
+          expect(updatedParticipant.uniqueId).toEqual(newUniqueId);
+        })
+        .catch(this.failTest);
+    };
+
+    this.updateEntityWithCallback(updateFunc,
+                            this.url('participants/uniqueId', participant.id),
+                            {
+                              uniqueId: newUniqueId,
+                              expectedVersion: participant.version
+                            },
+                            serverReply);
   });
 
   describe('updates to annotations', function () {
@@ -354,7 +365,7 @@ describe('Participant', function() {
   }
 
   function addJson(participant) {
-    return _.extend(_.pick(participant, 'studyId', 'uniqueId'),
+    return Object.assign(_.pick(participant, 'studyId', 'uniqueId'),
                     { annotations: annotationsForCommand(participant) } );
   }
 

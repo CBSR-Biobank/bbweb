@@ -7,8 +7,6 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash';
-
 const returnState = 'home.admin.studies.study.collection.ceventType';
 
 /*
@@ -55,10 +53,10 @@ class CollectionSpecimenDescriptionAddController {
         () => this.gettextCatalog.getString('Add collection specimen'))
     ];
 
-    this.anatomicalSourceTypes = _.values(this.AnatomicalSourceType);
-    this.preservTypes          = _.values(this.PreservationType);
-    this.preservTempTypes      = _.values(this.PreservationTemperature);
-    this.specimenTypes         = _.values(this.SpecimenType);
+    this.anatomicalSourceTypes = Object.values(this.AnatomicalSourceType);
+    this.preservTypes          = Object.values(this.PreservationType);
+    this.preservTempTypes      = Object.values(this.PreservationTemperature);
+    this.specimenTypes         = Object.values(this.SpecimenType);
   }
 
   submit(specimenDescription) {

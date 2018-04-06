@@ -7,8 +7,6 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 /* @ngInject */
 function AnnotationTypeViewController($state,
                                       gettextCatalog,
@@ -48,7 +46,7 @@ function AnnotationTypeViewController($state,
                         gettextCatalog.getString('Description'),
                         vm.annotationType.description)
       .result.then(function (description) {
-        var annotationType = _.extend({}, vm.annotationType, { description: description });
+        var annotationType = Object.assign({}, vm.annotationType, { description: description });
         vm.onUpdate()('description', annotationType);
       });
   }
@@ -66,7 +64,7 @@ function AnnotationTypeViewController($state,
 
   function editSelectionOptions() {
     annotationTypeUpdateModal.openModal(vm.annotationType).result.then(function (options) {
-      var annotationType = _.extend({}, vm.annotationType, { options: options });
+      var annotationType = Object.assign({}, vm.annotationType, { options: options });
       vm.onUpdate()(annotationType);
     });
   }

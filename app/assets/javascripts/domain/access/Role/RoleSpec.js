@@ -4,6 +4,8 @@
  */
 /* global angular */
 
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import _ from 'lodash'
 import ngModule from '../../index'
 
@@ -11,7 +13,7 @@ describe('Role', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test')
-    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
+    angular.mock.inject(function() {
       Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin)
 
       this.injectDependencies('$rootScope',

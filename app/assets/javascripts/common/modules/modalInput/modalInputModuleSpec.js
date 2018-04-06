@@ -6,9 +6,10 @@
  */
 /* global angular */
 
+import { ModalTestSuiteMixin } from 'test/mixins/ModalTestSuiteMixin';
 import _                  from 'lodash';
 import faker              from 'faker';
-import modalInputMatchers from '../../../test/matchers/modalInputMatchers';
+import modalInputMatchers from 'test/matchers/modalInputMatchers';
 import moment             from 'moment';
 import ngModule           from '../../index'  // need filters from common module for this test suite
 
@@ -27,8 +28,8 @@ describe('modalInputModule', function() {
 
   beforeEach(() => {
     //angular.mock.module('ngAnimateMock', 'biobankApp', 'biobank.test');
-    angular.mock.inject(function(ModalTestSuiteMixin) {
-      _.extend(this, ModalTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ModalTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$exceptionHandler',

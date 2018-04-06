@@ -72,7 +72,7 @@ function SpecimenLinkTypeFactory(funutils,
     specimenLinkType = specimenLinkType || {};
     options = options || {};
     ConcurrencySafeEntity.call(self, specimenLinkType);
-    _.extend(this, defaults, _.pick(specimenLinkType, _.keys(defaults)));
+    Object.assign(this, defaults, _.pick(specimenLinkType, Object.keys(defaults)));
 
     if (options.studySpecimenGroups) {
       self.studySpecimenGroups(options.studySpecimenGroups);
@@ -122,7 +122,7 @@ function SpecimenLinkTypeFactory(funutils,
   // FIXME: fix the unused parameter
   SpecimenLinkType.prototype.addOrUpdate = function () {
     var self = this,
-        cmd = _.extend(_.pick(this,
+        cmd = Object.assign(_.pick(this,
                               'processingTypeId',
                               'expectedInputChange',
                               'expectedOutputChange',

@@ -6,7 +6,7 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { AnnotationsEntityTestSuiteMixin } from 'test/mixins/AnnotationsEntityTestSuiteMixin';
 import moment from 'moment';
 import ngModule from '../../index'
 
@@ -15,12 +15,12 @@ import ngModule from '../../index'
  *
  * These test cases provide additional code coverage to the ones in AnnotationSpec.js.
  */
-describe('MultipleSelectAnnotation', function() {
+describe('annotationFactorySpec', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(AnnotationsEntityTestSuiteMixin) {
-      _.extend(this, AnnotationsEntityTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, AnnotationsEntityTestSuiteMixin);
       this.injectDependencies('annotationFactory',
                               'AnnotationType',
                               'AnnotationValueType',
@@ -32,28 +32,28 @@ describe('MultipleSelectAnnotation', function() {
   it('can create an annotation of each value type', function() {
     Object.values(this.annotationTypesForAllValueTypes()).forEach((options) => {
       const entities = this.getAnnotationAndType(options);
-      const annotation = this.annotationFactory.create(entities.serverAnnotation, entities.annotationType);
+      const annotation = this.annotationFactory.create(entities.jsonAnnotation, entities.annotationType);
 
       switch (entities.annotationType.valueType) {
 
       case this.AnnotationValueType.TEXT:
-        expect(annotation.value).toBe(entities.serverAnnotation.stringValue);
+        expect(annotation.value).toBe(entities.jsonAnnotation.stringValue);
         break;
 
       case this.AnnotationValueType.NUMBER:
-        expect(annotation.value).toBe(parseFloat(entities.serverAnnotation.numberValue));
+        expect(annotation.value).toBe(parseFloat(entities.jsonAnnotation.numberValue));
         break;
 
       case this.AnnotationValueType.DATE_TIME:
-          expect(moment(annotation.value).utc().format()).toBe(entities.serverAnnotation.stringValue);
+          expect(moment(annotation.value).utc().format()).toBe(entities.jsonAnnotation.stringValue);
         break;
 
       case this.AnnotationValueType.SELECT:
         if (entities.annotationType.isSingleSelect()) {
-          expect(annotation.value).toBe(entities.serverAnnotation.selectedValues[0]);
+          expect(annotation.value).toBe(entities.jsonAnnotation.selectedValues[0]);
         } else if (entities.annotationType.isMultipleSelect()) {
           annotation.value.forEach((option) => {
-            expect(entities.serverAnnotation.selectedValues).toContain(option.name);
+            expect(entities.jsonAnnotation.selectedValues).toContain(option.name);
           });
         }
         break;

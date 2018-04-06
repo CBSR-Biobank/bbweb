@@ -44,7 +44,7 @@ function ProcessingDtoFactory(funutils,
         };
 
     obj = obj || {};
-    _.extend(this, defaults, _.pick(obj, 'specimenLinkAnnotationTypeIdsInUse'));
+    Object.assign(this, defaults, _.pick(obj, 'specimenLinkAnnotationTypeIdsInUse'));
 
     self.processingTypes = obj.processingTypes.map((serverPt) => new ProcessingType(serverPt));
 

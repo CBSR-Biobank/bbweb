@@ -4,76 +4,61 @@
  */
 /* global angular */
 
-import _ from 'lodash';
-import membershipCommonBehaviour from '../../../test/behaviours/membershipCommonBehaviourSpec';
+import { MembershipTestSuiteMixin } from 'test/mixins/MembershipTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
+import membershipCommonBehaviour from 'test/behaviours/membershipCommonBehaviourSpec';
 import ngModule from '../../index'
 
 describe('UserMembership', function() {
 
-  function SuiteMixin(MembershipSpecCommon, ServerReplyMixin) {
+  const SuiteMixin = {
 
-    return _.extend({},
-                    MembershipSpecCommon,
-                    ServerReplyMixin,
-                    {
-                      jsonObj,
-                      membershipFromConstructor,
-                      membershipFromJson,
-                      membershipFromJsonAsync,
-                      jsonMembershipWithAllStudies,
-                      jsonMembershipWithStudy,
-                      jsonMembershipWithAllCentres,
-                      jsonMembershipWithCentre,
-                      jsonMembershipWithEntities,
-                      fixtures
-                    });
-
-    function jsonObj() {
+    jsonObj: function () {
       return this.Factory.userMembership();
-    }
+    },
 
-    function membershipFromConstructor() {
+    membershipFromConstructor: function () {
       return new this.UserMembership();
-    }
+    },
 
-    function membershipFromJson(json) {
+    membershipFromJson: function (json) {
       return this.UserMembership.create(json);
-    }
+    },
 
-    function membershipFromJsonAsync(json) {
+    membershipFromJsonAsync: function (json) {
       return this.UserMembership.asyncCreate(json);
-    }
+    },
 
-    function jsonMembershipWithAllStudies() {
+    jsonMembershipWithAllStudies: function () {
       var json = this.Factory.userMembership();
       json.studyData.allEntities = true;
       return json;
-    }
+    },
 
-    function jsonMembershipWithStudy(id, name) {
+    jsonMembershipWithStudy: function (id, name) {
       var json = this.Factory.userMembership();
       json.studyData.entityData = [ Object.assign(this.Factory.entityInfo(), { id: id, name: name}) ];
       return json;
-    }
+    },
 
-    function jsonMembershipWithAllCentres() {
+    jsonMembershipWithAllCentres: function () {
       var json = this.Factory.userMembership();
       json.centreData.allEntities = true;
       return json;
-    }
+    },
 
-    function jsonMembershipWithCentre(id, name) {
+    jsonMembershipWithCentre: function (id, name) {
       var json = this.Factory.userMembership();
       json.centreData.entityData = [ Object.assign(this.Factory.entityInfo(), { id: id, name: name}) ];
       return json;
-    }
+    },
 
-    function jsonMembershipWithEntities() {
+    jsonMembershipWithEntities: function () {
       var entityData = [ this.jsonEntityData() ];
       return this.jsonObjWithEntities(entityData, entityData);
-    }
+    },
 
-    function fixtures(options) {
+    fixtures: function (options) {
       var jsonMembership = this.Factory.userMembership(options),
           membership     = this.UserMembership.create(jsonMembership);
       return {
@@ -85,8 +70,8 @@ describe('UserMembership', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(MembershipSpecCommon, ServerReplyMixin) {
-      _.extend(this, SuiteMixin(MembershipSpecCommon, ServerReplyMixin));
+    angular.mock.inject(function() {
+      Object.assign(this, MembershipTestSuiteMixin, SuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$rootScope',
                               'UserMembership',

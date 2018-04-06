@@ -6,6 +6,7 @@
  */
 /* global angular */
 
+import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import _ from 'lodash';
 
 const ngModule = 'FIXME'
@@ -14,8 +15,8 @@ xdescribe('AnnotationTypeViewer', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(TestSuiteMixin) {
-      _.extend(this, TestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, TestSuiteMixin);
       this.injectDependencies('$uibModal',
                               'Study',
                               'AnnotationType',

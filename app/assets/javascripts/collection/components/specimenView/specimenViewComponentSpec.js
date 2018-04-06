@@ -4,15 +4,15 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('specimenViewComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(ComponentTestSuiteMixin) {
-      _.extend(this, ComponentTestSuiteMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, ComponentTestSuiteMixin);
       this.injectDependencies('$q',
                               '$rootScope',
                               '$compile',
@@ -68,7 +68,7 @@ describe('specimenViewComponent', function() {
 
   it('has valid scope', function() {
     var entities = this.createEntities();
-    this.createController.apply(this, _.values(entities));
+    this.createController.apply(this, Object.values(entities));
   });
 
   it('user can return to previous page', function() {
@@ -77,7 +77,7 @@ describe('specimenViewComponent', function() {
     this.injectDependencies('$state');
     spyOn(this.$state, 'go').and.returnValue(null);
 
-    this.createController.apply(this, _.values(entities));
+    this.createController.apply(this, Object.values(entities));
     this.controller.back();
 
     expect(this.$state.go).toHaveBeenCalledWith('^');

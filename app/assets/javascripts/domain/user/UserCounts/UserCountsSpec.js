@@ -6,7 +6,8 @@
  */
 /* global angular */
 
-import _ from 'lodash';
+import { EntityTestSuiteMixin } from 'test/mixins/EntityTestSuiteMixin';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import faker from 'faker';
 import ngModule from '../../index'
 
@@ -14,8 +15,8 @@ describe('UserCounts', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
-    angular.mock.inject(function(EntityTestSuiteMixin, ServerReplyMixin) {
-      _.extend(this, EntityTestSuiteMixin, ServerReplyMixin);
+    angular.mock.inject(function() {
+      Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
       this.injectDependencies('UserCounts', '$httpBackend');
     });
   });
