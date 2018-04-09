@@ -4,7 +4,7 @@ val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 
 version := conf.getString("app.version")
 
-val akkaVer = "2.5.8"
+val akkaVer = "2.5.11"
 
 name := "bbweb"
 
@@ -24,7 +24,7 @@ packageSummary in Linux := "Biorepository application for tracking biospecimens.
 
 packageDescription := "Biorepository application for tracking biospecimens."
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.4")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.5")
 
 scalacOptions in Compile ++= Seq(
     "-target:jvm-1.8",
@@ -92,21 +92,21 @@ libraryDependencies ++= Seq(
     ehcache,
     filters,
     "org.scala-stm"               %% "scala-stm"                           % "0.8",
-    "com.typesafe.play"           %% "play-json"                           % "2.6.8",
+    "com.typesafe.play"           %% "play-json"                           % "2.6.9",
     ( "com.typesafe.akka"         %% "akka-persistence"                    % akkaVer   % "compile"  )
       .excludeAll(ExclusionRule(organization="com.google.protobuf")),
     "com.typesafe.akka"           %% "akka-persistence-query"              % akkaVer   % "compile",
     "com.typesafe.akka"           %% "akka-remote"                         % akkaVer   % "compile",
-    ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "3.2.0" % "compile"  )
+    ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "3.3.0" % "compile"  )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "mysql"                       % "mysql-connector-java"                 % "8.0.9-rc",
-    "org.scalaz"                  %% "scalaz-core"                         % "7.2.19"  % "compile",
+    "org.scalaz"                  %% "scalaz-core"                         % "7.2.21"  % "compile",
     "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
     "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.1",
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
     "com.typesafe.play"           %% "play-mailer"                         % "6.0.1",
     "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.1",
-    "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.7.2",
+    "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.8.0",
     "com.github.ghik"             %% "silencer-lib"                        % "0.6"  % "compile",
     // Testing
     ( "com.github.dnvriend"       %% "akka-persistence-inmemory"           % "2.5.1.1"  % "test" )
@@ -115,7 +115,7 @@ libraryDependencies ++= Seq(
     "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.2"   % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
     "org.codehaus.janino"         %  "janino"                              % "3.0.8"   % "test",
-    "org.mockito"                 %  "mockito-core"                        % "2.13.0"  % "test",
+    "org.mockito"                 %  "mockito-core"                        % "2.18.0"  % "test",
     "it.bitbl"                    %% "scala-faker"                         % "0.4"     % "test"
   )
 
