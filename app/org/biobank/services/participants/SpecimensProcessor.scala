@@ -230,7 +230,8 @@ class SpecimensProcessor @Inject() (
     v.foreach { specimens =>
       val ceventId = CollectionEventId(event.getAdded.getCollectionEventId)
       specimens.foreach { specimen =>
-        specimenRepository.put(specimen.copy(slug = specimenRepository.slug(specimen.inventoryId)))
+        specimenRepository.put(
+          specimen.copy(slug = specimenRepository.uniqueSlugFromStr(specimen.inventoryId)))
         ceventSpecimenRepository.put(CeventSpecimen(ceventId, specimen.id))
       }
     }

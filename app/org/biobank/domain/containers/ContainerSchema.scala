@@ -19,7 +19,7 @@ final case class ContainerSchema(id:           ContainerSchemaId,
                                  version:      Long,
                                  timeAdded:    OffsetDateTime,
                                  timeModified: Option[OffsetDateTime],
-                                 slug:         String,
+                                 slug: Slug,
                                  name:         String,
                                  description:  Option[String],
                                  shared:       Boolean)

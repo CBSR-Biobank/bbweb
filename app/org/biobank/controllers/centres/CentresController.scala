@@ -2,6 +2,7 @@ package org.biobank.controllers.centres
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
+import org.biobank.domain.Slug
 import org.biobank.domain.centres.CentreId
 import org.biobank.dto._
 import org.biobank.infrastructure.commands.CentreCommands._
@@ -75,7 +76,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
       Future(validationReply(service.searchLocations(cmd)))
     }
 
-  def getBySlug(slug: String): Action[Unit] =
+  def getBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       val v = service.getCentreBySlug(request.authInfo.userId, slug)
       validationReply(v)

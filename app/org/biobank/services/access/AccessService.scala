@@ -5,7 +5,7 @@ import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import java.time.format.DateTimeFormatter
 import javax.inject._
-import org.biobank.domain.{ConcurrencySafeEntity, HasName, HasSlug, IdentifiedValueObject}
+import org.biobank.domain.{ConcurrencySafeEntity, HasName, HasSlug, IdentifiedValueObject, Slug}
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.users.{UserId, UserRepository}
@@ -36,7 +36,7 @@ trait AccessService extends BbwebService {
 
   def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[RoleDto]
 
-  def getRoleBySlug(requestUserId: UserId, slug: String): ServiceValidation[RoleDto]
+  def getRoleBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[RoleDto]
 
   def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString)
       : ServiceValidation[Seq[RoleDto]]
@@ -61,7 +61,7 @@ trait AccessService extends BbwebService {
 
   def getMembership(requestUserId: UserId, membershipId: MembershipId): ServiceValidation[Membership]
 
-  def getMembershipBySlug(requestUserId: UserId, slug: String): ServiceValidation[MembershipDto]
+  def getMembershipBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[MembershipDto]
 
   def getMemberships(requestUserId: UserId,
                      filter:        FilterString,
@@ -144,7 +144,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     }
   }
 
-  def getRoleBySlug(requestUserId: UserId, slug: String): ServiceValidation[RoleDto] = {
+  def getRoleBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[RoleDto] = {
     whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
       for {
         item <- accessItemRepository.getBySlug(slug)
@@ -233,7 +233,7 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     }
   }
 
-  def getMembershipBySlug(requestUserId: UserId, slug: String): ServiceValidation[MembershipDto] = {
+  def getMembershipBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[MembershipDto] = {
     whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
       membershipRepository.getBySlug(slug).flatMap(membershipToDto)
     }

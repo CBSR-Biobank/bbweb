@@ -2,6 +2,7 @@ package org.biobank.controllers.participants
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
+import org.biobank.domain.Slug
 import org.biobank.domain.studies.StudyId
 import org.biobank.domain.participants.ParticipantId
 import org.biobank.infrastructure.commands.ParticipantCommands._
@@ -27,7 +28,7 @@ class ParticipantsController @Inject() (controllerComponents: ControllerComponen
       validationReply(participantsService.get(request.authInfo.userId, studyId, participantId))
     }
 
-  def getBySlug(slug: String): Action[Unit] =
+  def getBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(participantsService.getBySlug(request.authInfo.userId, slug))
     }

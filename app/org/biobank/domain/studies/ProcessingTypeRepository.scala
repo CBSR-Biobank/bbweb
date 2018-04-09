@@ -8,9 +8,10 @@ import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 @ImplementedBy(classOf[ProcessingTypeRepositoryImpl])
-trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, ProcessingType] {
+trait ProcessingTypeRepository
+    extends ReadWriteRepositoryWithSlug[ProcessingTypeId, ProcessingType] {
 
-  def withId(studyId: StudyId,processingTypeId: ProcessingTypeId)
+  def withId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : DomainValidation[ProcessingType]
 
   def allForStudy(studyId: StudyId): Set[ProcessingType]
@@ -19,13 +20,16 @@ trait ProcessingTypeRepository extends ReadWriteRepository [ProcessingTypeId, Pr
 
 @Singleton
 class ProcessingTypeRepositoryImpl
-    extends ReadWriteRepositoryRefImpl[ProcessingTypeId, ProcessingType](v => v.id)
+    extends ReadWriteRepositoryRefImplWithSlug[ProcessingTypeId, ProcessingType](v => v.id)
     with ProcessingTypeRepository {
   import org.biobank.CommonValidations._
 
   def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 
   protected def notFound(id: ProcessingTypeId): IdNotFound = IdNotFound(s"processing type id: $id")
+
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound =
+    EntityCriteriaNotFound(s"processing type slug: $slug")
 
   def withId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : DomainValidation[ProcessingType] = {

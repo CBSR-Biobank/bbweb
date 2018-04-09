@@ -13,19 +13,16 @@ import play.api.libs.json._
 import scala.concurrent.duration._
 import scala.concurrent.Await
 
-final case class NamedStudiesProcessor1 @Inject() (@Named("studiesProcessor") processor: ActorRef)
-final case class NamedStudiesProcessor2 @Inject() (@Named("processingType") processor: ActorRef)
-final case class NamedStudiesProcessor3 @Inject() (@Named("specimenLinkType") processor: ActorRef)
+final case class NamedStudiesProcessor @Inject() (@Named("studiesProcessor") processor: ActorRef)
 
-class StudiesProcessorSpec extends ProcessorTestFixture {
+class StudiesProcessorSpec
+    extends ProcessorTestFixture {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.commands.StudyCommands._
   import org.biobank.infrastructure.events.StudyEvents._
 
-  private var studiesProcessor = app.injector.instanceOf[NamedStudiesProcessor1].processor
-  private val processingTypeProcessor = app.injector.instanceOf[NamedStudiesProcessor2].processor
-  private val specimenLinkTypeProcessor = app.injector.instanceOf[NamedStudiesProcessor3].processor
+  private var studiesProcessor = app.injector.instanceOf[NamedStudiesProcessor].processor
 
   private val studyRepository = app.injector.instanceOf[StudyRepository]
 

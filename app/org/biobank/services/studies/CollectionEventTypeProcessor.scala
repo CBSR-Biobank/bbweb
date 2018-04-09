@@ -337,7 +337,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       _.studyId                                      := cet.studyId.id,
       _.sessionUserId                                := cmd.sessionUserId,
       _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-      _.specimenDefinitionUpdated.version             := cmd.expectedVersion,
+      _.specimenDefinitionUpdated.version            := cmd.expectedVersion,
       _.specimenDefinitionUpdated.specimenDefinition := EventUtils.specimenDefinitionToEvent(specimenDesc))
   }
 
@@ -368,10 +368,13 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     process(event)(applyEvent)
   }
 
-  private def onValidEventAndVersion(event:        CollectionEventTypeEvent,
+  private def onValidEventAndVersion(
+    event:        CollectionEventTypeEvent,
     eventType:    Boolean,
-                                     eventVersion: Long)
-                                    (applyEvent: (CollectionEventType, OffsetDateTime) => ServiceValidation[Boolean])
+    eventVersion: Long
+  ) (
+    applyEvent: (CollectionEventType, OffsetDateTime) => ServiceValidation[Boolean]
+  )
       : Unit = {
     if (!eventType) {
       log.error(s"invalid event type: $event")
@@ -416,7 +419,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
       v.foreach { ct =>
         val timeAdded = OffsetDateTime.parse(event.getTime)
-        val slug = collectionEventTypeRepository.slug(ct.name)
+        val slug = collectionEventTypeRepository.uniqueSlugFromStr(ct.name)
         collectionEventTypeRepository.put(ct.copy(slug = slug, timeAdded = timeAdded))
       }
     }
@@ -447,7 +450,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
 
       val v = cet.withName(event.getNameUpdated.getName).map { updated =>
-        updated.copy(slug = collectionEventTypeRepository.slug(updated.name))
+          updated.copy(slug = collectionEventTypeRepository.uniqueSlugFromStr(updated.name))
         }
       storeIfValid(v, eventTime)
     }

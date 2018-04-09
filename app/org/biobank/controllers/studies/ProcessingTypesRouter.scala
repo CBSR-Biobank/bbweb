@@ -6,12 +6,16 @@ import play.api.routing.SimpleRouter
 import play.api.routing.sird._
 
 class ProcessingTypesRouter @Inject()(controller: ProcessingTypesController) extends SimpleRouter {
+  import org.biobank.controllers.SlugRouting._
   import StudiesRouting._
 
   override def routes: Routes = {
 
-    case GET(p"/${studyId(sId)}" ? q_o"ptId=${procTypeId(ptId)}") =>
-      controller.get(sId, ptId)
+    case GET(p"/${slug(studySlug)}/${slug(procTypeSlug)}") =>
+      controller.get(studySlug, procTypeSlug)
+
+    case POST(p"/snapshot") =>
+      controller.snapshot
 
     case POST(p"/${studyId(sId)}") =>
       controller.addProcessingType(sId)

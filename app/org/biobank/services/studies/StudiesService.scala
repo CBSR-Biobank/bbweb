@@ -4,6 +4,7 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject._
+import org.biobank.domain.Slug
 import org.biobank.domain.access._
 import org.biobank.domain.centres.{Centre, CentreRepository}
 import org.biobank.domain.participants.CollectionEventRepository
@@ -12,7 +13,6 @@ import org.biobank.domain.users.UserId
 //import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.commands.StudyCommands._
-import org.biobank.infrastructure.events.ProcessingTypeEvents._
 import org.biobank.infrastructure.events.StudyEvents._
 import org.biobank.services._
 import org.biobank.services.access.AccessService
@@ -54,48 +54,26 @@ trait StudiesService extends BbwebService {
 
   def getStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Study]
 
-  def getStudyBySlug(requestUserId: UserId, slug: String): ServiceValidation[Study]
+  def getStudyBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Study]
 
   def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]]
 
   def enableAllowed(requestUserId: UserId, studyId: StudyId): ServiceValidation[Boolean]
 
-  def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
-      : ServiceValidation[ProcessingType]
-
-  def processingTypesForStudy(studyId: StudyId): ServiceValidation[Set[ProcessingType]]
-
-  def specimenLinkTypeWithId(processingTypeId: ProcessingTypeId,
-                             specimenLinkTypeId: SpecimenLinkTypeId)
-      : ServiceValidation[SpecimenLinkType]
-
-  def specimenLinkTypesForProcessingType(processingTypeId: ProcessingTypeId)
-      : ServiceValidation[Set[SpecimenLinkType]]
-
-  //def getProcessingDto(studyId: StudyId): ServiceValidation[ProcessingDto]
-
   def processCommand(cmd: StudyCommand): Future[ServiceValidation[Study]]
-
-  // FIXME: move to its own service
-  def processProcessingTypeCommand(cmd: StudyCommand)
-      : Future[ServiceValidation[ProcessingType]]
-
-  // FIXME: move to its own service
-  def processRemoveProcessingTypeCommand(cmd: StudyCommand)
-      : Future[ServiceValidation[Boolean]]
 
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
 }
 
 /**
-  * This is the Study Aggregate Application Service.
-  *
-  * Handles the commands to configure studies. the commands are forwarded to the Study Aggregate
-  * Processor.
-  *
-  * @param studiesProcessor
-  *
+ * This is the Study Aggregate Application Service.
+ *
+ * Handles the commands to configure studies. the commands are forwarded to the Study Aggregate
+ * Processor.
+ *
+ * @param studiesProcessor
+ *
  */
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class StudiesServiceImpl @Inject()(
@@ -104,11 +82,9 @@ class StudiesServiceImpl @Inject()(
   val studyRepository:                      StudyRepository,
   val centreRepository:                     CentreRepository,
   val processingTypeRepository:             ProcessingTypeRepository,
-  val specimenGroupRepository:              SpecimenGroupRepository,
   val collectionEventTypeRepository:        CollectionEventTypeRepository,
-  val collectionEventRepository:            CollectionEventRepository,
-  val specimenLinkTypeRepository:           SpecimenLinkTypeRepository)
-                               (implicit executionContext: BbwebExecutionContext)
+  val collectionEventRepository:            CollectionEventRepository)
+                                (implicit executionContext: BbwebExecutionContext)
     extends StudiesService
     with AccessChecksSerivce
     with StudyServicePermissionChecks
@@ -178,7 +154,7 @@ class StudiesServiceImpl @Inject()(
     }
   }
 
-  def getStudyBySlug(requestUserId: UserId, slug: String): ServiceValidation[Study] = {
+  def getStudyBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Study] = {
     for {
       study      <- studyRepository.getBySlug(slug)
       permission <- accessService.hasPermissionAndIsMember(requestUserId,
@@ -211,59 +187,8 @@ class StudiesServiceImpl @Inject()(
       val specimenDefinitions = collectionEventTypeRepository.allForStudy(studyId).map { ceTypes =>
           ceTypes.specimenDefinitions
         }
-      (specimenDefinitions.size > 0).successNel[String]
+        (specimenDefinitions.size > 0).successNel[String]
     }
-  }
-
-  def processingTypeWithId(studyId: StudyId, processingTypeId: ProcessingTypeId)
-      : ServiceValidation[ProcessingType] = {
-    withStudy(studyId) { study =>
-      processingTypeRepository.withId(study.id, processingTypeId)
-    }
-  }
-
-  def processingTypesForStudy(studyId: StudyId)
-      : ServiceValidation[Set[ProcessingType]] = {
-    withStudy(studyId) { study =>
-      processingTypeRepository.allForStudy(study.id).successNel[String]
-    }
-  }
-
-  def specimenLinkTypeWithId(processingTypeId: ProcessingTypeId,
-                             specimenLinkTypeId: SpecimenLinkTypeId)
-      : ServiceValidation[SpecimenLinkType] = {
-    validProcessingTypeId(processingTypeId) { processingType =>
-      specimenLinkTypeRepository.withId(processingType.id, specimenLinkTypeId)
-    }
-  }
-
-  def specimenLinkTypesForProcessingType(processingTypeId: ProcessingTypeId)
-      : ServiceValidation[Set[SpecimenLinkType]] = {
-    validProcessingTypeId(processingTypeId) { processingType =>
-      specimenLinkTypeRepository.allForProcessingType(processingType.id).successNel[String]
-    }
-  }
-
-  // def getProcessingDto(studyId: StudyId): ServiceValidation[ProcessingDto] = {
-  //   "deprectated: annot type refactor".failureNel[ProcessingDto]
-  // }
-
-  private def withStudy[T](studyId: StudyId)(fn: Study => ServiceValidation[T])
-      : ServiceValidation[T] = {
-    for {
-      study  <- studyRepository.getByKey(studyId)
-      result <- fn(study)
-    } yield result
-  }
-
-  private def validProcessingTypeId[T](processingTypeId: ProcessingTypeId)
-                                   (fn: ProcessingType => ServiceValidation[T])
-      : ServiceValidation[T] = {
-    for {
-      pt     <- processingTypeRepository.getByKey(processingTypeId)
-      study  <- studyRepository.getByKey(pt.studyId)
-      result <- fn(pt)
-    } yield result
   }
 
   def processCommand(cmd: StudyCommand): Future[ServiceValidation[Study]] = {
@@ -286,26 +211,6 @@ class StudiesServiceImpl @Inject()(
         }
     }
   }
-
-  def processProcessingTypeCommand(cmd: StudyCommand)
-      : Future[ServiceValidation[ProcessingType]] = {
-    cmd match {
-      case c: RemoveProcessingTypeCmd =>
-        Future.successful(ServiceError(s"invalid service call: $cmd").failureNel[ProcessingType])
-      case _ =>
-        ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]].map { validation =>
-          for {
-            event  <- validation
-            result <- processingTypeRepository.getByKey(ProcessingTypeId(event.id))
-          } yield result
-        }
-    }
-  }
-
-  def processRemoveProcessingTypeCommand(cmd: StudyCommand)
-      : Future[ServiceValidation[Boolean]] =
-    ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]]
-      .map { validation => validation.map(_ => true) }
 
   private def filterStudiesInternal(unfilteredStudies: Set[Study], filter: FilterString, sort: SortString):
       ServiceValidation[Seq[Study]] = {

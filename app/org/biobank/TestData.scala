@@ -192,7 +192,7 @@ object BbpspTestData {
   val CollectionSpecimenDefinitions: Set[CollectionSpecimenDefinition] =
     Set(CollectionSpecimenDefinition(
           id                          = SpecimenDefinitionId(SpecimenHashids.encode(1)),
-          slug                        = "",
+          slug                        = Slug(""),
           name                        = "10 mL Lavender top EDTA tube",
           description                 = None,
           units                       = "mL",
@@ -204,7 +204,7 @@ object BbpspTestData {
           amount                      = 10.0),
         CollectionSpecimenDefinition(
           id                          = SpecimenDefinitionId(SpecimenHashids.encode(2)),
-          slug                        = "",
+          slug                        = Slug(""),
           name                        = "10 mL Orange top PAXgene tube",
           description                 = None,
           units                       = "mL",
@@ -216,7 +216,7 @@ object BbpspTestData {
           amount                      = 10.0),
         CollectionSpecimenDefinition(
           id                          = SpecimenDefinitionId(SpecimenHashids.encode(3)),
-          slug                        = "",
+          slug                        = Slug(""),
           name                        = "3mL Lavender top EDTA tube",
           description                 = None,
           units                       = "mL",
@@ -228,7 +228,7 @@ object BbpspTestData {
           amount                      = 3),
         CollectionSpecimenDefinition(
           id                          = SpecimenDefinitionId(SpecimenHashids.encode(4)),
-          slug                        = "",
+          slug                        = Slug(""),
           name                        = "4ml lavender top EDTA tube",
           description                 = None,
           units                       = "mL",
@@ -240,7 +240,7 @@ object BbpspTestData {
           amount                      = 4),
         CollectionSpecimenDefinition(
           id                          = SpecimenDefinitionId(SpecimenHashids.encode(5)),
-          slug                        = "",
+          slug                        = Slug(""),
           name                        = "9ml CPDA yellow top tube",
           description                 = None,
           units                       = "mL",
@@ -252,7 +252,7 @@ object BbpspTestData {
           amount                      = 9),
         CollectionSpecimenDefinition(
           id                          = SpecimenDefinitionId(SpecimenHashids.encode(6)),
-          slug                        = "",
+          slug                        = Slug(""),
           name                        = "Urine cup",
           description                 = None,
           units                       = "mL",
@@ -268,7 +268,7 @@ object BbpspTestData {
     Set(
       AnnotationType(
         id            = AnnotationTypeId(EventTypeAnnotationTypeHashids.encode(1)),
-        slug          = "",
+        slug          = Slug(""),
         name          = "Phlebotomist",
         description   = None,
         valueType     = AnnotationValueType.Text,
@@ -277,7 +277,7 @@ object BbpspTestData {
         required      = true),
       AnnotationType(
         id            = AnnotationTypeId(EventTypeAnnotationTypeHashids.encode(2)),
-        slug          = "",
+        slug          = Slug(""),
         name          = "Consent",
         description   = None,
         valueType     = AnnotationValueType.Select,
@@ -290,7 +290,7 @@ object BbpspTestData {
     Set(
       AnnotationType(
         id            = AnnotationTypeId(ParticipantAnnotationTypeHashids.encode(1)),
-        slug          = "",
+        slug          = Slug(""),
         name          = "Date of birth",
         description   = None,
         valueType     = AnnotationValueType.DateTime,
@@ -299,7 +299,7 @@ object BbpspTestData {
         required      = true),
       AnnotationType(
         id            = AnnotationTypeId(ParticipantAnnotationTypeHashids.encode(2)),
-        slug          = "",
+        slug          = Slug(""),
         name          = "Gender",
         description   = None,
         valueType     = AnnotationValueType.Select,
@@ -374,7 +374,7 @@ class TestData @Inject() (config:         Configuration,
         val locations = {
           if (name == "100-Calgary AB") {
             Set(Location(id             = LocationId(s"${name}_id:Primary"),
-                         slug           = "",
+                         slug           = Slug(""),
                          name           = "Primary",
                          street         = "1403 29 St NW",
                          city           = "Calgary",
@@ -384,7 +384,7 @@ class TestData @Inject() (config:         Configuration,
                          countryIsoCode = "CA"))
           } else if (name == "101-London ON") {
             Set(Location(id             = LocationId(s"${name}_id:Primary"),
-                         slug           = "",
+                         slug           = Slug(""),
                          name           = "Primary",
                          street         = "London Health Sciences Center, University Hospital, Rm A3-222B, 339 Windermere Road",
                          city           = "London",
@@ -398,15 +398,17 @@ class TestData @Inject() (config:         Configuration,
         }.map { l => l.copy(slug = Slug(l.id.id)) }
 
         if ((name == "100-Calgary AB") || (name == "101-London ON")) {
-          EnabledCentre(id           = CentreId(s"${name}_id"),
-                        version      = 0L,
-                        timeAdded    = Global.StartOfTime,
-                        timeModified = None,
-                        slug         = Slug(name),
-                        name         = name,
-                        description  = Some(description),
-                        studyIds     = Set(BbpspTestData.BbpspStudyId),
-                        locations    = locations).asInstanceOf[Centre]
+          EnabledCentre(
+            id           = CentreId(s"${name}_id"),
+            version      = 0L,
+            timeAdded    = Global.StartOfTime,
+            timeModified = None,
+            slug         = Slug(name),
+            name         = name,
+            description  = Some(description),
+            studyIds     = Set(BbpspTestData.BbpspStudyId),
+            locations    = locations
+          ).asInstanceOf[Centre]
         } else {
           DisabledCentre(id           = CentreId(s"${name}_id"),
                          version      = 0L,
@@ -741,7 +743,7 @@ class TestData @Inject() (config:         Configuration,
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
-                   slug         = "",
+                   slug         = Slug(""),
                    name         = "All studies",
                    description  = None,
                    userIds      = studyUserIds,
@@ -751,7 +753,7 @@ class TestData @Inject() (config:         Configuration,
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
-                   slug         = "",
+                   slug         = Slug(""),
                    name         = "All centres",
                    description  = None,
                    userIds      = centreUserIds,

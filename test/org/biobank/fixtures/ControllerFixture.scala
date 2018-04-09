@@ -116,23 +116,23 @@ abstract class ControllerFixture
 
     route(app, fakeRequest).fold {
       fail("HTTP request returned NONE")
-    } { result =>
-      status(result) match {
+    } { reply =>
+      status(reply) match {
         case `expectedStatus` =>
-          val bodyText = contentAsString(result)
+          val bodyText = contentAsString(reply)
           if (bodyText.isEmpty) {
-            log.debug(s"reply: status: $result,\nbodyText: EMPTY")
+            log.debug(s"reply: status: $reply,\nbodyText: EMPTY")
             JsNull
           } else {
-            contentType(result) mustBe Some("application/json")
-            val jsonResult = contentAsJson(result)
-            log.debug(s"reply: status: $result,\nresult: ${Json.prettyPrint(jsonResult)}")
+            contentType(reply) mustBe Some("application/json")
+            val jsonResult = contentAsJson(reply)
+            log.debug(s"reply: status: $reply,\nreply: ${Json.prettyPrint(jsonResult)}")
             jsonResult
           }
         case code =>
-          contentType(result) match {
-            case Some("application/json") => log.debug("reply: " + Json.prettyPrint(contentAsJson(result)))
-            case _ => log.debug("reply: " + contentAsString(result))
+          contentType(reply) match {
+            case Some("application/json") => log.debug("reply: " + Json.prettyPrint(contentAsJson(reply)))
+            case _ => log.debug("reply: " + contentAsString(reply))
           }
           fail(s"bad HTTP status: status: $code, expected: $expectedStatus")
       }
@@ -195,6 +195,7 @@ abstract class ControllerFixture
       case e: Study               => studyRepository.put(e)
       case e: Centre              => centreRepository.put(e)
       case e: CollectionEventType => collectionEventTypeRepository.put(e)
+      case e: ProcessingType      => processingTypeRepository.put(e)
       case e: Participant         => participantRepository.put(e)
       case e: CollectionEvent     => collectionEventRepository.put(e)
       case e: Specimen            => specimenRepository.put(e)

@@ -38,7 +38,7 @@ class CentreRepositoryImpl @Inject() (val testData: TestData)
 
   protected def notFound(id: CentreId): IdNotFound = IdNotFound(s"centre id: $id")
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound =
     EntityCriteriaNotFound(s"centre slug: $slug")
 
   def getDisabled(id: CentreId): DomainValidation[DisabledCentre] = {

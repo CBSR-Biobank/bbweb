@@ -2,6 +2,7 @@ package org.biobank.controllers.participants
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
+import org.biobank.domain.Slug
 import org.biobank.domain.participants.{CollectionEventId, SpecimenId}
 import org.biobank.services._
 import org.biobank.services.participants.SpecimensService
@@ -29,14 +30,14 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
   /**
    * Returns the specimen with the given ID.
    */
-  def get(slug: String): Action[Unit] =
+  def get(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       val v = service.getBySlug(request.authInfo.userId, slug)
         .flatMap { specimen => service.specimenToDto(specimen) }
       validationReply(v)
     }
 
-  def list(ceventSlug: String): Action[Unit] =
+  def list(ceventSlug: Slug): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {

@@ -2,6 +2,7 @@ package org.biobank.controllers.studies
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
+import org.biobank.domain.Slug
 import org.biobank.domain.studies.{StudyId, CollectionEventTypeId}
 import org.biobank.dto.EntityInfoDto
 import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
@@ -16,24 +17,27 @@ import scalaz.Validation.FlatMap._
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
-class CeventTypesController @Inject() (controllerComponents: ControllerComponents,
-                                       val action:  BbwebAction,
-                                       val env:     Environment,
-                                       val service: CollectionEventTypeService)
-                                   (implicit val ec: ExecutionContext)
+class CeventTypesController @Inject() (
+  controllerComponents: ControllerComponents,
+  val action:  BbwebAction,
+  val env:     Environment,
+  val service: CollectionEventTypeService
+) (
+  implicit val ec: ExecutionContext
+)
     extends CommandController(controllerComponents) {
 
   val log: Logger = Logger(this.getClass)
 
   private val PageSizeMax = 10
 
-  def get(studySlug: String, ceventTypeSlug: String): Action[Unit] =
+  def get(studySlug: Slug, ceventTypeSlug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       val ceventType = service.eventTypeBySlug(request.authInfo.userId, studySlug, ceventTypeSlug)
       validationReply(ceventType)
     }
 
-  def list(studySlug: String): Action[Unit] = {
+  def list(studySlug: Slug): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {
@@ -52,7 +56,7 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
   }
 
   // returns all the names of the collection events in a list of EntityInfoDto.
-  def listNames(studySlug: String): Action[Unit] = {
+  def listNames(studySlug: Slug): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
       validationReply(
         Future {
@@ -70,7 +74,7 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
     }
   }
 
-  def inUse(slug: String): Action[Unit] =
+  def inUse(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(service.eventTypeInUse(request.authInfo.userId, slug))
     }

@@ -40,11 +40,15 @@ trait ReadWriteRepository[K, A] extends ReadRepository[K, A] {
 
 trait ReadWriteRepositoryWithSlug[K, A] extends ReadWriteRepository[K, A] {
 
-  def slug(name: String): String
+  /** if slug is already used, then create a new one with a count appended to it. */
+  def uniqueSlug(slug: Slug): Slug
 
-  def getBySlug(slug: String): DomainValidation[A]
+  def getBySlug(slug: Slug): DomainValidation[A]
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound
+  /** if slug is already used, then create a new one with a count appended to it. */
+  def uniqueSlugFromStr(name: String): Slug
+
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound
 }
 
 /**
@@ -85,7 +89,7 @@ private [domain] abstract class ReadWriteRepositoryRefImpl[K, A](keyGetter: (A) 
 
   protected def nextIdentityAsString: String =
     // ensure all IDs can be used in URLs
-    Slug(
+    Slug.slugify(
       play.api.libs.Codecs.sha1(
         ReadWriteRepositoryRefImpl.md.digest(
           java.util.UUID.randomUUID.toString.getBytes)))
@@ -109,20 +113,23 @@ class ReadWriteRepositoryRefImplWithSlug
   [K, A <: ConcurrencySafeEntity[K] with HasSlug](keyGetter: (A) => K)
     extends ReadWriteRepositoryRefImpl[K, A](keyGetter) {
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound
 
-  def slug(value: String): String = {
-    val baseSlug = Slug(value)
-    val slugRegex = s"^${baseSlug}(-[0-9]+)?$$".r
+  def uniqueSlug(origSlug: Slug): Slug = {
+    val slugRegex = s"^${origSlug}(-[0-9]+)?$$".r
     val count = internalMap.single.get.values
       .filter { v =>
-        slugRegex.findFirstIn(v.slug) != None
+        slugRegex.findFirstIn(v.slug.id) != None
       }.size
-    if (count <= 0) baseSlug
-    else s"${baseSlug}-$count"
+    if (count <= 0) origSlug
+    else Slug(s"${origSlug.id}-$count")
   }
 
-  def getBySlug(slug: String): DomainValidation[A] = {
+  def uniqueSlugFromStr(strSlug: String): Slug = {
+    uniqueSlug(Slug(strSlug))
+  }
+
+  def getBySlug(slug: Slug): DomainValidation[A] = {
     internalMap.single.get.find(_._2.slug == slug).map(_._2).toSuccessNel(slugNotFound(slug).toString)
   }
 

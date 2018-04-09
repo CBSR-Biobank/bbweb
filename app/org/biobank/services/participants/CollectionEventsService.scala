@@ -196,9 +196,9 @@ class CollectionEventsServiceImpl @Inject() (
         CollectionEventDto(
           id                      = event.id.id,
           participantId           = participant.id.id,
-          participantSlug         = participant.slug,
+          participantSlug         = participant.slug.id,
           collectionEventTypeId   = ceventType.id.id,
-          collectionEventTypeSlug = ceventType.slug,
+          collectionEventTypeSlug = ceventType.slug.id,
           version                 = event.version,
           timeAdded               = event.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
           timeModified            = event.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),

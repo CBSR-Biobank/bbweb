@@ -6,6 +6,7 @@ import com.google.inject.ImplementedBy
 import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.ValidationKey
+import org.biobank.domain.Slug
 import org.biobank.domain.access.{AccessItemId, MembershipId, PermissionId}
 import org.biobank.domain.centres.CentreRepository
 import org.biobank.domain.studies.{Study, StudyId, StudyRepository}
@@ -44,7 +45,7 @@ trait UsersService extends BbwebService {
    *
    * @param slug the slug for the given user.
    */
-  def getUserBySlug(requestUserId: UserId, slug: String): ServiceValidation[UserDto]
+  def getUserBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[UserDto]
 
   /**
    * Should not be used by the REST API since permissions are not checked.
@@ -130,7 +131,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     }
   }
 
-  def getUserBySlug(requestUserId: UserId, slug: String): ServiceValidation[UserDto] = {
+  def getUserBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[UserDto] = {
     accessService.hasPermission(requestUserId, PermissionId.UserRead).flatMap { permission =>
       userRepository.getBySlug(slug).flatMap { user =>
         if (permission || (requestUserId == user.id)) {

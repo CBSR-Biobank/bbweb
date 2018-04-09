@@ -179,7 +179,7 @@ class AccessControllerMembershipSpec
 
       it("returns a membership") {
         val f = new MembershipFixture
-        val reply = makeRequest(GET, uri("memberships", f.membership.slug))
+        val reply = makeRequest(GET, uri("memberships", f.membership.slug.id))
 
         (reply \ "status").as[String] must be ("success")
 
@@ -190,7 +190,7 @@ class AccessControllerMembershipSpec
       it("fails for an invalid membership") {
         val f = new MembershipFixture
         membershipRepository.remove(f.membership)
-        val reply = makeRequest(GET, uri("memberships", f.membership.slug), NOT_FOUND)
+        val reply = makeRequest(GET, uri("memberships", f.membership.slug.id), NOT_FOUND)
 
         (reply \ "status").as[String] must be ("error")
 

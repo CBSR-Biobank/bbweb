@@ -18,13 +18,12 @@ trait CollectionEventTypePredicates extends HasNamePredicates[CollectionEventTyp
 
 }
 
-trait CollectionEventTypeValidations {
+trait CollectionEventTypeValidations extends StudyValidations {
 
   case object MaxCountInvalid extends ValidationKey
 
   case object AmountInvalid extends ValidationKey
 
-  case object StudyIdRequired extends ValidationKey
 }
 
 /**
@@ -51,7 +50,7 @@ final case class CollectionEventType(studyId:              StudyId,
                                      version:              Long,
                                      timeAdded:            OffsetDateTime,
                                      timeModified:         Option[OffsetDateTime],
-                                     slug:                 String,
+                                     slug: Slug,
                                      name:                 String,
                                      description:          Option[String],
                                      recurring:            Boolean,

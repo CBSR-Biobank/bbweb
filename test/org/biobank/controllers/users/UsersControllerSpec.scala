@@ -389,7 +389,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
       it("return a user") {
         val f = new activeUserFixture
-        val json = makeRequest(GET, uri(f.user.slug))
+        val json = makeRequest(GET, uri(f.user.slug.id))
 
         (json \ "status").as[String] must be ("success")
 
@@ -448,9 +448,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
           (response \ "data" \ "id").as[String] must not equal (users(1).id.id)
 
-          (response \ "data" \ "slug").as[String] must not equal (Slug(dupName))
+          (response \ "data" \ "slug").as[Slug] must not equal (Slug.slugify(dupName))
 
-          (response \ "data" \ "slug").as[String] must include (Slug(dupName))
+          (response \ "data" \ "slug").as[String] must include (Slug.slugify(dupName))
 
           (response \ "data" \ "name").as[String] must equal (dupName)
         }
@@ -747,7 +747,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           }
         }
 
-        val roleSlug = (roles(0) \ "slug").as[String]
+        val roleSlug = (roles(0) \ "slug").as[Slug]
         val roleName = (roles(0) \ "name").as[String]
 
         roleSlug must be (role.slug)
@@ -846,7 +846,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           }
         }
 
-        val membershipSlug = (jsonMembership \ "slug").as[String]
+        val membershipSlug = (jsonMembership \ "slug").as[Slug]
         val membershipName = (jsonMembership \ "name").as[String]
 
         membershipSlug must be (membership.slug)

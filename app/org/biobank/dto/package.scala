@@ -1,8 +1,8 @@
 package org.biobank
 
 import java.time.OffsetDateTime
+import org.biobank.domain.{EntityState, Location, Slug}
 import org.biobank.domain.annotations.Annotation
-import org.biobank.domain.{EntityState, Location}
 import org.biobank.domain.centres.Shipment
 import org.biobank.dto.access.{UserRoleDto, UserMembershipDto}
 import org.biobank.services.centres.CentreLocationInfo
@@ -12,7 +12,7 @@ package dto {
 
   trait Dto
 
-  final case class EntityInfoDto(id: String, slug: String, name: String)
+  final case class EntityInfoDto(id: String, slug: Slug, name: String)
 
   object EntityInfoDto {
 
@@ -30,7 +30,7 @@ package dto {
 
   }
 
-  final case class NameAndStateDto(id: String, slug: String, name: String, state: String)
+  final case class NameAndStateDto(id: String, slug: Slug, name: String, state: String)
 
   object NameAndStateDto {
 
@@ -44,7 +44,7 @@ package dto {
                              timeAdded:    String,
                              timeModified: Option[String],
                              state:        String,
-                             slug:         String,
+                             slug: Slug,
                              name:         String,
                              description:  Option[String],
                              studyNames:   Set[NameAndStateDto],
@@ -72,7 +72,7 @@ package dto {
                                       version:                 Long,
                                       timeAdded:               String,
                                       timeModified:            Option[String],
-                                      slug:                    String,
+                                      slug: Slug,
                                       timeCompleted:           String,
                                       visitNumber:             Int,
                                       annotations:             Set[Annotation])
@@ -88,7 +88,7 @@ package dto {
                            timeAdded:    String,
                            timeModified: Option[String],
                            state:        EntityState,
-                           slug:         String,
+                           slug: Slug,
                            name:         String,
                            email:        String,
                            avatarUrl:    Option[String],
@@ -106,7 +106,7 @@ package dto {
                                timeAdded:                String,
                                timeModified:             Option[String],
                                state:                    EntityState,
-                               slug:                     String,
+                               slug: Slug,
                                inventoryId:              String,
                                collectionEventId:        String,
                                specimenDefinitionId:    String,
@@ -229,17 +229,5 @@ package dto {
 
     implicit val shipmentSpecimenDtoWriter: Writes[ShipmentSpecimenDto] = Json.writes[ShipmentSpecimenDto]
   }
-
-  final case class ProcessingDto(
-    processingTypes:   List[org.biobank.domain.studies.ProcessingType],
-    specimenLinkTypes: List[org.biobank.domain.studies.SpecimenLinkType],
-    specimenGroups:    List[org.biobank.domain.studies.SpecimenGroup])
-
-  object ProcessingDto {
-
-    implicit val processingDtoWriter: Writes[ProcessingDto] = Json.writes[ProcessingDto]
-
-  }
-
 
 }

@@ -29,7 +29,7 @@ class MembershipRepositoryImpl @Inject() (val testData: TestData)
   override def init(): Unit = {
     super.init()
     val name = "All studies and all centres"
-    put(Membership(id           = MembershipId(Slug(name)),
+    put(Membership(id           = MembershipId(Slug(name).id),
                    version      = 0L,
                    timeAdded    = Global.StartOfTime,
                    timeModified = None,
@@ -47,7 +47,7 @@ class MembershipRepositoryImpl @Inject() (val testData: TestData)
 
   protected def notFound(id: MembershipId): IdNotFound = IdNotFound(s"membership id: $id")
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound =
     EntityCriteriaNotFound(s"membership slug: $slug")
 
   def getUserMembership(userId: UserId): DomainValidation[UserMembership] = {

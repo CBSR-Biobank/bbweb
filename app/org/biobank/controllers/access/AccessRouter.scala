@@ -10,6 +10,7 @@ import play.api.routing.sird._
 class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter {
   import AccessItemRouting._
   import MembershipRouting._
+  import org.biobank.controllers.SlugRouting._
   import org.biobank.controllers.studies.StudiesRouting._
   import org.biobank.controllers.centres.CentreRouting._
   import org.biobank.controllers.users.UsersRouting._
@@ -28,9 +29,9 @@ class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter 
       // this action extracts parameters from the raw query string
       controller.listRoleNames
 
-    case GET(p"/roles/$slug") =>
+    case GET(p"/roles/${slug(s)}") =>
       // this action extracts parameters from the query string
-      controller.getRoleBySlug(slug)
+      controller.getRoleBySlug(s)
 
     case GET(p"/memberships") =>
       controller.listMemberships
@@ -38,8 +39,8 @@ class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter 
     case GET(p"/memberships/names") =>
       controller.listMembershipNames
 
-    case GET(p"/memberships/$slug") =>
-      controller.getMembershipBySlug(slug)
+    case GET(p"/memberships/${slug(s)}") =>
+      controller.getMembershipBySlug(s)
 
     case POST(p"/roles") =>
       controller.roleAdd

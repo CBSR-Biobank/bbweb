@@ -42,7 +42,7 @@ final case class CollectionEvent(id:                    CollectionEventId,
                                  version:               Long,
                                  timeAdded:             OffsetDateTime,
                                  timeModified:          Option[OffsetDateTime],
-                                 slug:                  String,
+                                 slug: Slug,
                                  timeCompleted:         OffsetDateTime,
                                  visitNumber:           Int,
                                  annotations:           Set[Annotation])

@@ -369,7 +369,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
       }
 
       v.foreach { u =>
-        userRepository.put(u.copy(slug      = userRepository.slug(registeredEvent.getName),
+        userRepository.put(u.copy(slug      = userRepository.uniqueSlugFromStr(registeredEvent.getName),
                                   timeAdded = OffsetDateTime.parse(event.getTime)))
       }
     }
@@ -455,7 +455,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
   private def applyNameUpdatedEvent(event: UserEvent): Unit = {
     onValidUserActiveEvent(event) { (user, eventTime) =>
       val v = user.withName(event.getWhenActive.getNameUpdated.getName).map { u =>
-          u.copy(slug         = userRepository.slug(u.name),
+          u.copy(slug         = userRepository.uniqueSlugFromStr(u.name),
                  timeModified = Some(eventTime))
         }
       v.foreach(userRepository.put)

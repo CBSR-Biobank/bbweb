@@ -34,7 +34,7 @@ class Factory {
 
   private var domainObjects: Map[Class[_], _] = Map.empty
 
-  private def nextIdentityAsString[T: ClassTag](): String = Slug(nameGenerator.next[T])
+  private def nextIdentityAsString[T: ClassTag](): String = Slug.slugify(nameGenerator.next[T])
 
   def createRegisteredUser(): RegisteredUser = {
     val name = faker.Name.name
@@ -191,6 +191,22 @@ class Factory {
     specimenSpec
   }
 
+  def createProcessingSpecimenDefinition(): ProcessingSpecimenDefinition = {
+    val name = faker.Lorem.sentence(3)
+    val specimenSpec = ProcessingSpecimenDefinition(
+        id                      = SpecimenDefinitionId(nextIdentityAsString[ProcessingSpecimenDefinition]),
+        slug                    = Slug(name),
+        name                    = name,
+        description             = Some(nameGenerator.next[ProcessingSpecimenDefinition]),
+        units                   = nameGenerator.next[String],
+        anatomicalSourceType    = AnatomicalSourceType.Blood,
+        preservationType        = PreservationType.FreshSpecimen,
+        preservationTemperature = PreservationTemperature.Minus80celcius,
+        specimenType            = SpecimenType.FilteredUrine)
+    domainObjects = domainObjects + (classOf[ProcessingSpecimenDefinition] -> specimenSpec)
+    specimenSpec
+  }
+
   def createCollectionEventType(): CollectionEventType = {
     val disabledStudy = defaultDisabledStudy
     val name = faker.Lorem.sentence(3)
@@ -204,7 +220,7 @@ class Factory {
         name                 = name,
         description          = Some(nameGenerator.next[CollectionEventType]),
         recurring            = false,
-        specimenDefinitions = Set.empty,
+        specimenDefinitions  = Set.empty,
         annotationTypes      = Set.empty)
 
     domainObjects = domainObjects + (classOf[CollectionEventType] -> ceventType)
@@ -237,22 +253,31 @@ class Factory {
   }
 
   def createProcessingType(): ProcessingType = {
-    // val disabledStudy = defaultDisabledStudy
-    // val name = faker.Lorem.sentence(3)
-    // val processingType = ProcessingType(
-    //     id             = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
-    //     studyId        = disabledStudy.id,
-    //     version        = 0L,
-    //     timeAdded      = OffsetDateTime.now,
-    //     timeModified   = None,
-    //     slug           = Slug(name),
-    //     name           = name,
-    //     description    = Some(nameGenerator.next[ProcessingType]),
-    //     enabled        = false)
+    val disabledStudy = defaultDisabledStudy
+    val name = faker.Lorem.sentence(1)
+    val processingType        = ProcessingType(
+        id                    = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
+        studyId               = disabledStudy.id,
+        version               = 0L,
+        timeAdded             = OffsetDateTime.now,
+        timeModified          = None,
+        slug                  = Slug(name),
+        name                  = name,
+        description           = Some(faker.Lorem.sentence(4)),
+        enabled               = false,
+        expectedInputChange   = BigDecimal(1.0),
+        expectedOutputChange  = BigDecimal(1.0),
+        inputCount            = 1,
+        outputCount           = 1,
+        specimenDerivation    = CollectedSpecimenDerivation(CollectionEventTypeId(""),
+                                                            SpecimenDefinitionId(""),
+                                                            defaultProcessingSpecimenDefinition),
+        inputContainerTypeId  = None,
+        outputContainerTypeId = None,
+        annotationTypes       = Set.empty)
 
-    // domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
-    // processingType
-    ???
+    domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
+    processingType
   }
 
   def createParticipant(): Participant = {
@@ -609,6 +634,10 @@ class Factory {
 
   def defaultCollectionSpecimenDefinition: CollectionSpecimenDefinition = {
     defaultObject(classOf[CollectionSpecimenDefinition], createCollectionSpecimenDefinition)
+  }
+
+  def defaultProcessingSpecimenDefinition: ProcessingSpecimenDefinition = {
+    defaultObject(classOf[ProcessingSpecimenDefinition], createProcessingSpecimenDefinition)
   }
 
   def defaultAnnotationType: AnnotationType = {

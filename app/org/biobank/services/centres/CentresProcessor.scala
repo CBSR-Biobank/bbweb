@@ -377,7 +377,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                              description  = addedEvent.description,
                                              studyIds     = Set.empty,
                                              locations    = Set.empty).map { c =>
-          c.copy(slug     = centreRepository.slug(c.name),
+          c.copy(slug      = centreRepository.uniqueSlugFromStr(c.name),
                  timeAdded = OffsetDateTime.parse(event.getTime))
         }
 
@@ -394,7 +394,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                          event.eventType.isNameUpdated,
                                          event.getNameUpdated.getVersion) { (centre, _, eventTime) =>
       val v = centre.withName(event.getNameUpdated.getName).map { c =>
-          c.copy(slug         = centreRepository.slug(c.name),
+          c.copy(slug         = centreRepository.uniqueSlugFromStr(c.name),
                  timeModified = Some(eventTime))
         }
       v.foreach(centreRepository.put)

@@ -4,6 +4,7 @@ import akka.actor.ActorRef
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
+import org.biobank.domain.Slug
 import org.biobank.domain.access._
 import org.biobank.domain.studies._
 import org.biobank.domain.participants.CollectionEventRepository
@@ -33,10 +34,10 @@ trait CollectionEventTypeService extends BbwebService {
                       eventTypeId: CollectionEventTypeId): ServiceValidation[CollectionEventType]
 
   def eventTypeBySlug(requestUserId: UserId,
-                      studySlug:     String,
-                      eventTypeSlug: String): ServiceValidation[CollectionEventType]
+                      studySlug:     Slug,
+                      eventTypeSlug: Slug): ServiceValidation[CollectionEventType]
 
-  def eventTypeInUse(requestUserId: UserId, slug: String): ServiceValidation[Boolean]
+  def eventTypeInUse(requestUserId: UserId, slug: Slug): ServiceValidation[Boolean]
 
   def list(requestUserId: UserId,
            studyId:       StudyId,
@@ -44,7 +45,7 @@ trait CollectionEventTypeService extends BbwebService {
            sort:          SortString): ServiceValidation[Seq[CollectionEventType]]
 
   def listByStudySlug(requestUserId: UserId,
-                      studySlug:     String,
+                      studySlug:     Slug,
                       filter:        FilterString,
                       sort:          SortString): ServiceValidation[Seq[CollectionEventType]]
 
@@ -64,7 +65,6 @@ class CollectionEventTypeServiceImpl @Inject()(
   val accessService:                           AccessService,
   val eventTypeRepository:                     CollectionEventTypeRepository,
   val studiesService:                          StudiesService,
-  val specimenGroupRepository:                 SpecimenGroupRepository,
   val eventRepository:                         CollectionEventRepository)
                                             (implicit executionContext: BbwebExecutionContext)
     extends CollectionEventTypeService
@@ -89,14 +89,14 @@ class CollectionEventTypeServiceImpl @Inject()(
   }
 
   def eventTypeBySlug(requestUserId: UserId,
-                      studySlug:     String,
-                      eventTypeSlug: String): ServiceValidation[CollectionEventType] = {
+                      studySlug:     Slug,
+                      eventTypeSlug: Slug): ServiceValidation[CollectionEventType] = {
     studiesService.getStudyBySlug(requestUserId, studySlug).flatMap { study =>
       eventTypeRepository.getBySlug(eventTypeSlug)
     }
   }
 
-  def eventTypeInUse(requestUserId: UserId, slug: String): ServiceValidation[Boolean] = {
+  def eventTypeInUse(requestUserId: UserId, slug: Slug): ServiceValidation[Boolean] = {
     eventTypeRepository.getBySlug(slug).flatMap { ceventType =>
       whenPermittedAndIsMember(requestUserId,
                                PermissionId.StudyRead,
@@ -136,7 +136,7 @@ class CollectionEventTypeServiceImpl @Inject()(
   }
 
    def listByStudySlug(requestUserId: UserId,
-                       studySlug:     String,
+                       studySlug:     Slug,
                        filter:        FilterString,
                        sort:          SortString): ServiceValidation[Seq[CollectionEventType]] = {
      studiesService.getStudyBySlug(requestUserId, studySlug) flatMap { study =>

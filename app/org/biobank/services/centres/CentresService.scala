@@ -5,7 +5,7 @@ import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Named}
-import org.biobank.domain.LocationId
+import org.biobank.domain.{LocationId, Slug}
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId
 import org.biobank.domain.centres._
@@ -45,7 +45,7 @@ trait CentresService extends BbwebService {
 
   def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre]
 
-  def getCentreBySlug(requestUserId: UserId, slug: String): ServiceValidation[CentreDto]
+  def getCentreBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[CentreDto]
 
   def centreFromLocation(requestUserId: UserId, id: LocationId): ServiceValidation[Centre]
 
@@ -111,7 +111,7 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     }
   }
 
-  def getCentreBySlug(requestUserId: UserId, slug: String): ServiceValidation[CentreDto] = {
+  def getCentreBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[CentreDto] = {
     for {
       centre     <- centreRepository.getBySlug(slug)
       permission <- accessService.hasPermissionAndIsMember(requestUserId,

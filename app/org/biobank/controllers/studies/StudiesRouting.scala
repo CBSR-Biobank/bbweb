@@ -1,6 +1,6 @@
 package org.biobank.controllers.studies
 
-import org.biobank.domain.studies.{StudyId, CollectionEventTypeId, ProcessingTypeId, SpecimenLinkTypeId}
+import org.biobank.domain.studies.{StudyId, CollectionEventTypeId, ProcessingTypeId}
 import play.api.mvc.PathBindable.Parsing
 import play.api.routing.sird._
 
@@ -24,12 +24,6 @@ object StudiesRouting {
     (key: String, e: Exception) => s"$key is not a valid study Id"
   )
 
-  implicit object bindableSpecimenLinkTypeId extends Parsing[SpecimenLinkTypeId](
-    SpecimenLinkTypeId.apply,
-    _.id,
-    (key: String, e: Exception) => s"$key is not a valid study Id"
-  )
-
   val studyId: PathBindableExtractor[StudyId] =
     new PathBindableExtractor[StudyId]
 
@@ -38,8 +32,5 @@ object StudiesRouting {
 
   val procTypeId: PathBindableExtractor[ProcessingTypeId] =
     new PathBindableExtractor[ProcessingTypeId]
-
-  val slTypeId: PathBindableExtractor[SpecimenLinkTypeId] =
-    new PathBindableExtractor[SpecimenLinkTypeId]
 
 }

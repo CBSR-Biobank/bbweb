@@ -25,7 +25,6 @@ class AkkaModule extends AbstractModule with AkkaGuiceSupport {
     bindActor[StudiesProcessor]("studiesProcessor")
     bindActor[CollectionEventTypeProcessor]("collectionEventType")
     bindActor[ProcessingTypeProcessor]("processingType")
-    bindActor[SpecimenLinkTypeProcessor]("specimenLinkType")
   }
 
 }

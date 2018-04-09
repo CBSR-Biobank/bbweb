@@ -4,6 +4,7 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
+import org.biobank.domain.Slug
 import org.biobank.domain.access._
 import org.biobank.domain.centres.CentreRepository
 import org.biobank.domain.participants._
@@ -26,14 +27,14 @@ trait SpecimensService extends BbwebService {
 
   def get(requestUserId: UserId, id: SpecimenId): ServiceValidation[Specimen]
 
-  def getBySlug(requestUserId: UserId, slug: String): ServiceValidation[Specimen]
+  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Specimen]
 
   def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[Specimen]
 
   def list(requestUserId: UserId, collectionEventId: CollectionEventId, sort: SortString)
       : ServiceValidation[Seq[Specimen]]
 
-  def listBySlug(requestUserId: UserId, eventSlug: String, sort: SortString)
+  def listBySlug(requestUserId: UserId, eventSlug: Slug, sort: SortString)
       : ServiceValidation[Seq[Specimen]]
 
   def specimenToDto(specimen: Specimen): ServiceValidation[SpecimenDto]
@@ -73,7 +74,7 @@ class SpecimensServiceImpl @Inject() (
     } yield specimen
   }
 
-  def getBySlug(requestUserId: UserId, slug: String): ServiceValidation[Specimen] = {
+  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Specimen] = {
     for {
       specimen       <- specimenRepository.getBySlug(slug)
       ceventSpecimen <- ceventSpecimenRepository.withSpecimenId(specimen.id)
@@ -123,7 +124,7 @@ class SpecimensServiceImpl @Inject() (
     } yield specimens
   }
 
-  def listBySlug(requestUserId: UserId, eventSlug: String, sort: SortString)
+  def listBySlug(requestUserId: UserId, eventSlug: Slug, sort: SortString)
       : ServiceValidation[Seq[Specimen]] = {
     collectionEventRepository.getBySlug(eventSlug) flatMap { event =>
       list(requestUserId, event.id, sort)

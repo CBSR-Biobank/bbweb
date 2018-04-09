@@ -6,7 +6,6 @@
 
 ->      /api/studies/cetypes                    org.biobank.controllers.studies.CeventTypesRouter
 ->      /api/studies/proctypes                  org.biobank.controllers.studies.ProcessingTypesRouter
-->      /api/studies/proctypes/sltypes          org.biobank.controllers.studies.SpecimenLinkTypesRouter
 ->      /api/studies                            org.biobank.controllers.studies.StudiesRouter
 ->      /api/participants/cevents/spcs          org.biobank.controllers.participants.SpecimensRouter
 ->      /api/participants/cevents               org.biobank.controllers.participants.CollectionEventsRouter

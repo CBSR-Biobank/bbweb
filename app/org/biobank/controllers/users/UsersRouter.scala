@@ -11,6 +11,7 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
   import UsersRouting._
   import org.biobank.controllers.access.AccessItemRouting._
   import org.biobank.controllers.access.MembershipRouting._
+  import org.biobank.controllers.SlugRouting._
 
   override def routes: Routes = {
 
@@ -32,8 +33,8 @@ class UsersRouter @Inject()(controller: UsersController) extends SimpleRouter {
       // this action extracts parameters from the query string
       controller.list
 
-    case GET(p"/$slug") =>
-      controller.getBySlug(slug)
+    case GET(p"/${slug(s)}") =>
+      controller.getBySlug(s)
 
     case POST(p"/update/${userId(id)}") =>
       controller.update(id)

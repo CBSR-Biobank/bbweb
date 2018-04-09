@@ -35,7 +35,7 @@ class StudyRepositoryImpl @Inject() (val testData: TestData)
 
   protected def notFound(id: StudyId): IdNotFound = IdNotFound(s"study id: $id")
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound = EntityCriteriaNotFound(s"study slug: $slug")
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound = EntityCriteriaNotFound(s"study slug: $slug")
 
   def allStudies(): Set[Study] = getValues.toSet
 

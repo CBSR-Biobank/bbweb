@@ -31,6 +31,16 @@ object SpecimenDefinitionId {
 
 }
 
+/**
+ * Used to configure a [[SpecimenType]] used by a [[Study]].
+ *
+ * It records ownership, summary, storage, and classification information that applies to an
+ * entire group or collection of [[Specimen]]s. A specimen description is defined either for
+ * specimen types collected from participants, or for specimen types that are processed.
+ *
+ * This class has a private constructor and instances of this class can only be created using
+ * the [[SpecimenDefinition.create]] method on the factory object.
+ */
 trait SpecimenDefinition
     extends IdentifiedValueObject[SpecimenDefinitionId]
     with HasUniqueName
@@ -119,7 +129,7 @@ trait SpecimenSpecValidations {
  * specimen types collected from participants, or for specimen types that are processed.
  */
 final case class CollectionSpecimenDefinition(id:                          SpecimenDefinitionId,
-                                               slug:                        String,
+                                               slug: Slug,
                                                name:                        String,
                                                description:                 Option[String],
                                                units:                       String,
@@ -134,7 +144,7 @@ final case class CollectionSpecimenDefinition(id:                          Speci
 object CollectionSpecimenDefinition extends SpecimenSpecValidations {
   import org.biobank.CommonValidations._
 
-  implicit val collectionSpecimenSpecWrites: Format[CollectionSpecimenDefinition] =
+  implicit val collectionSpecimenDefinitionWrites: Format[CollectionSpecimenDefinition] =
     Json.format[CollectionSpecimenDefinition]
 
   val hashidsSalt: String = "biobank-collection-event-types"
@@ -206,6 +216,76 @@ object CollectionSpecimenDefinition extends SpecimenSpecValidations {
              specimenDesc.specimenType,
              specimenDesc.maxCount,
              specimenDesc.amount)
+  }
+
+
+}
+
+final case class ProcessingSpecimenDefinition(id:                      SpecimenDefinitionId,
+                                               slug: Slug,
+                                               name:                    String,
+                                               description:             Option[String],
+                                               units:                   String,
+                                               anatomicalSourceType:    AnatomicalSourceType,
+                                               preservationType:        PreservationType,
+                                               preservationTemperature: PreservationTemperature,
+                                               specimenType:            SpecimenType)
+    extends SpecimenDefinition
+
+object ProcessingSpecimenDefinition extends SpecimenSpecValidations {
+
+  implicit val processingSpecimenSpecWrites: Format[ProcessingSpecimenDefinition] =
+    Json.format[ProcessingSpecimenDefinition]
+
+  def create(name:                    String,
+             description:             Option[String],
+             units:                   String,
+             anatomicalSourceType:    AnatomicalSourceType,
+             preservationType:        PreservationType,
+             preservationTemperature: PreservationTemperature,
+             specimenType:            SpecimenType)
+      : DomainValidation[ProcessingSpecimenDefinition] = {
+    validate(name,
+             description,
+             units,
+             anatomicalSourceType,
+             preservationType,
+             preservationTemperature,
+             specimenType).map { _ =>
+      val id = SpecimenDefinitionId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
+      ProcessingSpecimenDefinition(id                      = id,
+                                    slug                    = Slug(name),
+                                    name                    = name,
+                                    description             = description,
+                                    units                   = units,
+                                    anatomicalSourceType    = anatomicalSourceType,
+                                    preservationType        = preservationType,
+                                    preservationTemperature = preservationTemperature,
+                                    specimenType            = specimenType)
+    }
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+  @silent def validate(name:                    String,
+                       description:             Option[String],
+                       units:                   String,
+                       anatomicalSourceType:    AnatomicalSourceType,
+                       preservationType:        PreservationType,
+                       preservationTemperature: PreservationTemperature,
+                       specimenType:            SpecimenType)
+      : DomainValidation[Boolean] = {
+    validate(name, description, units).map { _ => true }
+  }
+
+  @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+  def validate(specimenDesc: ProcessingSpecimenDefinition): DomainValidation[Boolean] = {
+    validate(specimenDesc.name,
+             specimenDesc.description,
+             specimenDesc.units,
+             specimenDesc.anatomicalSourceType,
+             specimenDesc.preservationType,
+             specimenDesc.preservationTemperature,
+             specimenDesc.specimenType)
   }
 
 

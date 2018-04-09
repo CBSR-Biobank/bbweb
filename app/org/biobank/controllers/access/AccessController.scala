@@ -2,6 +2,7 @@ package org.biobank.controllers.access
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
+import org.biobank.domain.Slug
 import org.biobank.domain.access._
 import org.biobank.domain.centres.CentreId
 import org.biobank.domain.studies.StudyId
@@ -84,13 +85,13 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
       )
     }
 
-  def getRoleBySlug(slug: String): Action[Unit] =
+  def getRoleBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       val v = accessService.getRoleBySlug(request.authInfo.userId, slug)
       validationReply(v)
     }
 
-  def getMembershipBySlug(slug: String): Action[Unit] =
+  def getMembershipBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       val v = accessService.getMembershipBySlug(request.authInfo.userId, slug)
       validationReply(v)

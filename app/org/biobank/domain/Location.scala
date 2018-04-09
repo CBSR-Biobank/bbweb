@@ -44,7 +44,7 @@ object LocationId {
  * @param countryIsoCode the ISO country code for the country the location is in.
  */
 final case class Location(id:             LocationId,
-                          slug:           String,
+                          slug: Slug,
                           name:           String,
                           street:         String,
                           city:           String,

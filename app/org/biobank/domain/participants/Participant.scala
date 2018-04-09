@@ -20,7 +20,7 @@ final case class Participant(id:           ParticipantId,
                              version:      Long,
                              timeAdded:    OffsetDateTime,
                              timeModified: Option[OffsetDateTime],
-                             slug:         String,
+                             slug: Slug,
                              uniqueId:     String,
                              annotations:  Set[Annotation])
     extends ConcurrencySafeEntity[ParticipantId]

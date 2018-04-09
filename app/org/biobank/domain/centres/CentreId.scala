@@ -14,7 +14,7 @@ object CentreId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val centreIdReader: Format[CentreId] = new Format[CentreId] {
+  implicit val centreIdFormat: Format[CentreId] = new Format[CentreId] {
 
       override def writes(id: CentreId): JsValue = JsString(id.id)
 

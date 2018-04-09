@@ -1,296 +1,326 @@
 package org.biobank.controllers.studies
 
 import org.biobank.domain.JsonHelper
-// import org.biobank.domain.studies._
-// import org.biobank.domain.studies.{ Study, ProcessingType }
+import org.biobank.domain.studies._
 import org.biobank.fixture.ControllerFixture
-// import play.api.libs.json._
-// import play.api.test.Helpers._
+import play.api.libs.json._
+import play.api.test.Helpers._
 
-@org.scalatest.Ignore
 class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
 
-//   def uri(study: Study): String = s"/studies/proctypes/${study.id.id}"
 
-//   def uri(study: Study, procType: ProcessingType): String =
-//     uri(study) + s"/${procType.id.id}"
+  class Fixture(numProcessingTypes: Int = 1) {
+    val study = factory.createDisabledStudy
+    val collectedSpecimenDefinition = factory.createCollectionSpecimenDefinition
+    val collectionEventType = factory.createCollectionEventType.copy(
+        specimenDefinitions = Set(collectedSpecimenDefinition))
+    val processingTypes = (0 until numProcessingTypes).map {_ =>
+        val processingSpecimenDefinition = factory.createProcessingSpecimenDefinition
+        factory.createProcessingType.copy(
+          studyId = study.id,
+          specimenDerivation = CollectedSpecimenDerivation(collectionEventType.id,
+                                                           collectedSpecimenDefinition.id,
+                                                           processingSpecimenDefinition))
+      }
+
+    (processingTypes ++ Set(study, collectionEventType)).foreach(addToRepository)
+  }
+
+  private def uri(paths: String*): String = {
+    if (paths.isEmpty) "/api/studies/cetypes"
+    else "/api/studies/proctypes/" + paths.mkString("/")
+  }
+
+  // private def procTypeToAddJson(procType: ProcessingType) = {
+  //   Json.obj(
+  //     "studyId"               -> procType.studyId.id,
+  //     "name"                  -> procType.name,
+  //     "description"           -> procType.description,
+  //     "enabled"               -> procType.enabled,
+  //     "expectedInputChange"   -> procType.expectedInputChange,
+  //     "expectedOutputChange"  -> procType.expectedOutputChange,
+  //     "inputCount"            -> procType.inputCount,
+  //     "outputCount"           -> procType.outputCount,
+  //     "specimenDerivation"    -> procType.specimenDerivation,
+  //     "inputContainerTypeId"  -> procType.inputContainerTypeId,
+  //     "outputContainerTypeId" -> procType.outputContainerTypeId,
+  //     "annotationTypes"       -> procType.annotationTypes,
+  //   )
+  // }
+
+  // private def procTypeToUpdateCmdJson(procType: ProcessingType) = {
+  //   procTypeToAddJson(procType) ++ Json.obj(
+  //     "id"              -> procType.id.id,
+  //     "expectedVersion" -> Some(procType.version)
+  //   )
+  // }
+
+  // def addOnNonDisabledStudy(study: Study) {
+  //   studyRepository.put(study)
+  //   val procType = factory.createProcessingType.copy(studyId = study.id)
+
+  //   val json = makeRequest(
+  //     POST,
+  //     uri(study),
+  //     BAD_REQUEST,
+  //     procTypeToAddCmdJson(procType))
+
+  //   (json \ "status").as[String] must include ("error")
+
+  //   (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+
+  //   ()
+  // }
+
+  //   def updateOnNonDisabledStudy(study: Study) {
+  //     studyRepository.put(study)
+
+  //     val procType = factory.createProcessingType.copy(studyId = study.id)
+  //     processingTypeRepository.put(procType)
+
+  //     val procType2 = factory.createProcessingType.copy(studyId = study.id)
+
+  //     val json = makeRequest(
+  //       PUT,
+  //       uri(study, procType2),
+  //       BAD_REQUEST,
+  //       procTypeToUpdateCmdJson(procType2))
+
+  //     (json \ "status").as[String] must include ("error")
+
+  //     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+
+  //     ()
+  //   }
 
-//   def uriWithQuery(study: Study, procType: ProcessingType): String =
-//     uri(study) + s"?procTypeId=${procType.id.id}"
+  //   def removeOnNonDisabledStudy(study: Study) {
+  //     studyRepository.put(study)
 
-//   def uri(study: Study, procType: ProcessingType, version: Long): String =
-//     uri(study, procType) + s"/${version}"
+  //     val procType = factory.createProcessingType
+  //     processingTypeRepository.put(procType)
 
-//   private def procTypeToAddCmdJson(procType: ProcessingType) = {
-//     Json.obj(
-//       "studyId"     -> procType.studyId.id,
-//       "name"        -> procType.name,
-//       "description" -> procType.description,
-//       "enabled"     -> procType.enabled
-//     )
-//   }
+  //     val json = makeRequest(
+  //       DELETE,
+  //       uri(study, procType, procType.version),
+  //       BAD_REQUEST)
 
-//   private def procTypeToUpdateCmdJson(procType: ProcessingType) = {
-//     procTypeToAddCmdJson(procType) ++ Json.obj(
-//       "id"              -> procType.id.id,
-//       "expectedVersion" -> Some(procType.version)
-//     )
-//   }
+  //     (json \ "status").as[String] must include ("error")
 
-//   def addOnNonDisabledStudy(study: Study) {
-//     studyRepository.put(study)
-//     val procType = factory.createProcessingType.copy(studyId = study.id)
+  //     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
 
-//     val json = makeRequest(
-//       POST,
-//       uri(study),
-//       BAD_REQUEST,
-//       procTypeToAddCmdJson(procType))
+  //     ()
+  //   }
 
-//     (json \ "status").as[String] must include ("error")
+  describe("Processing Type REST API") {
 
-//     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+    describe("GET /api/studies/proctypes/:studySlug:procTypeSlug") {
 
-//     ()
-//   }
+      it("get a single processing type") {
+        val f = new Fixture
+        val pt = f.processingTypes(0)
+        val reply = makeRequest(GET, uri(f.study.slug.id, pt.slug.id))
 
-//   def updateOnNonDisabledStudy(study: Study) {
-//     studyRepository.put(study)
+        (reply \ "status").as[String] must include ("success")
+        val jsonObj = (reply \ "data").as[JsObject]
+        compareObj(jsonObj, pt)
+      }
 
-//     val procType = factory.createProcessingType.copy(studyId = study.id)
-//     processingTypeRepository.put(procType)
+    }
 
-//     val procType2 = factory.createProcessingType.copy(studyId = study.id)
+    // describe("GET /api/studies/proctypes") {
 
-//     val json = makeRequest(
-//       PUT,
-//       uri(study, procType2),
-//       BAD_REQUEST,
-//       procTypeToUpdateCmdJson(procType2))
+      // it("list none") {
+      //   val study = factory.createDisabledStudy
+      //   studyRepository.put(study)
 
-//     (json \ "status").as[String] must include ("error")
+      //   val json = makeRequest(GET, uri(study.id.id))
+      //                         (json \ "status").as[String] must include ("success")
+      //   val jsonList = (json \ "data").as[List[JsObject]]
+      //   jsonList must have size 0
+      // }
 
-//     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+      //       it("list a single processing type") {
+      //         val study = factory.createDisabledStudy
+      //         studyRepository.put(study)
 
-//     ()
-//   }
+      //         val procType = factory.createProcessingType
+      //         processingTypeRepository.put(procType)
 
-//   def removeOnNonDisabledStudy(study: Study) {
-//     studyRepository.put(study)
+      //         val json = makeRequest(GET, uri(study))
+      //           (json \ "status").as[String] must include ("success")
+      //         val jsonList = (json \ "data").as[List[JsObject]]
+      //         jsonList must have size 1
+      //         compareObj(jsonList(0), procType)
+      //       }
 
-//     val procType = factory.createProcessingType
-//     processingTypeRepository.put(procType)
+      //       it("get a single processing type") {
+      //         val study = factory.createDisabledStudy
+      //         studyRepository.put(study)
 
-//     val json = makeRequest(
-//       DELETE,
-//       uri(study, procType, procType.version),
-//       BAD_REQUEST)
+      //         val procType = factory.createProcessingType
+      //         processingTypeRepository.put(procType)
 
-//     (json \ "status").as[String] must include ("error")
+      //         val json = makeRequest(GET, uriWithQuery(study, procType)).as[JsObject]
+      //           (json \ "status").as[String] must include ("success")
+      //         val jsonObj = (json \ "data").as[JsObject]
+      //         compareObj(jsonObj, procType)
+      //       }
 
-//     (json \ "message").as[String] must include regex ("InvalidStatus: study not disabled")
+      //       it("list multiple processing types") {
+      //         val study = factory.createDisabledStudy
+      //         studyRepository.put(study)
 
-//     ()
-//   }
+      //         val proctypes = List(factory.createProcessingType, factory.createProcessingType)
 
-//   describe("Processing Type REST API") {
+      //         proctypes map { procType => processingTypeRepository.put(procType) }
 
-//     describe("GET /api/studies/proctypes") {
-//       it("list none") {
-//         val study = factory.createDisabledStudy
-//         studyRepository.put(study)
+      //         val json = makeRequest(GET, uri(study))
+      //           (json \ "status").as[String] must include ("success")
+      //         val jsonList = (json \ "data").as[List[JsObject]]
 
-//         val json = makeRequest(GET, uri(study))
-//           (json \ "status").as[String] must include ("success")
-//         val jsonList = (json \ "data").as[List[JsObject]]
-//         jsonList must have size 0
-//       }
+      //         jsonList must have size proctypes.size.toLong
+      //           (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }
+      //         ()
+      //       }
 
-//       it("list a single processing type") {
-//         val study = factory.createDisabledStudy
-//         studyRepository.put(study)
+      //       it("fail for an invalid study ID") {
+      //         val study = factory.createDisabledStudy
 
-//         val procType = factory.createProcessingType
-//         processingTypeRepository.put(procType)
+      //         val json = makeRequest(GET, uri(study), NOT_FOUND)
 
-//         val json = makeRequest(GET, uri(study))
-//           (json \ "status").as[String] must include ("success")
-//         val jsonList = (json \ "data").as[List[JsObject]]
-//         jsonList must have size 1
-//         compareObj(jsonList(0), procType)
-//       }
+      //         (json \ "status").as[String] must include ("error")
 
-//       it("get a single processing type") {
-//         val study = factory.createDisabledStudy
-//         studyRepository.put(study)
+      //         (json \ "message").as[String] must include regex ("IdNotFound.*study")
+      //       }
 
-//         val procType = factory.createProcessingType
-//         processingTypeRepository.put(procType)
+      //       it("fail for an invalid study ID when using an processing type id") {
+      //         val study = factory.createDisabledStudy
+      //         val procType = factory.createProcessingType
 
-//         val json = makeRequest(GET, uriWithQuery(study, procType)).as[JsObject]
-//           (json \ "status").as[String] must include ("success")
-//         val jsonObj = (json \ "data").as[JsObject]
-//         compareObj(jsonObj, procType)
-//       }
+      //         val json = makeRequest(GET, uriWithQuery(study, procType), NOT_FOUND)
 
-//       it("list multiple processing types") {
-//         val study = factory.createDisabledStudy
-//         studyRepository.put(study)
+      //         (json \ "status").as[String] must include ("error")
 
-//         val proctypes = List(factory.createProcessingType, factory.createProcessingType)
+      //         (json \ "message").as[String] must include regex ("IdNotFound.*study")
+      //       }
 
-//         proctypes map { procType => processingTypeRepository.put(procType) }
+      //       it("fail for an invalid processing type id") {
+      //         val study = factory.createDisabledStudy
+      //         studyRepository.put(study)
 
-//         val json = makeRequest(GET, uri(study))
-//           (json \ "status").as[String] must include ("success")
-//         val jsonList = (json \ "data").as[List[JsObject]]
+      //         val procType = factory.createProcessingType
 
-//         jsonList must have size proctypes.size.toLong
-//           (jsonList zip proctypes).map { item => compareObj(item._1, item._2) }
-//         ()
-//       }
+      //         val json = makeRequest(GET, uriWithQuery(study, procType), NOT_FOUND)
 
-//       it("fail for an invalid study ID") {
-//         val study = factory.createDisabledStudy
+      //         (json \ "status").as[String] must include ("error")
 
-//         val json = makeRequest(GET, uri(study), NOT_FOUND)
+      //         (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
+      //       }
+      //     }
 
-//         (json \ "status").as[String] must include ("error")
+      //     describe("POST /api/studies/proctypes") {
 
-//         (json \ "message").as[String] must include regex ("IdNotFound.*study")
-//       }
+      //       it("add a processing type") {
+      //         val study = factory.createDisabledStudy
+      //         studyRepository.put(study)
 
-//       it("fail for an invalid study ID when using an processing type id") {
-//         val study = factory.createDisabledStudy
-//         val procType = factory.createProcessingType
+      //         val procType = factory.createProcessingType
+      //         val json = makeRequest(
+      //           POST,
+      //           uri(study),
+      //           json = procTypeToAddCmdJson(procType))
 
-//         val json = makeRequest(GET, uriWithQuery(study, procType), NOT_FOUND)
+      //         (json \ "status").as[String] must include ("success")
+      //       }
 
-//         (json \ "status").as[String] must include ("error")
+      //       it("not add a processing type to an enabled study") {
+      //         addOnNonDisabledStudy(factory.createEnabledStudy)
+      //       }
 
-//         (json \ "message").as[String] must include regex ("IdNotFound.*study")
-//       }
+      //       it("not add a processing type to an retired study") {
+      //         addOnNonDisabledStudy(factory.createRetiredStudy)
+      //       }
 
-//       it("fail for an invalid processing type id") {
-//         val study = factory.createDisabledStudy
-//         studyRepository.put(study)
+      //       it("allow adding a processing type with same name on two different studies") {
+      //         val commonName = nameGenerator.next[ProcessingType]
 
-//         val procType = factory.createProcessingType
+      //         (0 until 2).foreach { x =>
+      //           val study = factory.createDisabledStudy
+      //           studyRepository.put(study)
 
-//         val json = makeRequest(GET, uriWithQuery(study, procType), NOT_FOUND)
+      //           val pt = factory.createProcessingType.copy(name = commonName)
 
-//         (json \ "status").as[String] must include ("error")
+      //           val cmdJson = procTypeToAddCmdJson(pt)
+      //           val json = makeRequest(POST, uri(study), json = cmdJson)
+      //           (json \ "status").as[String] must include ("success")
+      //         }
+      //       }
+      //     }
 
-//         (json \ "message").as[String] must include regex ("IdNotFound.*processing type")
-//       }
-//     }
+      //     describe("PUT /studies/proctypes") {
+      //       it("update a processing type") {
+      //         val study = factory.createDisabledStudy
+      //         studyRepository.put(study)
 
-//     describe("POST /api/studies/proctypes") {
+      //         val procType = factory.createProcessingType
+      //         processingTypeRepository.put(procType)
 
-//       it("add a processing type") {
-//         val study = factory.createDisabledStudy
-//         studyRepository.put(study)
+      //         val procType2 = factory.createProcessingType.copy(
+      //           id = procType.id,
+      //           version = procType.version
+      //         )
 
-//         val procType = factory.createProcessingType
-//         val json = makeRequest(
-//           POST,
-//           uri(study),
-//           json = procTypeToAddCmdJson(procType))
+      //         val json = makeRequest(
+      //           PUT,
+      //           uri(study, procType2),
+      //           json = procTypeToUpdateCmdJson(procType2))
 
-//         (json \ "status").as[String] must include ("success")
-//       }
+      //         (json \ "status").as[String] must include ("success")
+      //       }
 
-//       it("not add a processing type to an enabled study") {
-//         addOnNonDisabledStudy(factory.createEnabledStudy)
-//       }
+      //       it("not update a processing type on an enabled study") {
+      //         updateOnNonDisabledStudy(factory.createEnabledStudy)
+      //       }
 
-//       it("not add a processing type to an retired study") {
-//         addOnNonDisabledStudy(factory.createRetiredStudy)
-//       }
+      //       it("not update a processing type on an retired study") {
+      //         updateOnNonDisabledStudy(factory.createRetiredStudy)
+      //       }
 
-//       it("allow adding a processing type with same name on two different studies") {
-//         val commonName = nameGenerator.next[ProcessingType]
+      //       it("allow a updating processing types on two different studies to same name") {
+      //         val commonName = nameGenerator.next[ProcessingType]
 
-//         (0 until 2).foreach { x =>
-//           val study = factory.createDisabledStudy
-//           studyRepository.put(study)
+      //         (0 until 2).map { study =>
+      //           val study = factory.createDisabledStudy
+      //           studyRepository.put(study)
+      //           val pt = factory.createProcessingType
+      //           processingTypeRepository.put(pt)
+      //           (study, pt)
+      //         } foreach { case (study: Study, pt: ProcessingType) =>
+      //             val cmdJson = procTypeToUpdateCmdJson(pt.copy(name = commonName))
+      //             val json = makeRequest(PUT, uri(study, pt), json = cmdJson)
+      //             (json \ "status").as[String] must include ("success")
+      //         }
+      //       }
+      //     }
 
-//           val pt = factory.createProcessingType.copy(name = commonName)
+      //     describe("DELETE /api/studies/proctypes/:studyId/:id/:ver") {
+      //       it("remove a processing type") {
+      //         val study = factory.createDisabledStudy
+      //         studyRepository.put(study)
 
-//           val cmdJson = procTypeToAddCmdJson(pt)
-//           val json = makeRequest(POST, uri(study), json = cmdJson)
-//           (json \ "status").as[String] must include ("success")
-//         }
-//       }
-//     }
+      //         val procType = factory.createProcessingType
+      //         processingTypeRepository.put(procType)
 
-//     describe("PUT /studies/proctypes") {
-//       it("update a processing type") {
-//         val study = factory.createDisabledStudy
-//         studyRepository.put(study)
+      //         val json = makeRequest(DELETE, uri(study, procType, procType.version))
 
-//         val procType = factory.createProcessingType
-//         processingTypeRepository.put(procType)
+      //         (json \ "status").as[String] must include ("success")
+      //       }
 
-//         val procType2 = factory.createProcessingType.copy(
-//           id = procType.id,
-//           version = procType.version
-//         )
+      //       it("not remove a processing type on an enabled study") {
+      //         removeOnNonDisabledStudy(factory.createEnabledStudy)
+      //       }
 
-//         val json = makeRequest(
-//           PUT,
-//           uri(study, procType2),
-//           json = procTypeToUpdateCmdJson(procType2))
-
-//         (json \ "status").as[String] must include ("success")
-//       }
-
-//       it("not update a processing type on an enabled study") {
-//         updateOnNonDisabledStudy(factory.createEnabledStudy)
-//       }
-
-//       it("not update a processing type on an retired study") {
-//         updateOnNonDisabledStudy(factory.createRetiredStudy)
-//       }
-
-//       it("allow a updating processing types on two different studies to same name") {
-//         val commonName = nameGenerator.next[ProcessingType]
-
-//         (0 until 2).map { study =>
-//           val study = factory.createDisabledStudy
-//           studyRepository.put(study)
-//           val pt = factory.createProcessingType
-//           processingTypeRepository.put(pt)
-//           (study, pt)
-//         } foreach { case (study: Study, pt: ProcessingType) =>
-//             val cmdJson = procTypeToUpdateCmdJson(pt.copy(name = commonName))
-//             val json = makeRequest(PUT, uri(study, pt), json = cmdJson)
-//             (json \ "status").as[String] must include ("success")
-//         }
-//       }
-//     }
-
-//     describe("DELETE /api/studies/proctypes/:studyId/:id/:ver") {
-//       it("remove a processing type") {
-//         val study = factory.createDisabledStudy
-//         studyRepository.put(study)
-
-//         val procType = factory.createProcessingType
-//         processingTypeRepository.put(procType)
-
-//         val json = makeRequest(DELETE, uri(study, procType, procType.version))
-
-//         (json \ "status").as[String] must include ("success")
-//       }
-
-//       it("not remove a processing type on an enabled study") {
-//         removeOnNonDisabledStudy(factory.createEnabledStudy)
-//       }
-
-//       it("not remove a processing type on an retired study") {
-//         removeOnNonDisabledStudy(factory.createRetiredStudy)
-//       }
-//     }
-//   }
-
+      //       it("not remove a processing type on an retired study") {
+      //         removeOnNonDisabledStudy(factory.createRetiredStudy)
+  }
 }

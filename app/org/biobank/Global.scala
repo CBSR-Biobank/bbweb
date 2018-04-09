@@ -39,7 +39,7 @@ object Global {
 
   val DefaultUserEmail: String = "admin@admin.com"
 
-  val DefaultUserId: UserId = UserId(Slug(DefaultUserEmail))
+  val DefaultUserId: UserId = UserId(Slug.slugify(DefaultUserEmail))
 
   val StartOfTime: OffsetDateTime = OffsetDateTime.of(1, 1, 1, 0, 0, 0, 0, ZoneOffset.UTC)
 

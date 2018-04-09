@@ -5,7 +5,6 @@ import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.annotations.AnnotationType
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.studies._
-import org.biobank.domain.studies.{ CollectionEventType, Study }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.fixture._
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -155,7 +154,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("get a single collection event type") {
         val f = new EventTypeFixture
         val cet = f.eventTypes(0)
-        val json = makeRequest(GET, uri(f.study.slug, cet.slug))
+        val json = makeRequest(GET, uri(f.study.slug.id, cet.slug.id))
 
         (json \ "status").as[String] must include ("success")
         val jsonObj = (json \ "data").as[JsObject]
@@ -165,7 +164,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("fail for an invalid study ID") {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
-        val json = makeRequest(GET, uri(study.slug, cet.slug), NOT_FOUND)
+        val json = makeRequest(GET, uri(study.slug.id, cet.slug.id), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -176,7 +175,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
         studyRepository.put(study)
-        val json = makeRequest(GET, uri(study.slug, cet.slug), NOT_FOUND)
+        val json = makeRequest(GET, uri(study.slug.id, cet.slug.id), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -191,13 +190,13 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list none") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
-        PagedResultsSpec(this).emptyResults(uri(study.slug))
+        PagedResultsSpec(this).emptyResults(uri(study.slug.id))
       }
 
       it("list a single collection event type") {
         val f = new EventTypeFixture
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri(f.study.slug),
+            uri = uri(f.study.slug.id),
             offset = 0,
             total = 1,
             maybeNext = None,
@@ -209,7 +208,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("get all collection event types for a study") {
         val f = new EventTypeFixture(3)
         val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri(f.study.slug),
+            uri       = uri(f.study.slug.id),
             offset    = 0,
             total     = f.eventTypes.size.toLong,
             maybeNext = None,
@@ -230,7 +229,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
         val sortExprs = Table("sort expressions", "name", "-name")
         forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri         = uri(f.study.slug),
+              uri         = uri(f.study.slug.id),
               queryParams = Map("sort" -> sortExpr),
               offset      = 0,
               total       = f.eventTypes.size.toLong,
@@ -252,7 +251,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list the first Collection Event Type in a paged query") {
         val f = new EventTypeFixture(3)
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.study.slug),
+            uri         = uri(f.study.slug.id),
             queryParams = Map("filter" -> s"name::${f.eventTypes(0).name}"),
             total       = 1)
 
@@ -262,7 +261,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list the last Collection Event Type in a paged query") {
         val f = new EventTypeFixture(3)
         val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.study.slug),
+            uri         = uri(f.study.slug.id),
             queryParams = Map("filter" -> s"name::${f.eventTypes(2).name}"),
             total       = 1)
 
@@ -271,7 +270,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fail for invalid study id") {
         val study = factory.createDisabledStudy
-        val json = makeRequest(GET, uri(study.slug), NOT_FOUND)
+        val json = makeRequest(GET, uri(study.slug.id), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -280,7 +279,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("fail when using an invalid query parameters") {
         val f = new EventTypeFixture(3)
-        val url = uri(f.study.slug)
+        val url = uri(f.study.slug.id)
 
         PagedResultsSpec(this).failWithNegativePageNumber(url)
         PagedResultsSpec(this).failWithInvalidPageNumber(url)
@@ -301,7 +300,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
             f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val json = makeRequest(GET, uri("names", f.study.slug) + "?order=asc")
+        val json = makeRequest(GET, uri("names", f.study.slug.id) + "?order=asc")
 
         (json \ "status").as[String] must include ("success")
 

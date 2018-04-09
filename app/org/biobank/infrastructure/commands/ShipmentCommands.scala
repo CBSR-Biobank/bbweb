@@ -1,10 +1,10 @@
 package org.biobank.infrastructure.commands
 
 import java.time.OffsetDateTime
-import org.biobank.infrastructure.commands.Commands._
 import play.api.libs.json._
 
 object ShipmentCommands {
+import org.biobank.infrastructure.commands.Commands._
 
   trait ShipmentCommand extends Command with HasSessionUserId
 

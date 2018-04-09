@@ -346,7 +346,7 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
                                event.getRole.getNameUpdated.getVersion) {
       (role, time) =>
       role.withName(event.getRole.getNameUpdated.getName).map { r =>
-        accessItemRepository.put(r.copy(slug         = accessItemRepository.slug(r.name),
+        accessItemRepository.put(r.copy(slug         = accessItemRepository.uniqueSlugFromStr(r.name),
                                         timeModified = Some(time)))
         true
       }

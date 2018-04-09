@@ -7,20 +7,21 @@ import play.api.routing.sird._
 
 class CeventTypesRouter @Inject()(controller: CeventTypesController) extends SimpleRouter {
   import StudiesRouting._
+  import org.biobank.controllers.SlugRouting._
 
   override def routes: Routes = {
 
-    case GET(p"/inuse/$slug") =>
-      controller.inUse(slug)
+    case GET(p"/inuse/${slug(s)}") =>
+      controller.inUse(s)
 
-    case GET(p"/names/$studySlug") =>
-      controller.listNames(studySlug)
+    case GET(p"/names/${slug(s)}") =>
+      controller.listNames(s)
 
-    case GET(p"/$studySlug/$ceventTypeSlug") =>
+    case GET(p"/${slug(studySlug)}/${slug(ceventTypeSlug)}") =>
       controller.get(studySlug, ceventTypeSlug)
 
-    case GET(p"/$studySlug") =>
-      controller.list(studySlug)
+    case GET(p"/${slug(s)}") =>
+      controller.list(s)
 
     case POST(p"/snapshot") =>
       controller.snapshot

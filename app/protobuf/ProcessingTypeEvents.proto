@@ -4,41 +4,72 @@ package org.biobank.infrastructure.events;
 
 message ProcessingTypeEvent {
 
-   message Added {
-      optional string studyId          = 1;
-      optional string name             = 2;
-      optional string description      = 3;
-      optional bool   enabled          = 4;
-   }
+  message SpecimenDefinition {
+    optional string id                      = 1;
+    optional string name                    = 2;
+    optional string description             = 3;
+    optional string units                   = 4;
+    optional string anatomicalSourceType    = 5;
+    optional string preservationType        = 6;
+    optional string preservationTemperature = 7;
+    optional string specimenType            = 8;
+  }
 
-   message NameUpdated {
-      optional int64  version          = 1;
-      optional string name             = 2;
-   }
+  message SpecimenDerivation {
+    optional string             inputEntityId             = 1;
+    optional string             inputSpecimenDefinitionId = 2;
+    optional SpecimenDefinition outputSpecimenDefinition  = 3;
+  }
 
-   message DescriptionUpdated {
-      optional int64  version          = 1;
-      optional string description      = 2;
-   }
+  message Added {
+    optional string studyId               = 1;
+    optional string name                  = 2;
+    optional string description           = 3;
+    optional bool   enabled               = 4;
+    optional double expectedInputChange   = 5;
+    optional double expectedOutputChange  = 6;
+    optional int32  inputCount            = 7;
+    optional int32  outputCount           = 8;
+    optional string inputGroupId          = 9;
+    optional string outputGroupId         = 10;
+    optional string inputContainerTypeId  = 11;
+    optional string outputContainerTypeId = 12;
 
-   message EnabledUpdated {
-      optional int64  version          = 1;
-      optional bool   enabled          = 2;
-   }
+    oneof specimen_derivation_type {
+      SpecimenDerivation collected = 13;
+      SpecimenDerivation processed = 14;
+    }
+  }
 
-   message Removed {
-      optional int64  version          = 1;
-   }
+  message NameUpdated {
+    optional int64  version          = 1;
+    optional string name             = 2;
+  }
 
-   required string id            = 1;
-   optional string sessionUserId = 2;
-   optional string time          = 3;
+  message DescriptionUpdated {
+    optional int64  version          = 1;
+    optional string description      = 2;
+  }
 
-   oneof event_type {
-      Added              added              = 4;
-      NameUpdated        nameUpdated        = 5;
-      DescriptionUpdated descriptionUpdated = 6;
-      EnabledUpdated     enabledUpdated     = 7;
-      Removed            removed            = 8;
-   }
+  message EnabledUpdated {
+    optional int64  version          = 1;
+    optional bool   enabled          = 2;
+  }
+
+  message Removed {
+    optional int64  version          = 1;
+  }
+
+  required string id            = 1;
+  optional string studyId       = 2;
+  optional string sessionUserId = 3;
+  optional string time          = 4;
+
+  oneof event_type {
+    Added              added              = 5;
+    NameUpdated        nameUpdated        = 6;
+    DescriptionUpdated descriptionUpdated = 7;
+    EnabledUpdated     enabledUpdated     = 8;
+    Removed            removed            = 9;
+  }
 }

@@ -134,7 +134,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       it("retrieve a centre") {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
-        val json = makeRequest(GET, uri(centre.slug))
+        val json = makeRequest(GET, uri(centre.slug.id))
 
 
         (json \ "status").as[String] must include ("success")
@@ -393,7 +393,7 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           repoCentre must have (
             'id          (centreId),
             'version     (0L),
-            'slug        (centre.slug),
+            'slug        (centre.slug.id),
             'name        (centre.name),
             'description (centre.description)
             )

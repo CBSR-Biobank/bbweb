@@ -233,7 +233,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                  uniqueId     = addedEvent.getUniqueId,
                                  annotations  = addedEvent.annotations.map(annotationFromEvent).toSet,
                                  timeAdded    = OffsetDateTime.parse(event.getTime)).map { p =>
-          p.copy(slug = participantRepository.slug(p.uniqueId))
+          p.copy(slug = participantRepository.uniqueSlugFromStr(p.uniqueId))
         }
 
       if (v.isFailure) {
@@ -275,9 +275,9 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                            event.eventType.isUniqueIdUpdated,
                            event.getUniqueIdUpdated.getVersion) { (participant, eventTime) =>
       val v = participant.withUniqueId(event.getUniqueIdUpdated.getUniqueId).map { p =>
-          p.copy(slug = participantRepository.slug(p.uniqueId))
+          p.copy(slug = participantRepository.uniqueSlugFromStr(p.uniqueId))
         }
-      v.foreach( p => participantRepository.put(p.copy(timeModified = Some(eventTime))))
+      v.foreach(p => participantRepository.put(p.copy(timeModified = Some(eventTime))))
       v.map(_ => true)
     }
   }

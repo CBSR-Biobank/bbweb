@@ -7,6 +7,7 @@ import play.api.routing.sird._
 
 class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRouter {
   import StudiesRouting._
+  import org.biobank.controllers.SlugRouting._
 
   override def routes: Routes = {
 
@@ -46,8 +47,8 @@ class StudiesRouter @Inject()(controller: StudiesController) extends SimpleRoute
       // this action extracts parameters from the raw query string
       controller.list
 
-    case GET(p"/$slug") =>
-      controller.getBySlug(slug)
+    case GET(p"/${slug(s)}") =>
+      controller.getBySlug(s)
 
     case POST(p"/snapshot") =>
       controller.snapshot

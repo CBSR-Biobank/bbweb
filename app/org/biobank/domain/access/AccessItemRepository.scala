@@ -38,7 +38,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
 
   protected def notFound(id: AccessItemId): IdNotFound = IdNotFound(s"access item id: $id")
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound =
     EntityCriteriaNotFound(s"access item slug: $slug")
 
   override def init(): Unit = {
@@ -257,9 +257,15 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
         createPermissionSimple(PermissionId.ShipmentDelete,
                                "Delete shipments",
                                "User can delete shipments",
-                               Set(RoleId.ShippingAdministrator))
+                               Set(RoleId.ShippingAdministrator)),
+
+        // SNAPSHOTS
+        createPermissionSimple(PermissionId.Snapshot,
+                               "Storage snapshots",
+                               "User can create storage snapshots",
+                               Set(RoleId.WebsiteAdministrator))
       )
-    permissions.foreach(p => put(p.copy(slug = slug(p.name))))
+    permissions.foreach(p => put(p.copy(slug = uniqueSlug(Slug(p.name)))))
   }
 
   def initRoles(): Unit = {
@@ -358,7 +364,7 @@ class AccessItemRepositoryImpl @Inject() (val testData: TestData)
       )
 
 
-    roles.foreach(r => put(r.copy(slug = slug(r.name))))
+    roles.foreach(r => put(r.copy(slug = uniqueSlug(Slug(r.name)))))
   }
 
   private def createPermission(permissionId: PermissionId,

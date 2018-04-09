@@ -389,13 +389,13 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("read a study by slug") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
-        val json = makeRequest(GET, uri(study.slug))
+        val json = makeRequest(GET, uri(study.slug.id))
         compareObj((json \ "data").get, study)
       }
 
       it("fails for an invalid study ID") {
         val study = factory.createEnabledStudy
-        val json = makeRequest(GET, uri(study.slug), NOT_FOUND)
+        val json = makeRequest(GET, uri(study.slug.id), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 
@@ -425,7 +425,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
           repoStudy must have (
             'id          (studyId),
             'version     (0L),
-            'slug        (Slug(study.name)),
+            'slug        (Slug.slugify(study.name)),
             'name        (study.name),
             'description (study.description)
           )
@@ -450,15 +450,8 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         (json \ "message").as[String] must include regex ("EntityCriteriaError.*name already used")
       }
 
-      it("not add add a new study with a name less than 2 characters") {
-        val json = makeRequest(POST,
-                               uri(""),
-                               BAD_REQUEST,
-                               Json.obj("name" -> "a"))
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must startWith ("InvalidName")
+      it("not add add a new study an empty name") {
+        badRequest(POST, uri(""), Json.obj("name" -> ""), "InvalidName")
       }
 
     }
@@ -698,7 +691,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
           repoStudy.annotationTypes.head.id.id must not be empty
           repoStudy.annotationTypes.head must have (
-            'slug          (Slug(newName)),
+            'slug          (Slug.slugify(newName)),
             'name          (newName),
             'description   (annotType.description),
             'valueType     (annotType.valueType),

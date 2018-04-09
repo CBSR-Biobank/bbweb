@@ -27,17 +27,12 @@ object StudiesProcessor {
 }
 
 /**
- * The StudiesProcessor is responsible for maintaining state changes for all
- * [[org.biobank.domain.studies.Study]] aggregates. This particular processor uses
- * [[https://doc.akka.io/docs/akka/2.5/persistence.html Akka's PersistentActor]]. It receives Commands and if
- * valid will persist the generated events, afterwhich it will updated the current state of the
- * [[org.biobank.domain.studies.Study]] being processed.
+ * The StudiesProcessor is responsible for maintaining state changes for the [[domain.studies.Study]]
+ * aggregate. This particular processor uses [[https://doc.akka.io/docs/akka/2.5/persistence.html Akka's
+ * PersistentActor]]. It receives Commands and if valid will persist the generated events, whereafter it will
+ * updated the current state of the [[domain.studies.Study]] being processed.
  */
-class StudiesProcessor @Inject() (
-  @Named("processingType")      val processingTypeProcessor:   ActorRef,
-  val studyRepository:                                         StudyRepository,
-  val processingTypeRepository:                                ProcessingTypeRepository,
-  val specimenGroupRepository:                                 SpecimenGroupRepository,
+class StudiesProcessor @Inject() (val studyRepository:               StudyRepository,
                                   val collectionEventTypeRepository: CollectionEventTypeRepository,
                                   val snapshotWriter:                SnapshotWriter)
     extends Processor {
@@ -78,20 +73,11 @@ class StudiesProcessor @Inject() (
   }
 
   /**
-   * These are the commands that are requested. A command can fail, and will send the failure as a response
-   * back to the user. Each valid command generates one or more events and is journaled.
-   *
-   * Some commands are forwared to child actors for processing. The child actors are:
-   *
-   *  - [[services.studies.CollectionEventTypeProcessor CollectionEventTypeProcessor]]
-   *  - [[services.studies.ProcessingTypeProcessor ProcessingTypeProcessor]]
-   *  - [[services.studies.StudiesProcessor StudiesProcessor]]
+   * These are the commands that are received. A command can fail, and will send the failure as a response
+   * back to the higher layer. Each valid command generates one or more events and is journaled.
    */
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {
-    case cmd: StudyCommandWithStudyId => validateAndForward(cmd)
-    case cmd: SpecimenLinkTypeCommand => validateAndForward(cmd)
-
     case cmd: AddStudyCmd =>
       process(addCmdToEvent(cmd))(applyAddedEvent)
 
@@ -165,27 +151,6 @@ class StudiesProcessor @Inject() (
         snapshot.studies.foreach(studyRepository.put)
       }
     )
-  }
-
-  private def validateAndForward(cmd: StudyCommand) = {
-    cmd match {
-      case cmd: StudyCommandWithStudyId =>
-        studyRepository.getByKey(StudyId(cmd.studyId)).fold(
-          err => context.sender ! IdNotFound(s"study: ${cmd.studyId}").failureNel[StudyEvent],
-          study => study match {
-            case study: DisabledStudy => {
-              val childActor = cmd match {
-                  case _: ProcessingTypeCommand      => processingTypeProcessor
-                }
-              childActor forward cmd
-            }
-            case study =>
-              context.sender ! InvalidStatus(s"study not disabled: ${study.id}").failureNel[StudyEvent]
-          }
-        )
-
-      case cmd => log.error(s"validateAndForward: invalid command: $cmd")
-    }
   }
 
   private def addCmdToEvent(cmd: AddStudyCmd): ServiceValidation[StudyEvent] = {
@@ -467,7 +432,7 @@ class StudiesProcessor @Inject() (
                                    description                = addedEvent.description,
                                    annotationTypes = Set.empty).map { s =>
           // the slug needs to be recalculated in case there are mutliples
-          s.copy(slug     = studyRepository.slug(s.name),
+          s.copy(slug     = studyRepository.uniqueSlugFromStr(s.name),
                  timeAdded = OffsetDateTime.parse(event.getTime))
         }
 
@@ -502,7 +467,7 @@ class StudiesProcessor @Inject() (
                                         event.getNameUpdated.getVersion) { (study, eventTime) =>
 
       val v = study.withName(event.getNameUpdated.getName).map { s =>
-          s.copy(slug = studyRepository.slug(s.name))
+          s.copy(slug = studyRepository.uniqueSlugFromStr(s.name))
         }
       putDisabledOnSuccess(v, eventTime)
     }

@@ -2,7 +2,7 @@ package org.biobank.controllers.participants
 
 import java.time.OffsetDateTime
 import org.biobank.controllers._
-import org.biobank.domain.JsonHelper
+import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.{ProcessingEventId, ProcessingEventInputSpecimen, ProcessingEventInputSpecimenId }
 import org.biobank.dto.SpecimenDto
@@ -92,7 +92,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
       it("fails for an invalid specimen ID") {
         val f = createEntitiesAndSpecimens
-        val specimen = f.specimens.head.copy(slug = nameGenerator.next[Specimen])
+        val specimen = f.specimens.head.copy(slug = Slug(nameGenerator.next[Specimen]))
 
         val json = makeRequest(GET, uri(specimen), NOT_FOUND)
 

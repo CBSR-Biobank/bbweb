@@ -3,6 +3,7 @@ package org.biobank.controllers.users
 import org.biobank.infrastructure.commands.Commands._
 import javax.inject.{Inject, Singleton}
 import org.biobank.dto._
+import org.biobank.domain.Slug
 import org.biobank.domain.access.{AccessItemId, MembershipId}
 import org.biobank.domain.users._
 import org.biobank.controllers._
@@ -137,7 +138,7 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
       )
     }
 
-  def getBySlug(slug: String): Action[Unit] =
+  def getBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       val v = usersService.getUserBySlug(request.authInfo.userId, slug)
       validationReply(v)

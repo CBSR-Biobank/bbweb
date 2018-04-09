@@ -38,7 +38,7 @@ class CollectionEventTypeRepositoryImpl @Inject() (val testData: TestData)
 
   protected def notFound(id: CollectionEventTypeId): IdNotFound = IdNotFound(s"collection event type: $id")
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound =
     EntityCriteriaNotFound(s"collection event type slug: $slug")
 
   def withId(studyId: StudyId, ceventTypeId: CollectionEventTypeId)
@@ -61,7 +61,8 @@ class CollectionEventTypeRepositoryImpl @Inject() (val testData: TestData)
     getValues.filter(x => x.studyId == studyId).toSet
   }
 
-  def specimenDefinitionCanBeUpdated(studyId: StudyId, specimenDefinitionId: SpecimenDefinitionId): Boolean = {
+  def specimenDefinitionCanBeUpdated(studyId: StudyId, specimenDefinitionId: SpecimenDefinitionId)
+      : Boolean = {
     ???
   }
 

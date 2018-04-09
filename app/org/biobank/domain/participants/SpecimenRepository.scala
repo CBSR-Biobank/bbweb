@@ -29,7 +29,7 @@ class SpecimenRepositoryImpl @Inject() (val testData: TestData)
 
   protected def notFound(id: SpecimenId): IdNotFound = IdNotFound(s"specimen id: $id")
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound =
     EntityCriteriaNotFound(s"specimen slug: $slug")
 
   def inventoryIdCriteriaError(inventoryId: String): String =

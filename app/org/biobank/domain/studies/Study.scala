@@ -124,7 +124,7 @@ final case class DisabledStudy(id:              StudyId,
                                version:         Long,
                                timeAdded:       OffsetDateTime,
                                timeModified:    Option[OffsetDateTime],
-                               slug:            String,
+                               slug: Slug,
                                name:            String,
                                description:     Option[String],
                                annotationTypes: Set[AnnotationType])
@@ -224,7 +224,7 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
       : DomainValidation[DisabledStudy] = {
     (validateId(id) |@|
        validateVersion(version) |@|
-       validateString(name, NameMinLength, InvalidName) |@|
+       validateNonEmptyString(name, InvalidName) |@|
        validateNonEmptyStringOption(description, InvalidDescription) |@|
        annotationTypes.toList.traverseU(validate)) { case _ =>
         DisabledStudy(id              = id,
@@ -250,7 +250,7 @@ final case class EnabledStudy(id:              StudyId,
                               version:         Long,
                               timeAdded:       OffsetDateTime,
                               timeModified:    Option[OffsetDateTime],
-                              slug:            String,
+                              slug: Slug,
                               name:            String,
                               description:     Option[String],
                               annotationTypes: Set[AnnotationType])
@@ -279,7 +279,7 @@ final case class RetiredStudy(id:              StudyId,
                               version:         Long,
                               timeAdded:       OffsetDateTime,
                               timeModified:    Option[OffsetDateTime],
-                              slug:            String,
+                              slug: Slug,
                               name:            String,
                               description:     Option[String],
                               annotationTypes: Set[AnnotationType])

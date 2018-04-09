@@ -48,7 +48,7 @@ object AnnotationTypeId {
  * @param required When true, the user must enter a value for this annotation.
  */
 final case class AnnotationType(id:            AnnotationTypeId,
-                                slug:          String,
+                                slug: Slug,
                                 name:          String,
                                 description:   Option[String],
                                 valueType:     AnnotationValueType,

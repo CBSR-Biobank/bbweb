@@ -1,16 +1,16 @@
 package org.biobank.infrastructure.events
 
 import java.time.format.DateTimeFormatter
-import org.biobank.infrastructure.commands.SpecimenCommands.SpecimenInfo
-import org.biobank.infrastructure.events.CommonEvents.{AnnotationType => EventAnnotationType}
-import org.biobank.infrastructure.events.CollectionEventTypeEvents._
-import org.biobank.infrastructure.events.SpecimenEvents._
 import org.biobank.domain._
 import org.biobank.domain.annotations._
-import org.biobank.domain.studies.{CollectionSpecimenDefinition, SpecimenDefinitionId}
-import org.biobank.domain.participants.SpecimenId
 import org.biobank.domain.centres.ShipmentSpecimen
+import org.biobank.domain.participants.SpecimenId
+import org.biobank.domain.studies.{CollectionSpecimenDefinition, SpecimenDefinitionId}
+import org.biobank.infrastructure.commands.SpecimenCommands.SpecimenInfo
+import org.biobank.infrastructure.events.CollectionEventTypeEvents._
+import org.biobank.infrastructure.events.CommonEvents.{AnnotationType => EventAnnotationType}
 import org.biobank.infrastructure.events.ShipmentSpecimenEvents._
+import org.biobank.infrastructure.events.SpecimenEvents._
 
 object EventUtils {
 
@@ -62,16 +62,16 @@ object EventUtils {
   def specimenDefinitionToEvent(specimenDesc: CollectionSpecimenDefinition):
       CollectionEventTypeEvent.SpecimenDefinition = {
     CollectionEventTypeEvent.SpecimenDefinition().update(
-      _.id                          := specimenDesc.id.id,
-      _.name                        := specimenDesc.name,
-      _.optionalDescription         := specimenDesc.description,
-      _.units                       := specimenDesc.units,
-      _.anatomicalSourceType        := specimenDesc.anatomicalSourceType.toString,
-      _.preservationType            := specimenDesc.preservationType.toString,
+      _.id                      := specimenDesc.id.id,
+      _.name                    := specimenDesc.name,
+      _.optionalDescription     := specimenDesc.description,
+      _.units                   := specimenDesc.units,
+      _.anatomicalSourceType    := specimenDesc.anatomicalSourceType.toString,
+      _.preservationType        := specimenDesc.preservationType.toString,
       _.preservationTemperature := specimenDesc.preservationTemperature.toString,
-      _.specimenType                := specimenDesc.specimenType.toString,
-      _.maxCount                    := specimenDesc.maxCount,
-      _.amount                      := specimenDesc.amount.doubleValue
+      _.specimenType            := specimenDesc.specimenType.toString,
+      _.maxCount                := specimenDesc.maxCount,
+      _.amount                  := specimenDesc.amount.doubleValue
     )
   }
 

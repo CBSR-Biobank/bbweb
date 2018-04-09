@@ -9,11 +9,4 @@ package studies {
 
   }
 
-  trait HasSpecimenGroupId {
-
-    /** The ID of the study this entity belongs to. */
-    val specimenGroupId: SpecimenGroupId
-
-  }
-
 }

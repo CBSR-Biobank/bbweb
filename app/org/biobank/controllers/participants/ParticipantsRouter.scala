@@ -8,11 +8,12 @@ import play.api.routing.sird._
 class ParticipantsRouter @Inject()(controller: ParticipantsController) extends SimpleRouter {
   import ParticipantsRouting._
   import org.biobank.controllers.studies.StudiesRouting._
+  import org.biobank.controllers.SlugRouting._
 
   override def routes: Routes = {
 
-    case GET(p"/$slug") =>
-      controller.getBySlug(slug)
+    case GET(p"/${slug(s)}") =>
+      controller.getBySlug(s)
 
     case GET(p"/${studyId(sId)}/${participantId(id)}") =>
       controller.get(sId, id)

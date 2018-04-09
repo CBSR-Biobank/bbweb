@@ -1,11 +1,12 @@
 package org.biobank.dto
 
+import org.biobank.domain.Slug
 import play.api.libs.json._
 
 package access {
 
   final case class AccessItemNameDto(id:             String,
-                                     slug:           String,
+                                     slug:           Slug,
                                      name:           String,
                                      accessItemType: String) extends Dto
 
@@ -22,7 +23,7 @@ package access {
                            timeAdded:      String,
                            timeModified:   Option[String],
                            accessItemType: String,
-                           slug:           String,
+                           slug: Slug,
                            name:           String,
                            description:    Option[String],
                            userData:       Set[EntityInfoDto],
@@ -37,7 +38,7 @@ package access {
 
   final case class UserRoleDto(id:             String,
                                version:        Long,
-                               slug:           String,
+                               slug: Slug,
                                name:           String,
                                childData:      Set[EntityInfoDto]) extends Dto
 
@@ -51,7 +52,7 @@ package access {
                                  version:      Long,
                                  timeAdded:    String,
                                  timeModified: Option[String],
-                                 slug:         String,
+                                 slug: Slug,
                                  name:         String,
                                  description:  Option[String],
                                  userData:     Set[EntityInfoDto],
@@ -68,7 +69,7 @@ package access {
                                      version:      Long,
                                      timeAdded:    String,
                                      timeModified: Option[String],
-                                     slug:         String,
+                                     slug: Slug,
                                      name:         String,
                                      description:  Option[String],
                                      studyData:    EntitySetDto,

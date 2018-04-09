@@ -4,6 +4,7 @@ import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named, Singleton}
+import org.biobank.domain.Slug
 import org.biobank.domain.access._
 import org.biobank.domain.participants._
 import org.biobank.domain.studies._
@@ -25,7 +26,7 @@ trait ParticipantsService extends BbwebService {
           studyId:       StudyId,
           participantId: ParticipantId): ServiceValidation[Participant]
 
-  def getBySlug(requestUserId: UserId, slug: String): ServiceValidation[Participant]
+  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Participant]
 
   def getByUniqueId(requestUserId: UserId,
                     studyId:       StudyId,
@@ -65,7 +66,7 @@ class ParticipantsServiceImpl @Inject() (
     }
   }
 
-  def getBySlug(requestUserId: UserId, slug: String): ServiceValidation[Participant] = {
+  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Participant] = {
     for {
       participant <- participantRepository.getBySlug(slug)
       study       <- studiesService.getStudy(requestUserId, participant.studyId)

@@ -141,7 +141,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
       it("can retrieve a participant by slug") {
         val f = new Fixture
-        val json = makeRequest(GET, uri(f.participant.slug))
+        val json = makeRequest(GET, uri(f.participant.slug.id))
 
         (json \ "status").as[String] must include ("success")
 
@@ -152,7 +152,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
       it("must return NOT_FOUND for a participant slug that does not exist") {
         val f = new Fixture
         participantRepository.remove(f.participant)
-        val json = makeRequest(GET, uri(f.participant.slug), NOT_FOUND)
+        val json = makeRequest(GET, uri(f.participant.slug.id), NOT_FOUND)
 
         (json \ "status").as[String] must include ("error")
 

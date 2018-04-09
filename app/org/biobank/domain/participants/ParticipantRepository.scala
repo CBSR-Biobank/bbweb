@@ -36,7 +36,7 @@ class ParticipantRepositoryImpl @Inject() (val testData: TestData)
 
   protected def notFound(id: ParticipantId): IdNotFound = IdNotFound(s"participant id: $id")
 
-  protected def slugNotFound(slug: String): EntityCriteriaNotFound =
+  protected def slugNotFound(slug: Slug): EntityCriteriaNotFound =
     EntityCriteriaNotFound(s"participant slug: $slug")
 
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant] = {

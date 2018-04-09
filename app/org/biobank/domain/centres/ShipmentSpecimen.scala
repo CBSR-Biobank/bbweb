@@ -159,7 +159,6 @@ object ShipmentSpecimen extends ShipmentSpecimenValidations {
   implicit val shipmentIdWriter: Writes[ShipmentId] =
     Writes{ (shipmentId: ShipmentId) => JsString(shipmentId.id) }
 
-
   implicit val shipmentSpecimenFormat: Format[ShipmentSpecimen] = Json.format[ShipmentSpecimen]
 
   def compareByState(a: ShipmentSpecimen, b: ShipmentSpecimen): Boolean = (a.state compareTo b.state) < 0

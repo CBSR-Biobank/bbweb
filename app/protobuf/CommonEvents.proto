@@ -3,34 +3,34 @@ syntax = "proto2";
 package org.biobank.infrastructure.events;
 
 message AnnotationType {
-   optional string id            = 1;
-   optional string name          = 2;
-   optional string description   = 3;
-   optional string valueType     = 4; // a scala enum is used here
-   optional int32  maxValueCount = 5;
-   repeated string options       = 6;
-   optional bool   required      = 7;
+  optional string id            = 1;
+  optional string name          = 2;
+  optional string description   = 3;
+  optional string valueType     = 4; // a scala enum is used here
+  optional int32  maxValueCount = 5;
+  repeated string options       = 6;
+  optional bool   required      = 7;
 }
 
 message AnnotationTypeRemoved {
-   optional int64  version = 1;
-   optional string id      = 2;
+  optional int64  version = 1;
+  optional string id      = 2;
 }
 
 message Annotation {
-   optional string annotationTypeId = 1;
-   optional string stringValue      = 2;
-   optional string numberValue      = 3;
-   repeated string selectedValues   = 4;
+  optional string annotationTypeId = 1;
+  optional string stringValue      = 2;
+  optional string numberValue      = 3;
+  repeated string selectedValues   = 4;
 }
 
 message Location {
-   optional string locationId     = 1;
-   optional string name           = 2;
-   optional string street         = 3;
-   optional string city           = 4;
-   optional string province       = 5;
-   optional string postalCode     = 6;
-   optional string poBoxNumber    = 7;
-   optional string countryIsoCode = 8;
+  optional string locationId     = 1;
+  optional string name           = 2;
+  optional string street         = 3;
+  optional string city           = 4;
+  optional string province       = 5;
+  optional string postalCode     = 6;
+  optional string poBoxNumber    = 7;
+  optional string countryIsoCode = 8;
 }

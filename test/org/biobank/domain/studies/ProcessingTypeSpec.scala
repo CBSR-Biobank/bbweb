@@ -1,194 +1,395 @@
 package org.biobank.domain.studies
 
-// import java.time.OffsetDateTime
-// import org.biobank.domain.DomainSpec
-// import org.biobank.fixture.NameGenerator
-// import org.biobank.TestUtils
-// import javax.inject.Inject
-// import org.slf4j.LoggerFactory
+import java.time.OffsetDateTime
+import org.biobank.domain._
+import org.biobank.domain.annotations._
+import org.biobank.domain.containers._
+import org.biobank.fixture.NameGenerator
+import org.biobank.TestUtils
+import org.slf4j.LoggerFactory
+import scala.language.reflectiveCalls
+import org.scalatest.prop.TableDrivenPropertyChecks._
 
-// class ProcessingTypeSpec @Inject() (val processingTypeRepository: ProcessingTypeRepository)
-//     extends DomainSpec {
-//   import org.biobank.TestUtils._
+trait ProcessingTypeSpecCommon {
 
-//   val log = LoggerFactory.getLogger(this.getClass)
+  val factory: Factory
 
-//   val nameGenerator = new NameGenerator(this.getClass)
+  def collectedSpecimenDerivationFixtures() = {
+    new {
+      val collectedSpecimenDefinition = factory.createCollectionSpecimenDefinition
+      val collectionEventType = factory.createCollectionEventType.copy(
+          specimenDefinitions = Set(collectedSpecimenDefinition))
+      val processingSpecimenDefinition = factory.createProcessingSpecimenDefinition
+      val specimenDerivation = CollectedSpecimenDerivation(collectionEventType.id,
+                                                           collectedSpecimenDefinition.id,
+                                                           processingSpecimenDefinition)
+      val processingType = factory.createProcessingType.copy(specimenDerivation = specimenDerivation)
+      val study = factory.defaultDisabledStudy
+    }
+  }
 
-//   describe("A processing type") {
+  def processedSpecimenDerivationFixtures() = {
+    val f = collectedSpecimenDerivationFixtures
+    new {
+      val inputProcessingType = f.processingType
+      val inputSpecimenDefinition = f.processingSpecimenDefinition
+      val outputSpecimenDefinition = factory.createProcessingSpecimenDefinition
+      val specimenDerivation = ProcessedSpecimenDerivation(inputProcessingType.id,
+                                                           inputSpecimenDefinition.id,
+                                                           outputSpecimenDefinition)
+      val outputProcessingType = factory.createProcessingType.copy(specimenDerivation = specimenDerivation)
+      val study = factory.defaultDisabledStudy
+    }
+  }
 
-//     it("be created") {
-//       val disabledStudy = factory.defaultDisabledStudy
-//       val processingTypeId = processingTypeRepository.nextIdentity
-//       val name = nameGenerator.next[ProcessingType]
-//       val description = Some(nameGenerator.next[ProcessingType])
-//       val enabled = true
+}
 
-//       val validation = ProcessingType.create(disabledStudy.id,
-//                                              processingTypeId,
-//                                              0L,
-//                                              name,
-//                                              description,
-//                                              enabled)
+class ProcessingTypeSpec
+    extends DomainSpec
+    with ProcessingTypeSpecCommon
+    with AnnotationTypeSetSharedSpec[ProcessingType] {
+  import org.biobank.TestUtils._
 
-//       validation mustSucceed { processingType =>
-//         processingType mustBe a [ProcessingType]
-//         processingType must have (
-//           'studyId (disabledStudy.id),
-//           'version (0L),
-//           'name (name),
-//           'description (description),
-//           'enabled (enabled)
-//         )
+  val log = LoggerFactory.getLogger(this.getClass)
 
-//         TestUtils.checkTimeStamps(processingType.timeAdded, OffsetDateTime.now)
-//         processingType.timeModified mustBe (None)
-//         ()
-//       }
-//     }
+  val nameGenerator = new NameGenerator(this.getClass)
 
-//     it("be updated") {
-//       val processingType = factory.createProcessingType
+  def createFrom(processingType: ProcessingType): DomainValidation[ProcessingType] =
+    ProcessingType.create(studyId               = processingType.studyId,
+                          id                    = processingType.id,
+                          version               = processingType.version,
+                          name                  = processingType.name,
+                          description           = processingType.description,
+                          enabled               = processingType.enabled,
+                          expectedInputChange   = processingType.expectedInputChange,
+                          expectedOutputChange  = processingType.expectedOutputChange,
+                          inputCount            = processingType.inputCount,
+                          outputCount           = processingType.outputCount,
+                          specimenDerivation    = processingType.specimenDerivation,
+                          inputContainerTypeId  = processingType.inputContainerTypeId,
+                          outputContainerTypeId = processingType.outputContainerTypeId,
+                          annotationTypes       = processingType.annotationTypes)
 
-//       val name = nameGenerator.next[ProcessingType]
-//       val description = Some(nameGenerator.next[ProcessingType])
-//       val enabled = !processingType.enabled
+  def compare(expected: ProcessingType, actual: ProcessingType) = {
+    actual mustBe a [ProcessingType]
+    actual must have (
+      'studyId               (expected.studyId),
+      'version               (expected.version),
+      'name                  (expected.name),
+      'description           (expected.description),
+      'enabled               (expected.enabled),
+      'expectedInputChange   (expected.expectedInputChange),
+      'expectedOutputChange  (expected.expectedOutputChange),
+      'inputCount            (expected.inputCount),
+      'outputCount           (expected.outputCount),
+      'specimenDerivation    (expected.specimenDerivation),
+      'inputContainerTypeId  (expected.inputContainerTypeId),
+      'outputContainerTypeId (expected.outputContainerTypeId)
+    )
 
-//       val validation = processingType.update(name, description, enabled)
-//       validation mustSucceed { pt2 =>
-//         pt2 mustBe a [ProcessingType]
-//         pt2 must have (
-//           'studyId (processingType.studyId),
-//           'id (processingType.id),
-//           'version (processingType.version + 1),
-//           'name (name),
-//           'description (description),
-//           'enabled (enabled)
-//         )
-
-//         pt2.timeAdded mustBe (processingType.timeAdded)
-//         pt2.timeModified must not be (None)
-//         ()
-//       }
-//     }
-//   }
-
-//   describe("A processing type") {
-
-//     it("not be created with an empty study id") {
-//       val studyId = StudyId("")
-//       val processingTypeId = processingTypeRepository.nextIdentity
-//       val name = nameGenerator.next[ProcessingType]
-//       val description = Some(nameGenerator.next[ProcessingType])
-//       val enabled = true
-
-//       val validation = ProcessingType.create(studyId,
-//                                              processingTypeId,
-//                                              0L,
-//                                              name,
-//                                              description,
-//                                              enabled)
-//       validation mustFail "IdRequired"
-//     }
+  }
 
 
-//     it("not be created with an empty id") {
-//       val disabledStudy = factory.defaultDisabledStudy
-//       val processingTypeId = ProcessingTypeId("")
-//       val name = nameGenerator.next[ProcessingType]
-//       val description = Some(nameGenerator.next[ProcessingType])
-//       val enabled = true
+  describe("A processing type can") {
 
-//       val validation = ProcessingType.create(disabledStudy.id,
-//                                              processingTypeId,
-//                                              0L,
-//                                              name,
-//                                              description,
-//                                              enabled)
-//       validation mustFail "IdRequired"
-//     }
+    describe("be created") {
 
-//     it("not be created with an invalid version") {
-//       val disabledStudy = factory.defaultDisabledStudy
-//       val processingTypeId = processingTypeRepository.nextIdentity
-//       val name = nameGenerator.next[ProcessingType]
-//       val description = Some(nameGenerator.next[ProcessingType])
-//       val enabled = true
+      it("with a collected specimen derivation") {
+        val f = collectedSpecimenDerivationFixtures
+        f.processingType.annotationTypes must have size 0
+        createFrom(f.processingType) mustSucceed { pt =>
+          compare(f.processingType, pt)
 
-//       val validation = ProcessingType.create(disabledStudy.id,
-//                                              processingTypeId,
-//                                              -2L,
-//                                              name,
-//                                              description,
-//                                              enabled)
-//       validation mustFail "InvalidVersion"
-//     }
+          pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
+          TestUtils.checkTimeStamps(pt.timeAdded, OffsetDateTime.now)
+          pt.timeModified mustBe (f.processingType.timeModified)
+        }
+      }
 
-//     it("not be created with an null or empty name") {
-//       val disabledStudy = factory.defaultDisabledStudy
-//       val processingTypeId = processingTypeRepository.nextIdentity
-//       var name: String = null
-//       val description = Some(nameGenerator.next[ProcessingType])
-//       val enabled = true
+      it("with a processed specimen derivation") {
+        val f = processedSpecimenDerivationFixtures
+        f.outputProcessingType.annotationTypes must have size 0
+        createFrom(f.outputProcessingType) mustSucceed { pt =>
+          compare(f.outputProcessingType, pt)
 
-//       val validation = ProcessingType.create(disabledStudy.id,
-//                                              processingTypeId,
-//                                              0L,
-//                                              name,
-//                                              description,
-//                                              enabled)
-//       validation mustFail "NameRequired"
+          pt.annotationTypes must have size f.outputProcessingType.annotationTypes.size.toLong
+          TestUtils.checkTimeStamps(pt.timeAdded, OffsetDateTime.now)
+          pt.timeModified mustBe (f.outputProcessingType.timeModified)
+        }
+      }
+    }
 
-//       name = ""
-//       val validation2 = ProcessingType.create(disabledStudy.id,
-//                                               processingTypeId,
-//                                               0L,
-//                                               name,
-//                                               description,
-//                                               enabled)
-//       validation2 mustFail "NameRequired"
-//     }
+    it("have it's name updated") {
+      val f = collectedSpecimenDerivationFixtures
+      val name = nameGenerator.next[CollectionEventType]
 
-//     it("not be created with an empty description option") {
-//       val disabledStudy = factory.defaultDisabledStudy
-//       val processingTypeId = processingTypeRepository.nextIdentity
-//       val name = nameGenerator.next[ProcessingType]
-//       var description: Option[String] = Some(null)
-//       val enabled = true
+      f.processingType.withName(name) mustSucceed { pt =>
+        compare(f.processingType.copy(name    = name,
+                                      version = f.processingType.version + 1),
+                pt)
 
-//       val validation = ProcessingType.create(disabledStudy.id,
-//                                              processingTypeId,
-//                                              0L,
-//                                              name,
-//                                              description,
-//                                              enabled)
-//       validation mustFail "InvalidDescription"
+        pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
+        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+      }
+    }
 
-//       description = Some("")
-//       val validation2 = ProcessingType.create(disabledStudy.id,
-//                                               processingTypeId,
-//                                               0L,
-//                                               name,
-//                                               description,
-//                                               enabled)
-//       validation2 mustFail "InvalidDescription"
-//     }
+    it("have it's description updated") {
+      val f = collectedSpecimenDerivationFixtures
+      val description = Some(nameGenerator.next[CollectionEventType])
 
-//     it("have more than one validation fail") {
-//       val disabledStudy = factory.defaultDisabledStudy
-//       val processingTypeId = processingTypeRepository.nextIdentity
-//       val name = nameGenerator.next[ProcessingType]
-//       val description: Option[String] = Some(null)
-//       val enabled = true
+      f.processingType.withDescription(description) mustSucceed { pt =>
+        compare(f.processingType.copy(description = description,
+                                      version = f.processingType.version + 1),
+                pt)
 
-//       val validation = ProcessingType.create(disabledStudy.id,
-//                                              processingTypeId,
-//                                              -2L,
-//                                              name,
-//                                              description,
-//                                              enabled)
-//       validation.mustFail("InvalidVersion", "InvalidDescription")
-//     }
-//   }
+        pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
+        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+      }
+    }
 
-// }
+    it("be enabled and disabled") {
+      val f = collectedSpecimenDerivationFixtures
+
+      val statusTable = Table(("processing type status", "label"),
+                              (true, "enabled"),
+                              (false, "disabled"))
+
+      forAll (statusTable) { (status, label) =>
+        info(label)
+        val pt = if (status) f.processingType.enable() else f.processingType.disable()
+
+        compare(f.processingType.copy(enabled = status,
+                                      version = f.processingType.version + 1),
+                pt)
+
+        pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
+        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+      }
+    }
+
+    it("have it's expected input change updated") {
+      val f = collectedSpecimenDerivationFixtures
+      val change = f.processingType.expectedInputChange + 1
+
+      f.processingType.withExpectedInputChange(change) mustSucceed { pt =>
+        compare(f.processingType.copy(expectedInputChange = change,
+                                      version             = f.processingType.version + 1),
+                pt)
+
+        pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
+        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+      }
+    }
+
+    it("have it's expected output change updated") {
+      val f = collectedSpecimenDerivationFixtures
+      val change = f.processingType.expectedOutputChange + 1
+
+      f.processingType.withExpectedOutputChange(change) mustSucceed { pt =>
+        compare(f.processingType.copy(expectedOutputChange = change,
+                                      version              = f.processingType.version + 1),
+                pt)
+
+        pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
+        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+      }
+    }
+
+    it("have it's input count updated") {
+      val f = collectedSpecimenDerivationFixtures
+      val count = f.processingType.inputCount + 1
+
+      f.processingType.withInputCount(count) mustSucceed { pt =>
+        compare(f.processingType.copy(inputCount = count,
+                                      version    = f.processingType.version + 1),
+                pt)
+
+        pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
+        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+      }
+    }
+
+    it("have it's output count updated") {
+      val f = collectedSpecimenDerivationFixtures
+      val count = f.processingType.outputCount + 1
+
+      f.processingType.withOutputCount(count) mustSucceed { pt =>
+        compare(f.processingType.copy(outputCount = count,
+                                      version    = f.processingType.version + 1),
+                pt)
+
+        pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
+        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+      }
+    }
+
+
+    describe("not be created") {
+
+      it("with an empty study id") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(studyId = StudyId(""))
+        createFrom(processingType) mustFail "StudyIdRequired"
+      }
+
+
+      it("not be created with an empty id") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(id = ProcessingTypeId(""))
+        createFrom(processingType) mustFail "IdRequired"
+      }
+
+      it("not be created with an invalid version") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(version = -2L)
+        createFrom(processingType) mustFail "InvalidVersion"
+      }
+
+      it("not be created with an invalid name") {
+        val f = collectedSpecimenDerivationFixtures
+
+        val invalidNameTable = Table(("invalid name", "label"),
+                                     ("", "empty"),
+                                     (null, "null"))
+        forAll (invalidNameTable) { (invalidName, label) =>
+          info(label)
+          val processingType = f.processingType.copy(name = invalidName)
+          createFrom(processingType) mustFail "NameRequired"
+        }
+      }
+
+      it("not be created with an invalid description") {
+        val f = collectedSpecimenDerivationFixtures
+
+        val invalidDescriptionTable = Table(("invalid description", "label"),
+                                            (Some(""), "empty"),
+                                            (Some(null), "null"))
+        forAll (invalidDescriptionTable) { (invalidDescription, label) =>
+          info(label)
+          val processingType = f.processingType.copy(description = invalidDescription)
+          createFrom(processingType) mustFail "InvalidDescription"
+        }
+      }
+
+      it("not be created with an invalid expected input change") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(expectedInputChange = -1.0)
+        createFrom(processingType) mustFail "InvalidPositiveNumber"
+      }
+
+      it("not be created with an invalid expected output change") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(expectedOutputChange = -1.0)
+        createFrom(processingType) mustFail "InvalidPositiveNumber"
+      }
+
+      it("not be created with an invalid input count") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(inputCount = -1)
+        createFrom(processingType) mustFail "InvalidPositiveNumber"
+      }
+
+      it("not be created with an invalid output count") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(outputCount = -1)
+        createFrom(processingType) mustFail "InvalidPositiveNumber"
+      }
+
+      it("not be created with an invalid input container id") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(inputContainerTypeId = Some(ContainerTypeId("")))
+        createFrom(processingType) mustFail "ContainerTypeIdRequired"
+      }
+
+      it("not be created with an invalid output container id") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(outputContainerTypeId = Some(ContainerTypeId("")))
+        createFrom(processingType) mustFail "ContainerTypeIdRequired"
+      }
+
+      describe("not be created with an invalid specimen derivation") {
+
+        it("when it is for a collected specimen") {
+          val f = collectedSpecimenDerivationFixtures
+
+          val invalidSpecimenDerivationTable =
+            Table(("invalid specimen derivation", "error", "label"),
+                  (CollectedSpecimenDerivation(CollectionEventTypeId(""),
+                                               f.collectedSpecimenDefinition.id,
+                                               f.processingSpecimenDefinition),
+                   "CollectionEventTypeIdRequired",
+                   "invalid collection event type id"),
+                  (CollectedSpecimenDerivation(f.collectionEventType.id,
+                                               SpecimenDefinitionId(""),
+                                               f.processingSpecimenDefinition),
+                   "SpecimenDefinitionIdRequired",
+                   "invalid specimen definition id"))
+
+          forAll (invalidSpecimenDerivationTable) { (invalidSpecimenDerivation, error, label) =>
+            info(label)
+            val processingType = f.processingType.copy(specimenDerivation = invalidSpecimenDerivation)
+            createFrom(processingType) mustFail error
+          }
+        }
+
+        it("when it is for a processed specimen") {
+          val f = processedSpecimenDerivationFixtures
+
+          val invalidSpecimenDerivationTable =
+            Table(("invalid specimen derivation", "error", "label"),
+                  (ProcessedSpecimenDerivation(ProcessingTypeId(""),
+                                               f.inputSpecimenDefinition.id,
+                                               f.outputSpecimenDefinition),
+                   "ProcessingTypeIdRequired",
+                   "invalid processing type id"),
+                  (ProcessedSpecimenDerivation(f.inputProcessingType.id,
+                                               SpecimenDefinitionId(""),
+                                               f.outputSpecimenDefinition),
+                   "SpecimenDefinitionIdRequired",
+                   "invalid specimen definition id"))
+
+          forAll (invalidSpecimenDerivationTable) { (invalidSpecimenDerivation, error, label) =>
+            info(label)
+            val processingType = f.outputProcessingType.copy(
+                specimenDerivation = invalidSpecimenDerivation)
+            createFrom(processingType) mustFail error
+          }
+        }
+      }
+
+      it("have more than one validation fail") {
+        val f = collectedSpecimenDerivationFixtures
+        val processingType = f.processingType.copy(version = -2L,
+                                                   description = Some(""))
+        createFrom(processingType).mustFail("InvalidVersion", "InvalidDescription")
+      }
+
+    }
+
+  }
+
+  describe("A processing type's annotation type set can") {
+
+    annotationTypeSetSharedBehaviour
+
+  }
+
+  override def createEntity(): ProcessingType = {
+    factory.createProcessingType.copy(annotationTypes = Set.empty)
+  }
+
+  override def getAnnotationTypeSet(entity: ProcessingType): Set[AnnotationType] = {
+    entity.annotationTypes
+  }
+
+  override def addAnnotationType(entity: ProcessingType, annotationType: AnnotationType)
+      : DomainValidation[ProcessingType] = {
+    entity.withAnnotationType(annotationType)
+  }
+
+  override def removeAnnotationType(entity: ProcessingType, id: AnnotationTypeId)
+      : DomainValidation[ProcessingType] = {
+    entity.removeAnnotationType(id)
+  }
+
+}

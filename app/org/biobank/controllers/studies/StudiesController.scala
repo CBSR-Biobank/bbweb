@@ -82,7 +82,7 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
       )
     }
 
-  def getBySlug(slug: String): Action[Unit] =
+  def getBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(service.getStudyBySlug(request.authInfo.userId, slug))
     }
