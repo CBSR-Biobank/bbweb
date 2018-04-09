@@ -7,7 +7,7 @@ import org.biobank.domain._
 import org.biobank.domain.centre.CentreId
 import org.biobank.domain.study.StudyId
 import org.biobank.domain.user.UserId
-import org.slf4j.{Logger, LoggerFactory}
+//import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 
 @ImplementedBy(classOf[MembershipRepositoryImpl])
@@ -24,7 +24,7 @@ class MembershipRepositoryImpl @Inject() (val testData: TestData)
 
   import org.biobank.CommonValidations._
 
-  private val log: Logger = LoggerFactory.getLogger(this.getClass)
+  //private val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   override def init(): Unit = {
     super.init()

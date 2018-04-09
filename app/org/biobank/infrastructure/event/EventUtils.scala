@@ -38,7 +38,7 @@ object EventUtils {
     )
   }
 
-  def annotationToEvent(annotation: org.biobank.domain.annotations.Annotation)
+  def annotationToEvent(annotation: org.biobank.domain.Annotation)
       : org.biobank.infrastructure.event.CommonEvents.Annotation = {
     org.biobank.infrastructure.event.CommonEvents.Annotation().update(
       _.annotationTypeId    := annotation.annotationTypeId.id,
@@ -49,8 +49,8 @@ object EventUtils {
   }
 
   def annotationFromEvent(event: org.biobank.infrastructure.event.CommonEvents.Annotation)
-      : org.biobank.domain.annotations.Annotation = {
-    org.biobank.domain.annotations.Annotation(
+      : org.biobank.domain.Annotation = {
+    org.biobank.domain.Annotation(
       annotationTypeId = AnnotationTypeId(event.getAnnotationTypeId),
       stringValue      = event.stringValue,
       numberValue      = event.numberValue,

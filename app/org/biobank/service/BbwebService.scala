@@ -75,16 +75,13 @@ trait ServicePermissionChecks {
                                             studyId:      Option[StudyId],
                                             centreId:     Option[CentreId])
                                         (block: () => ServiceValidation[T]): ServiceValidation[T] = {
-    val v = accessService.hasPermissionAndIsMember(requestUserId, permissionId, studyId, centreId)
+    accessService.hasPermissionAndIsMember(requestUserId, permissionId, studyId, centreId)
       .fold(
         err        => err.failure[T],
         permission => if (permission) block()
                       else Unauthorized.failureNel[T]
       )
 
-    org.slf4j.LoggerFactory.getLogger(this.getClass)
-      .info(s"whenPermittedAndIsMember: permission: $permissionId, studyId: $studyId, centreId: $centreId, $v")
-    v
   }
 
   protected def whenPermittedAndIsMemberAsync[T](requestUserId: UserId,

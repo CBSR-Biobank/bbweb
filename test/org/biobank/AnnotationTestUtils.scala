@@ -1,6 +1,6 @@
 package org.biobank
 
-import org.biobank.domain.annotations.Annotation
+import org.biobank.domain.Annotation
 
 import play.api.libs.json._
 

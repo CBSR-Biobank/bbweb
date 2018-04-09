@@ -121,7 +121,7 @@ package biobank {
         "InvalidName: must contain only letters (a-z), digits (0-9), period or quote"
     }
 
-    @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments"))
+    @SuppressWarnings(Array("org.wartremover.warts.DefaultArguments", "org.wartremover.warts.Null"))
     def validateNonEmptyString(s: String, err: ValidationKey = NonEmptyString): SystemValidation[String] = {
       if ((s == null) || s.isEmpty()) err.failureNel[String] else s.successNel[String]
     }

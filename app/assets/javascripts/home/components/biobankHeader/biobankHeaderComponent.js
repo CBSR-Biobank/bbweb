@@ -15,6 +15,7 @@ class BiobankHeaderController {
               $log,
               languageService,
               userService) {
+    'ngInject';
     Object.assign(this,
                   {
                     $scope,

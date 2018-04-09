@@ -11,7 +11,7 @@ import org.biobank.domain.participants._
 import org.biobank.domain.centre._
 import org.biobank.domain.containers._
 import org.biobank.domain.AnnotationValueType._
-import org.slf4j.LoggerFactory
+//import org.slf4j.LoggerFactory
 import scala.reflect._
 import scalaz.Scalaz._
 
@@ -28,7 +28,7 @@ import scalaz.Scalaz._
  */
 class Factory {
 
-  private val log = LoggerFactory.getLogger(this.getClass)
+  //private val log = LoggerFactory.getLogger(this.getClass)
 
   private val nameGenerator = new NameGenerator(this.getClass)
 

@@ -2,7 +2,7 @@ package org.biobank.infrastructure.command
 
 import Commands._
 import java.time.OffsetDateTime
-import org.biobank.domain.annotations.Annotation
+import org.biobank.domain.Annotation
 import play.api.libs.json._
 
 object CollectionEventCommands {

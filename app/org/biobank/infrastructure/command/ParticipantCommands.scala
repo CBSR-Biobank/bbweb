@@ -1,6 +1,6 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.domain.annotations.Annotation
+import org.biobank.domain.Annotation
 import org.biobank.infrastructure.command.Commands._
 import play.api.libs.json._
 
