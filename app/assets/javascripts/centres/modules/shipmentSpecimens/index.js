@@ -3,7 +3,7 @@
  *
  * @author Nelson Loyola <loyola@ualberta.ca * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
-import DomainModule    from '../domain'
+import DomainModule    from '../../../domain'
 import angular         from 'angular';
 import angularUiRouter from '@uirouter/angularjs'
 
