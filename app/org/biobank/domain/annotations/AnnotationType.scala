@@ -1,7 +1,8 @@
-package org.biobank.domain
+package org.biobank.domain.annotations
 
 import org.biobank._
-import org.biobank.domain.AnnotationValueType._
+import org.biobank.domain._
+import org.biobank.domain.annotations.AnnotationValueType._
 
 import play.api.libs.json._
 import scalaz.Scalaz._

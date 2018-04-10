@@ -4,7 +4,7 @@ import akka.actor._
 import akka.testkit.{TestKit, TestProbe}
 import akka.persistence.inmemory.extension.{ InMemoryJournalStorage, InMemorySnapshotStorage, StorageExtension }
 import org.biobank.controllers.CacheForTesting
-import org.biobank.service.SnapshotWriter
+import org.biobank.services.SnapshotWriter
 import org.scalatest._
 import org.scalatest.time._
 import org.scalatest.concurrent.ScalaFutures

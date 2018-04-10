@@ -1,10 +1,11 @@
 package org.biobank
 
 import java.time.OffsetDateTime
-import org.biobank.domain.{Annotation, EntityState, Location}
-import org.biobank.domain.centre.Shipment
+import org.biobank.domain.annotations.Annotation
+import org.biobank.domain.{EntityState, Location}
+import org.biobank.domain.centres.Shipment
 import org.biobank.dto.access.{UserRoleDto, UserMembershipDto}
-import org.biobank.service.centres.CentreLocationInfo
+import org.biobank.services.centres.CentreLocationInfo
 import play.api.libs.json._
 
 package dto {
@@ -230,9 +231,9 @@ package dto {
   }
 
   final case class ProcessingDto(
-    processingTypes:   List[org.biobank.domain.study.ProcessingType],
-    specimenLinkTypes: List[org.biobank.domain.study.SpecimenLinkType],
-    specimenGroups:    List[org.biobank.domain.study.SpecimenGroup])
+    processingTypes:   List[org.biobank.domain.studies.ProcessingType],
+    specimenLinkTypes: List[org.biobank.domain.studies.SpecimenLinkType],
+    specimenGroups:    List[org.biobank.domain.studies.SpecimenGroup])
 
   object ProcessingDto {
 

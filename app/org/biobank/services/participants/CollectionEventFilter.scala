@@ -1,11 +1,11 @@
-package org.biobank.service.participants
+package org.biobank.services.participants
 
 import org.biobank.domain.participants.{CollectionEvent, CollectionEventPredicates}
 import org.biobank.domain.PredicateHelper
-import org.biobank.service._
-import org.biobank.service.Comparator._
-import org.biobank.service.QueryFilterParserGrammar._
-import org.biobank.service.{ServiceValidation, ServiceError}
+import org.biobank.services._
+import org.biobank.services.Comparator._
+import org.biobank.services.QueryFilterParserGrammar._
+import org.biobank.services.{ServiceValidation, ServiceError}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 

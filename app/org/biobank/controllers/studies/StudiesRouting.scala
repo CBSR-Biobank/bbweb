@@ -1,6 +1,6 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.studies
 
-import org.biobank.domain.study.{StudyId, CollectionEventTypeId, ProcessingTypeId, SpecimenLinkTypeId}
+import org.biobank.domain.studies.{StudyId, CollectionEventTypeId, ProcessingTypeId, SpecimenLinkTypeId}
 import play.api.mvc.PathBindable.Parsing
 import play.api.routing.sird._
 

@@ -1,9 +1,9 @@
-package org.biobank.service.participants
+package org.biobank.services.participants
 
 import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.participants._
-import org.biobank.service.studies.StudiesServiceFixtures
+import org.biobank.services.studies.StudiesServiceFixtures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
 trait ParticipantsServiceFixtures extends StudiesServiceFixtures {

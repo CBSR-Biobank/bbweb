@@ -2,9 +2,9 @@ package org.biobank.domain.access
 
 import java.time.OffsetDateTime
 import org.biobank.domain._
-import org.biobank.domain.user.UserId
-import org.biobank.domain.study.StudyId
-import org.biobank.domain.centre.CentreId
+import org.biobank.domain.users.UserId
+import org.biobank.domain.studies.StudyId
+import org.biobank.domain.centres.CentreId
 import play.api.libs.json._
 import play.api.libs.functional.syntax._
 import scalaz.Scalaz._

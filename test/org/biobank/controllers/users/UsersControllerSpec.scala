@@ -6,7 +6,7 @@ import org.biobank.controllers.PagedResultsSpec
 import org.biobank.dto.NameAndStateDto
 import org.biobank.domain.access.{AccessItemId, Membership, MembershipId, Role}
 import org.biobank.domain.{JsonHelper, Slug}
-import org.biobank.domain.user._
+import org.biobank.domain.users._
 import org.biobank.fixture.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.Inside

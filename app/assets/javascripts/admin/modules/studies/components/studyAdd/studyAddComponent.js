@@ -57,7 +57,7 @@ function StudyAddController($state,
 }
 
 /**
- * An AngularJS component that allows the user to add a {@link domain.study.Study Study} to the server.
+ * An AngularJS component that allows the user to add a {@link domain.studies.Study Study} to the server.
  *
  * The component displays a form the user must fill in.
  *

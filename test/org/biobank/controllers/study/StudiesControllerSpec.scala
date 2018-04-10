@@ -1,9 +1,10 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.studies
 
 import java.time.OffsetDateTime
 import org.biobank.controllers._
-import org.biobank.domain.{AnnotationType, JsonHelper, Slug}
-import org.biobank.domain.study._
+import org.biobank.domain.annotations.AnnotationType
+import org.biobank.domain.{JsonHelper, Slug}
+import org.biobank.domain.studies._
 import org.biobank.fixture.ControllerFixture
 import play.api.libs.json._
 import play.api.test.Helpers._

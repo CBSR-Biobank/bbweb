@@ -1,8 +1,8 @@
-package org.biobank.service
+package org.biobank.services
 
 import com.google.inject.ImplementedBy
 import javax.inject.{ Inject, Singleton }
-import org.biobank.domain.user.UserId
+import org.biobank.domain.users.UserId
 import play.api.Environment
 import play.api.cache.SyncCacheApi
 import scala.concurrent.duration._

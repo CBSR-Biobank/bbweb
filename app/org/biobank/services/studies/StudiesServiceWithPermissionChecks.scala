@@ -1,10 +1,10 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
 import org.biobank.domain.access._
-import org.biobank.domain.user.UserId
-import org.biobank.domain.study._
-import org.biobank.service._
-import org.biobank.service.ServicePermissionChecks
+import org.biobank.domain.users.UserId
+import org.biobank.domain.studies._
+import org.biobank.services._
+import org.biobank.services.ServicePermissionChecks
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 

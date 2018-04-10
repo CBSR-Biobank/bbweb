@@ -1,4 +1,4 @@
-package org.biobank.domain.centre
+package org.biobank.domain.centres
 
 import java.time.OffsetDateTime
 import org.biobank.domain.DomainSpec

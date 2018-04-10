@@ -1,4 +1,4 @@
-package org.biobank.service.centres
+package org.biobank.services.centres
 
 import akka.actor._
 import akka.event.{Logging, LoggingAdapter}
@@ -9,14 +9,14 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.TestData
 import org.biobank.domain.LocationId
-import org.biobank.domain.centre._
+import org.biobank.domain.centres._
 import org.biobank.domain.participants.{SpecimenId, SpecimenRepository}
 import org.biobank.infrastructure.command.ShipmentCommands._
 import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.ShipmentEvents._
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
+import org.biobank.services.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

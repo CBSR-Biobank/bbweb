@@ -1,11 +1,11 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
 import org.biobank.domain._
 import org.biobank.domain.access._
-import org.biobank.domain.study._
-import org.biobank.domain.user._
+import org.biobank.domain.studies._
+import org.biobank.domain.users._
 import org.biobank.fixture._
-import org.biobank.service.users.UserServiceFixtures
+import org.biobank.services.users.UserServiceFixtures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
 trait StudiesServiceFixtures extends ProcessorTestFixture with UserServiceFixtures {

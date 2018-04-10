@@ -1,4 +1,4 @@
-package org.biobank.service.participants
+package org.biobank.services.participants
 
 import akka.actor._
 import akka.pattern.ask
@@ -7,14 +7,14 @@ import javax.inject.{Inject, Named}
 import java.time.format.DateTimeFormatter
 import org.biobank.domain.access._
 import org.biobank.domain.participants._
-import org.biobank.domain.study._
-import org.biobank.domain.user.UserId
+import org.biobank.domain.studies._
+import org.biobank.domain.users.UserId
 import org.biobank.dto.CollectionEventDto
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
-import org.biobank.service._
-import org.biobank.service.access.AccessService
+import org.biobank.services._
+import org.biobank.services.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent._
 import scalaz.Scalaz._

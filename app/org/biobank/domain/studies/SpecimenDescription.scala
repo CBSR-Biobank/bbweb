@@ -1,4 +1,4 @@
-package org.biobank.domain.study
+package org.biobank.domain.studies
 
 import com.github.ghik.silencer.silent
 import org.biobank.ValidationKey
@@ -31,14 +31,15 @@ object SpecimenDescriptionId {
 
 }
 
-/** Used to define a [[Specimen]] that is collected by a [[Study]].
+/** Used to define a [[domain.participants.Specimen Specimen]] that is collected by a [[domain.studies.Study
+  * Study]].
  *
- * It records ownership, summary, storage, and classification information that applies to an
- * entire group or collection of [[Specimen]]s. A specimen description is defined either for
+ * It records ownership, summary, storage, and classification information that applies to an entire group or
+ * collection of [[domain.participants. Specimen Specimens]]. A specimen description is defined either for
  * specimen types collected from participants, or for specimen types that are processed.
  *
- * This class has a private constructor and instances of this class can only be created using
- * the [[SpecimenDescription.create]] method on the factory object.
+ * This class has a private constructor and instances of this class can only be created using the
+ * [[domain.studies.SpecimenDescription#create SpecimenDescription.create]] method on the factory object.
  */
 trait SpecimenDescription
     extends IdentifiedValueObject[SpecimenDescriptionId]

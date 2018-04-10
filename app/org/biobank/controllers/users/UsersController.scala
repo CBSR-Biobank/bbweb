@@ -4,11 +4,11 @@ import org.biobank.infrastructure.command.Commands._
 import javax.inject.{Inject, Singleton}
 import org.biobank.dto._
 import org.biobank.domain.access.{AccessItemId, MembershipId}
-import org.biobank.domain.user._
+import org.biobank.domain.users._
 import org.biobank.controllers._
 import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.service.users.UsersService
-import org.biobank.service.{AuthToken, PagedResults}
+import org.biobank.services.users.UsersService
+import org.biobank.services.{AuthToken, PagedResults}
 import play.api.Logger
 import play.api.cache.SyncCacheApi
 import play.api.libs.json._

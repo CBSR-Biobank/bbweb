@@ -1,6 +1,6 @@
 package org.biobank.controllers.users
 
-import org.biobank.domain.user.UserId
+import org.biobank.domain.users.UserId
 import javax.inject.Inject
 import play.api.mvc.PathBindable.Parsing
 import play.api.routing.Router.Routes

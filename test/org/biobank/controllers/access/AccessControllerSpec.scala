@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain._
 import org.biobank.domain.access._
-import org.biobank.domain.user._
+import org.biobank.domain.users._
 import org.biobank.dto.EntityInfoDto
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.Inside

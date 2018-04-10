@@ -1,8 +1,8 @@
 package org.biobank.controllers
 
-import org.biobank.domain.user.{ UserId, UserHelper }
-import org.biobank.service.AuthToken
-import org.biobank.service.users.UsersService
+import org.biobank.domain.users.{ UserId, UserHelper }
+import org.biobank.services.AuthToken
+import org.biobank.services.users.UsersService
 import play.api.mvc._
 import play.api.{ Environment, Mode, Logger }
 import scalaz.Scalaz._

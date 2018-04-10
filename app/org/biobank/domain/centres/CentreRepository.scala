@@ -1,10 +1,10 @@
-package org.biobank.domain.centre
+package org.biobank.domain.centres
 
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject , Singleton}
 import org.biobank.TestData
 import org.biobank.domain._
-import org.biobank.domain.study.StudyId
+import org.biobank.domain.studies.StudyId
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 

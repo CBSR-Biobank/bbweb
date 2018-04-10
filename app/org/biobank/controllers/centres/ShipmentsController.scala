@@ -6,13 +6,13 @@ import play.api.libs.json._
 import play.api.{Environment, Logger}
 import play.api.mvc._
 import org.biobank.controllers._
-import org.biobank.domain.centre.{CentreId, Shipment, ShipmentId, ShipmentSpecimen, ShipmentSpecimenId}
-import org.biobank.domain.user.UserId
+import org.biobank.domain.centres.{CentreId, Shipment, ShipmentId, ShipmentSpecimen, ShipmentSpecimenId}
+import org.biobank.domain.users.UserId
 import org.biobank.dto.{ShipmentDto, ShipmentSpecimenDto}
 import org.biobank.infrastructure.AscendingOrder
-import org.biobank.service.{FilterString, ServiceValidation, SortString, PagedResults, QuerySortParser}
-import org.biobank.service.centres.{CentresService, ShipmentsService, CentreLocationInfo}
-import org.biobank.service.participants.SpecimensService
+import org.biobank.services.{FilterString, ServiceValidation, SortString, PagedResults, QuerySortParser}
+import org.biobank.services.centres.{CentresService, ShipmentsService, CentreLocationInfo}
+import org.biobank.services.participants.SpecimensService
 
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._

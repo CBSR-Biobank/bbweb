@@ -4,7 +4,7 @@ import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
 import org.biobank.TestData
 import org.biobank.domain._
-import org.biobank.domain.study.CollectionEventTypeId
+import org.biobank.domain.studies.CollectionEventTypeId
 import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

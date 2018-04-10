@@ -1,7 +1,7 @@
 package org.biobank.domain.containerType
 
 //import org.biobank.domain.containers._
-//import org.biobank.domain.centre.CentreId
+//import org.biobank.domain.centres.CentreId
 import org.biobank.domain.DomainSpec
 import org.biobank.fixture.NameGenerator
 

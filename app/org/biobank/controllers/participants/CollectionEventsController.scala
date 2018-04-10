@@ -4,8 +4,8 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.participants.{ParticipantId, CollectionEventId}
 import org.biobank.infrastructure.command.CollectionEventCommands._
-import org.biobank.service.PagedResults
-import org.biobank.service.participants.CollectionEventsService
+import org.biobank.services.PagedResults
+import org.biobank.services.participants.CollectionEventsService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, ControllerComponents, Result}

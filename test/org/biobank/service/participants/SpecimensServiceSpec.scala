@@ -1,12 +1,12 @@
-package org.biobank.service.participants
+package org.biobank.services.participants
 import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.access._
-import org.biobank.domain.centre._
-import org.biobank.domain.study._
+import org.biobank.domain.centres._
+import org.biobank.domain.studies._
 import org.biobank.domain.participants._
-import org.biobank.domain.user._
-import org.biobank.service.SortString
+import org.biobank.domain.users._
+import org.biobank.services.SortString
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 

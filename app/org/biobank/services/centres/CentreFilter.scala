@@ -1,10 +1,10 @@
-package org.biobank.service.centres
+package org.biobank.services.centres
 
-import org.biobank.service._
-import org.biobank.service.Comparator._
-import org.biobank.service.QueryFilterParserGrammar._
-import org.biobank.service.{ServiceValidation, ServiceError}
-import org.biobank.domain.centre.{Centre, CentrePredicates}
+import org.biobank.services._
+import org.biobank.services.Comparator._
+import org.biobank.services.QueryFilterParserGrammar._
+import org.biobank.services.{ServiceValidation, ServiceError}
+import org.biobank.domain.centres.{Centre, CentrePredicates}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 

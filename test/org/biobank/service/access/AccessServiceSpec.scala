@@ -1,11 +1,11 @@
-package org.biobank.service.access
+package org.biobank.services.access
 
 import org.biobank.fixture._
 import org.biobank.domain.access._
-import org.biobank.domain.user.{ActiveUser, UserRepository}
-import org.biobank.domain.study.{StudyId, StudyRepository}
-import org.biobank.domain.centre.{CentreId, CentreRepository}
-import org.biobank.service.{FilterString, SortString}
+import org.biobank.domain.users.{ActiveUser, UserRepository}
+import org.biobank.domain.studies.{StudyId, StudyRepository}
+import org.biobank.domain.centres.{CentreId, CentreRepository}
+import org.biobank.services.{FilterString, SortString}
 
 class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
 

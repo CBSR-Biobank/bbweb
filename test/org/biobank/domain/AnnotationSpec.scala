@@ -2,6 +2,7 @@ package org.biobank.domain.participants
 
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
+import org.biobank.domain.annotations._
 
 class AnnotationSpec extends DomainSpec {
   import org.biobank.TestUtils._

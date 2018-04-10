@@ -1,4 +1,4 @@
-package org.biobank.service.users
+package org.biobank.services.users
 
 import akka.actor.ActorRef
 import akka.pattern.ask
@@ -7,9 +7,9 @@ import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.ValidationKey
 import org.biobank.domain.access.{AccessItemId, MembershipId, PermissionId}
-import org.biobank.domain.centre.CentreRepository
-import org.biobank.domain.study.{Study, StudyId, StudyRepository}
-import org.biobank.domain.user._
+import org.biobank.domain.centres.CentreRepository
+import org.biobank.domain.studies.{Study, StudyId, StudyRepository}
+import org.biobank.domain.users._
 import org.biobank.dto._
 import org.biobank.dto.access.{MembershipDto, RoleDto, UserRoleDto}
 import org.biobank.infrastructure.AscendingOrder
@@ -17,9 +17,9 @@ import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.command.MembershipCommands._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
-import org.biobank.service._
-import org.biobank.service.access.AccessService
-import org.biobank.service.studies.StudiesService
+import org.biobank.services._
+import org.biobank.services.access.AccessService
+import org.biobank.services.studies.StudiesService
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.Future
 import scalaz.Scalaz._

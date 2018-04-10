@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.containers.{ ContainerId, ContainerSchemaPositionId }
-import org.biobank.domain.study.SpecimenDescriptionId
+import org.biobank.domain.studies.SpecimenDescriptionId
 import org.slf4j.LoggerFactory
 
 class SpecimenSpec extends DomainSpec {

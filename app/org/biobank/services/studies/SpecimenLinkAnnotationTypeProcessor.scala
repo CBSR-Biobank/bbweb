@@ -1,11 +1,11 @@
-// package org.biobank.service.studies
+// package org.biobank.services.studies
 
 // import org.biobank.infrastructure.command.StudyCommands._
 // import org.biobank.infrastructure.event.StudyEvents._
 // import org.biobank.domain._
-// import org.biobank.domain.user.UserId
-// import org.biobank.domain.study._
-// import org.biobank.domain.study.Study
+// import org.biobank.domain.users.UserId
+// import org.biobank.domain.studies._
+// import org.biobank.domain.studies.Study
 
 // import akka.actor._
 // import akka.persistence.SnapshotOffer
@@ -22,12 +22,12 @@
 
 // /**
 //   * The SpecimenLinkAnnotationTypeProcessor is responsible for maintaining state changes for all
-//   * [[org.biobank.domain.study.SpecimenLinkAnnotationType]] aggregates. This particular processor uses
+//   * [[org.biobank.domain.studies.SpecimenLinkAnnotationType]] aggregates. This particular processor uses
 //   * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
 //   * the generated events, afterwhich it will updated the current state of the
-//   * [[org.biobank.domain.study.SpecimenLinkAnnotationType]] being processed.
+//   * [[org.biobank.domain.studies.SpecimenLinkAnnotationType]] being processed.
 //   *
-//   * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+//   * It is a child actor of [[org.biobank.services.study.StudiesProcessorComponent.StudiesProcessor]].
 //   */
 // class SpecimenLinkAnnotationTypeProcessor @javax.inject.Inject() (
 //   val annotationTypeRepository: AnnotationTypeRepository,

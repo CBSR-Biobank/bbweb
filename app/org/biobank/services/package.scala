@@ -2,7 +2,7 @@ package org.biobank
 
 import scalaz._
 
-package service {
+package services {
 
   class FilterString(val expression: String) extends AnyVal {
     override def toString: String = expression
@@ -20,7 +20,7 @@ package service {
 }
 
 // move package object here due to: https://issues.scala-lang.org/browse/SI-9922
-package object service {
+package object services {
 
   /** Used to validate commands received by the system at the service layer. */
   type ServiceValidation[A] = ValidationNel[ServiceError, A]

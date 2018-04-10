@@ -1,6 +1,6 @@
 package org.biobank.domain
 
-import org.biobank.domain.user.UserId
+import org.biobank.domain.users.UserId
 
 import org.joda.time.DateTime
 

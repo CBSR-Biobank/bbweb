@@ -1,4 +1,4 @@
-package org.biobank.service.access
+package org.biobank.services.access
 
 import akka.actor.ActorRef
 import akka.pattern._
@@ -7,7 +7,7 @@ import org.biobank.Global
 import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.access._
-import org.biobank.service._
+import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._

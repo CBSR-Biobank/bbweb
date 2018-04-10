@@ -6,9 +6,10 @@ import org.biobank.infrastructure.event.CommonEvents.{AnnotationType => EventAnn
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
 import org.biobank.infrastructure.event.SpecimenEvents._
 import org.biobank.domain._
-import org.biobank.domain.study.{CollectionSpecimenDescription, SpecimenDescriptionId}
+import org.biobank.domain.annotations._
+import org.biobank.domain.studies.{CollectionSpecimenDescription, SpecimenDescriptionId}
 import org.biobank.domain.participants.SpecimenId
-import org.biobank.domain.centre.ShipmentSpecimen
+import org.biobank.domain.centres.ShipmentSpecimen
 import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
 
 object EventUtils {
@@ -38,7 +39,7 @@ object EventUtils {
     )
   }
 
-  def annotationToEvent(annotation: org.biobank.domain.Annotation)
+  def annotationToEvent(annotation: org.biobank.domain.annotations.Annotation)
       : org.biobank.infrastructure.event.CommonEvents.Annotation = {
     org.biobank.infrastructure.event.CommonEvents.Annotation().update(
       _.annotationTypeId    := annotation.annotationTypeId.id,
@@ -49,8 +50,8 @@ object EventUtils {
   }
 
   def annotationFromEvent(event: org.biobank.infrastructure.event.CommonEvents.Annotation)
-      : org.biobank.domain.Annotation = {
-    org.biobank.domain.Annotation(
+      : org.biobank.domain.annotations.Annotation = {
+    org.biobank.domain.annotations.Annotation(
       annotationTypeId = AnnotationTypeId(event.getAnnotationTypeId),
       stringValue      = event.stringValue,
       numberValue      = event.numberValue,

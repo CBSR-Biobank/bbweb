@@ -1,8 +1,9 @@
-package org.biobank.domain.study
+package org.biobank.domain.studies
 
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.domain._
+import org.biobank.domain.annotations._
 import org.biobank.infrastructure.EnumUtils._
 import play.api.libs.json._
 import scalaz.Scalaz._

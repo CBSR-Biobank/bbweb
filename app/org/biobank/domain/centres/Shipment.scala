@@ -1,4 +1,4 @@
-package org.biobank.domain.centre
+package org.biobank.domain.centres
 
 import java.time.OffsetDateTime
 import org.biobank.domain._
@@ -61,10 +61,10 @@ trait ShipmentPredicates {
 
 /**
  * Represents a transfer of [org.biobank.domain.participants.Specimen]s and / or
- * [org.biobank.domain.containers.Container]s from one [org.biobank.domain.centre.Centre] to another.
+ * [org.biobank.domain.containers.Container]s from one [org.biobank.domain.centres.Centre] to another.
  *
- * @see org.biobank.domain.centre.ShipmentSpecimen
- * @see org.biobank.domain.centre.ShipmentContainer
+ * @see org.biobank.domain.centres.ShipmentSpecimen
+ * @see org.biobank.domain.centres.ShipmentContainer
  */
 sealed trait Shipment
     extends ConcurrencySafeEntity[ShipmentId]

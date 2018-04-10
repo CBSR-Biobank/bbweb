@@ -1,9 +1,9 @@
 package org.biobank.domain.participants
 
 import org.biobank.domain.Factory
-import org.biobank.domain.study.{ CollectionEventType, CollectionSpecimenDescription }
+import org.biobank.domain.studies.{ CollectionEventType, CollectionSpecimenDescription }
 import scala.language.reflectiveCalls
-import org.biobank.service.centres.CentreLocationInfo
+import org.biobank.services.centres.CentreLocationInfo
 
 trait SpecimenSpecFixtures {
 

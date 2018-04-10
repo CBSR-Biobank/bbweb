@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.services
 
 import org.biobank.domain.{HasName, HasNamePredicates, PredicateHelper}
 import scalaz.Scalaz._

@@ -1,14 +1,14 @@
-package org.biobank.service.centres
+package org.biobank.services.centres
 
 import java.time.OffsetDateTime
 import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.access._
-import org.biobank.domain.centre._
-import org.biobank.domain.study._
+import org.biobank.domain.centres._
+import org.biobank.domain.studies._
 import org.biobank.domain.participants._
-import org.biobank.domain.user._
-import org.biobank.service.FilterString
+import org.biobank.domain.users._
+import org.biobank.services.FilterString
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 

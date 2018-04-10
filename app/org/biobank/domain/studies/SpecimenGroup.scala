@@ -1,4 +1,4 @@
-package org.biobank.domain.study
+package org.biobank.domain.studies
 
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey

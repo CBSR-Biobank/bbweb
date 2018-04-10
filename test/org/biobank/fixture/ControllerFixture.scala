@@ -4,12 +4,12 @@ import org.biobank.Global
 import org.biobank.controllers.CacheForTesting
 import org.biobank.domain._
 import org.biobank.domain.access._
-import org.biobank.domain.centre._
+import org.biobank.domain.centres._
 import org.biobank.domain.participants._
 import org.biobank.domain.processing._
-import org.biobank.domain.study._
-import org.biobank.domain.user._
-import org.biobank.service.PasswordHasher
+import org.biobank.domain.studies._
+import org.biobank.domain.users._
+import org.biobank.services.PasswordHasher
 import org.scalatest._
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneServerPerTest

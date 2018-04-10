@@ -1,4 +1,4 @@
-package org.biobank.domain.study
+package org.biobank.domain.studies
 
 import org.biobank.domain.IdentifiedValueObject
 

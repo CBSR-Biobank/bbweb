@@ -1,12 +1,12 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import com.github.ghik.silencer.silent
-import org.biobank.domain.study.{ProcessingTypeId, ProcessingTypeRepository, SpecimenLinkType, SpecimenLinkTypeId, SpecimenLinkTypeRepository, SpecimenGroupRepository }
+import org.biobank.domain.studies.{ProcessingTypeId, ProcessingTypeRepository, SpecimenLinkType, SpecimenLinkTypeId, SpecimenLinkTypeRepository, SpecimenGroupRepository }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.{Processor, ServiceValidation}
+import org.biobank.services.{Processor, ServiceValidation}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -18,12 +18,12 @@ object SpecimenLinkTypeProcessor {
 
 /**
   * The SpecimenLinkTypeProcessor is responsible for maintaining state changes for all
-  * [[org.biobank.domain.study.SpecimenLinkType]] aggregates. This particular processor uses
+  * [[org.biobank.domain.studies.SpecimenLinkType]] aggregates. This particular processor uses
   * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
   * the generated events, afterwhich it will updated the current state of the
-  * [[org.biobank.domain.study.SpecimenLinkType]] being processed.
+  * [[org.biobank.domain.studies.SpecimenLinkType]] being processed.
   *
-  * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+  * It is a child actor of [[org.biobank.services.study.StudiesProcessorComponent.StudiesProcessor]].
   */
 class SpecimenLinkTypeProcessor @javax.inject.Inject() (
   val specimenGroupRepository:              SpecimenGroupRepository,

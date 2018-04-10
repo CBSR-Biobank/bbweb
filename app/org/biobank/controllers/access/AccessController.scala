@@ -3,14 +3,14 @@ package org.biobank.controllers.access
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.access._
-import org.biobank.domain.centre.CentreId
-import org.biobank.domain.study.StudyId
-import org.biobank.domain.user.UserId
-import org.biobank.service.PagedResults
-import org.biobank.service.access.AccessService
-import org.biobank.service.centres.CentresService
-import org.biobank.service.studies.StudiesService
-import org.biobank.service.users.UsersService
+import org.biobank.domain.centres.CentreId
+import org.biobank.domain.studies.StudyId
+import org.biobank.domain.users.UserId
+import org.biobank.services.PagedResults
+import org.biobank.services.access.AccessService
+import org.biobank.services.centres.CentresService
+import org.biobank.services.studies.StudiesService
+import org.biobank.services.users.UsersService
 import play.api.Logger
 import play.api.libs.json.Reads._
 import play.api.libs.json._

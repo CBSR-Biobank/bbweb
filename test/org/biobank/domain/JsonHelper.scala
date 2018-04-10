@@ -4,14 +4,15 @@ import com.typesafe.scalalogging._
 import java.time.OffsetDateTime
 import org.biobank.TestUtils
 import org.biobank.domain.access._
-import org.biobank.domain.centre._
+import org.biobank.domain.annotations._
+import org.biobank.domain.centres._
 import org.biobank.domain.participants.{CollectionEvent, Participant}
-import org.biobank.domain.study._
-import org.biobank.domain.user._
+import org.biobank.domain.studies._
+import org.biobank.domain.users._
 import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.scalatest._
-import org.biobank.service.centres.CentreLocationInfo
+import org.biobank.services.centres.CentreLocationInfo
 //import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._
 

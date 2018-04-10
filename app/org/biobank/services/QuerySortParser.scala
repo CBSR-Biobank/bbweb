@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.services
 
 import org.biobank.infrastructure.{AscendingOrder, DescendingOrder, SortOrder}
 import scala.util.parsing.combinator.RegexParsers
@@ -38,7 +38,7 @@ object QuerySortParser extends RegexParsers {
   def sortExpressions: Parser[List[SortExpression]] =
     rep1sep(sortExpression, "|") ^^ { case e => e }
 
-  def apply(sort: org.biobank.service.SortString): Option[List[SortExpression]] = {
+  def apply(sort: org.biobank.services.SortString): Option[List[SortExpression]] = {
     if (sort.expression.trim.isEmpty) {
       Some(List[SortExpression]())
     } else {

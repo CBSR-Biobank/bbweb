@@ -3,6 +3,7 @@ package org.biobank.domain.participants
 import java.time.OffsetDateTime
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
+import org.biobank.domain.annotations._
 import org.slf4j.LoggerFactory
 
 class ParticipantSpec extends DomainSpec {

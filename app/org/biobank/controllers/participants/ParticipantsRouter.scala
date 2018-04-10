@@ -7,7 +7,7 @@ import play.api.routing.sird._
 
 class ParticipantsRouter @Inject()(controller: ParticipantsController) extends SimpleRouter {
   import ParticipantsRouting._
-  import org.biobank.controllers.study.StudiesRouting._
+  import org.biobank.controllers.studies.StudiesRouting._
 
   override def routes: Routes = {
 

@@ -1,4 +1,4 @@
-package org.biobank.domain.centre
+package org.biobank.domain.centres
 
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}

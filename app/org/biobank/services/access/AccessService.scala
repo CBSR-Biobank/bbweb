@@ -1,4 +1,4 @@
-package org.biobank.service.access
+package org.biobank.services.access
 
 import akka.actor._
 import akka.pattern.ask
@@ -8,9 +8,9 @@ import javax.inject._
 import org.biobank.domain.{ConcurrencySafeEntity, HasName, HasSlug, IdentifiedValueObject}
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId._
-import org.biobank.domain.user.{UserId, UserRepository}
-import org.biobank.domain.study.{StudyId, StudyRepository}
-import org.biobank.domain.centre.{CentreId, CentreRepository}
+import org.biobank.domain.users.{UserId, UserRepository}
+import org.biobank.domain.studies.{StudyId, StudyRepository}
+import org.biobank.domain.centres.{CentreId, CentreRepository}
 import org.biobank.dto._
 import org.biobank.dto.access._
 import org.biobank.infrastructure.AscendingOrder
@@ -18,7 +18,7 @@ import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.command.MembershipCommands._
 import org.biobank.infrastructure.event.AccessEvents._
 import org.biobank.infrastructure.event.MembershipEvents._
-import org.biobank.service._
+import org.biobank.services._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.Environment
 import scala.concurrent.Future

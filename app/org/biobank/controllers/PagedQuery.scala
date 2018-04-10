@@ -3,7 +3,7 @@ package org.biobank.controllers
 import java.net.URLDecoder
 import java.nio.charset.{StandardCharsets => SC}
 import org.biobank.infrastructure._
-import org.biobank.service.{FilterString, SortString}
+import org.biobank.services.{FilterString, SortString}
 //import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

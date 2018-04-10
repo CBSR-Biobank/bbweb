@@ -1,13 +1,14 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.studies
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers.{BbwebAction, FilterAndSortQuery, CommandController, PagedQuery}
 import org.biobank.domain._
-import org.biobank.domain.study._
+import org.biobank.domain.annotations._
+import org.biobank.domain.studies._
 import org.biobank.dto.NameAndStateDto
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service._
-import org.biobank.service.studies.StudiesService
+import org.biobank.services._
+import org.biobank.services.studies.StudiesService
 import play.api.Logger
 import play.api.libs.json._
 import play.api.mvc.{Action, ControllerComponents, Result}

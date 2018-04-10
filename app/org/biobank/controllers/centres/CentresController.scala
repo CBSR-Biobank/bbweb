@@ -2,12 +2,12 @@ package org.biobank.controllers.centres
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.centre.CentreId
+import org.biobank.domain.centres.CentreId
 import org.biobank.dto._
 import org.biobank.infrastructure.command.CentreCommands._
-import org.biobank.service._
-import org.biobank.service.centres.CentresService
-import org.biobank.service.studies.StudiesService
+import org.biobank.services._
+import org.biobank.services.centres.CentresService
+import org.biobank.services.studies.StudiesService
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.{ Environment, Logger }

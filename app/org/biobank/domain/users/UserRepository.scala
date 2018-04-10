@@ -1,4 +1,4 @@
-package org.biobank.domain.user
+package org.biobank.domain.users
 
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}

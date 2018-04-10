@@ -5,7 +5,7 @@ import RoleId._
 import PermissionId._
 import org.biobank.Global
 import org.biobank.domain._
-import org.biobank.domain.user.UserId
+import org.biobank.domain.users.UserId
 import play.api.libs.json._
 import scalaz.Scalaz._
 

@@ -1,4 +1,4 @@
-package org.biobank.service.centres
+package org.biobank.services.centres
 
 import akka.actor._
 import akka.pattern.ask
@@ -8,15 +8,15 @@ import javax.inject.{Inject, Named}
 import org.biobank.domain.LocationId
 import org.biobank.domain.access._
 import org.biobank.domain.access.PermissionId
-import org.biobank.domain.centre._
-import org.biobank.domain.user.UserId
+import org.biobank.domain.centres._
+import org.biobank.domain.users.UserId
 import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.service._
-import org.biobank.service.access.AccessService
-import org.biobank.service.studies.StudiesService
+import org.biobank.services._
+import org.biobank.services.access.AccessService
+import org.biobank.services.studies.StudiesService
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent._

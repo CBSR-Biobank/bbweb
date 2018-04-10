@@ -1,5 +1,6 @@
-package org.biobank.domain
+package org.biobank.domain.annotations
 
+import org.biobank.domain._
 import scalaz.Scalaz._
 
 trait HasAnnotationTypes extends AnnotationTypeValidations {

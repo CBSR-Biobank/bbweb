@@ -1,14 +1,14 @@
-package org.biobank.service.centres
+package org.biobank.services.centres
 
 import akka.actor.ActorRef
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.Global
-import org.biobank.domain.centre.ShipmentSpecFixtures
+import org.biobank.domain.centres.ShipmentSpecFixtures
 import org.biobank.fixture._
-import org.biobank.domain.study.StudyRepository
-import org.biobank.domain.centre.{CentreRepository, ShipmentRepository}
-import org.biobank.service._
+import org.biobank.domain.studies.StudyRepository
+import org.biobank.domain.centres.{CentreRepository, ShipmentRepository}
+import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._

@@ -1,10 +1,10 @@
-package org.biobank.domain.centre
+package org.biobank.domain.centres
 
 import java.time.OffsetDateTime
 import org.biobank._
 import org.biobank.dto.{ShipmentSpecimenDto, SpecimenDto}
 import org.biobank.domain._
-import org.biobank.domain.centre.ShipmentItemState._
+import org.biobank.domain.centres.ShipmentItemState._
 import org.biobank.domain.participants.SpecimenId
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -44,7 +44,7 @@ trait ShipmentSpecimenValidations {
 
 /**
  * Marks a specific [org.biobank.domain.participants.Specimen] as having been in a specific
- * [org.biobank.domain.centre.Shipment].
+ * [org.biobank.domain.centres.Shipment].
  *
  */
 final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,

@@ -1,11 +1,11 @@
-package org.biobank.domain.centre
+package org.biobank.domain.centres
 
 import java.time.OffsetDateTime
 import org.biobank.dto._
 import org.biobank.domain.{EntityState, Factory}
-import org.biobank.domain.study._
+import org.biobank.domain.studies._
 import org.biobank.domain.participants._
-import org.biobank.service.centres.CentreLocationInfo
+import org.biobank.services.centres.CentreLocationInfo
 import org.scalatest.Assertions._
 
 trait ShipmentSpecFixtures {

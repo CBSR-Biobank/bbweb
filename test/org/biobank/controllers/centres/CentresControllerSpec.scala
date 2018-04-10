@@ -4,10 +4,10 @@ import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.Location
-import org.biobank.domain.centre._
-import org.biobank.domain.study.Study
+import org.biobank.domain.centres._
+import org.biobank.domain.studies.Study
 import org.biobank.fixture.ControllerFixture
-import org.biobank.service.centres.CentreLocationInfo
+import org.biobank.services.centres.CentreLocationInfo
 import play.api.libs.json._
 import play.api.test.Helpers._
 

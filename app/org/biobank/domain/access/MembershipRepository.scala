@@ -4,9 +4,9 @@ import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Singleton}
 import org.biobank.{Global, TestData}
 import org.biobank.domain._
-import org.biobank.domain.centre.CentreId
-import org.biobank.domain.study.StudyId
-import org.biobank.domain.user.UserId
+import org.biobank.domain.centres.CentreId
+import org.biobank.domain.studies.StudyId
+import org.biobank.domain.users.UserId
 //import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 

@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.services
 
 import com.google.inject.ImplementedBy
 import com.github.t3hnar.bcrypt._

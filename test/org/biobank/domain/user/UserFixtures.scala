@@ -1,7 +1,7 @@
-package org.biobank.domain.user
+package org.biobank.domain.users
 
 import org.biobank.domain.Factory
-import org.biobank.service.PasswordHasher
+import org.biobank.services.PasswordHasher
 
 trait UserFixtures {
 

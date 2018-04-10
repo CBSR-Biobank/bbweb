@@ -1,4 +1,4 @@
-package org.biobank.service.participants
+package org.biobank.services.participants
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
@@ -6,14 +6,14 @@ import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import org.biobank.domain.AnnotationTypeId
+import org.biobank.domain.annotations.AnnotationTypeId
 import org.biobank.domain.participants._
-import org.biobank.domain.study._
-import org.biobank.domain.Annotation
+import org.biobank.domain.studies._
+import org.biobank.domain.annotations.Annotation
 import org.biobank.infrastructure.command.CollectionEventCommands._
 import org.biobank.infrastructure.event.CollectionEventEvents._
 import org.biobank.infrastructure.event.CommonEvents._
-import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
+import org.biobank.services.{Processor, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

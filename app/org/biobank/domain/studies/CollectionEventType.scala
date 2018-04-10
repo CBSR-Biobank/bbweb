@@ -1,8 +1,9 @@
-package org.biobank.domain.study
+package org.biobank.domain.studies
 
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.domain._
+import org.biobank.domain.annotations._
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -30,7 +31,7 @@ trait CollectionEventTypeValidations {
   * Defines a classification name, unique to the Study, to a participant visit.
   *
   * A participant visit is a record of when specimens were collected from a
-  * [[org.biobank.domain.participant.Participant]] at a collection [[org.biobank.domain.centre.Centre]]. Each
+  * [[org.biobank.domain.participant.Participant]] at a collection [[org.biobank.domain.centres.Centre]]. Each
   * collection event type is assigned one or more [[SpecimenGroup]]s to specify the [[SpecimenType]]s that are
   * collected.
   *

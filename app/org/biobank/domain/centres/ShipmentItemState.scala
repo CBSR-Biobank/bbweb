@@ -1,4 +1,4 @@
-package org.biobank.domain.centre
+package org.biobank.domain.centres
 
 import org.biobank.infrastructure.EnumUtils._
 import play.api.libs.json._

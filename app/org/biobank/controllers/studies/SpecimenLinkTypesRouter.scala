@@ -1,4 +1,4 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.studies
 
 import javax.inject.Inject
 import play.api.routing.Router.Routes

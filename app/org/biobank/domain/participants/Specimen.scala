@@ -6,20 +6,20 @@ import org.biobank.ValidationKey
 import org.biobank.dto.SpecimenDto
 import org.biobank.domain._
 import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
-import org.biobank.domain.study.{CollectionSpecimenDescription, SpecimenDescriptionId, StudyValidations}
+import org.biobank.domain.studies.{CollectionSpecimenDescription, SpecimenDescriptionId, StudyValidations}
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
 import org.biobank.infrastructure.EnumUtils._
-import org.biobank.service.centres.CentreLocationInfo
+import org.biobank.services.centres.CentreLocationInfo
 import play.api.libs.json._
 import scalaz.Scalaz._
 
 /**
  * Represents something that was obtained from a [[domain.participants.Participant Participant]] in a
- * [[domain.study.Study Study]].
+ * [[domain.studies.Study Study]].
  *
  * A Specimen collected from a [[domain.participants.Participant Participant]] can be created with
  * this aggregate and then added to a [[domain.participants.CollectionEvent CollectionEvent]]. When a
- * specimen is created it must be assigned the corresponding [[domain.study.SpecimenDescription
+ * specimen is created it must be assigned the corresponding [[domain.studies.SpecimenDescription
  * SpecimenDescription]] defined in either the [[domain.participants.CollectionEvent
  * CollectionEvent]] or the specimen link type to which it corresponds .
  */
@@ -32,7 +32,7 @@ sealed trait Specimen
   /** The inventory ID assigned to this specimen. */
   val inventoryId: String
 
-  /** The [[domain.study.CollectionSpecimenDescription CollectionSpecimenDescription]] this specimen
+  /** The [[domain.studies.CollectionSpecimenDescription CollectionSpecimenDescription]] this specimen
     * belongs to, defined by the study it belongs to. */
   val specimenDescriptionId: SpecimenDescriptionId
 

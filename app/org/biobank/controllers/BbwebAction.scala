@@ -1,8 +1,8 @@
 package org.biobank.controllers
 
 import javax.inject.Inject
-import org.biobank.service.AuthToken
-import org.biobank.service.users.UsersService
+import org.biobank.services.AuthToken
+import org.biobank.services.users.UsersService
 import play.api.Environment
 import play.api.http.HttpVerbs
 import play.api.mvc._

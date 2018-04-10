@@ -1,6 +1,6 @@
 package org.biobank.controllers.centres
 
-import org.biobank.domain.centre.{CentreId, ShipmentId}
+import org.biobank.domain.centres.{CentreId, ShipmentId}
 import play.api.mvc.PathBindable.Parsing
 import play.api.routing.sird._
 

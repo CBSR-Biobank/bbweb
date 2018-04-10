@@ -1,4 +1,4 @@
-package org.biobank.domain.study
+package org.biobank.domain.studies
 
 import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime

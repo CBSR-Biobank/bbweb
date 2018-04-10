@@ -1,7 +1,8 @@
 package org.biobank.controllers
 
 import org.biobank.domain._
-import org.biobank.domain.study.{ EnabledStudy, Study }
+import org.biobank.domain.annotations._
+import org.biobank.domain.studies.{ EnabledStudy, Study }
 import org.biobank.fixture._
 import scala.collection.mutable.ListBuffer
 import play.api.libs.json._

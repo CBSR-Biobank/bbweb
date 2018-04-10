@@ -1,12 +1,12 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
 import akka.actor._
 import akka.persistence.SnapshotOffer
 import java.time.OffsetDateTime
-import org.biobank.domain.study.{StudyId, ProcessingType, ProcessingTypeId, ProcessingTypeRepository }
+import org.biobank.domain.studies.{StudyId, ProcessingType, ProcessingTypeId, ProcessingTypeRepository }
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.{Processor, ServiceValidation}
+import org.biobank.services.{Processor, ServiceValidation}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -18,13 +18,13 @@ object ProcessingTypeProcessor {
 
 /**
   * The ProcessingTypeProcessor is responsible for maintaining state changes for all
-  * [[org.biobank.domain.study.ProcessingType]] aggregates. This particular processor uses
+  * [[org.biobank.domain.studies.ProcessingType]] aggregates. This particular processor uses
   * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
   * the generated events, afterwhich it will updated the current state of the
-  * [[org.biobank.domain.study.ProcessingType]] being processed.
+  * [[org.biobank.domain.studies.ProcessingType]] being processed.
   *
   * It is a child actor of
-  * [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+  * [[org.biobank.services.study.StudiesProcessorComponent.StudiesProcessor]].
   */
 class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeRepository: ProcessingTypeRepository)
     extends Processor {

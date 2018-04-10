@@ -1,13 +1,13 @@
-package org.biobank.service.users
+package org.biobank.services.users
 
 import akka.actor.ActorRef
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
-import org.biobank.domain.user.UserRepository
+import org.biobank.domain.users.UserRepository
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
-import org.biobank.service._
+import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._

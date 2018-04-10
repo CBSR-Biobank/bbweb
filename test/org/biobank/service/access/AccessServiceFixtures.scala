@@ -1,10 +1,10 @@
-package org.biobank.service.access
+package org.biobank.services.access
 
 import org.biobank.domain.{ConcurrencySafeEntity, Factory}
 import org.biobank.domain.access._
-import org.biobank.domain.centre.{Centre, CentreRepository}
-import org.biobank.domain.study.{Study, StudyRepository}
-import org.biobank.domain.user._
+import org.biobank.domain.centres.{Centre, CentreRepository}
+import org.biobank.domain.studies.{Study, StudyRepository}
+import org.biobank.domain.users._
 import org.scalatest.Assertions
 
 trait AccessServiceFixtures extends Assertions {

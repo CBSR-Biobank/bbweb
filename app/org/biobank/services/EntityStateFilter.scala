@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.services
 
 import org.biobank.domain.{EntityState, HasState, HasStatePredicates, PredicateHelper}
 import scalaz.Scalaz._

@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.services
 
 import scala.util.parsing.combinator.RegexParsers
 import scalaz.Scalaz._

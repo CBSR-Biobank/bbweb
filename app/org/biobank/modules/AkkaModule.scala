@@ -1,11 +1,11 @@
 package org.biobank.modules
 
 import com.google.inject.AbstractModule
-import org.biobank.service.access._
-import org.biobank.service.centres._
-import org.biobank.service.participants._
-import org.biobank.service.studies._
-import org.biobank.service.users._
+import org.biobank.services.access._
+import org.biobank.services.centres._
+import org.biobank.services.participants._
+import org.biobank.services.studies._
+import org.biobank.services.users._
 import play.api.libs.concurrent.AkkaGuiceSupport
 
 class AkkaModule extends AbstractModule with AkkaGuiceSupport {

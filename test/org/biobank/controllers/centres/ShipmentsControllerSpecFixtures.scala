@@ -1,6 +1,6 @@
 package org.biobank.controllers.centres
 
-import org.biobank.domain.centre._
+import org.biobank.domain.centres._
 import org.biobank.fixture.ControllerFixture
 import org.biobank.domain.participants._
 

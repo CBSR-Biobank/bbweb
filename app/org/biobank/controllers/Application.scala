@@ -3,10 +3,10 @@ package org.biobank.controllers
 import javax.inject._
 import org.biobank.dto.AggregateCountsDto
 import org.biobank.domain.access.PermissionId
-import org.biobank.service.access.AccessService
-import org.biobank.service.centres.CentresService
-import org.biobank.service.studies.StudiesService
-import org.biobank.service.users.UsersService
+import org.biobank.services.access.AccessService
+import org.biobank.services.centres.CentresService
+import org.biobank.services.studies.StudiesService
+import org.biobank.services.users.UsersService
 import play.api.{Environment, Logger}
 import play.api.mvc._
 import scala.concurrent.{ExecutionContext, Future}

@@ -1,9 +1,9 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
-import org.biobank.domain.study.{CollectionEventType, CollectionEventTypePredicates}
-import org.biobank.service._
-import org.biobank.service.QueryFilterParserGrammar._
-import org.biobank.service.{ServiceValidation, ServiceError}
+import org.biobank.domain.studies.{CollectionEventType, CollectionEventTypePredicates}
+import org.biobank.services._
+import org.biobank.services.QueryFilterParserGrammar._
+import org.biobank.services.{ServiceValidation, ServiceError}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 

@@ -3,8 +3,9 @@ package org.biobank.controllers.participants
 import java.time.OffsetDateTime
 import org.biobank.controllers._
 import org.biobank.domain._
+import org.biobank.domain.annotations._
 import org.biobank.domain.participants._
-import org.biobank.domain.study._
+import org.biobank.domain.studies._
 import play.api.libs.json._
 import play.api.test.Helpers._
 

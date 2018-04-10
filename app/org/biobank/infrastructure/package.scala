@@ -37,7 +37,7 @@ package infrastructure {
     val required: Boolean
   }
 
-  /** Used to define annotation types to be used by a [[org.biobank.domain.study.SpecimenLinkType]]. */
+  /** Used to define annotation types to be used by a [[org.biobank.domain.studies.SpecimenLinkType]]. */
   final case class SpecimenLinkTypeAnnotationTypeData(annotationTypeId: String, required: Boolean)
       extends AnnotationTypeData
 

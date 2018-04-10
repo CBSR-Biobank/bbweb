@@ -3,13 +3,14 @@ package org.biobank
 import java.time.OffsetDateTime
 import javax.inject.{ Inject, Singleton }
 import org.biobank.domain._
+import org.biobank.domain.annotations._
 import org.biobank.domain.access._
 import org.biobank.domain.access.RoleId._
-import org.biobank.domain.centre._
+import org.biobank.domain.centres._
 import org.biobank.domain.participants._
-import org.biobank.domain.study._
-import org.biobank.domain.user._
-import org.biobank.service.PasswordHasher
+import org.biobank.domain.studies._
+import org.biobank.domain.users._
+import org.biobank.services.PasswordHasher
 import org.hashids.Hashids
 import play.api.{ Configuration, Environment, Logger, Mode }
 import scalaz.Scalaz._

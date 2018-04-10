@@ -4,7 +4,7 @@ import akka.stream.Materializer
 import java.time.{OffsetDateTime, ZoneOffset}
 import javax.inject._
 import org.biobank.domain.Slug
-import org.biobank.domain.user._
+import org.biobank.domain.users._
 import play.api.{Configuration, Logger}
 
 /**

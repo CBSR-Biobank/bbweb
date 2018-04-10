@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.service.{FilterString, SortString}
+import org.biobank.services.{FilterString, SortString}
 import scalaz.Scalaz._
 
 final case class FilterAndSortQuery(filter: FilterString, sort: SortString)

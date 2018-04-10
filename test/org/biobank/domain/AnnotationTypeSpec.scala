@@ -1,5 +1,6 @@
 package org.biobank.domain
 
+import org.biobank.domain.annotations._
 import org.biobank.fixture.NameGenerator
 
 class AnnotationTypeSpec extends DomainSpec {

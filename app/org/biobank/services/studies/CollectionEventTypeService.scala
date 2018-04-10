@@ -1,18 +1,18 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
 import akka.actor.ActorRef
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.access._
-import org.biobank.domain.study._
+import org.biobank.domain.studies._
 import org.biobank.domain.participants.CollectionEventRepository
-import org.biobank.domain.user.UserId
+import org.biobank.domain.users.UserId
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.CollectionEventTypeEvents._
-import org.biobank.service._
-import org.biobank.service.access.AccessService
+import org.biobank.services._
+import org.biobank.services.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent.Future
 import scalaz.Scalaz._

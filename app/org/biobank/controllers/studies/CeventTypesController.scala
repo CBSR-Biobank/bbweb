@@ -1,12 +1,12 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.studies
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.study.{StudyId, CollectionEventTypeId}
+import org.biobank.domain.studies.{StudyId, CollectionEventTypeId}
 import org.biobank.dto.EntityInfoDto
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
-import org.biobank.service.PagedResults
-import org.biobank.service.studies.CollectionEventTypeService
+import org.biobank.services.PagedResults
+import org.biobank.services.studies.CollectionEventTypeService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, ControllerComponents, Result}

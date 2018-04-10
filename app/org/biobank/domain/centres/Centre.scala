@@ -1,10 +1,10 @@
-package org.biobank.domain.centre
+package org.biobank.domain.centres
 
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.dto.NameAndStateDto
 import org.biobank.domain._
-import org.biobank.domain.study.StudyId
+import org.biobank.domain.studies.StudyId
 import org.biobank.infrastructure.EnumUtils._
 import play.api.libs.json._
 import scalaz.Scalaz._

@@ -3,9 +3,9 @@ package org.biobank.controllers.access
 import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.access._
-import org.biobank.domain.centre._
-import org.biobank.domain.study._
-import org.biobank.domain.user._
+import org.biobank.domain.centres._
+import org.biobank.domain.studies._
+import org.biobank.domain.users._
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._

@@ -6,7 +6,7 @@ import org.biobank.{Global, TestData}
 import org.biobank.domain._
 import org.biobank.domain.access.PermissionId._
 import org.biobank.domain.access.RoleId._
-import org.biobank.domain.user.UserId
+import org.biobank.domain.users.UserId
 import org.slf4j.{Logger, LoggerFactory}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

@@ -1,12 +1,12 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
 import akka.actor.ActorRef
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.Global
 import org.biobank.fixture._
-import org.biobank.domain.study.{StudyRepository, CollectionEventTypeRepository}
-import org.biobank.service._
+import org.biobank.domain.studies.{StudyRepository, CollectionEventTypeRepository}
+import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._

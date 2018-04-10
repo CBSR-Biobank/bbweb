@@ -5,7 +5,7 @@ import org.biobank.domain._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 
-/** Identifies a unique [[org.biobank.domain.participants.Specimen|Specimen]] in the system.
+/** Identifies a unique [[domain.participants.Specimen Specimen]] in the system.
   *
   * Used as a value object to maintain associations to with objects in the system.
   */

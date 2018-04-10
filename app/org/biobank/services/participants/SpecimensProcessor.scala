@@ -1,4 +1,4 @@
-package org.biobank.service.participants
+package org.biobank.services.participants
 
 import akka.actor._
 
@@ -10,10 +10,10 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.domain.LocationId
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
-import org.biobank.domain.study.{CollectionEventType, CollectionEventTypeRepository, SpecimenDescriptionId}
+import org.biobank.domain.studies.{CollectionEventType, CollectionEventTypeRepository, SpecimenDescriptionId}
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.service._
+import org.biobank.services._
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

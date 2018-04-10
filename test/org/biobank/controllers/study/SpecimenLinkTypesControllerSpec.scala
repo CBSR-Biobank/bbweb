@@ -1,8 +1,8 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.studies
 
 import org.biobank.domain.JsonHelper
-import org.biobank.domain.study._
-import org.biobank.domain.study.{ Study, ProcessingType, SpecimenLinkType }
+import org.biobank.domain.studies._
+import org.biobank.domain.studies.{ Study, ProcessingType, SpecimenLinkType }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.fixture._
 import play.api.libs.json._

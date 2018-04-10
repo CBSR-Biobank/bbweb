@@ -3,7 +3,7 @@ package org.biobank.controllers.centres
 import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.{EntityState, LocationId}
-import org.biobank.domain.centre._
+import org.biobank.domain.centres._
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._

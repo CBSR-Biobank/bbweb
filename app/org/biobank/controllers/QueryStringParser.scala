@@ -26,7 +26,7 @@ object QueryStringParserGrammar {
 /**
  * This parser for Query Strings is able to parse expressions using RSQL syntax.
  *
- * However, the comparsion operators are given in [[org.biobank.service.Comparator]]
+ * However, the comparsion operators are given in [[org.biobank.services.Comparator]]
  *
  * See: https://github.com/jirutka/rsql-parser/blob/master/README.adoc
  *

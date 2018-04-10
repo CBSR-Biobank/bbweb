@@ -1,6 +1,6 @@
 package org.biobank.domain.access
 
-import org.biobank.domain.user.User
+import org.biobank.domain.users.User
 
 trait Rule {
 

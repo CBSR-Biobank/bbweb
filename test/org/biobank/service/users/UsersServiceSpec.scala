@@ -1,12 +1,12 @@
-package org.biobank.service.users
+package org.biobank.services.users
 
 import org.biobank.domain.access._
-import org.biobank.domain.centre.CentreRepository
-import org.biobank.domain.study.{StudyId, StudyRepository}
-import org.biobank.domain.user._
+import org.biobank.domain.centres.CentreRepository
+import org.biobank.domain.studies.{StudyId, StudyRepository}
+import org.biobank.domain.users._
 import org.biobank.fixture.{NameGenerator, ProcessorTestFixture}
-import org.biobank.service.{FilterString, PasswordHasher, SortString}
-import org.biobank.service.access._
+import org.biobank.services.{FilterString, PasswordHasher, SortString}
+import org.biobank.services.access._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 

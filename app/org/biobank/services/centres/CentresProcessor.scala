@@ -1,4 +1,4 @@
-package org.biobank.service.centres
+package org.biobank.services.centres
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
@@ -7,12 +7,12 @@ import java.time.format.DateTimeFormatter
 import javax.inject.{Inject}
 import org.biobank.TestData
 import org.biobank.domain.{LocationId, Slug}
-import org.biobank.domain.centre._
-import org.biobank.domain.study.{StudyId, StudyRepository}
+import org.biobank.domain.centres._
+import org.biobank.domain.studies.{StudyId, StudyRepository}
 import org.biobank.domain.Location
 import org.biobank.infrastructure.command.CentreCommands._
 import org.biobank.infrastructure.event.CentreEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
+import org.biobank.services.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

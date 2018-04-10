@@ -38,7 +38,7 @@ function ShipmentSpecimenFactory($q,
 
   /**
    * Marks a specific {@link domain.participants.Specimen Specimen} as having been in a specific {@link
-   * domain.centre.Shipment Shipment}.
+   * domain.centres.Shipment Shipment}.
    *
    * Use this contructor to create new Shipment Specimens to be persited on the server. Use [create()]{@link
    * domain.centres.ShipmentSpecimen.create} or [asyncCreate()]{@link

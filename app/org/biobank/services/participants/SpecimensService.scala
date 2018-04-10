@@ -1,21 +1,21 @@
-package org.biobank.service.participants
+package org.biobank.services.participants
 
 import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
 import javax.inject.{Inject, Named}
 import org.biobank.domain.access._
-import org.biobank.domain.centre.CentreRepository
+import org.biobank.domain.centres.CentreRepository
 import org.biobank.domain.participants._
-import org.biobank.domain.study._
-import org.biobank.domain.user.UserId
+import org.biobank.domain.studies._
+import org.biobank.domain.users.UserId
 import org.biobank.dto.SpecimenDto
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.command.SpecimenCommands._
 import org.biobank.infrastructure.event.SpecimenEvents._
-import org.biobank.service._
-import org.biobank.service.access.AccessService
-import org.biobank.service.centres.CentreLocationInfo
+import org.biobank.services._
+import org.biobank.services.access.AccessService
+import org.biobank.services.centres.CentreLocationInfo
 import org.slf4j.{Logger, LoggerFactory}
 import scala.concurrent._
 import scalaz.Scalaz._

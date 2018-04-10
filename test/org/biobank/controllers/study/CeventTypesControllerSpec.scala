@@ -1,11 +1,11 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.studies
 
 import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSpec
-import org.biobank.domain.AnnotationType
+import org.biobank.domain.annotations.AnnotationType
 import org.biobank.domain.JsonHelper
-import org.biobank.domain.study._
-import org.biobank.domain.study.{ CollectionEventType, Study }
+import org.biobank.domain.studies._
+import org.biobank.domain.studies.{ CollectionEventType, Study }
 import org.biobank.fixture.ControllerFixture
 import org.biobank.fixture._
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -226,7 +226,7 @@ class CeventTypesControllerSpec extends ControllerFixture with JsonHelper {
       it("list collection event types sorted by name") {
         val f = new EventTypeFixture(3)
         val sortedEventTypes = f.eventTypes
-          .sortWith(org.biobank.domain.study.CollectionEventType.compareByName)
+          .sortWith(org.biobank.domain.studies.CollectionEventType.compareByName)
         val sortExprs = Table("sort expressions", "name", "-name")
         forAll(sortExprs) { sortExpr =>
           val jsonItems = PagedResultsSpec(this).multipleItemsResult(

@@ -1,15 +1,16 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import org.biobank.domain._
+import org.biobank.domain.annotations._
 import org.biobank.domain.participants.CollectionEventRepository
-import org.biobank.domain.study._
+import org.biobank.domain.studies._
 import org.biobank.infrastructure.command.CollectionEventTypeCommands._
 import org.biobank.infrastructure.event.EventUtils
-import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
+import org.biobank.services.{Processor, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -26,12 +27,12 @@ object CollectionEventTypeProcessor {
 
 /**
  * The CollectionEventTypeProcessor is responsible for maintaining state changes for all
- * [[org.biobank.domain.study.CollectionEventType]] aggregates. This particular processor uses
+ * [[org.biobank.domain.studies.CollectionEventType]] aggregates. This particular processor uses
  * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands, and if valid, persists the
  * generated events, afterwhich it will update the state of the
- * [[org.biobank.domain.study.CollectionEventType]] being processed.
+ * [[org.biobank.domain.studies.CollectionEventType]] being processed.
  *
- * It is a child actor of [[org.biobank.service.study.StudiesProcessorComponent.StudiesProcessor]].
+ * It is a child actor of [[org.biobank.services.study.StudiesProcessorComponent.StudiesProcessor]].
  */
 class CollectionEventTypeProcessor @javax.inject.Inject() (
   val collectionEventTypeRepository: CollectionEventTypeRepository,

@@ -1,15 +1,15 @@
-package org.biobank.service.centres
+package org.biobank.services.centres
 
-import org.biobank.service.ServiceValidation
+import org.biobank.services.ServiceValidation
 import org.biobank.domain.LocationId
-import org.biobank.domain.centre.{
+import org.biobank.domain.centres.{
   ShipmentId,
   ShipmentItemState,
   ShipmentRepository,
   ShipmentSpecimen,
   ShipmentSpecimenRepository
 }
-import org.biobank.domain.centre.ShipmentItemState._
+import org.biobank.domain.centres.ShipmentItemState._
 import org.biobank.domain.participants.{Specimen, SpecimenRepository}
 //import org.slf4j.LoggerFactory
 import scalaz._

@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.services
 
 import org.biobank.infrastructure.{AscendingOrder, DescendingOrder}
 import org.slf4j.LoggerFactory

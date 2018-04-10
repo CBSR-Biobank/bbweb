@@ -1,6 +1,7 @@
-package org.biobank.domain
+package org.biobank.domain.annotations
 
 import org.biobank.ValidationKey
+import org.biobank.domain._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import org.slf4j.{Logger, LoggerFactory}

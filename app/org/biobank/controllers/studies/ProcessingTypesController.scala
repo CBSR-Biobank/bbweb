@@ -1,10 +1,10 @@
-package org.biobank.controllers.study
+package org.biobank.controllers.studies
 
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
-import org.biobank.domain.study.{StudyId, ProcessingTypeId}
+import org.biobank.domain.studies.{StudyId, ProcessingTypeId}
 import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.service.studies.StudiesService
+import org.biobank.services.studies.StudiesService
 import play.api.libs.json._
 import play.api.Environment
 import play.api.mvc.{Action, ControllerComponents, Result}

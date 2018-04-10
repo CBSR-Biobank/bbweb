@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.services
 
 import javax.inject.{ Inject, Singleton }
 import play.api.libs.mailer._

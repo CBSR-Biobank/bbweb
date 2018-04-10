@@ -1,4 +1,4 @@
-package org.biobank.service
+package org.biobank.services
 
 import akka.actor.ActorSystem
 import javax.inject._

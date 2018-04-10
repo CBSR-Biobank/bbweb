@@ -3,7 +3,7 @@ package org.biobank.domain.containers
 import java.time.OffsetDateTime
 import org.biobank.ValidationKey
 import org.biobank.domain._
-import org.biobank.domain.centre.CentreId
+import org.biobank.domain.centres.CentreId
 import play.api.libs.json._
 import scalaz.Scalaz._
 

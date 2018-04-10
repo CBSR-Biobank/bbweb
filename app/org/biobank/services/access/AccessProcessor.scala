@@ -1,4 +1,4 @@
-package org.biobank.service.access
+package org.biobank.services.access
 
 import akka.actor._
 import akka.event.{Logging, LoggingAdapter}
@@ -8,10 +8,10 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.domain.access._
-import org.biobank.domain.user.UserId
+import org.biobank.domain.users.UserId
 import org.biobank.infrastructure.command.AccessCommands._
 import org.biobank.infrastructure.event.AccessEvents._
-import org.biobank.service.{Processor, ServiceValidation, SnapshotWriter}
+import org.biobank.services.{Processor, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

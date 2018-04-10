@@ -1,10 +1,10 @@
-package org.biobank.service.centres
+package org.biobank.services.centres
 
 import org.biobank.domain.access._
-import org.biobank.domain.user.UserId
-import org.biobank.domain.centre._
-import org.biobank.service._
-import org.biobank.service.ServicePermissionChecks
+import org.biobank.domain.users.UserId
+import org.biobank.domain.centres._
+import org.biobank.services._
+import org.biobank.services.ServicePermissionChecks
 import org.slf4j.Logger
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._

@@ -1,4 +1,4 @@
-package org.biobank.service.studies
+package org.biobank.services.studies
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
@@ -7,11 +7,12 @@ import java.time.format.DateTimeFormatter
 import javax.inject._
 import org.biobank.TestData
 import org.biobank.domain._
-import org.biobank.domain.study._
+import org.biobank.domain.annotations._
+import org.biobank.domain.studies._
 import org.biobank.infrastructure.command.StudyCommands._
 import org.biobank.infrastructure.event.EventUtils
 import org.biobank.infrastructure.event.StudyEvents._
-import org.biobank.service.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
+import org.biobank.services.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -28,9 +29,9 @@ object StudiesProcessor {
 
 /**
  * The StudiesProcessor is responsible for maintaining state changes for all
- * [[org.biobank.domain.study.Study]] aggregates. This particular processor uses Akka-Persistence's
+ * [[org.biobank.domain.studies.Study]] aggregates. This particular processor uses Akka-Persistence's
  * [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist the generated
- * events, afterwhich it will updated the current state of the [[org.biobank.domain.study.Study]] being
+ * events, afterwhich it will updated the current state of the [[org.biobank.domain.studies.Study]] being
  * processed.
  */
 class StudiesProcessor @Inject() (

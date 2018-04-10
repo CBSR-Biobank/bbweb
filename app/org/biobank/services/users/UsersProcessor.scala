@@ -1,14 +1,14 @@
-package org.biobank.service.users
+package org.biobank.services.users
 
 import akka.actor._
 import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFailure, SnapshotOffer}
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import org.biobank.domain.user._
+import org.biobank.domain.users._
 import org.biobank.infrastructure.command.UserCommands._
 import org.biobank.infrastructure.event.UserEvents._
-import org.biobank.service._
+import org.biobank.services._
 import play.api.{Configuration, Environment}
 import play.api.libs.json._
 import scalaz.Scalaz._

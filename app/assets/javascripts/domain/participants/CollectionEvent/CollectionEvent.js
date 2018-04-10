@@ -60,7 +60,7 @@ function CollectionEventFactory($q,
    * @param {object} [obj = {}] - The JSON object to create this CollectionEvent from. This object usually
    * comes from the server.
    *
-   * @param {domain.study.CollectionEventType} [collectionEventType] - The CollectionEventType that
+   * @param {domain.studies.CollectionEventType} [collectionEventType] - The CollectionEventType that
    * describes this object.
    */
   class CollectionEvent extends HasAnnotations {

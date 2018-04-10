@@ -1,6 +1,6 @@
 package org.biobank.infrastructure.command
 
-import org.biobank.domain.AnnotationValueType._
+import org.biobank.domain.annotations.AnnotationValueType._
 import org.biobank.infrastructure._
 import play.api.libs.json.Reads._
 import play.api.libs.json._

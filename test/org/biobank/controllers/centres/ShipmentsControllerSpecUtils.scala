@@ -2,7 +2,7 @@ package org.biobank.controllers.centres
 
 import java.time.OffsetDateTime
 import org.biobank.domain.JsonHelper
-import org.biobank.domain.centre._
+import org.biobank.domain.centres._
 import play.api.libs.json._
 
 private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {

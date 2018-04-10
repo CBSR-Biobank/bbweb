@@ -3,7 +3,7 @@ package org.biobank.domain.participants
 import java.time.OffsetDateTime
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
-import org.biobank.domain.study._
+import org.biobank.domain.studies._
 import org.slf4j.LoggerFactory
 
 class CollectionEventSpec extends DomainSpec {

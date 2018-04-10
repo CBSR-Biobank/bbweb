@@ -3,8 +3,8 @@ package org.biobank.controllers.participants
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.participants.{CollectionEventId, SpecimenId}
-import org.biobank.service._
-import org.biobank.service.participants.SpecimensService
+import org.biobank.services._
+import org.biobank.services.participants.SpecimensService
 import play.api.libs.json._
 import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, ControllerComponents}

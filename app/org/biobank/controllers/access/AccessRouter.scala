@@ -10,7 +10,7 @@ import play.api.routing.sird._
 class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter {
   import AccessItemRouting._
   import MembershipRouting._
-  import org.biobank.controllers.study.StudiesRouting._
+  import org.biobank.controllers.studies.StudiesRouting._
   import org.biobank.controllers.centres.CentreRouting._
   import org.biobank.controllers.users.UsersRouting._
 

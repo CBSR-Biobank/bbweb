@@ -1,14 +1,14 @@
-package org.biobank.service
+package org.biobank.services
 
 import akka.actor.ActorRef
 import akka.util.Timeout
 import com.github.ghik.silencer.silent
 import org.biobank.domain.access.PermissionId
 import org.biobank.domain.access.PermissionId._
-import org.biobank.domain.centre.CentreId
-import org.biobank.domain.study.StudyId
-import org.biobank.domain.user.UserId
-import org.biobank.service.access.AccessService
+import org.biobank.domain.centres.CentreId
+import org.biobank.domain.studies.StudyId
+import org.biobank.domain.users.UserId
+import org.biobank.services.access.AccessService
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scalaz.Scalaz._

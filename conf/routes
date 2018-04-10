@@ -4,10 +4,10 @@
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
 
-->      /api/studies/cetypes                    org.biobank.controllers.study.CeventTypesRouter
-->      /api/studies/proctypes                  org.biobank.controllers.study.ProcessingTypesRouter
-->      /api/studies/proctypes/sltypes          org.biobank.controllers.study.SpecimenLinkTypesRouter
-->      /api/studies                            org.biobank.controllers.study.StudiesRouter
+->      /api/studies/cetypes                    org.biobank.controllers.studies.CeventTypesRouter
+->      /api/studies/proctypes                  org.biobank.controllers.studies.ProcessingTypesRouter
+->      /api/studies/proctypes/sltypes          org.biobank.controllers.studies.SpecimenLinkTypesRouter
+->      /api/studies                            org.biobank.controllers.studies.StudiesRouter
 ->      /api/participants/cevents/spcs          org.biobank.controllers.participants.SpecimensRouter
 ->      /api/participants/cevents               org.biobank.controllers.participants.CollectionEventsRouter
 ->      /api/participants                       org.biobank.controllers.participants.ParticipantsRouter

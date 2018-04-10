@@ -1,4 +1,4 @@
-package org.biobank.domain.user
+package org.biobank.domain.users
 
 import java.time.OffsetDateTime
 import org.biobank.domain.{DomainSpec, DomainValidation}
