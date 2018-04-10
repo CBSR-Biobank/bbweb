@@ -188,53 +188,43 @@ to disk. This must be disabled for the production server (see [conf/ehcache.xml]
   (../conf/application.conf). It is in [conf/reference.conf] (../conf/reference.conf) for the testing
   environment.
 
+# Souce code documentation
+
+## Server
+
+To generate the documentationt from the server source code, run the following command:
+
+```sh
+sbt doc
+```
+
+The documentation can now be opened in a web broser by opening this link:
+
+```
+file:///<_path_to_project_>/target/scala-2.12/api/index.html
+```
+
+Where `<_path_to_project_>` is the root directory for the project.
+
+
+
+## Client
+
+To generate the documentation from the client source code, run the following command:
+
+```sh
+npm run jsdoc
+```
+
+The documentation can now be opened in a web broser by opening this link:
+
+```
+file:///<_path_to_project_>/dcumentation/js/index.htm
+```
+
+Where `<_path_to_project_>` is the root directory for the project.
+
 # Translations
 
 Internationalization is done with [angular-gettext](https://angular-gettext.rocketeer.be/). To include the
 latest translations, the command `grunt nggettext_compile` must be run from the command line.
-
-## Docker
-
-In the `tools\docker` folder of the project is a **Docker** file. This file can be used to create a docker
-image to run the web application in. You also need:
-
-* the ZIP file that is created when the web application is created with the `sbt dist` command,
-* a valid email.conf file
-* and the `bbweb_start.sh` script.
-
-This docker image contains instructions to also install Oracle Java 8.
-
-Run the command `docker build -t bbweb .` to build the docker image in the directory containing the
-Dockerfile.
-
-To keep data between appliction versions, the image uses a data volume to store the mongo database. On
-`aicml-med.cs.ualberta.ca`, the database files are kept in directory `/opt/bbweb_docker/mongodb_data`. To make
-backups of this database a mongo server must be started with the configuration pointing at the `mongod.conf`
-file. Use the command:
-
-```bash
-/usr/bin/mongod --config /opt/bbweb_docker/mongod.conf &
-```
-
-The Dockerfile was built by using the following as an example:
-
-* https://github.com/mingfang/docker-play/blob/master/Dockerfile
-* http://stackoverflow.com/questions/25364940/how-to-create-docker-image-for-local-application-taking-file-and-value-parameter
-
-Some docker commands:
-* remove docker image by id: `docker rmi __image_id__`
-* remove all existing containers: `docker rm $(docker ps -a -q)`
-* stop a docker image: `docker stop __container_id__`
-
-#### Test server
-
-Once the docker image has been created on the test server, the docker container can be started using this
-command:
-
-```bash
-sudo docker run -d -p 9000:9000 -v /opt/bbweb_docker/mongodb_data:/data/db bbweb /bin/bash -c "(/usr/bin/mongod &) && su bbweb -c '/home/bbweb/bbweb_start.sh'"
-```
-
----
-
-[Back to top](../README.md)

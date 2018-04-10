@@ -14,11 +14,14 @@ import play.api.libs.json._
 import scalaz.Scalaz._
 
 /**
- * Represents something that was obtained from a [[Participant]] in a [[study.Study]].
+ * Represents something that was obtained from a [[domain.participants.Participant Participant]] in a
+ * [[domain.study.Study Study]].
  *
- * A Specimen collected from a [[Participant]] can be created with this aggregate and then added to a
- * [[CollectionEvent]]. When a specimen is created it must be assigned the corresponding [[SpecimenDescription]]
- * defined in either the [[CollectionEvent]] or the specimen link type to which it corresponds .
+ * A Specimen collected from a [[domain.participants.Participant Participant]] can be created with
+ * this aggregate and then added to a [[domain.participants.CollectionEvent CollectionEvent]]. When a
+ * specimen is created it must be assigned the corresponding [[domain.study.SpecimenDescription
+ * SpecimenDescription]] defined in either the [[domain.participants.CollectionEvent
+ * CollectionEvent]] or the specimen link type to which it corresponds .
  */
 sealed trait Specimen
     extends ConcurrencySafeEntity[SpecimenId]
@@ -29,7 +32,8 @@ sealed trait Specimen
   /** The inventory ID assigned to this specimen. */
   val inventoryId: String
 
-  /** The [[CollectionSpecimenDescription]] this specimen belongs to, defined by the study it belongs to. */
+  /** The [[domain.study.CollectionSpecimenDescription CollectionSpecimenDescription]] this specimen
+    * belongs to, defined by the study it belongs to. */
   val specimenDescriptionId: SpecimenDescriptionId
 
   /** The [[Centre]] where this specimen was created. */

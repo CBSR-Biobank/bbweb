@@ -4,8 +4,8 @@ import play.api.libs.json._
 import org.biobank.infrastructure.EnumUtils._
 
 /**
-  * A standardized set of regions from a [[org.biobank.domain.participant.Participant]] where a [[Specimen]]
-  * is collected from.
+  * A standardized set of regions from a [[org.biobank.domain.participants.Participant Participant]] where a
+  * [[org.biobank.domain.participants.Specimen Specimen]] is collected from.
   */
 @SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object AnatomicalSourceType extends Enumeration {

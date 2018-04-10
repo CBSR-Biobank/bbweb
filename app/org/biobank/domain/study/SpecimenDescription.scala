@@ -31,7 +31,7 @@ object SpecimenDescriptionId {
 
 }
 
-/** Used to configure a [[SpecimenType]] used by a [[Study]].
+/** Used to define a [[Specimen]] that is collected by a [[Study]].
  *
  * It records ownership, summary, storage, and classification information that applies to an
  * entire group or collection of [[Specimen]]s. A specimen description is defined either for
