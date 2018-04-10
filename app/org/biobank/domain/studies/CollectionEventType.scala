@@ -31,9 +31,9 @@ trait CollectionEventTypeValidations {
   * Defines a classification name, unique to the Study, to a participant visit.
   *
   * A participant visit is a record of when specimens were collected from a
-  * [[org.biobank.domain.participant.Participant]] at a collection [[org.biobank.domain.centres.Centre]]. Each
-  * collection event type is assigned one or more [[SpecimenGroup]]s to specify the [[SpecimenType]]s that are
-  * collected.
+  * [[domain.participants.Participant]] at a collection [[domain.centres.Centre]]. Each collection event type
+  * is assigned one or more [[domain.studies.CollectionSpecimenDescription CollectionSpecimenDescriptions]] to
+  * specify the type of [[domain.participants.Specimen Specimens]] that are collected.
   *
   * A study must have at least one collection event type defined in order to record collected specimens.
   *

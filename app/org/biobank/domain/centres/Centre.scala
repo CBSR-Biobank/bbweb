@@ -299,9 +299,6 @@ object DisabledCentre extends CentreValidations {
 
 /**
   * When a centre is in this state, collection and processing of specimens can be recorded.
-  *
-  * This class has a private constructor and instances of this class can only be created using
-  * the [[EnabledCentre.create]] method on the factory object.
   */
 final case class EnabledCentre(id:           CentreId,
                                version:      Long,

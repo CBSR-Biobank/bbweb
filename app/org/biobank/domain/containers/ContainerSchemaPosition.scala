@@ -16,7 +16,7 @@ trait ContainerSchemaPositionValidations {
 }
 
 /**
- * Represents a labelled position that a child (e.g. a [[Container]] or a [[Specimen]]) has in a
+ * Represents a labelled position that a child (e.g. a [[Container]] or a [[domain.participants.Specimen Specimen]]) has in a
  * parent [[Container]]. Labels are associated with a single [[ContainerSchema]].
  *
  * This is a value object because it must be referenced and the [[label]] could be quite long.

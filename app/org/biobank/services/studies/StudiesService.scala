@@ -26,7 +26,7 @@ import scalaz.Validation.FlatMap._
 trait StudiesService extends BbwebService {
 
   /**
-   * Returns a sequence of enabled [[Study]] for which the user can collect specimens for.
+   * Returns a sequence of enabled [[domain.studies.Study Study]] for which the user can collect specimens for.
    *
    * @param requestUserId the ID of the user making the request.
    *

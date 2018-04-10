@@ -19,12 +19,12 @@ object ProcessingTypeProcessor {
 /**
   * The ProcessingTypeProcessor is responsible for maintaining state changes for all
   * [[org.biobank.domain.studies.ProcessingType]] aggregates. This particular processor uses
-  * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
-  * the generated events, afterwhich it will updated the current state of the
+  * [[https://doc.akka.io/docs/akka/2.5/persistence.html Akka's PersistentActor]]. It receives Commands and if
+  * valid will persist the generated events, afterwhich it will updated the current state of the
   * [[org.biobank.domain.studies.ProcessingType]] being processed.
   *
   * It is a child actor of
-  * [[org.biobank.services.study.StudiesProcessorComponent.StudiesProcessor]].
+  * [[org.biobank.services.studies.StudiesProcessor]].
   */
 class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeRepository: ProcessingTypeRepository)
     extends Processor {

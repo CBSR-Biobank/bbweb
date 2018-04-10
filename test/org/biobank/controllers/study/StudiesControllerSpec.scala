@@ -10,7 +10,7 @@ import play.api.libs.json._
 import play.api.test.Helpers._
 
 /**
- * Tests the REST API for [[Study]].
+ * Tests the REST API for [[domain.studies.Study Study]].
  */
 class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   import org.biobank.TestUtils._

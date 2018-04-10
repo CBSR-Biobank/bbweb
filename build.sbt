@@ -69,6 +69,8 @@ javacOptions in ThisBuild  ++= Seq(
 javaOptions in run ++= Seq(
     "-Xms256M", "-Xmx2G", "-XX:+UseConcMarkSweepGC")
 
+sources in (Compile, doc) ~= (_ filter (_.getParent contains "org/biobank"))
+
 fork in run := true
 
 testOptions in Test := Nil

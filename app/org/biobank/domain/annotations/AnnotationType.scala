@@ -7,7 +7,8 @@ import org.biobank.domain.annotations.AnnotationValueType._
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-/** Identifies a unique [[AnnotationType]] in a [[Study]] or [[CollectionEventType]].
+/** Identifies a unique [[domain.annotations.AnnotationType AnnotationType]] in a [[domain.studies.Study
+  * Study]] or [[domain.studies.CollectionEventType CollectionEventType]].
   *
   * Used as a value object to maintain associations to with entities in the system.
   */

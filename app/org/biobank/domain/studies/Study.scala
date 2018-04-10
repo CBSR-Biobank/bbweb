@@ -243,8 +243,8 @@ object DisabledStudy extends StudyValidations with AnnotationTypeValidations {
 /**
  * When a study is in this state, collection and processing of specimens can be recorded.
  *
- * This class has a private constructor and instances of this class can only be created using
- * the [[EnabledStudy.create]] method on the factory object.
+ * This class has a private constructor and instances of this class can only be created by enabling a
+ * [[domain.studies.DisabledStudy DisabledStudy]].
  */
 final case class EnabledStudy(id:              StudyId,
                               version:         Long,
@@ -272,8 +272,8 @@ final case class EnabledStudy(id:              StudyId,
 /**
  *  In this state the study cannot be modified and collection and processing of specimens is not allowed.
  *
- * This class has a private constructor and instances of this class can only be created using
- * the [[RetiredStudy.create]] method on the factory object.
+ * This class has a private constructor and instances of this class can only be created by retiring a
+ * [[domain.studies.RetiredStudy RetiredStudy]].
  */
 final case class RetiredStudy(id:              StudyId,
                               version:         Long,

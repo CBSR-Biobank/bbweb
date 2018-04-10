@@ -2,7 +2,7 @@ package org.biobank.domain
 
 import play.api.libs.json._
 
-/** Identifies a unique [[Loction]] in for a [[Centre]].
+/** Identifies a unique [[domain.Location Location]] in for a [[domain.centres.Centre Centre]].
   *
   * Used as a value object to maintain associations to with entities in the system.
   */

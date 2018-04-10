@@ -28,8 +28,10 @@ trait CollectionEventValidations extends ParticipantValidations {
 }
 
 /**
- * A collection event is used to record a visit by a [[Participant]] to a [[centre.Centre]] (e.g. a clinic). A
- * collection event must have a [[study.CollectionEventType]] as defined by the [[study.Study]].
+ * A collection event is used to record a visit by a [[domain.participants.Participant Participant]] to a
+ * [[domain.centres.Centre Centre]] (e.g. a clinic). A collection event must have a
+ * [[domain.studies.CollectionEventType CollectionEventType]] as defined by the [[domain.studies.Study
+ * Study]].
  *
  * @param timeCompleted a time stamp for when the participant made the visit to the centre.
  * @param visitNumber an positive integer used to uniquely identify the visit. The fist visit starts at 1.

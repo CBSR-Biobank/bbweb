@@ -3,8 +3,8 @@ package org.biobank.domain
 import play.api.libs.json._
 import org.biobank.infrastructure.EnumUtils._
 
-/** Describes how a [[Specimen]] should be preserved/stored by describing a preservation method. Also see
-  * [[PreservationTemperature]].
+/** Describes how a [[domain.participants.Specimen Specimen]] should be preserved/stored by describing a
+  * preservation method. Also see [[domain.PreservationTemperature PreservationTemperature]].
   */
 @SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object PreservationType extends Enumeration {
@@ -18,8 +18,9 @@ object PreservationType extends Enumeration {
   implicit val preservationTypeReads: Format[PreservationType] = enumFormat(PreservationType)
 }
 
-/** Describes how a [[Specimen]] should be preserved/stored by describing temperature requirements (degrees
-  * Celcius), as well as a preservation method (see [[PreservationType]]).
+/** Describes how a [[domain.participants.Specimen Specimen]] should be preserved/stored by describing
+  * temperature requirements (degrees Celcius), as well as a preservation method (see
+  * [[domain.PreservationType PreservationType]]).
   *
   */
 @SuppressWarnings(Array("org.wartremover.warts.Enumeration"))

@@ -9,8 +9,25 @@ import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
 /**
- * This is a value type.
+ * Annotations allow the system to collect custom named and defined pieces of data.
  *
+ * The type information for an Annotation is stored in an [[domain.annotations.AnnotationType
+ * AnnotationType]].
+ *
+ * @param annotationTypeId the ID of the corresponding [[domain.annotations.AnnotationType AnnotationType]]
+ * that defines the type information for this annotation.
+ *
+ * @param stringValue if the `valueType` for the [[domain.annotations.AnnotationType AnnotationType]] is
+ * [[domain.annotations.AnnotationValueType.Text Text]] or [[domain.annotations.AnnotationValueType.DateTime
+ * DateTime]] then the value of the annotation is stored in this property.
+ *
+ * @param numberValue if the `valueType` for the [[domain.annotations.AnnotationType AnnotationType]] is
+ * [[domain.annotations.AnnotationValueType.Number Number]] then the value of the annotation is stored in this
+ * property.
+ *
+ * @param selectedValues if the `valueType` for the [[domain.annotations.AnnotationType AnnotationType]] is
+ * [[domain.annotations.AnnotationValueType.Select Select]] then the value of the annotation is stored in this
+ * property.
  */
 final case class Annotation(annotationTypeId: AnnotationTypeId,
                             stringValue:      Option[String],
@@ -67,7 +84,7 @@ object Annotation {
         : DomainValidation[Boolean] = {
       if ((selectedValues.isEmpty && stringValue.isDefined && numberValue.isDefined)
             || (!selectedValues.isEmpty && (stringValue.isDefined || numberValue.isDefined))) {
-          DomainError("cannot have multiple values assigned").failureNel[Boolean]
+        DomainError("cannot have multiple values assigned").failureNel[Boolean]
       } else {
         true.successNel[String]
       }

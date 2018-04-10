@@ -36,16 +36,19 @@ sealed trait Specimen
     * belongs to, defined by the study it belongs to. */
   val specimenDescriptionId: SpecimenDescriptionId
 
-  /** The [[Centre]] where this specimen was created. */
+  /** The [[domain.centres.Centre Centre]] where this specimen was created. */
   val originLocationId: LocationId
 
-  /** The [[Centre]] where this specimen is currently located. */
+  /** The [[domain.centres.Centre Centre]] where this specimen is currently located. */
   val locationId: LocationId
 
-  /** The [[Container]] this specimen is stored in. */
+  /** The [[domain.containers.Container Container]] this specimen is stored in. */
   val containerId: Option[ContainerId]
 
-  /** The [[ContainerSchemaPosition]] (i.e. position or label) this specimen has in its container. . */
+  /**
+   * The [[domain.containers.ContainerSchemaPosition ContainerSchemaPosition]] (i.e. position or label) this
+   * specimen has in its container.
+   */
   val positionId: Option[ContainerSchemaPositionId]
 
   /**
@@ -55,7 +58,10 @@ sealed trait Specimen
    */
   val timeCreated: OffsetDateTime
 
-  /** The amount, in units specified in the [[SpecimenDescription]], for this specimen. */
+  /**
+   * The amount, in units specified in the [[domain.studies.SpecimenDescription SpecimenDescription]], for this
+   * specimen.
+   */
   val amount: scala.math.BigDecimal
 
   def createDto(collectionEvent:    CollectionEvent,

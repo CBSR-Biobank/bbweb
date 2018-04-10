@@ -11,10 +11,10 @@ import play.api.libs.json._
 import scalaz._
 import Scalaz._
 
-/** Used to configure a [[SpecimenType]] used by a [[Study]].
+/** Used to configure a [[SpecimenType]] used by a [[domain.studies.Study Study]].
  *
  * It records ownership, summary, storage, and classification information that applies to an
- * entire group or collection of [[Specimen]]s. A specimen group is defined either for
+ * entire group or collection of [[domain.participants.Specimen Specimen]]s. A specimen group is defined either for
  * specimen types collected from participants, or for specimen types that are processed.
  *
  * This class has a private constructor and instances of this class can only be created using

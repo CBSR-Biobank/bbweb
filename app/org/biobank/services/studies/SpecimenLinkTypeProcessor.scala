@@ -19,11 +19,11 @@ object SpecimenLinkTypeProcessor {
 /**
   * The SpecimenLinkTypeProcessor is responsible for maintaining state changes for all
   * [[org.biobank.domain.studies.SpecimenLinkType]] aggregates. This particular processor uses
-  * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist
-  * the generated events, afterwhich it will updated the current state of the
+  * [[https://doc.akka.io/docs/akka/2.5/persistence.html Akka's PersistentActor]]. It receives Commands and if
+  * valid will persist the generated events, afterwhich it will updated the current state of the
   * [[org.biobank.domain.studies.SpecimenLinkType]] being processed.
   *
-  * It is a child actor of [[org.biobank.services.study.StudiesProcessorComponent.StudiesProcessor]].
+  * It is a child actor of [[org.biobank.services.studies.StudiesProcessor StudiesProcessor]].
   */
 class SpecimenLinkTypeProcessor @javax.inject.Inject() (
   val specimenGroupRepository:              SpecimenGroupRepository,

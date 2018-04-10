@@ -3,7 +3,7 @@ package org.biobank.domain.studies
 import org.biobank.domain.IdentifiedValueObject
 import play.api.libs.json._
 
-/** Identifies a unique [[Study]] in the system.
+/** Identifies a unique [[domain.studies.Study Study]] in the system.
   *
   * Used as a value object to maintain associations to with other entities in the system.
   */

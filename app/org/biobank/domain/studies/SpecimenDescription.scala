@@ -31,16 +31,6 @@ object SpecimenDescriptionId {
 
 }
 
-/** Used to define a [[domain.participants.Specimen Specimen]] that is collected by a [[domain.studies.Study
-  * Study]].
- *
- * It records ownership, summary, storage, and classification information that applies to an entire group or
- * collection of [[domain.participants. Specimen Specimens]]. A specimen description is defined either for
- * specimen types collected from participants, or for specimen types that are processed.
- *
- * This class has a private constructor and instances of this class can only be created using the
- * [[domain.studies.SpecimenDescription#create SpecimenDescription.create]] method on the factory object.
- */
 trait SpecimenDescription
     extends IdentifiedValueObject[SpecimenDescriptionId]
     with HasUniqueName
@@ -120,6 +110,14 @@ trait SpecimenSpecValidations {
 
 }
 
+/**
+ * Used to define a [[domain.participants.Specimen Specimen]] that is collected by a [[domain.studies.Study
+ * Study]].
+ *
+ * It records ownership, summary, storage, and classification information that applies to an entire group or
+ * collection of [[domain.participants. Specimen Specimens]]. A specimen description is defined either for
+ * specimen types collected from participants, or for specimen types that are processed.
+ */
 final case class CollectionSpecimenDescription(id:                          SpecimenDescriptionId,
                                                slug:                        String,
                                                name:                        String,
@@ -141,7 +139,10 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
 
   val hashidsSalt: String = "biobank-collection-event-types"
 
-
+  /**
+   * Creates a [[domain.studies.CollectionSpecimenDescription.create CollectionSpecimenDescription]] with the
+   * given properties.
+   */
   def create(name:                        String,
              description:                 Option[String],
              units:                       String,

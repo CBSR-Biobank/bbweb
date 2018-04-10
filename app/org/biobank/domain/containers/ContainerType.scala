@@ -28,26 +28,30 @@ sealed trait ContainerType
   import org.biobank.domain.DomainValidations._
 
   /**
-   * The [[centre.Centre]] that owns and is allowed to modify this [[ContainerType]].
+   * The [[domain.centres.Centre Centre]] that owns and is allowed to modify this
+   * [[domain.containers.ContainerType ContainerType]].
    *
-   * When equal to [[None]] then it is a globally accessible [[ContainerType]].
+   * When equal to [[https://www.scala-lang.org/api/current/scala/None$.html None]] then it is a globally
+   * accessible [[domain.containers.ContainerType ContainerType]].
    */
   val centreId: Option[CentreId]
 
   /**
-   * How [[Containers]] of this [[ContainerType]] are designed and laid out, with labelled positions for
-   * children.
+   * How [[domain.containers.Container Containers]] of this [[domain.containers.ContainerType ContainerType]]
+   * are designed and laid out, with labelled positions for children.
    */
   val schemaId: ContainerSchemaId
 
   /**
-   * True if this [[ContainerType]] can be used by (but not modified) by other [[Centre]]s, otherwise false.
+   * True if this [[domain.containers.ContainerType ContainerType]] can be used by (but not modified) by other
+   * [[domain.centres.Centre Centres]], otherwise false.
    */
   val shared: Boolean
 
   /**
-   * True if this [[ContainerType]] can be used to create new [[Container]]s, or false if this
-   * [[ContainerType]] is to be used only for existing [[Container]]s.
+   * True if this [[domain.containers.ContainerType ContainerType]] can be used to create new [[Container]]s,
+   * or false if this [[domain.containers.ContainerType ContainerType]] is to be used only for existing
+   * [[domain.containers.Container Containers]].
    */
   val enabled: Boolean
 

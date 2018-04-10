@@ -3,7 +3,7 @@ package org.biobank.domain
 import play.api.libs.json._
 import org.biobank.infrastructure.EnumUtils._
 
-/** A standardized set of classifications that describe what a [[Specimen]] is.
+/** A standardized set of classifications that describe what a [[domain.participants.Specimen Specimen]] is.
   */
 @SuppressWarnings(Array("org.wartremover.warts.Enumeration"))
 object SpecimenType extends Enumeration {

@@ -21,7 +21,8 @@ trait Container[T <: ContainerType]
 
  /**
   * An inventory identifier, such as a barcode. Global uniqueness is required so that
-  * [[Container]]s, like [[Specimen]]s, can be shipped between [[Center]]s.
+  * [[domain.containers.Container Containers]], like [[domain.participants.Specimen Specimen]]s, can be
+  * shipped between [[domain.centres.Centre Centers]].
   */
   val inventoryId: String
 

@@ -55,10 +55,10 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
   private val PageSizeMax = 20
 
   /**
-   * Log-in a user. Expects the credentials in the body in JSON format.
+   * Used for user login. Expects the credentials in the body in JSON format.
    *
-   * Set the cookie [[AuthTokenCookieKey]] to have AngularJS set the X-XSRF-TOKEN in the HTTP
-   * header.
+   * Sets the cookie [[controllers.Security.AuthTokenCookieKey AuthTokenCookieKey]] to have AngularJS set the
+   * X-XSRF-TOKEN in the HTTP header.
    *
    * @return The token needed for subsequent requests
    */
@@ -90,10 +90,10 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
     }
 
   /**
-   * Log-out a user. Invalidates the authentication token.
+   * Used for logging out a user. Invalidates the authentication token.
    *
-   * Discard the cookie [[AuthTokenCookieKey]] to have AngularJS no longer set the
-   * X-XSRF-TOKEN in HTTP header.
+   * Discard the cookie [[controllers.Security.AuthTokenCookieKey AuthTokenCookieKey]] to have AngularJS no
+   * longer set the X-XSRF-TOKEN in HTTP header.
    */
   def logout(): Action[Unit] = action(parse.empty) { implicit request =>
       authToken.removeToken(request.authInfo.token)

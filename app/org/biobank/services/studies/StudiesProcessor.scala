@@ -29,10 +29,10 @@ object StudiesProcessor {
 
 /**
  * The StudiesProcessor is responsible for maintaining state changes for all
- * [[org.biobank.domain.studies.Study]] aggregates. This particular processor uses Akka-Persistence's
- * [[akka.persistence.PersistentActor]]. It receives Commands and if valid will persist the generated
- * events, afterwhich it will updated the current state of the [[org.biobank.domain.studies.Study]] being
- * processed.
+ * [[org.biobank.domain.studies.Study]] aggregates. This particular processor uses
+ * [[https://doc.akka.io/docs/akka/2.5/persistence.html Akka's PersistentActor]]. It receives Commands and if
+ * valid will persist the generated events, afterwhich it will updated the current state of the
+ * [[org.biobank.domain.studies.Study]] being processed.
  */
 class StudiesProcessor @Inject() (
   @Named("processingType")      val processingTypeProcessor:   ActorRef,
@@ -84,14 +84,9 @@ class StudiesProcessor @Inject() (
    *
    * Some commands are forwared to child actors for processing. The child actors are:
    *
-   *  - [[CeventAnnotationTypeProcessor]]
-   *  - [[CollectionEventTypeProcessor]]
-   *  - [[ProcessingTypeProcessor]]
-   *  - [[SpecimenGroupProcessor]]
-   *  - [[SpecimenLinkAnnotationTypeProcessor]]
-   *  - [[SpecimenLinkTypeProcessor]]
-   *  - [[StudiesProcessor]]
-   *  - [[StudyAnnotationTypeProcessor]]
+   *  - [[services.studies.CollectionEventTypeProcessor CollectionEventTypeProcessor]]
+   *  - [[services.studies.ProcessingTypeProcessor ProcessingTypeProcessor]]
+   *  - [[services.studies.StudiesProcessor StudiesProcessor]]
    */
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveCommand: Receive = {

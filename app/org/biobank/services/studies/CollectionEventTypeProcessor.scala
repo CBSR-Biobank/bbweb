@@ -27,12 +27,12 @@ object CollectionEventTypeProcessor {
 
 /**
  * The CollectionEventTypeProcessor is responsible for maintaining state changes for all
- * [[org.biobank.domain.studies.CollectionEventType]] aggregates. This particular processor uses
- * Akka-Persistence's [[akka.persistence.PersistentActor]]. It receives Commands, and if valid, persists the
- * generated events, afterwhich it will update the state of the
- * [[org.biobank.domain.studies.CollectionEventType]] being processed.
+ * [[domain.studies.CollectionEventType CollectionEventType]] aggregates. This particular processor uses
+ * [[https://doc.akka.io/docs/akka/2.5/persistence.html Akka's PersistentActor]]. It receives
+ * Commands, and if valid, persists the generated events, afterwhich it will update the state of the
+ * [[domain.studies.CollectionEventType CollectionEventType]] being processed.
  *
- * It is a child actor of [[org.biobank.services.study.StudiesProcessorComponent.StudiesProcessor]].
+ * It is a child actor of [[services.studies.StudiesProcessor StudiesProcessor]].
  */
 class CollectionEventTypeProcessor @javax.inject.Inject() (
   val collectionEventTypeRepository: CollectionEventTypeRepository,

@@ -7,7 +7,7 @@ import scalaz.Scalaz._
 
 /** Records a regularly preformed specimen processing procedure. There are one or more associated
   * [[SpecimenLinkType]]s that further define legal procedures, and allow recording of procedures
-  * performed on different types of [[Specimen]]s.
+  * performed on different types of [[domain.participants.Specimen Specimen]]s.
   *
   * For speicmen processing to take place, a study must have at least one processing type defined.
   *

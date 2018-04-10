@@ -33,7 +33,7 @@ trait ShipmentConstraints {
    *
    * @param specimenInventoyIds one or more inventory IDs.
    *
-   * @returns a validation. Success if all inventory IDS match specimens in the system. Failure if not.
+   * @return a validation: Success if all inventory IDS match specimens in the system. Failure if not.
    */
   protected def inventoryIdsToSpecimens(specimenInventoryIds: String*): ServiceValidation[List[Specimen]] = {
     specimenInventoryIds.

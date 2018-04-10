@@ -20,14 +20,17 @@ trait SpecimenLinkTypeValidations {
 
 }
 
-/** [[SpecimenLinkType]]s are assigned to a [[ProcessingType]], and are used to represent a regularly
-  * performed processing procedure involving two [[Specimen]]s: an input, which must be in a specific
-  * [[SpecimenGroup]], and an output, which must also be in another specific [[SpecimenGroup]].
+/** [[domain.studies.SpecimenLinkType SpecimenLinkType]]s are assigned to a [[domain.studies.ProcessingType
+  * ProcessingType]], and are used to represent a regularly performed processing procedure involving two
+  * [[domain.participants.Specimen Specimen]]: an input, which must be in a specific
+  * [[domain.studies.SpecimenGroup SpecimenGroup]], and an output, which must also be in another specific
+  * [[domain.studies.SpecimenGroup SpecimenGroup]].
   *
   * To avoid redundancy, each combination of inputGroup and outputGroup may exist only once per
   * ProcessingType.
   *
-  * @param processingTypeId the [[ProcessingType]] this specimen link belongs to.
+  * @param processingTypeId the [[domain.studies.ProcessingType ProcessingType]] this specimen link belongs
+  * to.
   *
   * @param expectedInputChange the expected amount to be removed from each input. If the value is
   *        not required then use a value of zero.
@@ -40,9 +43,9 @@ trait SpecimenLinkTypeValidations {
   * @param outputCount are the number of resulting specimens when the processing is carried out.
   *        A value of zero for output count implies that the count is the same as the input count.
   *
-  * @param inputGroupId The [[SpecimenGroup]] the input specimens are from.
+  * @param inputGroupId The [[domain.studies.SpecimenGroup SpecimenGroup]] the input specimens are from.
   *
-  * @param outputGroupId The [[SpecimenGroup]] the output specimens are from.
+  * @param outputGroupId The [[domain.studies.SpecimenGroup SpecimenGroup]] the output specimens are from.
   *
   * @param inputContainerTypeId The specimen container type that holds the input specimens. This is
   *        an optional field.
