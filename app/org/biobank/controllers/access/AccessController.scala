@@ -33,8 +33,8 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
                               (implicit val ec: ExecutionContext)
     extends CommandController(controllerComponents) {
 
-  import org.biobank.infrastructure.command.AccessCommands._
-  import org.biobank.infrastructure.command.MembershipCommands._
+  import org.biobank.infrastructure.commands.AccessCommands._
+  import org.biobank.infrastructure.commands.MembershipCommands._
 
   val log: Logger = Logger(this.getClass)
 

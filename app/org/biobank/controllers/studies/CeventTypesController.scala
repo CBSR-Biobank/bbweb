@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.studies.{StudyId, CollectionEventTypeId}
 import org.biobank.dto.EntityInfoDto
-import org.biobank.infrastructure.command.CollectionEventTypeCommands._
+import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 import org.biobank.services.PagedResults
 import org.biobank.services.studies.CollectionEventTypeService
 import play.api.libs.json._

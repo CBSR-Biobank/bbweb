@@ -21,7 +21,7 @@ class UsersServiceSpec
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.UserCommands._
+  import org.biobank.infrastructure.commands.UserCommands._
   import org.biobank.domain.access.AccessItem._
 
   val usersService = app.injector.instanceOf[UsersService]

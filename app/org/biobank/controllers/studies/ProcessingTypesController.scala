@@ -3,7 +3,7 @@ package org.biobank.controllers.studies
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.studies.{StudyId, ProcessingTypeId}
-import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.commands.StudyCommands._
 import org.biobank.services.studies.StudiesService
 import play.api.libs.json._
 import play.api.Environment

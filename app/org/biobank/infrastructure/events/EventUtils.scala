@@ -1,16 +1,16 @@
-package org.biobank.infrastructure.event
+package org.biobank.infrastructure.events
 
 import java.time.format.DateTimeFormatter
-import org.biobank.infrastructure.command.SpecimenCommands.SpecimenInfo
-import org.biobank.infrastructure.event.CommonEvents.{AnnotationType => EventAnnotationType}
-import org.biobank.infrastructure.event.CollectionEventTypeEvents._
-import org.biobank.infrastructure.event.SpecimenEvents._
+import org.biobank.infrastructure.commands.SpecimenCommands.SpecimenInfo
+import org.biobank.infrastructure.events.CommonEvents.{AnnotationType => EventAnnotationType}
+import org.biobank.infrastructure.events.CollectionEventTypeEvents._
+import org.biobank.infrastructure.events.SpecimenEvents._
 import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies.{CollectionSpecimenDescription, SpecimenDescriptionId}
 import org.biobank.domain.participants.SpecimenId
 import org.biobank.domain.centres.ShipmentSpecimen
-import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
+import org.biobank.infrastructure.events.ShipmentSpecimenEvents._
 
 object EventUtils {
 
@@ -40,8 +40,8 @@ object EventUtils {
   }
 
   def annotationToEvent(annotation: org.biobank.domain.annotations.Annotation)
-      : org.biobank.infrastructure.event.CommonEvents.Annotation = {
-    org.biobank.infrastructure.event.CommonEvents.Annotation().update(
+      : org.biobank.infrastructure.events.CommonEvents.Annotation = {
+    org.biobank.infrastructure.events.CommonEvents.Annotation().update(
       _.annotationTypeId    := annotation.annotationTypeId.id,
       _.optionalStringValue := annotation.stringValue,
       _.optionalNumberValue := annotation.numberValue,
@@ -49,7 +49,7 @@ object EventUtils {
     )
   }
 
-  def annotationFromEvent(event: org.biobank.infrastructure.event.CommonEvents.Annotation)
+  def annotationFromEvent(event: org.biobank.infrastructure.events.CommonEvents.Annotation)
       : org.biobank.domain.annotations.Annotation = {
     org.biobank.domain.annotations.Annotation(
       annotationTypeId = AnnotationTypeId(event.getAnnotationTypeId),

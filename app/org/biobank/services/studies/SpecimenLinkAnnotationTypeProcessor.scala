@@ -1,7 +1,7 @@
 // package org.biobank.services.studies
 
-// import org.biobank.infrastructure.command.StudyCommands._
-// import org.biobank.infrastructure.event.StudyEvents._
+// import org.biobank.infrastructure.commands.StudyCommands._
+// import org.biobank.infrastructure.events.StudyEvents._
 // import org.biobank.domain._
 // import org.biobank.domain.users.UserId
 // import org.biobank.domain.studies._
@@ -33,7 +33,7 @@
 //   val annotationTypeRepository: AnnotationTypeRepository,
 //   val specimenLinkTypeRepository: SpecimenLinkTypeRepository)
 //     extends StudyAnnotationTypeProcessor[SpecimenLinkAnnotationType] {
-//   import org.biobank.infrastructure.event.StudyEventsUtil._
+//   import org.biobank.infrastructure.events.StudyEventsUtil._
 //   import StudyEventOld.EventType
 
 //   override def persistenceId: String = "specimen-link-annotation-type-processor-id"

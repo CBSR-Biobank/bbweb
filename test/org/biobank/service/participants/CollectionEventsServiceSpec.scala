@@ -20,7 +20,7 @@ class CollectionEventServiceSpec
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.CollectionEventCommands._
+  import org.biobank.infrastructure.commands.CollectionEventCommands._
 
   protected val nameGenerator = new NameGenerator(this.getClass)
 

@@ -1,6 +1,6 @@
 syntax = "proto2";
 
-package org.biobank.infrastructure.event;
+package org.biobank.infrastructure.events;
 
 message AccessEvent {
 

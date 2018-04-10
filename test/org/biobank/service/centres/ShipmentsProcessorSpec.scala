@@ -21,8 +21,8 @@ final case class NamedShipmentsProcessor @Inject() (@Named("shipmentsProcessor")
 class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.ShipmentCommands._
-  import org.biobank.infrastructure.event.ShipmentEvents._
+  import org.biobank.infrastructure.commands.ShipmentCommands._
+  import org.biobank.infrastructure.events.ShipmentEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
 

@@ -19,7 +19,7 @@ class SpecimensServiceSpec
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.SpecimenCommands._
+  import org.biobank.infrastructure.commands.SpecimenCommands._
 
   class UsersWithSpecimenAccessFixture extends UsersWithCeventAccessFixture {
     val location = factory.createLocation

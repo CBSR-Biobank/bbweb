@@ -4,8 +4,8 @@ import akka.actor._
 import akka.persistence.SnapshotOffer
 import java.time.OffsetDateTime
 import org.biobank.domain.studies.{StudyId, ProcessingType, ProcessingTypeId, ProcessingTypeRepository }
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.commands.StudyCommands._
+import org.biobank.infrastructure.events.StudyEvents._
 import org.biobank.services.{Processor, ServiceValidation}
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
@@ -28,7 +28,7 @@ object ProcessingTypeProcessor {
   */
 class ProcessingTypeProcessor @javax.inject.Inject() (val processingTypeRepository: ProcessingTypeRepository)
     extends Processor {
-  import org.biobank.infrastructure.event.StudyEventsUtil._
+  import org.biobank.infrastructure.events.StudyEventsUtil._
   import StudyEventOld.EventType
 
   override def persistenceId: String = "processing-type-processor-id"

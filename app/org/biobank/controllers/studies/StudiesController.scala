@@ -6,7 +6,7 @@ import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies._
 import org.biobank.dto.NameAndStateDto
-import org.biobank.infrastructure.command.StudyCommands._
+import org.biobank.infrastructure.commands.StudyCommands._
 import org.biobank.services._
 import org.biobank.services.studies.StudiesService
 import play.api.Logger

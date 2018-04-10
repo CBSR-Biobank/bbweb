@@ -10,8 +10,8 @@ import org.biobank.domain.annotations.AnnotationTypeId
 import org.biobank.domain.participants._
 import org.biobank.domain.studies._
 import org.biobank.domain.annotations.Annotation
-import org.biobank.infrastructure.command.ParticipantCommands._
-import org.biobank.infrastructure.event.ParticipantEvents._
+import org.biobank.infrastructure.commands.ParticipantCommands._
+import org.biobank.infrastructure.events.ParticipantEvents._
 import org.biobank.services.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -37,7 +37,7 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
 
   import ParticipantsProcessor._
   import ParticipantEvent.EventType
-  import org.biobank.infrastructure.event.EventUtils._
+  import org.biobank.infrastructure.events.EventUtils._
 
   override def persistenceId: String = "participant-processor-id"
 

@@ -21,8 +21,8 @@ class ShipmentsServiceSpec
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.ShipmentCommands._
-  import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
+  import org.biobank.infrastructure.commands.ShipmentCommands._
+  import org.biobank.infrastructure.commands.ShipmentSpecimenCommands._
 
   class UsersWithShipmentAccessFixture {
     val fromLocation = factory.createLocation

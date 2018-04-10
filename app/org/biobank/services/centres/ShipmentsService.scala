@@ -10,10 +10,10 @@ import org.biobank.domain.access.PermissionId
 import org.biobank.domain.participants._
 import org.biobank.domain.studies.CollectionEventTypeRepository
 import org.biobank.domain.users.UserId
-import org.biobank.infrastructure.command.ShipmentCommands._
-import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
-import org.biobank.infrastructure.event.ShipmentEvents._
-import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
+import org.biobank.infrastructure.commands.ShipmentCommands._
+import org.biobank.infrastructure.commands.ShipmentSpecimenCommands._
+import org.biobank.infrastructure.events.ShipmentEvents._
+import org.biobank.infrastructure.events.ShipmentSpecimenEvents._
 import org.biobank.services.participants.SpecimensService
 import org.biobank.services._
 import org.biobank.services.access.AccessService

@@ -5,8 +5,8 @@ import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
 import org.biobank.domain.users.UserRepository
-import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.infrastructure.commands.UserCommands._
+import org.biobank.infrastructure.events.UserEvents._
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito

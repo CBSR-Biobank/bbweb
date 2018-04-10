@@ -1,4 +1,4 @@
-package org.biobank.infrastructure.command
+package org.biobank.infrastructure.commands
 
 import org.biobank.domain.annotations.AnnotationValueType._
 import org.biobank.infrastructure._
@@ -6,7 +6,7 @@ import play.api.libs.json.Reads._
 import play.api.libs.json._
 
 object StudyCommands {
-  import org.biobank.infrastructure.command.Commands._
+  import org.biobank.infrastructure.commands.Commands._
 
   // study commands
   trait StudyCommand extends Command with HasOptionalSessionUserId

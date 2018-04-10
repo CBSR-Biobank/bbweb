@@ -9,9 +9,9 @@ import org.biobank.TestData
 import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies._
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.EventUtils
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.commands.StudyCommands._
+import org.biobank.infrastructure.events.EventUtils
+import org.biobank.infrastructure.events.StudyEvents._
 import org.biobank.services.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._

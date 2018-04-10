@@ -12,8 +12,8 @@ import org.biobank.domain.centres._
 import org.biobank.domain.users.UserId
 import org.biobank.dto._
 import org.biobank.infrastructure._
-import org.biobank.infrastructure.command.CentreCommands._
-import org.biobank.infrastructure.event.CentreEvents._
+import org.biobank.infrastructure.commands.CentreCommands._
+import org.biobank.infrastructure.events.CentreEvents._
 import org.biobank.services._
 import org.biobank.services.access.AccessService
 import org.biobank.services.studies.StudiesService

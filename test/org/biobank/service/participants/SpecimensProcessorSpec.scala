@@ -24,8 +24,8 @@ class SpecimensProcessorSpec
     with PresistenceQueryEvents {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.SpecimenCommands._
-  import org.biobank.infrastructure.event.SpecimenEvents._
+  import org.biobank.infrastructure.commands.SpecimenCommands._
+  import org.biobank.infrastructure.events.SpecimenEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
 

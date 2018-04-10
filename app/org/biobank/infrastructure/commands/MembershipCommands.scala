@@ -1,4 +1,4 @@
-package org.biobank.infrastructure.command
+package org.biobank.infrastructure.commands
 
 import Commands._
 

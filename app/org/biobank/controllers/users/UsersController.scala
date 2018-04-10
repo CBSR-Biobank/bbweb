@@ -1,12 +1,12 @@
 package org.biobank.controllers.users
 
-import org.biobank.infrastructure.command.Commands._
+import org.biobank.infrastructure.commands.Commands._
 import javax.inject.{Inject, Singleton}
 import org.biobank.dto._
 import org.biobank.domain.access.{AccessItemId, MembershipId}
 import org.biobank.domain.users._
 import org.biobank.controllers._
-import org.biobank.infrastructure.command.UserCommands._
+import org.biobank.infrastructure.commands.UserCommands._
 import org.biobank.services.users.UsersService
 import org.biobank.services.{AuthToken, PagedResults}
 import play.api.Logger

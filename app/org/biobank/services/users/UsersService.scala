@@ -13,10 +13,10 @@ import org.biobank.domain.users._
 import org.biobank.dto._
 import org.biobank.dto.access.{MembershipDto, RoleDto, UserRoleDto}
 import org.biobank.infrastructure.AscendingOrder
-import org.biobank.infrastructure.command.AccessCommands._
-import org.biobank.infrastructure.command.MembershipCommands._
-import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.infrastructure.commands.AccessCommands._
+import org.biobank.infrastructure.commands.MembershipCommands._
+import org.biobank.infrastructure.commands.UserCommands._
+import org.biobank.infrastructure.events.UserEvents._
 import org.biobank.services._
 import org.biobank.services.access.AccessService
 import org.biobank.services.studies.StudiesService

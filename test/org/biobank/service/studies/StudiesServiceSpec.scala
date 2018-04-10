@@ -19,7 +19,7 @@ class StudiesServiceSpec
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.StudyCommands._
+  import org.biobank.infrastructure.commands.StudyCommands._
 
   class StudyOfAllStatesFixure extends UsersWithStudyAccessFixture {
     val disabledStudy = study

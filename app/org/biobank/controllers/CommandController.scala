@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.infrastructure.command.Commands._
+import org.biobank.infrastructure.commands.Commands._
 import org.biobank.services.ServiceValidation
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.libs.json._

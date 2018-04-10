@@ -9,8 +9,8 @@ import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.domain.access._
 import org.biobank.domain.users.UserId
-import org.biobank.infrastructure.command.AccessCommands._
-import org.biobank.infrastructure.event.AccessEvents._
+import org.biobank.infrastructure.commands.AccessCommands._
+import org.biobank.infrastructure.events.AccessEvents._
 import org.biobank.services.{Processor, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._

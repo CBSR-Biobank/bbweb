@@ -11,8 +11,8 @@ import org.biobank.domain.LocationId
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
 import org.biobank.domain.studies.{CollectionEventType, CollectionEventTypeRepository, SpecimenDescriptionId}
-import org.biobank.infrastructure.command.SpecimenCommands._
-import org.biobank.infrastructure.event.SpecimenEvents._
+import org.biobank.infrastructure.commands.SpecimenCommands._
+import org.biobank.infrastructure.events.SpecimenEvents._
 import org.biobank.services._
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -48,7 +48,7 @@ class SpecimensProcessor @Inject() (
 
   import SpecimensProcessor._
   import SpecimenEvent.EventType
-  import org.biobank.infrastructure.event.EventUtils._
+  import org.biobank.infrastructure.events.EventUtils._
   import org.biobank.CommonValidations._
 
   override def persistenceId: String = "specimens-processor-id"

@@ -20,8 +20,8 @@ case class NamedCollectionEventsProcessor @Inject() (@Named("collectionEventsPro
 class CollectionEventsProcessorSpec extends ProcessorTestFixture {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.CollectionEventCommands._
-  import org.biobank.infrastructure.event.CollectionEventEvents._
+  import org.biobank.infrastructure.commands.CollectionEventCommands._
+  import org.biobank.infrastructure.events.CollectionEventEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
 

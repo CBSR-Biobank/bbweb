@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.centres.CentreId
 import org.biobank.dto._
-import org.biobank.infrastructure.command.CentreCommands._
+import org.biobank.infrastructure.commands.CentreCommands._
 import org.biobank.services._
 import org.biobank.services.centres.CentresService
 import org.biobank.services.studies.StudiesService

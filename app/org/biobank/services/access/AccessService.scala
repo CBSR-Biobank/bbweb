@@ -14,10 +14,10 @@ import org.biobank.domain.centres.{CentreId, CentreRepository}
 import org.biobank.dto._
 import org.biobank.dto.access._
 import org.biobank.infrastructure.AscendingOrder
-import org.biobank.infrastructure.command.AccessCommands._
-import org.biobank.infrastructure.command.MembershipCommands._
-import org.biobank.infrastructure.event.AccessEvents._
-import org.biobank.infrastructure.event.MembershipEvents._
+import org.biobank.infrastructure.commands.AccessCommands._
+import org.biobank.infrastructure.commands.MembershipCommands._
+import org.biobank.infrastructure.events.AccessEvents._
+import org.biobank.infrastructure.events.MembershipEvents._
 import org.biobank.services._
 import org.slf4j.{Logger, LoggerFactory}
 import play.api.Environment

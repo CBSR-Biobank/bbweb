@@ -32,8 +32,8 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
                                  (implicit val ec: ExecutionContext)
     extends CommandController(controllerComponents) {
 
-  import org.biobank.infrastructure.command.ShipmentCommands._
-  import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
+  import org.biobank.infrastructure.commands.ShipmentCommands._
+  import org.biobank.infrastructure.commands.ShipmentSpecimenCommands._
 
   type ServiceListFunc = (CentreId, FilterString, SortString) => ServiceValidation[List[ShipmentDto]]
 

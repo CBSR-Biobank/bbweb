@@ -1,9 +1,9 @@
-package org.biobank.infrastructure.event
+package org.biobank.infrastructure.events
 
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
-import org.biobank.infrastructure.command.StudyCommands.StudyCommand
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.commands.StudyCommands.StudyCommand
+import org.biobank.infrastructure.events.StudyEvents._
 import org.biobank.domain.studies._
 
 object StudyEventsUtil {

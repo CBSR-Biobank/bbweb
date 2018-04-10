@@ -23,8 +23,8 @@ class MembershipProcessorSpec
     with Inside {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.MembershipCommands._
-  import org.biobank.infrastructure.event.MembershipEvents._
+  import org.biobank.infrastructure.commands.MembershipCommands._
+  import org.biobank.infrastructure.events.MembershipEvents._
 
   class MembershipFixture {
     val membership = factory.createMembership

@@ -8,8 +8,8 @@ import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.studies._
-import org.biobank.infrastructure.command.CollectionEventTypeCommands._
-import org.biobank.infrastructure.event.EventUtils
+import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
+import org.biobank.infrastructure.events.EventUtils
 import org.biobank.services.{Processor, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._
@@ -42,8 +42,8 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
   import CollectionEventTypeProcessor._
   import org.biobank.CommonValidations._
-  import org.biobank.infrastructure.event.CollectionEventTypeEvents._
-  import org.biobank.infrastructure.event.CollectionEventTypeEvents.CollectionEventTypeEvent.EventType
+  import org.biobank.infrastructure.events.CollectionEventTypeEvents._
+  import org.biobank.infrastructure.events.CollectionEventTypeEvents.CollectionEventTypeEvent.EventType
 
   override def persistenceId: String = "collection-event-type-processor-id"
 

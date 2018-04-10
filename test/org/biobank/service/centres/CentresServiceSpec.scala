@@ -18,7 +18,7 @@ class CentresServiceSpec
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.CentreCommands._
+  import org.biobank.infrastructure.commands.CentreCommands._
 
   class CentresOfAllStatesFixure extends UsersWithCentreAccessFixture {
     val disabledCentre = centre

@@ -11,8 +11,8 @@ import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
 import org.biobank.dto.CollectionEventDto
 import org.biobank.infrastructure.AscendingOrder
-import org.biobank.infrastructure.command.CollectionEventCommands._
-import org.biobank.infrastructure.event.CollectionEventEvents._
+import org.biobank.infrastructure.commands.CollectionEventCommands._
+import org.biobank.infrastructure.events.CollectionEventEvents._
 import org.biobank.services._
 import org.biobank.services.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}

@@ -9,8 +9,8 @@ import org.biobank.domain.studies._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.users.UserId
 import org.biobank.infrastructure.AscendingOrder
-import org.biobank.infrastructure.command.CollectionEventTypeCommands._
-import org.biobank.infrastructure.event.CollectionEventTypeEvents._
+import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
+import org.biobank.infrastructure.events.CollectionEventTypeEvents._
 import org.biobank.services._
 import org.biobank.services.access.AccessService
 import org.slf4j.{Logger, LoggerFactory}

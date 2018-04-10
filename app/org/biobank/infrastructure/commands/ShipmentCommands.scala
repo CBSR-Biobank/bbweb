@@ -1,7 +1,7 @@
-package org.biobank.infrastructure.command
+package org.biobank.infrastructure.commands
 
 import java.time.OffsetDateTime
-import org.biobank.infrastructure.command.Commands._
+import org.biobank.infrastructure.commands.Commands._
 import play.api.libs.json._
 
 object ShipmentCommands {

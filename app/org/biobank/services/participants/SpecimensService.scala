@@ -11,8 +11,8 @@ import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
 import org.biobank.dto.SpecimenDto
 import org.biobank.infrastructure.AscendingOrder
-import org.biobank.infrastructure.command.SpecimenCommands._
-import org.biobank.infrastructure.event.SpecimenEvents._
+import org.biobank.infrastructure.commands.SpecimenCommands._
+import org.biobank.infrastructure.events.SpecimenEvents._
 import org.biobank.services._
 import org.biobank.services.access.AccessService
 import org.biobank.services.centres.CentreLocationInfo

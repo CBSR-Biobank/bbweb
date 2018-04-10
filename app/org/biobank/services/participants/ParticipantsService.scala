@@ -8,8 +8,8 @@ import org.biobank.domain.access._
 import org.biobank.domain.participants._
 import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
-import org.biobank.infrastructure.command.ParticipantCommands._
-import org.biobank.infrastructure.event.ParticipantEvents._
+import org.biobank.infrastructure.commands.ParticipantCommands._
+import org.biobank.infrastructure.events.ParticipantEvents._
 import org.biobank.services._
 import org.biobank.services.access.AccessService
 import org.biobank.services.studies.StudiesService

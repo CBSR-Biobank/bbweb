@@ -19,8 +19,8 @@ case class NamedParticipantsProcessor @Inject() (@Named("participantsProcessor")
 class ParticipantsProcessorSpec extends ProcessorTestFixture {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.ParticipantCommands._
-  import org.biobank.infrastructure.event.ParticipantEvents._
+  import org.biobank.infrastructure.commands.ParticipantCommands._
+  import org.biobank.infrastructure.events.ParticipantEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
 

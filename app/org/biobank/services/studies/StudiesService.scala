@@ -11,9 +11,9 @@ import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
 //import org.biobank.dto._
 import org.biobank.infrastructure._
-import org.biobank.infrastructure.command.StudyCommands._
-import org.biobank.infrastructure.event.ProcessingTypeEvents._
-import org.biobank.infrastructure.event.StudyEvents._
+import org.biobank.infrastructure.commands.StudyCommands._
+import org.biobank.infrastructure.events.ProcessingTypeEvents._
+import org.biobank.infrastructure.events.StudyEvents._
 import org.biobank.services._
 import org.biobank.services.access.AccessService
 import org.biobank.services.centres.{CentreServicePermissionChecks, CentreLocation}

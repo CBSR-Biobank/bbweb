@@ -18,8 +18,8 @@ case class NamedCentresProcessor @Inject() (@Named("centresProcessor") processor
 class CentresProcessorSpec extends ProcessorTestFixture {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.CentreCommands._
-  import org.biobank.infrastructure.event.CentreEvents._
+  import org.biobank.infrastructure.commands.CentreCommands._
+  import org.biobank.infrastructure.events.CentreEvents._
 
   val log = LoggerFactory.getLogger(this.getClass)
 

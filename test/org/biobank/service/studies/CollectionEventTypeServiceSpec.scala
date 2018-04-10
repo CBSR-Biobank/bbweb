@@ -18,7 +18,7 @@ class CollectionEventTypeServiceSpec
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.CollectionEventTypeCommands._
+  import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 
   class UsersCeventTypeFixture extends UsersWithStudyAccessFixture {
     val specimenDesc = factory.createCollectionSpecimenDescription

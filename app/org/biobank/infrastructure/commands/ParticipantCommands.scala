@@ -1,7 +1,7 @@
-package org.biobank.infrastructure.command
+package org.biobank.infrastructure.commands
 
 import org.biobank.domain.annotations.Annotation
-import org.biobank.infrastructure.command.Commands._
+import org.biobank.infrastructure.commands.Commands._
 import play.api.libs.json._
 
 object ParticipantCommands {

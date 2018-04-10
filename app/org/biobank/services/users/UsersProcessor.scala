@@ -6,8 +6,8 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import org.biobank.domain.users._
-import org.biobank.infrastructure.command.UserCommands._
-import org.biobank.infrastructure.event.UserEvents._
+import org.biobank.infrastructure.commands.UserCommands._
+import org.biobank.infrastructure.events.UserEvents._
 import org.biobank.services._
 import play.api.{Configuration, Environment}
 import play.api.libs.json._

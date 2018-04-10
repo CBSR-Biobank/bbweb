@@ -11,11 +11,11 @@ import org.biobank.TestData
 import org.biobank.domain.LocationId
 import org.biobank.domain.centres._
 import org.biobank.domain.participants.{SpecimenId, SpecimenRepository}
-import org.biobank.infrastructure.command.ShipmentCommands._
-import org.biobank.infrastructure.command.ShipmentSpecimenCommands._
-import org.biobank.infrastructure.event.EventUtils
-import org.biobank.infrastructure.event.ShipmentEvents._
-import org.biobank.infrastructure.event.ShipmentSpecimenEvents._
+import org.biobank.infrastructure.commands.ShipmentCommands._
+import org.biobank.infrastructure.commands.ShipmentSpecimenCommands._
+import org.biobank.infrastructure.events.EventUtils
+import org.biobank.infrastructure.events.ShipmentEvents._
+import org.biobank.infrastructure.events.ShipmentSpecimenEvents._
 import org.biobank.services.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._

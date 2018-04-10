@@ -20,7 +20,7 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
                                      val service:      SpecimensService)
                                  (implicit val ec: ExecutionContext)
     extends CommandController(controllerComponents) {
-  import org.biobank.infrastructure.command.SpecimenCommands._
+  import org.biobank.infrastructure.commands.SpecimenCommands._
 
   val log: Logger = Logger(this.getClass)
 

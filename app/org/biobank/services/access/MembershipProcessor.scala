@@ -10,8 +10,8 @@ import org.biobank.domain.access._
 import org.biobank.domain.centres.CentreId
 import org.biobank.domain.studies.StudyId
 import org.biobank.domain.users.UserId
-import org.biobank.infrastructure.command.MembershipCommands._
-import org.biobank.infrastructure.event.MembershipEvents._
+import org.biobank.infrastructure.commands.MembershipCommands._
+import org.biobank.infrastructure.events.MembershipEvents._
 import org.biobank.services.{Processor, ServiceError, ServiceValidation, SnapshotWriter}
 import play.api.libs.json._
 import scalaz.Scalaz._

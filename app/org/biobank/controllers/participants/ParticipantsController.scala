@@ -4,7 +4,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.studies.StudyId
 import org.biobank.domain.participants.ParticipantId
-import org.biobank.infrastructure.command.ParticipantCommands._
+import org.biobank.infrastructure.commands.ParticipantCommands._
 import org.biobank.services.participants._
 import play.api.{ Environment, Logger }
 import play.api.libs.json._

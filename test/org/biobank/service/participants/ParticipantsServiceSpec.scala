@@ -19,7 +19,7 @@ class ParticipantsServiceSpec
     with ScalaFutures {
 
   import org.biobank.TestUtils._
-  import org.biobank.infrastructure.command.ParticipantCommands._
+  import org.biobank.infrastructure.commands.ParticipantCommands._
 
   protected val nameGenerator = new NameGenerator(this.getClass)
 
