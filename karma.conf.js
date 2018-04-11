@@ -61,8 +61,8 @@ function KarmaConf(config) {
     },
 
     reporters: [
-      'kjhtml'
-      //'dots'
+      'dots'
+      //'kjhtml'
       //'spec'
       //'failed'
     ],
