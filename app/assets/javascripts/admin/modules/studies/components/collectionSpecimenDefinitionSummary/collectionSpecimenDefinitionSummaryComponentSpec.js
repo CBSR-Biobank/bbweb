@@ -9,7 +9,7 @@
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ngModule from '../../index'
 
-describe('collectionSpecimenDescriptionSummaryDirective', function() {
+describe('collectionSpecimenDefinitionSummaryDirective', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -18,23 +18,23 @@ describe('collectionSpecimenDescriptionSummaryDirective', function() {
 
       this.injectDependencies('$rootScope',
                               '$compile',
-                              'CollectionSpecimenDescription',
+                              'CollectionSpecimenDefinition',
                               'Factory');
 
-      this.specimenDescription =
-        new this.CollectionSpecimenDescription(this.Factory.collectionSpecimenDescription());
+      this.specimenDefinition =
+        new this.CollectionSpecimenDefinition(this.Factory.collectionSpecimenDefinition());
 
-      this.createController = (specimenDescription) => {
-        specimenDescription = specimenDescription || this.specimenDescription;
+      this.createController = (specimenDefinition) => {
+        specimenDefinition = specimenDefinition || this.specimenDefinition;
         ComponentTestSuiteMixin.createController.call(
           this,
           [
-            '<collection-specimen-description-summary',
-            '  specimen-description="vm.specimenDescription">',
-            '</collection-specimen-description-summary>'
+            '<collection-specimen-definition-summary',
+            '  specimen-definition="vm.specimenDefinition">',
+            '</collection-specimen-definition-summary>'
           ].join(''),
-          { specimenDescription: specimenDescription },
-          'collectionSpecimenDescriptionSummary'
+          { specimenDefinition: specimenDefinition },
+          'collectionSpecimenDefinitionSummary'
         );
       };
     });
@@ -42,7 +42,7 @@ describe('collectionSpecimenDescriptionSummaryDirective', function() {
 
   it('can be created', function() {
     this.createController();
-    expect(this.scope.vm.specimenDescription).toBe(this.specimenDescription);
+    expect(this.scope.vm.specimenDefinition).toBe(this.specimenDefinition);
   });
 
 

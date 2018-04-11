@@ -13,7 +13,7 @@ trait ParticipantsServiceFixtures extends StudiesServiceFixtures {
     val annotationType    = factory.createAnnotationType
     val annotation        = factory.createAnnotationWithValues(annotationType)
     val enabledStudy      = factory.createEnabledStudy.copy(annotationTypes = Set(annotationType))
-    val specimenDesc      = factory.createCollectionSpecimenDescription
+    val specimenDesc      = factory.createCollectionSpecimenDefinition
     val participant       = factory.createParticipant.copy(studyId     = enabledStudy.id,
                                                         annotations = Set(annotation))
 
@@ -39,7 +39,7 @@ trait ParticipantsServiceFixtures extends StudiesServiceFixtures {
   class UsersWithCeventAccessFixture extends UsersWithParticipantAccessFixture {
     val ceventAnnotationType = factory.createAnnotationType
     val ceventType = factory.createCollectionEventType.copy(studyId              = enabledStudy.id,
-                                                            specimenDescriptions = Set(specimenDesc),
+                                                            specimenDefinitions = Set(specimenDesc),
                                                             annotationTypes      = Set(ceventAnnotationType))
     val ceventAnnotation = factory.createAnnotationWithValues(annotationType)
     val cevent = factory.createCollectionEvent.copy(participantId = participant.id,

@@ -17,9 +17,9 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
   class CollectionFixture {
     val study = factory.createEnabledStudy
-    val specimenDescription = factory.createCollectionSpecimenDescription
+    val specimenDefinition = factory.createCollectionSpecimenDefinition
     val ceventType = factory.createCollectionEventType.copy(studyId               = study.id,
-                                                             specimenDescriptions = Set(specimenDescription),
+                                                             specimenDefinitions = Set(specimenDefinition),
                                                              annotationTypes      = Set.empty)
     val participant = factory.createParticipant.copy(studyId = study.id)
     val cevent = factory.createCollectionEvent
@@ -830,7 +830,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
         val cet = factory.createCollectionEventType.copy(
             studyId              = study.id,
-            specimenDescriptions = Set(factory.createCollectionSpecimenDescription))
+            specimenDefinitions = Set(factory.createCollectionSpecimenDefinition))
         collectionEventTypeRepository.put(cet)
 
         val cmdJson = Json.obj("expectedVersion" -> Some(study.version))

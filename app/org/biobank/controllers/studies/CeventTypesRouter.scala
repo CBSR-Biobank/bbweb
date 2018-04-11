@@ -35,13 +35,13 @@ class CeventTypesRouter @Inject()(controller: CeventTypesController) extends Sim
       controller.updateRecurring(cetId)
 
     case POST(p"/spcdesc/${ceventTypeId(cetId)}") =>
-      controller.addSpecimenDescription(cetId)
+      controller.addSpecimenDefinition(cetId)
 
     case POST(p"/spcdesc/${ceventTypeId(cetId)}/$sdId") =>
-      controller.updateSpecimenDescription(cetId, sdId)
+      controller.updateSpecimenDefinition(cetId, sdId)
 
     case DELETE(p"/spcdesc/${studyId(id)}/${ceventTypeId(cetId)}/${long(ver)}/$sdId") =>
-      controller.removeSpecimenDescription(id, cetId, ver, sdId)
+      controller.removeSpecimenDefinition(id, cetId, ver, sdId)
 
     case POST(p"/annottype/${ceventTypeId(cetId)}") =>
       controller.addAnnotationType(cetId)

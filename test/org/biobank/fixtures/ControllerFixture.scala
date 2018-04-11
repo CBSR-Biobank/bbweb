@@ -175,8 +175,6 @@ abstract class ControllerFixture
   protected def studyRepository                        = app.injector.instanceOf[StudyRepository]
   protected def collectionEventTypeRepository          = app.injector.instanceOf[CollectionEventTypeRepository]
   protected def processingTypeRepository               = app.injector.instanceOf[ProcessingTypeRepository]
-  protected def specimenGroupRepository                = app.injector.instanceOf[SpecimenGroupRepository]
-  protected def specimenLinkTypeRepository             = app.injector.instanceOf[SpecimenLinkTypeRepository]
 
   protected def participantRepository                  = app.injector.instanceOf[ParticipantRepository]
   protected def collectionEventRepository              = app.injector.instanceOf[CollectionEventRepository]

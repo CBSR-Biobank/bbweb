@@ -84,7 +84,7 @@ object CollectionEventTypeCommands {
                                                               annotationTypeId: String)
       extends CollectionEventTypeModifyCommand
 
-  final case class AddCollectionSpecimenDescriptionCmd(sessionUserId:               String,
+  final case class AddCollectionSpecimenDefinitionCmd(sessionUserId:               String,
                                                        studyId:                     String,
                                                        id:                          String,
                                                        expectedVersion:             Long,
@@ -99,11 +99,11 @@ object CollectionEventTypeCommands {
                                                        amount:                      BigDecimal)
       extends CollectionEventTypeModifyCommand
 
-  final case class UpdateCollectionSpecimenDescriptionCmd(sessionUserId:           String,
+  final case class UpdateCollectionSpecimenDefinitionCmd(sessionUserId:           String,
                                                           studyId:                 String,
                                                           id:                      String,
                                                           expectedVersion:         Long,
-                                                          specimenDescriptionId:   String,
+                                                          specimenDefinitionId:   String,
                                                           name:                    String,
                                                           description:             Option[String],
                                                           units:                   String,
@@ -115,11 +115,11 @@ object CollectionEventTypeCommands {
                                                           amount:                  BigDecimal)
       extends CollectionEventTypeModifyCommand
 
-  final case class RemoveCollectionSpecimenDescriptionCmd(sessionUserId:         String,
+  final case class RemoveCollectionSpecimenDefinitionCmd(sessionUserId:         String,
                                                           studyId:               String,
                                                           id:                    String,
                                                           expectedVersion:       Long,
-                                                          specimenDescriptionId: String)
+                                                          specimenDefinitionId: String)
       extends CollectionEventTypeModifyCommand
 
 
@@ -149,13 +149,13 @@ object CollectionEventTypeCommands {
   implicit val removeCollectionEventAnnotationTypeCmdReads: Reads[RemoveCollectionEventTypeAnnotationTypeCmd] =
     Json.reads[RemoveCollectionEventTypeAnnotationTypeCmd]
 
-  implicit val addCollectionSpecimenDescriptionCmdReads: Reads[AddCollectionSpecimenDescriptionCmd] =
-    Json.reads[AddCollectionSpecimenDescriptionCmd]
+  implicit val addCollectionSpecimenDefinitionCmdReads: Reads[AddCollectionSpecimenDefinitionCmd] =
+    Json.reads[AddCollectionSpecimenDefinitionCmd]
 
-  implicit val updateCollectionSpecimenDescriptionCmdReads: Reads[UpdateCollectionSpecimenDescriptionCmd] =
-    Json.reads[UpdateCollectionSpecimenDescriptionCmd]
+  implicit val updateCollectionSpecimenDefinitionCmdReads: Reads[UpdateCollectionSpecimenDefinitionCmd] =
+    Json.reads[UpdateCollectionSpecimenDefinitionCmd]
 
-  implicit val removeCollectionSpecimenDescriptionCmdReads: Reads[RemoveCollectionSpecimenDescriptionCmd] =
-    Json.reads[RemoveCollectionSpecimenDescriptionCmd]
+  implicit val removeCollectionSpecimenDefinitionCmdReads: Reads[RemoveCollectionSpecimenDefinitionCmd] =
+    Json.reads[RemoveCollectionSpecimenDefinitionCmd]
 
 }

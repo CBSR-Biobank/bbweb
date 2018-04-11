@@ -109,9 +109,9 @@ package dto {
                                slug:                     String,
                                inventoryId:              String,
                                collectionEventId:        String,
-                               specimenDescriptionId:    String,
-                               specimenDescriptionName:  String,
-                               specimenDescriptionUnits: String,
+                               specimenDefinitionId:    String,
+                               specimenDefinitionName:  String,
+                               specimenDefinitionUnits: String,
                                originLocationInfo:       CentreLocationInfo,
                                locationInfo:             CentreLocationInfo,
                                containerId:              Option[String],
@@ -222,7 +222,7 @@ package dto {
       (a.state compareTo b.state) < 0
 
     def compareBySpecName(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
-      (a.specimen.specimenDescriptionName compareTo b.specimen.specimenDescriptionName) < 0
+      (a.specimen.specimenDefinitionName compareTo b.specimen.specimenDefinitionName) < 0
 
     def compareByTimeCreated(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
       (a.specimen.timeCreated compareTo b.specimen.timeCreated) < 0

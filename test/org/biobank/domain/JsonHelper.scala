@@ -74,37 +74,33 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "state").as[String] mustBe (nameAndStateDto.state)
   }
 
-  def compareObj(json: JsValue, specimenGroup: SpecimenGroup) = {
-    compareEntity(json, specimenGroup)
-  }
+  def compareSpecimenDefinition(json: JsValue, specimenDefinition: SpecimenDefinition): Unit = {
+    (json \ "id").as[String]                          mustBe (specimenDefinition.id.id)
 
-  def compareSpecimenDescription(json: JsValue, specimenDescription: SpecimenDescription): Unit = {
-    (json \ "id").as[String]                          mustBe (specimenDescription.id.id)
+    (json \ "slug").as[String]                        mustBe (specimenDefinition.slug)
 
-    (json \ "slug").as[String]                        mustBe (specimenDescription.slug)
+    (json \ "name").as[String]                        mustBe (specimenDefinition.name)
 
-    (json \ "name").as[String]                        mustBe (specimenDescription.name)
+    (json \ "description").asOpt[String]              mustBe (specimenDefinition.description)
 
-    (json \ "description").asOpt[String]              mustBe (specimenDescription.description)
+    (json \ "units").as[String]                       mustBe (specimenDefinition.units)
 
-    (json \ "units").as[String]                       mustBe (specimenDescription.units)
+    (json \ "anatomicalSourceType").as[String]        mustBe (specimenDefinition.anatomicalSourceType.toString)
 
-    (json \ "anatomicalSourceType").as[String]        mustBe (specimenDescription.anatomicalSourceType.toString)
+    (json \ "preservationType").as[String]            mustBe (specimenDefinition.preservationType.toString)
 
-    (json \ "preservationType").as[String]            mustBe (specimenDescription.preservationType.toString)
+    (json \ "preservationTemperature").as[String] mustBe (specimenDefinition.preservationTemperature.toString)
 
-    (json \ "preservationTemperature").as[String] mustBe (specimenDescription.preservationTemperature.toString)
-
-    (json \ "specimenType").as[String]                mustBe (specimenDescription.specimenType.toString)
+    (json \ "specimenType").as[String]                mustBe (specimenDefinition.specimenType.toString)
 
     ()
   }
 
-  def compareCollectionSpecimenDescription(json: JsValue, specimenDescription: CollectionSpecimenDescription): Unit = {
-    compareSpecimenDescription(json, specimenDescription)
-    (json \ "maxCount").as[Int]         mustBe (specimenDescription.maxCount)
+  def compareCollectionSpecimenDefinition(json: JsValue, specimenDefinition: CollectionSpecimenDefinition): Unit = {
+    compareSpecimenDefinition(json, specimenDefinition)
+    (json \ "maxCount").as[Int]         mustBe (specimenDefinition.maxCount)
 
-    (json \ "amount").as[BigDecimal] mustBe (specimenDescription.amount)
+    (json \ "amount").as[BigDecimal] mustBe (specimenDefinition.amount)
 
     ()
   }
@@ -122,13 +118,13 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "description").asOpt[String] mustBe (ceventType.description)
     (json \ "recurring").as[Boolean] mustBe (ceventType.recurring)
 
-    (json \ "specimenDescriptions").as[List[JsObject]] must have size ceventType.specimenDescriptions.size.toLong
+    (json \ "specimenDefinitions").as[List[JsObject]] must have size ceventType.specimenDefinitions.size.toLong
     (json \ "annotationTypes").as[List[JsObject]] must have size ceventType.annotationTypes.size.toLong
 
-    (json \ "specimenDescriptions").as[List[JsObject]].foreach { jsItem =>
+    (json \ "specimenDefinitions").as[List[JsObject]].foreach { jsItem =>
       val jsonId = (jsItem \ "id").as[String]
-      val sg = ceventType.specimenDescriptions.find { x => x.id.id == jsonId }.value
-      compareCollectionSpecimenDescription(jsItem, sg)
+      val sg = ceventType.specimenDefinitions.find { x => x.id.id == jsonId }.value
+      compareCollectionSpecimenDefinition(jsItem, sg)
     }
 
     (json \ "annotationTypes").as[List[JsObject]].foreach { jsItem =>
@@ -156,26 +152,6 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "name").as[String]           mustBe (processingType.name)
     (json \ "description").asOpt[String] mustBe (processingType.description)
     (json \ "enabled").as[Boolean]       mustBe (processingType.enabled)
-  }
-
-  def compareObj(json: JsValue, specimenLinkType: SpecimenLinkType) = {
-    compareEntity(json, specimenLinkType)
-    (json \ "processingTypeId").as[String]         mustBe (specimenLinkType.processingTypeId.id)
-    (json \ "expectedInputChange").as[BigDecimal]  mustBe (specimenLinkType.expectedInputChange)
-    (json \ "expectedOutputChange").as[BigDecimal] mustBe (specimenLinkType.expectedOutputChange)
-    (json \ "inputCount").as[Int]                  mustBe (specimenLinkType.inputCount)
-    (json \ "outputCount").as[Int]                 mustBe (specimenLinkType.outputCount)
-    (json \ "inputGroupId").as[String]             mustBe (specimenLinkType.inputGroupId.id)
-    (json \ "outputGroupId").as[String]            mustBe (specimenLinkType.outputGroupId.id)
-    (json \ "inputContainerTypeId").asOpt[String]  mustBe (specimenLinkType.inputContainerTypeId.map(_.id))
-    (json \ "outputContainerTypeId").asOpt[String] mustBe (specimenLinkType.outputContainerTypeId.map(_.id))
-
-    (json \ "annotationTypeData").as[List[JsObject]] must have size specimenLinkType.annotationTypeData.size.toLong
-
-    (json \ "annotationTypeData")
-      .as[List[JsObject]].zip(specimenLinkType.annotationTypeData).foreach { item =>
-        compareAnnotData(item._1, item._2)
-      }
   }
 
   def compareAnnotation(json: JsValue, annotation: Annotation): Unit = {
@@ -291,7 +267,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
     annotationTypeToJson(annotType) - "id"
   }
 
-  def collectionSpecimenDescriptionToJson(desc: CollectionSpecimenDescription): JsObject = {
+  def collectionSpecimenDefinitionToJson(desc: CollectionSpecimenDefinition): JsObject = {
     Json.obj("id"                          -> desc.id,
              "slug"                        -> desc.slug,
              "name"                        -> desc.name,
@@ -305,8 +281,8 @@ trait JsonHelper extends MustMatchers with OptionValues {
              "amount"                      -> desc.amount)
   }
 
-  def collectionSpecimenDescriptionToJsonNoId(spec: CollectionSpecimenDescription): JsObject = {
-    collectionSpecimenDescriptionToJson(spec) - "id"
+  def collectionSpecimenDefinitionToJsonNoId(spec: CollectionSpecimenDefinition): JsObject = {
+    collectionSpecimenDefinitionToJson(spec) - "id"
   }
 
   def compareCentreLocationInfo(json: JsValue, centreLocatinInfo: CentreLocationInfo) = {
@@ -328,7 +304,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
     TestUtils.checkOpionalTimeString(specimenDto.timeModified,
                                      (json \ "timeModified").asOpt[OffsetDateTime])
 
-    (json \ "specimenDescriptionId").as[String] mustBe (specimenDto.specimenDescriptionId)
+    (json \ "specimenDefinitionId").as[String] mustBe (specimenDto.specimenDefinitionId)
 
     compareCentreLocationInfo((json \ "originLocationInfo").as[JsValue], specimenDto.originLocationInfo)
     compareCentreLocationInfo((json \ "locationInfo").as[JsValue], specimenDto.locationInfo)

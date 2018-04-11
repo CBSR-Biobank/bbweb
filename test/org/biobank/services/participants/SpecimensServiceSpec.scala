@@ -25,7 +25,7 @@ class SpecimensServiceSpec
     val location = factory.createLocation
     val centre = factory.createEnabledCentre.copy(studyIds = Set(enabledStudy.id),
                                                   locations = Set(location))
-    val specimen = factory.createUsableSpecimen.copy(specimenDescriptionId = specimenDesc.id,
+    val specimen = factory.createUsableSpecimen.copy(specimenDefinitionId = specimenDesc.id,
                                                      locationId = location.id)
     Set(specimen, centre).foreach(addToRepository)
     ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))
@@ -65,7 +65,7 @@ class SpecimensServiceSpec
 
   private def getSpecimenInfo(specimen: Specimen) = {
     SpecimenInfo(inventoryId           = specimen.inventoryId,
-                 specimenDescriptionId = specimen.specimenDescriptionId.id,
+                 specimenDefinitionId = specimen.specimenDefinitionId.id,
                  timeCreated           = specimen.timeCreated,
                  locationId            = specimen.locationId.id,
                  amount                = specimen.amount)
@@ -88,7 +88,7 @@ class SpecimensServiceSpec
   //                                 collectionEvent: CollectionEvent,
   //                                 specimen:        Specimen) = {
   //   val specimenInfo = SpecimenInfo(inventoryId           = specimen.inventoryId,
-  //                                   specimenDescriptionId = specimen.specimenDescriptionId.id,
+  //                                   specimenDefinitionId = specimen.specimenDefinitionId.id,
   //                                   timeCreated           = specimen.timeCreated,
   //                                   locationId            = specimen.locationId.id,
   //                                   amount                = specimen.amount)

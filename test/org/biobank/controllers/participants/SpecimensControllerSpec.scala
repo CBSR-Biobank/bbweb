@@ -59,7 +59,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         specimens.map { specimen =>
           Json.obj(
             "inventoryId"           -> specimen.inventoryId,
-            "specimenDescriptionId" -> specimen.specimenDescriptionId,
+            "specimenDefinitionId" -> specimen.specimenDefinitionId,
             "timeCreated"           -> specimen.timeCreated,
             "locationId"            -> specimen.locationId.id,
             "amount"                -> specimen.amount)
@@ -133,7 +133,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
                                            e.ceventType,
-                                           e.specimenDescription,
+                                           e.specimenDefinition,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
 
@@ -171,7 +171,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
                                            e.ceventType,
-                                           e.specimenDescription,
+                                           e.specimenDefinition,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
 
@@ -206,7 +206,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         val specimenDtos = specimensToDtos(specimens,
                                            e.cevent,
                                            e.ceventType,
-                                           e.specimenDescription,
+                                           e.specimenDefinition,
                                            e.centreLocationInfo,
                                            e.centreLocationInfo)
 
@@ -241,7 +241,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         val specimenDto = specimens(0).createDto(e.cevent,
                                                  e.ceventType.name,
-                                                 e.specimenDescription,
+                                                 e.specimenDefinition,
                                                  e.centreLocationInfo,
                                                  e.centreLocationInfo)
 
@@ -265,7 +265,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
         val specimenDto = specimens(1).createDto(e.cevent,
                                                  e.ceventType.name,
-                                                 e.specimenDescription,
+                                                 e.specimenDefinition,
                                                  e.centreLocationInfo,
                                                  e.centreLocationInfo)
 
@@ -323,7 +323,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
 
           repoSpecimen must have (
             'inventoryId           (specimen.inventoryId),
-            'specimenDescriptionId (specimen.specimenDescriptionId),
+            'specimenDefinitionId (specimen.specimenDefinitionId),
             'version               (specimen.version),
             'originLocationId      (specimen.originLocationId),
             'locationId            (specimen.locationId),

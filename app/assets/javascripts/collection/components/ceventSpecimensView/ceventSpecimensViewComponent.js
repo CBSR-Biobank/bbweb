@@ -48,7 +48,7 @@ function CeventSpecimensViewController($q,
       .then(centreLocations => {
         vm.centreLocations = centreLocations;
         return specimenAddModal.open(vm.centreLocations,
-                                     vm.collectionEvent.collectionEventType.specimenDescriptions,
+                                     vm.collectionEvent.collectionEventType.specimenDefinitions,
                                      new Date(vm.collectionEvent.timeCompleted)).result;
       })
       .then(specimens => Specimen.add(vm.collectionEvent.id, specimens))

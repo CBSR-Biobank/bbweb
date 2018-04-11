@@ -14,7 +14,7 @@ object SpecimenCommands {
       with HasExpectedVersion
 
   final case class SpecimenInfo(inventoryId:           String,
-                                specimenDescriptionId: String,
+                                specimenDefinitionId: String,
                                 timeCreated:           OffsetDateTime,
                                 locationId:            String,
                                 amount:                BigDecimal)

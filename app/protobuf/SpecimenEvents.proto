@@ -9,7 +9,7 @@ message SpecimenEvent {
       message SpecimenInfo {
          optional string id                    = 1;
          optional string inventoryId           = 2;
-         optional string specimenDescriptionId = 3;
+         optional string specimenDefinitionId = 3;
          optional string specimenId            = 4;
          optional string timeCreated           = 5;
          optional string locationId            = 6;

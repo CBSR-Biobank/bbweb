@@ -7,13 +7,13 @@
  * AngularJS Factory
  */
 /* @ngInject */
-function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
+function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
 
   /*
    * Used for validation.
    */
   const SCHEMA = {
-    'id': 'CollectionSpecimenDescription',
+    'id': 'CollectionSpecimenDefinition',
     'type': 'object',
     'properties': {
       'id':                          { 'type': 'string' },
@@ -51,7 +51,7 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
    *
    * @memberOf domain.studies
    */
-  class CollectionSpecimenDescription extends DomainEntity {
+  class CollectionSpecimenDefinition extends DomainEntity {
 
     /**
      * @param {object} obj - An initialization object whose properties are the same as the members from
@@ -60,46 +60,46 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
     constructor(obj) {
       /**
        * A short identifying name.
-       * @name domain.studies.CollectionSpecimenDescription#name
+       * @name domain.studies.CollectionSpecimenDefinition#name
        * @type string
        */
 
       /**
        * Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
-       * @name domain.studies.CollectionSpecimenDescription#units
+       * @name domain.studies.CollectionSpecimenDefinition#units
        * @type {string}
        */
 
       /**
-       * @name domain.studies.CollectionSpecimenDescription#anatomicalSourceType
+       * @name domain.studies.CollectionSpecimenDefinition#anatomicalSourceType
        * @type {domain.AnatomicalSourceType.AnatomicalSourceType}
        */
 
       /**
-       * @name domain.studies.CollectionSpecimenDescription#preservationType
+       * @name domain.studies.CollectionSpecimenDefinition#preservationType
        * @type {domain.PreservationType.PreservationType}
        */
 
       /**
-       * @name domain.studies.CollectionSpecimenDescription#preservationTemperature
+       * @name domain.studies.CollectionSpecimenDefinition#preservationTemperature
        * @type {domain.PreservationTemperature.PreservationTemperature}
        */
 
       /**
-       * @name domain.studies.CollectionSpecimenDescription#specimenType
+       * @name domain.studies.CollectionSpecimenDefinition#specimenType
        * @type {domain.studies.SpecimenType.SpecimenType}
        */
 
       /**
        * The amount per specimen, measured in units, to be collected.
-       * @name domain.studies.CollectionSpecimenDescription#amount
+       * @name domain.studies.CollectionSpecimenDefinition#amount
        * @type {number}
        * @see #units
        */
 
       /**
        * The number of specimens to be collected.
-       * @name domain.studies.CollectionSpecimenDescription#maxCount
+       * @name domain.studies.CollectionSpecimenDefinition#maxCount
        * @type {number}
        * @see #units
        */
@@ -129,18 +129,18 @@ function CollectionSpecimenDescriptionFactory($log, DomainEntity, DomainError) {
     }
 
     static create(obj) {
-      var validation = CollectionSpecimenDescription.isValid(obj);
+      var validation = CollectionSpecimenDefinition.isValid(obj);
 
       if (!validation.valid) {
         $log.error('invalid object from server: ' + validation.message);
         throw new DomainError('invalid object from server: ' + validation.message);
       }
-      return new CollectionSpecimenDescription(obj);
+      return new CollectionSpecimenDefinition(obj);
     }
   }
 
-  return CollectionSpecimenDescription;
+  return CollectionSpecimenDefinition;
 }
 
-export default ngModule => ngModule.factory('CollectionSpecimenDescription',
-                                           CollectionSpecimenDescriptionFactory)
+export default ngModule => ngModule.factory('CollectionSpecimenDefinition',
+                                           CollectionSpecimenDefinitionFactory)

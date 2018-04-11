@@ -42,7 +42,7 @@ class SpecimenAddModalService {
    * @param {domain.Location[]} centreLocations - The locations belonging to the centres the specimens can be
    * collected at.
    *
-   * @param {domain.studies.CollectionSpecimenDescription[]} specimenDescriptions - the *Specimen
+   * @param {domain.studies.CollectionSpecimenDefinition[]} specimenDefinitions - the *Specimen
    *        Specifications* belonging to the *Collection Event* these specimen belong to.
    *
    * @param {Date} defaultDatetime - The default date to use for the specimen's {@link
@@ -50,7 +50,7 @@ class SpecimenAddModalService {
    *
    * @return {object} The "UI Bootstrap" modal instance.
    */
-  open(centreLocations, specimenDescriptions, defaultDatetime) {
+  open(centreLocations, specimenDefinitions, defaultDatetime) {
 
     /*
      * The controller used by this modal.
@@ -65,12 +65,12 @@ class SpecimenAddModalService {
                         $uibModalInstance,
                         $scope,
                         centreLocations,
-                        specimenDescriptions,
+                        specimenDefinitions,
                         defaultDatetime
                       },
                       {
                         inventoryId:                 undefined,
-                        selectedSpecimenDescription: undefined,
+                        selectedSpecimenDefinition: undefined,
                         selectedLocationInfo:        undefined,
                         amount:                      undefined,
                         defaultAmount:               undefined,
@@ -89,7 +89,7 @@ class SpecimenAddModalService {
        * Creates a new specimen based on values stored in the controller.
        */
       createSpecimen() {
-        if (_.isUndefined(this.selectedSpecimenDescription)) {
+        if (_.isUndefined(this.selectedSpecimenDefinition)) {
           throw new Error('specimen type not selected');
         }
 
@@ -101,7 +101,7 @@ class SpecimenAddModalService {
             timeCreated:        service.timeService.dateAndTimeToUtcString(this.timeCollected),
             amount:             this.amount
           },
-          this.selectedSpecimenDescription);
+          this.selectedSpecimenDefinition);
       }
 
       /*
@@ -119,7 +119,7 @@ class SpecimenAddModalService {
         this.specimens.push(this.createSpecimen());
 
         this.inventoryId                 = undefined;
-        this.selectedSpecimenDescription = undefined;
+        this.selectedSpecimenDefinition = undefined;
         this.amount                      = undefined;
         this.defaultAmount               = undefined;
         this.usingDefaultAmount          = true;
@@ -132,7 +132,7 @@ class SpecimenAddModalService {
         // inputs elements that are in a disabled state but are enabled when those events
         // are triggered.
         service.$timeout(() => {
-          const element = service.$window.document.getElementById('specimenDescription');
+          const element = service.$window.document.getElementById('specimenDefinition');
           if (element) { element.focus(); }
         });
       }
@@ -154,11 +154,11 @@ class SpecimenAddModalService {
       /*
        * Called when the user selects a new specimen type in the modal.
        */
-      specimenDescriptionChanged() {
-        if (this.selectedSpecimenDescription) {
-          this.amount        = this.selectedSpecimenDescription.amount;
-          this.defaultAmount = this.selectedSpecimenDescription.amount;
-          this.units         = this.selectedSpecimenDescription.units;
+      specimenDefinitionChanged() {
+        if (this.selectedSpecimenDefinition) {
+          this.amount        = this.selectedSpecimenDefinition.amount;
+          this.defaultAmount = this.selectedSpecimenDefinition.amount;
+          this.units         = this.selectedSpecimenDefinition.units;
         }
       }
 

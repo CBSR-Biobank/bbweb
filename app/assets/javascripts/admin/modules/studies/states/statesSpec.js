@@ -211,7 +211,7 @@ describe('study admin collection states', function() {
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when({}))
         this.gotoUrl('/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/add')
         expect(this.$state.current.name)
-          .toBe('home.admin.studies.study.collection.ceventType.specimenDescriptionAdd')
+          .toBe('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd')
       })
 
       it('should go to the 404 state when an invalid eventId is used', function() {
@@ -231,15 +231,15 @@ describe('study admin collection states', function() {
       });
 
       it('should go to valid state', function() {
-        const jsonSpcDesc   = this.Factory.collectionSpecimenDescription(),
-              jsonEventType = this.Factory.collectionEventType({ specimenDescriptions: [ jsonSpcDesc ]}),
+        const jsonSpcDesc   = this.Factory.collectionSpecimenDefinition(),
+              jsonEventType = this.Factory.collectionEventType({ specimenDefinitions: [ jsonSpcDesc ]}),
               eventType     = this.CollectionEventType.create(jsonEventType)
 
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(eventType))
         this.gotoUrl(
           `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/${jsonSpcDesc.slug}`)
         expect(this.$state.current.name)
-          .toBe('home.admin.studies.study.collection.ceventType.specimenDescriptionView')
+          .toBe('home.admin.studies.study.collection.ceventType.specimenDefinitionView')
       })
 
       it('should go to the 404 state when an invalid eventId is used', function() {

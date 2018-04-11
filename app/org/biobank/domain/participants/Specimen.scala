@@ -6,7 +6,7 @@ import org.biobank.ValidationKey
 import org.biobank.dto.SpecimenDto
 import org.biobank.domain._
 import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
-import org.biobank.domain.studies.{CollectionSpecimenDescription, SpecimenDescriptionId, StudyValidations}
+import org.biobank.domain.studies.{CollectionSpecimenDefinition, SpecimenDefinitionId, StudyValidations}
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
 import org.biobank.infrastructure.EnumUtils._
 import org.biobank.services.centres.CentreLocationInfo
@@ -19,8 +19,8 @@ import scalaz.Scalaz._
  *
  * A Specimen collected from a [[domain.participants.Participant Participant]] can be created with
  * this aggregate and then added to a [[domain.participants.CollectionEvent CollectionEvent]]. When a
- * specimen is created it must be assigned the corresponding [[domain.studies.SpecimenDescription
- * SpecimenDescription]] defined in either the [[domain.participants.CollectionEvent
+ * specimen is created it must be assigned the corresponding [[domain.studies.SpecimenDefinition
+ * SpecimenDefinition]] defined in either the [[domain.participants.CollectionEvent
  * CollectionEvent]] or the specimen link type to which it corresponds .
  */
 sealed trait Specimen
@@ -32,9 +32,9 @@ sealed trait Specimen
   /** The inventory ID assigned to this specimen. */
   val inventoryId: String
 
-  /** The [[domain.studies.CollectionSpecimenDescription CollectionSpecimenDescription]] this specimen
+  /** The [[domain.studies.CollectionSpecimenDefinition CollectionSpecimenDefinition]] this specimen
     * belongs to, defined by the study it belongs to. */
-  val specimenDescriptionId: SpecimenDescriptionId
+  val specimenDefinitionId: SpecimenDefinitionId
 
   /** The [[domain.centres.Centre Centre]] where this specimen was created. */
   val originLocationId: LocationId
@@ -59,14 +59,14 @@ sealed trait Specimen
   val timeCreated: OffsetDateTime
 
   /**
-   * The amount, in units specified in the [[domain.studies.SpecimenDescription SpecimenDescription]], for this
+   * The amount, in units specified in the [[domain.studies.SpecimenDefinition SpecimenDefinition]], for this
    * specimen.
    */
   val amount: scala.math.BigDecimal
 
   def createDto(collectionEvent:    CollectionEvent,
                 eventTypeName:      String,
-                specimenDesc:       CollectionSpecimenDescription,
+                specimenDesc:       CollectionSpecimenDefinition,
                 originLocationInfo: CentreLocationInfo,
                 locationInfo:       CentreLocationInfo): SpecimenDto =
     SpecimenDto(id                       = this.id.id,
@@ -77,9 +77,9 @@ sealed trait Specimen
                 slug                     = this.slug,
                 inventoryId              = this.inventoryId,
                 collectionEventId        = collectionEvent.id.id,
-                specimenDescriptionId    = this.specimenDescriptionId.id,
-                specimenDescriptionName  = specimenDesc.name,
-                specimenDescriptionUnits = specimenDesc.units,
+                specimenDefinitionId    = this.specimenDefinitionId.id,
+                specimenDefinitionName  = specimenDesc.name,
+                specimenDefinitionUnits = specimenDesc.units,
                 originLocationInfo       = originLocationInfo,
                 locationInfo             = locationInfo,
                 containerId              = this.containerId.map(_.id),
@@ -98,7 +98,7 @@ sealed trait Specimen
         |  timeModified:          $timeModified
         |  slug:                  $slug,
         |  inventoryId:           $inventoryId
-        |  specimenDescriptionId: $specimenDescriptionId
+        |  specimenDefinitionId: $specimenDefinitionId
         |  originLocationId:      $originLocationId
         |  locationId:            $locationId
         |  containerId:           $containerId
@@ -120,7 +120,7 @@ object Specimen {
           "state"                 -> specimen.state.id,
           "slug"                  -> specimen.slug,
           "inventoryId"           -> specimen.inventoryId,
-          "specimenDescriptionId" -> specimen.specimenDescriptionId,
+          "specimenDefinitionId" -> specimen.specimenDefinitionId,
           "originLocationId"      -> specimen.originLocationId.id,
           "locationId"            -> specimen.locationId.id,
           "containerId"           -> specimen.containerId,
@@ -163,7 +163,7 @@ trait SpecimenValidations {
 
   case object InventoryIdInvalid extends ValidationKey
 
-  case object SpecimenDescriptionIdInvalid extends ValidationKey
+  case object SpecimenDefinitionIdInvalid extends ValidationKey
 
 }
 
@@ -176,7 +176,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
                                 timeModified:          Option[OffsetDateTime],
                                 slug:                  String,
                                 inventoryId:           String,
-                                specimenDescriptionId: SpecimenDescriptionId,
+                                specimenDefinitionId: SpecimenDefinitionId,
                                 originLocationId:      LocationId,
                                 locationId:            LocationId,
                                 containerId:           Option[ContainerId],
@@ -247,7 +247,7 @@ final case class UsableSpecimen(id:                    SpecimenId,
                      timeModified          = Some(OffsetDateTime.now),
                      slug                  = this.slug,
                      inventoryId           = this.inventoryId,
-                     specimenDescriptionId = this.specimenDescriptionId,
+                     specimenDefinitionId = this.specimenDefinitionId,
                      originLocationId      = this.originLocationId,
                      locationId            = this.locationId,
                      containerId           = this.containerId,
@@ -267,7 +267,7 @@ object UsableSpecimen
 
   def create(id:                    SpecimenId,
              inventoryId:           String,
-             specimenDescriptionId: SpecimenDescriptionId,
+             specimenDefinitionId: SpecimenDefinitionId,
              version:               Long,
              originLocationId:      LocationId,
              locationId:            LocationId,
@@ -279,7 +279,7 @@ object UsableSpecimen
       : DomainValidation[UsableSpecimen] = {
     validate(id,
              inventoryId,
-             specimenDescriptionId,
+             specimenDefinitionId,
              version,
              originLocationId,
              locationId,
@@ -292,7 +292,7 @@ object UsableSpecimen
                                timeModified          = None,
                                slug                  = Slug(inventoryId),
                                inventoryId           = inventoryId,
-                               specimenDescriptionId = specimenDescriptionId,
+                               specimenDefinitionId = specimenDefinitionId,
                                originLocationId      = originLocationId,
                                locationId            = locationId,
                                containerId           = containerId,
@@ -303,7 +303,7 @@ object UsableSpecimen
 
   def validate(id:                    SpecimenId,
                inventoryId:           String,
-               specimenDescriptionId: SpecimenDescriptionId,
+               specimenDefinitionId: SpecimenDefinitionId,
                version:               Long,
                originLocationId:      LocationId,
                locationId:            LocationId,
@@ -313,7 +313,7 @@ object UsableSpecimen
       : DomainValidation[Boolean] = {
     (validateId(id) |@|
        validateNonEmptyString(inventoryId, InventoryIdInvalid) |@|
-       validateId(specimenDescriptionId, SpecimenDescriptionIdInvalid) |@|
+       validateId(specimenDefinitionId, SpecimenDefinitionIdInvalid) |@|
        validateVersion(version) |@|
        validateNonEmptyString(originLocationId.id, OriginLocationIdInvalid) |@|
        validateNonEmptyString(locationId.id, LocationIdInvalid) |@|
@@ -337,7 +337,7 @@ final case class UnusableSpecimen(id:                    SpecimenId,
                                   timeModified:          Option[OffsetDateTime],
                                   slug:                  String,
                                   inventoryId:           String,
-                                  specimenDescriptionId: SpecimenDescriptionId,
+                                  specimenDefinitionId: SpecimenDefinitionId,
                                   originLocationId:      LocationId,
                                   locationId:            LocationId,
                                   containerId:           Option[ContainerId],
@@ -355,7 +355,7 @@ final case class UnusableSpecimen(id:                    SpecimenId,
                    timeModified          = Some(OffsetDateTime.now),
                    slug                  = this.slug,
                    inventoryId           = this.inventoryId,
-                   specimenDescriptionId = this.specimenDescriptionId,
+                   specimenDefinitionId = this.specimenDefinitionId,
                    originLocationId      = this.originLocationId,
                    locationId            = this.locationId,
                    containerId           = this.containerId,

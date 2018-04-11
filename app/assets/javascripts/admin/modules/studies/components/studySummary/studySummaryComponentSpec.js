@@ -16,7 +16,7 @@ describe('Component: studySummary', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      var specimenDescription, ceventType;
+      var specimenDefinition, ceventType;
 
       Object.assign(this, ComponentTestSuiteMixin);
 
@@ -26,15 +26,15 @@ describe('Component: studySummary', function() {
                               '$state',
                               'Study',
                               'CollectionEventType',
-                              'CollectionSpecimenDescription',
+                              'CollectionSpecimenDefinition',
                               'modalService',
                               'notificationsService',
                               'Factory');
 
-      specimenDescription = this.Factory.collectionSpecimenDescription();
+      specimenDefinition = this.Factory.collectionSpecimenDefinition();
       this.study = this.Study.create(this.Factory.study());
       ceventType = this.CollectionEventType.create(
-        this.Factory.collectionEventType({ specimenDescriptions: [ specimenDescription ]}));
+        this.Factory.collectionEventType({ specimenDefinitions: [ specimenDefinition ]}));
 
       spyOn(this.CollectionEventType, 'list').and.returnValue(this.$q.when([ ceventType ]));
       spyOn(this.modalService, 'showModal').and.returnValue(this.$q.when(true));

@@ -36,9 +36,9 @@ trait ShipmentSpecFixtures {
 
   class CollectionEventFixture {
     val study = factory.createEnabledStudy
-    val specimenDescription = factory.createCollectionSpecimenDescription
+    val specimenDefinition = factory.createCollectionSpecimenDefinition
     val ceventType = factory.createCollectionEventType.copy(studyId = study.id,
-                                                            specimenDescriptions = Set(specimenDescription),
+                                                            specimenDefinitions = Set(specimenDefinition),
                                                             annotationTypes = Set.empty)
     val participant = factory.createParticipant.copy(studyId = study.id)
     val cevent = factory.createCollectionEvent
@@ -48,7 +48,7 @@ trait ShipmentSpecFixtures {
                          toCentre:                Centre,
                          shipment:                Shipment,
                          val study:               Study,
-                         val specimenDescription: CollectionSpecimenDescription,
+                         val specimenDefinition: CollectionSpecimenDefinition,
                          val ceventType:          CollectionEventType,
                          val participant:         Participant,
                          val cevent:              CollectionEvent,
@@ -64,7 +64,7 @@ trait ShipmentSpecFixtures {
                                  toCentre:                Centre,
                                  shipment:                Shipment,
                                  study:                   Study,
-                                 specimenDescription:     CollectionSpecimenDescription,
+                                 specimenDefinition:     CollectionSpecimenDefinition,
                                  ceventType:              CollectionEventType,
                                  participant:             Participant,
                                  cevent:                  CollectionEvent,
@@ -74,7 +74,7 @@ trait ShipmentSpecFixtures {
                                toCentre,
                                shipment,
                                study,
-                               specimenDescription,
+                               specimenDefinition,
                                ceventType,
                                participant,
                                cevent,
@@ -206,7 +206,7 @@ trait ShipmentSpecFixtures {
     new SpecimensFixture(fromCentre          = f.fromCentre,
                          toCentre            = f.toCentre,
                          study               = ceventFixture.study,
-                         specimenDescription = ceventFixture.specimenDescription,
+                         specimenDefinition = ceventFixture.specimenDefinition,
                          ceventType          = ceventFixture.ceventType,
                          participant         = ceventFixture.participant,
                          cevent              = ceventFixture.cevent,
@@ -228,7 +228,7 @@ trait ShipmentSpecFixtures {
                                                     originLocationName)
         val specimenDto = specimen.createDto(f.cevent,
                                              f.ceventType.name,
-                                             f.specimenDescription,
+                                             f.specimenDefinition,
                                              centreLocationInfo,
                                              centreLocationInfo)
         (updatedSpecimen.id, new ShipmentSpecimenData(updatedSpecimen,
@@ -240,7 +240,7 @@ trait ShipmentSpecFixtures {
     new ShipmentSpecimensFixture(fromCentre          = f.fromCentre,
                                  toCentre            = f.toCentre,
                                  study               = f.study,
-                                 specimenDescription = f.specimenDescription,
+                                 specimenDefinition = f.specimenDefinition,
                                  ceventType          = f.ceventType,
                                  participant         = f.participant,
                                  cevent              = f.cevent,

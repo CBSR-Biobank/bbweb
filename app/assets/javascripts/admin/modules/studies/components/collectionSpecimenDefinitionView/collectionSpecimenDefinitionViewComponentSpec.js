@@ -10,7 +10,7 @@ import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import faker from 'faker';
 import ngModule from '../../index'
 
-describe('Component: collectionSpecimenDescriptionView', function() {
+describe('Component: collectionSpecimenDefinitionView', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -22,18 +22,18 @@ describe('Component: collectionSpecimenDescriptionView', function() {
                               '$q',
                               'Study',
                               'CollectionEventType',
-                              'CollectionSpecimenDescription',
+                              'CollectionSpecimenDefinition',
                               'Factory');
 
-      this.jsonSpecimenDescription = this.Factory.collectionSpecimenDescription();
+      this.jsonSpecimenDefinition = this.Factory.collectionSpecimenDefinition();
       this.jsonCeventType          = this.Factory.collectionEventType({
-        specimenDescriptions: [ this.jsonSpecimenDescription ]
+        specimenDefinitions: [ this.jsonSpecimenDefinition ]
       });
       this.jsonStudy           = this.Factory.defaultStudy;
 
       this.study               = new this.Study(this.jsonStudy);
       this.collectionEventType = new this.CollectionEventType(this.jsonCeventType);
-      this.specimenDescription = new this.CollectionSpecimenDescription(this.jsonSpecimenDescription);
+      this.specimenDefinition = new this.CollectionSpecimenDefinition(this.jsonSpecimenDefinition);
       this.createController = () => {
         this.CollectionEventType.get = jasmine.createSpy()
           .and.returnValue(this.$q.when(this.collectionEventType));
@@ -41,18 +41,18 @@ describe('Component: collectionSpecimenDescriptionView', function() {
         ComponentTestSuiteMixin.createController.call(
           this,
           [
-            '<collection-specimen-description-view',
+            '<collection-specimen-definition-view',
             '  study="vm.study"',
             '  collection-event-type="vm.collectionEventType"',
-            '  specimen-description="vm.specimenDescription">',
-            '</collection-specimen-description-view>'
+            '  specimen-definition="vm.specimenDefinition">',
+            '</collection-specimen-definition-view>'
           ].join(''),
           {
             study:               this.study,
             collectionEventType: this.collectionEventType,
-            specimenDescription: this.specimenDescription
+            specimenDefinition: this.specimenDefinition
           },
-          'collectionSpecimenDescriptionView');
+          'collectionSpecimenDefinitionView');
       };
     });
   });
@@ -62,7 +62,7 @@ describe('Component: collectionSpecimenDescriptionView', function() {
 
     expect(this.controller.study).toBe(this.study);
     expect(this.controller.collectionEventType).toBe(this.collectionEventType);
-    expect(this.controller.specimenDescription).toBe(this.specimenDescription);
+    expect(this.controller.specimenDefinition).toBe(this.specimenDefinition);
 
     expect(this.controller.editName).toBeFunction();
     expect(this.controller.editDescription).toBeFunction();
@@ -247,7 +247,7 @@ describe('Component: collectionSpecimenDescriptionView', function() {
    *
    * @param {object} context.ceventType the collection event type that contains the specimen spec.
    *
-   * @param {CollectionSpecimenDescription} context.specimenDescription the specimen spec to be viewed.
+   * @param {CollectionSpecimenDefinition} context.specimenDefinition the specimen spec to be viewed.
    *
    * @param {function} context.createController is a function that creates the controller and scope:
    * this.controller, and this.scope.
@@ -267,7 +267,7 @@ describe('Component: collectionSpecimenDescriptionView', function() {
 
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: deferred.promise});
-        spyOn(this.CollectionEventType.prototype, 'updateSpecimenDescription')
+        spyOn(this.CollectionEventType.prototype, 'updateSpecimenDefinition')
           .and.returnValue(this.$q.when(context.ceventType));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
@@ -275,7 +275,7 @@ describe('Component: collectionSpecimenDescriptionView', function() {
         this.controller[context.controllerUpdateFuncName]();
         this.scope.$digest();
 
-        expect(this.CollectionEventType.prototype.updateSpecimenDescription).toHaveBeenCalled();
+        expect(this.CollectionEventType.prototype.updateSpecimenDefinition).toHaveBeenCalled();
         expect(this.notificationsService.success).toHaveBeenCalled();
       });
 
@@ -284,7 +284,7 @@ describe('Component: collectionSpecimenDescriptionView', function() {
 
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: this.$q.when(context.newValue) });
-        spyOn(this.CollectionEventType.prototype, 'updateSpecimenDescription')
+        spyOn(this.CollectionEventType.prototype, 'updateSpecimenDefinition')
           .and.returnValue(this.$q.reject('simulated error'));
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 

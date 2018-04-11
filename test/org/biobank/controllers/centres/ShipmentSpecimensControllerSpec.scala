@@ -68,7 +68,7 @@ class ShipmentSpecimensControllerSpec
 
         val dto = shipmentSpecimen.createDto(specimen.createDto(f.cevent,
                                                                 f.ceventType.name,
-                                                                f.specimenDescription,
+                                                                f.specimenDefinition,
                                                                 centreLocationInfo,
                                                                 centreLocationInfo))
         compareObj(jsonItem, dto)
@@ -102,7 +102,7 @@ class ShipmentSpecimensControllerSpec
                                                       originLocationName)
           val dto = shipmentSpecimen.createDto(specimen.createDto(f.cevent,
                                                                   f.ceventType.name,
-                                                                  f.specimenDescription,
+                                                                  f.specimenDefinition,
                                                                   centreLocationInfo,
                                                                   centreLocationInfo))
           compareObj(jsonItems(index), dto)
@@ -272,7 +272,7 @@ class ShipmentSpecimensControllerSpec
                                                     originLocationName)
         val specimenDto = specimen.createDto(f.cevent,
                                              f.ceventType.name,
-                                             f.specimenDescription,
+                                             f.specimenDefinition,
                                              centreLocationInfo,
                                              centreLocationInfo)
 

@@ -25,7 +25,7 @@ describe('ceventTypeViewComponent', function() {
                               'Study',
                               'StudyState',
                               'CollectionEventType',
-                              'CollectionSpecimenDescription',
+                              'CollectionSpecimenDefinition',
                               'AnnotationType',
                               'notificationsService',
                               'domainNotificationService',
@@ -69,12 +69,12 @@ describe('ceventTypeViewComponent', function() {
       .toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType.annotationTypeAdd');
   });
 
-  it('calling addSpecimenDescription should change to the correct state', function() {
+  it('calling addSpecimenDefinition should change to the correct state', function() {
     this.createController();
-    this.controller.addSpecimenDescription();
+    this.controller.addSpecimenDefinition();
     this.scope.$digest();
     expect(this.$state.go)
-      .toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType.specimenDescriptionAdd');
+      .toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd');
   });
 
   it('calling editAnnotationType should change to the correct state', function() {
@@ -143,44 +143,44 @@ describe('ceventTypeViewComponent', function() {
   });
 
   it('editing a specimen description changes to correct state', function() {
-    var specimenDescription =
-        new this.CollectionSpecimenDescription(this.Factory.collectionSpecimenDescription());
+    var specimenDefinition =
+        new this.CollectionSpecimenDefinition(this.Factory.collectionSpecimenDefinition());
 
     this.createController();
-    this.controller.editSpecimenDescription(specimenDescription);
+    this.controller.editSpecimenDefinition(specimenDefinition);
     this.scope.$digest();
     expect(this.$state.go).toHaveBeenCalledWith(
-      'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
-      { specimenDescriptionSlug: specimenDescription.slug });
+      'home.admin.studies.study.collection.ceventType.specimenDefinitionView',
+      { specimenDefinitionSlug: specimenDefinition.slug });
   });
 
   describe('removing a specimen description', function() {
 
     it('can be removed when in valid state', function() {
       var modalService = this.$injector.get('modalService'),
-          jsonSpecimenDescription = this.Factory.collectionSpecimenDescription(),
+          jsonSpecimenDefinition = this.Factory.collectionSpecimenDefinition(),
           jsonCeventType = this.Factory.collectionEventType(
-            { specimenDescriptions: [ jsonSpecimenDescription ]}),
+            { specimenDefinitions: [ jsonSpecimenDefinition ]}),
           ceventType = this.CollectionEventType.create(jsonCeventType);
 
       spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
-      spyOn(this.CollectionEventType.prototype, 'removeSpecimenDescription')
+      spyOn(this.CollectionEventType.prototype, 'removeSpecimenDefinition')
         .and.returnValue(this.$q.when(ceventType));
 
       this.createController();
       this.controller.modificationsAllowed = true;
-      this.controller.removeSpecimenDescription(ceventType.specimenDescriptions[0]);
+      this.controller.removeSpecimenDefinition(ceventType.specimenDefinitions[0]);
       this.scope.$digest();
 
       expect(this.domainNotificationService.removeEntity).toHaveBeenCalled();
-      expect(this.CollectionEventType.prototype.removeSpecimenDescription).toHaveBeenCalled();
+      expect(this.CollectionEventType.prototype.removeSpecimenDefinition).toHaveBeenCalled();
     });
 
     it('throws an error if study is not disabled', function() {
       var self = this,
-          specimenDescription = new self.CollectionSpecimenDescription(
-            self.Factory.collectionSpecimenDescription());
+          specimenDefinition = new self.CollectionSpecimenDefinition(
+            self.Factory.collectionSpecimenDefinition());
 
       spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
 
@@ -188,7 +188,7 @@ describe('ceventTypeViewComponent', function() {
         self.study.state = state;
         self.createController();
         expect(function () {
-          self.controller.removeSpecimenDescription(specimenDescription);
+          self.controller.removeSpecimenDefinition(specimenDefinition);
         }).toThrowError('modifications not allowed');
       });
     });

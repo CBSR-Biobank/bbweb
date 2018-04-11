@@ -189,9 +189,9 @@ object BbpspTestData {
 
   // the slug is temporarily assigned an empty value, once the set is created, the slug is then derived
   // from the name below.
-  val CollectionSpecimenDescriptions: Set[CollectionSpecimenDescription] =
-    Set(CollectionSpecimenDescription(
-          id                          = SpecimenDescriptionId(SpecimenHashids.encode(1)),
+  val CollectionSpecimenDefinitions: Set[CollectionSpecimenDefinition] =
+    Set(CollectionSpecimenDefinition(
+          id                          = SpecimenDefinitionId(SpecimenHashids.encode(1)),
           slug                        = "",
           name                        = "10 mL Lavender top EDTA tube",
           description                 = None,
@@ -202,8 +202,8 @@ object BbpspTestData {
           specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 2, // set to 2 for testing form, set back to 1 for demo
           amount                      = 10.0),
-        CollectionSpecimenDescription(
-          id                          = SpecimenDescriptionId(SpecimenHashids.encode(2)),
+        CollectionSpecimenDefinition(
+          id                          = SpecimenDefinitionId(SpecimenHashids.encode(2)),
           slug                        = "",
           name                        = "10 mL Orange top PAXgene tube",
           description                 = None,
@@ -214,8 +214,8 @@ object BbpspTestData {
           specimenType                = SpecimenType.Paxgene,
           maxCount                    = 1,
           amount                      = 10.0),
-        CollectionSpecimenDescription(
-          id                          = SpecimenDescriptionId(SpecimenHashids.encode(3)),
+        CollectionSpecimenDefinition(
+          id                          = SpecimenDefinitionId(SpecimenHashids.encode(3)),
           slug                        = "",
           name                        = "3mL Lavender top EDTA tube",
           description                 = None,
@@ -226,8 +226,8 @@ object BbpspTestData {
           specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 1,
           amount                      = 3),
-        CollectionSpecimenDescription(
-          id                          = SpecimenDescriptionId(SpecimenHashids.encode(4)),
+        CollectionSpecimenDefinition(
+          id                          = SpecimenDefinitionId(SpecimenHashids.encode(4)),
           slug                        = "",
           name                        = "4ml lavender top EDTA tube",
           description                 = None,
@@ -238,8 +238,8 @@ object BbpspTestData {
           specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 1,
           amount                      = 4),
-        CollectionSpecimenDescription(
-          id                          = SpecimenDescriptionId(SpecimenHashids.encode(5)),
+        CollectionSpecimenDefinition(
+          id                          = SpecimenDefinitionId(SpecimenHashids.encode(5)),
           slug                        = "",
           name                        = "9ml CPDA yellow top tube",
           description                 = None,
@@ -250,8 +250,8 @@ object BbpspTestData {
           specimenType                = SpecimenType.WholeBloodEdta,
           maxCount                    = 1,
           amount                      = 9),
-        CollectionSpecimenDescription(
-          id                          = SpecimenDescriptionId(SpecimenHashids.encode(6)),
+        CollectionSpecimenDefinition(
+          id                          = SpecimenDefinitionId(SpecimenHashids.encode(6)),
           slug                        = "",
           name                        = "Urine cup",
           description                 = None,
@@ -476,7 +476,7 @@ class TestData @Inject() (config:         Configuration,
                             name                 = name,
                             description          = None,
                             recurring            = true,
-                            specimenDescriptions = BbpspTestData.CollectionSpecimenDescriptions,
+                            specimenDefinitions = BbpspTestData.CollectionSpecimenDefinitions,
                             annotationTypes      = annotationTypes)
       }
     }
@@ -664,7 +664,7 @@ class TestData @Inject() (config:         Configuration,
         val centreId = CentreId(s"${centreName}_id")
         val locationId = LocationId(s"${centreId}:Primary")
 
-        BbpspTestData.CollectionSpecimenDescriptions.zipWithIndex.map { case (specimenDesc, specimenIndex) =>
+        BbpspTestData.CollectionSpecimenDefinitions.zipWithIndex.map { case (specimenDesc, specimenIndex) =>
           val reverseHash = BbpspTestData.EventHashids.decode(event.id.id)
           val participantIndex = reverseHash(0)
           val eventIndex = reverseHash(1)
@@ -678,7 +678,7 @@ class TestData @Inject() (config:         Configuration,
                          timeModified          = None,
                          slug                  = Slug(inventoryId),
                          inventoryId           = inventoryId,
-                         specimenDescriptionId = specimenDesc.id,
+                         specimenDefinitionId = specimenDesc.id,
                          originLocationId      = locationId,
                          locationId            = locationId,
                          containerId           = None,

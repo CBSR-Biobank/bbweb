@@ -7,7 +7,7 @@ import org.biobank.infrastructure.events.CollectionEventTypeEvents._
 import org.biobank.infrastructure.events.SpecimenEvents._
 import org.biobank.domain._
 import org.biobank.domain.annotations._
-import org.biobank.domain.studies.{CollectionSpecimenDescription, SpecimenDescriptionId}
+import org.biobank.domain.studies.{CollectionSpecimenDefinition, SpecimenDefinitionId}
 import org.biobank.domain.participants.SpecimenId
 import org.biobank.domain.centres.ShipmentSpecimen
 import org.biobank.infrastructure.events.ShipmentSpecimenEvents._
@@ -59,9 +59,9 @@ object EventUtils {
     )
   }
 
-  def specimenDescriptionToEvent(specimenDesc: CollectionSpecimenDescription):
-      CollectionEventTypeEvent.SpecimenDescription = {
-    CollectionEventTypeEvent.SpecimenDescription().update(
+  def specimenDefinitionToEvent(specimenDesc: CollectionSpecimenDefinition):
+      CollectionEventTypeEvent.SpecimenDefinition = {
+    CollectionEventTypeEvent.SpecimenDefinition().update(
       _.id                          := specimenDesc.id.id,
       _.name                        := specimenDesc.name,
       _.optionalDescription         := specimenDesc.description,
@@ -75,10 +75,10 @@ object EventUtils {
     )
   }
 
-  def specimenDescriptionFromEvent(event: CollectionEventTypeEvent.SpecimenDescription)
-      : CollectionSpecimenDescription = {
-    CollectionSpecimenDescription(
-      id                      = SpecimenDescriptionId(event.getId),
+  def specimenDefinitionFromEvent(event: CollectionEventTypeEvent.SpecimenDefinition)
+      : CollectionSpecimenDefinition = {
+    CollectionSpecimenDefinition(
+      id                      = SpecimenDefinitionId(event.getId),
       slug                    = Slug(event.getName),
       name                    = event.getName,
       description             = event.description,
@@ -96,7 +96,7 @@ object EventUtils {
     SpecimenEvent.Added.SpecimenInfo().update(
       _.id                    := id.id,
       _.inventoryId           := specimenInfo.inventoryId,
-      _.specimenDescriptionId := specimenInfo.specimenDescriptionId,
+      _.specimenDefinitionId := specimenInfo.specimenDefinitionId,
       _.timeCreated           := specimenInfo.timeCreated.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.locationId            := specimenInfo.locationId,
       _.amount                := specimenInfo.amount.doubleValue

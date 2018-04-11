@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 import org.biobank.fixture.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.containers.{ ContainerId, ContainerSchemaPositionId }
-import org.biobank.domain.studies.SpecimenDescriptionId
+import org.biobank.domain.studies.SpecimenDefinitionId
 import org.slf4j.LoggerFactory
 
 class SpecimenSpec extends DomainSpec {
@@ -17,7 +17,7 @@ class SpecimenSpec extends DomainSpec {
   def createFrom(specimen: Specimen): DomainValidation[Specimen] =
     UsableSpecimen.create(id                    = specimen.id,
                           inventoryId           = specimen.inventoryId,
-                          specimenDescriptionId = specimen.specimenDescriptionId,
+                          specimenDefinitionId = specimen.specimenDefinitionId,
                           version               = specimen.version,
                           timeAdded             = OffsetDateTime.now,
                           timeCreated           = specimen.timeCreated,
@@ -37,7 +37,7 @@ class SpecimenSpec extends DomainSpec {
           spc must have(
             'id                    (specimen.id),
             'inventoryId           (specimen.inventoryId),
-            'specimenDescriptionId (specimen.specimenDescriptionId),
+            'specimenDefinitionId (specimen.specimenDefinitionId),
             'version               (0),
             'originLocationId      (specimen.originLocationId),
             'locationId            (specimen.locationId),
@@ -138,8 +138,8 @@ class SpecimenSpec extends DomainSpec {
       }
 
       it("with an empty specimen spec id") {
-        val specimen = factory.createUsableSpecimen.copy(specimenDescriptionId = SpecimenDescriptionId(""))
-        createFrom(specimen) mustFail "SpecimenDescriptionIdInvalid"
+        val specimen = factory.createUsableSpecimen.copy(specimenDefinitionId = SpecimenDefinitionId(""))
+        createFrom(specimen) mustFail "SpecimenDefinitionIdInvalid"
       }
 
       it("with an invalid version number") {

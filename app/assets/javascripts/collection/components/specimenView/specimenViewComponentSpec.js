@@ -45,13 +45,13 @@ describe('specimenViewComponent', function() {
 
       // the object must have keys in same order as the parameters for createController()
       this.createEntities = () => {
-        var rawSpecimenDescription = this.Factory.collectionSpecimenDescription(),
+        var rawSpecimenDefinition = this.Factory.collectionSpecimenDefinition(),
             rawCollectionEventType = this.Factory.collectionEventType(
-              { specimenDescriptions: [ rawSpecimenDescription ]}),
+              { specimenDefinitions: [ rawSpecimenDefinition ]}),
             collectionEventType = this.CollectionEventType.create(rawCollectionEventType),
             collectionEvent = new this.CollectionEvent(this.Factory.collectionEvent(), collectionEventType),
             specimen = new this.Specimen(this.Factory.specimen(),
-                                         collectionEventType.specimenDescriptions[0]),
+                                         collectionEventType.specimenDefinitions[0]),
             participant = new this.Participant(this.Factory.defaultParticipant()),
             study = new this.Study(this.Factory.defaultStudy());
 

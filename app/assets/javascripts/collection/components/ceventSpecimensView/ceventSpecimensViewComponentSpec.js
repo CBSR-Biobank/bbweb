@@ -27,14 +27,14 @@ describe('ceventSpecimensViewComponent', function() {
                               'domainNotificationService',
                               'Factory');
 
-      this.rawSpecimenDescription = this.Factory.collectionSpecimenDescription();
+      this.rawSpecimenDefinition = this.Factory.collectionSpecimenDefinition();
       this.rawCollectionEventType = this.Factory.collectionEventType(
-        { specimenDescriptions: [ this.rawSpecimenDescription ]});
+        { specimenDefinitions: [ this.rawSpecimenDefinition ]});
       this.collectionEventType = new this.CollectionEventType(this.rawCollectionEventType);
       this.collectionEvent = new this.CollectionEvent(this.Factory.collectionEvent(),
                                                       this.collectionEventType);
       this.specimen = this.Specimen.create(this.Factory.specimen(),
-                                           this.collectionEventType.specimenDescriptions[0]);
+                                           this.collectionEventType.specimenDefinitions[0]);
       this.study = this.Study.create(this.Factory.defaultStudy());
 
       this.createController = (study, collectionEvent) => {

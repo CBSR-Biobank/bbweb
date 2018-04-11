@@ -107,7 +107,7 @@
       <span class="pull-right">
         <button class="btn btn-xs btn-primary"
                 title="{{'Add a specimen to this collection event'|translate}}"
-                ng-click="vm.addSpecimenDescription()"
+                ng-click="vm.addSpecimenDefinition()"
                 ng-if="vm.study.isDisabled()">
           Add specimen
           <i class="glyphicon glyphicon-plus"></i>
@@ -125,15 +125,15 @@
       </div>
     </li>
     <li class="list-group-item"
-        ng-repeat="specimenDescription in vm.collectionEventType.specimenDescriptions">
+        ng-repeat="specimenDefinition in vm.collectionEventType.specimenDefinitions">
       <div class="row">
         <div class="col-md-10">
-          <collection-specimen-description-summary specimen-description="specimenDescription">
-          </collection-specimen-description-summary>
+          <collection-specimen-definition-summary specimen-definition="specimenDefinition">
+          </collection-specimen-definition-summary>
         </div>
         <div class="col-md-2">
-          <update-remove-buttons on-update="vm.editSpecimenDescription(specimenDescription)"
-                                 on-remove="vm.removeSpecimenDescription(specimenDescription)"
+          <update-remove-buttons on-update="vm.editSpecimenDefinition(specimenDefinition)"
+                                 on-remove="vm.removeSpecimenDefinition(specimenDefinition)"
                                  update-button-enabled="vm.study.isDisabled()"
                                  remove-button-enabled="vm.study.isDisabled()">
           </update-remove-buttons>

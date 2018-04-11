@@ -1,7 +1,7 @@
 /**
  * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
  *
- * @namespace admin.studies.components.collectionSpecimenDescriptionSummary
+ * @namespace admin.studies.components.collectionSpecimenDefinitionSummary
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -10,27 +10,27 @@
 /*
  * Controller for this component.
  */
-function CollectionSpecimenDescriptionSummaryController() {
+function CollectionSpecimenDefinitionSummaryController() {
 
 }
 
 /**
  * An AngularJS component that displays summary information for a {@link
- * domain.studies.CollectionSpecimenDescription CollectionSpecimenDescription}
+ * domain.studies.CollectionSpecimenDefinition CollectionSpecimenDefinition}
  *
- * @memberOf admin.studies.components.collectionSpecimenDescriptionSummary
+ * @memberOf admin.studies.components.collectionSpecimenDefinitionSummary
  *
- * @param {domain.studies.CollectionSpecimenDescription} specimenDescription - the *Specimen Description* to
+ * @param {domain.studies.CollectionSpecimenDefinition} specimenDefinition - the *Specimen Description* to
  * display information for.
  */
-const collectionSpecimenDescriptionSummaryComponent = {
-  template: require('./collectionSpecimenDescriptionSummary.html'),
-  controller: CollectionSpecimenDescriptionSummaryController,
+const collectionSpecimenDefinitionSummaryComponent = {
+  template: require('./collectionSpecimenDefinitionSummary.html'),
+  controller: CollectionSpecimenDefinitionSummaryController,
   controllerAs: 'vm',
   bindings: {
-    specimenDescription: '<'
+    specimenDefinition: '<'
   }
 };
 
-export default ngModule => ngModule.component('collectionSpecimenDescriptionSummary',
-                                             collectionSpecimenDescriptionSummaryComponent)
+export default ngModule => ngModule.component('collectionSpecimenDefinitionSummary',
+                                             collectionSpecimenDefinitionSummaryComponent)

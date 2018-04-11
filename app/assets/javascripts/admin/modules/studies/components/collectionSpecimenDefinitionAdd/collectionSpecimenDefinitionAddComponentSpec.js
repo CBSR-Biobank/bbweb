@@ -9,7 +9,7 @@
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ngModule from '../../index'
 
-describe('Component: collectionSpecimenDescriptionAdd', function() {
+describe('Component: collectionSpecimenDefinitionAdd', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -24,7 +24,7 @@ describe('Component: collectionSpecimenDescriptionAdd', function() {
                               'domainNotificationService',
                               'Study',
                               'CollectionEventType',
-                              'CollectionSpecimenDescription',
+                              'CollectionSpecimenDefinition',
                               'Factory');
 
       this.jsonCevenType       = this.Factory.collectionEventType();
@@ -37,16 +37,16 @@ describe('Component: collectionSpecimenDescriptionAdd', function() {
         ComponentTestSuiteMixin.createController.call(
           this,
           [
-            '<collection-specimen-description-add',
+            '<collection-specimen-definition-add',
             ' study="vm.study"',
             ' collection-event-type="vm.collectionEventType">',
-            '</collection-specimen-description-add>'
+            '</collection-specimen-definition-add>'
           ].join(''),
           {
             study: this.study,
             collectionEventType: this.collectionEventType
           },
-          'collectionSpecimenDescriptionAdd');
+          'collectionSpecimenDefinitionAdd');
       };
     });
   });
@@ -69,18 +69,18 @@ describe('Component: collectionSpecimenDescriptionAdd', function() {
   describe('on submit', function() {
 
     beforeEach(function() {
-      this.jsonSpec            = this.Factory.collectionSpecimenDescription();
-      this.specimenDescription = new this.CollectionSpecimenDescription(this.jsonSpec);
+      this.jsonSpec            = this.Factory.collectionSpecimenDefinition();
+      this.specimenDefinition = new this.CollectionSpecimenDefinition(this.jsonSpec);
     });
 
 
     it('can submit a specimen spec', function() {
-      spyOn(this.CollectionEventType.prototype, 'addSpecimenDescription')
+      spyOn(this.CollectionEventType.prototype, 'addSpecimenDefinition')
         .and.returnValue(this.$q.when(this.collectionEventType));
       spyOn(this.notificationsService, 'submitSuccess').and.callThrough();
 
       this.createController();
-      this.controller.submit(this.specimenDescription);
+      this.controller.submit(this.specimenDefinition);
       this.scope.$digest();
 
       expect(this.$state.go).toHaveBeenCalledWith(
@@ -90,10 +90,10 @@ describe('Component: collectionSpecimenDescriptionAdd', function() {
 
     it('displays an error when submit fails', function() {
       this.createController();
-      spyOn(this.CollectionEventType.prototype, 'addSpecimenDescription')
+      spyOn(this.CollectionEventType.prototype, 'addSpecimenDefinition')
         .and.returnValue(this.$q.reject('simulated error'));
       spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
-      this.controller.submit(this.specimenDescription);
+      this.controller.submit(this.specimenDefinition);
       this.scope.$digest();
 
       expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();

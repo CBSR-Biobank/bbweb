@@ -11,28 +11,28 @@ import org.biobank.domain.{DomainValidation, HasUniqueName, HasOptionalDescripti
 import play.api.libs.json._
 import scalaz.Scalaz._
 
-/** Identifies a unique [[SpecimenDescription]] in a Collection Event Type.
+/** Identifies a unique [[SpecimenDefinition]] in a Collection Event Type.
   *
   * Used as a value object to maintain associations to with entities in the system.
   */
-final case class SpecimenDescriptionId(id: String) extends IdentifiedValueObject[String]
+final case class SpecimenDefinitionId(id: String) extends IdentifiedValueObject[String]
 
-object SpecimenDescriptionId {
+object SpecimenDefinitionId {
 
   // Do not want JSON to create a sub object, we just want it to be converted
   // to a single string
-  implicit val specimenDescriptionIdFormat: Format[SpecimenDescriptionId] = new Format[SpecimenDescriptionId] {
+  implicit val specimenDefinitionIdFormat: Format[SpecimenDefinitionId] = new Format[SpecimenDefinitionId] {
 
-      override def writes(id: SpecimenDescriptionId): JsValue = JsString(id.id)
+      override def writes(id: SpecimenDefinitionId): JsValue = JsString(id.id)
 
-      override def reads(json: JsValue): JsResult[SpecimenDescriptionId] =
-        Reads.StringReads.reads(json).map(SpecimenDescriptionId.apply _)
+      override def reads(json: JsValue): JsResult[SpecimenDefinitionId] =
+        Reads.StringReads.reads(json).map(SpecimenDefinitionId.apply _)
     }
 
 }
 
-trait SpecimenDescription
-    extends IdentifiedValueObject[SpecimenDescriptionId]
+trait SpecimenDefinition
+    extends IdentifiedValueObject[SpecimenDefinitionId]
     with HasUniqueName
     with HasSlug
     with HasOptionalDescription {
@@ -58,7 +58,7 @@ trait SpecimenDescription
   val specimenType: SpecimenType
 
   override def toString: String =
-    s"""|SpecimenDescription:{
+    s"""|SpecimenDefinition:{
         |  id:                          $id,
         |  slug:                        $slug,
         |  name:                        $name,
@@ -104,7 +104,7 @@ trait SpecimenSpecValidations {
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  def validate(specimenDesc: SpecimenDescription): DomainValidation[Boolean] =  {
+  def validate(specimenDesc: SpecimenDefinition): DomainValidation[Boolean] =  {
     validate(specimenDesc.name, specimenDesc.description, specimenDesc.units)
   }
 
@@ -118,7 +118,7 @@ trait SpecimenSpecValidations {
  * collection of [[domain.participants. Specimen Specimens]]. A specimen description is defined either for
  * specimen types collected from participants, or for specimen types that are processed.
  */
-final case class CollectionSpecimenDescription(id:                          SpecimenDescriptionId,
+final case class CollectionSpecimenDefinition(id:                          SpecimenDefinitionId,
                                                slug:                        String,
                                                name:                        String,
                                                description:                 Option[String],
@@ -129,18 +129,18 @@ final case class CollectionSpecimenDescription(id:                          Spec
                                                specimenType:                SpecimenType,
                                                maxCount:                    Int,
                                                amount:                      BigDecimal)
-    extends SpecimenDescription
+    extends SpecimenDefinition
 
-object CollectionSpecimenDescription extends SpecimenSpecValidations {
+object CollectionSpecimenDefinition extends SpecimenSpecValidations {
   import org.biobank.CommonValidations._
 
-  implicit val collectionSpecimenSpecWrites: Format[CollectionSpecimenDescription] =
-    Json.format[CollectionSpecimenDescription]
+  implicit val collectionSpecimenSpecWrites: Format[CollectionSpecimenDefinition] =
+    Json.format[CollectionSpecimenDefinition]
 
   val hashidsSalt: String = "biobank-collection-event-types"
 
   /**
-   * Creates a [[domain.studies.CollectionSpecimenDescription.create CollectionSpecimenDescription]] with the
+   * Creates a [[domain.studies.CollectionSpecimenDefinition.create CollectionSpecimenDefinition]] with the
    * given properties.
    */
   def create(name:                        String,
@@ -152,7 +152,7 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
              specimenType:                SpecimenType,
              maxCount:                    Int,
              amount:                      BigDecimal)
-      : DomainValidation[CollectionSpecimenDescription] = {
+      : DomainValidation[CollectionSpecimenDefinition] = {
     validate(name,
              description,
              units,
@@ -162,8 +162,8 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
              specimenType,
              maxCount,
              amount).map { _ =>
-      val id = SpecimenDescriptionId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
-      CollectionSpecimenDescription(id                          = id,
+      val id = SpecimenDefinitionId(java.util.UUID.randomUUID.toString.replaceAll("-","").toUpperCase)
+      CollectionSpecimenDefinition(id                          = id,
                                     slug                        = Slug(name),
                                     name                        = name,
                                     description                 = description,
@@ -196,7 +196,7 @@ object CollectionSpecimenDescription extends SpecimenSpecValidations {
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  def validate(specimenDesc: CollectionSpecimenDescription): DomainValidation[Boolean] = {
+  def validate(specimenDesc: CollectionSpecimenDefinition): DomainValidation[Boolean] = {
     validate(specimenDesc.name,
              specimenDesc.description,
              specimenDesc.units,

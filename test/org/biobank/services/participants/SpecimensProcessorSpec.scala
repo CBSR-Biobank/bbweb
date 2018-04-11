@@ -77,7 +77,7 @@ class SpecimensProcessorSpec
 
       f.specimens.foreach { specimen =>
         val specimenInfo = SpecimenInfo(inventoryId           = specimen.inventoryId,
-                                        specimenDescriptionId = specimen.specimenDescriptionId.id,
+                                        specimenDefinitionId = specimen.specimenDefinitionId.id,
                                         timeCreated           = specimen.timeCreated,
                                         locationId            = specimen.originLocationId.id,
                                         amount                = specimen.amount)

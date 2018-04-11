@@ -229,7 +229,7 @@ class Factory {
             id:                   domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
             studyId:              study.id,
             description:          faker.lorem.sentences(4),
-            specimenDescriptions: [],
+            specimenDefinitions: [],
             annotationTypes:      [],
             recurring:            false
           },
@@ -431,14 +431,14 @@ class Factory {
   }
 
   specimen(options = {}) {
-    const ceventType = this.collectionEventType({ specimenDescriptions: [ this.collectionSpecimenDescription() ] }),
+    const ceventType = this.collectionEventType({ specimenDefinitions: [ this.collectionSpecimenDefinition() ] }),
           ctr = this.centre({ locations: [ this.location() ]}),
           inventoryId = domainEntityNameNext(ENTITY_NAME_SPECIMEN),
           defaults = {
             id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN),
             slug:                  slugify(inventoryId),
             inventoryId:           inventoryId,
-            specimenDescriptionId: null,
+            specimenDefinitionId: null,
             originLocationInfo:    null,
             locationInfo:          null,
             timeCreated:           moment(faker.date.recent(10)).format(),
@@ -448,8 +448,8 @@ class Factory {
           },
           validKeys = this.commonFieldNames.concat(Object.keys(defaults))
 
-    if (ceventType.specimenDescriptions && (ceventType.specimenDescriptions.length > 0)) {
-      defaults.specimenDescriptionId = ceventType.specimenDescriptions[0].id;
+    if (ceventType.specimenDefinitions && (ceventType.specimenDefinitions.length > 0)) {
+      defaults.specimenDefinitionId = ceventType.specimenDefinitions[0].id;
     }
 
     if (ctr.locations && (ctr.locations.length > 0)) {
@@ -599,7 +599,7 @@ class Factory {
     return annotationTypes;
   }
 
-  collectionSpecimenDescription(options = {}) {
+  collectionSpecimenDefinition(options = {}) {
     var defaults = Object.assign({ id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
                                    description:                 faker.lorem.sentences(4),
                                    units:                       'mL',

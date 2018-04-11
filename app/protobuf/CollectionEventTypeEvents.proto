@@ -41,7 +41,7 @@ message CollectionEventTypeEvent {
     optional AnnotationType annotationType = 2;
   };
 
-  message SpecimenDescription {
+  message SpecimenDefinition {
     optional string id                          = 1;
     optional string name                        = 2;
     optional string description                 = 3;
@@ -54,17 +54,17 @@ message CollectionEventTypeEvent {
     optional double amount                      = 10;
   }
 
-  message SpecimenDescriptionAdded {
+  message SpecimenDefinitionAdded {
     optional int64               version             = 1;
-    optional SpecimenDescription specimenDescription = 2;
+    optional SpecimenDefinition specimenDefinition = 2;
   }
 
-  message SpecimenDescriptionUpdated {
+  message SpecimenDefinitionUpdated {
     optional int64               version             = 1;
-    optional SpecimenDescription specimenDescription = 2;
+    optional SpecimenDefinition specimenDefinition = 2;
   }
 
-  message SpecimenDescriptionRemoved {
+  message SpecimenDefinitionRemoved {
     optional int64  version = 1;
     optional string id      = 2;
   }
@@ -83,8 +83,8 @@ message CollectionEventTypeEvent {
     AnnotationTypeAdded         annotationTypeAdded        = 10;
     AnnotationTypeUpdated       annotationTypeUpdated      = 11;
     AnnotationTypeRemoved       annotationTypeRemoved      = 12;
-    SpecimenDescriptionAdded    specimenDescriptionAdded   = 13;
-    SpecimenDescriptionUpdated  specimenDescriptionUpdated = 14;
-    SpecimenDescriptionRemoved  specimenDescriptionRemoved = 15;
+    SpecimenDefinitionAdded    specimenDefinitionAdded   = 13;
+    SpecimenDefinitionUpdated  specimenDefinitionUpdated = 14;
+    SpecimenDefinitionRemoved  specimenDefinitionRemoved = 15;
   }
 }

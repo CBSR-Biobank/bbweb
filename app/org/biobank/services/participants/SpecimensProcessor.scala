@@ -10,7 +10,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.domain.LocationId
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.ProcessingEventInputSpecimenRepository
-import org.biobank.domain.studies.{CollectionEventType, CollectionEventTypeRepository, SpecimenDescriptionId}
+import org.biobank.domain.studies.{CollectionEventType, CollectionEventTypeRepository, SpecimenDefinitionId}
 import org.biobank.infrastructure.commands.SpecimenCommands._
 import org.biobank.infrastructure.events.SpecimenEvents._
 import org.biobank.services._
@@ -211,7 +211,7 @@ class SpecimensProcessor @Inject() (
               id                    = SpecimenId(info.getId),
               version               = 0L,
               inventoryId           = info.getInventoryId,
-              specimenDescriptionId = SpecimenDescriptionId(info.getSpecimenDescriptionId),
+              specimenDefinitionId = SpecimenDefinitionId(info.getSpecimenDefinitionId),
               originLocationId      = LocationId(info.getLocationId),
               locationId            = LocationId(info.getLocationId),
               containerId           = None,
@@ -289,8 +289,8 @@ class SpecimensProcessor @Inject() (
   private def validateSpecimenInfo(specimenData: List[SpecimenInfo], ceventType: CollectionEventType)
       : ServiceValidation[Boolean] = {
 
-    val cmdSpcDescIds = specimenData.map(s => SpecimenDescriptionId(s.specimenDescriptionId)).toSet
-    val ceventDescId  = ceventType.specimenDescriptions.map(s => s.id).toSet
+    val cmdSpcDescIds = specimenData.map(s => SpecimenDefinitionId(s.specimenDefinitionId)).toSet
+    val ceventDescId  = ceventType.specimenDefinitions.map(s => s.id).toSet
     val notBelonging  = cmdSpcDescIds.diff(ceventDescId)
 
     if (notBelonging.isEmpty) true.successNel[String]

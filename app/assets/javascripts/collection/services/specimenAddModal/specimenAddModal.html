@@ -6,23 +6,23 @@
 
     <!-- SPECIMEN Description -->
     <div class="form-group row"
-         ng-class="{ 'has-error' : form.specimenDescription.$invalid && !form.specimenDescription.$pristine }">
+         ng-class="{ 'has-error' : form.specimenDefinition.$invalid && !form.specimenDefinition.$pristine }">
       <label class="col-md-3 form-control-label" translate>Specimen type</label>
       <div class="col-md-9">
         <select class="form-control"
-                id="specimenDescription"
-                name="specimenDescription"
-                ng-model="vm.selectedSpecimenDescription"
-                ng-options="specimenDescription as specimenDescription.name for specimenDescription in vm.specimenDescriptions"
-                ng-change="vm.specimenDescriptionChanged()"
+                id="specimenDefinition"
+                name="specimenDefinition"
+                ng-model="vm.selectedSpecimenDefinition"
+                ng-options="specimenDefinition as specimenDefinition.name for specimenDefinition in vm.specimenDefinitions"
+                ng-change="vm.specimenDefinitionChanged()"
                 focus-me="true"
                 required>
           <option value="" translate>-- make a selection --</option>
         </select>
       </div>
       <div class="col-sm-offset-3 col-sm-9"
-           ng-messages="form.specimenDescription.$error"
-           ng-if="form.specimenDescription.$dirty">
+           ng-messages="form.specimenDefinition.$error"
+           ng-if="form.specimenDefinition.$dirty">
         <div ng-message="required" class="help-block" translate>A specimen type must be selected</div>
       </div>
     </div>
@@ -68,7 +68,7 @@
                  ng-model="vm.amount"
                  positive-float />
           <span class="input-group-addon">
-            {{vm.selectedSpecimenDescription ? vm.selectedSpecimenDescription.units : ''}}
+            {{vm.selectedSpecimenDefinition ? vm.selectedSpecimenDefinition.units : ''}}
           </span>
         </div>
       </div>

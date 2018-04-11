@@ -34,9 +34,9 @@ function SpecimenFactory($q,
     properties: {
       'slug':                     { 'type': 'string' },
       'inventoryId':              { 'type': 'string' },
-      'specimenDescriptionId':    { 'type': 'string' },
-      'specimenDescriptionName':  { 'type': [ 'string', 'null' ] },
-      'specimenDescriptionUnits': { 'type': [ 'string', 'null' ] },
+      'specimenDefinitionId':    { 'type': 'string' },
+      'specimenDefinitionName':  { 'type': [ 'string', 'null' ] },
+      'specimenDefinitionUnits': { 'type': [ 'string', 'null' ] },
       'originLocationInfo':       {
         'type':  'object',
         'items': { '$ref': 'CentreLocationInfo' }
@@ -56,7 +56,7 @@ function SpecimenFactory($q,
     required: [
       'slug',
       'inventoryId',
-      'specimenDescriptionId',
+      'specimenDefinitionId',
       'state',
       'originLocationInfo',
       'locationInfo',
@@ -81,10 +81,10 @@ function SpecimenFactory($q,
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      *        this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {domain.studies.CollectionSpecimenDescription} [specimenDescription] - The specimen spec from
+     * @param {domain.studies.CollectionSpecimenDefinition} [specimenDefinition] - The specimen spec from
      *        the collection event type this specimen represents. An Undefined value is also valid.
      */
-    constructor(obj, specimenDescription) {
+    constructor(obj, specimenDefinition) {
       /**
        * The unique inventory ID for this specimen.
        *
@@ -94,10 +94,10 @@ function SpecimenFactory($q,
        */
 
       /**
-       * The ID corresponding to the the {@link domain.studies.CollectionSpecimenDescription
-       * SpecimenDescription} for this specimen.
+       * The ID corresponding to the the {@link domain.studies.CollectionSpecimenDefinition
+       * SpecimenDefinition} for this specimen.
        *
-       * @name domain.participants.Specimen#specimenDescriptionId
+       * @name domain.participants.Specimen#specimenDefinitionId
        * @type {string}
        * @default null
        */
@@ -136,7 +136,7 @@ function SpecimenFactory($q,
 
       /**
        * The amount this specimen contains, in units specified in {@link
-       * domain.studies.CollectionSpecimenDescription#units CollectionSpecimenDescription#units}.
+       * domain.studies.CollectionSpecimenDefinition#units CollectionSpecimenDefinition#units}.
        *
        * @name domain.participants.Specimen#amount
        * @type {number}
@@ -151,7 +151,7 @@ function SpecimenFactory($q,
       super(Object.assign(
               {
                 inventoryId:           null,
-                specimenDescriptionId: null,
+                specimenDefinitionId: null,
                 originLocationInfo:    null,
                 locationInfo:          null,
                 timeCreated:           null,
@@ -160,8 +160,8 @@ function SpecimenFactory($q,
               },
               obj));
 
-      if (specimenDescription) {
-        this.setSpecimenDescription(specimenDescription);
+      if (specimenDefinition) {
+        this.setSpecimenDefinition(specimenDefinition);
       }
     }
 
@@ -187,7 +187,7 @@ function SpecimenFactory($q,
      * @param {object} obj={} - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
      *
-     * @param {CollectionSpecimenDescription} [specimenDescription] - The specimen spec from the collection
+     * @param {CollectionSpecimenDefinition} [specimenDefinition] - The specimen spec from the collection
      * event type this specimen represents.
      *
      * @returns {domain.participants.Specimen} A new specimen.
@@ -195,14 +195,14 @@ function SpecimenFactory($q,
      * @see {@link domain.participants.Specimen.asyncCreate asyncCreate()} when you need to create
      * a specimen within asynchronous code.
      */
-    static create(obj, specimenDescription) {
+    static create(obj, specimenDefinition) {
       var validation = Specimen.isValid(obj);
       if (!validation.valid) {
         $log.error('invalid object from server: ' + validation.message);
         throw new DomainError('invalid object from server: ' + validation.message);
       }
 
-      return new Specimen(obj, specimenDescription);
+      return new Specimen(obj, specimenDefinition);
     }
 
     /**
@@ -301,7 +301,7 @@ function SpecimenFactory($q,
       var json = { collectionEventId: ceventId };
 
       json.specimenData = specimens.map((specimen) => {
-        var result = _.pick(specimen, 'inventoryId', 'specimenDescriptionId', 'timeCreated', 'amount');
+        var result = _.pick(specimen, 'inventoryId', 'specimenDefinitionId', 'timeCreated', 'amount');
         result.locationId = specimen.locationInfo.locationId;
         return result;
       });
@@ -311,14 +311,14 @@ function SpecimenFactory($q,
     /**
      * Sets the specimen spec ID for this Specimen.
      *
-     * @param {domain.studies.CollectionSpecimenDescription} specimenDescription The specimen specifications
+     * @param {domain.studies.CollectionSpecimenDefinition} specimenDefinition The specimen specifications
      * associated with this specimen.
      *
      * @returns {undefined}
      */
-    setSpecimenDescription(specimenDescription) {
-      this.specimenDescriptionId = specimenDescription.id;
-      this.specimenDescription = specimenDescription;
+    setSpecimenDefinition(specimenDefinition) {
+      this.specimenDefinitionId = specimenDefinition.id;
+      this.specimenDefinition = specimenDefinition;
     }
 
     /**
@@ -327,10 +327,10 @@ function SpecimenFactory($q,
      * @returns {string}
      */
     name() {
-      if (_.isUndefined(this.specimenDescription)) {
+      if (_.isUndefined(this.specimenDefinition)) {
         throw new DomainError('specimen spec not assigned');
       }
-      return this.specimenDescription.name;
+      return this.specimenDefinition.name;
     }
 
     /**
@@ -339,10 +339,10 @@ function SpecimenFactory($q,
      * @returns {number}
      */
     defaultAmount() {
-      if (_.isUndefined(this.specimenDescription)) {
+      if (_.isUndefined(this.specimenDefinition)) {
         throw new DomainError('specimen spec not assigned');
       }
-      return this.specimenDescription.amount;
+      return this.specimenDefinition.amount;
     }
 
     /**

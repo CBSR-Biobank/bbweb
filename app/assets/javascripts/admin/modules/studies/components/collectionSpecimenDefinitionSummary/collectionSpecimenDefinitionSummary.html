@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-md-12">
     <strong>
-      {{vm.specimenDescription.name}}
+      {{vm.specimenDefinition.name}}
     </strong>
   </div>
 </div>
@@ -13,7 +13,7 @@
   </div>
   <div class="col-md-3">
     <small class="text-muted">
-      <strong>{{ vm.specimenDescription.anatomicalSourceType }}</strong>
+      <strong>{{ vm.specimenDefinition.anatomicalSourceType }}</strong>
     </small>
   </div>
   <div class="col-md-3">
@@ -23,7 +23,7 @@
   </div>
   <div class="col-md-3">
     <small class="text-muted">
-      <strong>{{ vm.specimenDescription.specimenType }}</strong>
+      <strong>{{ vm.specimenDefinition.specimenType }}</strong>
     </small>
   </div>
 </div>
@@ -35,7 +35,7 @@
   </div>
   <div class="col-md-9">
     <small class="text-muted">
-      <strong>{{ vm.specimenDescription.preservationType }}: {{ vm.specimenDescription.preservationTemperature }}</strong>
+      <strong>{{ vm.specimenDefinition.preservationType }}: {{ vm.specimenDefinition.preservationTemperature }}</strong>
     </small>
   </div>
 </div>
@@ -47,7 +47,7 @@
   </div>
   <div class="col-md-3">
     <small class="text-info">
-      <strong>{{ vm.specimenDescription.amount }} {{ vm.specimenDescription.units }}</strong>
+      <strong>{{ vm.specimenDefinition.amount }} {{ vm.specimenDefinition.units }}</strong>
     </small>
   </div>
   <div class="col-md-3">
@@ -57,12 +57,12 @@
   </div>
   <div class="col-md-3">
     <small class="text-info">
-      <strong>{{ vm.specimenDescription.maxCount }}</strong>
+      <strong>{{ vm.specimenDefinition.maxCount }}</strong>
     </small>
   </div>
 </div>
 <div class="row">
   <div class="col-md-12">
-    <p>{{vm.specimenDescription.description | truncate:100}}</p>
+    <p>{{vm.specimenDefinition.description | truncate:100}}</p>
   </div>
 </div>

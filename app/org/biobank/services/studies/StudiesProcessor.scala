@@ -35,7 +35,6 @@ object StudiesProcessor {
  */
 class StudiesProcessor @Inject() (
   @Named("processingType")      val processingTypeProcessor:   ActorRef,
-  @Named("specimenLinkType")    val specimenLinkTypeProcessor: ActorRef,
   val studyRepository:                                         StudyRepository,
   val processingTypeRepository:                                ProcessingTypeRepository,
   val specimenGroupRepository:                                 SpecimenGroupRepository,
@@ -177,26 +176,9 @@ class StudiesProcessor @Inject() (
             case study: DisabledStudy => {
               val childActor = cmd match {
                   case _: ProcessingTypeCommand      => processingTypeProcessor
-                  case _: SpecimenLinkTypeCommand    => specimenLinkTypeProcessor
-
                 }
               childActor forward cmd
             }
-            case study =>
-              context.sender ! InvalidStatus(s"study not disabled: ${study.id}").failureNel[StudyEvent]
-          }
-        )
-
-      case cmd: SpecimenLinkTypeCommand =>
-        val validation = for {
-            processingType <- processingTypeRepository.getByKey(ProcessingTypeId(cmd.processingTypeId))
-            study <- studyRepository.getByKey(processingType.studyId)
-          } yield study
-
-        validation.fold(
-          err => context.sender ! err.failureNel[StudyEvent],
-          study => study match {
-            case study: DisabledStudy => specimenLinkTypeProcessor forward cmd
             case study =>
               context.sender ! InvalidStatus(s"study not disabled: ${study.id}").failureNel[StudyEvent]
           }
@@ -308,7 +290,7 @@ class StudiesProcessor @Inject() (
 
     if (collectionEventTypes.isEmpty) {
       EntityCriteriaError("no collection event types").failureNel[StudyEvent]
-    } else if (collectionEventTypes.filter { cet => cet.hasSpecimenDescriptions }.isEmpty) {
+    } else if (collectionEventTypes.filter { cet => cet.hasSpecimenDefinitions }.isEmpty) {
       EntityCriteriaError("no collection specimen specs").failureNel[StudyEvent]
     } else {
       study.enable.map { _ =>

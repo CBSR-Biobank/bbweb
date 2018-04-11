@@ -32,7 +32,7 @@ trait CollectionEventTypeValidations {
   *
   * A participant visit is a record of when specimens were collected from a
   * [[domain.participants.Participant]] at a collection [[domain.centres.Centre]]. Each collection event type
-  * is assigned one or more [[domain.studies.CollectionSpecimenDescription CollectionSpecimenDescriptions]] to
+  * is assigned one or more [[domain.studies.CollectionSpecimenDefinition CollectionSpecimenDefinitions]] to
   * specify the type of [[domain.participants.Specimen Specimens]] that are collected.
   *
   * A study must have at least one collection event type defined in order to record collected specimens.
@@ -55,7 +55,7 @@ final case class CollectionEventType(studyId:              StudyId,
                                      name:                 String,
                                      description:          Option[String],
                                      recurring:            Boolean,
-                                     specimenDescriptions: Set[CollectionSpecimenDescription],
+                                     specimenDefinitions: Set[CollectionSpecimenDefinition],
                                      annotationTypes:      Set[AnnotationType])
     extends ConcurrencySafeEntity[CollectionEventTypeId]
     with HasName
@@ -111,41 +111,41 @@ final case class CollectionEventType(studyId:              StudyId,
   // replaces a previous one with the same unique id if it exists
   //
   // fails if there is another with the same name
-  def withSpecimenDescription(specimenDesc: CollectionSpecimenDescription)
+  def withSpecimenDefinition(specimenDesc: CollectionSpecimenDefinition)
       : DomainValidation[CollectionEventType] = {
     for {
       nameNotUsed <- {
-        specimenDescriptions
+        specimenDefinitions
           .find { x => (x.name == specimenDesc.name) && (x.id != specimenDesc.id) }
           .fold
           { true.successNel[DomainError] }
           { _ => DomainError(s"specimen spec name already used: ${specimenDesc.name}").failureNel[Boolean] }
       }
-      specValid <- CollectionSpecimenDescription.validate(specimenDesc)
-    } yield copy(specimenDescriptions = specimenDescriptions - specimenDesc + specimenDesc,
+      specValid <- CollectionSpecimenDefinition.validate(specimenDesc)
+    } yield copy(specimenDefinitions = specimenDefinitions - specimenDesc + specimenDesc,
                  version       = version + 1,
                  timeModified  = Some(OffsetDateTime.now))
   }
 
-  def removeSpecimenDescription(specimenDescId: SpecimenDescriptionId)
+  def removeSpecimenDefinition(specimenDescId: SpecimenDefinitionId)
       : DomainValidation[CollectionEventType] = {
-    specimenDescriptions
+    specimenDefinitions
       .find { x => x.id == specimenDescId }
       .fold
       { DomainError(s"specimen spec does not exist: $specimenDescId").failureNel[CollectionEventType] }
       { specimenDesc =>
-        copy(specimenDescriptions = specimenDescriptions - specimenDesc,
+        copy(specimenDefinitions = specimenDefinitions - specimenDesc,
              version       = version + 1,
              timeModified  = Some(OffsetDateTime.now)).successNel[DomainError]
       }
   }
 
-  def hasSpecimenDescriptions(): Boolean = {
-    ! specimenDescriptions.isEmpty
+  def hasSpecimenDefinitions(): Boolean = {
+    ! specimenDefinitions.isEmpty
   }
 
-  def specimenDesc(id: SpecimenDescriptionId): DomainValidation[CollectionSpecimenDescription] = {
-    specimenDescriptions.find(_.id == id).toSuccessNel("specimen description not found")
+  def specimenDesc(id: SpecimenDefinitionId): DomainValidation[CollectionSpecimenDefinition] = {
+    specimenDefinitions.find(_.id == id).toSuccessNel("specimen description not found")
   }
 
   override def toString: String =
@@ -159,7 +159,7 @@ final case class CollectionEventType(studyId:              StudyId,
         |  name:                 $name,
         |  description:          $description,
         |  recurring:            $recurring,
-        |  specimenDescriptions: { $specimenDescriptions },
+        |  specimenDefinitions: { $specimenDefinitions },
         |  annotationTypes:      { $annotationTypes }
         |}""".stripMargin
 
@@ -177,7 +177,7 @@ object CollectionEventType extends CollectionEventTypeValidations {
              name:                 String,
              description:          Option[String],
              recurring:            Boolean,
-             specimenDescriptions: Set[CollectionSpecimenDescription],
+             specimenDefinitions: Set[CollectionSpecimenDefinition],
              annotationTypes:      Set[AnnotationType])
       : DomainValidation[CollectionEventType] = {
     (validateId(studyId, StudyIdRequired) |@|
@@ -185,7 +185,7 @@ object CollectionEventType extends CollectionEventTypeValidations {
        validateVersion(version) |@|
        validateNonEmptyString(name, NameRequired) |@|
        validateNonEmptyStringOption(description, InvalidDescription) |@|
-       specimenDescriptions.toList.traverseU(CollectionSpecimenDescription.validate) |@|
+       specimenDefinitions.toList.traverseU(CollectionSpecimenDefinition.validate) |@|
        annotationTypes.toList.traverseU(AnnotationType.validate)) { case _ =>
         CollectionEventType(studyId              = studyId,
                             id                   = id,
@@ -196,7 +196,7 @@ object CollectionEventType extends CollectionEventTypeValidations {
                             name                 = name,
                             description          = description,
                             recurring            = recurring,
-                            specimenDescriptions = specimenDescriptions,
+                            specimenDefinitions = specimenDefinitions,
                             annotationTypes      = annotationTypes)
     }
   }

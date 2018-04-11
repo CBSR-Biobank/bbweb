@@ -21,11 +21,11 @@ class CollectionEventTypeServiceSpec
   import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 
   class UsersCeventTypeFixture extends UsersWithStudyAccessFixture {
-    val specimenDesc = factory.createCollectionSpecimenDescription
+    val specimenDesc = factory.createCollectionSpecimenDefinition
     val annotationType = factory.createAnnotationType
     val ceventType = factory.createCollectionEventType
       .copy(studyId              = study.id,
-            specimenDescriptions = Set(specimenDesc),
+            specimenDefinitions = Set(specimenDesc),
             annotationTypes      = Set(annotationType))
     collectionEventTypeRepository.put(ceventType)
   }
@@ -47,7 +47,7 @@ class CollectionEventTypeServiceSpec
   private def updateCommandsTable(sessionUserId:  UserId,
                                   study:          Study,
                                   ceventType:     CollectionEventType,
-                                  specimenDesc:   CollectionSpecimenDescription,
+                                  specimenDesc:   CollectionSpecimenDefinition,
                                   annotationType: AnnotationType) = {
     Table("collection event type update commands",
           UpdateCollectionEventTypeNameCmd(
@@ -90,7 +90,7 @@ class CollectionEventTypeServiceSpec
             expectedVersion  = ceventType.version,
             annotationTypeId = annotationType.id.id
           ),
-          AddCollectionSpecimenDescriptionCmd(
+          AddCollectionSpecimenDefinitionCmd(
             sessionUserId               = sessionUserId.id,
             studyId                     = study.id.id,
             id                          = ceventType.id.id,
@@ -105,12 +105,12 @@ class CollectionEventTypeServiceSpec
             maxCount                    = specimenDesc.maxCount,
             amount                      = specimenDesc.amount
           ),
-          RemoveCollectionSpecimenDescriptionCmd(
+          RemoveCollectionSpecimenDefinitionCmd(
             sessionUserId         = sessionUserId.id,
             studyId               = study.id.id,
             id                    = ceventType.id.id,
             expectedVersion       = ceventType.version,
-            specimenDescriptionId = specimenDesc.id.id
+            specimenDefinitionId = specimenDesc.id.id
           )
     )
   }
@@ -247,8 +247,8 @@ class CollectionEventTypeServiceSpec
             val ceventType = cmd match {
                 case _: CollectionEventTypeAddAnnotationTypeCmd =>
                   f.ceventType.copy(annotationTypes = Set.empty[AnnotationType])
-                case _: AddCollectionSpecimenDescriptionCmd =>
-                  f.ceventType.copy(specimenDescriptions = Set.empty[CollectionSpecimenDescription])
+                case _: AddCollectionSpecimenDefinitionCmd =>
+                  f.ceventType.copy(specimenDefinitions = Set.empty[CollectionSpecimenDefinition])
                 case _ =>
                   f.ceventType
               }

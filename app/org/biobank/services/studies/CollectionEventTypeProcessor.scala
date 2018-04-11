@@ -66,9 +66,9 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
         case et: EventType.AnnotationTypeAdded        => applyAnnotationTypeAddedEvent(event)
         case et: EventType.AnnotationTypeUpdated      => applyAnnotationTypeUpdatedEvent(event)
         case et: EventType.AnnotationTypeRemoved      => applyAnnotationTypeRemovedEvent(event)
-        case et: EventType.SpecimenDescriptionAdded   => applySpecimenDescriptionAddedEvent(event)
-        case et: EventType.SpecimenDescriptionUpdated => applySpecimenDescriptionUpdatedEvent(event)
-        case et: EventType.SpecimenDescriptionRemoved => applySpecimenDescriptionRemovedEvent(event)
+        case et: EventType.SpecimenDefinitionAdded   => applySpecimenDefinitionAddedEvent(event)
+        case et: EventType.SpecimenDefinitionUpdated => applySpecimenDefinitionUpdatedEvent(event)
+        case et: EventType.SpecimenDefinitionRemoved => applySpecimenDefinitionRemovedEvent(event)
 
         case event => log.error(s"event not handled: $event")
       }
@@ -114,14 +114,14 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     case cmd: RemoveCollectionEventTypeAnnotationTypeCmd =>
       processUpdateCmd(cmd, removeAnnotationTypeCmdToEvent, applyAnnotationTypeRemovedEvent)
 
-    case cmd: AddCollectionSpecimenDescriptionCmd =>
-      processUpdateCmd(cmd, addSepcimenSpecCmdToEvent, applySpecimenDescriptionAddedEvent)
+    case cmd: AddCollectionSpecimenDefinitionCmd =>
+      processUpdateCmd(cmd, addSepcimenSpecCmdToEvent, applySpecimenDefinitionAddedEvent)
 
-    case cmd: UpdateCollectionSpecimenDescriptionCmd =>
-      processUpdateCmd(cmd, updateSepcimenSpecCmdToEvent, applySpecimenDescriptionUpdatedEvent)
+    case cmd: UpdateCollectionSpecimenDefinitionCmd =>
+      processUpdateCmd(cmd, updateSepcimenSpecCmdToEvent, applySpecimenDefinitionUpdatedEvent)
 
-    case cmd: RemoveCollectionSpecimenDescriptionCmd =>
-      processUpdateCmd(cmd, removeSpecimenDescriptionCmdToEvent, applySpecimenDescriptionRemovedEvent)
+    case cmd: RemoveCollectionSpecimenDefinitionCmd =>
+      processUpdateCmd(cmd, removeSpecimenDefinitionCmdToEvent, applySpecimenDefinitionRemovedEvent)
 
     case "snap" =>
       mySaveSnapshot
@@ -151,7 +151,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   }
 
   private def applySnapshot(filename: String): Unit = {
-    log.debug(s"snapshot recovery file: $filename")
+    log.info(s"snapshot recovery file: $filename")
     val fileContents = snapshotWriter.load(filename);
     Json.parse(fileContents).validate[SnapshotState].fold(
       errors => log.error(s"could not apply snapshot: $filename: $errors"),
@@ -293,11 +293,11 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     }
   }
 
-  private def addSepcimenSpecCmdToEvent(cmd: AddCollectionSpecimenDescriptionCmd,
+  private def addSepcimenSpecCmdToEvent(cmd: AddCollectionSpecimenDefinitionCmd,
                                         cet: CollectionEventType)
       : ServiceValidation[CollectionEventTypeEvent] = {
     for {
-      specimenDesc <- CollectionSpecimenDescription.create(cmd.name,
+      specimenDesc <- CollectionSpecimenDefinition.create(cmd.name,
                                                           cmd.description,
                                                           cmd.units,
                                                           cmd.anatomicalSourceType,
@@ -306,21 +306,21 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                                           cmd.specimenType,
                                                           cmd.maxCount,
                                                           cmd.amount)
-      updatedCet <- cet.withSpecimenDescription(specimenDesc)
+      updatedCet <- cet.withSpecimenDefinition(specimenDesc)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                      := cet.studyId.id,
       _.sessionUserId                                := cmd.sessionUserId,
       _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-      _.specimenDescriptionAdded.version             := cmd.expectedVersion,
-      _.specimenDescriptionAdded.specimenDescription := EventUtils.specimenDescriptionToEvent(specimenDesc))
+      _.specimenDefinitionAdded.version             := cmd.expectedVersion,
+      _.specimenDefinitionAdded.specimenDefinition := EventUtils.specimenDefinitionToEvent(specimenDesc))
   }
 
-  private def updateSepcimenSpecCmdToEvent(cmd: UpdateCollectionSpecimenDescriptionCmd,
+  private def updateSepcimenSpecCmdToEvent(cmd: UpdateCollectionSpecimenDefinitionCmd,
                                            cet: CollectionEventType)
       : ServiceValidation[CollectionEventTypeEvent] = {
     for {
       specimenDesc <- {
-        CollectionSpecimenDescription(SpecimenDescriptionId(cmd.specimenDescriptionId),
+        CollectionSpecimenDefinition(SpecimenDefinitionId(cmd.specimenDefinitionId),
                                      Slug(cmd.name),
                                      cmd.name,
                                      cmd.description,
@@ -332,25 +332,25 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                      cmd.maxCount,
                                      cmd.amount).successNel[String]
       }
-      updatedCet <- cet.withSpecimenDescription(specimenDesc)
+      updatedCet <- cet.withSpecimenDefinition(specimenDesc)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                      := cet.studyId.id,
       _.sessionUserId                                := cmd.sessionUserId,
       _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-      _.specimenDescriptionUpdated.version             := cmd.expectedVersion,
-      _.specimenDescriptionUpdated.specimenDescription := EventUtils.specimenDescriptionToEvent(specimenDesc))
+      _.specimenDefinitionUpdated.version             := cmd.expectedVersion,
+      _.specimenDefinitionUpdated.specimenDefinition := EventUtils.specimenDefinitionToEvent(specimenDesc))
   }
 
-  private def removeSpecimenDescriptionCmdToEvent(cmd: RemoveCollectionSpecimenDescriptionCmd,
+  private def removeSpecimenDefinitionCmdToEvent(cmd: RemoveCollectionSpecimenDefinitionCmd,
                                                  cet: CollectionEventType)
       : ServiceValidation[CollectionEventTypeEvent] = {
-    cet.removeSpecimenDescription(SpecimenDescriptionId(cmd.specimenDescriptionId)) map { c =>
+    cet.removeSpecimenDefinition(SpecimenDefinitionId(cmd.specimenDefinitionId)) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
         _.studyId                             := cet.studyId.id,
         _.sessionUserId                       := cmd.sessionUserId,
         _.time                                := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-        _.specimenDescriptionRemoved.version  := cmd.expectedVersion,
-        _.specimenDescriptionRemoved.id       := cmd.specimenDescriptionId)
+        _.specimenDefinitionRemoved.version  := cmd.expectedVersion,
+        _.specimenDefinitionRemoved.id       := cmd.specimenDefinitionId)
     }
   }
 
@@ -407,7 +407,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
           name                 = addedEvent.getName,
           description          = addedEvent.description,
           recurring            = addedEvent.getRecurring,
-          specimenDescriptions = Set.empty,
+          specimenDefinitions = Set.empty,
           annotationTypes      = Set.empty)
 
       if (v.isFailure) {
@@ -505,32 +505,32 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     }
   }
 
-  private def applySpecimenDescriptionAddedEvent(event: CollectionEventTypeEvent): Unit = {
+  private def applySpecimenDefinitionAddedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
-                           event.eventType.isSpecimenDescriptionAdded,
-                           event.getSpecimenDescriptionAdded.getVersion) { (cet, eventTime) =>
+                           event.eventType.isSpecimenDefinitionAdded,
+                           event.getSpecimenDefinitionAdded.getVersion) { (cet, eventTime) =>
       storeIfValid(
-        cet.withSpecimenDescription(EventUtils.specimenDescriptionFromEvent(event.getSpecimenDescriptionAdded.getSpecimenDescription)),
+        cet.withSpecimenDefinition(EventUtils.specimenDefinitionFromEvent(event.getSpecimenDefinitionAdded.getSpecimenDefinition)),
         eventTime)
     }
   }
 
-  private def applySpecimenDescriptionUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
+  private def applySpecimenDefinitionUpdatedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
-                           event.eventType.isSpecimenDescriptionUpdated,
-                           event.getSpecimenDescriptionUpdated.getVersion) { (cet, eventTime) =>
+                           event.eventType.isSpecimenDefinitionUpdated,
+                           event.getSpecimenDefinitionUpdated.getVersion) { (cet, eventTime) =>
       storeIfValid(
-        cet.withSpecimenDescription(EventUtils.specimenDescriptionFromEvent(event.getSpecimenDescriptionUpdated.getSpecimenDescription)),
+        cet.withSpecimenDefinition(EventUtils.specimenDefinitionFromEvent(event.getSpecimenDefinitionUpdated.getSpecimenDefinition)),
         eventTime)
     }
   }
 
-  private def applySpecimenDescriptionRemovedEvent(event: CollectionEventTypeEvent): Unit = {
+  private def applySpecimenDefinitionRemovedEvent(event: CollectionEventTypeEvent): Unit = {
     onValidEventAndVersion(event,
-                           event.eventType.isSpecimenDescriptionRemoved,
-                           event.getSpecimenDescriptionRemoved.getVersion) { (cet, eventTime) =>
-      val id = SpecimenDescriptionId(event.getSpecimenDescriptionRemoved.getId)
-      storeIfValid(cet.removeSpecimenDescription(id), eventTime)
+                           event.eventType.isSpecimenDefinitionRemoved,
+                           event.getSpecimenDefinitionRemoved.getVersion) { (cet, eventTime) =>
+      val id = SpecimenDefinitionId(event.getSpecimenDefinitionRemoved.getId)
+      storeIfValid(cet.removeSpecimenDefinition(id), eventTime)
     }
   }
 

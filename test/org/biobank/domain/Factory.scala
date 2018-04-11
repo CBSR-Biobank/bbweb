@@ -173,34 +173,13 @@ class Factory {
     retiredStudy
   }
 
-  def createSpecimenGroup(): SpecimenGroup = {
-    val disabledStudy = defaultDisabledStudy
+  def createCollectionSpecimenDefinition(): CollectionSpecimenDefinition = {
     val name = faker.Lorem.sentence(3)
-    val specimenGroup = SpecimenGroup(
-        id                          = SpecimenGroupId(nextIdentityAsString[SpecimenGroup]),
-        studyId                     = disabledStudy.id,
-        version                     = 0L,
-        timeAdded                   = OffsetDateTime.now,
-        timeModified                = None,
-        slug                        = Slug(name),
-        name                        = name,
-        description                 = Some(nameGenerator.next[SpecimenGroup]),
-        units                       = nameGenerator.next[String],
-        anatomicalSourceType        = AnatomicalSourceType.Blood,
-        preservationType            = PreservationType.FreshSpecimen,
-        preservationTemperature = PreservationTemperature.Minus80celcius,
-        specimenType                = SpecimenType.FilteredUrine)
-    domainObjects = domainObjects + (classOf[SpecimenGroup] -> specimenGroup)
-    specimenGroup
-  }
-
-  def createCollectionSpecimenDescription(): CollectionSpecimenDescription = {
-    val name = faker.Lorem.sentence(3)
-    val specimenSpec = CollectionSpecimenDescription(
-        id                      = SpecimenDescriptionId(nextIdentityAsString[CollectionSpecimenDescription]),
+    val specimenSpec = CollectionSpecimenDefinition(
+        id                      = SpecimenDefinitionId(nextIdentityAsString[CollectionSpecimenDefinition]),
         slug                    = Slug(name),
         name                    = name,
-        description             = Some(nameGenerator.next[CollectionSpecimenDescription]),
+        description             = Some(nameGenerator.next[CollectionSpecimenDefinition]),
         units                   = nameGenerator.next[String],
         anatomicalSourceType    = AnatomicalSourceType.Blood,
         preservationType        = PreservationType.FreshSpecimen,
@@ -208,7 +187,7 @@ class Factory {
         specimenType            = SpecimenType.FilteredUrine,
         maxCount                = 1,
         amount                  = BigDecimal(0.5))
-    domainObjects = domainObjects + (classOf[CollectionSpecimenDescription] -> specimenSpec)
+    domainObjects = domainObjects + (classOf[CollectionSpecimenDefinition] -> specimenSpec)
     specimenSpec
   }
 
@@ -225,7 +204,7 @@ class Factory {
         name                 = name,
         description          = Some(nameGenerator.next[CollectionEventType]),
         recurring            = false,
-        specimenDescriptions = Set.empty,
+        specimenDefinitions = Set.empty,
         annotationTypes      = Set.empty)
 
     domainObjects = domainObjects + (classOf[CollectionEventType] -> ceventType)
@@ -258,49 +237,22 @@ class Factory {
   }
 
   def createProcessingType(): ProcessingType = {
-    val disabledStudy = defaultDisabledStudy
-    val name = faker.Lorem.sentence(3)
-    val processingType = ProcessingType(
-        id             = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
-        studyId        = disabledStudy.id,
-        version        = 0L,
-        timeAdded      = OffsetDateTime.now,
-        timeModified   = None,
-        slug           = Slug(name),
-        name           = name,
-        description    = Some(nameGenerator.next[ProcessingType]),
-        enabled        = false)
+    // val disabledStudy = defaultDisabledStudy
+    // val name = faker.Lorem.sentence(3)
+    // val processingType = ProcessingType(
+    //     id             = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
+    //     studyId        = disabledStudy.id,
+    //     version        = 0L,
+    //     timeAdded      = OffsetDateTime.now,
+    //     timeModified   = None,
+    //     slug           = Slug(name),
+    //     name           = name,
+    //     description    = Some(nameGenerator.next[ProcessingType]),
+    //     enabled        = false)
 
-    domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
-    processingType
-  }
-
-  def createSpecimenLinkType(): SpecimenLinkType = {
-    val slt = SpecimenLinkType(
-        id                    = SpecimenLinkTypeId(nextIdentityAsString[SpecimenLinkType]),
-        processingTypeId      = defaultProcessingType.id,
-        version               = 0L,
-        timeAdded             = OffsetDateTime.now,
-        timeModified          = None,
-        expectedInputChange   = BigDecimal(1.0),
-        expectedOutputChange  = BigDecimal(1.0),
-        inputCount            = 1,
-        outputCount           = 1,
-        inputGroupId          = SpecimenGroupId(nextIdentityAsString[SpecimenLinkType]),
-        outputGroupId         = SpecimenGroupId(nextIdentityAsString[SpecimenLinkType]),
-        inputContainerTypeId  = None,
-        outputContainerTypeId = None,
-        annotationTypeData    = List.empty)
-
-    domainObjects = domainObjects + (classOf[SpecimenLinkType] -> slt)
-    slt
-  }
-
-  def createSpecimenLinkTypeAndSpecimenGroups(): (SpecimenLinkType, SpecimenGroup, SpecimenGroup) = {
-    val inputSg = createSpecimenGroup
-    val outputSg = createSpecimenGroup
-    val slType = createSpecimenLinkType.copy(inputGroupId = inputSg.id, outputGroupId = outputSg.id)
-    (slType, inputSg, outputSg)
+    // domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
+    // processingType
+    ???
   }
 
   def createParticipant(): Participant = {
@@ -379,7 +331,7 @@ class Factory {
   }
 
   def createUsableSpecimen(): UsableSpecimen = {
-    val specimenDescription = defaultCollectionSpecimenDescription
+    val specimenDefinition = defaultCollectionSpecimenDefinition
     val location            = defaultLocation
     val inventoryId         = nextIdentityAsString[Specimen]
 
@@ -390,7 +342,7 @@ class Factory {
         timeModified          = None,
         slug                  = Slug(inventoryId),
         inventoryId           = inventoryId,
-        specimenDescriptionId = specimenDescription.id,
+        specimenDefinitionId = specimenDefinition.id,
         originLocationId      = location.id,
         locationId            = location.id,
         containerId           = None,
@@ -403,7 +355,7 @@ class Factory {
   }
 
   def createUnusableSpecimen(): UnusableSpecimen = {
-    val specimenDescription = defaultCollectionSpecimenDescription
+    val specimenDefinition = defaultCollectionSpecimenDefinition
     val location            = defaultLocation
     val inventoryId         = nextIdentityAsString[Specimen]
 
@@ -414,7 +366,7 @@ class Factory {
         timeModified          = None,
         slug                  = Slug(inventoryId),
         inventoryId           = inventoryId,
-        specimenDescriptionId = specimenDescription.id,
+        specimenDefinitionId = specimenDefinition.id,
         originLocationId      = location.id,
         locationId            = location.id,
         containerId           = None,
@@ -651,16 +603,12 @@ class Factory {
     defaultObject(classOf[EnabledStudy], createEnabledStudy)
   }
 
-  def defaultSpecimenGroup: SpecimenGroup = {
-    defaultObject(classOf[SpecimenGroup], createSpecimenGroup)
-  }
-
   def defaultCollectionEventType: CollectionEventType = {
     defaultObject(classOf[CollectionEventType], createCollectionEventType)
   }
 
-  def defaultCollectionSpecimenDescription: CollectionSpecimenDescription = {
-    defaultObject(classOf[CollectionSpecimenDescription], createCollectionSpecimenDescription)
+  def defaultCollectionSpecimenDefinition: CollectionSpecimenDefinition = {
+    defaultObject(classOf[CollectionSpecimenDefinition], createCollectionSpecimenDefinition)
   }
 
   def defaultAnnotationType: AnnotationType = {
@@ -669,10 +617,6 @@ class Factory {
 
   def defaultProcessingType: ProcessingType = {
     defaultObject(classOf[ProcessingType], createProcessingType)
-  }
-
-  def defaultSpecimenLinkType: SpecimenLinkType = {
-    defaultObject(classOf[SpecimenLinkType], createSpecimenLinkType)
   }
 
   def defaultParticipant: Participant = {

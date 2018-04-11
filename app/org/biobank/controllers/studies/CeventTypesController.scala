@@ -118,22 +118,22 @@ class CeventTypesController @Inject() (controllerComponents: ControllerComponent
       processCommand(cmd)
     }
 
-  def addSpecimenDescription(id: CollectionEventTypeId): Action[JsValue] =
-    commandAction[AddCollectionSpecimenDescriptionCmd](Json.obj("id" -> id))(processCommand)
+  def addSpecimenDefinition(id: CollectionEventTypeId): Action[JsValue] =
+    commandAction[AddCollectionSpecimenDefinitionCmd](Json.obj("id" -> id))(processCommand)
 
-  def updateSpecimenDescription(id: CollectionEventTypeId, sdId: String): Action[JsValue] =
-    commandAction[UpdateCollectionSpecimenDescriptionCmd](
-      Json.obj("id" -> id,"specimenDescriptionId" -> sdId))(processCommand)
+  def updateSpecimenDefinition(id: CollectionEventTypeId, sdId: String): Action[JsValue] =
+    commandAction[UpdateCollectionSpecimenDefinitionCmd](
+      Json.obj("id" -> id,"specimenDefinitionId" -> sdId))(processCommand)
 
-  def removeSpecimenDescription(studyId: StudyId, id: CollectionEventTypeId, ver: Long, sdId: String)
+  def removeSpecimenDefinition(studyId: StudyId, id: CollectionEventTypeId, ver: Long, sdId: String)
       : Action[Unit]=
     action.async(parse.empty) { implicit request =>
-      val cmd = RemoveCollectionSpecimenDescriptionCmd(
+      val cmd = RemoveCollectionSpecimenDefinitionCmd(
           sessionUserId         = request.authInfo.userId.id,
           studyId               = studyId.id,
           id                    = id.id,
           expectedVersion       = ver,
-          specimenDescriptionId = sdId)
+          specimenDefinitionId = sdId)
       processCommand(cmd)
     }
 

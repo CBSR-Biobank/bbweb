@@ -1,7 +1,7 @@
 /**
  * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
  *
- * @namespace admin.studies.components.collectionSpecimenDescriptionView
+ * @namespace admin.studies.components.collectionSpecimenDefinitionView
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -11,12 +11,12 @@
  * Controller for this component.
  */
 /* @ngInject */
-function CollectionSpecimenDescriptionViewController($state,
+function CollectionSpecimenDefinitionViewController($state,
                                                      gettextCatalog,
                                                      modalInput,
                                                      notificationsService,
                                                      CollectionEventType,
-                                                     CollectionSpecimenDescription,
+                                                     CollectionSpecimenDefinition,
                                                      AnatomicalSourceType,
                                                      PreservationType,
                                                      PreservationTemperature,
@@ -38,8 +38,8 @@ function CollectionSpecimenDescriptionViewController($state,
         `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
         () => vm.study.name + ': ' + vm.collectionEventType.name),
       breadcrumbService.forStateWithFunc(
-        'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
-        () => vm.specimenDescription.name)
+        'home.admin.studies.study.collection.ceventType.specimenDefinitionView',
+        () => vm.specimenDefinition.name)
     ];
 
     vm.returnState = {
@@ -72,7 +72,7 @@ function CollectionSpecimenDescriptionViewController($state,
   }
 
   function updateCollectionEventType() {
-    return vm.collectionEventType.updateSpecimenDescription(vm.specimenDescription)
+    return vm.collectionEventType.updateSpecimenDefinition(vm.specimenDefinition)
       .then(function (collectionEventType) {
         vm.collectionEventType = collectionEventType;
       })
@@ -83,10 +83,10 @@ function CollectionSpecimenDescriptionViewController($state,
   function editName() {
     modalInput.text(gettextCatalog.getString('Specimen spec name'),
                     gettextCatalog.getString('Name'),
-                    vm.specimenDescription.name,
+                    vm.specimenDefinition.name,
                     { required: true, minLength: 2 }).result
       .then(function (name) {
-        vm.specimenDescription.name = name;
+        vm.specimenDefinition.name = name;
         return updateCollectionEventType();
       });
   }
@@ -94,9 +94,9 @@ function CollectionSpecimenDescriptionViewController($state,
   function editDescription() {
     modalInput.textArea(gettextCatalog.getString('Specimen spec description'),
                         gettextCatalog.getString('Description'),
-                        vm.specimenDescription.description).result
+                        vm.specimenDefinition.description).result
       .then(function (description) {
-        vm.specimenDescription.description = description;
+        vm.specimenDefinition.description = description;
         return updateCollectionEventType();
       });
   }
@@ -104,13 +104,13 @@ function CollectionSpecimenDescriptionViewController($state,
   function editAnatomicalSource() {
     modalInput.select(gettextCatalog.getString('Specimen spec anatomical source'),
                       gettextCatalog.getString('Anatomical source'),
-                      vm.specimenDescription.anatomicalSourceType,
+                      vm.specimenDefinition.anatomicalSourceType,
                       {
                         required: true,
                         selectOptions: Object.values(AnatomicalSourceType)
                       }).result
       .then(function (selection) {
-        vm.specimenDescription.anatomicalSourceType = selection;
+        vm.specimenDefinition.anatomicalSourceType = selection;
         return updateCollectionEventType();
       });
   }
@@ -118,13 +118,13 @@ function CollectionSpecimenDescriptionViewController($state,
   function editPreservationType() {
     modalInput.select(gettextCatalog.getString('Specimen spec preservation type'),
                       gettextCatalog.getString('Preservation type'),
-                      vm.specimenDescription.preservationType,
+                      vm.specimenDefinition.preservationType,
                       {
                         required: true,
                         selectOptions: Object.values(PreservationType)
                       }).result
       .then(function (selection) {
-        vm.specimenDescription.preservationType = selection;
+        vm.specimenDefinition.preservationType = selection;
         return updateCollectionEventType();
       });
   }
@@ -132,13 +132,13 @@ function CollectionSpecimenDescriptionViewController($state,
   function editPreservationTemperature() {
     modalInput.select(gettextCatalog.getString('Specimen spec preservation temperature'),
                       gettextCatalog.getString('Preservation temperature'),
-                      vm.specimenDescription.preservationTemperature,
+                      vm.specimenDefinition.preservationTemperature,
                       {
                         required: true,
                         selectOptions: Object.values(PreservationTemperature)
                       }).result
       .then(function (selection) {
-        vm.specimenDescription.preservationTemperature = selection;
+        vm.specimenDefinition.preservationTemperature = selection;
         return updateCollectionEventType();
       });
   }
@@ -146,13 +146,13 @@ function CollectionSpecimenDescriptionViewController($state,
   function editSpecimenType() {
     modalInput.select(gettextCatalog.getString('Specimen spec - specimen type'),
                       gettextCatalog.getString('Sepcimen type'),
-                      vm.specimenDescription.specimenType,
+                      vm.specimenDefinition.specimenType,
                       {
                         required: true,
                         selectOptions: Object.values(SpecimenType)
                       }).result
       .then(function (selection) {
-        vm.specimenDescription.specimenType = selection;
+        vm.specimenDefinition.specimenType = selection;
         return updateCollectionEventType();
       });
   }
@@ -160,10 +160,10 @@ function CollectionSpecimenDescriptionViewController($state,
   function editUnits() {
     modalInput.text(gettextCatalog.getString('Specimen spec units'),
                     gettextCatalog.getString('Units'),
-                    vm.specimenDescription.units,
+                    vm.specimenDefinition.units,
                     { required: true }).result
       .then(function (units) {
-        vm.specimenDescription.units = units;
+        vm.specimenDefinition.units = units;
         return updateCollectionEventType();
       });
   }
@@ -171,10 +171,10 @@ function CollectionSpecimenDescriptionViewController($state,
   function editAmount() {
     modalInput.positiveFloat(gettextCatalog.getString('Specimen spec amount'),
                              gettextCatalog.getString('Amount'),
-                             vm.specimenDescription.amount,
+                             vm.specimenDefinition.amount,
                              { required: true, positiveFloat: true }).result
       .then(function (value) {
-        vm.specimenDescription.amount = value;
+        vm.specimenDefinition.amount = value;
         return updateCollectionEventType();
       });
   }
@@ -182,10 +182,10 @@ function CollectionSpecimenDescriptionViewController($state,
   function editMaxCount() {
     modalInput.naturalNumber(gettextCatalog.getString('Specimen spec max count'),
                              gettextCatalog.getString('Max count'),
-                             vm.specimenDescription.maxCount,
+                             vm.specimenDefinition.maxCount,
                              { required: true, naturalNumber: true, min: 1 }).result
       .then(function (value) {
-        vm.specimenDescription.maxCount = value;
+        vm.specimenDefinition.maxCount = value;
         return updateCollectionEventType();
       });
   }
@@ -198,29 +198,29 @@ function CollectionSpecimenDescriptionViewController($state,
 
 /**
  * An AngularJS component that component that allows the user to view a {@link
- * domain.studies.CollectionSpecimenDescription CollectionSpecimenDescription} from a {@link
+ * domain.studies.CollectionSpecimenDefinition CollectionSpecimenDefinition} from a {@link
  * domain.studies.CollectionEventType CollectionEventType}.
  *
- * @memberOf admin.studies.components.collectionSpecimenDescriptionView
+ * @memberOf admin.studies.components.collectionSpecimenDefinitionView
  *
  * @param {domain.studies.Study} study - the *Study* the *Collection Event Type* belongs to.
  *
  * @param {domain.studies.CollectionEventType} collectionEventType - the *Collection Event Type* the
  * *Specimen Description* should be added to.
  *
- * @param {domain.studies.CollectionSpecimenDescription} specimenDescription - The *Specimen Description* to
+ * @param {domain.studies.CollectionSpecimenDefinition} specimenDefinition - The *Specimen Description* to
  * display.
  */
-const collectionSpecimenDescriptionViewComponent = {
-  template: require('./collectionSpecimenDescriptionView.html'),
-  controller: CollectionSpecimenDescriptionViewController,
+const collectionSpecimenDefinitionViewComponent = {
+  template: require('./collectionSpecimenDefinitionView.html'),
+  controller: CollectionSpecimenDefinitionViewController,
   controllerAs: 'vm',
   bindings: {
     study:               '<',
     collectionEventType: '<',
-    specimenDescription: '<'
+    specimenDefinition: '<'
   }
 };
 
-export default ngModule => ngModule.component('collectionSpecimenDescriptionView',
-                                             collectionSpecimenDescriptionViewComponent)
+export default ngModule => ngModule.component('collectionSpecimenDefinitionView',
+                                             collectionSpecimenDefinitionViewComponent)

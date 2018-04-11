@@ -27,7 +27,7 @@ class StudiesServiceSpec
     val retiredStudy = factory.createRetiredStudy
     val cet = factory.createCollectionEventType
       .copy(studyId              = disabledStudy.id,
-            specimenDescriptions = Set(factory.createCollectionSpecimenDescription))
+            specimenDefinitions = Set(factory.createCollectionSpecimenDefinition))
 
     Set(disabledStudy, enabledStudy, retiredStudy).foreach(addToRepository)
     collectionEventTypeRepository.put(cet)

@@ -45,7 +45,7 @@ describe('CollectionEventType', function() {
        * Returns 3 collection event types, each one with a different missing field.
        */
       this.getBadCollectionEventTypes = () => {
-        const badSpecimenDescription   = _.omit(this.Factory.collectionSpecimenDescription(), 'name'),
+        const badSpecimenDefinition   = _.omit(this.Factory.collectionSpecimenDefinition(), 'name'),
               badAnnotationType = _.omit(this.Factory.annotationType(), 'name');
 
         return [
@@ -54,8 +54,8 @@ describe('CollectionEventType', function() {
             errMsg : 'Missing required property'
           },
           {
-            cet: this.Factory.collectionEventType({ specimenDescriptions: [ badSpecimenDescription ]}),
-            errMsg : 'specimenDescriptions.*Missing required property'
+            cet: this.Factory.collectionEventType({ specimenDefinitions: [ badSpecimenDefinition ]}),
+            errMsg : 'specimenDefinitions.*Missing required property'
           },
           {
             cet: this.Factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
@@ -87,7 +87,7 @@ describe('CollectionEventType', function() {
     expect(ceventType.studyId).toBeUndefined();
     expect(ceventType.name).toBeUndefined();
     expect(ceventType.recurring).toBe(false);
-    expect(ceventType.specimenDescriptions).toBeArrayOfSize(0);
+    expect(ceventType.specimenDefinitions).toBeArrayOfSize(0);
     expect(ceventType.annotationTypes).toBeArrayOfSize(0);
   });
 
@@ -99,12 +99,12 @@ describe('CollectionEventType', function() {
   });
 
   it('fails when creating from a bad json specimen spec', function() {
-    var jsonSpec = _.omit(this.Factory.collectionSpecimenDescription(), 'name'),
+    var jsonSpec = _.omit(this.Factory.collectionSpecimenDefinition(), 'name'),
         badJsonCet = Object.assign(this.Factory.collectionEventType(this.jsonStudy),
-                              { specimenDescriptions: [ jsonSpec ] });
+                              { specimenDefinitions: [ jsonSpec ] });
 
     expect(() => CollectionEventType.create(badJsonCet))
-      .toThrowError(/specimenDescriptions.*Missing required property/);
+      .toThrowError(/specimenDefinitions.*Missing required property/);
   });
 
   it('fails when creating from bad json annotation type data', function() {
@@ -261,14 +261,14 @@ describe('CollectionEventType', function() {
   describe('for specimen specs', function() {
 
     beforeEach(function() {
-      this.jsonSpec = this.Factory.collectionSpecimenDescription();
-      this.jsonCet  = this.Factory.collectionEventType({ specimenDescriptions: [ this.jsonSpec ] });
+      this.jsonSpec = this.Factory.collectionSpecimenDefinition();
+      this.jsonCet  = this.Factory.collectionEventType({ specimenDefinitions: [ this.jsonSpec ] });
       this.cet      = this.CollectionEventType.create(this.jsonCet);
     });
 
     it('should add a specimen description', function () {
       this.updateEntity(this.cet,
-                        'addSpecimenDescription',
+                        'addSpecimenDefinition',
                         _.omit(this.jsonSpec, 'id'),
                         this.url('spcdesc', this.cet.id),
                         Object.assign(_.omit(this.jsonSpec, 'id'), { studyId: this.cet.studyId }),
@@ -280,14 +280,14 @@ describe('CollectionEventType', function() {
     it('should remove a specimen description', function () {
       var url = this.url('spcdesc', this.cet.studyId, this.cet.id, this.cet.version, this.jsonSpec.id);
       this.$httpBackend.whenDELETE(url).respond(this.reply(this.jsonCet));
-      this.cet.removeSpecimenDescription(this.jsonSpec).then(this.expectCet).catch(this.failTest);
+      this.cet.removeSpecimenDefinition(this.jsonSpec).then(this.expectCet).catch(this.failTest);
       this.$httpBackend.flush();
     });
 
     it('throws an error when attempting to remove an invalid specimen spec', function () {
-      this.cet.specimenDescriptions = [];
+      this.cet.specimenDefinitions = [];
       expect(() => {
-        this.cet.removeSpecimenDescription(this.jsonSpec).then(this.expectCet).catch(this.failTest);
+        this.cet.removeSpecimenDefinition(this.jsonSpec).then(this.expectCet).catch(this.failTest);
       }).toThrowError(/specimen description with ID not present/);
     });
 

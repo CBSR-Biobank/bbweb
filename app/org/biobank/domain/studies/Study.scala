@@ -62,7 +62,6 @@ object Study {
                                             enabledState,
                                             retiredState)
 
-
   val sort2Compare: Map[String, (Study, Study) => Boolean] =
     Map[String, (Study, Study) => Boolean](
       "name"  -> compareByName,
@@ -107,7 +106,8 @@ trait StudyValidations {
 
   val NameMinLength: Long = 2L
 
-  case object InvalidSpecimenGroupId extends ValidationKey
+  case object StudyIdRequired extends ValidationKey
+
 }
 
 /**

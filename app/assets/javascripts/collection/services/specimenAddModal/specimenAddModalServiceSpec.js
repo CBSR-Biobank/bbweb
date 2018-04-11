@@ -30,9 +30,9 @@ describe('Service: specimenAddModal', function() {
       this.addModalMatchers();
 
       this.openModal = (centreLocations = [],
-                        specimenDescriptions = [],
+                        specimenDefinitions = [],
                         defaultDatetime = new Date()) => {
-        this.modal = this.specimenAddModal.open(centreLocations, specimenDescriptions, defaultDatetime);
+        this.modal = this.specimenAddModal.open(centreLocations, specimenDefinitions, defaultDatetime);
         this.modal.result.then(angular.noop, angular.noop);
         this.$rootScope.$digest();
         this.modalElement = this.modalElementFind();
@@ -52,8 +52,8 @@ describe('Service: specimenAddModal', function() {
         return this.Factory.centreLocations(centres);
       };
 
-      this.createSpecimenDescriptions = () =>
-        _.range(2).map(() => this.Factory.collectionSpecimenDescription());
+      this.createSpecimenDefinitions = () =>
+        _.range(2).map(() => this.Factory.collectionSpecimenDefinition());
     });
   });
 
@@ -86,13 +86,13 @@ describe('Service: specimenAddModal', function() {
       this.openModal();
 
       expect(this.scope.vm.inventoryId).toBeUndefined();
-      expect(this.scope.vm.selectedSpecimenDescription).toBeUndefined();
+      expect(this.scope.vm.selectedSpecimenDefinition).toBeUndefined();
       expect(this.scope.vm.selectedLocationId).toBeUndefined();
       expect(this.scope.vm.amount).toBeUndefined();
       expect(this.scope.vm.defaultAmount).toBeUndefined();
 
       expect(this.scope.vm.centreLocations).toBeEmptyArray();
-      expect(this.scope.vm.specimenDescriptions).toBeEmptyArray();
+      expect(this.scope.vm.specimenDefinitions).toBeEmptyArray();
       expect(this.scope.vm.usingDefaultAmount).toBeBoolean();
       expect(this.scope.vm.timeCollected).toBeDate();
       expect(this.scope.vm.specimens).toBeEmptyArray();
@@ -100,7 +100,7 @@ describe('Service: specimenAddModal', function() {
       expect(this.scope.vm.okPressed).toBeFunction();
       expect(this.scope.vm.nextPressed).toBeFunction();
       expect(this.scope.vm.closePressed).toBeFunction();
-      expect(this.scope.vm.specimenDescriptionChanged).toBeFunction();
+      expect(this.scope.vm.specimenDefinitionChanged).toBeFunction();
 
       this.dismiss();
       expect(this.$document).toHaveModalsOpen(0);
@@ -108,21 +108,21 @@ describe('Service: specimenAddModal', function() {
 
     it('modal is closed when okPressed is called', function () {
       var centreLocations = this.createCentreLocations(),
-          specimenDescriptions = this.createSpecimenDescriptions();
+          specimenDefinitions = this.createSpecimenDefinitions();
 
-      this.openModal(centreLocations, specimenDescriptions);
-      this.scope.vm.selectedSpecimenDescription = specimenDescriptions[0];
+      this.openModal(centreLocations, specimenDefinitions);
+      this.scope.vm.selectedSpecimenDefinition = specimenDefinitions[0];
       this.scope.vm.okPressed();
       this.flush();
       expect(this.$document).toHaveModalsOpen(0);
     });
 
-    it('when okPressed is called and a specimenDescription is not selected, an error is thrown', function() {
+    it('when okPressed is called and a specimenDefinition is not selected, an error is thrown', function() {
       var self = this,
           centreLocations = this.createCentreLocations();
 
       this.openModal(centreLocations);
-      this.scope.vm.selectedSpecimenDescription = undefined;
+      this.scope.vm.selectedSpecimenDefinition = undefined;
 
       expect(function () {
         self.scope.vm.okPressed();
@@ -137,10 +137,10 @@ describe('Service: specimenAddModal', function() {
 
       beforeEach(function() {
         var centreLocations = this.createCentreLocations(),
-            specimenDescriptions = this.createSpecimenDescriptions();
+            specimenDefinitions = this.createSpecimenDefinitions();
 
-        this.openModal(centreLocations, specimenDescriptions);
-        this.scope.vm.selectedSpecimenDescription = specimenDescriptions[0];
+        this.openModal(centreLocations, specimenDefinitions);
+        this.scope.vm.selectedSpecimenDefinition = specimenDefinitions[0];
         this.scope.vm.selectedLocationId = centreLocations[0].locationId;
         this.scope.vm.nextPressed();
       });
@@ -152,7 +152,7 @@ describe('Service: specimenAddModal', function() {
 
       it('specimen variables are reset', function() {
         expect(this.scope.vm.inventoryId).toBeUndefined();
-        expect(this.scope.vm.selectedSpecimenDescription).toBeUndefined();
+        expect(this.scope.vm.selectedSpecimenDefinition).toBeUndefined();
         expect(this.scope.vm.amount).toBeUndefined();
         expect(this.scope.vm.defaultAmount).toBeUndefined();
       });
@@ -171,12 +171,12 @@ describe('Service: specimenAddModal', function() {
 
     });
 
-    it('when nextPressed is called and a specimenDescription is not selected, an error is thrown', function() {
+    it('when nextPressed is called and a specimenDefinition is not selected, an error is thrown', function() {
       var self = this,
           centreLocations = this.createCentreLocations();
 
       this.openModal(centreLocations);
-      this.scope.vm.selectedSpecimenDescription = undefined;
+      this.scope.vm.selectedSpecimenDefinition = undefined;
 
       expect(function () {
         self.scope.vm.nextPressed();
@@ -193,28 +193,28 @@ describe('Service: specimenAddModal', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
-    it('when specimenDescriptionChanged amount, defaultAmount and units are assigned', function() {
+    it('when specimenDefinitionChanged amount, defaultAmount and units are assigned', function() {
       var centreLocations = this.createCentreLocations(),
-          specimenDescriptions = this.createSpecimenDescriptions();
+          specimenDefinitions = this.createSpecimenDefinitions();
 
-      specimenDescriptions[0].amount = 10;
-      specimenDescriptions[1].amount = 20;
+      specimenDefinitions[0].amount = 10;
+      specimenDefinitions[1].amount = 20;
 
-      specimenDescriptions[0].units = 'mL';
-      specimenDescriptions[1].units = 'g';
+      specimenDefinitions[0].units = 'mL';
+      specimenDefinitions[1].units = 'g';
 
-      this.openModal(centreLocations, specimenDescriptions);
-      this.scope.vm.selectedSpecimenDescription = specimenDescriptions[0];
-      this.scope.vm.specimenDescriptionChanged();
+      this.openModal(centreLocations, specimenDefinitions);
+      this.scope.vm.selectedSpecimenDefinition = specimenDefinitions[0];
+      this.scope.vm.specimenDefinitionChanged();
 
-      expect(this.scope.vm.amount).toBe(specimenDescriptions[0].amount);
-      expect(this.scope.vm.units).toBe(specimenDescriptions[0].units);
+      expect(this.scope.vm.amount).toBe(specimenDefinitions[0].amount);
+      expect(this.scope.vm.units).toBe(specimenDefinitions[0].units);
 
-      this.scope.vm.selectedSpecimenDescription = specimenDescriptions[1];
-      this.scope.vm.specimenDescriptionChanged();
+      this.scope.vm.selectedSpecimenDefinition = specimenDefinitions[1];
+      this.scope.vm.specimenDefinitionChanged();
 
-      expect(this.scope.vm.amount).toBe(specimenDescriptions[1].amount);
-      expect(this.scope.vm.units).toBe(specimenDescriptions[1].units);
+      expect(this.scope.vm.amount).toBe(specimenDefinitions[1].amount);
+      expect(this.scope.vm.units).toBe(specimenDefinitions[1].units);
 
       this.dismiss();
       expect(this.$document).toHaveModalsOpen(0);

@@ -15,7 +15,7 @@ function CollectionEventTypeFactory($q,
                                     biobankApi,
                                     DomainEntity,
                                     ConcurrencySafeEntity,
-                                    CollectionSpecimenDescription,
+                                    CollectionSpecimenDefinition,
                                     DomainError,
                                     AnnotationType) {
 
@@ -26,7 +26,7 @@ function CollectionEventTypeFactory($q,
       'name':                 { 'type': 'string' },
       'description':          { 'type': [ 'string', 'null' ] },
       'recurring':            { 'type': 'boolean' },
-      'specimenDescriptions': { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenDescription' } },
+      'specimenDefinitions': { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenDefinition' } },
       'annotationTypes':      { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
     },
     'required': [ 'slug', 'name', 'recurring' ]
@@ -50,7 +50,7 @@ function CollectionEventTypeFactory($q,
    */
   class CollectionEventType extends HasAnnotationTypesMixin(ConcurrencySafeEntity) {
 
-    constructor(obj = {}, options = { specimenDescriptions: [], annotationTypes: [] }) {
+    constructor(obj = {}, options = { specimenDefinitions: [], annotationTypes: [] }) {
       /**
        * The ID of the {@link domain.studies.Study|Study} this collection event type belongs to.
        *
@@ -83,8 +83,8 @@ function CollectionEventTypeFactory($q,
       /**
        * The specifications for the specimens that are collected for this collection event type.
        *
-       * @name domain.studies.CollectionEventType#specimenDescriptions
-       * @type {Array<domain.studies.CollectionSpecimenDescription>}
+       * @name domain.studies.CollectionEventType#specimenDefinitions
+       * @type {Array<domain.studies.CollectionSpecimenDefinition>}
        */
 
       /**
@@ -112,7 +112,7 @@ function CollectionEventTypeFactory($q,
                       biobankApi,
                       DomainError
                     },
-                    _.pick(options, 'study', 'specimenDescriptions', 'annotationTypes'));
+                    _.pick(options, 'study', 'specimenDefinitions', 'annotationTypes'));
 
       if (options.study) {
         this.studyId = options.study.id;
@@ -134,7 +134,7 @@ function CollectionEventTypeFactory($q,
     /** @private */
     static additionalSchemas() {
       return [
-        CollectionSpecimenDescription.schema(),
+        CollectionSpecimenDefinition.schema(),
         AnnotationType.schema()
       ];
     }
@@ -168,10 +168,10 @@ function CollectionEventTypeFactory($q,
         }
       }
 
-      if (obj.specimenDescriptions) {
+      if (obj.specimenDefinitions) {
         try {
-          options.specimenDescriptions = obj.specimenDescriptions
-            .map((specimenDescription) => CollectionSpecimenDescription.create(specimenDescription));
+          options.specimenDefinitions = obj.specimenDefinitions
+            .map((specimenDefinition) => CollectionSpecimenDefinition.create(specimenDefinition));
         } catch (e) {
           throw new DomainError('invalid specimen specs from server: ' + validation.message);
         }
@@ -293,28 +293,28 @@ function CollectionEventTypeFactory($q,
                          { studyId: this.studyId, recurring: recurring });
     }
 
-    addSpecimenDescription(specimenDescription) {
+    addSpecimenDefinition(specimenDefinition) {
       return this.update(CollectionEventType.url('spcdesc', this.id),
-                         Object.assign({ studyId: this.studyId }, _.omit(specimenDescription, 'id')));
+                         Object.assign({ studyId: this.studyId }, _.omit(specimenDefinition, 'id')));
     }
 
-    updateSpecimenDescription(specimenDescription) {
-      return this.update(CollectionEventType.url('spcdesc', this.id, specimenDescription.id),
-                         Object.assign({ studyId: this.studyId }, specimenDescription));
+    updateSpecimenDefinition(specimenDefinition) {
+      return this.update(CollectionEventType.url('spcdesc', this.id, specimenDefinition.id),
+                         Object.assign({ studyId: this.studyId }, specimenDefinition));
     }
 
-    removeSpecimenDescription(specimenDescription) {
-      const found = _.find(this.specimenDescriptions,  { id: specimenDescription.id });
+    removeSpecimenDefinition(specimenDefinition) {
+      const found = _.find(this.specimenDefinitions,  { id: specimenDefinition.id });
 
       if (!found) {
-        throw new DomainError('specimen description with ID not present: ' + specimenDescription.id);
+        throw new DomainError('specimen description with ID not present: ' + specimenDefinition.id);
       }
 
       const url = CollectionEventType.url('spcdesc',
                                           this.studyId,
                                           this.id,
                                           this.version,
-                                          specimenDescription.id);
+                                          specimenDefinition.id);
       return biobankApi.del(url).then(CollectionEventType.asyncCreate);
     }
 

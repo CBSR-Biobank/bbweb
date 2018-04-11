@@ -208,10 +208,10 @@ class StudiesServiceImpl @Inject()(
                              PermissionId.StudyRead,
                              Some(studyId),
                              None) { () =>
-      val specimenDescriptions = collectionEventTypeRepository.allForStudy(studyId).map { ceTypes =>
-          ceTypes.specimenDescriptions
+      val specimenDefinitions = collectionEventTypeRepository.allForStudy(studyId).map { ceTypes =>
+          ceTypes.specimenDefinitions
         }
-      (specimenDescriptions.size > 0).successNel[String]
+      (specimenDefinitions.size > 0).successNel[String]
     }
   }
 

@@ -1,7 +1,7 @@
 /**
  * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
  *
- * @namespace admin.studies.components.collectionSpecimenDescriptionAdd
+ * @namespace admin.studies.components.collectionSpecimenDefinitionAdd
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -13,7 +13,7 @@ const returnState = 'home.admin.studies.study.collection.ceventType';
  * Controller for this component.
  */
 /* @ngInject */
-class CollectionSpecimenDescriptionAddController {
+class CollectionSpecimenDefinitionAddController {
 
   constructor($state,
               gettextCatalog,
@@ -49,7 +49,7 @@ class CollectionSpecimenDescriptionAddController {
         `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
         () => this.study.name + ': ' + this.collectionEventType.name),
       this.breadcrumbService.forStateWithFunc(
-        'home.admin.studies.study.collection.ceventType.specimenDescriptionView',
+        'home.admin.studies.study.collection.ceventType.specimenDefinitionView',
         () => this.gettextCatalog.getString('Add collection specimen'))
     ];
 
@@ -59,8 +59,8 @@ class CollectionSpecimenDescriptionAddController {
     this.specimenTypes         = Object.values(this.SpecimenType);
   }
 
-  submit(specimenDescription) {
-    this.collectionEventType.addSpecimenDescription(specimenDescription)
+  submit(specimenDefinition) {
+    this.collectionEventType.addSpecimenDefinition(specimenDefinition)
       .then(() => {
         this.notificationsService.submitSuccess();
         this.$state.go(returnState, {}, { reload: true });
@@ -75,19 +75,19 @@ class CollectionSpecimenDescriptionAddController {
 }
 
 /**
- * An AngularJS component that allows the user to add a {@link domain.studies.CollectionSpecimenDescription
- * CollectionSpecimenDescription} to a {@link domain.studies.CollectionEventType CollectionEventType}.
+ * An AngularJS component that allows the user to add a {@link domain.studies.CollectionSpecimenDefinition
+ * CollectionSpecimenDefinition} to a {@link domain.studies.CollectionEventType CollectionEventType}.
  *
- * @memberOf admin.studies.components.collectionSpecimenDescriptionAdd
+ * @memberOf admin.studies.components.collectionSpecimenDefinitionAdd
  *
  * @param {domain.studies.Study} study - the study the *Collection Event Type* belongs to.
  *
  * @param {domain.studies.CollectionEventType} collectionEventType - the collection event type the
  * *Specimen Description* should be added to.
 */
-const collectionSpecimenDescriptionAddComponent = {
-  template: require('./collectionSpecimenDescriptionAdd.html'),
-  controller: CollectionSpecimenDescriptionAddController,
+const collectionSpecimenDefinitionAddComponent = {
+  template: require('./collectionSpecimenDefinitionAdd.html'),
+  controller: CollectionSpecimenDefinitionAddController,
   controllerAs: 'vm',
   bindings: {
     study:               '<',
@@ -95,4 +95,4 @@ const collectionSpecimenDescriptionAddComponent = {
   }
 };
 
-export default ngModule => ngModule.component('collectionSpecimenDescriptionAdd', collectionSpecimenDescriptionAddComponent)
+export default ngModule => ngModule.component('collectionSpecimenDefinitionAdd', collectionSpecimenDefinitionAddComponent)

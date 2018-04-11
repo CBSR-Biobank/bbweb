@@ -15,8 +15,8 @@
     <tbody ng-if="!vm.tableDataLoading && (vm.shipmentSpecimens.length > 0)">
       <tr ng-repeat="ss in vm.shipmentSpecimens">
         <td><small>{{ss.specimen.inventoryId}}</small></td>
-        <td><small>{{ss.specimen.amount}} {{ss.specimen.specimenDescriptionUnits}}</small></td>
-        <td><small>{{ss.specimen.specimenDescriptionName}}</small></td>
+        <td><small>{{ss.specimen.amount}} {{ss.specimen.specimenDefinitionUnits}}</small></td>
+        <td><small>{{ss.specimen.specimenDefinitionName}}</small></td>
         <td><small>{{ss.specimen.timeCreated| localTime}}</small></td>
         <td ng-if="vm.showItemState">
           <span class="badge">{{ss.state}}</span>
