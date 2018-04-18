@@ -1,6 +1,6 @@
 package org.biobank.services.access
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.Global
@@ -8,13 +8,13 @@ import org.biobank.fixture._
 import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.services._
+import org.scalatest.Inside
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import scalaz.Scalaz._
-import org.scalatest.Inside
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 final case class NamedAccessProcessor @Inject() (@Named("accessProcessor") processor: ActorRef)
 
@@ -32,18 +32,28 @@ class AccesssProcessorSpec
     Set(role, permission).foreach(addToRepository)
   }
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  private var accesssProcessor = app.injector.instanceOf[NamedAccessProcessor].processor
 
-  val accesssProcessor = app.injector.instanceOf[NamedAccessProcessor].processor
+  private val accessItemRepository = app.injector.instanceOf[AccessItemRepository]
 
-  val accessItemRepository = app.injector.instanceOf[AccessItemRepository]
-
-  val nameGenerator = new NameGenerator(this.getClass)
+  private val nameGenerator = new NameGenerator(this.getClass)
 
   override def beforeEach() {
     accessItemRepository.removeAll
     accessItemRepository.removeAll
     super.beforeEach()
+  }
+
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new AccessProcessor(
+                                       accessItemRepository,
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "access")
+    Thread.sleep(250)
+    actor
   }
 
   protected def addToRepository[T <: ConcurrencySafeEntity[_]](entity: T): Unit = {
@@ -69,9 +79,9 @@ class AccesssProcessorSpec
         accessItemRepository.getByKey(AccessItemId(event.getRole.getId)) mustSucceed { accessItem =>
           inside(accessItem) { case repoRole: Role =>
             repoRole.userIds must contain (user.id)
-            accesssProcessor ! "persistence_restart"
 
-            Thread.sleep(250)
+            accessItemRepository.removeAll
+            accesssProcessor = restartProcessor(accesssProcessor)
 
             accessItemRepository.getByKey(AccessItemId(event.getRole.getId)).isSuccess must be (true)
           }
@@ -79,17 +89,7 @@ class AccesssProcessorSpec
       }
     }
 
-    it("allow a snapshot request", PersistenceTest) {
-      val f = new AccessItemsFixture
-      accessItemRepository.put(f.role)
-
-      accesssProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
-    }
-
-    it("accept a snapshot offer", PersistenceTest) {
+    it("recovers a snapshot", PersistenceTest) {
       val f = new AccessItemsFixture
       val user = factory.createRegisteredUser
       val snapshotFilename = "testfilename"
@@ -101,11 +101,10 @@ class AccesssProcessorSpec
         .thenReturn(Json.toJson(snapshotState).toString);
 
       accessItemRepository.put(f.role)
-      accesssProcessor ? "snap"
-      Thread.sleep(250)
-      accesssProcessor ! "persistence_restart"
+      (accesssProcessor ? "snap").mapTo[String].futureValue
 
-      Thread.sleep(250)
+      accessItemRepository.removeAll
+      accesssProcessor = restartProcessor(accesssProcessor)
 
       accessItemRepository.getByKey(snapshotRole.id) mustSucceed { accessItem =>
         inside(accessItem) { case repoRole: Role =>

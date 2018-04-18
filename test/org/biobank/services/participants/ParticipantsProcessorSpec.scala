@@ -1,6 +1,6 @@
 package org.biobank.services.participants
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
@@ -9,10 +9,9 @@ import org.biobank.domain.participants.ParticipantRepository
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
-import org.mockito.Mockito._
-import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import scalaz.Scalaz._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 case class NamedParticipantsProcessor @Inject() (@Named("participantsProcessor") processor: ActorRef)
 
@@ -22,19 +21,30 @@ class ParticipantsProcessorSpec extends ProcessorTestFixture {
   import org.biobank.infrastructure.commands.ParticipantCommands._
   import org.biobank.infrastructure.events.ParticipantEvents._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  private var participantsProcessor = app.injector.instanceOf[NamedParticipantsProcessor].processor
 
-  val studyRepository = app.injector.instanceOf[StudyRepository]
+  private val studyRepository = app.injector.instanceOf[StudyRepository]
 
-  val participantsProcessor = app.injector.instanceOf[NamedParticipantsProcessor].processor
+  private val participantRepository = app.injector.instanceOf[ParticipantRepository]
 
-  val participantRepository = app.injector.instanceOf[ParticipantRepository]
-
-  val nameGenerator = new NameGenerator(this.getClass)
+  private val nameGenerator = new NameGenerator(this.getClass)
 
   override def beforeEach() {
     participantRepository.removeAll
     super.beforeEach()
+  }
+
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new ParticipantsProcessor(
+                                       participantRepository,
+                                       studyRepository,
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "participants")
+    Thread.sleep(250)
+    actor
   }
 
   describe("A participants processor must") {
@@ -50,26 +60,14 @@ class ParticipantsProcessorSpec extends ProcessorTestFixture {
       val v = ask(participantsProcessor, cmd).mapTo[ServiceValidation[ParticipantEvent]].futureValue
       v.isSuccess must be (true)
       participantRepository.getValues.map { s => s.uniqueId } must contain (participant.uniqueId)
-      participantsProcessor ! "persistence_restart"
       participantRepository.removeAll
-
-      Thread.sleep(250)
+      participantsProcessor = restartProcessor(participantsProcessor)
 
       participantRepository.getValues.size must be (1)
       participantRepository.getValues.map { s => s.uniqueId } must contain (participant.uniqueId)
     }
 
-    it("allow a snapshot request", PersistenceTest) {
-      val participants = (1 to 2).map { _ => factory.createParticipant }
-      participants.foreach(participantRepository.put)
-
-      participantsProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
-    }
-
-    it("accept a snapshot offer", PersistenceTest) {
+    it("recovers a snapshot", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val participants = (1 to 2).map { _ => factory.createParticipant }
       val snapshotParticipant = participants(1)
@@ -80,12 +78,10 @@ class ParticipantsProcessorSpec extends ProcessorTestFixture {
         .thenReturn(Json.toJson(snapshotState).toString);
 
       participants.foreach(participantRepository.put)
-      participantsProcessor ? "snap"
-      Thread.sleep(250)
-      participantsProcessor ! "persistence_restart"
-      participantRepository.removeAll
+      (participantsProcessor ? "snap").mapTo[String].futureValue
 
-      Thread.sleep(250)
+      participantRepository.removeAll
+      participantsProcessor = restartProcessor(participantsProcessor)
 
       participantRepository.getValues.size must be (1)
       participantRepository.getByKey(snapshotParticipant.id) mustSucceed { repoParticipant =>

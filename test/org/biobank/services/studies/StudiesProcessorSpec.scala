@@ -1,19 +1,21 @@
 package org.biobank.services.studies
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
-import org.biobank.domain.studies.StudyRepository
+import org.biobank.domain.studies._
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
-import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import scalaz.Scalaz._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
-final case class NamedStudiesProcessor @Inject() (@Named("studiesProcessor") processor: ActorRef)
+final case class NamedStudiesProcessor1 @Inject() (@Named("studiesProcessor") processor: ActorRef)
+final case class NamedStudiesProcessor2 @Inject() (@Named("processingType") processor: ActorRef)
+final case class NamedStudiesProcessor3 @Inject() (@Named("specimenLinkType") processor: ActorRef)
 
 class StudiesProcessorSpec extends ProcessorTestFixture {
 
@@ -21,19 +23,32 @@ class StudiesProcessorSpec extends ProcessorTestFixture {
   import org.biobank.infrastructure.commands.StudyCommands._
   import org.biobank.infrastructure.events.StudyEvents._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  private var studiesProcessor = app.injector.instanceOf[NamedStudiesProcessor1].processor
+  private val processingTypeProcessor = app.injector.instanceOf[NamedStudiesProcessor2].processor
+  private val specimenLinkTypeProcessor = app.injector.instanceOf[NamedStudiesProcessor3].processor
 
-  val studiesProcessor = app.injector.instanceOf[NamedStudiesProcessor].processor
-
-  val studyRepository = app.injector.instanceOf[StudyRepository]
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
-  val persistenceId = "studies-processor-id"
+  private val studyRepository = app.injector.instanceOf[StudyRepository]
 
   override def beforeEach() {
     studyRepository.removeAll
     super.beforeEach()
+  }
+
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new StudiesProcessor(
+                                       processingTypeProcessor,
+                                       specimenLinkTypeProcessor,
+                                       studyRepository,
+                                       app.injector.instanceOf[ProcessingTypeRepository],
+                                       app.injector.instanceOf[SpecimenGroupRepository],
+                                       app.injector.instanceOf[CollectionEventTypeRepository],
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "studies")
+    Thread.sleep(250)
+    actor
   }
 
   describe("A studies processor must") {
@@ -46,26 +61,15 @@ class StudiesProcessorSpec extends ProcessorTestFixture {
       val v = ask(studiesProcessor, cmd).mapTo[ServiceValidation[StudyEvent]].futureValue
       v.isSuccess must be (true)
       studyRepository.getValues.map { s => s.name } must contain (study.name)
-      studiesProcessor ! "persistence_restart"
-      studyRepository.removeAll
 
-      Thread.sleep(250)
+      studyRepository.removeAll
+      studiesProcessor = restartProcessor(studiesProcessor)
 
       studyRepository.getValues.size must be (1)
       studyRepository.getValues.map { s => s.name } must contain (study.name)
     }
 
-    it("allow a snapshot request", PersistenceTest) {
-      val studies = (1 to 2).map { _ => factory.createDisabledStudy }
-      studies.foreach(studyRepository.put)
-
-      studiesProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
-    }
-
-    it("accept a snapshot offer", PersistenceTest) {
+    it("recovers a snapshot", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val studies = (1 to 2).map { _ => factory.createDisabledStudy }
       val snapshotStudy = studies(1)
@@ -76,12 +80,10 @@ class StudiesProcessorSpec extends ProcessorTestFixture {
         .thenReturn(Json.toJson(snapshotState).toString);
 
       studies.foreach(studyRepository.put)
-      studiesProcessor ? "snap"
-      Thread.sleep(250)
-      studiesProcessor ! "persistence_restart"
-      studyRepository.removeAll
+      (studiesProcessor ? "snap").mapTo[String].futureValue
 
-      Thread.sleep(250)
+      studyRepository.removeAll
+      studiesProcessor = restartProcessor(studiesProcessor)
 
       studyRepository.getValues.size must be (1)
       studyRepository.getByKey(snapshotStudy.id) mustSucceed { repoStudy =>

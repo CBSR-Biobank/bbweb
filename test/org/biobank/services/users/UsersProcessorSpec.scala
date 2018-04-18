@@ -1,6 +1,6 @@
 package org.biobank.services.users
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
@@ -10,10 +10,10 @@ import org.biobank.infrastructure.events.UserEvents._
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
-import org.mockito.Mockito._
-import org.slf4j.LoggerFactory
+import play.api.{Configuration, Environment}
 import play.api.libs.json._
-import scalaz.Scalaz._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 case class NamedUsersProcessor @Inject() (@Named("usersProcessor") processor: ActorRef)
 
@@ -21,17 +21,29 @@ class UsersProcessorSpec extends ProcessorTestFixture with PresistenceQueryEvent
 
   import org.biobank.TestUtils._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  private var usersProcessor = app.injector.instanceOf[NamedUsersProcessor].processor
 
-  val usersProcessor = app.injector.instanceOf[NamedUsersProcessor].processor
-
-  val userRepository = app.injector.instanceOf[UserRepository]
-
-  val nameGenerator = new NameGenerator(this.getClass)
+  private val userRepository = app.injector.instanceOf[UserRepository]
 
   override def beforeEach() {
     userRepository.removeAll
     super.beforeEach()
+  }
+
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new UsersProcessor(
+                                       app.injector.instanceOf[Configuration],
+                                       userRepository,
+                                       app.injector.instanceOf[PasswordHasher],
+                                       app.injector.instanceOf[EmailService],
+                                       app.injector.instanceOf[Environment],
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "users")
+    Thread.sleep(250)
+    actor
   }
 
   describe("A user processor must") {
@@ -47,21 +59,9 @@ class UsersProcessorSpec extends ProcessorTestFixture with PresistenceQueryEvent
       userRepository.getValues.map { c => c.name } must contain (user.name)
 
       userRepository.removeAll
-      usersProcessor ! "persistence_restart"
-
-      Thread.sleep(500)
+      usersProcessor = restartProcessor(usersProcessor)
 
       userRepository.getValues.map { c => c.name } must contain (user.name)
-    }
-
-    it("allow a snapshot request", PersistenceTest) {
-      val users = (1 to 2).map { _ => factory.createActiveUser }
-      users.foreach(userRepository.put)
-
-      usersProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
     }
 
     it("accept a snapshot offer", PersistenceTest) {
@@ -75,12 +75,10 @@ class UsersProcessorSpec extends ProcessorTestFixture with PresistenceQueryEvent
         .thenReturn(Json.toJson(snapshotState).toString);
 
       users.foreach(userRepository.put)
-      usersProcessor ? "snap"
-      Thread.sleep(250)
-      usersProcessor ! "persistence_restart"
-      userRepository.removeAll
+      (usersProcessor ? "snap").mapTo[String].futureValue
 
-      Thread.sleep(250)
+      userRepository.removeAll
+      usersProcessor = restartProcessor(usersProcessor)
 
       userRepository.getByKey(snapshotUser.id) mustSucceed { repoUser =>
         repoUser.name must be (snapshotUser.name)

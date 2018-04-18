@@ -1,13 +1,11 @@
 package org.biobank.services.centres
 
 import akka.actor._
-import akka.event.{Logging, LoggingAdapter}
 import akka.persistence.{RecoveryCompleted, SnapshotOffer, SaveSnapshotSuccess, SaveSnapshotFailure}
 import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
-import org.biobank.TestData
 import org.biobank.domain.LocationId
 import org.biobank.domain.centres._
 import org.biobank.domain.participants.{SpecimenId, SpecimenRepository}
@@ -40,7 +38,6 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
                                     val shipmentSpecimenRepository: ShipmentSpecimenRepository,
                                     val centreRepository:           CentreRepository,
                                     val specimenRepository:         SpecimenRepository,
-                                    val testData:                   TestData,
                                     val snapshotWriter:             SnapshotWriter)
     extends Processor
     with ShipmentValidations
@@ -48,9 +45,11 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   import ShipmentsProcessor._
   import org.biobank.CommonValidations._
 
-  override val log: LoggingAdapter = Logging(context.system, this)
-
   override def persistenceId: String = "shipments-processor-id"
+
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  private var replyTo: Option[ActorRef] = None
 
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
@@ -170,13 +169,17 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
 
     case "snap" =>
       mySaveSnapshot
+     replyTo = Some(sender())
 
     case SaveSnapshotSuccess(metadata) =>
-      log.info(s"SaveSnapshotSuccess: $metadata")
+      log.debug(s"SaveSnapshotSuccess: $metadata")
+      replyTo.foreach(_ ! akka.actor.Status.Success(s"snapshot saved: $metadata"))
+      replyTo = None
 
     case SaveSnapshotFailure(metadata, reason) =>
-      log.info(s"SaveSnapshotFailure: $metadata, reason: $reason")
-      reason.printStackTrace
+      log.debug(s"SaveSnapshotFailure: $metadata, reason: $reason")
+      replyTo.foreach(_ ! akka.actor.Status.Failure(reason))
+      replyTo = None
 
     case cmd => log.error(s"shipmentsProcessor: message not handled: $cmd")
   }
@@ -189,13 +192,13 @@ class ShipmentsProcessor @Inject() (val shipmentRepository:         ShipmentRepo
   }
 
   private def applySnapshot(filename: String): Unit = {
-    log.info(s"snapshot recovery file: $filename")
+    log.debug(s"snapshot recovery file: $filename")
     val fileContents = snapshotWriter.load(filename);
     Json.parse(fileContents).validate[SnapshotState].fold(
         errors => log.error(s"could not apply snapshot: $filename: $errors"),
         snapshot =>  {
-          log.info(s"snapshot contains ${snapshot.shipments.size} shipments")
-          log.info(s"snapshot contains ${snapshot.shipmentSpecimens.size} shipment specimens")
+          log.debug(s"snapshot contains ${snapshot.shipments.size} shipments")
+          log.debug(s"snapshot contains ${snapshot.shipmentSpecimens.size} shipment specimens")
           snapshot.shipments.foreach(shipmentRepository.put)
           snapshot.shipmentSpecimens.foreach(shipmentSpecimenRepository.put)
         }

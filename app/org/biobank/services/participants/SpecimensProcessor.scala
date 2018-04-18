@@ -53,6 +53,9 @@ class SpecimensProcessor @Inject() (
 
   override def persistenceId: String = "specimens-processor-id"
 
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  private var replyTo: Option[ActorRef] = None
+
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
@@ -112,13 +115,17 @@ class SpecimensProcessor @Inject() (
 
     case "snap" =>
      mySaveSnapshot
+     replyTo = Some(sender())
 
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"snapshot saved successfully: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Success(s"snapshot saved: $metadata"))
+      replyTo = None
 
     case SaveSnapshotFailure(metadata, reason) =>
-      log.error(s"snapshot save error: ${metadata}")
-      reason.printStackTrace
+      log.debug(s"snapshot save error: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Failure(reason))
+      replyTo = None
 
     case "persistence_restart" =>
       throw new Exception(
@@ -131,12 +138,12 @@ class SpecimensProcessor @Inject() (
   private def mySaveSnapshot(): Unit = {
     val snapshotState = SnapshotState(specimenRepository.getValues.toSet)
     val filename = snapshotWriter.save(persistenceId, Json.toJson(snapshotState).toString)
-    log.info(s"saved snapshot to: $filename")
+    log.debug(s"saved snapshot to: $filename")
     saveSnapshot(filename)
   }
 
   private def applySnapshot(filename: String): Unit = {
-    log.info(s"snapshot recovery file: $filename")
+    log.debug(s"snapshot recovery file: $filename")
     val fileContents = snapshotWriter.load(filename);
     Json.parse(fileContents).validate[SnapshotState].fold(
       errors => log.error(s"could not apply snapshot: $filename: $errors"),

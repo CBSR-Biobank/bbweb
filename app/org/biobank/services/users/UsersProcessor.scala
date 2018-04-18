@@ -46,6 +46,9 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
   override def persistenceId: String = "user-processor-id"
 
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  private var replyTo: Option[ActorRef] = None
+
   @SuppressWarnings(Array("org.wartremover.warts.Any"))
   val receiveRecover: Receive = {
     case event: UserEvent =>
@@ -108,13 +111,17 @@ class UsersProcessor @Inject() (val config:         Configuration,
 
     case "snap" =>
      mySaveSnapshot
+     replyTo = Some(sender())
 
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"snapshot saved successfully: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Success(s"snapshot saved: $metadata"))
+      replyTo = None
 
     case SaveSnapshotFailure(metadata, reason) =>
       log.error(s"snapshot save error: ${metadata}")
-      reason.printStackTrace
+      replyTo.foreach(_ ! akka.actor.Status.Failure(reason))
+      replyTo = None
 
     case "persistence_restart" =>
       throw new Exception(
@@ -131,7 +138,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
   }
 
   private def applySnapshot(filename: String): Unit = {
-    log.info(s"snapshot recovery file: $filename")
+    log.debug(s"snapshot recovery file: $filename")
     val fileContents = snapshotWriter.load(filename);
     Json.parse(fileContents).validate[SnapshotState].fold(
       errors => log.error(s"could not apply snapshot: $filename: $errors"),

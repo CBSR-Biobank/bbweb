@@ -47,6 +47,9 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
   override def persistenceId: String = "collection-event-type-processor-id"
 
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  private var replyTo: Option[ActorRef] = None
+
   /**
    * These are the events that are recovered during journal recovery. They cannot fail and must be
    * processed to recreate the current state of the aggregate.
@@ -121,14 +124,18 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       processUpdateCmd(cmd, removeSpecimenDescriptionCmdToEvent, applySpecimenDescriptionRemovedEvent)
 
     case "snap" =>
-     mySaveSnapshot
+      mySaveSnapshot
+      replyTo = Some(sender())
 
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"snapshot saved successfully: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Success(s"snapshot saved: $metadata"))
+      replyTo = None
 
     case SaveSnapshotFailure(metadata, reason) =>
-      log.error(s"snapshot save error: ${metadata}")
-      reason.printStackTrace
+      log.debug(s"snapshot save error: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Failure(reason))
+      replyTo = None
 
     case "persistence_restart" =>
       throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
@@ -144,7 +151,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   }
 
   private def applySnapshot(filename: String): Unit = {
-    log.info(s"snapshot recovery file: $filename")
+    log.debug(s"snapshot recovery file: $filename")
     val fileContents = snapshotWriter.load(filename);
     Json.parse(fileContents).validate[SnapshotState].fold(
       errors => log.error(s"could not apply snapshot: $filename: $errors"),
@@ -291,14 +298,14 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
       : ServiceValidation[CollectionEventTypeEvent] = {
     for {
       specimenDesc <- CollectionSpecimenDescription.create(cmd.name,
-                                                           cmd.description,
-                                                           cmd.units,
-                                                           cmd.anatomicalSourceType,
-                                                           cmd.preservationType,
-                                                           cmd.preservationTemperature,
-                                                           cmd.specimenType,
-                                                           cmd.maxCount,
-                                                           cmd.amount)
+                                                          cmd.description,
+                                                          cmd.units,
+                                                          cmd.anatomicalSourceType,
+                                                          cmd.preservationType,
+                                                          cmd.preservationTemperature,
+                                                          cmd.specimenType,
+                                                          cmd.maxCount,
+                                                          cmd.amount)
       updatedCet <- cet.withSpecimenDescription(specimenDesc)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                      := cet.studyId.id,
@@ -314,28 +321,28 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     for {
       specimenDesc <- {
         CollectionSpecimenDescription(SpecimenDescriptionId(cmd.specimenDescriptionId),
-                                      Slug(cmd.name),
-                                      cmd.name,
-                                      cmd.description,
-                                      cmd.units,
-                                      cmd.anatomicalSourceType,
-                                      cmd.preservationType,
-                                      cmd.preservationTemperature,
-                                      cmd.specimenType,
-                                      cmd.maxCount,
-                                      cmd.amount).successNel[String]
+                                     Slug(cmd.name),
+                                     cmd.name,
+                                     cmd.description,
+                                     cmd.units,
+                                     cmd.anatomicalSourceType,
+                                     cmd.preservationType,
+                                     cmd.preservationTemperature,
+                                     cmd.specimenType,
+                                     cmd.maxCount,
+                                     cmd.amount).successNel[String]
       }
       updatedCet <- cet.withSpecimenDescription(specimenDesc)
     } yield CollectionEventTypeEvent(cet.id.id).update(
-      _.studyId                                        := cet.studyId.id,
-      _.sessionUserId                                  := cmd.sessionUserId,
-      _.time                                           := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+      _.studyId                                      := cet.studyId.id,
+      _.sessionUserId                                := cmd.sessionUserId,
+      _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.specimenDescriptionUpdated.version             := cmd.expectedVersion,
       _.specimenDescriptionUpdated.specimenDescription := EventUtils.specimenDescriptionToEvent(specimenDesc))
   }
 
   private def removeSpecimenDescriptionCmdToEvent(cmd: RemoveCollectionSpecimenDescriptionCmd,
-                                           cet: CollectionEventType)
+                                                 cet: CollectionEventType)
       : ServiceValidation[CollectionEventTypeEvent] = {
     cet.removeSpecimenDescription(SpecimenDescriptionId(cmd.specimenDescriptionId)) map { c =>
       CollectionEventTypeEvent(cet.id.id).update(
@@ -362,7 +369,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   }
 
   private def onValidEventAndVersion(event:        CollectionEventTypeEvent,
-                                     eventType:    Boolean,
+    eventType:    Boolean,
                                      eventVersion: Long)
                                     (applyEvent: (CollectionEventType, OffsetDateTime) => ServiceValidation[Boolean])
       : Unit = {
@@ -441,7 +448,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
 
       val v = cet.withName(event.getNameUpdated.getName).map { updated =>
         updated.copy(slug = collectionEventTypeRepository.slug(updated.name))
-      }
+        }
       storeIfValid(v, eventTime)
     }
   }

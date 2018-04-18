@@ -1,11 +1,12 @@
 package org.biobank.services.studies
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.Global
 import org.biobank.fixture._
-import org.biobank.domain.studies.{StudyRepository, CollectionEventTypeRepository}
+import org.biobank.domain.studies.CollectionEventTypeRepository
+import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
@@ -13,6 +14,8 @@ import org.mockito.Mockito._
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scalaz.Scalaz._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 case class NamedCollectionEventTypeProcessor @Inject() (@Named("collectionEventType") processor: ActorRef)
 
@@ -24,20 +27,27 @@ class CollectionEventTypesProcessorSpec extends ProcessorTestFixture {
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val collectionEventTypeProcessor =
+  private var collectionEventTypeProcessor =
     app.injector.instanceOf[NamedCollectionEventTypeProcessor].processor
 
-  val studyRepository = app.injector.instanceOf[StudyRepository]
-
-  val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
-  val persistenceId = "collection-event-type-processor-id"
+  private val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
 
   override def beforeEach() {
     collectionEventTypeRepository.removeAll
     super.beforeEach()
+  }
+
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new CollectionEventTypeProcessor(
+                                       collectionEventTypeRepository,
+                                       app.injector.instanceOf[CollectionEventRepository],
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "actor")
+    Thread.sleep(250)
+    actor
   }
 
   describe("A collectionEventTypes processor must") {
@@ -55,28 +65,14 @@ class CollectionEventTypesProcessorSpec extends ProcessorTestFixture {
         .futureValue
       v.isSuccess must be (true)
       collectionEventTypeRepository.getValues.map { cet => cet.name } must contain (collectionEventType.name)
-      collectionEventTypeProcessor ! "persistence_restart"
       collectionEventTypeRepository.removeAll
-
-      Thread.sleep(250)
+      collectionEventTypeProcessor = restartProcessor(collectionEventTypeProcessor)
 
       collectionEventTypeRepository.getValues.size must be (1)
       collectionEventTypeRepository.getValues.map { cet => cet.name } must contain (collectionEventType.name)
     }
 
-    it("allow a snapshot request", PersistenceTest) {
-      val collectionEventTypes = (1 to 2).map { _ => factory.createCollectionEventType }
-      val study = factory.defaultDisabledStudy
-      collectionEventTypes.foreach(collectionEventTypeRepository.put)
-      studyRepository.put(study)
-
-      collectionEventTypeProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
-    }
-
-    it("accept a snapshot offer", PersistenceTest) {
+    it("recovers a snapshot", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val collectionEventTypes = (1 to 2).map { _ => factory.createCollectionEventType }
       val snapshotCollectionEventType = collectionEventTypes(1)
@@ -87,12 +83,10 @@ class CollectionEventTypesProcessorSpec extends ProcessorTestFixture {
         .thenReturn(Json.toJson(snapshotState).toString);
 
       collectionEventTypes.foreach(collectionEventTypeRepository.put)
-      collectionEventTypeProcessor ? "snap"
-      Thread.sleep(250)
-      collectionEventTypeProcessor ! "persistence_restart"
-      collectionEventTypeRepository.removeAll
+      (collectionEventTypeProcessor ? "snap").mapTo[String].futureValue
 
-      Thread.sleep(250)
+      collectionEventTypeRepository.removeAll
+      collectionEventTypeProcessor = restartProcessor(collectionEventTypeProcessor)
 
       collectionEventTypeRepository.getValues.size must be (1)
       collectionEventTypeRepository.getByKey(snapshotCollectionEventType.id)

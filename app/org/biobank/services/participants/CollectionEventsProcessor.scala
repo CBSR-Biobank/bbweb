@@ -44,6 +44,9 @@ class CollectionEventsProcessor @Inject() (
   import CollectionEventEvent.EventType
   import org.biobank.infrastructure.events.EventUtils._
 
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  private var replyTo: Option[ActorRef] = None
+
   override def persistenceId: String = "collection-events-processor-id"
 
   /**
@@ -99,13 +102,17 @@ class CollectionEventsProcessor @Inject() (
 
     case "snap" =>
      mySaveSnapshot
+     replyTo = Some(sender())
 
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"snapshot saved successfully: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Success(s"snapshot saved: $metadata"))
+      replyTo = None
 
     case SaveSnapshotFailure(metadata, reason) =>
-      log.error(s"snapshot save error: ${metadata}")
-      reason.printStackTrace
+      log.debug(s"snapshot save error: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Failure(reason))
+      replyTo = None
 
     case "persistence_restart" =>
       throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
@@ -123,7 +130,7 @@ class CollectionEventsProcessor @Inject() (
   }
 
   private def applySnapshot(filename: String): Unit = {
-    log.info(s"snapshot recovery file: $filename")
+    log.debug(s"snapshot recovery file: $filename")
     val fileContents = snapshotWriter.load(filename);
     Json.parse(fileContents).validate[SnapshotState].fold(
       errors => log.error(s"could not apply snapshot: $filename: $errors"),

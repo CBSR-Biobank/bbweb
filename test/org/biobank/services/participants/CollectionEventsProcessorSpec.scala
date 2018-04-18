@@ -1,6 +1,6 @@
 package org.biobank.services.participants
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import java.time.OffsetDateTime
 import javax.inject.{ Inject, Named }
@@ -10,10 +10,9 @@ import org.biobank.domain.studies.{StudyRepository, CollectionEventTypeRepositor
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
-import org.mockito.Mockito._
-import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import scalaz.Scalaz._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 case class NamedCollectionEventsProcessor @Inject() (@Named("collectionEventsProcessor") processor: ActorRef)
 
@@ -23,25 +22,36 @@ class CollectionEventsProcessorSpec extends ProcessorTestFixture {
   import org.biobank.infrastructure.commands.CollectionEventCommands._
   import org.biobank.infrastructure.events.CollectionEventEvents._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  private var collectionEventsProcessor = app.injector.instanceOf[NamedCollectionEventsProcessor].processor
 
-  val collectionEventsProcessor = app.injector.instanceOf[NamedCollectionEventsProcessor].processor
+  private val studyRepository = app.injector.instanceOf[StudyRepository]
 
-  val studyRepository = app.injector.instanceOf[StudyRepository]
+  private val collectionEventRepository = app.injector.instanceOf[CollectionEventRepository]
 
-  val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
+  private val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
 
-  val participantRepository = app.injector.instanceOf[ParticipantRepository]
+  private val participantRepository = app.injector.instanceOf[ParticipantRepository]
 
-  val collectionEventRepository = app.injector.instanceOf[CollectionEventRepository]
-
-  val nameGenerator = new NameGenerator(this.getClass)
-
-  val persistenceId = "collectionEvents-processor-id"
+  private val nameGenerator = new NameGenerator(this.getClass)
 
   override def beforeEach() {
     collectionEventRepository.removeAll
     super.beforeEach()
+  }
+
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new CollectionEventsProcessor(
+                                       collectionEventRepository,
+                                       collectionEventTypeRepository,
+                                       participantRepository,
+                                       app.injector.instanceOf[StudyRepository],
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "collectionEvents")
+    Thread.sleep(250)
+    actor
   }
 
   describe("A collectionEvents processor must") {
@@ -60,29 +70,19 @@ class CollectionEventsProcessorSpec extends ProcessorTestFixture {
       studyRepository.put(study)
       participantRepository.put(participant)
       collectionEventTypeRepository.put(ceventType)
-      val v = ask(collectionEventsProcessor, cmd).mapTo[ServiceValidation[CollectionEventEvent]].futureValue
+      val v = ask(collectionEventsProcessor, cmd)
+        .mapTo[ServiceValidation[CollectionEventEvent]]
+        .futureValue
       v.isSuccess must be (true)
       collectionEventRepository.getValues.map { s => s.visitNumber } must contain (collectionEvent.visitNumber)
-      collectionEventsProcessor ! "persistence_restart"
       collectionEventRepository.removeAll
-
-      Thread.sleep(250)
+      collectionEventsProcessor = restartProcessor(collectionEventsProcessor)
 
       collectionEventRepository.getValues.size must be (1)
       collectionEventRepository.getValues.map { s => s.visitNumber } must contain (collectionEvent.visitNumber)
     }
 
-    it("allow a snapshot request", PersistenceTest) {
-      val collectionEvents = (1 to 2).map { _ => factory.createCollectionEvent }
-      collectionEvents.foreach(collectionEventRepository.put)
-
-      collectionEventsProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
-    }
-
-    it("accept a snapshot offer", PersistenceTest) {
+    it("recovers a snapshot", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val collectionEvents = (1 to 2).map { _ => factory.createCollectionEvent }
       val snapshotCollectionEvent = collectionEvents(1)
@@ -93,12 +93,11 @@ class CollectionEventsProcessorSpec extends ProcessorTestFixture {
         .thenReturn(Json.toJson(snapshotState).toString);
 
       collectionEvents.foreach(collectionEventRepository.put)
-      collectionEventsProcessor ? "snap"
-      Thread.sleep(250)
-      collectionEventsProcessor ! "persistence_restart"
-      collectionEventRepository.removeAll
 
-      Thread.sleep(250)
+      (collectionEventsProcessor ? "snap").mapTo[String].futureValue
+
+      collectionEventRepository.removeAll
+      collectionEventsProcessor = restartProcessor(collectionEventsProcessor)
 
       collectionEventRepository.getValues.size must be (1)
       collectionEventRepository.getByKey(snapshotCollectionEvent.id) mustSucceed { repoCollectionEvent =>

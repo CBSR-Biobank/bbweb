@@ -5,7 +5,6 @@ import akka.persistence.{RecoveryCompleted, SaveSnapshotSuccess, SaveSnapshotFai
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import javax.inject.{Inject}
-import org.biobank.TestData
 import org.biobank.domain.{LocationId, Slug}
 import org.biobank.domain.centres._
 import org.biobank.domain.studies.{StudyId, StudyRepository}
@@ -29,14 +28,16 @@ object CentresProcessor {
 
 class CentresProcessor @Inject() (val centreRepository: CentreRepository,
                                   val studyRepository:  StudyRepository,
-                                  val snapshotWriter:   SnapshotWriter,
-                                  val testData:         TestData)
+                                  val snapshotWriter:   SnapshotWriter)
     extends Processor {
   import CentresProcessor._
   import org.biobank.CommonValidations._
   import CentreEvent.EventType
 
   override def persistenceId: String = "centre-processor-id"
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  private var replyTo: Option[ActorRef] = None
 
   val ErrMsgNameExists: String = "centre with name already exists"
 
@@ -100,13 +101,17 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
 
     case "snap" =>
      mySaveSnapshot
+     replyTo = Some(sender())
 
     case SaveSnapshotSuccess(metadata) =>
       log.debug(s"snapshot saved successfully: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Success(s"snapshot saved: $metadata"))
+      replyTo = None
 
     case SaveSnapshotFailure(metadata, reason) =>
-      log.error(s"snapshot save error: ${metadata}")
-      reason.printStackTrace
+      log.debug(s"snapshot save error: ${metadata}")
+      replyTo.foreach(_ ! akka.actor.Status.Failure(reason))
+      replyTo = None
 
     case "persistence_restart" =>
       throw new Exception("Intentionally throwing exception to test persistence by restarting the actor")
@@ -122,7 +127,7 @@ class CentresProcessor @Inject() (val centreRepository: CentreRepository,
   }
 
   private def applySnapshot(filename: String): Unit = {
-    log.info(s"snapshot recovery file: $filename")
+    log.debug(s"snapshot recovery file: $filename")
     val fileContents = snapshotWriter.load(filename);
     Json.parse(fileContents).validate[SnapshotState].fold(
       errors => log.error(s"could not apply snapshot: $filename: $errors"),

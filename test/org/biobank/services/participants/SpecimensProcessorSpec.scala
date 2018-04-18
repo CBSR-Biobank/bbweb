@@ -1,20 +1,20 @@
 package org.biobank.services.participants
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.fixture._
 import org.biobank.domain.studies.{StudyRepository, CollectionEventTypeRepository}
 import org.biobank.domain.centres.CentreRepository
 import org.biobank.domain.participants._
+import org.biobank.domain.processing._
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
-import org.mockito.Mockito._
-import org.slf4j.LoggerFactory
 import play.api.libs.json._
 import scala.language.reflectiveCalls
-import scalaz.Scalaz._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 case class NamedSpecimensProcessor @Inject() (@Named("specimensProcessor") processor: ActorRef)
 
@@ -27,32 +27,46 @@ class SpecimensProcessorSpec
   import org.biobank.infrastructure.commands.SpecimenCommands._
   import org.biobank.infrastructure.events.SpecimenEvents._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  private var specimensProcessor = app.injector.instanceOf[NamedSpecimensProcessor].processor
 
-  val specimensProcessor = app.injector.instanceOf[NamedSpecimensProcessor].processor
+  private val studyRepository = app.injector.instanceOf[StudyRepository]
 
-  val studyRepository = app.injector.instanceOf[StudyRepository]
+  private val centreRepository = app.injector.instanceOf[CentreRepository]
 
-  val centreRepository = app.injector.instanceOf[CentreRepository]
+  private val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
 
-  val collectionEventTypeRepository = app.injector.instanceOf[CollectionEventTypeRepository]
+  private val participantRepository = app.injector.instanceOf[ParticipantRepository]
 
-  val participantRepository = app.injector.instanceOf[ParticipantRepository]
+  private val collectionEventRepository = app.injector.instanceOf[CollectionEventRepository]
 
-  val collectionEventRepository = app.injector.instanceOf[CollectionEventRepository]
+  private val specimenRepository = app.injector.instanceOf[SpecimenRepository]
 
-  val specimenRepository = app.injector.instanceOf[SpecimenRepository]
-
-  val nameGenerator = new NameGenerator(this.getClass)
+  private val nameGenerator = new NameGenerator(this.getClass)
 
   override def beforeEach() {
     specimenRepository.removeAll
     super.beforeEach()
   }
 
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new SpecimensProcessor(
+                                       specimenRepository,
+                                       collectionEventRepository,
+                                       collectionEventTypeRepository,
+                                       app.injector.instanceOf[CeventSpecimenRepository],
+                                       app.injector.instanceOf[ProcessingEventInputSpecimenRepository],
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "specimens")
+    Thread.sleep(250)
+    actor
+  }
+
   describe("A specimens processor must") {
 
-    ignore("allow recovery from journal", PersistenceTest) {
+    it("allow recovery from journal", PersistenceTest) {
       val f = createEntitiesAndSpecimens
 
       centreRepository.put(f.centre)
@@ -78,10 +92,7 @@ class SpecimensProcessorSpec
       }
 
       specimenRepository.removeAll
-      specimensProcessor ! "persistence_restart"
-
-      Thread.sleep(2500)
-      logEvents("specimens-processor-id")
+      specimensProcessor = restartProcessor(specimensProcessor)
 
       specimenRepository.getValues.size must be (f.specimens.size)
       f.specimens.foreach { specimen =>
@@ -89,17 +100,7 @@ class SpecimensProcessorSpec
       }
     }
 
-    it("allow a snapshot request", PersistenceTest) {
-      val specimens = (1 to 2).map { _ => factory.createUsableSpecimen }
-      specimens.foreach(specimenRepository.put)
-
-      specimensProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
-    }
-
-    it("accept a snapshot offer", PersistenceTest) {
+    it("recovers a snapshot", PersistenceTest) {
       val snapshotFilename = "testfilename"
       val specimens = (1 to 2).map { _ => factory.createUsableSpecimen }
       val snapshotSpecimen = specimens(1)
@@ -110,12 +111,10 @@ class SpecimensProcessorSpec
         .thenReturn(Json.toJson(snapshotState).toString);
 
       specimens.foreach(specimenRepository.put)
-      specimensProcessor ? "snap"
-      Thread.sleep(250)
-      specimensProcessor ! "persistence_restart"
-      specimenRepository.removeAll
+      (specimensProcessor ? "snap").mapTo[String].futureValue
 
-      Thread.sleep(250)
+      specimenRepository.removeAll
+      specimensProcessor = restartProcessor(specimensProcessor)
 
       specimenRepository.getValues.size must be (1)
       specimenRepository.getByKey(snapshotSpecimen.id) mustSucceed { repoSpecimen =>

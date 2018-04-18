@@ -1,7 +1,6 @@
 package org.biobank.services.access
 
 import akka.actor._
-import akka.event.{Logging, LoggingAdapter}
 import akka.persistence.{RecoveryCompleted, SnapshotOffer, SaveSnapshotSuccess, SaveSnapshotFailure}
 //import com.github.ghik.silencer.silent
 import java.time.OffsetDateTime
@@ -39,9 +38,10 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
 
   type ApplyRoleEvent = (Role, OffsetDateTime) => ServiceValidation[Boolean]
 
-  override val log: LoggingAdapter = Logging(context.system, this)
-
   override def persistenceId: String = "access-processor-id"
+
+  @SuppressWarnings(Array("org.wartremover.warts.Var"))
+  private var replyTo: Option[ActorRef] = None
 
   @SuppressWarnings(Array("org.wartremover.warts.Any", "org.wartremover.warts.Throw"))
   val receiveRecover: Receive = {
@@ -108,13 +108,17 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
 
     case "snap" =>
       mySaveSnapshot
+     replyTo = Some(sender())
 
     case SaveSnapshotSuccess(metadata) =>
-      log.info(s"SaveSnapshotSuccess: $metadata")
+      log.debug(s"SaveSnapshotSuccess: $metadata")
+      replyTo.foreach(_ ! akka.actor.Status.Success(s"snapshot saved: $metadata"))
+      replyTo = None
 
     case SaveSnapshotFailure(metadata, reason) =>
-      log.info(s"SaveSnapshotFailure: $metadata, reason: $reason")
-      reason.printStackTrace
+      log.debug(s"SaveSnapshotFailure: $metadata, reason: $reason")
+      replyTo.foreach(_ ! akka.actor.Status.Failure(reason))
+      replyTo = None
 
     case cmd => log.error(s"accessProcessor: message not handled: $cmd")
   }
@@ -126,12 +130,12 @@ class AccessProcessor @Inject() (val accessItemRepository: AccessItemRepository,
   }
 
   private def applySnapshot(filename: String): Unit = {
-    log.info(s"snapshot recovery file: $filename")
+    log.debug(s"snapshot recovery file: $filename")
     val fileContents = snapshotWriter.load(filename);
     Json.parse(fileContents).validate[SnapshotState].fold(
       errors => log.error(s"could not apply snapshot: $filename: $errors"),
       snapshot =>  {
-        log.info(s"snapshot contains ${snapshot.accessItems.size} accessItems")
+        log.debug(s"snapshot contains ${snapshot.accessItems.size} accessItems")
         snapshot.accessItems.foreach(accessItemRepository.put)
       }
     )

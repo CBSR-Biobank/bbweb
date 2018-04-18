@@ -18,7 +18,7 @@ matrix:
       script:
         - cp conf/logback-test.xml.template conf/logback-test.xml
         - sbt ++$TRAVIS_SCALA_VERSION test:compile
-        - sbt ++$TRAVIS_SCALA_VERSION clean coverage "testOnly -- -l PersistenceTest"
+        - sbt ++$TRAVIS_SCALA_VERSION clean coverage "test"
       after_success:
         - sbt ++$TRAVIS_SCALA_VERSION coverageReport coveralls
 

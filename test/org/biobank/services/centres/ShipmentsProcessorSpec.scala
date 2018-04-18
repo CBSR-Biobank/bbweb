@@ -1,20 +1,20 @@
 package org.biobank.services.centres
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.Global
 import org.biobank.domain.centres.ShipmentSpecFixtures
-import org.biobank.fixture._
 import org.biobank.domain.studies.StudyRepository
-import org.biobank.domain.centres.{CentreRepository, ShipmentRepository}
+import org.biobank.domain.centres._
+import org.biobank.domain.participants._
+import org.biobank.fixture._
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
-import org.mockito.Mockito._
-import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import scalaz.Scalaz._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 final case class NamedShipmentsProcessor @Inject() (@Named("shipmentsProcessor") processor: ActorRef)
 
@@ -24,20 +24,18 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
   import org.biobank.infrastructure.commands.ShipmentCommands._
   import org.biobank.infrastructure.events.ShipmentEvents._
 
-  val log = LoggerFactory.getLogger(this.getClass)
+  private var shipmentsProcessor = app.injector.instanceOf[NamedShipmentsProcessor].processor
 
-  val shipmentsProcessor = app.injector.instanceOf[NamedShipmentsProcessor].processor
+  private val studyRepository = app.injector.instanceOf[StudyRepository]
 
-  val studyRepository = app.injector.instanceOf[StudyRepository]
+  private val centreRepository = app.injector.instanceOf[CentreRepository]
 
-  val centreRepository = app.injector.instanceOf[CentreRepository]
-
-  val shipmentRepository = app.injector.instanceOf[ShipmentRepository]
-
-  val nameGenerator = new NameGenerator(this.getClass)
+  private val shipmentRepository = app.injector.instanceOf[ShipmentRepository]
 
   override def beforeEach() {
     studyRepository.removeAll
+    shipmentRepository.removeAll
+    centreRepository.removeAll
     super.beforeEach()
   }
 
@@ -54,6 +52,21 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
     f
   }
 
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new ShipmentsProcessor(
+                                       shipmentRepository,
+                                       app.injector.instanceOf[ShipmentSpecimenRepository],
+                                       centreRepository,
+                                       app.injector.instanceOf[SpecimenRepository],
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "shipments")
+    Thread.sleep(250)
+    actor
+  }
+
   describe("A shipments processor must") {
 
     it("allow recovery from journal", PersistenceTest) {
@@ -67,26 +80,15 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
       val v = ask(shipmentsProcessor, cmd).mapTo[ServiceValidation[ShipmentEvent]].futureValue
       v.isSuccess must be (true)
       shipmentRepository.getValues.map { s => s.courierName } must contain (f.shipment.courierName)
-      shipmentsProcessor ! "persistence_restart"
-      shipmentRepository.removeAll
 
-      Thread.sleep(250)
+      shipmentRepository.removeAll
+      shipmentsProcessor = restartProcessor(shipmentsProcessor)
 
       shipmentRepository.getValues.size must be (1)
       shipmentRepository.getValues.map { s => s.courierName } must contain (f.shipment.courierName)
     }
 
-    it("allow a snapshot request", PersistenceTest) {
-      val f = createdShipmentFixture
-      shipmentRepository.put(f.shipment)
-
-      shipmentsProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
-    }
-
-    it("accept a snapshot offer", PersistenceTest) {
+    it("recovers a snapshot", PersistenceTest) {
       val f = createdShipmentsFixture(2)
       val snapshotFilename = "testfilename"
       val snapshotShipment = f.shipmentMap.values.toList(1)
@@ -95,14 +97,11 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
       Mockito.when(snapshotWriterMock.save(anyString, anyString)).thenReturn(snapshotFilename);
       Mockito.when(snapshotWriterMock.load(snapshotFilename))
         .thenReturn(Json.toJson(snapshotState).toString);
-
       f.shipmentMap.values.foreach(shipmentRepository.put)
-      shipmentsProcessor ? "snap"
-      Thread.sleep(250)
-      shipmentsProcessor ! "persistence_restart"
-      shipmentRepository.removeAll
 
-      Thread.sleep(250)
+      (shipmentsProcessor ? "snap").mapTo[String].futureValue
+      shipmentRepository.removeAll
+      shipmentsProcessor = restartProcessor(shipmentsProcessor)
 
       shipmentRepository.getValues.size must be (1)
       shipmentRepository.getByKey(snapshotShipment.id) mustSucceed { repoShipment =>

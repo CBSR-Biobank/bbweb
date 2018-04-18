@@ -1,6 +1,6 @@
 package org.biobank.services.access
 
-import akka.actor.ActorRef
+import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.Global
@@ -11,10 +11,11 @@ import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito
 import org.mockito.Mockito._
+import org.scalatest.Inside
 import org.slf4j.LoggerFactory
 import play.api.libs.json._
-import org.scalatest.Inside
-import scalaz.Scalaz._
+import scala.concurrent.duration._
+import scala.concurrent.Await
 
 final case class NamedMembershipProcessor @Inject() (@Named("membershipProcessor") processor: ActorRef)
 
@@ -33,7 +34,7 @@ class MembershipProcessorSpec
 
   val log = LoggerFactory.getLogger(this.getClass)
 
-  val membershipProcessor = app.injector.instanceOf[NamedMembershipProcessor].processor
+  var membershipProcessor = app.injector.instanceOf[NamedMembershipProcessor].processor
 
   val membershipRepository = app.injector.instanceOf[MembershipRepository]
 
@@ -48,6 +49,18 @@ class MembershipProcessorSpec
     inside(entity) { case e: Membership =>
       membershipRepository.put(e)
     }
+  }
+
+  private def restartProcessor(processor: ActorRef) = {
+    val stopped = gracefulStop(processor, 5 seconds, PoisonPill)
+    Await.result(stopped, 6 seconds)
+
+    val actor = system.actorOf(Props(new MembershipProcessor(
+                                       membershipRepository,
+                                       app.injector.instanceOf[SnapshotWriter])),
+                               "access")
+    Thread.sleep(250)
+    actor
   }
 
   describe("An membership processor must") {
@@ -68,26 +81,14 @@ class MembershipProcessorSpec
       v mustSucceed { event =>
         membershipRepository.getByKey(MembershipId(event.id)) mustSucceed { membership =>
           membership.userIds must contain (user.id)
-          membershipProcessor ! "persistence_restart"
-
-          Thread.sleep(250)
+          membershipProcessor = restartProcessor(membershipProcessor)
 
           membershipRepository.getByKey(MembershipId(event.id)).isSuccess must be (true)
         }
       }
     }
 
-    it("allow a snapshot request", PersistenceTest) {
-      val f = new MembershipFixture
-      membershipRepository.put(f.membership)
-
-      membershipProcessor ! "snap"
-      Thread.sleep(250)
-      verify(snapshotWriterMock, atLeastOnce).save(anyString, anyString)
-      ()
-    }
-
-    it("accept a snapshot offer", PersistenceTest) {
+    it("recovers a snapshot", PersistenceTest) {
       val f = new MembershipFixture
       val user = factory.createRegisteredUser
       val snapshotFilename = "testfilename"
@@ -99,11 +100,10 @@ class MembershipProcessorSpec
         .thenReturn(Json.toJson(snapshotState).toString);
 
       membershipRepository.put(f.membership)
-      membershipProcessor ? "snap"
-      Thread.sleep(250)
-      membershipProcessor ! "persistence_restart"
+      (membershipProcessor ? "snap").mapTo[String].futureValue
 
-      Thread.sleep(250)
+      membershipRepository.removeAll
+      membershipProcessor = restartProcessor(membershipProcessor)
 
       membershipRepository.getByKey(snapshotMembership.id) mustSucceed { repoAccess =>
         repoAccess.userIds must contain (user.id)
