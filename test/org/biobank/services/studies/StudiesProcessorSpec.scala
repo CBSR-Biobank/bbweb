@@ -36,11 +36,7 @@ class StudiesProcessorSpec
     Await.result(stopped, 6 seconds)
 
     val actor = system.actorOf(Props(new StudiesProcessor(
-                                       processingTypeProcessor,
-                                       specimenLinkTypeProcessor,
                                        studyRepository,
-                                       app.injector.instanceOf[ProcessingTypeRepository],
-                                       app.injector.instanceOf[SpecimenGroupRepository],
                                        app.injector.instanceOf[CollectionEventTypeRepository],
                                        app.injector.instanceOf[SnapshotWriter])),
                                "studies")

@@ -1,34 +1,26 @@
 package org.biobank.controllers.studies
 
 import org.biobank.domain.JsonHelper
-import org.biobank.domain.studies._
-import org.biobank.fixture.ControllerFixture
+//import org.biobank.domain.studies._
+import org.biobank.fixture._
 import play.api.libs.json._
 import play.api.test.Helpers._
+import scala.language.reflectiveCalls
 
-class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
-
-
-  class Fixture(numProcessingTypes: Int = 1) {
-    val study = factory.createDisabledStudy
-    val collectedSpecimenDefinition = factory.createCollectionSpecimenDefinition
-    val collectionEventType = factory.createCollectionEventType.copy(
-        specimenDefinitions = Set(collectedSpecimenDefinition))
-    val processingTypes = (0 until numProcessingTypes).map {_ =>
-        val processingSpecimenDefinition = factory.createProcessingSpecimenDefinition
-        factory.createProcessingType.copy(
-          studyId = study.id,
-          specimenDerivation = CollectedSpecimenDerivation(collectionEventType.id,
-                                                           collectedSpecimenDefinition.id,
-                                                           processingSpecimenDefinition))
-      }
-
-    (processingTypes ++ Set(study, collectionEventType)).foreach(addToRepository)
-  }
+class ProcessingTypesControllerSpec
+    extends ControllerFixture
+    with ProcessingTypeFixtures
+    with JsonHelper {
 
   private def uri(paths: String*): String = {
     if (paths.isEmpty) "/api/studies/cetypes"
     else "/api/studies/proctypes/" + paths.mkString("/")
+  }
+
+  override protected def collectedSpecimenDerivationFixtures() = {
+    val f = super.collectedSpecimenDerivationFixtures
+    Set(f.study, f.collectionEventType).foreach(addToRepository)
+    f
   }
 
   // private def procTypeToAddJson(procType: ProcessingType) = {
@@ -113,16 +105,31 @@ class ProcessingTypesControllerSpec extends ControllerFixture with JsonHelper {
 
   describe("Processing Type REST API") {
 
-    describe("GET /api/studies/proctypes/:studySlug:procTypeSlug") {
+    describe("GET /api/studies/proctypes/:studySlug/:procTypeSlug") {
 
       it("get a single processing type") {
-        val f = new Fixture
-        val pt = f.processingTypes(0)
-        val reply = makeRequest(GET, uri(f.study.slug.id, pt.slug.id))
+        val f = collectedSpecimenDerivationFixtures
+        addToRepository(f.processingType)
+
+        val reply = makeRequest(GET, uri(f.study.slug.id, f.processingType.slug.id))
 
         (reply \ "status").as[String] must include ("success")
         val jsonObj = (reply \ "data").as[JsObject]
-        compareObj(jsonObj, pt)
+        compareObj(jsonObj, f.processingType)
+      }
+
+      it("fail for an invalid study ID") {
+        val f = collectedSpecimenDerivationFixtures
+        studyRepository.remove(f.study)
+
+        BbwebRequest(GET, uri(f.study.slug.id, f.processingType.slug.id)) must
+        beNotFoundWithMessage("EntityCriteriaNotFound.*study slug".r)
+      }
+
+      it("fail for an invalid collection event type id") {
+        val f = collectedSpecimenDerivationFixtures
+        BbwebRequest(GET, uri(f.study.slug.id, f.processingType.slug.id))
+          .must(beNotFoundWithMessage("EntityCriteriaNotFound.*processing type slug".r))
       }
 
     }

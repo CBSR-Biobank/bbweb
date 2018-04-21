@@ -399,7 +399,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
       it("return not found for an invalid user") {
         val user = factory.createActiveUser
-        notFound(GET, uri(user), JsNull, "EntityCriteriaNotFound: user slug")
+        BbwebRequest(GET, uri(user), JsNull) must beNotFoundWithMessage (
+          "EntityCriteriaNotFound: user slug".r)
       }
     }
 
@@ -769,20 +770,22 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val user = factory.createActiveUser
         val role = factory.createRole.copy(userIds = Set(user.id))
         Set(role).foreach(addToRepository)
-        notFound(POST,
-                 uri("roles", user.id.id),
-                 addRoleToUserJson(user, role),
-                 "IdNotFound: user id")
+        BbwebRequest(
+          POST,
+          uri("roles", user.id.id),
+          addRoleToUserJson(user, role)
+        ) must beNotFoundWithMessage("IdNotFound: user id".r)
       }
 
       it("cannot add a role that does not exist") {
         val user = factory.createActiveUser
         val role = factory.createRole.copy(userIds = Set(user.id))
         Set(user).foreach(addToRepository)
-        notFound(POST,
-                 uri("roles", user.id.id),
-                 addRoleToUserJson(user, role),
-                 "IdNotFound: role id")
+        BbwebRequest(
+          POST,
+          uri("roles", user.id.id),
+          addRoleToUserJson(user, role)
+        ) must beNotFoundWithMessage ("IdNotFound: role id".r)
       }
 
       it("cannot add a role to a user with a wrong user version") {
@@ -893,10 +896,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val membership = factory.createMembership.copy(userIds = Set(user.id))
         Set(membership).foreach(addToRepository)
 
-        notFound(POST,
-                 uri("memberships", user.id.id),
-                 addMembershipToUserJson(user, membership),
-                 "IdNotFound: user id")
+        BbwebRequest(
+          POST,
+          uri("memberships", user.id.id),
+          addMembershipToUserJson(user, membership)
+        ) must beNotFoundWithMessage ("IdNotFound: user id".r)
       }
 
       it("cannot add a membership that does not exist") {
@@ -904,10 +908,11 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val membership = factory.createMembership.copy(userIds = Set(user.id))
         Set(user).foreach(addToRepository)
 
-        notFound(POST,
-                 uri("memberships", user.id.id),
-                 addMembershipToUserJson(user, membership),
-                 "IdNotFound: membership id")
+        BbwebRequest(
+          POST,
+          uri("memberships", user.id.id),
+          addMembershipToUserJson(user, membership)
+        ) must beNotFoundWithMessage ("IdNotFound: membership id".r)
       }
 
       it("cannot add a role to a user with a wrong user version") {
@@ -1069,7 +1074,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
         // this request is valid since user is logged in
         var json = makeRequest(GET, uri("authenticate"), OK, JsNull, token)
-                              (json \ "data" \ "id").as[String] must be (user.id.id)
+
+        (json \ "data" \ "id").as[String] must be (user.id.id)
 
         // the user is now logged out
         json = makeRequest(POST, uri("logout"), OK, JsNull, token)
@@ -1227,19 +1233,17 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       Set(role).foreach(addToRepository)
 
       val url = uri("roles", user.id.id, user.version.toString, role.id.id)
-      notFound(DELETE, url, JsNull, "IdNotFound: user id")
+      BbwebRequest(DELETE, url, JsNull) must beNotFoundWithMessage("IdNotFound: user id".r)
     }
-
-    it("111 fail when removing and role ID does not exist") {
+   it("111 fail when removing and role ID does not exist") {
       val user = factory.createActiveUser
       val role = factory.createRole
       Set(user).foreach(addToRepository)
 
       val url = uri("roles", user.id.id, user.version.toString, role.id.id)
-      notFound(DELETE, url, JsNull, "IdNotFound: role id")
+      BbwebRequest(DELETE, url, JsNull) must beNotFoundWithMessage("IdNotFound: role id".r)
     }
-
-    it("cannot remove a role to a user with a wrong user version") {
+   it("cannot remove a role to a user with a wrong user version") {
       val user = factory.createActiveUser
       val role = factory.createRole.copy(userIds = Set(user.id))
       Set(user, role).foreach(addToRepository)
@@ -1312,16 +1316,16 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       Set(membership).foreach(addToRepository)
 
       val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
-      notFound(DELETE, url, JsNull, "IdNotFound: user id")
+      BbwebRequest(DELETE, url, JsNull) must beNotFoundWithMessage("IdNotFound: user id".r)
     }
 
-    it("111 fail when removing and membership ID does not exist") {
+    it("fail when removing and membership ID does not exist") {
       val user = factory.createActiveUser
       val membership = factory.createMembership
       Set(user).foreach(addToRepository)
 
       val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
-      notFound(DELETE, url, JsNull, "IdNotFound: membership id")
+      BbwebRequest(DELETE, url, JsNull) must beNotFoundWithMessage("IdNotFound: membership id".r)
     }
 
     it("cannot remove a membership to a user with a wrong user version") {

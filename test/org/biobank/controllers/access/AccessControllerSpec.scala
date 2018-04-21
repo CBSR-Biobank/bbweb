@@ -259,8 +259,11 @@ class AccessControllerSpec
 
       it("fail when updating and role ID does not exist") {
         val f = new RoleFixture
-        notFound(uri("roles", "name", f.role.id.id),
-                 updateNameJson(f.role, nameGenerator.next[Role]))
+        BbwebRequest(
+          POST,
+          uri("roles", "name", f.role.id.id),
+          updateNameJson(f.role, nameGenerator.next[Role])
+        ) must beNotFoundWithMessage("IdNotFound: role id".r)
       }
 
       it("fail when updating with invalid version") {
@@ -313,8 +316,12 @@ class AccessControllerSpec
 
       it("fail when updating and role ID does not exist") {
         val f = new RoleFixture
-        notFound(uri("roles", "description", f.role.id.id),
-                 updateDescriptionJson(f.role, Some(nameGenerator.next[Role])))
+        BbwebRequest(
+          POST,
+          uri("roles", "description", f.role.id.id),
+          updateDescriptionJson(f.role, Some(nameGenerator.next[Role]))
+        ) must beNotFoundWithMessage("IdNotFound: role id".r)
+
       }
 
       it("fail when updating with invalid version") {
@@ -390,7 +397,12 @@ class AccessControllerSpec
         val user = factory.createRegisteredUser
         val json = addUserJson(f.role, user)
         userRepository.put(user)
-        notFound(uri("roles", "user", f.role.id.id), json)
+        BbwebRequest(
+          POST,
+          uri("roles", "user", f.role.id.id),
+          json
+        ) must beNotFoundWithMessage("IdNotFound: role id".r)
+
       }
 
       it("fail when updating with invalid version") {
@@ -481,7 +493,12 @@ class AccessControllerSpec
         val parentRole = factory.createRole
         val json = addParentRoleJson(f.role, parentRole)
         accessItemRepository.put(parentRole)
-        notFound(uri("roles", "parent", f.role.id.id), json)
+        BbwebRequest(
+          POST,
+          uri("roles", "parent", f.role.id.id),
+          json
+        ) must beNotFoundWithMessage("IdNotFound: role id".r)
+
       }
 
       it("fail when updating with invalid version") {
@@ -582,7 +599,11 @@ class AccessControllerSpec
         val child = factory.createRole
         val json = addChildJson(f.role, child)
         accessItemRepository.put(child)
-        notFound(uri("roles", "child", f.role.id.id), json)
+        BbwebRequest(
+          POST,
+          uri("roles", "child", f.role.id.id),
+          json
+        ) must beNotFoundWithMessage("IdNotFound: role id".r)
       }
 
       it("fail when updating with invalid version") {
@@ -655,7 +676,8 @@ class AccessControllerSpec
       val user = factory.createRegisteredUser
       val url = uri("roles", "user", f.role.id.id, f.role.version.toString, user.id.id)
       Set(user).map(addToRepository)
-      notFoundOnDelete(url)
+
+      BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound: role id".r)
     }
 
     it("fail when removing with invalid version") {
@@ -727,7 +749,7 @@ class AccessControllerSpec
       val parentRole = factory.createRole
       val url = uri("roles", "parent", f.role.id.id, f.role.version.toString, parentRole.id.id)
       Set(parentRole).map(addToRepository)
-      notFoundOnDelete(url)
+      BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound: role id".r)
     }
 
     it("fail when removing with invalid version") {
@@ -794,7 +816,7 @@ class AccessControllerSpec
     it("cannot remove a role that does not exist") {
       val f = new RoleFixture
       val url = uri("roles", f.role.id.id, f.role.version.toString)
-      notFoundOnDelete(url)
+      BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound: role id".r)
     }
 
     it("fail when removing with invalid version") {
@@ -804,14 +826,6 @@ class AccessControllerSpec
       hasInvalidVersion(DELETE, url)
     }
 
-  }
-
-  private def notFound(url: String, json: JsValue): Unit = {
-    notFound(POST, url, json, "IdNotFound: role id")
-  }
-
-  private def notFoundOnDelete(url: String): Unit = {
-    notFound(DELETE, url, JsNull, "IdNotFound: role id")
   }
 
 }

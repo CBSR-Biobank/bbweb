@@ -4,49 +4,15 @@ import java.time.OffsetDateTime
 import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.containers._
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixture._
 import org.biobank.TestUtils
 import org.slf4j.LoggerFactory
 import scala.language.reflectiveCalls
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
-trait ProcessingTypeSpecCommon {
-
-  val factory: Factory
-
-  def collectedSpecimenDerivationFixtures() = {
-    new {
-      val collectedSpecimenDefinition = factory.createCollectionSpecimenDefinition
-      val collectionEventType = factory.createCollectionEventType.copy(
-          specimenDefinitions = Set(collectedSpecimenDefinition))
-      val processingSpecimenDefinition = factory.createProcessingSpecimenDefinition
-      val specimenDerivation = CollectedSpecimenDerivation(collectionEventType.id,
-                                                           collectedSpecimenDefinition.id,
-                                                           processingSpecimenDefinition)
-      val processingType = factory.createProcessingType.copy(specimenDerivation = specimenDerivation)
-      val study = factory.defaultDisabledStudy
-    }
-  }
-
-  def processedSpecimenDerivationFixtures() = {
-    val f = collectedSpecimenDerivationFixtures
-    new {
-      val inputProcessingType = f.processingType
-      val inputSpecimenDefinition = f.processingSpecimenDefinition
-      val outputSpecimenDefinition = factory.createProcessingSpecimenDefinition
-      val specimenDerivation = ProcessedSpecimenDerivation(inputProcessingType.id,
-                                                           inputSpecimenDefinition.id,
-                                                           outputSpecimenDefinition)
-      val outputProcessingType = factory.createProcessingType.copy(specimenDerivation = specimenDerivation)
-      val study = factory.defaultDisabledStudy
-    }
-  }
-
-}
-
 class ProcessingTypeSpec
     extends DomainSpec
-    with ProcessingTypeSpecCommon
+    with ProcessingTypeFixtures
     with AnnotationTypeSetSharedSpec[ProcessingType] {
   import org.biobank.TestUtils._
 

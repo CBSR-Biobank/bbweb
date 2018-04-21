@@ -379,8 +379,11 @@ class AccessControllerMembershipSpec
       it("fail when updating and membership ID does not exist") {
         val f = new MembershipFixture
         membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/name/${f.membership.id}",
-                 updateNameJson(f.membership, nameGenerator.next[Membership]))
+        BbwebRequest(
+          POST,
+          uri("memberships") + s"/name/${f.membership.id}",
+          updateNameJson(f.membership, nameGenerator.next[Membership])
+        )  must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when updating with invalid version") {
@@ -429,8 +432,11 @@ class AccessControllerMembershipSpec
       it("fail when updating and membership ID does not exist") {
         val f = new MembershipFixture
         membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/description/${f.membership.id}",
-                 updateDescriptionJson(f.membership, Some(nameGenerator.next[Membership])))
+        BbwebRequest(
+          POST,
+          uri("memberships") + s"/description/${f.membership.id}",
+          updateDescriptionJson(f.membership, Some(nameGenerator.next[Membership]))
+        )  must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when updating with invalid version") {
@@ -500,7 +506,12 @@ class AccessControllerMembershipSpec
         val json = addUserJson(f.membership, user)
         userRepository.put(user)
         membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/user/${f.membership.id}", json)
+
+        BbwebRequest(
+          POST,
+          uri("memberships") + s"/user/${f.membership.id}",
+          json
+        ) must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when updating with invalid version") {
@@ -623,7 +634,11 @@ class AccessControllerMembershipSpec
         val json = addStudyJson(f.membership, study)
         studyRepository.put(study)
         membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/study/${f.membership.id}", json)
+        BbwebRequest(
+          POST,
+          uri("memberships") + s"/study/${f.membership.id}",
+          json
+        ) must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when updating with invalid version") {
@@ -746,7 +761,12 @@ class AccessControllerMembershipSpec
         val json = addCentreJson(f.membership, centre)
         centreRepository.put(centre)
         membershipRepository.remove(f.membership)
-        notFound(uri("memberships") + s"/centre/${f.membership.id}", json)
+
+        BbwebRequest(
+          POST,
+          uri("memberships") + s"/centre/${f.membership.id}",
+          json
+        ) must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when updating with invalid version") {
@@ -813,7 +833,8 @@ class AccessControllerMembershipSpec
         val url = uri("memberships") + s"/user/${f.membership.id}/${f.membership.version}/${user.id.id}"
         userRepository.put(user)
         membershipRepository.remove(f.membership)
-        notFoundOnDelete(url)
+
+        BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when removing with invalid version") {
@@ -891,7 +912,7 @@ class AccessControllerMembershipSpec
         val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version}/${study.id.id}"
         studyRepository.put(study)
         membershipRepository.remove(f.membership)
-        notFoundOnDelete(url)
+        BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when removing with invalid version") {
@@ -969,7 +990,7 @@ class AccessControllerMembershipSpec
         val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version}/${centre.id.id}"
         centreRepository.put(centre)
         membershipRepository.remove(f.membership)
-        notFoundOnDelete(url)
+        BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when removing with invalid version") {
@@ -1000,7 +1021,7 @@ class AccessControllerMembershipSpec
         val f = new MembershipFixture
         val url = uri("memberships") + s"/${f.membership.id}/${f.membership.version}"
         membershipRepository.remove(f.membership)
-        notFoundOnDelete(url)
+        BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound.*membership".r)
       }
 
       it("fail when removing with invalid version") {
@@ -1011,14 +1032,6 @@ class AccessControllerMembershipSpec
 
     }
 
-  }
-
-  private def notFound(url: String, json: JsValue): Unit = {
-    notFound(POST, url, json, "IdNotFound.*membership")
-  }
-
-  private def notFoundOnDelete(url: String): Unit = {
-    notFound(DELETE, url, JsNull, "IdNotFound.*membership")
   }
 
 }

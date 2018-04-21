@@ -26,7 +26,7 @@ import scalaz.Scalaz._
 
 case class NamedProcessingTypeProcessor @Inject() (@Named("processingType") processor: ActorRef)
 
-class ProcessingTypesProcessorSpec extends ProcessorTestFixture with ProcessingTypeSpecCommon {
+class ProcessingTypesProcessorSpec extends ProcessorTestFixture with ProcessingTypeFixtures {
 
   import org.biobank.TestUtils._
   import org.biobank.infrastructure.commands.ProcessingTypeCommands._
