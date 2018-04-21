@@ -8,6 +8,16 @@ import org.biobank.domain.containers._
 import play.api.libs.json._
 import scalaz.Scalaz._
 
+/**
+ * Predicates that can be used to filter collections of [[ProcessingType]]s.
+ *
+ */
+trait ProcessingTypePredicates extends HasNamePredicates[ProcessingType] {
+
+  type ProcessingTypeFilter = ProcessingType => Boolean
+
+}
+
 trait ProcessingTypeValidations extends StudyValidations {
 
   case object ProcessingTypeIdRequired extends ValidationKey
@@ -248,4 +258,10 @@ object ProcessingType extends ProcessingTypeValidations {
 
     }
   }
+
+  val sort2Compare: Map[String, (ProcessingType, ProcessingType) => Boolean] =
+    Map[String, (ProcessingType, ProcessingType) => Boolean]("name"  -> compareByName)
+
+  def compareByName(a: ProcessingType, b: ProcessingType): Boolean =
+    (a.name compareToIgnoreCase b.name) < 0
 }

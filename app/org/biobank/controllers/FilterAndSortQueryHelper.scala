@@ -1,13 +1,11 @@
 package org.biobank.controllers
 
-import org.biobank.services.{FilterString, SortString}
+import org.biobank.services._
 import scalaz.Scalaz._
 
-final case class FilterAndSortQuery(filter: FilterString, sort: SortString)
+object FilterAndSortQueryHelper {
 
-object FilterAndSortQuery {
-
-  def create(rawQueryString: String): ControllerValidation[FilterAndSortQuery] = {
+  def apply(rawQueryString: String): ControllerValidation[FilterAndSortQuery] = {
     QueryStringParser(rawQueryString)
       .toSuccessNel(s"could not parse query string: $rawQueryString")
       .map(createFromExpressions)

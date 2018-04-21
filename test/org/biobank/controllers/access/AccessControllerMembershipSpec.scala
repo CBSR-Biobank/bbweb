@@ -21,6 +21,7 @@ class AccessControllerMembershipSpec
     with UserFixtures
     with Inside {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   class MembershipFixture {
     val user   = factory.createActiveUser
@@ -227,7 +228,7 @@ class AccessControllerMembershipSpec
             'version        (0L)
           )
           repoMembership.userIds must contain (f.user.id)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, None)
+          repoMembership must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
         }
       }
 
@@ -349,7 +350,7 @@ class AccessControllerMembershipSpec
             'version        (f.membership.version + 1),
             'name           (newName)
           )
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(f.membership.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -379,11 +380,10 @@ class AccessControllerMembershipSpec
       it("fail when updating and membership ID does not exist") {
         val f = new MembershipFixture
         membershipRepository.remove(f.membership)
-        BbwebRequest(
-          POST,
-          uri("memberships") + s"/name/${f.membership.id}",
-          updateNameJson(f.membership, nameGenerator.next[Membership])
-        )  must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(POST,
+                                    uri("memberships") + s"/name/${f.membership.id}",
+                                    updateNameJson(f.membership, nameGenerator.next[Membership]))
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when updating with invalid version") {
@@ -424,7 +424,7 @@ class AccessControllerMembershipSpec
               'version        (f.membership.version + 1),
               'description    (newDescription)
             )
-            checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+            repoMembership must beEntityWithTimeStamps(f.membership.timeAdded, Some(OffsetDateTime.now), 5L)
           }
         }
       }
@@ -432,11 +432,11 @@ class AccessControllerMembershipSpec
       it("fail when updating and membership ID does not exist") {
         val f = new MembershipFixture
         membershipRepository.remove(f.membership)
-        BbwebRequest(
-          POST,
-          uri("memberships") + s"/description/${f.membership.id}",
-          updateDescriptionJson(f.membership, Some(nameGenerator.next[Membership]))
-        )  must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(POST,
+                                    uri("memberships") + s"/description/${f.membership.id}",
+                                    updateDescriptionJson(f.membership,
+                                                          Some(nameGenerator.next[Membership])))
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when updating with invalid version") {
@@ -475,7 +475,7 @@ class AccessControllerMembershipSpec
             'version        (f.membership.version + 1)
           )
           repoMembership.userIds must contain (user.id)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(f.membership.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -507,11 +507,10 @@ class AccessControllerMembershipSpec
         userRepository.put(user)
         membershipRepository.remove(f.membership)
 
-        BbwebRequest(
-          POST,
-          uri("memberships") + s"/user/${f.membership.id}",
-          json
-        ) must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(POST,
+                                    uri("memberships") + s"/user/${f.membership.id}",
+                                    json)
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when updating with invalid version") {
@@ -550,7 +549,7 @@ class AccessControllerMembershipSpec
           )
           repoMembership.studyData.allEntities must be (true)
           repoMembership.studyData.ids must have size (0L)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(f.membership.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -577,7 +576,7 @@ class AccessControllerMembershipSpec
           )
           repoMembership.studyData.allEntities must be (false)
           repoMembership.studyData.ids must contain (studyId)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -634,11 +633,10 @@ class AccessControllerMembershipSpec
         val json = addStudyJson(f.membership, study)
         studyRepository.put(study)
         membershipRepository.remove(f.membership)
-        BbwebRequest(
-          POST,
-          uri("memberships") + s"/study/${f.membership.id}",
-          json
-        ) must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(POST,
+                                    uri("memberships") + s"/study/${f.membership.id}",
+                                    json)
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when updating with invalid version") {
@@ -677,7 +675,7 @@ class AccessControllerMembershipSpec
           )
           repoMembership.centreData.allEntities must be (true)
           repoMembership.centreData.ids must have size (0L)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(f.membership.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -704,7 +702,7 @@ class AccessControllerMembershipSpec
           )
           repoMembership.centreData.allEntities must be (false)
           repoMembership.centreData.ids must contain (centreId)
-          checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -762,11 +760,10 @@ class AccessControllerMembershipSpec
         centreRepository.put(centre)
         membershipRepository.remove(f.membership)
 
-        BbwebRequest(
-          POST,
-          uri("memberships") + s"/centre/${f.membership.id}",
-          json
-        ) must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(POST,
+                                    uri("memberships") + s"/centre/${f.membership.id}",
+                                    json)
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when updating with invalid version") {
@@ -800,7 +797,7 @@ class AccessControllerMembershipSpec
             'version        (f.membership.version + 1)
           )
           repoMembership.userIds must not contain (f.user.id)
-          checkTimeStamps(repoMembership, f.membership.timeAdded, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(f.membership.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -834,7 +831,8 @@ class AccessControllerMembershipSpec
         userRepository.put(user)
         membershipRepository.remove(f.membership)
 
-        BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(DELETE, url)
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when removing with invalid version") {
@@ -867,7 +865,7 @@ class AccessControllerMembershipSpec
             'version        (f.membership.version + 1)
           )
           repoMembership.studyData.ids must not contain (f.study.id)
-          checkTimeStamps(repoMembership, f.membership.timeAdded, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(f.membership.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -912,7 +910,8 @@ class AccessControllerMembershipSpec
         val url = uri("memberships") + s"/study/${f.membership.id}/${f.membership.version}/${study.id.id}"
         studyRepository.put(study)
         membershipRepository.remove(f.membership)
-        BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(DELETE, url)
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when removing with invalid version") {
@@ -945,7 +944,7 @@ class AccessControllerMembershipSpec
             'version        (f.membership.version + 1)
           )
           repoMembership.centreData.ids must not contain (f.centre.id)
-          checkTimeStamps(repoMembership, f.membership.timeAdded, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(f.membership.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -990,7 +989,8 @@ class AccessControllerMembershipSpec
         val url = uri("memberships") + s"/centre/${f.membership.id}/${f.membership.version}/${centre.id.id}"
         centreRepository.put(centre)
         membershipRepository.remove(f.membership)
-        BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(DELETE, url)
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when removing with invalid version") {
@@ -1021,7 +1021,8 @@ class AccessControllerMembershipSpec
         val f = new MembershipFixture
         val url = uri("memberships") + s"/${f.membership.id}/${f.membership.version}"
         membershipRepository.remove(f.membership)
-        BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound.*membership".r)
+        val reply = makeAuthRequest(DELETE, url)
+        reply.value must beNotFoundWithMessage("IdNotFound.*membership")
       }
 
       it("fail when removing with invalid version") {

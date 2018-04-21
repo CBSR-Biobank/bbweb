@@ -18,8 +18,6 @@ import play.api.mvc._
 import play.api.{Environment, Logger}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
-import scalaz._
 
 object UsersController {
 
@@ -110,30 +108,24 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
 
   def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            users      <- usersService.getUsers(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
-            validPage  <- pagedQuery.validPage(users.size)
-            results    <- PagedResults.create(users, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[UserDto]]))
+        },
+        pagedQuery => {
+          validationReply(usersService.getUsers(request.authInfo.userId, pagedQuery))
         }
       )
     }
 
   def listNames: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            users         <- usersService.getUsers(request.authInfo.userId,
-                                                   filterAndSort.filter,
-                                                   filterAndSort.sort)
-          } yield {
-            users.map(user => NameAndStateDto(user.id, user.slug, user.name, user.state.id))
-          }
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[NameAndStateDto]]))
+        },
+        query => {
+          validationReply(usersService.getUserNames(request.authInfo.userId, query))
         }
       )
     }
@@ -205,15 +197,12 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
 
   def userStudies: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            studies    <- usersService.getUserStudies(request.authInfo.userId,
-                                                      pagedQuery.filter,
-                                                      pagedQuery.sort)
-            results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[Seq[CentreDto]]))
+        },
+        query => {
+          validationReply(usersService.getUserStudies(request.authInfo.userId, query))
         }
       )
     }

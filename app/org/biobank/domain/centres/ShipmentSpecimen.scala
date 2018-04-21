@@ -2,7 +2,6 @@ package org.biobank.domain.centres
 
 import java.time.OffsetDateTime
 import org.biobank._
-import org.biobank.dto.{ShipmentSpecimenDto, SpecimenDto}
 import org.biobank.domain._
 import org.biobank.domain.centres.ShipmentItemState._
 import org.biobank.domain.participants.SpecimenId
@@ -121,17 +120,6 @@ final case class ShipmentSpecimen(id:                  ShipmentSpecimenId,
   def isStateExtra(): DomainValidation[Boolean] = {
     if (state == ShipmentItemState.Extra) true.successNel[String]
     else DomainError(s"shipment specimen is not in extra state").failureNel[Boolean]
-  }
-
-  def createDto(specimenDto: SpecimenDto): ShipmentSpecimenDto = {
-    ShipmentSpecimenDto(id                  = this.id.id,
-                        version             = this.version,
-                        timeAdded           = this.timeAdded,
-                        timeModified        = this.timeModified,
-                        shipmentId          = this.shipmentId.id,
-                        shipmentContainerId = this.shipmentContainerId.map(id => id.id),
-                        state               = this.state.toString,
-                        specimen            = specimenDto)
   }
 
   override def toString: String =

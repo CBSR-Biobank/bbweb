@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory
 
 class ParticipantSpec extends DomainSpec {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -36,7 +37,7 @@ class ParticipantSpec extends DomainSpec {
               'annotations  (participant.annotations)
           )
 
-          checkTimeStamps(participant, p.timeAdded, None)
+          p must beEntityWithTimeStamps(participant.timeAdded, None, 5L)
         }
       }
 
@@ -53,7 +54,7 @@ class ParticipantSpec extends DomainSpec {
               'annotations  (participant.annotations)
           )
 
-          checkTimeStamps(participant, p.timeAdded, None)
+          p must beEntityWithTimeStamps(participant.timeAdded, None, 5L)
         }
       }
 
@@ -68,8 +69,8 @@ class ParticipantSpec extends DomainSpec {
         participant.withUniqueId(newUniqueId) mustSucceed { p =>
           p.uniqueId must be (newUniqueId)
           p.version must be (participant.version + 1)
-          checkTimeStamps(p, participant.timeAdded, OffsetDateTime.now)
-        }
+          p must beEntityWithTimeStamps(participant.timeAdded, Some(OffsetDateTime.now), 5L)
+       }
       }
 
       it("with a new annotation") {
@@ -79,7 +80,7 @@ class ParticipantSpec extends DomainSpec {
         participant.withAnnotation(annotation) mustSucceed { p =>
           p.annotations must have size 1
           p.version must be (participant.version + 1)
-          checkTimeStamps(p, participant.timeAdded, OffsetDateTime.now)
+          p must beEntityWithTimeStamps(participant.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -90,7 +91,7 @@ class ParticipantSpec extends DomainSpec {
         participant.withoutAnnotation(annotation.annotationTypeId) mustSucceed { p =>
           p.annotations must have size 0
           p.version must be (participant.version + 1)
-          checkTimeStamps(p, participant.timeAdded, OffsetDateTime.now)
+          p must beEntityWithTimeStamps(participant.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
     }

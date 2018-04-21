@@ -10,6 +10,7 @@ import scalaz.Scalaz._
 class ShipmentSpecimenSpec extends DomainSpec {
 
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -39,7 +40,7 @@ class ShipmentSpecimenSpec extends DomainSpec {
             'shipmentContainerId (shipmentSpecimen.shipmentContainerId)
           )
 
-          checkTimeStamps(s, OffsetDateTime.now, None)
+          s must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
         }
       }
 

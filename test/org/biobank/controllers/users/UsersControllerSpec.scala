@@ -20,6 +20,8 @@ import play.api.test._
  */
 class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFixtures with Inside {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.JsonMatchers._
+  import org.biobank.matchers.EntityMatchers._
 
   class activeUserFixture {
     val user = factory.createActiveUser
@@ -242,16 +244,19 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val f = new Fixture
           val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }
 
-          val json = makeRequest(GET, uri("names") + "?sort=name")
+          val reply = makeAuthRequest(GET, uri("names") + "?sort=name").value
+          reply must beOkResponseWithJsonReply
 
-          (json \ "status").as[String] must include ("success")
+          val json = contentAsJson(reply)
+          val replyDtos = (json \ "data").validate[List[NameAndStateDto]]
+          replyDtos must be (jsSuccess)
+          replyDtos.get must have length (nameDtos.size.toLong + 1)
 
-          val jsonObjs = jsonUsersFilterOutDefaultUser((json \ "data").as[List[JsObject]])
-
-          jsonObjs.size must be (nameDtos.size)
-          jsonObjs.zip(nameDtos).foreach { case (jsonObj, nameDtos) =>
-            compareObj(jsonObj, nameDtos)
-          }
+          replyDtos.get
+            .filter(r => r.name != "Administrator")  // FIXME: this shoule be in the config file
+            .zip(nameDtos).foreach { case (replyDto, nameDto) =>
+              replyDto must equal (nameDto)
+            }
         }
 
         it("in reverse order") {
@@ -358,7 +363,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'avatarUrl   (user.avatarUrl)
           )
 
-          checkTimeStamps(repoUser, OffsetDateTime.now, None)
+          repoUser must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
         }
       }
 
@@ -399,8 +404,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
 
       it("return not found for an invalid user") {
         val user = factory.createActiveUser
-        BbwebRequest(GET, uri(user), JsNull) must beNotFoundWithMessage (
-          "EntityCriteriaNotFound: user slug".r)
+        val reply = makeAuthRequest(GET, uri(user), JsNull)
+        reply.value must beNotFoundWithMessage ("EntityCriteriaNotFound: user slug")
       }
     }
 
@@ -431,7 +436,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
               'avatarUrl   (user.avatarUrl)
             )
 
-            checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+          repoUser must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
           }
         }
 
@@ -462,7 +467,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val json = Json.obj("expectedVersion" -> (user.version + 1L),
                               "property"        -> "name",
                               "newValue"        -> user.name)
-          badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
+
+          val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+          reply.value must beBadRequestWithMessage("InvalidVersion")
         }
 
         it("not update a user's name with invalid values") {
@@ -478,7 +485,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             val json = Json.obj("expectedVersion" -> user.version,
                                 "property"        -> "name",
                                 "newValue"        -> value)
-            badRequest(POST, updateUri(user, "update"), json, errMsg)
+            val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+            reply.value must beBadRequestWithMessage(errMsg)
           }
         }
       }
@@ -508,7 +516,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
               'avatarUrl   (user.avatarUrl)
             )
 
-            checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+          repoUser must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
           }
         }
 
@@ -518,7 +526,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val json = Json.obj("expectedVersion" -> user.version,
                               "property"        -> "email",
                               "newValue"        -> faker.Lorem.sentence(3))
-          badRequest(POST, updateUri(user, "update"), json, "InvalidEmail")
+          val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+          reply.value must beBadRequestWithMessage(
+            "InvalidEmail")
         }
 
         it("not update a user's email if an invalid version number is used") {
@@ -527,7 +537,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val json = Json.obj("expectedVersion" -> (user.version + 10L),
                               "property"        -> "email",
                               "newValue"        -> user.email)
-          badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
+          val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+          reply.value must beBadRequestWithMessage(
+            "InvalidVersion")
         }
 
       }
@@ -566,7 +578,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
               'avatarUrl   (user.avatarUrl)
             )
 
-            checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+            repoUser must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
           }
         }
 
@@ -584,7 +596,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             val json = Json.obj("expectedVersion" -> user.version,
                                 "property"        -> "password",
                                 "newValue"        -> newValue)
-            badRequest(POST, updateUri(user, "update"), json, "InvalidPassword")
+            val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+            reply.value must beBadRequestWithMessage(
+            "InvalidPassword")
           }
         }
 
@@ -596,7 +610,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val json = Json.obj("expectedVersion" -> user.version,
                               "property"        -> "password",
                               "newValue"        -> newValue)
-          badRequest(POST, updateUri(user, "update"), json, "InvalidNewPassword")
+          val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+          reply.value must beBadRequestWithMessage ("InvalidNewPassword")
         }
 
         it("fail when attempting to update a user's password with a bad version number") {
@@ -607,7 +622,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val json = Json.obj("expectedVersion" -> (user.version + 10L),
                               "property"        -> "password",
                               "newValue"        -> newValue)
-          badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
+          val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+          reply.value must beBadRequestWithMessage("InvalidVersion")
         }
       }
 
@@ -636,7 +652,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
               'avatarUrl   (Some(newAvatarUrl))
             )
 
-            checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+            repoUser must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
           }
         }
 
@@ -659,7 +675,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val json = Json.obj("expectedVersion" -> user.version,
                               "property"        -> "avatarUrl",
                               "newValue"        -> "bad url")
-          badRequest(POST, updateUri(user, "update"), json, "InvalidUrl")
+          val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+          reply.value must beBadRequestWithMessage(
+            "InvalidUrl")
         }
 
         it("not update a user's avatar URL if an invalid version number is used") {
@@ -668,7 +686,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           val json = Json.obj("expectedVersion" -> (user.version + 10L),
                               "property"        -> "avatarUrl",
                               "newValue"        -> nameGenerator.nextUrl[User])
-          badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
+          val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+          reply.value must beBadRequestWithMessage(
+            "InvalidVersion")
         }
       }
 
@@ -729,7 +749,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'avatarUrl   (user.avatarUrl),
             'state       (user.state.id))
 
-          checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
+            repoUser must beEntityWithTimeStamps(user.timeAdded, user.timeModified, 5L)
         }
 
         val roles = (reply \ "data" \ "roles").as[List[JsObject]]
@@ -744,7 +764,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
               'version        (role.version + 1)
             )
             repoRole.userIds must contain (user.id)
-            checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+            repoRole must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
           }
         }
 
@@ -760,43 +780,48 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val role = factory.createRole.copy(userIds = Set(user.id))
         Set(user, role).foreach(addToRepository)
 
-        badRequest(POST,
-                   uri("roles", user.id.id),
-                   addRoleToUserJson(user, role),
-                   "EntityCriteriaError: user ID is already in role")
+        val reply = makeAuthRequest(
+          POST,
+          uri("roles", user.id.id),
+          addRoleToUserJson(user, role)
+          )
+        reply.value must beBadRequestWithMessage("EntityCriteriaError: user ID is already in role")
       }
 
       it("cannot add a user that does not exist") {
         val user = factory.createActiveUser
         val role = factory.createRole.copy(userIds = Set(user.id))
         Set(role).foreach(addToRepository)
-        BbwebRequest(
+        val reply = makeAuthRequest(
           POST,
           uri("roles", user.id.id),
           addRoleToUserJson(user, role)
-        ) must beNotFoundWithMessage("IdNotFound: user id".r)
-      }
+          )
+        reply.value must beNotFoundWithMessage("IdNotFound: user id")}
 
       it("cannot add a role that does not exist") {
         val user = factory.createActiveUser
         val role = factory.createRole.copy(userIds = Set(user.id))
         Set(user).foreach(addToRepository)
-        BbwebRequest(
+        val reply = makeAuthRequest(
           POST,
           uri("roles", user.id.id),
           addRoleToUserJson(user, role)
-        ) must beNotFoundWithMessage ("IdNotFound: role id".r)
-      }
+          )
+        reply.value must beNotFoundWithMessage ("IdNotFound: role id")}
 
       it("cannot add a role to a user with a wrong user version") {
         val user = factory.createActiveUser
         val role = factory.createRole
         Set(user, role).foreach(addToRepository)
 
-        badRequest(POST,
-                   uri("roles", user.id.id),
-                   addRoleToUserJson(user, role) ++ Json.obj("expectedVersion" -> (user.version + 10L)),
-                   "InvalidVersion.*ActiveUser: expected version doesn't match current version")
+        val reply = makeAuthRequest(
+          POST,
+          uri("roles", user.id.id),
+          addRoleToUserJson(user, role) ++ Json.obj("expectedVersion" -> (user.version + 10L))
+          )
+        reply.value must beBadRequestWithMessage(
+          "InvalidVersion.*ActiveUser: expected version doesn't match current version")
       }
 
     }
@@ -832,7 +857,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'avatarUrl   (user.avatarUrl),
             'state       (user.state.id))
 
-          checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
+          repoUser must beEntityWithTimeStamps(user.timeAdded, user.timeModified, 5L)
         }
 
         val jsonMembership = (reply \ "data" \ "membership").as[JsObject]
@@ -845,7 +870,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
               'version        (membership.version + 1)
             )
             repoMembership.userIds must contain (user.id)
-            checkTimeStamps(repoMembership, OffsetDateTime.now, OffsetDateTime.now)
+            repoMembership must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
           }
         }
 
@@ -885,10 +910,10 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val membership = factory.createMembership.copy(userIds = Set(user.id))
         Set(user, membership).foreach(addToRepository)
 
-        badRequest(POST,
-                   uri("memberships", user.id.id),
-                   addMembershipToUserJson(user, membership),
-                   "EntityCriteriaError: user ID is already in membership")
+        val reply = makeAuthRequest(POST,
+                                    uri("memberships", user.id.id),
+                                    addMembershipToUserJson(user, membership))
+        reply.value must beBadRequestWithMessage ("EntityCriteriaError: user ID is already in membership")
       }
 
       it("cannot add a user that does not exist to a membership") {
@@ -896,35 +921,37 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val membership = factory.createMembership.copy(userIds = Set(user.id))
         Set(membership).foreach(addToRepository)
 
-        BbwebRequest(
+        val reply = makeAuthRequest(
           POST,
           uri("memberships", user.id.id),
           addMembershipToUserJson(user, membership)
-        ) must beNotFoundWithMessage ("IdNotFound: user id".r)
-      }
+          )
+        reply.value must beNotFoundWithMessage ("IdNotFound: user id")}
 
       it("cannot add a membership that does not exist") {
         val user = factory.createActiveUser
         val membership = factory.createMembership.copy(userIds = Set(user.id))
         Set(user).foreach(addToRepository)
 
-        BbwebRequest(
+        val reply = makeAuthRequest(
           POST,
           uri("memberships", user.id.id),
           addMembershipToUserJson(user, membership)
-        ) must beNotFoundWithMessage ("IdNotFound: membership id".r)
-      }
+          )
+        reply.value must beNotFoundWithMessage ("IdNotFound: membership id")}
 
       it("cannot add a role to a user with a wrong user version") {
         val user = factory.createActiveUser
         val membership = factory.createMembership
         Set(user, membership).foreach(addToRepository)
 
-        badRequest(POST,
-                   uri("memberships", user.id.id),
-                   addMembershipToUserJson(user, membership) ++
-                     Json.obj("expectedVersion" -> (user.version + 10L)),
-                   "InvalidVersion.*ActiveUser: expected version doesn't match current version")
+        val reply = makeAuthRequest(
+          POST,
+          uri("memberships", user.id.id),
+          addMembershipToUserJson(user, membership) ++ Json.obj("expectedVersion" -> (user.version + 10L))
+          )
+        reply.value must beBadRequestWithMessage(
+          "InvalidVersion.*ActiveUser: expected version doesn't match current version")
       }
 
     }
@@ -1200,7 +1227,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           'avatarUrl   (user.avatarUrl),
           'state       (user.state.id))
 
-        checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
+        repoUser must beEntityWithTimeStamps(user.timeAdded, user.timeModified, 5L)
       }
 
       val roles = (reply \ "data" \ "roles").as[List[JsObject]]
@@ -1213,7 +1240,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'version        (role.version + 1)
           )
           repoRole.userIds must not contain (user.id)
-          checkTimeStamps(repoRole, role.timeAdded, OffsetDateTime.now)
+          repoRole must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
         }
       }
     }
@@ -1224,7 +1251,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       Set(user, role).foreach(addToRepository)
 
       val url = uri("roles", user.id.id, user.version.toString, role.id.id)
-      badRequest(DELETE, url, JsNull, "EntityCriteriaError: user ID is not in role")
+      val reply = makeAuthRequest(DELETE, url, JsNull)
+      reply.value must beBadRequestWithMessage(
+        "EntityCriteriaError: user ID is not in role")
     }
 
     it("cannot remove a user that does not exist") {
@@ -1233,26 +1262,27 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       Set(role).foreach(addToRepository)
 
       val url = uri("roles", user.id.id, user.version.toString, role.id.id)
-      BbwebRequest(DELETE, url, JsNull) must beNotFoundWithMessage("IdNotFound: user id".r)
-    }
-   it("111 fail when removing and role ID does not exist") {
+      val reply = makeAuthRequest(DELETE, url, JsNull)
+      reply.value must beNotFoundWithMessage("IdNotFound: user id")}
+
+    it("111 fail when removing and role ID does not exist") {
       val user = factory.createActiveUser
       val role = factory.createRole
       Set(user).foreach(addToRepository)
 
       val url = uri("roles", user.id.id, user.version.toString, role.id.id)
-      BbwebRequest(DELETE, url, JsNull) must beNotFoundWithMessage("IdNotFound: role id".r)
-    }
-   it("cannot remove a role to a user with a wrong user version") {
+      val reply = makeAuthRequest(DELETE, url, JsNull)
+      reply.value must beNotFoundWithMessage("IdNotFound: role id")}
+
+    it("cannot remove a role to a user with a wrong user version") {
       val user = factory.createActiveUser
       val role = factory.createRole.copy(userIds = Set(user.id))
       Set(user, role).foreach(addToRepository)
 
       val url = uri("roles", user.id.id, (user.version + 10L).toString, role.id.id)
-      badRequest(DELETE,
-                 url,
-                 JsNull,
-                 "InvalidVersion.*ActiveUser: expected version doesn't match current version")
+      val reply = makeAuthRequest(DELETE, url)
+      reply.value must beBadRequestWithMessage(
+        "InvalidVersion.*ActiveUser: expected version doesn't match current version")
     }
 
   }
@@ -1284,7 +1314,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           'avatarUrl   (user.avatarUrl),
           'state       (user.state.id))
 
-        checkTimeStamps(repoUser, user.timeAdded, user.timeModified)
+        repoUser must beEntityWithTimeStamps(user.timeAdded, user.timeModified, 5L)
       }
 
       (reply \ "data" \ "memberships").asOpt[JsObject] mustBe None
@@ -1296,7 +1326,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
             'version        (membership.version + 1)
           )
           repoMembership.userIds must not contain (user.id)
-          checkTimeStamps(repoMembership, membership.timeAdded, OffsetDateTime.now)
+          repoMembership must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
         }
       }
     }
@@ -1307,7 +1337,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       Set(user, membership).foreach(addToRepository)
 
       val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
-      badRequest(DELETE, url, JsNull, "EntityCriteriaError: user ID is not in membership")
+      val reply = makeAuthRequest(DELETE, url)
+      reply.value must beBadRequestWithMessage(
+        "EntityCriteriaError: user ID is not in membership")
     }
 
     it("cannot remove a user that does not exist") {
@@ -1316,8 +1348,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       Set(membership).foreach(addToRepository)
 
       val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
-      BbwebRequest(DELETE, url, JsNull) must beNotFoundWithMessage("IdNotFound: user id".r)
-    }
+      val reply = makeAuthRequest(DELETE, url, JsNull)
+      reply.value must beNotFoundWithMessage("IdNotFound: user id")}
 
     it("fail when removing and membership ID does not exist") {
       val user = factory.createActiveUser
@@ -1325,8 +1357,8 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       Set(user).foreach(addToRepository)
 
       val url = uri("memberships", user.id.id, user.version.toString, membership.id.id)
-      BbwebRequest(DELETE, url, JsNull) must beNotFoundWithMessage("IdNotFound: membership id".r)
-    }
+      val reply = makeAuthRequest(DELETE, url, JsNull)
+      reply.value must beNotFoundWithMessage("IdNotFound: membership id")}
 
     it("cannot remove a membership to a user with a wrong user version") {
       val user = factory.createActiveUser
@@ -1334,10 +1366,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       Set(user, membership).foreach(addToRepository)
 
       val url = uri("memberships", user.id.id, (user.version + 10L).toString, membership.id.id)
-      badRequest(DELETE,
-                 url,
-                 JsNull,
-                 "InvalidVersion.*ActiveUser: expected version doesn't match current version")
+      val reply = makeAuthRequest(DELETE, url)
+      reply.value must beBadRequestWithMessage(
+        "InvalidVersion.*ActiveUser: expected version doesn't match current version")
     }
 
   }
@@ -1368,7 +1399,7 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
           'avatarUrl   (user.avatarUrl),
           'state       (newState))
 
-        checkTimeStamps(repoUser, user.timeAdded, OffsetDateTime.now)
+        repoUser must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -1377,7 +1408,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
       val json = Json.obj("expectedVersion" -> (user.version + 10L),
                           "property"        -> "state",
                           "newValue"        -> stateAction)
-      badRequest(POST, updateUri(user, "update"), json, "InvalidVersion")
+      val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+      reply.value must beBadRequestWithMessage(
+        "InvalidVersion")
     }
 
     it("must not change a user to the wrong state") {
@@ -1388,7 +1421,9 @@ class UsersControllerSpec extends ControllerFixture with JsonHelper with UserFix
         val json = Json.obj("expectedVersion" -> user.version,
                             "property"        -> "state",
                             "newValue"        -> stateAction)
-        badRequest(POST, updateUri(user, "update"), json, "InvalidStatus")
+        val reply = makeAuthRequest(POST, updateUri(user, "update"), json)
+        reply.value must beBadRequestWithMessage(
+          "InvalidStatus")
       }
     }
 

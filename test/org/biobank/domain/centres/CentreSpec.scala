@@ -8,6 +8,7 @@ import scalaz.Scalaz._
 
 class CentreSpec extends DomainSpec {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -36,7 +37,7 @@ class CentreSpec extends DomainSpec {
         centre.studyIds must have size 0
         centre.locations must have size 0
 
-        checkTimeStamps(s, OffsetDateTime.now, None)
+        s must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
     }
 
@@ -55,7 +56,7 @@ class CentreSpec extends DomainSpec {
         updatedCentre.studyIds must have size 0
         updatedCentre.locations must have size 0
 
-        checkTimeStamps(updatedCentre, OffsetDateTime.now, OffsetDateTime.now)
+        updatedCentre must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
     }
 
@@ -74,7 +75,7 @@ class CentreSpec extends DomainSpec {
         updatedCentre.studyIds must have size 0
         updatedCentre.locations must have size 0
 
-        checkTimeStamps(updatedCentre, OffsetDateTime.now, OffsetDateTime.now)
+        updatedCentre must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
       }
     }
 

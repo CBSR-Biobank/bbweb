@@ -1,7 +1,6 @@
 package org.biobank.controllers.centres
 
 import java.time.OffsetDateTime
-import org.biobank.TestUtils
 import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain.centres._
 import org.biobank.domain.participants._
@@ -19,6 +18,7 @@ class ShipmentSpecimensControllerSpec
     extends ShipmentsControllerSpecFixtures
     with ShipmentsControllerSpecUtils {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   override def uri(shipment: Shipment): String =
     uri() + s"specimens/${shipment.id.id}"
@@ -36,7 +36,7 @@ class ShipmentSpecimensControllerSpec
 
     describe("GET /api/shipments/specimens/:id") {
 
-      it("work for shipment with no specimens") {
+      it("works for shipment with no specimens") {
         val f = createdShipmentFixture
         shipmentRepository.put(f.shipment)
 
@@ -49,101 +49,102 @@ class ShipmentSpecimensControllerSpec
         jsonItems must have size 0
       }
 
-      it("work for shipment with one specimen") {
-        val f = specimensFixture(1)
+      it("works for shipment with one specimen") {
+        // val f = specimensFixture(1)
 
-        val specimen = f.specimens.head
-        val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                                   specimenId = specimen.id)
+        // val specimen = f.specimens.head
+        // val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
+        //                                                            specimenId = specimen.id)
 
-        shipmentSpecimenRepository.put(shipmentSpecimen)
+        // shipmentSpecimenRepository.put(shipmentSpecimen)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri(f.shipment))
+        // val jsonItem = PagedResultsSpec(this).singleItemResult(uri(f.shipment))
 
-        val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
-          .fold(e => "error", n => n)
-        val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                    specimen.originLocationId.id,
-                                                    originLocationName)
+        // val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
+        //                                             specimen.originLocationId.id,
+        //                                             f.fromLocation.name)
 
-        val dto = shipmentSpecimen.createDto(specimen.createDto(f.cevent,
-                                                                f.ceventType.name,
-                                                                f.specimenDefinition,
-                                                                centreLocationInfo,
-                                                                centreLocationInfo))
-        compareObj(jsonItem, dto)
+        // val dto = shipmentSpecimen.createDto(specimen.createDto(f.cevent,
+        //                                                         f.ceventType.name,
+        //                                                         f.specimenDefinition,
+        //                                                         centreLocationInfo,
+        //                                                         centreLocationInfo))
+        //compareObj(jsonItem, dto)
+        fail("fix this testcase")
       }
 
       it("work for shipment with more than one specimen") {
-        val numSpecimens = 2
-        val f = specimensFixture(numSpecimens)
+        // val numSpecimens = 2
+        // val f = specimensFixture(numSpecimens)
 
-        val shipmentSpecimenMap = f.specimens.map { specimen =>
-            val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
-                                                                       specimenId = specimen.id)
-            specimen -> shipmentSpecimen
-          }.toMap
+        // val shipmentSpecimenMap = f.specimens.map { specimen =>
+        //     val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
+        //                                                                specimenId = specimen.id)
+        //     specimen -> shipmentSpecimen
+        //   }.toMap
 
-        shipmentSpecimenMap.values.foreach(shipmentSpecimenRepository.put)
+        // shipmentSpecimenMap.values.foreach(shipmentSpecimenRepository.put)
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri(f.shipment),
-            offset    = 0,
-            total     = numSpecimens.toLong,
-            maybeNext = None,
-            maybePrev = None)
+        // val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+        //     uri       = uri(f.shipment),
+        //     offset    = 0,
+        //     total     = numSpecimens.toLong,
+        //     maybeNext = None,
+        //     maybePrev = None)
 
-        shipmentSpecimenMap.zipWithIndex.foreach { case ((specimen, shipmentSpecimen), index) =>
-          val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
-            .fold(e => "error", n => n)
+        // shipmentSpecimenMap.zipWithIndex.foreach { case ((specimen, shipmentSpecimen), index) =>
+        //   val originLocationName = f.fromCentre.locationName(specimen.originLocationId)
+        //     .fold(e => "error", n => n)
 
-          val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                      specimen.originLocationId.id,
-                                                      originLocationName)
-          val dto = shipmentSpecimen.createDto(specimen.createDto(f.cevent,
-                                                                  f.ceventType.name,
-                                                                  f.specimenDefinition,
-                                                                  centreLocationInfo,
-                                                                  centreLocationInfo))
-          compareObj(jsonItems(index), dto)
-        }
+          // val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
+          //                                             specimen.originLocationId.id,
+          //                                             originLocationName)
+          // val dto = shipmentSpecimen.createDto(specimen.createDto(f.cevent,
+          //                                                         f.ceventType.name,
+          //                                                         f.specimenDefinition,
+          //                                                         centreLocationInfo,
+          //                                                         centreLocationInfo))
+          // compareObj(jsonItems(index), dto)
+        // }
+          fail("fix this testcase")
       }
 
       it("list shipment specimens by item state") {
-        val numSpecimens = 4
-        val f = shipmentSpecimensFixture(numSpecimens)
+        // val numSpecimens = 4
+        // val f = shipmentSpecimensFixture(numSpecimens)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.shipment),
-            queryParams = Map("limit" -> "1"),
-            total       = numSpecimens.toLong,
-            maybeNext   = Some(2))
+        // val jsonItem = PagedResultsSpec(this).singleItemResult(
+        //     uri         = uri(f.shipment),
+        //     queryParams = Map("limit" -> "1"),
+        //     total       = numSpecimens.toLong,
+        //     maybeNext   = Some(2))
 
-
-        compareObj(jsonItem, f.shipmentSpecimenMap.values.head.shipmentSpecimenDto)
+        //compareObj(jsonItem, f.shipmentSpecimenMap.values.head.shipmentSpecimenDto)
+        fail("fix this testcase")
       }
 
       it("list shipment specimens filtered by item state") {
-        val numSpecimens = ShipmentItemState.values.size
-        val f = shipmentSpecimensFixture(numSpecimens)
+        // val numSpecimens = ShipmentItemState.values.size
+        // val f = shipmentSpecimensFixture(numSpecimens)
 
-        val shipmentSpecimensMap = f.shipmentSpecimenMap.values.zip(ShipmentItemState.values).
-          map { case (shipmentSpecimenData, itemState) =>
-            val shipmentSpecimen = shipmentSpecimenData.shipmentSpecimen.copy(state = itemState)
-            val shipmentSpecimenDto = shipmentSpecimen.createDto(shipmentSpecimenData.specimenDto)
-            shipmentSpecimenRepository.put(shipmentSpecimen)
-            (itemState, shipmentSpecimen, shipmentSpecimenDto)
-          }
+        // val shipmentSpecimensMap = f.shipmentSpecimenMap.values.zip(ShipmentItemState.values).
+        //   map { case (shipmentSpecimenData, itemState) =>
+        //     val shipmentSpecimen = shipmentSpecimenData.shipmentSpecimen.copy(state = itemState)
+        //     val shipmentSpecimenDto = shipmentSpecimen.createDto(shipmentSpecimenData.specimenDto)
+        //     shipmentSpecimenRepository.put(shipmentSpecimen)
+        //     (itemState, shipmentSpecimen, shipmentSpecimenDto)
+        //   }
 
-        shipmentSpecimensMap.foreach { case (itemState, shipmentSpecimen, shipmentSpecimenDto ) =>
-          val jsonItem = PagedResultsSpec(this).singleItemResult(
-              uri         = uri(f.shipment),
-              queryParams = Map("filter" -> s"state::$itemState"),
-              total       = 1,
-              maybeNext   = None)
+        // shipmentSpecimensMap.foreach { case (itemState, shipmentSpecimen, shipmentSpecimenDto ) =>
+        //   val jsonItem = PagedResultsSpec(this).singleItemResult(
+        //       uri         = uri(f.shipment),
+        //       queryParams = Map("filter" -> s"state::$itemState"),
+        //       total       = 1,
+        //       maybeNext   = None)
 
-          compareObj(jsonItem, shipmentSpecimenDto)
-        }
+        //   compareObj(jsonItem, shipmentSpecimenDto)
+        // }
+        fail("fix this testcase")
       }
 
       it("fail for an invalid item state for a shipment specimen") {
@@ -162,32 +163,33 @@ class ShipmentSpecimensControllerSpec
       }
 
       it("list a single specimen when using paged query") {
-        val numSpecimens = 2
-        val f = shipmentSpecimensFixture(numSpecimens)
+        // val numSpecimens = 2
+        // val f = shipmentSpecimensFixture(numSpecimens)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.shipment),
-            queryParams = Map("limit" -> "1"),
-            total       = numSpecimens.toLong,
-            maybeNext   = Some(2))
+        // val jsonItem = PagedResultsSpec(this).singleItemResult(
+        //     uri         = uri(f.shipment),
+        //     queryParams = Map("limit" -> "1"),
+        //     total       = numSpecimens.toLong,
+        //     maybeNext   = Some(2))
 
-
-        compareObj(jsonItem, f.shipmentSpecimenMap.values.head.shipmentSpecimenDto)
+        //compareObj(jsonItem, f.shipmentSpecimenMap.values.head.shipmentSpecimenDto)
+        fail("fix this testcase")
       }
 
       it("list the last specimen when using paged query") {
-        val numSpecimens = 2
-        val f = shipmentSpecimensFixture(numSpecimens)
+        // val numSpecimens = 2
+        // val f = shipmentSpecimensFixture(numSpecimens)
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uri(f.shipment),
-            queryParams = Map("page" -> "2", "limit" -> "1"),
-            total       = numSpecimens.toLong,
-            offset      = 1,
-            maybeNext   = None,
-            maybePrev   = Some(1))
+        // val jsonItem = PagedResultsSpec(this).singleItemResult(
+        //     uri         = uri(f.shipment),
+        //     queryParams = Map("page" -> "2", "limit" -> "1"),
+        //     total       = numSpecimens.toLong,
+        //     offset      = 1,
+        //     maybeNext   = None,
+        //     maybePrev   = Some(1))
 
-        compareObj(jsonItem, f.shipmentSpecimenMap.values.toList(1).shipmentSpecimenDto)
+        //compareObj(jsonItem, f.shipmentSpecimenMap.values.toList(1).shipmentSpecimenDto)
+        fail("fix this testcase")
       }
 
       it("fail when using an invalid query parameters") {
@@ -201,58 +203,61 @@ class ShipmentSpecimensControllerSpec
       }
 
       it("list specimens in descending order by state") {
-        val numSpecimens = ShipmentItemState.values.size
-        val f = shipmentSpecimensFixture(numSpecimens)
+        // val numSpecimens = ShipmentItemState.values.size
+        // val f = shipmentSpecimensFixture(numSpecimens)
 
-        val shipmentSpecimensMap = f.shipmentSpecimenMap.values.zip(ShipmentItemState.values).
-          map { case (shipmentSpecimenData, itemState) =>
-            val shipmentSpecimen = shipmentSpecimenData.shipmentSpecimen.copy(state = itemState)
-            val shipmentSpecimenDto = shipmentSpecimen.createDto(shipmentSpecimenData.specimenDto)
-            shipmentSpecimenRepository.put(shipmentSpecimen)
-            (itemState, (shipmentSpecimen, shipmentSpecimenDto))
-          }.toMap
+        // val shipmentSpecimensMap = f.shipmentSpecimenMap.values.zip(ShipmentItemState.values).
+        //   map { case (shipmentSpecimenData, itemState) =>
+        //     val shipmentSpecimen = shipmentSpecimenData.shipmentSpecimen.copy(state = itemState)
+        //     val shipmentSpecimenDto = shipmentSpecimen.createDto(shipmentSpecimenData.specimenDto)
+        //     shipmentSpecimenRepository.put(shipmentSpecimen)
+        //     (itemState, (shipmentSpecimen, shipmentSpecimenDto))
+        //   }.toMap
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri         = uri(f.shipment),
-            queryParams = Map("sort" -> "-state"),
-            offset      = 0,
-            total       = shipmentSpecimensMap.size.toLong,
-            maybeNext   = None,
-            maybePrev   = None)
+        // val jsonItems = PagedResultsSpec(this).multipleItemsResult(
+        //     uri         = uri(f.shipment),
+        //     queryParams = Map("sort" -> "-state"),
+        //     offset      = 0,
+        //     total       = shipmentSpecimensMap.size.toLong,
+        //     maybeNext   = None,
+        //     maybePrev   = None)
 
-        compareObj(jsonItems(0), shipmentSpecimensMap.get(ShipmentItemState.Received).value._2)
-        compareObj(jsonItems(1), shipmentSpecimensMap.get(ShipmentItemState.Present).value._2)
-        compareObj(jsonItems(2), shipmentSpecimensMap.get(ShipmentItemState.Missing).value._2)
-        compareObj(jsonItems(3), shipmentSpecimensMap.get(ShipmentItemState.Extra).value._2)
+        // compareObj(jsonItems(0), shipmentSpecimensMap.get(ShipmentItemState.Received).value._2)
+        // compareObj(jsonItems(1), shipmentSpecimensMap.get(ShipmentItemState.Present).value._2)
+        // compareObj(jsonItems(2), shipmentSpecimensMap.get(ShipmentItemState.Missing).value._2)
+        // compareObj(jsonItems(3), shipmentSpecimensMap.get(ShipmentItemState.Extra).value._2)
+        fail("fix this testcase")
       }
     }
 
     describe("GET /api/shipments/specimens/:shId/:shSpcId") {
 
       it("get a shipment specimen") {
-        val f = shipmentSpecimensFixture(1)
-        val shipmentSpecimen = f.shipmentSpecimenMap.values.head.shipmentSpecimen
-        val dto = f.shipmentSpecimenMap.values.head.shipmentSpecimenDto
+        // val f = shipmentSpecimensFixture(1)
+        // val shipmentSpecimen = f.shipmentSpecimenMap.values.head.shipmentSpecimen
+        // val dto = f.shipmentSpecimenMap.values.head.shipmentSpecimenDto
 
-        val json = makeRequest(GET, uri(f.shipment) + s"/${shipmentSpecimen.id}")
+        // val json = makeRequest(GET, uri(f.shipment) + s"/${shipmentSpecimen.id}")
 
-        (json \ "status").as[String] must include ("success")
+        // (json \ "status").as[String] must include ("success")
 
-        val jsonObj = (json \ "data").as[JsObject]
-        compareObj(jsonObj, dto)
+        // val jsonObj = (json \ "data").as[JsObject]
+        // compareObj(jsonObj, dto)
+        fail("fix this testcase")
       }
 
       it("fails for an invalid shipment id") {
-        val f = shipmentSpecimensFixture(1)
-        val shipmentSpecimen = f.shipmentSpecimenMap.values.head.specimenDto
+        // val f = shipmentSpecimensFixture(1)
+        // val shipmentSpecimen = f.shipmentSpecimenMap.values.head.specimenDto
 
-        val badShipment = factory.createShipment
+        // val badShipment = factory.createShipment
 
-        val json = makeRequest(GET, uri(badShipment) + s"/${shipmentSpecimen.id}", NOT_FOUND)
+        // val json = makeRequest(GET, uri(badShipment) + s"/${shipmentSpecimen.id}", NOT_FOUND)
 
-        (json \ "status").as[String] must include ("error")
+        // (json \ "status").as[String] must include ("error")
 
-        (json \ "message").as[String] must include regex ("IdNotFound.*shipment id")
+        // (json \ "message").as[String] must include regex ("IdNotFound.*shipment id")
+        fail("fix this testcase")
       }
 
     }
@@ -363,8 +368,7 @@ class ShipmentSpecimensControllerSpec
           'state      (ShipmentItemState.Present)
         )
 
-        TestUtils.checkTimeStamps(repoSs.timeAdded, OffsetDateTime.now)
-        TestUtils.checkOpionalTime(repoSs.timeModified, None)
+        repoSs must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
 
       it("not add a specimen to a shipment which is not in the system") {
@@ -463,9 +467,8 @@ class ShipmentSpecimensControllerSpec
             'state      (state)
           )
 
-          TestUtils.checkTimeStamps(repoSs.timeAdded, shipmentSpecimen.timeAdded)
-          TestUtils.checkOpionalTime(repoSs.timeModified, Some(OffsetDateTime.now))
-        }
+          repoSs must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+         }
       }
 
       it("cannot change a shipment specimen's state if shipment is not PACKED") {
@@ -589,9 +592,8 @@ class ShipmentSpecimensControllerSpec
             'state      (ShipmentItemState.Present)
           )
 
-          TestUtils.checkTimeStamps(repoSs.timeAdded, shipmentSpecimen.timeAdded)
-          TestUtils.checkOpionalTime(repoSs.timeModified, Some(OffsetDateTime.now))
-        }
+          repoSs must beEntityWithTimeStamps(shipmentSpecimen.timeAdded, Some(OffsetDateTime.now), 5L)
+         }
       }
 
       it("fail when changing a shipment specimen's state to PRESENT when it is already PRESENT") {
@@ -640,8 +642,7 @@ class ShipmentSpecimensControllerSpec
           'state      (ShipmentItemState.Extra)
         )
 
-        TestUtils.checkTimeStamps(repoSs.timeAdded, OffsetDateTime.now)
-        TestUtils.checkOpionalTime(repoSs.timeModified, None)
+        repoSs must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
 
       it("not add an EXTRA shipment specimen to a shipment if it is present in another shipment") {

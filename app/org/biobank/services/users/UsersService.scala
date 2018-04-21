@@ -9,7 +9,7 @@ import org.biobank.ValidationKey
 import org.biobank.domain.Slug
 import org.biobank.domain.access.{AccessItemId, MembershipId, PermissionId}
 import org.biobank.domain.centres.CentreRepository
-import org.biobank.domain.studies.{Study, StudyId, StudyRepository}
+import org.biobank.domain.studies.StudyRepository
 import org.biobank.domain.users._
 import org.biobank.dto._
 import org.biobank.dto.access.{MembershipDto, RoleDto, UserRoleDto}
@@ -63,8 +63,11 @@ trait UsersService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the users.
    */
-  def getUsers(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[UserDto]]
+  def getUsers(requestUserId: UserId, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[UserDto]]]
+
+  def getUserNames(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[NameAndStateDto]]]
 
   /**
    * Returns the counts of all users and also counts of users categorized by state.
@@ -83,10 +86,8 @@ trait UsersService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the studies.
    */
-  def getUserStudies(userId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[Study]]
-
-  def getUserStudyIds(requestUserId: UserId): ServiceValidation[Set[StudyId]]
+  def getUserStudies(userId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[NameAndStateDto]]]
 
   /**
    * Permissions not checked since anyone can attempt a login.
@@ -148,33 +149,60 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
       .leftMap(_ => IdNotFound(s"user with id does not exist: $id").nel)
   }
 
-  def getUsers(requestUserId: UserId,
-               filter:        FilterString,
-               sort:          SortString): ServiceValidation[Seq[UserDto]] = {
-    whenPermitted(requestUserId, PermissionId.UserRead) { () =>
-      val allUsers = userRepository.getValues.toSet
-      val sortStr = if (sort.expression.isEmpty) new SortString("email")
-                    else sort
-      for {
-        users           <- UserFilter.filterUsers(allUsers, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { User.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-        dtos            <- {
-          users
-            .toSeq
-            .sortWith(sortFunc)
-            .map(user => userToDto(user, accessService.getUserRoles(user.id)))
-            .toList.sequenceU
-            .map(_.toSeq)
-        }
-      } yield {
-        if (firstSort.order == AscendingOrder) dtos
-        else dtos.reverse
+  def getUsers(requestUserId: UserId, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[UserDto]]] = {
+    Future {
+      whenPermitted(requestUserId, PermissionId.UserRead) { () =>
+        for {
+          users     <- filterUsers(query.filter, query.sort)
+          validPage <- query.validPage(users.size)
+          results   <- PagedResults.create(users, query.page, query.limit)
+        } yield results
       }
+    }
+  }
+
+  def getUserNames(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[NameAndStateDto]]] = {
+    Future {
+      whenPermitted(requestUserId, PermissionId.UserRead) { () =>
+        filterUsers(query.filter, query.sort).map {
+          _.map { u => NameAndStateDto(u.id, u.slug, u.name, u.state.id) }
+        }
+      }
+    }
+  }
+
+  private def filterUsers(filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[UserDto]] = {
+    val allUsers = userRepository.getValues.toSet
+    val sortStr = if (sort.expression.isEmpty) new SortString("email")
+                  else sort
+    for {
+      users           <- UserFilter.filterUsers(allUsers, filter)
+      sortExpressions <- {
+        QuerySortParser(sortStr).
+          toSuccessNel(ServiceError(s"could not parse sort expression: ${sort}"))
+      }
+      firstSort       <- {
+        sortExpressions.headOption.
+          toSuccessNel(ServiceError("at least one sort expression is required"))
+      }
+      sortFunc        <- {
+        User.sort2Compare.get(firstSort.name).
+          toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}"))
+      }
+      dtos            <- {
+        users
+          .toSeq
+          .sortWith(sortFunc)
+          .map(user => userToDto(user, accessService.getUserRoles(user.id)))
+          .toList.sequenceU
+          .map(_.toSeq)
+      }
+    } yield {
+      if (firstSort.order == AscendingOrder) dtos
+      else dtos.reverse
     }
   }
 
@@ -190,15 +218,20 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     }
   }
 
-  def getUserStudies(userId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[Study]] = {
-    studiesService.getStudies(userId, filter, sort)
-  }
-
-  def getUserStudyIds(requestUserId: UserId): ServiceValidation[Set[StudyId]] = {
-    accessService.getUserMembership(requestUserId).map { membershipStudyIds =>
-      if (membershipStudyIds.studyData.allEntities) studyRepository.getKeys.toSet
-      else membershipStudyIds.studyData.ids
+  def getUserStudies(userId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[NameAndStateDto]]] = {
+    Future {
+      for {
+        membership <- accessService.getUserMembership(userId)
+        studyIds = {
+          if (membership.studyData.allEntities) studyRepository.getKeys.toSet
+          else membership.studyData.ids
+        }
+        dtos <- {
+          studyIds.map(studyRepository.getByKey).toList.sequenceU
+            .map { _.toSeq.map { s => NameAndStateDto(s.id.id, s.slug, s.name, s.state.id) } }
+        }
+      } yield dtos
     }
   }
 

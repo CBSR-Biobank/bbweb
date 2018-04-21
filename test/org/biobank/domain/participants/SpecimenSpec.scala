@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory
 
 class SpecimenSpec extends DomainSpec {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.DateMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -46,8 +48,9 @@ class SpecimenSpec extends DomainSpec {
             'amount                (specimen.amount)
           )
 
-          checkTimeStamps(specimen, spc.timeAdded, spc.timeModified)
-          checkTimeStamps(specimen.timeCreated, spc.timeCreated)
+          spc must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+
+          spc.timeCreated must beTimeWithinSeconds(specimen.timeCreated, 5L)
         }
       }
 
@@ -62,7 +65,8 @@ class SpecimenSpec extends DomainSpec {
         specimen.withInventoryId(newInventoryId) mustSucceed { s =>
           s.inventoryId must be (newInventoryId)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
+
+          s must beEntityWithTimeStamps(specimen.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -73,7 +77,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withAmount(newAmount) mustSucceed { s =>
           s.amount must be (newAmount)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
+          s must beEntityWithTimeStamps(specimen.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -84,7 +88,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withOriginLocation(newLocation.id) mustSucceed { s =>
           s.originLocationId must be (newLocation.id)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
+          s must beEntityWithTimeStamps(specimen.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -95,7 +99,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withLocation(newLocation.id) mustSucceed { s =>
           s.locationId must be (newLocation.id)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
+          s must beEntityWithTimeStamps(specimen.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -106,7 +110,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.withPosition(newPosition) mustSucceed { s =>
           s.positionId mustBe Some(newPosition)
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
+          s must beEntityWithTimeStamps(specimen.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
     }
@@ -119,7 +123,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.makeUnusable mustSucceed { s =>
           s mustBe a[UnusableSpecimen]
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
+          s must beEntityWithTimeStamps(specimen.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -216,7 +220,7 @@ class SpecimenSpec extends DomainSpec {
       specimen.makeUnusable mustSucceed { s =>
         s mustBe a[UnusableSpecimen]
         s.version must be (specimen.version + 1)
-        checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
+        s must beEntityWithTimeStamps(specimen.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -232,7 +236,7 @@ class SpecimenSpec extends DomainSpec {
         specimen.makeUsable mustSucceed { s =>
           s mustBe a[UsableSpecimen]
           s.version must be (specimen.version + 1)
-          checkTimeStamps(s, specimen.timeAdded, OffsetDateTime.now)
+          s must beEntityWithTimeStamps(specimen.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 

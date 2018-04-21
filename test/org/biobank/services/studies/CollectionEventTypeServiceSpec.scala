@@ -5,7 +5,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
-import org.biobank.services.{FilterString, SortString}
+import org.biobank.services.{FilterString, PagedQuery, SortString}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -179,23 +179,27 @@ class CollectionEventTypeServiceSpec
 
       it("users can access") {
         val f = new UsersCeventTypeFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          ceventTypeService.list(user.id, f.study.id, new FilterString(""), new SortString(""))
+          ceventTypeService.list(user.id, f.study.id, query).futureValue
             .mustSucceed { result =>
-              result must have size 1
+              result.items must have size 1
             }
         }
       }
 
       it("users cannot access") {
         val f = new UsersCeventTypeFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+
         info("no membership user")
-        ceventTypeService.list(f.noMembershipUser.id, f.study.id, new FilterString(""), new SortString(""))
+        ceventTypeService.list(f.noMembershipUser.id, f.study.id, query).futureValue
           .mustFail("Unauthorized")
 
         info("no permission user")
-        ceventTypeService.list(f.nonStudyPermissionUser.id, f.study.id, new FilterString(""), new SortString(""))
+        ceventTypeService.list(f.nonStudyPermissionUser.id, f.study.id, query).futureValue
           .mustFail("Unauthorized")
       }
 

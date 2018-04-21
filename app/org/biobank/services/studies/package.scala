@@ -11,7 +11,7 @@ package studies {
 
   object StudyCountsByStatus {
 
-    implicit val studyCountsByStatusWriter: Writes[StudyCountsByStatus] = Json.writes[StudyCountsByStatus]
+    implicit val studyCountsByStatusFormat: Format[StudyCountsByStatus] = Json.format[StudyCountsByStatus]
   }
 
 }

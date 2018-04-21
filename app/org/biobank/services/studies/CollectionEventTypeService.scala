@@ -9,6 +9,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.studies._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.users.UserId
+import org.biobank.dto.EntityInfoDto
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 import org.biobank.infrastructure.events.CollectionEventTypeEvents._
@@ -41,13 +42,15 @@ trait CollectionEventTypeService extends BbwebService {
 
   def list(requestUserId: UserId,
            studyId:       StudyId,
-           filter:        FilterString,
-           sort:          SortString): ServiceValidation[Seq[CollectionEventType]]
+           pagedQuery:    PagedQuery): Future[ServiceValidation[PagedResults[CollectionEventType]]]
 
   def listByStudySlug(requestUserId: UserId,
                       studySlug:     Slug,
-                      filter:        FilterString,
-                      sort:          SortString): ServiceValidation[Seq[CollectionEventType]]
+                      pagedQuery:    PagedQuery)
+      : Future[ServiceValidation[PagedResults[CollectionEventType]]]
+
+  def listNamesByStudySlug(requestUserId: UserId, studySlug: Slug, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[EntityInfoDto]]]
 
   def processCommand(cmd: CollectionEventTypeCommand)
       : Future[ServiceValidation[CollectionEventType]]
@@ -107,44 +110,47 @@ class CollectionEventTypeServiceImpl @Inject()(
     }
   }
 
-  def list(requestUserId: UserId,
-           studyId:       StudyId,
-           filter:        FilterString,
-           sort:          SortString): ServiceValidation[Seq[CollectionEventType]] = {
-    whenPermittedAndIsMember(requestUserId,
-                             PermissionId.StudyRead,
-                             Some(studyId),
-                             None) { () =>
-      val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                    else sort
-
-      for {
-        study           <- studiesService.getStudy(requestUserId, studyId)
-        ceventTypes     <- getEventTypes(studyId, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { CollectionEventType.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-      } yield {
-        val result = ceventTypes.toSeq.sortWith(sortFunc)
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
+  def list(requestUserId: UserId, studyId: StudyId, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[CollectionEventType]]] = {
+    Future {
+      whenPermittedAndIsMember(requestUserId,
+                               PermissionId.StudyRead,
+                               Some(studyId),
+                               None) { () =>
+        queryInternal(requestUserId, studyId, query.filter, query.sort).flatMap { types =>
+          PagedResults.create(types, query.page, query.limit)
+        }
       }
     }
   }
 
-   def listByStudySlug(requestUserId: UserId,
-                       studySlug:     Slug,
-                       filter:        FilterString,
-                       sort:          SortString): ServiceValidation[Seq[CollectionEventType]] = {
-     studiesService.getStudyBySlug(requestUserId, studySlug) flatMap { study =>
-       list(requestUserId, study.id, filter, sort)
+   def listByStudySlug(requestUserId: UserId, studySlug: Slug, query: PagedQuery)
+       : Future[ServiceValidation[PagedResults[CollectionEventType]]] = {
+     Future {
+       for {
+         study     <- studiesService.getStudyBySlug(requestUserId, studySlug)
+         types     <- queryInternal(requestUserId, study.id, query.filter, query.sort)
+         validPage <- query.validPage(types.size)
+         results   <- PagedResults.create(types, query.page, query.limit)
+       } yield results
      }
    }
 
- def processCommand(cmd: CollectionEventTypeCommand): Future[ServiceValidation[CollectionEventType]] = {
+  def listNamesByStudySlug(requestUserId: UserId,
+                           studySlug:     Slug,
+                           query:         FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[EntityInfoDto]]] = {
+     Future {
+       for {
+         study <- studiesService.getStudyBySlug(requestUserId, studySlug)
+         types <- queryInternal(requestUserId, study.id, query.filter, query.sort)
+       } yield {
+         types.map { t => EntityInfoDto(t.id.id, t.slug, t.name) }
+       }
+     }
+  }
+
+  def processCommand(cmd: CollectionEventTypeCommand): Future[ServiceValidation[CollectionEventType]] = {
     val v = for {
         validCommand <- cmd match {
           case c: RemoveCollectionEventTypeCmd =>
@@ -186,6 +192,37 @@ class CollectionEventTypeServiceImpl @Inject()(
     )
   }
 
+  private def queryInternal(requestUserId: UserId,
+                            studyId: StudyId,
+                            filter: FilterString,
+                            sort: SortString)
+      : ServiceValidation[Seq[CollectionEventType]] = {
+    val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                  else sort
+
+    for {
+      study           <- studiesService.getStudy(requestUserId, studyId)
+      ceventTypes     <- getEventTypes(studyId, filter)
+      sortExpressions <- {
+        QuerySortParser(sortStr).
+          toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
+      }
+      firstSort       <- {
+        sortExpressions.headOption.
+          toSuccessNel(ServiceError("at least one sort expression is required"))
+      }
+      sortFunc        <- {
+        CollectionEventType.sort2Compare.get(firstSort.name).
+          toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}"))
+      }
+    } yield {
+      val result = ceventTypes.toSeq.sortWith(sortFunc)
+
+      if (firstSort.order == AscendingOrder) result
+      else result.reverse
+    }
+  }
+
   private def withStudy[T](sessionUserId: UserId,
                            studyId:       StudyId)
                        (fn: Study => ServiceValidation[T]): ServiceValidation[T] = {
@@ -208,6 +245,6 @@ class CollectionEventTypeServiceImpl @Inject()(
   private def getEventTypes(studyId: StudyId, filter: FilterString)
       : ServiceValidation[Set[CollectionEventType]] = {
     val allCeventTypes = eventTypeRepository.allForStudy(studyId).toSet
-    CollectionEventTypeFilter.filterCollectionEvents(allCeventTypes, filter)
+    CollectionEventTypeFilter.filterCollectionEventTypes(allCeventTypes, filter)
   }
 }

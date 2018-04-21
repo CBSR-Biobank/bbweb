@@ -44,7 +44,7 @@ object ConcurrencySafeEntity {
              "timeAdded"    -> entity.timeAdded) ++
     JsObject(
       Seq[(String, JsValue)]() ++
-        entity.timeModified.map("timeModified" -> Json.toJson(_)))
+        entity.timeModified.map(t => "timeModified" -> Json.toJson(t)))
   }
 
 }

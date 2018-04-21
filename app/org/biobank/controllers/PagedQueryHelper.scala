@@ -3,38 +3,22 @@ package org.biobank.controllers
 import java.net.URLDecoder
 import java.nio.charset.{StandardCharsets => SC}
 import org.biobank.infrastructure._
-import org.biobank.services.{FilterString, SortString}
-//import org.slf4j.{Logger, LoggerFactory}
+import org.biobank.services._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
-final case class PagedQuery(filter: FilterString,
-                            sort:   SortString,
-                            page:   Int,
-                            limit:  Int) {
+/**
+ * Creates a [[services.PagedQuery PagedQuery]] object from the a query string from an HTML Request.
+ */
+object PagedQueryHelper {
 
-  def validPage(totalItems: Int): ControllerValidation[Int] = {
-    if (((totalItems > 0) && ((page - 1) * limit >= totalItems)) ||
-          ((totalItems == 0) && (page > 1))) {
-      ControllerError(s"page exceeds limit: $page").failureNel[Int]
-    } else {
-      // if totalItems is zero, but page is 1 then it is valid
-      page.successNel
-    }
-  }
-}
-
-object PagedQuery {
-
-  //val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  def create(rawQueryString: String, maxPageSize: Int): ControllerValidation[PagedQuery] = {
+  def apply(rawQueryString: String, maxPageSize: Int): ControllerValidation[PagedQuery] = {
     for {
       qsExpressions <- {
         val path = URLDecoder.decode(rawQueryString, SC.US_ASCII.name)
         QueryStringParser(path).toSuccessNel(s"could not parse query string: $rawQueryString")
       }
-      filterAndSort <- FilterAndSortQuery.createFromExpressions(qsExpressions).successNel[String]
+      query <- FilterAndSortQueryHelper.createFromExpressions(qsExpressions).successNel[String]
       page <- {
         Util.toInt(qsExpressions.get("page").getOrElse("1")).
           toSuccessNel(s"page is not a number: $rawQueryString")
@@ -49,8 +33,8 @@ object PagedQuery {
       }
       validLimit <- validLimit(limit, maxPageSize)
     } yield {
-      PagedQuery(filter = filterAndSort.filter,
-                 sort   = filterAndSort.sort,
+      PagedQuery(filter = query.filter,
+                 sort   = query.sort,
                  page   = page,
                  limit  = limit)
     }

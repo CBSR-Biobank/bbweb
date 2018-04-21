@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory
 
 class CollectionEventSpec extends DomainSpec {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.DateMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -39,8 +41,9 @@ class CollectionEventSpec extends DomainSpec {
             'annotations            (cevent.annotations)
           )
 
-          checkTimeStamps(cevent, ce.timeAdded, ce.timeModified)
-          checkTimeStamps(cevent.timeCompleted, ce.timeCompleted)
+          ce must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+
+          ce.timeCompleted must beTimeWithinSeconds(cevent.timeCompleted, 5L)
         }
       }
 
@@ -58,8 +61,9 @@ class CollectionEventSpec extends DomainSpec {
             'annotations            (cevent.annotations)
           )
 
-          checkTimeStamps(cevent, ce.timeAdded, ce.timeModified)
-          checkTimeStamps(cevent.timeCompleted, ce.timeCompleted)
+          ce must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+
+          ce.timeCompleted must beTimeWithinSeconds(cevent.timeCompleted, 5L)
         }
       }
     }
@@ -102,7 +106,7 @@ class CollectionEventSpec extends DomainSpec {
         cevent.withVisitNumber(newVisitNumber) mustSucceed { s =>
           s.visitNumber must be (newVisitNumber)
           s.version must be (cevent.version + 1)
-          checkTimeStamps(s, cevent.timeAdded, OffsetDateTime.now)
+          s must beEntityWithTimeStamps(cevent.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 
@@ -113,7 +117,7 @@ class CollectionEventSpec extends DomainSpec {
         cevent.withTimeCompleted(newTimeCompleted) mustSucceed { s =>
           s.timeCompleted must be (newTimeCompleted)
           s.version must be (cevent.version + 1)
-          checkTimeStamps(s, cevent.timeAdded, OffsetDateTime.now)
+          s must beEntityWithTimeStamps(cevent.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 

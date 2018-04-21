@@ -122,14 +122,14 @@ class ProcessingTypesControllerSpec
         val f = collectedSpecimenDerivationFixtures
         studyRepository.remove(f.study)
 
-        BbwebRequest(GET, uri(f.study.slug.id, f.processingType.slug.id)) must
-        beNotFoundWithMessage("EntityCriteriaNotFound.*study slug".r)
+        val reply = makeAuthRequest(GET, uri(f.study.slug.id, f.processingType.slug.id))
+        reply.value must beNotFoundWithMessage("EntityCriteriaNotFound.*study slug")
       }
 
       it("fail for an invalid collection event type id") {
         val f = collectedSpecimenDerivationFixtures
-        BbwebRequest(GET, uri(f.study.slug.id, f.processingType.slug.id))
-          .must(beNotFoundWithMessage("EntityCriteriaNotFound.*processing type slug".r))
+        val reply = makeAuthRequest(GET, uri(f.study.slug.id, f.processingType.slug.id))
+        reply.value must beNotFoundWithMessage("EntityCriteriaNotFound.*processing type slug")
       }
 
     }

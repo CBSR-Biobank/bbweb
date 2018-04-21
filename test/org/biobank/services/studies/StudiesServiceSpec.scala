@@ -6,7 +6,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
-import org.biobank.services.{FilterString, SortString}
+import org.biobank.services.{FilterString, FilterAndSortQuery, PagedQuery, SortString}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -147,28 +147,26 @@ class StudiesServiceSpec
 
       it("all types of users can access") {
         val f = new UsersWithStudyAccessFixture
+        val query = FilterAndSortQuery(new FilterString(""), new SortString(""))
+
         forAll (f.usersCanReadTable) { (user, label) =>
           info(s"$label")
-          studiesService.collectionStudies(user.id,
-                                           new FilterString(""),
-                                           new SortString("")) mustSucceed { set =>
-            set must have size (0)
+          studiesService.collectionStudies(user.id, query).futureValue.mustSucceed { results =>
+            results must have size (0)
           }
         }
 
         info("no membership user")
-        studiesService.collectionStudies(f.noMembershipUser.id,
-                                           new FilterString(""),
-                                           new SortString("")) mustSucceed { set =>
-          set must have size (0)
-        }
+        studiesService.collectionStudies(f.noMembershipUser.id, query).futureValue
+          .mustSucceed { set =>
+            set must have size (0)
+          }
 
         info("no permission user")
-        studiesService.collectionStudies(f.nonStudyPermissionUser.id,
-                                           new FilterString(""),
-                                           new SortString("")) mustSucceed { set =>
-          set must have size (0)
-        }
+        studiesService.collectionStudies(f.nonStudyPermissionUser.id, query).futureValue
+          .mustSucceed { set =>
+            set must have size (0)
+          }
       }
 
     }
@@ -227,25 +225,29 @@ class StudiesServiceSpec
 
       it("users can access") {
         val f = new UsersWithStudyAccessFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          studiesService.getStudies(user.id, new FilterString(""), new SortString(""))
-            .mustSucceed { studies =>
-              studies must have length (1)
+          studiesService.getStudies(user.id, query).futureValue
+            .mustSucceed { results =>
+              results.items must have length (1)
             }
         }
       }
 
       it("users cannot access") {
         val f = new UsersWithStudyAccessFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+
         info("no membership user")
-        studiesService.getStudies(f.noMembershipUser.id, new FilterString(""), new SortString(""))
-          .mustSucceed { studies =>
-            studies must have length (0)
+        studiesService.getStudies(f.noMembershipUser.id, query).futureValue
+          .mustSucceed { results =>
+            results.items must have length (0)
           }
 
         info("no permission user")
-        studiesService.getStudies(f.nonStudyPermissionUser.id, new FilterString(""), new SortString(""))
+        studiesService.getStudies(f.nonStudyPermissionUser.id, query).futureValue
           .mustFail("Unauthorized")
       }
 
@@ -405,32 +407,35 @@ class StudiesServiceSpec
     describe("studies membership") {
 
       it("user has access to all studies corresponding his membership") {
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         val secondStudy = factory.createDisabledStudy  // should show up in results
         addToRepository(secondStudy)
 
         val f = new UsersWithStudyAccessFixture
-        studiesService.getStudies(f.allStudiesAdminUser.id, new FilterString(""), new SortString(""))
+        studiesService.getStudies(f.allStudiesAdminUser.id, query).futureValue
           .mustSucceed { reply =>
-            reply must have size (2)
-            val studyIds = reply.map(c => c.id)
+            reply.items must have size (2)
+            val studyIds = reply.items.map(c => c.id)
             studyIds must contain (f.study.id)
             studyIds must contain (secondStudy.id)
           }
       }
 
       it("user has access only to studies corresponding his membership") {
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         val secondStudy = factory.createDisabledStudy  // should not show up in results
         addToRepository(secondStudy)
 
         val f = new UsersWithStudyAccessFixture
-        studiesService.getStudies(f.studyOnlyAdminUser.id, new FilterString(""), new SortString(""))
+        studiesService.getStudies(f.studyOnlyAdminUser.id, query).futureValue
           .mustSucceed { reply =>
-            reply must have size (1)
-            reply.map(c => c.id) must contain (f.study.id)
+            reply.items must have size (1)
+            reply.items.map(c => c.id) must contain (f.study.id)
           }
       }
 
       it("user does not have access to study if not in membership") {
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         val f = new UsersWithStudyAccessFixture
 
         // remove all studies from membership
@@ -442,9 +447,9 @@ class StudiesServiceSpec
         val study = factory.createDisabledStudy
         addToRepository(study)
 
-        studiesService.getStudies(f.studyUser.id, new FilterString(""), new SortString(""))
+        studiesService.getStudies(f.studyUser.id, query).futureValue
           .mustSucceed { reply =>
-            reply must have size (0)
+            reply.items must have size (0)
           }
       }
 

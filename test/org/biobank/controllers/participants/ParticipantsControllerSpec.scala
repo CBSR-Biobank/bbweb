@@ -16,6 +16,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   class Fixture {
     val study = factory.createEnabledStudy
@@ -180,7 +181,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
             'annotations (participant.annotations)
           )
 
-          checkTimeStamps(participant, pt.timeAdded, None)
+          pt must beEntityWithTimeStamps(participant.timeAdded, None, 5L)
         }
       }
 
@@ -318,7 +319,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
             'annotations            (participant.annotations)
           )
 
-          checkTimeStamps(pt, participant.timeAdded, OffsetDateTime.now)
+          pt must beEntityWithTimeStamps(participant.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 

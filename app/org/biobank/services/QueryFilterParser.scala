@@ -47,7 +47,8 @@ object QueryFilterParserGrammar {
     override def toString: String = name
   }
 
-  final case class Comparison(selector:   String,
+  final case class
+    Comparison(selector:   String,
                               comparator: Comparator,
                               arguments:  List[String]) extends Expression {
     override def toString: String =

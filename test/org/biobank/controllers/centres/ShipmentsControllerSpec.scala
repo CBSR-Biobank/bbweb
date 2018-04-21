@@ -18,6 +18,7 @@ class ShipmentsControllerSpec
     with ShipmentsControllerSpecUtils {
 
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val states = Table("state",
                      Shipment.createdState,
@@ -53,7 +54,7 @@ class ShipmentsControllerSpec
         'fromLocationId (shipment.fromLocationId),
         'toLocationId   (shipment.toLocationId))
 
-      checkTimeStamps(repoShipment, shipment.timeAdded, OffsetDateTime.now)
+      repoShipment must beEntityWithTimeStamps(shipment.timeAdded, Some(OffsetDateTime.now), 5L)
     }
   }
 
@@ -406,7 +407,7 @@ class ShipmentsControllerSpec
             'fromLocationId (f.shipment.fromLocationId),
             'toLocationId   (f.shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, OffsetDateTime.now, None)
+          repoShipment must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -473,7 +474,7 @@ class ShipmentsControllerSpec
             'fromLocationId (f.shipment.fromLocationId),
             'toLocationId   (f.shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, OffsetDateTime.now)
+          repoShipment must beEntityWithTimeStamps(f.shipment.timeAdded, Some(OffsetDateTime.now), 5L)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -532,7 +533,7 @@ class ShipmentsControllerSpec
             'fromLocationId (f.shipment.fromLocationId),
             'toLocationId   (f.shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, OffsetDateTime.now)
+          repoShipment must beEntityWithTimeStamps(f.shipment.timeAdded, Some(OffsetDateTime.now), 5L)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -595,7 +596,7 @@ class ShipmentsControllerSpec
             'fromLocationId (newLocation.id),
             'toLocationId   (f.shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, OffsetDateTime.now)
+          repoShipment must beEntityWithTimeStamps(f.shipment.timeAdded, Some(OffsetDateTime.now), 5L)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -674,7 +675,7 @@ class ShipmentsControllerSpec
             'fromLocationId (f.shipment.fromLocationId),
             'toLocationId   (newLocation.id))
 
-          checkTimeStamps(repoShipment, f.shipment.timeAdded, OffsetDateTime.now)
+          repoShipment must beEntityWithTimeStamps(f.shipment.timeAdded, Some(OffsetDateTime.now), 5L)
           compareTimestamps(repoShipment, f.shipment)
         }
       }
@@ -751,7 +752,7 @@ class ShipmentsControllerSpec
             'fromLocationId (shipment.fromLocationId),
             'toLocationId   (shipment.toLocationId))
 
-          checkTimeStamps(repoShipment, shipment.timeAdded, OffsetDateTime.now)
+          repoShipment must beEntityWithTimeStamps(shipment.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
 

@@ -32,17 +32,18 @@ trait AccessService extends BbwebService {
 
   def getAccessItems(requestUserId: UserId,
                      filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[AccessItemNameDto]]
+                     sort:          SortString)
+      : Future[ServiceValidation[Seq[AccessItemNameDto]]]
 
   def getRole(requestUserId: UserId, roleId: AccessItemId): ServiceValidation[RoleDto]
 
   def getRoleBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[RoleDto]
 
-  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[RoleDto]]
+  def getRoles(requestUserId: UserId, pagedQuery: PagedQuery)
+      : Future[ServiceValidation[PagedResults[RoleDto]]]
 
-  def getRoleNames(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[EntityInfoDto]]
+  def getRoleNames(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[EntityInfoDto]]]
 
   def getUserRoles(userId: UserId): ServiceValidation[Set[UserRoleDto]]
 
@@ -63,12 +64,11 @@ trait AccessService extends BbwebService {
 
   def getMembershipBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[MembershipDto]
 
-  def getMemberships(requestUserId: UserId,
-                     filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[MembershipDto]]
+  def getMemberships(requestUserId: UserId, pagedQuery: PagedQuery)
+      : Future[ServiceValidation[PagedResults[MembershipDto]]]
 
-  def getMembershipNames(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[EntityInfoDto]]
+  def getMembershipNames(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[EntityInfoDto]]]
 
   def getUserMembership(userId: UserId): ServiceValidation[UserMembership]
 
@@ -110,27 +110,29 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
 
   def getAccessItems(requestUserId: UserId,
                      filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[AccessItemNameDto]] = {
-    whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
-      val allItems = accessItemRepository.getValues.toSet
-      val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                    else sort
-      for {
-        items           <- AccessItemFilter.filterAccessItems(allItems, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-      } yield {
-        val sortedItems = items.toSeq.sortWith(sortFunc)
-        val dtos =         sortedItems.map(i => AccessItemNameDto(i.id.id,
-                                                                  i.slug,
-                                                                  i.name,
-                                                                  i.accessItemType.id))
-        if (firstSort.order == AscendingOrder) dtos
-        else dtos.reverse
+                     sort:          SortString): Future[ServiceValidation[Seq[AccessItemNameDto]]] = {
+    Future {
+      whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
+        val allItems = accessItemRepository.getValues.toSet
+        val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                      else sort
+        for {
+          items           <- AccessItemFilter.filterAccessItems(allItems, filter)
+          sortExpressions <- { QuerySortParser(sortStr).
+                                toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+          firstSort       <- { sortExpressions.headOption.
+                                toSuccessNel(ServiceError("at least one sort expression is required")) }
+          sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
+                                toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+        } yield {
+          val sortedItems = items.toSeq.sortWith(sortFunc)
+          val dtos =         sortedItems.map(i => AccessItemNameDto(i.id.id,
+                                                                    i.slug,
+                                                                    i.name,
+                                                                    i.accessItemType.id))
+          if (firstSort.order == AscendingOrder) dtos
+          else dtos.reverse
+        }
       }
     }
   }
@@ -159,34 +161,47 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     }
   }
 
-  def getRoles(requestUserId: UserId, filter: FilterString, sort: SortString)
-    : ServiceValidation[Seq[RoleDto]] = {
-    whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
-      val allRoles = accessItemRepository.getRoles
-      val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                    else sort
-      for {
-        roles           <- AccessItemFilter.filterRoles(allRoles, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-        sortedRoles     <- roles.toSeq.sortWith(sortFunc).successNel[String]
-        dtos            <- sortedRoles.map(roleToDto).toList.sequenceU
-      } yield {
-        if (firstSort.order == AscendingOrder) dtos
-        else dtos.reverse
+   def getRoles(requestUserId: UserId, query: PagedQuery)
+       : Future[ServiceValidation[PagedResults[RoleDto]]] = {
+     Future {
+       whenPermitted(requestUserId, PermissionId.RoleRead) { () =>
+         for {
+           sortedRoles <- getRolesInternal(query.filter, query.sort)
+           validPage   <- query.validPage(sortedRoles.size)
+           dtos        <- sortedRoles.map(roleToDto).toList.sequenceU
+           result      <- PagedResults.create(dtos, query.page, query.limit)
+         } yield result
+       }
+     }
+  }
+
+  def getRoleNames(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[EntityInfoDto]]] = {
+    Future {
+      getRolesInternal(query.filter, query.sort).map {
+        _.map { r => EntityInfoDto(r.id.id, r.slug, r.name) }
       }
     }
   }
 
-  def getRoleNames(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[EntityInfoDto]] = {
-    getRoles(requestUserId, filter, sort).map {
-      _.map { r => EntityInfoDto(r.id, r.slug, r.name) }
-    }
+  private def getRolesInternal(filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[Role]] = {
+    val allRoles = accessItemRepository.getRoles
+    val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                  else sort
+    for {
+      roles           <- AccessItemFilter.filterRoles(allRoles, filter)
+      sortExpressions <- { QuerySortParser(sortStr).
+                            toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+      firstSort       <- { sortExpressions.headOption.
+                            toSuccessNel(ServiceError("at least one sort expression is required")) }
+      sortFunc        <- { AccessItem.sort2Compare.get(firstSort.name).
+                            toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+    } yield {
+        val sorted = roles.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) sorted
+        else sorted.reverse
+      }
   }
 
   def hasPermission(userId: UserId, permissionId: AccessItemId): ServiceValidation[Boolean] = {
@@ -239,34 +254,52 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     }
   }
 
-  def getMemberships(requestUserId: UserId,
-                     filter:        FilterString,
-                     sort:          SortString): ServiceValidation[Seq[MembershipDto]] = {
-    whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
-      val allMemberships = membershipRepository.getValues.toSet
-      val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                    else sort
-      for {
-        memberships     <- MembershipFilter.filterMemberships(allMemberships, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { Membership.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-        sorted          <- memberships.toSeq.sortWith(sortFunc).successNel[String]
-        dtos            <- sorted.map(membershipToDto).toList.sequenceU
-      } yield {
-        if (firstSort.order == AscendingOrder) dtos
-        else dtos.reverse
+   def getMemberships(requestUserId: UserId, query: PagedQuery)
+       : Future[ServiceValidation[PagedResults[MembershipDto]]] = {
+     Future {
+       whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
+         for {
+           memberships <- getMembershipsInternal(query.filter, query.sort)
+           validPage <- query.validPage(memberships.size)
+           dtos        <- memberships.map(membershipToDto).toList.sequenceU
+           result      <- PagedResults.create(dtos, query.page, query.limit)
+         } yield result
+       }
+     }
+   }
+
+  def getMembershipNames(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[EntityInfoDto]]] = {
+    Future {
+      getMembershipsInternal(query.filter, query.sort).map {
+        _.map { m => EntityInfoDto(m.id.id, m.slug, m.name) }
       }
     }
   }
 
-  def getMembershipNames(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[EntityInfoDto]] = {
-    getMemberships(requestUserId, filter, sort).map {
-      _.map { m => EntityInfoDto(m.id, m.slug, m.name) }
+  private def getMembershipsInternal(filter: FilterString, sort: SortString)
+      : ServiceValidation[Seq[Membership]] = {
+    val allMemberships = membershipRepository.getValues.toSet
+    val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                  else sort
+    for {
+      memberships     <- MembershipFilter.filterMemberships(allMemberships, filter)
+      sortExpressions <- {
+        QuerySortParser(sortStr).
+          toSuccessNel(ServiceError(s"could not parse sort expression: $sort"))
+      }
+      firstSort       <- {
+        sortExpressions.headOption.
+          toSuccessNel(ServiceError("at least one sort expression is required"))
+      }
+      sortFunc        <- {
+        Membership.sort2Compare.get(firstSort.name).
+          toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}"))
+      }
+    } yield {
+      val sorted = memberships.toSeq.sortWith(sortFunc)
+      if (firstSort.order == AscendingOrder) sorted
+      else sorted.reverse
     }
   }
 

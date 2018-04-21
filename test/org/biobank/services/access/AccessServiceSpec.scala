@@ -5,9 +5,10 @@ import org.biobank.domain.access._
 import org.biobank.domain.users.{ActiveUser, UserRepository}
 import org.biobank.domain.studies.{StudyId, StudyRepository}
 import org.biobank.domain.centres.{CentreId, CentreRepository}
-import org.biobank.services.{FilterString, SortString}
+import org.biobank.services.{FilterString, PagedQuery, SortString}
+import org.scalatest.concurrent.ScalaFutures
 
-class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
+class AccessServiceSpec extends TestFixture with AccessServiceFixtures with ScalaFutures {
 
   import org.biobank.TestUtils._
   import org.biobank.domain.access.AccessItem._
@@ -230,18 +231,18 @@ class AccessServiceSpec extends TestFixture with AccessServiceFixtures {
 
         it("user with 'membership read' permission can retrieve memberships") {
           val f = new Fixture
-          accessService.getMemberships(f.permittedUser.id,
-                                       new FilterString(""),
-                                       new SortString("")) mustSucceed { memberships =>
-            memberships must have size (1)
-          }
+          val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+          accessService.getMemberships(f.permittedUser.id, query)
+            .futureValue.mustSucceed { pagedResults =>
+              pagedResults.items must have size (1L)
+            }
         }
 
         it("fails for user without 'membership read' permission") {
           val f = new Fixture
-          accessService.getMemberships(f.nonPermittedUser.id,
-                                       new FilterString(""),
-                                       new SortString("")).mustFail("Unauthorized")
+          val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+          accessService.getMemberships(f.nonPermittedUser.id, query)
+            .futureValue.mustFail("Unauthorized")
         }
       }
 

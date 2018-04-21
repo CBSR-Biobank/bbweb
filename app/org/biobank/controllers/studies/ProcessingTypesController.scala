@@ -23,11 +23,31 @@ class ProcessingTypesController @Inject() (
 )
     extends CommandController(controllerComponents) {
 
+  protected val PageSizeMax = 10
+
   def get(studySlug: Slug, procTypeSlug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       val processingType = service.processingTypeBySlug(request.authInfo.userId, studySlug, procTypeSlug)
       validationReply(processingType)
     }
+
+  // def list(studySlug: Slug): Action[Unit] = {
+  //   action.async(parse.empty) { implicit request =>
+  //     validationReply(
+  //       Future {
+  //         for {
+  //           pagedQuery      <- PagedQuery.create(request.rawQueryString, PageSizeMax)
+  //           processingTypes <- service.listByStudySlug(request.authInfo.userId,
+  //                                                      studySlug,
+  //                                                      pagedQuery.filter,
+  //                                                      pagedQuery.sort)
+  //           validPage       <- pagedQuery.validPage(processingTypes.size)
+  //           results         <- PagedResults.create(processingTypes, pagedQuery.page, pagedQuery.limit)
+  //         } yield results
+  //       }
+  //     )
+  //   }
+  // }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>

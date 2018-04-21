@@ -7,6 +7,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.centres.CentreId
 import org.biobank.domain.studies.StudyId
 import org.biobank.domain.users.UserId
+import org.biobank.dto.access._
 import org.biobank.services.PagedResults
 import org.biobank.services.access.AccessService
 import org.biobank.services.centres.CentresService
@@ -19,8 +20,6 @@ import play.api.mvc._
 import play.api.{Environment, Logger}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
-import scalaz._
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
@@ -36,6 +35,7 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
 
   import org.biobank.infrastructure.commands.AccessCommands._
   import org.biobank.infrastructure.commands.MembershipCommands._
+  import PagedResults._
 
   val log: Logger = Logger(this.getClass)
 
@@ -43,44 +43,36 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
 
   def listItemNames: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            items         <- accessService.getAccessItems(request.authInfo.userId,
-                                                          filterAndSort.filter,
-                                                          filterAndSort.sort)
-          } yield items
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[Seq[AccessItemNameDto]]))
+        },
+        query => {
+          validationReply(accessService.getAccessItems(request.authInfo.userId, query.filter, query.sort))
         }
       )
     }
 
   def listRoles: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            roles      <- accessService.getRoles(request.authInfo.userId,
-                                                 pagedQuery.filter,
-                                                 pagedQuery.sort)
-            validPage  <- pagedQuery.validPage(roles.size)
-            results    <- PagedResults.create(roles, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[RoleDto]]))
+        },
+        pagedQuery => {
+          validationReply(accessService.getRoles(request.authInfo.userId, pagedQuery))
         }
       )
     }
 
   def listRoleNames: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            roleNames     <- accessService.getRoleNames(request.authInfo.userId,
-                                                        filterAndSort.filter,
-                                                        filterAndSort.sort)
-          } yield roleNames
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[Seq[AccessItemNameDto]]))
+        },
+        query => {
+          validationReply(accessService.getRoleNames(request.authInfo.userId, query))
         }
       )
     }
@@ -99,30 +91,24 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
 
   def listMemberships(): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery  <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            memberships <- accessService.getMemberships(request.authInfo.userId,
-                                                        pagedQuery.filter,
-                                                        pagedQuery.sort)
-            validPage   <- pagedQuery.validPage(memberships.size)
-            results     <- PagedResults.create(memberships, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[MembershipDto]]))
+        },
+        pagedQuery => {
+          validationReply(accessService.getMemberships(request.authInfo.userId, pagedQuery))
         }
       )
     }
 
   def listMembershipNames: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            filterAndSort   <- FilterAndSortQuery.create(request.rawQueryString)
-            membershipNames <- accessService.getMembershipNames(request.authInfo.userId,
-                                                                filterAndSort.filter,
-                                                                filterAndSort.sort)
-          } yield membershipNames
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[Seq[AccessItemNameDto]]))
+        },
+        query => {
+          validationReply(accessService.getMembershipNames(request.authInfo.userId, query))
         }
       )
     }

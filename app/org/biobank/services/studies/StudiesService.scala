@@ -10,7 +10,7 @@ import org.biobank.domain.centres.{Centre, CentreRepository}
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
-//import org.biobank.dto._
+import org.biobank.dto._
 import org.biobank.infrastructure._
 import org.biobank.infrastructure.commands.StudyCommands._
 import org.biobank.infrastructure.events.StudyEvents._
@@ -34,8 +34,8 @@ trait StudiesService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the studies.
    */
-  def collectionStudies(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[Study]]
+  def collectionStudies(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[NameAndStateDto]]]
 
   def getStudyCount(requestUserId: UserId): ServiceValidation[Long]
 
@@ -48,13 +48,15 @@ trait StudiesService extends BbwebService {
    *
    * @param sort the string representation of the sort expression to use when sorting the studies.
    */
-  def getStudies(requestUserId: UserId,
-                 filter:        FilterString,
-                 sort:          SortString): ServiceValidation[Seq[Study]]
+  def getStudies(requestUserId: UserId, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[Study]]]
 
   def getStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Study]
 
   def getStudyBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Study]
+
+  def getStudyNames(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[NameAndStateDto]]]
 
   def getCentresForStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Set[CentreLocation]]
 
@@ -95,30 +97,39 @@ class StudiesServiceImpl @Inject()(
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def collectionStudies(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[Study]] = {
-    val collectionStudies: ServiceValidation[Seq[Study]] = for {
-        membershipStudies <- getMembershipStudies(requestUserId)
-        membershipCentres <- getMembershipCentres(requestUserId)
-      } yield {
-        val enabledStudies = membershipStudies.filter { s => s.state == Study.enabledState }
-        val enabledCentres = membershipCentres.filter { c => c.state == Centre.enabledState }
-        val centreStudies  = enabledCentres
-          .flatMap { centre =>
-            centre.studyIds.map(studyRepository.getByKey)
-          }
-          .toList.sequenceU
-          .map { s =>
-            s.filter { s => s.state == Study.enabledState }.toSet
-          }
+  def collectionStudies(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[NameAndStateDto]]] = {
+    Future {
+      val v: ServiceValidation[Seq[Study]] =
+        for {
+          membershipStudies <- getMembershipStudies(requestUserId)
+          membershipCentres <- getMembershipCentres(requestUserId)
+        } yield {
+          val enabledStudies = membershipStudies.filter { s => s.state == Study.enabledState }
+          val enabledCentres = membershipCentres.filter { c => c.state == Centre.enabledState }
+          val centreStudies  = enabledCentres
+            .flatMap { centre =>
+              centre.studyIds.map(studyRepository.getByKey)
+            }
+            .toList.sequenceU
+            .map { s =>
+              s.filter { s => s.state == Study.enabledState }.toSet
+            }
 
-        // centreStudies should never be an error because its value is based on enabled centres
-        centreStudies.fold(
-          err => Seq.empty[EnabledStudy],
-          cs  => (enabledStudies & cs).toSeq
-        )
+          // centreStudies should never be an error because its value is based on enabled centres
+          centreStudies.fold(
+            err => Seq.empty[EnabledStudy],
+            cs  => (enabledStudies & cs).toSeq
+          )
+        }
+
+      for {
+        studies <- v
+        filtered <- filterStudiesInternal(studies.toSet, query.filter, query.sort)
+      } yield {
+        filtered.map { s => NameAndStateDto(s.id.id, s.slug, s.name, s.state.id) }
       }
-    collectionStudies.flatMap(studies => filterStudiesInternal(studies.toSet, filter, sort))
+    }
   }
 
   def getStudyCount(requestUserId: UserId): ServiceValidation[Long] = {
@@ -126,6 +137,7 @@ class StudiesServiceImpl @Inject()(
       studies.size.toLong.successNel[String]
     }
   }
+
 
   def getCountsByStatus(requestUserId: UserId): ServiceValidation[StudyCountsByStatus] = {
     withPermittedStudies(requestUserId) { studies =>
@@ -138,10 +150,27 @@ class StudiesServiceImpl @Inject()(
     }
   }
 
-  def getStudies(requestUserId: UserId, filter: FilterString, sort: SortString)
-      : ServiceValidation[Seq[Study]] = {
-    withPermittedStudies(requestUserId) { studies =>
-      filterStudiesInternal(studies, filter, sort)
+  def getStudies(requestUserId: UserId, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[Study]]] = {
+    Future {
+      withPermittedStudies(requestUserId) { studies =>
+        for {
+          studies   <- filterStudiesInternal(studies, query.filter, query.sort)
+          validPage <- query.validPage(studies.size)
+          results   <- PagedResults.create(studies, query.page, query.limit)
+        } yield results
+      }
+    }
+  }
+
+  def getStudyNames(requestUserId: UserId, query: FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[NameAndStateDto]]] = {
+    Future {
+      withPermittedStudies(requestUserId) { studies =>
+        filterStudiesInternal(studies, query.filter, query.sort).map {
+          _.map { s => NameAndStateDto(s.id.id, s.slug, s.name, s.state.id) }
+        }
+      }
     }
   }
 

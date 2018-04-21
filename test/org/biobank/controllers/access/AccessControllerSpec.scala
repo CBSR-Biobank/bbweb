@@ -22,6 +22,7 @@ class AccessControllerSpec
     with UserFixtures
     with Inside {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   class ActiveUserFixture {
     val user = factory.createActiveUser
@@ -146,7 +147,7 @@ class AccessControllerSpec
               'version        (0L)
             )
             repoRole.userIds must contain (f.user.id)
-            checkTimeStamps(repoRole, OffsetDateTime.now, None)
+            repoRole must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
           }
         }
       }
@@ -227,7 +228,7 @@ class AccessControllerSpec
               'version        (f.role.version + 1),
               'name           (newName)
             )
-            checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+            repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
           }
         }
       }
@@ -259,11 +260,10 @@ class AccessControllerSpec
 
       it("fail when updating and role ID does not exist") {
         val f = new RoleFixture
-        BbwebRequest(
-          POST,
-          uri("roles", "name", f.role.id.id),
-          updateNameJson(f.role, nameGenerator.next[Role])
-        ) must beNotFoundWithMessage("IdNotFound: role id".r)
+        val reply = makeAuthRequest(POST,
+                                    uri("roles", "name", f.role.id.id),
+                                    updateNameJson(f.role, nameGenerator.next[Role]))
+        reply.value must beNotFoundWithMessage("IdNotFound: role id")
       }
 
       it("fail when updating with invalid version") {
@@ -308,7 +308,7 @@ class AccessControllerSpec
                 'version        (f.role.version + 1),
                 'description    (newDescription)
               )
-              checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+              repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
             }
           }
         }
@@ -316,12 +316,10 @@ class AccessControllerSpec
 
       it("fail when updating and role ID does not exist") {
         val f = new RoleFixture
-        BbwebRequest(
-          POST,
-          uri("roles", "description", f.role.id.id),
-          updateDescriptionJson(f.role, Some(nameGenerator.next[Role]))
-        ) must beNotFoundWithMessage("IdNotFound: role id".r)
-
+        val reply = makeAuthRequest(POST,
+                                    uri("roles", "description", f.role.id.id),
+                                    updateDescriptionJson(f.role, Some(nameGenerator.next[Role])))
+        reply.value must beNotFoundWithMessage("IdNotFound: role id")
       }
 
       it("fail when updating with invalid version") {
@@ -362,7 +360,7 @@ class AccessControllerSpec
               'version        (f.role.version + 1)
             )
             repoRole.userIds must contain (user.id)
-            checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+            repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
           }
         }
       }
@@ -397,11 +395,10 @@ class AccessControllerSpec
         val user = factory.createRegisteredUser
         val json = addUserJson(f.role, user)
         userRepository.put(user)
-        BbwebRequest(
-          POST,
-          uri("roles", "user", f.role.id.id),
-          json
-        ) must beNotFoundWithMessage("IdNotFound: role id".r)
+        val reply = makeAuthRequest(POST,
+                                    uri("roles", "user", f.role.id.id),
+                                    json)
+        reply.value must beNotFoundWithMessage("IdNotFound: role id")
 
       }
 
@@ -444,7 +441,7 @@ class AccessControllerSpec
               'version        (f.role.version + 1)
             )
             repoRole.parentIds must contain (parentRole.id)
-            checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+            repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
           }
         }
       }
@@ -493,12 +490,10 @@ class AccessControllerSpec
         val parentRole = factory.createRole
         val json = addParentRoleJson(f.role, parentRole)
         accessItemRepository.put(parentRole)
-        BbwebRequest(
-          POST,
-          uri("roles", "parent", f.role.id.id),
-          json
-        ) must beNotFoundWithMessage("IdNotFound: role id".r)
-
+        val reply = makeAuthRequest(POST,
+                                    uri("roles", "parent", f.role.id.id),
+                                    json)
+        reply.value must beNotFoundWithMessage("IdNotFound: role id")
       }
 
       it("fail when updating with invalid version") {
@@ -544,7 +539,7 @@ class AccessControllerSpec
                 'version        (f.role.version + 1)
               )
               repoRole.childrenIds must contain (child.id)
-              checkTimeStamps(repoRole, OffsetDateTime.now, OffsetDateTime.now)
+              repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
             }
           }
         }
@@ -599,11 +594,10 @@ class AccessControllerSpec
         val child = factory.createRole
         val json = addChildJson(f.role, child)
         accessItemRepository.put(child)
-        BbwebRequest(
-          POST,
-          uri("roles", "child", f.role.id.id),
-          json
-        ) must beNotFoundWithMessage("IdNotFound: role id".r)
+        val reply = makeAuthRequest(POST,
+                                    uri("roles", "child", f.role.id.id),
+                                    json)
+        reply.value must beNotFoundWithMessage("IdNotFound: role id")
       }
 
       it("fail when updating with invalid version") {
@@ -642,7 +636,7 @@ class AccessControllerSpec
             'version        (f.role.version + 1)
           )
           repoRole.userIds must not contain (f.user.id)
-          checkTimeStamps(repoRole, f.role.timeAdded, OffsetDateTime.now)
+          repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
     }
@@ -677,7 +671,8 @@ class AccessControllerSpec
       val url = uri("roles", "user", f.role.id.id, f.role.version.toString, user.id.id)
       Set(user).map(addToRepository)
 
-      BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound: role id".r)
+      val reply = makeAuthRequest(DELETE, url)
+      reply.value must beNotFoundWithMessage("IdNotFound: role id")
     }
 
     it("fail when removing with invalid version") {
@@ -715,7 +710,7 @@ class AccessControllerSpec
             'version        (role.version + 1)
           )
           repoRole.parentIds must not contain (parentRole.id)
-          checkTimeStamps(repoRole, role.timeAdded, OffsetDateTime.now)
+          repoRole must beEntityWithTimeStamps(role.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
     }
@@ -749,7 +744,8 @@ class AccessControllerSpec
       val parentRole = factory.createRole
       val url = uri("roles", "parent", f.role.id.id, f.role.version.toString, parentRole.id.id)
       Set(parentRole).map(addToRepository)
-      BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound: role id".r)
+      val reply = makeAuthRequest(DELETE, url)
+      reply.value must beNotFoundWithMessage("IdNotFound: role id")
     }
 
     it("fail when removing with invalid version") {
@@ -790,7 +786,7 @@ class AccessControllerSpec
               'version        (role.version + 1)
             )
             repoRole.childrenIds must not contain (child.id)
-            checkTimeStamps(repoRole, role.timeAdded, OffsetDateTime.now)
+            repoRole must beEntityWithTimeStamps(role.timeAdded, Some(OffsetDateTime.now), 5L)
           }
         }
       }
@@ -816,7 +812,8 @@ class AccessControllerSpec
     it("cannot remove a role that does not exist") {
       val f = new RoleFixture
       val url = uri("roles", f.role.id.id, f.role.version.toString)
-      BbwebRequest(DELETE, url) must beNotFoundWithMessage("IdNotFound: role id".r)
+      val reply = makeAuthRequest(DELETE, url)
+      reply.value must beNotFoundWithMessage("IdNotFound: role id")
     }
 
     it("fail when removing with invalid version") {

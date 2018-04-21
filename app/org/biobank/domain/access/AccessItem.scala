@@ -13,9 +13,9 @@ import scalaz.Scalaz._
  * Predicates that can be used to filter collections of accessItems.
  *
  */
-trait AccessItemPredicates extends HasNamePredicates[AccessItem] {
+trait AccessItemPredicates[T <: AccessItem] extends HasNamePredicates[T] {
 
-  type AccessItemFilter = AccessItem => Boolean
+  type AccessItemFilter = T => Boolean
 
 }
 

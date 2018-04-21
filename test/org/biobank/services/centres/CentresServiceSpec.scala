@@ -6,7 +6,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.centres._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
-import org.biobank.services.{FilterString, SortString}
+import org.biobank.services.{FilterString, SortString, PagedQuery}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -175,26 +175,25 @@ class CentresServiceSpec
 
       it("users can access") {
         val f = new UsersWithCentreAccessFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          centresService.getCentres(user.id, new FilterString(""), new SortString(""))
-            .mustSucceed { centres =>
-              centres must have length (1)
+          centresService.getCentres(user.id, query).futureValue.mustSucceed { pagedResults =>
+              pagedResults.items must have length (1)
             }
         }
       }
 
       it("users cannot access") {
         val f = new UsersWithCentreAccessFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         info("no membership user")
-        centresService.getCentres(f.noMembershipUser.id, new FilterString(""), new SortString(""))
-          .mustSucceed { centres =>
-            centres must have length (0)
+        centresService.getCentres(f.noMembershipUser.id, query).futureValue.mustSucceed { pagedResults =>
+            pagedResults.items must have length (0)
           }
 
         info("no permission user")
-        centresService.getCentres(f.noCentrePermissionUser.id, new FilterString(""), new SortString(""))
-          .mustFail("Unauthorized")
+        centresService.getCentres(f.noCentrePermissionUser.id, query).futureValue.mustFail("Unauthorized")
       }
 
     }
@@ -362,13 +361,13 @@ class CentresServiceSpec
 
       it("user has access to all centres corresponding his membership") {
         val secondCentre = factory.createDisabledCentre  // should show up in results
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         addToRepository(secondCentre)
 
         val f = new UsersWithCentreAccessFixture
-        centresService.getCentres(f.allCentresAdminUser.id, new FilterString(""), new SortString(""))
-          .mustSucceed { reply =>
-            reply must have size (2)
-            val centreIds = reply.map(c => c.id)
+        centresService.getCentres(f.allCentresAdminUser.id, query).futureValue.mustSucceed { reply =>
+            reply.items must have size (2)
+            val centreIds = reply.items.map(c => c.id)
             centreIds must contain (f.centre.id.id)
             centreIds must contain (secondCentre.id.id)
           }
@@ -376,17 +375,18 @@ class CentresServiceSpec
 
       it("user has access only to centres corresponding his membership") {
         val secondCentre = factory.createDisabledCentre  // should show up in results
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         addToRepository(secondCentre)
 
         val f = new UsersWithCentreAccessFixture
-        centresService.getCentres(f.centreOnlyAdminUser.id, new FilterString(""), new SortString(""))
-          .mustSucceed { reply =>
-            reply must have size (1)
-            reply.map(c => c.id) must contain (f.centre.id.id)
+        centresService.getCentres(f.centreOnlyAdminUser.id, query).futureValue.mustSucceed { reply =>
+            reply.items must have size (1)
+            reply.items.map(c => c.id) must contain (f.centre.id.id)
           }
       }
 
       it("user does not have access to centre if not in membership") {
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         val f = new UsersWithCentreAccessFixture
 
         // remove all studies from membership
@@ -398,9 +398,8 @@ class CentresServiceSpec
         val secondStudy = factory.createDisabledStudy
         addToRepository(secondStudy)
 
-        centresService.getCentres(f.centreUser.id, new FilterString(""), new SortString(""))
-          .mustSucceed { reply =>
-            reply must have size (0)
+        centresService.getCentres(f.centreUser.id, query).futureValue.mustSucceed { reply =>
+            reply.items must have size (0)
           }
       }
 

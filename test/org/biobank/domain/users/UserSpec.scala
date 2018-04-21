@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory
  */
 class UserSpec extends DomainSpec {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -41,7 +42,7 @@ class UserSpec extends DomainSpec {
           'state     (User.registeredState.id)
         )
 
-        checkTimeStamps(u, OffsetDateTime.now, None)
+        u must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
     }
 
@@ -62,7 +63,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
+        u must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -101,7 +102,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
+        u must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -123,7 +124,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
+        u must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -146,7 +147,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
+        u must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -168,7 +169,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
+        u must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -189,7 +190,7 @@ class UserSpec extends DomainSpec {
           'state     (User.lockedState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
+        u must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
   }
@@ -213,7 +214,7 @@ class UserSpec extends DomainSpec {
           'state     (User.activeState.id)
         )
 
-        checkTimeStamps(u, user.timeAdded, OffsetDateTime.now)
+        u must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
   }

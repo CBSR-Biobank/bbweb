@@ -6,7 +6,7 @@ import org.biobank.domain.centres._
 import play.api.libs.json._
 
 private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
-  import org.biobank.TestUtils._
+  import org.biobank.matchers.DateMatchers._
 
   def uri(): String = "/api/shipments/"
 
@@ -31,10 +31,11 @@ private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
                         timeSent:     Option[OffsetDateTime],
                         timeReceived: Option[OffsetDateTime],
                         timeUnpacked: Option[OffsetDateTime]): Unit = {
-    checkOpionalTime(timePacked,   shipment.timePacked)
-    checkOpionalTime(timeSent,     shipment.timeSent)
-    checkOpionalTime(timeReceived, shipment.timeReceived)
-    checkOpionalTime(timeUnpacked, shipment.timeUnpacked)
+    shipment.timePacked must beOptionalTimeWithinSeconds(timePacked, 5L)
+    shipment.timeSent must beOptionalTimeWithinSeconds(timeSent, 5L)
+    shipment.timeReceived must beOptionalTimeWithinSeconds(timeReceived, 5L)
+    shipment.timeUnpacked must beOptionalTimeWithinSeconds(timeUnpacked, 5L)
+    ()
   }
 
   def compareTimestamps(shipment:      Shipment,
@@ -43,11 +44,8 @@ private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
                         timeReceived:  Option[OffsetDateTime],
                         timeUnpacked:  Option[OffsetDateTime],
                         timeCompleted: Option[OffsetDateTime]): Unit = {
-    checkOpionalTime(timePacked,    shipment.timePacked)
-    checkOpionalTime(timeSent,      shipment.timeSent)
-    checkOpionalTime(timeReceived,  shipment.timeReceived)
-    checkOpionalTime(timeUnpacked,  shipment.timeUnpacked)
-    checkOpionalTime(timeCompleted, shipment.timeCompleted)
+    shipment.timeCompleted must beOptionalTimeWithinSeconds(timeCompleted, 5L)
+    compareTimestamps(shipment, timePacked, timeSent, timeReceived, timeUnpacked)
   }
 
   def compareTimestamps(shipment1: Shipment, shipment2: Shipment): Unit = {

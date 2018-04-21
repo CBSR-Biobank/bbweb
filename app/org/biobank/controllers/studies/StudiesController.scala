@@ -1,13 +1,12 @@
 package org.biobank.controllers.studies
 
 import javax.inject.{Inject, Singleton}
-import org.biobank.controllers.{BbwebAction, FilterAndSortQuery, CommandController, PagedQuery}
+import org.biobank.controllers._
 import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies._
-import org.biobank.dto.NameAndStateDto
 import org.biobank.infrastructure.commands.StudyCommands._
-import org.biobank.services._
+import org.biobank.services.PagedResults
 import org.biobank.services.studies.StudiesService
 import play.api.Logger
 import play.api.libs.json._
@@ -15,7 +14,6 @@ import play.api.mvc.{Action, ControllerComponents, Result}
 import play.api.{ Environment, Logger }
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 /**
  *
@@ -31,18 +29,16 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
 
   val log: Logger = Logger(this.getClass)
 
-  private val PageSizeMax = 10
+  protected val PageSizeMax = 10
 
   def collectionStudies(): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            studies    <- service.collectionStudies(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
-            validPage  <- pagedQuery.validPage(studies.size)
-            results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[Study]]))
+        },
+        query => {
+          validationReply(service.collectionStudies(request.authInfo.userId, query))
         }
       )
     }
@@ -54,30 +50,24 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
 
   def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            studies    <- service.getStudies(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
-            validPage  <- pagedQuery.validPage(studies.size)
-            results    <- PagedResults.create(studies, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[Study]]))
+        },
+        pagedQuery => {
+          validationReply(service.getStudies(request.authInfo.userId, pagedQuery))
         }
       )
     }
 
   def listNames: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            studies       <- service.getStudies(request.authInfo.userId,
-                                                 filterAndSort.filter,
-                                                 filterAndSort.sort)
-          } yield {
-            studies.map(s => NameAndStateDto(s.id.id, s.slug, s.name, s.state.id))
-          }
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
+        },
+        query => {
+          validationReply(service.getStudyNames(request.authInfo.userId, query))
         }
       )
     }
@@ -162,7 +152,7 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
   /** Value types used by Specimen groups.
    *
    */
-  def specimenGroupValueTypes: Action[Unit] = Action(parse.empty) { request =>
+  def specimenDefinitionValueTypes: Action[Unit] = Action(parse.empty) { request =>
       // FIXME add container types to this response
       Ok(Map(
            "anatomicalSourceType"    -> AnatomicalSourceType.values.map(x => x),

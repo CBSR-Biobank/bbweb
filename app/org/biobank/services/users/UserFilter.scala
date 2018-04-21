@@ -2,55 +2,32 @@ package org.biobank.services.users
 
 import org.biobank.services._
 import org.biobank.services.Comparator._
-import org.biobank.services.QueryFilterParserGrammar._
 import org.biobank.services.{ServiceValidation, ServiceError}
 import org.biobank.domain.users.{User, UserPredicates}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 /**
  * Functions that filter a set of users from an expression contained in a filter string.
  *
  */
 object UserFilter
-    extends EntityNameFilter[User]
+    extends EntityFilter[User]
+    with EntityNameFilter[User]
     with EntityStateFilter[User]
     with UserPredicates {
 
   def filterUsers(users: Set[User], filter: FilterString):ServiceValidation[Set[User]] = {
-    QueryFilterParser.expressions(filter).flatMap { filterExpression =>
-      filterExpression match {
-        case None =>
-          users.successNel[String]
-        case Some(c: Comparison) =>
-          comparisonToPredicates(c).map(users.filter)
-        case Some(e: AndExpression) =>
-          comparisonToPredicates(e).map(users.filter)
-        case Some(e: OrExpression) =>
-          comparisonToPredicates(e).map(users.filter)
-        case _ =>
-          ServiceError(s"bad filter expression: $filterExpression").failureNel[Set[User]]
-      }
-    }
+    filterEntities(users, filter, users.filter)
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-  private def comparisonToPredicates(expression: Expression): ServiceValidation[UserFilter] = {
-    expression match {
-      case Comparison(selector, comparator, args) =>
-        selector match {
-          case "name"  => nameFilter(comparator, args)
-          case "email" => emailFilter(comparator, args)
-          case "state" => stateFilter(comparator, args)
-          case _ =>
-            ServiceError(s"invalid filter selector: $selector").failureNel[UserFilter]
-        }
-      case AndExpression(expressions) =>
-        expressions.map(comparisonToPredicates).sequenceU.map(x => every(x:_*))
-      case OrExpression(expressions) =>
-        expressions.map(comparisonToPredicates).sequenceU.map(x => any(x:_*))
+  protected def predicateFromSelector(selector: String, comparator: Comparator, args: List[String])
+      : ServiceValidation[User => Boolean] = {
+    selector match {
+      case "name"  => nameFilter(comparator, args)
+      case "email" => emailFilter(comparator, args)
+      case "state" => stateFilter(comparator, args)
       case _ =>
-        ServiceError(s"invalid filter expression: $expression").failureNel[UserFilter]
+        ServiceError(s"invalid filter selector: $selector").failureNel[UserFilter]
     }
   }
 

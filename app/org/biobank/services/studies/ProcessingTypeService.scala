@@ -8,6 +8,7 @@ import org.biobank.domain.Slug
 import org.biobank.domain.access._
 import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
+import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.commands.ProcessingTypeCommands._
 import org.biobank.infrastructure.events.ProcessingTypeEvents._
 import org.biobank.services._
@@ -65,6 +66,36 @@ class ProcessingTypeServiceImpl @Inject() (
     }
   }
 
+  def list(requestUserId: UserId,
+           studyId:       StudyId,
+           filter:        FilterString,
+           sort:          SortString): ServiceValidation[Seq[ProcessingType]] = {
+    whenPermittedAndIsMember(requestUserId,
+                             PermissionId.StudyRead,
+                             Some(studyId),
+                             None) { () =>
+      val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                    else sort
+
+      for {
+        study           <- studiesService.getStudy(requestUserId, studyId)
+        processingTypes <- getEventTypes(studyId, filter)
+        sortExpressions <- { QuerySortParser(sortStr).
+                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
+        firstSort       <- { sortExpressions.headOption.
+                              toSuccessNel(ServiceError("at least one sort expression is required")) }
+        sortFunc        <- { ProcessingType.sort2Compare.get(firstSort.name).
+                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+      } yield {
+        val result = processingTypes.toSeq.sortWith(sortFunc)
+        if (firstSort.order == AscendingOrder) result
+        else result.reverse
+      }
+    }
+  }
+
+
+
   def processingTypesForStudy(requestUserId: UserId, studyId: StudyId)
       : ServiceValidation[Set[ProcessingType]] = {
     whenPermittedAndIsMember(requestUserId,
@@ -104,6 +135,12 @@ class ProcessingTypeServiceImpl @Inject() (
       study  <- studiesService.getStudy(sessionUserId, studyId)
       result <- fn(study)
     } yield result
+  }
+
+  private def getEventTypes(studyId: StudyId, filter: FilterString)
+      : ServiceValidation[Set[ProcessingType]] = {
+    val allProcessingTypes = processingTypeRepository.allForStudy(studyId).toSet
+    ProcessingTypeFilter.filterProcessingTypes(allProcessingTypes, filter)
   }
 
 }

@@ -447,7 +447,7 @@ class UsersProcessor @Inject() (val config:         Configuration,
                                          event.eventType.isActivated,
                                          event.getActivated.getVersion) { (user, eventTime) =>
       val v = user.activate
-      v.foreach { u => userRepository.put(u.copy(timeAdded = eventTime)) }
+      v.foreach { u => userRepository.put(u.copy(timeModified = Some(eventTime))) }
       v.map(_ => true)
     }
   }

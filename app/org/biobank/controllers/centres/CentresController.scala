@@ -14,7 +14,6 @@ import play.api.mvc._
 import play.api.{ Environment, Logger }
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 /**
  *  Uses [[http://labs.omniti.com/labs/jsend JSend]] format for JSon replies.
@@ -40,33 +39,26 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
 
   def list: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            centres    <- service.getCentres(request.authInfo.userId, pagedQuery.filter, pagedQuery.sort)
-            validPage  <- pagedQuery.validPage(centres.size)
-            results    <- PagedResults.create(centres, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[CentreDto]]))
+        },
+        pagedQuery => {
+          validationReply(service.getCentres(request.authInfo.userId, pagedQuery))
         }
       )
     }
 
   def listNames: Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            centres       <- service.getCentres(request.authInfo.userId,
-                                                filterAndSort.filter,
-                                                filterAndSort.sort)
-          } yield {
-            centres.map(centre => NameAndStateDto(centre.id,
-                                                  centre.slug,
-                                                  centre.name,
-                                                  centre.state))
-          }
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[Seq[CentreDto]]))
+        },
+        query => {
+          validationReply(service.getCentreNames(request.authInfo.userId,
+                                                 query.filter,
+                                                 query.sort))
         }
       )
     }

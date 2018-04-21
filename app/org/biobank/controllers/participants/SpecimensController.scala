@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.Slug
 import org.biobank.domain.participants.{CollectionEventId, SpecimenId}
+import org.biobank.dto.SpecimenDto
 import org.biobank.services._
 import org.biobank.services.participants.SpecimensService
 import play.api.libs.json._
@@ -11,7 +12,6 @@ import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, ControllerComponents}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
@@ -33,22 +33,19 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
   def get(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       val v = service.getBySlug(request.authInfo.userId, slug)
-        .flatMap { specimen => service.specimenToDto(specimen) }
       validationReply(v)
     }
 
   def list(ceventSlug: Slug): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery   <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            specimens    <- service.listBySlug(request.authInfo.userId, ceventSlug, pagedQuery.sort)
-            validPage    <- pagedQuery.validPage(specimens.size)
-            specimenDtos <- specimens.map(s => service.specimenToDto(s)).toList.sequenceU
-            results      <- PagedResults.create(specimenDtos, pagedQuery.page, pagedQuery.limit)
-          } yield results
-        })
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[SpecimenDto]]))
+        },
+        pagedQuery => {
+          validationReply(service.listBySlug(request.authInfo.userId, ceventSlug, pagedQuery))
+        }
+      )
     }
 
   def snapshot: Action[Unit] =

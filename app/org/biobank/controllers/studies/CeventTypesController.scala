@@ -3,8 +3,7 @@ package org.biobank.controllers.studies
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.Slug
-import org.biobank.domain.studies.{StudyId, CollectionEventTypeId}
-import org.biobank.dto.EntityInfoDto
+import org.biobank.domain.studies.{StudyId, CollectionEventType, CollectionEventTypeId}
 import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 import org.biobank.services.PagedResults
 import org.biobank.services.studies.CollectionEventTypeService
@@ -13,7 +12,6 @@ import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, ControllerComponents, Result}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 @Singleton
@@ -29,7 +27,7 @@ class CeventTypesController @Inject() (
 
   val log: Logger = Logger(this.getClass)
 
-  private val PageSizeMax = 10
+  protected val PageSizeMax = 10
 
   def get(studySlug: Slug, ceventTypeSlug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
@@ -39,36 +37,27 @@ class CeventTypesController @Inject() (
 
   def list(studySlug: Slug): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery  <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            ceventTypes <- service.listByStudySlug(request.authInfo.userId,
-                                                   studySlug,
-                                                   pagedQuery.filter,
-                                                   pagedQuery.sort)
-            validPage   <- pagedQuery.validPage(ceventTypes.size)
-            results     <- PagedResults.create(ceventTypes, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
+        },
+        pagedQuery => {
+          validationReply(service.listByStudySlug(request.authInfo.userId,
+                                                  studySlug,
+                                                  pagedQuery))
         }
       )
     }
   }
 
-  // returns all the names of the collection events in a list of EntityInfoDto.
   def listNames(studySlug: Slug): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            filterAndSort <- FilterAndSortQuery.create(request.rawQueryString)
-            ceventTypes   <- service.listByStudySlug(request.authInfo.userId,
-                                                     studySlug,
-                                                     filterAndSort.filter,
-                                                     filterAndSort.sort)
-          } yield {
-            ceventTypes.map(et => EntityInfoDto(et.id.id, et.slug, et.name))
-          }
+      FilterAndSortQueryHelper(request.rawQueryString).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
+        },
+        query => {
+          validationReply(service.listNamesByStudySlug(request.authInfo.userId, studySlug, query))
         }
       )
     }

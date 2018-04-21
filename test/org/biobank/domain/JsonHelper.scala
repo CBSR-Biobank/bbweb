@@ -2,7 +2,6 @@ package org.biobank.domain
 
 import com.typesafe.scalalogging._
 import java.time.OffsetDateTime
-import org.biobank.TestUtils
 import org.biobank.domain.access._
 import org.biobank.domain.annotations._
 import org.biobank.domain.centres._
@@ -17,16 +16,20 @@ import org.biobank.services.centres.CentreLocationInfo
 import play.api.libs.json._
 
 trait JsonHelper extends MustMatchers with OptionValues {
+  import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.DateMatchers._
 
-  //private val log: Logger = LoggerFactory.getLogger(this.getClass)
+  private def compareEntity[T <: IdentifiedDomainObject[_]]
+    (json: JsValue, entity: ConcurrencySafeEntity[T]) = {
 
-  private def compareEntity[T <: IdentifiedDomainObject[_]](json: JsValue, entity: ConcurrencySafeEntity[T]) = {
     (json \ "id").as[String] mustBe (entity.id.toString)
+
     (json \ "version").as[Long] mustBe (entity.version)
 
-    TestUtils.checkTimeStamps(entity,
-                              (json \ "timeAdded").as[OffsetDateTime],
-                              (json \ "timeModified").asOpt[OffsetDateTime])
+    val timeAdded = (json \ "timeAdded").as[OffsetDateTime]
+    val timeModified = (json \ "timeModified").asOpt[OffsetDateTime]
+
+    entity must beEntityWithTimeStamps(timeAdded, timeModified, 5L)
   }
 
   def compareObj(json: JsValue, user: User) = {
@@ -187,9 +190,9 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "collectionEventTypeId").as[String] mustBe (collectionEvent.collectionEventTypeId.id)
     (json \ "visitNumber").as[Int]              mustBe (collectionEvent.visitNumber)
 
-    TestUtils.checkTimeStamps((json \ "timeCompleted").as[OffsetDateTime],
-                              collectionEvent.timeCompleted,
-                              1L)
+    (json \ "timeCompleted").as[OffsetDateTime] must beTimeWithinSeconds(collectionEvent.timeCompleted ,
+                                                                         5L)
+
   }
 
   def compareObj(json: JsValue, centre: Centre) = {
@@ -243,12 +246,19 @@ trait JsonHelper extends MustMatchers with OptionValues {
     (json \ "trackingNumber").as[String] mustBe (shipment.trackingNumber)
     (json \ "fromLocationInfo" \ "locationId").as[String] mustBe (shipment.fromLocationId.id)
     (json \ "toLocationInfo" \ "locationId").as[String] mustBe (shipment.toLocationId.id)
+
     (json \ "state").as[String] mustBe (shipment.state.toString)
 
-    TestUtils.checkOpionalTime((json \ "timePacked").asOpt[OffsetDateTime], shipment.timePacked)
-    TestUtils.checkOpionalTime((json \ "timeSent").asOpt[OffsetDateTime], shipment.timeSent)
-    TestUtils.checkOpionalTime((json \ "timeReceived").asOpt[OffsetDateTime], shipment.timeReceived)
-    TestUtils.checkOpionalTime((json \ "timeUnpacked").asOpt[OffsetDateTime], shipment.timeUnpacked)
+
+    (json \ "timePacked").asOpt[OffsetDateTime] must beOptionalTimeWithinSeconds(shipment.timePacked , 5L)
+
+    (json \ "timeSent").asOpt[OffsetDateTime] must beOptionalTimeWithinSeconds(shipment.timeSent, 5L)
+
+    (json \ "timeReceived").asOpt[OffsetDateTime] must beOptionalTimeWithinSeconds(shipment.timeReceived,
+                                                                                   5L)
+
+    (json \ "timeUnpacked").asOpt[OffsetDateTime] must beOptionalTimeWithinSeconds(shipment.timeUnpacked,
+                                                                                   5L)
   }
 
   def annotationTypeToJson(annotType: AnnotationType): JsObject = {
@@ -299,10 +309,13 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
   def compareSpecimenDto(json: JsValue, specimenDto: SpecimenDto) = {
     (json \ "id").as[String] mustBe (specimenDto.id)
+
     (json \ "version").as[Long] mustBe (specimenDto.version)
-    TestUtils.checkTimeStamps(specimenDto.timeAdded, (json \ "timeAdded").as[OffsetDateTime])
-    TestUtils.checkOpionalTimeString(specimenDto.timeModified,
-                                     (json \ "timeModified").asOpt[OffsetDateTime])
+
+
+    (json \ "timeAdded").as[String] must be (specimenDto.timeAdded)
+
+    (json \ "timeModified").asOpt[String] must be (specimenDto.timeModified)
 
     (json \ "specimenDefinitionId").as[String] mustBe (specimenDto.specimenDefinitionId)
 
@@ -317,9 +330,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "state").as[String]            mustBe (specimenDto.state.toString)
 
-    TestUtils.checkTimeStamps((json \ "timeCreated").as[OffsetDateTime],
-                              specimenDto.timeCreated,
-                              1L)
+    (json \ "timeCreated").as[String] must be(specimenDto.timeCreated)
   }
 
   def compareObj(json: JsValue, dto: ShipmentSpecimenDto) = {
@@ -331,8 +342,9 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "state").as[String] mustBe (dto.state)
 
-    TestUtils.checkTimeStamps(dto.timeAdded, (json \ "timeAdded").as[OffsetDateTime])
-    TestUtils.checkOpionalTime(dto.timeModified, (json \ "timeModified").asOpt[OffsetDateTime])
+    (json \ "timeAdded").as[String] must be (dto.timeAdded)
+
+    (json \ "timeModified").asOpt[OffsetDateTime] must beOptionalTimeWithinSeconds(dto.timeModified, 5L)
 
     compareSpecimenDto((json \ "specimen").as[JsValue], dto.specimen)
   }

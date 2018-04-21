@@ -1,11 +1,9 @@
 package org.biobank.domain.centres
 
 import java.time.OffsetDateTime
-import org.biobank.dto._
-import org.biobank.domain.{EntityState, Factory}
+import org.biobank.domain.{EntityState, Factory, Location}
 import org.biobank.domain.studies._
 import org.biobank.domain.participants._
-import org.biobank.services.centres.CentreLocationInfo
 import org.scalatest.Assertions._
 
 trait ShipmentSpecFixtures {
@@ -47,8 +45,10 @@ trait ShipmentSpecFixtures {
   class SpecimensFixture(fromCentre:              Centre,
                          toCentre:                Centre,
                          shipment:                Shipment,
+                         val fromLocation:        Location,
+                         val toLocation:          Location,
                          val study:               Study,
-                         val specimenDefinition: CollectionSpecimenDefinition,
+                         val specimenDefinition:  CollectionSpecimenDefinition,
                          val ceventType:          CollectionEventType,
                          val participant:         Participant,
                          val cevent:              CollectionEvent,
@@ -56,9 +56,7 @@ trait ShipmentSpecFixtures {
       extends ShipmentFixture(fromCentre, toCentre, shipment)
 
   case class ShipmentSpecimenData(val specimen:            UsableSpecimen,
-                                  val specimenDto:         SpecimenDto,
-                                  val shipmentSpecimen:    ShipmentSpecimen,
-                                  val shipmentSpecimenDto: ShipmentSpecimenDto)
+                                  val shipmentSpecimen:    ShipmentSpecimen)
 
   class ShipmentSpecimensFixture(fromCentre:              Centre,
                                  toCentre:                Centre,
@@ -73,6 +71,8 @@ trait ShipmentSpecFixtures {
       extends SpecimensFixture(fromCentre,
                                toCentre,
                                shipment,
+                               fromCentre.locations.head,
+                               toCentre.locations.head,
                                study,
                                specimenDefinition,
                                ceventType,
@@ -197,14 +197,18 @@ trait ShipmentSpecFixtures {
   def specimensFixture(numSpecimens: Int) = {
     val f = createdShipmentFixture
     val ceventFixture = new CollectionEventFixture
+    val fromLocation = f.fromCentre.locations.head
+    val toLocation = f.toCentre.locations.head
 
     val specimens = (1 to numSpecimens).map { _ =>
-        factory.createUsableSpecimen.copy(originLocationId = f.fromCentre.locations.head.id,
-                                          locationId = f.fromCentre.locations.head.id)
+        factory.createUsableSpecimen.copy(originLocationId = fromLocation.id,
+                                          locationId = fromLocation.id)
       }.toList
 
     new SpecimensFixture(fromCentre          = f.fromCentre,
+                         fromLocation        = fromLocation,
                          toCentre            = f.toCentre,
+                         toLocation          = toLocation,
                          study               = ceventFixture.study,
                          specimenDefinition = ceventFixture.specimenDefinition,
                          ceventType          = ceventFixture.ceventType,
@@ -221,20 +225,7 @@ trait ShipmentSpecFixtures {
         val updatedSpecimen = specimen.copy(inventoryId = s"inventoryId_$index")
         val shipmentSpecimen = factory.createShipmentSpecimen.copy(shipmentId = f.shipment.id,
                                                                    specimenId = specimen.id)
-        val originLocationName = f.fromCentre.locationName(specimen.originLocationId).
-          fold(e => "error", n => n)
-        val centreLocationInfo = CentreLocationInfo(f.fromCentre.id.id,
-                                                    specimen.originLocationId.id,
-                                                    originLocationName)
-        val specimenDto = specimen.createDto(f.cevent,
-                                             f.ceventType.name,
-                                             f.specimenDefinition,
-                                             centreLocationInfo,
-                                             centreLocationInfo)
-        (updatedSpecimen.id, new ShipmentSpecimenData(updatedSpecimen,
-                                                      specimenDto,
-                                                      shipmentSpecimen,
-                                                      shipmentSpecimen.createDto(specimenDto)))
+        (updatedSpecimen.id, new ShipmentSpecimenData(updatedSpecimen, shipmentSpecimen))
       }.toMap
 
     new ShipmentSpecimensFixture(fromCentre          = f.fromCentre,

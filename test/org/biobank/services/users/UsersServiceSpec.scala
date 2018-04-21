@@ -5,7 +5,7 @@ import org.biobank.domain.centres.CentreRepository
 import org.biobank.domain.studies.{StudyId, StudyRepository}
 import org.biobank.domain.users._
 import org.biobank.fixture.{NameGenerator, ProcessorTestFixture}
-import org.biobank.services.{FilterString, PasswordHasher, SortString}
+import org.biobank.services.{FilterAndSortQuery, FilterString, PagedQuery, PasswordHasher, SortString}
 import org.biobank.services.access._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -126,10 +126,11 @@ class UsersServiceSpec
       }
 
       it("retrieve users") {
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         val f = usersFixture
-        usersService.getUsers(f.adminUser.id, new FilterString(""), new SortString(""))
-          .mustSucceed { users =>
-            users must have length (userRepository.getValues.size.toLong)
+        usersService.getUsers(f.adminUser.id, query).futureValue
+          .mustSucceed { results =>
+            results.items must have length (userRepository.getValues.size.toLong)
           }
       }
 
@@ -173,7 +174,9 @@ class UsersServiceSpec
 
       it("retrieve users") {
         val f = usersFixture
-        usersService.getUsers(f.nonAdminUser.id, new FilterString(""), new SortString(""))
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+
+        usersService.getUsers(f.nonAdminUser.id, query).futureValue
           .mustFail("Unauthorized")
       }
 
@@ -207,8 +210,10 @@ class UsersServiceSpec
       it("user has access to all studies corresponding his membership") {
         val f = membershipFixture
         val membership = f.membership.copy(studyData  = MembershipEntitySet(true, Set.empty[StudyId]))
+        val query = FilterAndSortQuery(new FilterString(""), new SortString(""))
+
         Set(f.user, f.study, membership).foreach(addToRepository)
-        usersService.getUserStudyIds(f.user.id) mustSucceed { reply =>
+        usersService.getUserStudies(f.user.id, query).futureValue mustSucceed { reply =>
           reply must have size (1)
           reply must contain (f.study.id)
         }
@@ -216,8 +221,10 @@ class UsersServiceSpec
 
       it("user has access to studies corresponding his membership") {
         val f = membershipFixture
+        val query = FilterAndSortQuery(new FilterString(""), new SortString(""))
+
         Set(f.user, f.study, f.membership).foreach(addToRepository)
-        usersService.getUserStudyIds(f.user.id) mustSucceed { reply =>
+        usersService.getUserStudies(f.user.id, query).futureValue mustSucceed { reply =>
           reply must have size (1)
           reply must contain (f.study.id)
         }

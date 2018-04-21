@@ -2,56 +2,38 @@ package org.biobank.services.access
 
 import org.biobank.domain.access._
 import org.biobank.services._
-import org.biobank.services.QueryFilterParserGrammar._
 import org.biobank.services.{ServiceValidation, ServiceError}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 /**
  * Functions that filter a set of accessItems from an expression contained in a filter string.
  *
  */
 object AccessItemFilter
-    extends EntityNameFilter[AccessItem]
-    with AccessItemPredicates {
+    extends EntityFilter[AccessItem]
+    with EntityNameFilter[AccessItem]
+    with AccessItemPredicates[AccessItem] {
 
-  def filterAccessItems[T <: AccessItem](accessItems: Set[T], filter: FilterString)
-      :ServiceValidation[Set[T]] = {
-    QueryFilterParser.expressions(filter).flatMap { filterExpression =>
-      filterExpression match {
-        case None =>
-          accessItems.successNel[String]
-        case Some(c: Comparison) =>
-          comparisonToPredicates(c).map(accessItems.filter)
-        case Some(e: AndExpression) =>
-          comparisonToPredicates(e).map(accessItems.filter)
-        case Some(e: OrExpression) =>
-          comparisonToPredicates(e).map(accessItems.filter)
-        case _ =>
-          ServiceError(s"bad filter expression: $filterExpression").failureNel[Set[T]]
-      }
-    }
+  import org.biobank.services.Comparator._
+
+  def filterAccessItems(accessItems: Set[AccessItem], filter: FilterString)
+      :ServiceValidation[Set[AccessItem]] = {
+    filterEntities(accessItems, filter, accessItems.filter)
   }
 
-  def filterRoles(roles: Set[Role], filter: FilterString): ServiceValidation[Set[Role]] = {
-    filterAccessItems(roles, filter)
+  @SuppressWarnings(Array("org.wartremover.warts.AsInstanceOf"))
+  def filterRoles(roles: Set[Role], filter: FilterString):ServiceValidation[Set[Role]] = {
+    val items = roles.map(r => r.asInstanceOf[AccessItem])
+    filterEntities(items, filter, items.filter)
+      .map(result => result.map(_.asInstanceOf[Role]))
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-  private def comparisonToPredicates(expression: Expression): ServiceValidation[AccessItemFilter] = {
-    expression match {
-      case Comparison(selector, comparator, args) =>
-        selector match {
-          case "name"  => nameFilter(comparator, args)
-          case _ =>
-            ServiceError(s"invalid filter selector: $selector").failureNel[AccessItemFilter]
-        }
-      case AndExpression(expressions) =>
-        expressions.map(comparisonToPredicates).sequenceU.map(x => every(x:_*))
-      case OrExpression(expressions) =>
-        expressions.map(comparisonToPredicates).sequenceU.map(x => any(x:_*))
+  protected def predicateFromSelector(selector: String, comparator: Comparator, args: List[String])
+      : ServiceValidation[AccessItem => Boolean] = {
+    selector match {
+      case "name"  => nameFilter(comparator, args)
       case _ =>
-        ServiceError(s"invalid filter expression: $expression").failureNel[AccessItemFilter]
+        ServiceError(s"invalid filter selector: $selector").failureNel[AccessItemFilter]
     }
   }
 

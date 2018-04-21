@@ -15,6 +15,8 @@ import scala.language.reflectiveCalls
 class SpecimensControllerSpec extends ControllerFixture with JsonHelper with SpecimenSpecFixtures {
 
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.DateMatchers._
 
   def uri(): String = "/api/participants/cevents/spcs"
 
@@ -319,7 +321,7 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         repoSpecimens must have size 1
         repoSpecimens.head.ceventId must be (e.cevent.id)
 
-          specimenRepository.getByKey(repoSpecimens.head.specimenId) mustSucceed { repoSpecimen =>
+        specimenRepository.getByKey(repoSpecimens.head.specimenId) mustSucceed { repoSpecimen =>
 
           repoSpecimen must have (
             'inventoryId           (specimen.inventoryId),
@@ -332,8 +334,9 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
             'amount                (specimen.amount)
           )
 
-          checkTimeStamps(repoSpecimen.timeCreated, specimen.timeCreated, TimeCoparisonSeconds)
-          checkTimeStamps(repoSpecimen, OffsetDateTime.now, None)
+          repoSpecimen must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+
+          repoSpecimen.timeCreated must beTimeWithinSeconds(specimen.timeCreated, 5L)
         }
       }
 

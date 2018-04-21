@@ -3,6 +3,7 @@ package org.biobank.controllers.participants
 import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.participants.{ParticipantId, CollectionEventId}
+import org.biobank.dto.CollectionEventDto
 import org.biobank.infrastructure.commands.CollectionEventCommands._
 import org.biobank.services.PagedResults
 import org.biobank.services.participants.CollectionEventsService
@@ -11,14 +12,13 @@ import play.api.{ Environment, Logger }
 import play.api.mvc.{Action, ControllerComponents, Result}
 import scala.concurrent.{ExecutionContext, Future}
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 @Singleton
 @SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class CollectionEventsController @Inject() (controllerComponents: ControllerComponents,
-                                            val action:       BbwebAction,
-                                            val env:          Environment,
-                                            val service:      CollectionEventsService)
+                                            val action:           BbwebAction,
+                                            val env:              Environment,
+                                            val service:          CollectionEventsService)
                                         (implicit val ec: ExecutionContext)
     extends CommandController(controllerComponents) {
 
@@ -33,17 +33,12 @@ class CollectionEventsController @Inject() (controllerComponents: ControllerComp
 
   def list(participantId: ParticipantId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(
-        Future {
-          for {
-            pagedQuery <- PagedQuery.create(request.rawQueryString, PageSizeMax)
-            cevents    <- service.list(request.authInfo.userId,
-                                       participantId,
-                                       pagedQuery.filter,
-                                       pagedQuery.sort)
-            validPage  <- pagedQuery.validPage(cevents.size)
-            results    <- PagedResults.create(cevents, pagedQuery.page, pagedQuery.limit)
-          } yield results
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[CollectionEventDto]]))
+        },
+        pagedQuery => {
+          validationReply(service.list(request.authInfo.userId, participantId, pagedQuery))
         }
       )
     }

@@ -9,6 +9,7 @@ import scalaz.Scalaz._
 
 class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStudy] {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -37,7 +38,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
         )
 
         s.annotationTypes mustBe empty
-        checkTimeStamps(s, OffsetDateTime.now, None)
+        s must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
     }
 
@@ -53,7 +54,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
           'description (study.description)
         )
 
-        checkTimeStamps(updatedStudy, OffsetDateTime.now, OffsetDateTime.now)
+        updatedStudy must beEntityWithTimeStamps(study.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -69,7 +70,7 @@ class StudySpec extends DomainSpec with AnnotationTypeSetSharedSpec[DisabledStud
           'description (description)
         )
 
-        checkTimeStamps(updatedStudy, OffsetDateTime.now, OffsetDateTime.now)
+        updatedStudy must beEntityWithTimeStamps(study.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 

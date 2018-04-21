@@ -1,7 +1,6 @@
 package org.biobank.controllers.participants
 
 import java.time.format.DateTimeFormatter
-import org.biobank.TestUtils
 import java.time.OffsetDateTime
 import org.biobank.controllers._
 import org.biobank.domain._
@@ -20,6 +19,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
 
   import org.biobank.TestUtils._
   import org.biobank.AnnotationTestUtils._
+  import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.DateMatchers._
 
   def uri(): String = "/api/participants/cevents"
 
@@ -521,9 +522,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
             )
 
             repoCe.annotations must have size 0
-
-            TestUtils.checkTimeStamps(repoCe.timeCompleted, cevent.timeCompleted, TimeCoparisonSeconds)
-            checkTimeStamps(repoCe, OffsetDateTime.now, None)
+            repoCe must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+            repoCe.timeCompleted must beTimeWithinSeconds(cevent.timeCompleted, 5L)
           }
         }
       }
@@ -778,8 +778,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               'annotations            (cevent.annotations)
             )
 
-            TestUtils.checkTimeStamps(repoCe.timeCompleted, cevent.timeCompleted, TimeCoparisonSeconds)
-            checkTimeStamps(repoCe, cevent.timeAdded, OffsetDateTime.now)
+            repoCe must beEntityWithTimeStamps(cevent.timeAdded, Some(OffsetDateTime.now), 5L)
+            repoCe.timeCompleted must beTimeWithinSeconds(cevent.timeCompleted, 5L)
           }
         }
       }
@@ -878,8 +878,8 @@ class CollectionEventsControllerSpec extends StudyAnnotationsControllerSharedSpe
               'annotations            (cevent.annotations)
             )
 
-            TestUtils.checkTimeStamps(repoCe.timeCompleted, newTimeCompleted, TimeCoparisonSeconds)
-            checkTimeStamps(repoCe, cevent.timeAdded, OffsetDateTime.now)
+            repoCe must beEntityWithTimeStamps(cevent.timeAdded, Some(OffsetDateTime.now), 5L)
+            repoCe.timeCompleted must beTimeWithinSeconds(newTimeCompleted, 5L)
           }
         }
       }

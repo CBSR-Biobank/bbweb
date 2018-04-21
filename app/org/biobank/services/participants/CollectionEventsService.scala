@@ -32,8 +32,7 @@ trait CollectionEventsService extends BbwebService {
 
   def list(requestUserId: UserId,
            participantId: ParticipantId,
-           filter:        FilterString,
-           sort:          SortString): ServiceValidation[Seq[CollectionEventDto]]
+           pagedQuery:    PagedQuery): Future[ServiceValidation[PagedResults[CollectionEventDto]]]
 
   def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEventDto]]
 
@@ -76,32 +75,41 @@ class CollectionEventsServiceImpl @Inject() (
     } yield dto
   }
 
-  def list(requestUserId: UserId,
-           participantId: ParticipantId,
-           filter:        FilterString,
-           sort:          SortString): ServiceValidation[Seq[CollectionEventDto]] = {
-    whenParticipantPermitted(requestUserId, participantId) { participant =>
-      val allCevents = collectionEventRepository.allForParticipant(participantId).toSet
-      val sortStr = if (sort.expression.isEmpty) new SortString("visitNumber")
-                    else sort
+  def list(requestUserId: UserId, participantId: ParticipantId, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[CollectionEventDto]]] = {
+    Future {
+      whenParticipantPermitted(requestUserId, participantId) { participant =>
+        val allCevents = collectionEventRepository.allForParticipant(participantId).toSet
+        val sortStr = if (query.sort.expression.isEmpty) new SortString("visitNumber")
+                      else query.sort
 
-      for {
-        cevents         <- CollectionEventFilter.filterCollectionEvents(allCevents, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { CollectionEvent.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-        sorted          <- cevents.toSeq.sortWith(sortFunc).successNel[String]
-        dtos            <-  {
-          cevents.map(event => collectionEventToDto(requestUserId, event, participant))
-            .toList.sequenceU.map(_.toSeq)
-        }
-      } yield {
-        val result = dtos
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
+        for {
+          cevents <- CollectionEventFilter.filterCollectionEvents(allCevents, query.filter)
+          validPage <- query.validPage(cevents.size)
+          sortExpressions <- {
+            QuerySortParser(sortStr).
+              toSuccessNel(ServiceError(s"could not parse sort expression: ${query.sort}"))
+          }
+          firstSort <- {
+            sortExpressions.headOption.
+              toSuccessNel(ServiceError("at least one sort expression is required"))
+          }
+          sortFunc <- {
+            CollectionEvent.sort2Compare.get(firstSort.name).
+              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}"))
+          }
+          sorted <- cevents.toSeq.sortWith(sortFunc).successNel[String]
+          dtos <-  {
+            cevents.map(event => collectionEventToDto(requestUserId, event, participant))
+              .toList.sequenceU.map(_.toSeq)
+          }
+          results <- {
+            val sorted = if (firstSort.order == AscendingOrder) dtos
+                         else dtos.reverse
+
+            PagedResults.create(sorted, query.page, query.limit)
+          }
+        } yield results
       }
     }
   }

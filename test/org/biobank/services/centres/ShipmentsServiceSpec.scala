@@ -8,7 +8,7 @@ import org.biobank.domain.centres._
 import org.biobank.domain.studies._
 import org.biobank.domain.participants._
 import org.biobank.domain.users._
-import org.biobank.services.FilterString
+import org.biobank.services.{FilterString, PagedQuery, SortString}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 
@@ -363,27 +363,27 @@ class ShipmentsServiceSpec
     describe("when listing shipments") {
 
       it("users can access") {
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         val f = new UsersWithShipmentAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          shipmentsService.getShipments(user.id, new FilterString(""))
-            .mustSucceed { result =>
-              result must have size 1
+          shipmentsService.getShipments(user.id, query).futureValue.mustSucceed { result =>
+              result.items must have size 1
             }
         }
       }
 
       it("users cannot access") {
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
         val f = new UsersWithShipmentAccessFixture
         info("no membership user")
-        shipmentsService.getShipments(f.noMembershipUser.id, new FilterString(""))
-          .mustSucceed { result =>
-            result must have size 0
+        shipmentsService.getShipments(f.noMembershipUser.id, query).futureValue.mustSucceed { result =>
+            result.items must have size 0
           }
 
         info("no permission user")
-        shipmentsService.getShipments(f.noShippingPermissionUser.id, new FilterString(""))
-          .mustFail("Unauthorized")
+        shipmentsService.getShipments(f.noShippingPermissionUser.id, query)
+          .futureValue.mustFail("Unauthorized")
       }
 
     }
@@ -417,29 +417,29 @@ class ShipmentsServiceSpec
 
       it("users can access") {
         val (f, _, _) = shipmentSpecimenFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+
         forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
-          shipmentsService.getShipmentSpecimens(user.id,
-                                                f.shipment.id,
-                                                new FilterString(""))
+          shipmentsService.getShipmentSpecimens(user.id, f.shipment.id, query).futureValue
             .mustSucceed { reply =>
-              reply must have size 1
+              reply.items must have size 1
             }
         }
       }
 
       it("users cannot access") {
         val (f, _, _) = shipmentSpecimenFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+
         info("no membership user")
-        shipmentsService.getShipmentSpecimens(f.noMembershipUser.id,
-                                              f.shipment.id,
-                                              new FilterString(""))
+        shipmentsService
+          .getShipmentSpecimens(f.noMembershipUser.id, f.shipment.id, query).futureValue
           .mustFail("Unauthorized")
 
         info("no permission user")
-        shipmentsService.getShipmentSpecimens(f.noShippingPermissionUser.id,
-                                              f.shipment.id,
-                                              new FilterString(""))
+        shipmentsService
+          .getShipmentSpecimens(f.noShippingPermissionUser.id, f.shipment.id, query).futureValue
           .mustFail("Unauthorized")
       }
 

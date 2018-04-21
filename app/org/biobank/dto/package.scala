@@ -1,7 +1,7 @@
 package org.biobank
 
 import java.time.OffsetDateTime
-import org.biobank.domain.{EntityState, Location, Slug}
+import org.biobank.domain._
 import org.biobank.domain.annotations.Annotation
 import org.biobank.domain.centres.Shipment
 import org.biobank.dto.access.{UserRoleDto, UserMembershipDto}
@@ -34,9 +34,15 @@ package dto {
 
   object NameAndStateDto {
 
+    @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+    def apply[T <: ConcurrencySafeEntity[_] with HasSlug with HasName with HasState](entity: T)
+        : NameAndStateDto = {
+      NameAndStateDto(entity.id.toString, entity.slug, entity.name, entity.state.id)
+    }
+
     def compareByName(a: NameAndStateDto, b: NameAndStateDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
 
-    implicit val nameAndStateDtoWriter: Writes[NameAndStateDto] = Json.writes[NameAndStateDto]
+    implicit val nameAndStateDtoFormat: Format[NameAndStateDto] = Json.format[NameAndStateDto]
   }
 
   final case class CentreDto(id:           String,
@@ -44,7 +50,7 @@ package dto {
                              timeAdded:    String,
                              timeModified: Option[String],
                              state:        String,
-                             slug: Slug,
+                             slug:         Slug,
                              name:         String,
                              description:  Option[String],
                              studyNames:   Set[NameAndStateDto],
@@ -52,7 +58,7 @@ package dto {
 
   object CentreDto {
 
-    implicit val centreDtoWriter: Writes[CentreDto] = Json.writes[CentreDto]
+    implicit val centreDtoFormat: Format[CentreDto] = Json.format[CentreDto]
 
   }
 
@@ -72,7 +78,7 @@ package dto {
                                       version:                 Long,
                                       timeAdded:               String,
                                       timeModified:            Option[String],
-                                      slug: Slug,
+                                      slug:                    Slug,
                                       timeCompleted:           String,
                                       visitNumber:             Int,
                                       annotations:             Set[Annotation])
@@ -88,7 +94,7 @@ package dto {
                            timeAdded:    String,
                            timeModified: Option[String],
                            state:        EntityState,
-                           slug: Slug,
+                           slug:         Slug,
                            name:         String,
                            email:        String,
                            avatarUrl:    Option[String],
@@ -101,26 +107,26 @@ package dto {
 
   }
 
-  final case class SpecimenDto(id:                       String,
-                               version:                  Long,
-                               timeAdded:                String,
-                               timeModified:             Option[String],
-                               state:                    EntityState,
-                               slug: Slug,
-                               inventoryId:              String,
-                               collectionEventId:        String,
+  final case class SpecimenDto(id:                      String,
+                               version:                 Long,
+                               timeAdded:               String,
+                               timeModified:            Option[String],
+                               state:                   EntityState,
+                               slug:                    Slug,
+                               inventoryId:             String,
+                               collectionEventId:       String,
                                specimenDefinitionId:    String,
                                specimenDefinitionName:  String,
                                specimenDefinitionUnits: String,
-                               originLocationInfo:       CentreLocationInfo,
-                               locationInfo:             CentreLocationInfo,
-                               containerId:              Option[String],
-                               positionId:               Option[String],
-                               timeCreated:              OffsetDateTime,
-                               amount:                   BigDecimal,
-                               units:                    String,
-                               isDefaultAmount:          Boolean,
-                               eventTypeName:            String)
+                               originLocationInfo:      CentreLocationInfo,
+                               locationInfo:            CentreLocationInfo,
+                               containerId:             Option[String],
+                               positionId:              Option[String],
+                               timeCreated:             OffsetDateTime,
+                               amount:                  BigDecimal,
+                               units:                   String,
+                               isDefaultAmount:         Boolean,
+                               eventTypeName:           String)
 
   object SpecimenDto {
 

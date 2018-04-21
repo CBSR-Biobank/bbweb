@@ -5,7 +5,6 @@ import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.containers._
 import org.biobank.fixture._
-import org.biobank.TestUtils
 import org.slf4j.LoggerFactory
 import scala.language.reflectiveCalls
 import org.scalatest.prop.TableDrivenPropertyChecks._
@@ -15,6 +14,7 @@ class ProcessingTypeSpec
     with ProcessingTypeFixtures
     with AnnotationTypeSetSharedSpec[ProcessingType] {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -67,8 +67,7 @@ class ProcessingTypeSpec
           compare(f.processingType, pt)
 
           pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
-          TestUtils.checkTimeStamps(pt.timeAdded, OffsetDateTime.now)
-          pt.timeModified mustBe (f.processingType.timeModified)
+          pt must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
         }
       }
 
@@ -79,9 +78,8 @@ class ProcessingTypeSpec
           compare(f.outputProcessingType, pt)
 
           pt.annotationTypes must have size f.outputProcessingType.annotationTypes.size.toLong
-          TestUtils.checkTimeStamps(pt.timeAdded, OffsetDateTime.now)
-          pt.timeModified mustBe (f.outputProcessingType.timeModified)
-        }
+          pt must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+       }
       }
     }
 
@@ -95,7 +93,7 @@ class ProcessingTypeSpec
                 pt)
 
         pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
-        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+        pt must beEntityWithTimeStamps(f.processingType.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -109,7 +107,7 @@ class ProcessingTypeSpec
                 pt)
 
         pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
-        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+        pt must beEntityWithTimeStamps(f.processingType.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -129,7 +127,7 @@ class ProcessingTypeSpec
                 pt)
 
         pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
-        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+        pt must beEntityWithTimeStamps(f.processingType.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -143,7 +141,7 @@ class ProcessingTypeSpec
                 pt)
 
         pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
-        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+        pt must beEntityWithTimeStamps(f.processingType.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -157,7 +155,7 @@ class ProcessingTypeSpec
                 pt)
 
         pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
-        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+        pt must beEntityWithTimeStamps(f.processingType.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -171,7 +169,7 @@ class ProcessingTypeSpec
                 pt)
 
         pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
-        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+        pt must beEntityWithTimeStamps(f.processingType.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -185,7 +183,7 @@ class ProcessingTypeSpec
                 pt)
 
         pt.annotationTypes must have size f.processingType.annotationTypes.size.toLong
-        checkTimeStamps(pt, OffsetDateTime.now, OffsetDateTime.now)
+        pt must beEntityWithTimeStamps(f.processingType.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 

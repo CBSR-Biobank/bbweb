@@ -9,6 +9,7 @@ import scalaz.Scalaz._
 
 class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpec[CollectionEventType] {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -43,7 +44,8 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         cet.specimenDefinitions must have size 0
         cet.annotationTypes must have size 0
-        checkTimeStamps(cet, OffsetDateTime.now, None)
+
+        cet must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
     }
 
@@ -65,7 +67,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDefinitions must have size 0
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
+        updatedCet must beEntityWithTimeStamps(cet.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -87,7 +89,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDefinitions must have size 0
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
+        updatedCet must beEntityWithTimeStamps(cet.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -109,7 +111,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
           updatedCet.specimenDefinitions must have size 0
           updatedCet.annotationTypes must have size 0
-          checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
+          updatedCet must beEntityWithTimeStamps(cet.timeAdded, Some(OffsetDateTime.now), 5L)
         }
       }
     }
@@ -176,7 +178,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDefinitions must have size 1
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
+        updatedCet must beEntityWithTimeStamps(cet.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -199,7 +201,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDefinitions must have size 1
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
+        updatedCet must beEntityWithTimeStamps(cet.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 
@@ -221,7 +223,7 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
 
         updatedCet.specimenDefinitions must have size 0
         updatedCet.annotationTypes must have size 0
-        checkTimeStamps(updatedCet, OffsetDateTime.now, OffsetDateTime.now)
+        updatedCet must beEntityWithTimeStamps(cet.timeAdded, Some(OffsetDateTime.now), 5L)
       }
     }
 

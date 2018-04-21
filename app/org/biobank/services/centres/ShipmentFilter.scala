@@ -4,7 +4,6 @@ import com.google.inject.ImplementedBy
 import javax.inject.Inject
 import org.biobank.services._
 import org.biobank.services.Comparator._
-import org.biobank.services.QueryFilterParserGrammar._
 import org.biobank.services.{ServiceValidation, ServiceError}
 import org.biobank.domain.PredicateHelper
 import org.biobank.domain.centres._
@@ -15,7 +14,7 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[ShipmentFilterImpl])
 trait ShipmentFilter {
 
-  def filterShipments(shipments: Set[Shipment], filter: FilterString):ServiceValidation[Set[Shipment]];
+  def filterShipments(shipments: Set[Shipment], filter: FilterString):ServiceValidation[Set[Shipment]]
 
 }
 
@@ -25,47 +24,28 @@ trait ShipmentFilter {
  */
 class ShipmentFilterImpl @Inject() (val shipmentRepository: ShipmentRepository,
                                     val centreRepository:   CentreRepository)
- extends ShipmentFilter with PredicateHelper with ShipmentPredicates {
+    extends ShipmentFilter
+    with EntityFilter[Shipment]
+    with PredicateHelper
+    with ShipmentPredicates {
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def filterShipments(shipments: Set[Shipment], filter: FilterString): ServiceValidation[Set[Shipment]] = {
-    QueryFilterParser.expressions(filter).flatMap { filterExpression =>
-      filterExpression match {
-        case None =>
-          shipments.successNel[String]
-        case Some(c: Comparison) =>
-          comparisonToPredicates(c).map(shipments.filter)
-        case Some(e: AndExpression) =>
-          comparisonToPredicates(e).map(shipments.filter)
-        case Some(e: OrExpression) =>
-          comparisonToPredicates(e).map(shipments.filter)
-        case _ =>
-          ServiceError(s"bad filter expression: $filterExpression").failureNel[Set[Shipment]]
-      }
-    }
+    filterEntities(shipments, filter, shipments.filter)
   }
 
-  @SuppressWarnings(Array("org.wartremover.warts.Recursion"))
-  private def comparisonToPredicates(expression: Expression): ServiceValidation[ShipmentFilter] = {
-    expression match {
-      case Comparison(selector, comparator, args) =>
-        selector match {
-          case "fromCentre"     => fromCentreFilter(comparator, args)
-          case "toCentre"       => toCentreFilter(comparator, args)
-          case "withCentre"     => withCentreFilter(comparator, args)
-          case "courierName"    => courierNameFilter(comparator, args)
-          case "trackingNumber" => trackingNumberFilter(comparator, args)
-          case "state"          => stateFilter(comparator, args)
-          case _ =>
-            ServiceError(s"invalid filter selector: $selector").failureNel[ShipmentFilter]
-        }
-      case AndExpression(expressions) =>
-        expressions.map(comparisonToPredicates).sequenceU.map(x => every(x:_*))
-      case OrExpression(expressions) =>
-        expressions.map(comparisonToPredicates).sequenceU.map(x => any(x:_*))
+  protected def predicateFromSelector(selector: String, comparator: Comparator, args: List[String])
+      : ServiceValidation[Shipment => Boolean] = {
+    selector match {
+      case "fromCentre"     => fromCentreFilter(comparator, args)
+      case "toCentre"       => toCentreFilter(comparator, args)
+      case "withCentre"     => withCentreFilter(comparator, args)
+      case "courierName"    => courierNameFilter(comparator, args)
+      case "trackingNumber" => trackingNumberFilter(comparator, args)
+      case "state"          => stateFilter(comparator, args)
       case _ =>
-        ServiceError(s"invalid filter expression: $expression").failureNel[ShipmentFilter]
+        ServiceError(s"invalid filter selector: $selector").failureNel[ShipmentFilter]
     }
   }
 

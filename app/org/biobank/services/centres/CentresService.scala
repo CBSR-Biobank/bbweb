@@ -39,9 +39,12 @@ trait CentresService extends BbwebService {
 
   def searchLocations(cmd: SearchCentreLocationsCmd): ServiceValidation[Set[CentreLocationInfo]]
 
-  def getCentres(requestUserId: UserId,
-                 filter:        FilterString,
-                 sort:          SortString): ServiceValidation[Seq[CentreDto]]
+  def getCentres(requestUserId: UserId, pagedQuery: PagedQuery)
+      : Future[ServiceValidation[PagedResults[CentreDto]]]
+
+  def getCentreNames(requestUserId: UserId,
+                     filter:        FilterString,
+                     sort:          SortString): Future[ServiceValidation[Seq[NameAndStateDto]]]
 
   def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre]
 
@@ -93,16 +96,33 @@ class CentresServiceImpl @Inject() (@Named("centresProcessor") val processor: Ac
     }
   }
 
-  def getCentres(requestUserId: UserId,
-                 filter:        FilterString,
-                 sort:          SortString):ServiceValidation[Seq[CentreDto]] =  {
-    withPermittedCentres(requestUserId) { centres =>
-      filterCentresInternal(centres, filter, sort)
-        .flatMap(centres => centres.map(centreToDto(requestUserId, _)).toList.sequenceU.map(_.toSeq))
+  def getCentres(requestUserId: UserId, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[CentreDto]]] =  {
+    Future {
+      withPermittedCentres(requestUserId) { centres =>
+        for {
+          centres   <- filterCentresInternal(centres, query.filter, query.sort)
+          validPage <- query.validPage(centres.size)
+          dtos      <- centres.map(centreToDto(requestUserId, _)).toList.sequenceU.map(_.toSeq)
+          result    <- PagedResults.create(dtos, query.page, query.limit)
+        } yield result
+      }
     }
   }
 
-  def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre] = {
+   def getCentreNames(requestUserId: UserId,
+                      filter:        FilterString,
+                      sort:          SortString): Future[ServiceValidation[Seq[NameAndStateDto]]] =  {
+     Future {
+       withPermittedCentres(requestUserId) { centres =>
+         filterCentresInternal(centres, filter, sort).map { centres =>
+           centres.map(c => NameAndStateDto(c.id.id, c.slug, c.name, c.state.id))
+         }
+       }
+     }
+   }
+
+ def getCentre(requestUserId: UserId, id: CentreId): ServiceValidation[Centre] = {
     whenPermittedAndIsMember(requestUserId,
                              PermissionId.CentreRead,
                              None,

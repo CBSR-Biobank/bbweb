@@ -1,43 +1,52 @@
 package org.biobank.controllers.studies
 
 import java.time.OffsetDateTime
-import org.biobank.controllers._
-import org.biobank.domain.annotations.AnnotationType
+import org.biobank.controllers.PagedResultsSharedSpec
+import org.biobank.domain._
+import org.biobank.domain.annotations._
 import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.studies._
-import org.biobank.fixture.ControllerFixture
+import org.biobank.dto.NameAndStateDto
+import org.biobank.fixture.{ControllerFixture, Url}
+import org.biobank.matchers.PagedResultsMatchers
+import org.biobank.services.centres.CentreLocation
+import org.biobank.services.studies.StudyCountsByStatus
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
+import scala.language.reflectiveCalls
 
 /**
  * Tests the REST API for [[domain.studies.Study Study]].
  */
-class StudiesControllerSpec extends ControllerFixture with JsonHelper {
+class StudiesControllerSpec
+    extends ControllerFixture
+    with JsonHelper
+    with PagedResultsSharedSpec
+    with PagedResultsMatchers {
+
   import org.biobank.TestUtils._
+  import org.biobank.matchers.JsonMatchers._
+  import org.biobank.matchers.EntityMatchers._
 
   class CollectionFixture {
     val study = factory.createEnabledStudy
     val specimenDefinition = factory.createCollectionSpecimenDefinition
     val ceventType = factory.createCollectionEventType.copy(studyId               = study.id,
-                                                             specimenDefinitions = Set(specimenDefinition),
-                                                             annotationTypes      = Set.empty)
+                                                            specimenDefinitions = Set(specimenDefinition),
+                                                            annotationTypes      = Set.empty)
     val participant = factory.createParticipant.copy(studyId = study.id)
     val cevent = factory.createCollectionEvent
     val centre = factory.createEnabledCentre.copy(studyIds  = Set(study.id),
                                                   locations = Set(factory.createLocation))
 
-    Set(centre,
-        study,
-        ceventType,
-        participant,
-        cevent)
-      .foreach(addToRepository)
+    Set(centre, study, ceventType, participant, cevent).foreach(addToRepository)
   }
 
   private def uri(paths: String*): String = {
     val basePath = "/api/studies"
     if (paths.isEmpty) basePath
-    else s"$basePath/" + paths.mkString("/")
+    else basePath + "/" + paths.mkString("/")
   }
 
   private def urlName(study: Study)        = uri("name", study.id.id)
@@ -50,66 +59,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
   private def urlAddAnnotationType(study: Study) = uri("pannottype", study.id.id)
 
   private def urlUpdateAnnotationType(annotType: AnnotationType) =
-      (study: Study) => urlAddAnnotationType(study) + s"/${annotType.id}"
-
-  private def compareObjs(jsonList: List[JsObject], studies: List[Study]) = {
-    val studiesMap = studies.map { study => (study.id, study) }.toMap
-    jsonList.foreach { jsonObj =>
-      val jsonId = StudyId((jsonObj \ "id").as[String])
-      compareObj(jsonObj, studiesMap(jsonId))
-    }
-  }
-
-  private def checkInvalidStudyId(jsonField: JsObject, urlFunc: Study => String): Unit = {
-    val invalidStudy = factory.createDisabledStudy
-    val cmdJson = Json.obj("expectedVersion" -> 0L) ++ jsonField
-    val json = makeRequest(POST, urlFunc(invalidStudy), NOT_FOUND, cmdJson)
-
-    (json \ "status").as[String] must include ("error")
-
-    (json \ "message").as[String] must include regex("IdNotFound.*study")
-
-    ()
-  }
-
-  private def checkInvalidStudyId(urlFunc: Study => String): Unit = {
-    checkInvalidStudyId(Json.obj(), urlFunc)
-  }
-
-  private def updateWithInvalidVersion(jsonField: JsObject, urlFunc: Study => String): Unit = {
-    val study = factory.createDisabledStudy
-    studyRepository.put(study)
-    val cmdJson = Json.obj("expectedVersion" -> Some(study.version + 1)) ++ jsonField
-    val json = makeRequest(POST, urlFunc(study), BAD_REQUEST, cmdJson)
-
-    (json \ "status").as[String] must include ("error")
-
-    (json \ "message").as[String] must include ("expected version doesn't match current version")
-
-    ()
-  }
-
-  private def updateWithInvalidVersion(urlFunc: Study => String): Unit = {
-    updateWithInvalidVersion(Json.obj(), urlFunc)
-  }
-
-  private def updateNonDisabledStudy[T <: Study](study:     T,
-                                                 jsonField: JsObject,
-                                                 urlFunc:   Study => String): Unit = {
-    study match {
-      case s: DisabledStudy => fail("study should not be disabled")
-      case _ => // do nothing
-    }
-    studyRepository.put(study)
-    val cmdJson = Json.obj("expectedVersion" -> Some(study.version)) ++ jsonField
-    val json = makeRequest(POST, urlFunc(study), BAD_REQUEST, cmdJson)
-
-    (json \ "status").as[String] must include ("error")
-
-    (json \ "message").as[String] must include regex("InvalidStatus: study not disabled")
-
-    ()
-  }
+    (study: Study) => urlAddAnnotationType(study) + s"/${annotType.id}"
 
   describe("Study REST API") {
 
@@ -117,20 +67,43 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("returns the studies that a user can collect specimens for") {
         val f = new CollectionFixture
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("collectionStudies"))
-        compareObj(jsonItem, f.study)
+        val reply = makeAuthRequest(GET, uri("collectionStudies")).value
+        reply must beOkResponseWithJsonReply
+
+        val json = contentAsJson(reply)
+        val dtos = (json \ "data").validate[List[NameAndStateDto]]
+        dtos must be (jsSuccess)
+        dtos.get must have size 1
+        dtos.get(0) must equal (NameAndStateDto(f.study.id.id,
+                                                f.study.slug,
+                                                f.study.name,
+                                                f.study.state.id))
       }
 
       it("when study disabled, returns zero studies") {
         val f = new CollectionFixture
         f.study.disable.map(addToRepository)
-        PagedResultsSpec(this).emptyResults(uri("collectionStudies"))
+
+        val reply = makeAuthRequest(GET, uri("collectionStudies")).value
+        reply must beOkResponseWithJsonReply
+
+        val json = contentAsJson(reply)
+        val dtos = (json \ "data").validate[List[NameAndStateDto]]
+        dtos must be (jsSuccess)
+        dtos.get must have size 0
       }
 
       it("when centre disabled, returns zero studies") {
         val f = new CollectionFixture
         f.centre.disable.map(addToRepository)
-        PagedResultsSpec(this).emptyResults(uri("collectionStudies"))
+
+        val reply = makeAuthRequest(GET, uri("collectionStudies")).value
+        reply must beOkResponseWithJsonReply
+
+        val json = contentAsJson(reply)
+        val dtos = (json \ "data").validate[List[NameAndStateDto]]
+        dtos must be (jsSuccess)
+        dtos.get must have size 0
       }
 
     }
@@ -138,17 +111,12 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     describe("GET /api/studies/counts") {
 
       it("return empty counts") {
-        val json = makeRequest(GET, uri("counts"))
-
-        (json \ "status").as[String] must include ("success")
-
-        (json \ "data" \ "total").as[Long] must be (0)
-
-        (json \ "data" \ "disabledCount").as[Long] must be (0)
-
-        (json \ "data" \ "enabledCount").as[Long] must be (0)
-
-        (json \ "data" \ "retiredCount").as[Long] must be (0)
+        val reply = makeAuthRequest(GET, uri("counts")).value
+        reply must beOkResponseWithJsonReply
+        val json = contentAsJson(reply)
+        val counts = (json \ "data").validate[StudyCountsByStatus]
+        counts must be (jsSuccess)
+        counts.get must equal (StudyCountsByStatus(0, 0, 0, 0))
       }
 
       it("return valid counts") {
@@ -159,19 +127,14 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createEnabledStudy,
                            factory.createRetiredStudy)
 
-        studies.foreach { c => studyRepository.put(c) }
+        studies.foreach(studyRepository.put)
 
-        val json = makeRequest(GET, uri("counts"))
-
-        (json \ "status").as[String] must include ("success")
-
-        (json \ "data" \ "total").as[Long] must be (6)
-
-        (json \ "data" \ "disabledCount").as[Long] must be (3)
-
-        (json \ "data" \ "enabledCount").as[Long] must be (2)
-
-        (json \ "data" \ "retiredCount").as[Long] must be (1)
+        val reply = makeAuthRequest(GET, uri("counts")).value
+        reply must beOkResponseWithJsonReply
+        val json = contentAsJson(reply)
+        val counts = (json \ "data").validate[StudyCountsByStatus]
+        counts must be (jsSuccess)
+        counts.get must equal (StudyCountsByStatus(6, 3, 2, 1))
       }
 
     }
@@ -179,207 +142,183 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
     describe("GET /api/studies/search") {
 
       it("list none") {
-        PagedResultsSpec(this).emptyResults(uri("search"))
+        val url = new Url(uri("search"))
+        url must beEmptyResults
       }
 
-      it("list a study") {
-        val study = factory.createDisabledStudy
-        studyRepository.put(study)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"))
-        compareObj(jsonItem, study)
+      describe("list a study") {
+
+        listSingleStudy() { () =>
+          val study = factory.createDisabledStudy
+          studyRepository.put(study)
+
+          (new Url(uri("search")), study)
+        }
+
       }
 
-      it("list multiple studies") {
-        val studies = List(factory.createDisabledStudy,
-                           factory.createDisabledStudy)
-        studies.foreach(studyRepository.put)
+      describe("list multiple studies") {
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri("search"),
-            offset = 0,
-            total = studies.size.toLong,
-            maybeNext = None,
-            maybePrev = None)
-        jsonItems must have size studies.size.toLong
-        compareObjs(jsonItems, studies)
+        listMultipleStudies() { () =>
+          val studies = List(factory.createDisabledStudy,
+                             factory.createDisabledStudy)
+          studies.foreach(studyRepository.put)
+          (new Url(uri("search")), studies.sortWith(_.name < _.name))
+        }
+
       }
 
-      it("list a single study when filtered by name") {
-        val studies = List(factory.createDisabledStudy, factory.createEnabledStudy)
-        val study = studies(0)
-        studies.foreach(studyRepository.put)
+      describe("list a single study when filtered by name") {
 
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"),
-                                                               Map("filter" -> s"name::${study.name}"))
-        compareObj(jsonItem, study)
+        listSingleStudy() { () =>
+          val studies = List(factory.createDisabledStudy, factory.createEnabledStudy)
+          studies.foreach(studyRepository.put)
+          (new Url(uri("search") + s"?filter=name::${studies(0).name}"), studies(0))
+        }
+
       }
 
-      it("list a single disabled study when filtered by status") {
-        val studies = List(factory.createDisabledStudy,
-                           factory.createEnabledStudy,
+      describe("list a single disabled study when filtered by status") {
+
+        listSingleStudy() { () =>
+          val studies = List(factory.createDisabledStudy,
+                             factory.createEnabledStudy,
                            factory.createRetiredStudy)
-        studies.foreach(studyRepository.put)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"),
-                                                               Map("filter" -> "state::disabled"))
-        compareObj(jsonItem, studies(0))
+          studies.foreach(studyRepository.put)
+          (new Url(uri("search") + s"?filter=state::disabled"), studies(0))
+        }
+
       }
 
-      it("list disabled studies when filtered by state") {
-        val studies = List(factory.createDisabledStudy,
-                           factory.createDisabledStudy,
-                           factory.createEnabledStudy,
-                           factory.createEnabledStudy)
-        studies.foreach(studyRepository.put)
+      describe("list studies when filtered by state") {
 
-        val expectedStudies = List(studies(0), studies(1))
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri("search"),
-            queryParams = Map("filter" -> "state::disabled"),
-            offset = 0,
-            total = expectedStudies.size.toLong,
-            maybeNext = None,
-            maybePrev = None)
+        def commonSetup = {
+          val studies = List(factory.createDisabledStudy,
+                             factory.createDisabledStudy,
+                             factory.createEnabledStudy,
+                             factory.createEnabledStudy)
+          studies.foreach(studyRepository.put)
+          studies
+        }
 
-        jsonItems must have size expectedStudies.size.toLong
-        compareObjs(jsonItems, expectedStudies)
+        describe("for disabled") {
+
+          listMultipleStudies() { () =>
+            (new Url(uri("search") + s"?filter=state::disabled"),
+             commonSetup.filter { c => c.state == Study.disabledState  }.sortWith(_.name < _.name))
+          }
+
+        }
+
+        describe("for enabled") {
+
+          listMultipleStudies() { () =>
+            (new Url(uri("search") + s"?filter=state::enabled"),
+             commonSetup.filter { c => c.state == Study.enabledState  }.sortWith(_.name < _.name))
+          }
+
+        }
+
+        it("fail with an invalid state name") {
+          val invalidStateName = "state::" + nameGenerator.next[Study]
+          val reply = makeAuthRequest(GET, uri("search") + s"?filter=$invalidStateName").value
+          reply must beNotFoundWithMessage ("InvalidState: entity state does not exist")
+        }
+
       }
 
-      it("list enabled studies when filtered by state") {
-        val studies = List(factory.createDisabledStudy,
-                           factory.createDisabledStudy,
-                           factory.createEnabledStudy,
-                           factory.createEnabledStudy)
-        studies.foreach(studyRepository.put)
+      describe("list studies sorted by name") {
 
-        val expectedStudies = List(studies(2), studies(3))
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri("search"),
-            queryParams = Map("filter" -> "state::enabled"),
-            offset = 0,
-            total = expectedStudies.size.toLong,
-            maybeNext = None,
-            maybePrev = None)
+        def commonSetup = {
+          val studies = List(factory.createDisabledStudy.copy(name = "CTR3"),
+                             factory.createDisabledStudy.copy(name = "CTR2"),
+                             factory.createEnabledStudy.copy(name = "CTR1"),
+                             factory.createEnabledStudy.copy(name = "CTR0"))
+          studies.foreach(studyRepository.put)
+          studies
+        }
 
-        jsonItems must have size expectedStudies.size.toLong
-        compareObjs(jsonItems, expectedStudies)
+        describe("in ascending order") {
+
+          listMultipleStudies() { () =>
+            (new Url(uri("search") + s"?sort=name"), commonSetup.sortWith(_.name < _.name))
+          }
+
+        }
+
+        describe("in decending order") {
+
+          listMultipleStudies() { () =>
+            (new Url(uri("search") + s"?sort=-name"), commonSetup.sortWith(_.name > _.name))
+          }
+        }
+
       }
 
-      it("fail on attempt to list studies filtered by an invalid state name") {
-        val invalidStateName = "state::" + nameGenerator.next[Study]
-        val reply = makeRequest(GET,
-                                uri("search") + s"?filter=$invalidStateName",
-                                NOT_FOUND)
+      describe("list studies sorted by state") {
 
-        (reply \ "status").as[String] must include ("error")
+        def commonSetup = {
+          val studies = List(factory.createDisabledStudy, factory.createEnabledStudy)
+          studies.foreach(studyRepository.put)
+          studies
+        }
 
-        (reply \ "message").as[String] must include regex (
-          "InvalidState: entity state does not exist")
+        describe("in ascending order") {
+
+          listMultipleStudies() { () =>
+            (new Url(uri("search") + s"?sort=state"), commonSetup.sortWith(_.state.id < _.state.id))
+          }
+
+        }
+
+        describe("in decending order") {
+
+          listMultipleStudies() { () =>
+            (new Url(uri("search") + s"?sort=-state"), commonSetup.sortWith(_.state.id > _.state.id))
+          }
+        }
+
+        it("fail with an invalid state name") {
+          val invalidStateName = nameGenerator.next[Study]
+          val reply = makeAuthRequest(GET, uri("search") + s"?sort=$invalidStateName").value
+          reply must beBadRequestWithMessage ("could not parse sort expression")
+        }
+
       }
 
-      it("list studies sorted by name") {
-        val studies = List(factory.createDisabledStudy.copy(name = "CTR3"),
-                           factory.createDisabledStudy.copy(name = "CTR2"),
-                           factory.createEnabledStudy.copy(name = "CTR1"),
-                           factory.createEnabledStudy.copy(name = "CTR0"))
-        studies.foreach(studyRepository.put)
+      describe("list a single study when using paged query") {
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri("search"),
-            queryParams = Map("sort" -> "name"),
-            offset = 0,
-            total = studies.size.toLong,
-            maybeNext = None,
-            maybePrev = None)
+        def commonSetup = {
+          val studies = List(factory.createDisabledStudy.copy(name = "CTR3"),
+                             factory.createDisabledStudy.copy(name = "CTR2"),
+                             factory.createEnabledStudy.copy(name = "CTR1"),
+                             factory.createEnabledStudy.copy(name = "CTR0"))
+          studies.foreach(studyRepository.put)
+          studies
+        }
 
-        jsonItems must have size studies.size.toLong
-        compareObj(jsonItems(0), studies(3))
-        compareObj(jsonItems(1), studies(2))
-        compareObj(jsonItems(2), studies(1))
-        compareObj(jsonItems(3), studies(0))
+        describe("fist page") {
+
+          listSingleStudy(maybeNext = Some(2)) { () =>
+            (new Url(uri("search") + s"?sort=name&limit=1"), commonSetup(3))
+          }
+
+        }
+
+        describe("last page") {
+
+          listSingleStudy(offset = 3, maybePrev = Some(3)) { () =>
+            (new Url(uri("search") + s"?sort=name&page=4&limit=1"), commonSetup(0))
+          }
+
+        }
+
       }
 
-      it("list studies sorted by state") {
-        val studies = List(factory.createEnabledStudy,
-                           factory.createDisabledStudy)
-        studies.foreach(studyRepository.put)
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri         = uri("search"),
-            queryParams = Map("sort" -> "state"),
-            offset      = 0,
-            total       = studies.size.toLong,
-            maybeNext   = None,
-            maybePrev   = None)
+      describe("fail when using an invalid query parameters") {
 
-        jsonItems must have size studies.size.toLong
-        compareObj(jsonItems(0), studies(1))
-        compareObj(jsonItems(1), studies(0))
-      }
+        pagedQueryShouldFailSharedBehaviour(uri("search"))
 
-      it("list studies sorted by state in descending order") {
-        val studies = List(factory.createEnabledStudy,
-                           factory.createDisabledStudy)
-        studies.foreach(studyRepository.put)
-
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri = uri("search"),
-            queryParams = Map("sort" -> "-state"),
-            offset = 0,
-            total = studies.size.toLong,
-            maybeNext = None,
-            maybePrev = None)
-
-        jsonItems must have size studies.size.toLong
-        compareObj(jsonItems(0), studies(0))
-        compareObj(jsonItems(1), studies(1))
-      }
-
-      it("fail on attempt to list studies sorted by an invalid state name") {
-        val invalidStateName = nameGenerator.next[Study]
-        val reply = makeRequest(GET,
-                                uri("search") + s"?sort=$invalidStateName",
-                                BAD_REQUEST)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("could not parse sort expression")
-      }
-
-      it("list a single study when using paged query") {
-        val studies = List(factory.createDisabledStudy.copy(name = "CTR3"),
-                           factory.createDisabledStudy.copy(name = "CTR2"),
-                           factory.createEnabledStudy.copy(name = "CTR1"),
-                           factory.createEnabledStudy.copy(name = "CTR0"))
-        studies.foreach(studyRepository.put)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri = uri("search"),
-            queryParams = Map("sort" -> "name", "limit" -> "1"),
-            total = studies.size.toLong,
-            maybeNext = Some(2))
-
-        compareObj(jsonItem, studies(3))
-      }
-
-      it("list the last study when using paged query") {
-        val studies = List(factory.createDisabledStudy.copy(name = "CTR3"),
-                           factory.createDisabledStudy.copy(name = "CTR2"),
-                           factory.createEnabledStudy.copy(name = "CTR1"),
-                           factory.createEnabledStudy.copy(name = "CTR0"))
-        studies.foreach(studyRepository.put)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri = uri("search"),
-            queryParams = Map("sort" -> "name", "page" -> "4", "limit" -> "1"),
-            total = 4,
-            offset = 3,
-            maybeNext = None,
-            maybePrev = Some(3))
-
-        compareObj(jsonItem, studies(0))
-      }
-
-      it("fail when using an invalid query parameters") {
-        PagedResultsSpec(this).failWithInvalidParams(uri("search"))
       }
 
     }
@@ -389,17 +328,18 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("read a study by slug") {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
-        val json = makeRequest(GET, uri(study.slug.id))
-        compareObj((json \ "data").get, study)
+
+        val reply = makeAuthRequest(GET, uri(study.slug.id)).value
+        reply must beOkResponseWithJsonReply
+
+        val json = contentAsJson(reply)
+        json must containValue((JsPath \ "data" ), Json.toJson(study))
       }
 
       it("fails for an invalid study ID") {
         val study = factory.createEnabledStudy
-        val json = makeRequest(GET, uri(study.slug.id), NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex("EntityCriteriaNotFound: study slug")
+        val reply = makeAuthRequest(GET, uri(study.slug.id)).value
+        reply must beNotFoundWithMessage ("EntityCriteriaNotFound: study slug")
       }
 
     }
@@ -408,30 +348,19 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
 
       it("add a study") {
         val study = factory.createDisabledStudy
-        val cmdJson = Json.obj(
-            "name" -> study.name,
-            "description" -> study.description)
-        val json = makeRequest(POST, uri(""), json = cmdJson)
+        val reqJson = Json.obj("name" -> study.name,
+                               "description" -> study.description)
 
-        (json \ "status").as[String] must include ("success")
+        val reply = makeAuthRequest(POST, uri(""), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        val studyId = StudyId(jsonId)
-        jsonId.length must be > 0
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        studyRepository.getByKey(studyId) mustSucceed { repoStudy =>
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (studyId),
-            'version     (0L),
-            'slug        (Slug.slugify(study.name)),
-            'name        (study.name),
-            'description (study.description)
-          )
-
-          repoStudy.annotationTypes must have size 0
-          checkTimeStamps(repoStudy, OffsetDateTime.now, None)
+        studyRepository.getByKey(replyStudy.get.id) mustSucceed { repoStudy =>
+          val updatedStudy = study.copy(id = replyStudy.get.id)
+          replyStudy.get must matchStudy (updatedStudy)
+          repoStudy must matchStudy (updatedStudy)
         }
       }
 
@@ -439,19 +368,14 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val json = makeRequest(POST,
-                               uri(""),
-                               BAD_REQUEST,
-                               Json.obj("name"        -> study.name,
-                                        "description" -> study.description))
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("EntityCriteriaError.*name already used")
+        val resp = makeAuthRequest(POST, uri(""), Json.obj("name" -> study.name,
+                                                           "description" -> study.description))
+        resp.value must beBadRequestWithMessage("EntityCriteriaError.*name already used")
       }
 
       it("not add add a new study an empty name") {
-        badRequest(POST, uri(""), Json.obj("name" -> ""), "InvalidName")
+        val reply = makeAuthRequest(POST, uri(""), Json.obj("name" -> ""))
+        reply.value must beBadRequestWithMessage ("InvalidName")
       }
 
     }
@@ -463,27 +387,21 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(study.version),
+        val reqJson = Json.obj("expectedVersion" -> Some(study.version),
                                "name"            -> newName)
-        val json = makeRequest(POST, uri("name", study.id.id), json = cmdJson)
+        val reply = makeAuthRequest(POST, uri("name", study.id.id), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (study.id.id)
-
+        val updatedStudy = study.copy(version      = study.version + 1,
+                                      name         = newName,
+                                      slug         = Slug(newName),
+                                      timeModified = Some(OffsetDateTime.now))
+        replyStudy.get must matchStudy (updatedStudy)
         studyRepository.getByKey(study.id) mustSucceed { repoStudy =>
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (newName),
-            'description (study.description)
-          )
-
-          repoStudy.annotationTypes must have size study.annotationTypes.size.toLong
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+          repoStudy must matchStudy (updatedStudy)
         }
       }
 
@@ -492,47 +410,41 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             val study = factory.createDisabledStudy
             studyRepository.put(study)
             study
-        }
+          }
 
-        val json = makeRequest(POST,
-                               uri("name", studies(0).id.id),
-                               BAD_REQUEST,
-                               Json.obj(
-                                 "expectedVersion" -> Some(studies(0).version),
-                                 "name"            -> studies(1).name))
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("EntityCriteriaError.*name already used")
+        val reply = makeAuthRequest(POST,
+                                    uri("name", studies(0).id.id),
+                                    Json.obj("expectedVersion" -> Some(studies(0).version),
+                                             "name"            -> studies(1).name))
+        reply.value must beBadRequestWithMessage("EntityCriteriaError.*name already used")
       }
 
       it("fail when updating a study's name to something with less than 2 characters") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val json = makeRequest(POST,
-                               uri("name", study.id.id),
-                               BAD_REQUEST,
-                               Json.obj("expectedVersion" -> Some(study.version),
-                                        "name"            -> "a"))
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must startWith ("InvalidName")
+        val reply = makeAuthRequest(POST,
+                                   uri("name", study.id.id),
+                                   Json.obj("expectedVersion" -> Some(study.version),
+                                            "name"            -> "a"))
+        reply.value must beBadRequestWithMessage("InvalidName")
       }
 
-      it("fail when updating name and study ID does not exist") {
-        checkInvalidStudyId(Json.obj("name" -> nameGenerator.next[Study]), urlName)
+      describe("fail when updating name and study ID does not exist") {
+        checkInvalidStudyIdSharedBehaviour(Json.obj("name" -> nameGenerator.next[Study]), urlName)
       }
 
-      it("fail when updating name with invalid version") {
-        updateWithInvalidVersion(Json.obj("name" -> nameGenerator.next[Study]), urlName)
+      describe("fail when updating name with invalid version") {
+
+        updateWithInvalidVersionSharedBehaviour(urlName,
+                                                Json.obj("name" -> nameGenerator.next[Study]))
+
       }
 
-      it("fail when updating name on an enabled study") {
-        List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
-          updateNonDisabledStudy(study, Json.obj("name" -> nameGenerator.next[Study]), urlName)
-        }
+      describe("fail when updating name on a non disabled study") {
+
+        updateNonDisabledStudySharedBehaviour(Json.obj("name" -> nameGenerator.next[Study]),
+                                              urlName)
       }
 
     }
@@ -544,44 +456,40 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val cmdJson = Json.obj("expectedVersion" -> study.version,
+        val reqJson = Json.obj("expectedVersion" -> study.version,
                                "description"     -> newDescription)
-        val json = makeRequest(POST, uri("description", study.id.id), json = cmdJson)
+        val reply = makeAuthRequest(POST, uri("description", study.id.id), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (study.id.id)
-
+        val updatedStudy = study.copy(version      = study.version + 1,
+                                      description  = newDescription,
+                                      timeModified = Some(OffsetDateTime.now))
+        replyStudy.get must matchStudy (updatedStudy)
         studyRepository.getByKey(study.id) mustSucceed { repoStudy =>
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (study.name),
-            'description (newDescription)
-          )
-
-          repoStudy.annotationTypes must have size study.annotationTypes.size.toLong
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+          repoStudy must matchStudy (updatedStudy)
         }
       }
 
-      it("fail when updating description and study ID does not exist") {
-        checkInvalidStudyId(Json.obj("description" -> nameGenerator.next[Study]), urlDescription)
+      describe("fail when updating description and study ID does not exist") {
+        checkInvalidStudyIdSharedBehaviour(Json.obj("description" -> nameGenerator.next[Study]),
+                                           urlDescription)
       }
 
-      it("fail when updating description with invalid version") {
-        updateWithInvalidVersion(Json.obj("description" -> nameGenerator.next[Study]), urlDescription)
+      describe("fail when updating description with invalid version") {
+
+        updateWithInvalidVersionSharedBehaviour(urlDescription,
+                                                Json.obj("description" -> nameGenerator.next[Study]))
+
       }
 
-      it("fail when updating description on a non disabled study") {
-        List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
-          updateNonDisabledStudy(study,
-                                 Json.obj("description" -> nameGenerator.next[Study]),
-                                 urlDescription)
-        }
+      describe("fail when updating description on a non disabled study") {
+
+        updateNonDisabledStudySharedBehaviour(Json.obj("description" -> nameGenerator.next[Study]),
+                                              urlDescription)
+
       }
 
     }
@@ -593,7 +501,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val cmdJson = Json.obj(
+        val reqJson = Json.obj(
             "id"              -> study.id.id,
             "expectedVersion" -> Some(study.version),
             "name"            -> annotType.name,
@@ -601,54 +509,39 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             "valueType"       -> annotType.valueType,
             "options"         -> annotType.options,
             "required"        -> annotType.required)
-        val json = makeRequest(POST, uri("pannottype", study.id.id), json = cmdJson)
 
-        (json \ "status").as[String] must include ("success")
+        val reply = makeAuthRequest(POST, uri("pannottype", study.id.id), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        val jsonId = StudyId((json \ "data" \ "id").as[String])
-        jsonId must be (study.id)
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        studyRepository.getByKey(jsonId) mustSucceed { repoStudy =>
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (study.name),
-            'description (study.description)
-            )
-
-          repoStudy.annotationTypes must have size 1
-
-          repoStudy.annotationTypes.head.id.id must not be empty
-          repoStudy.annotationTypes.head must have (
-            'name          (annotType.name),
-            'description   (annotType.description),
-            'valueType     (annotType.valueType),
-            'maxValueCount (annotType.maxValueCount),
-            'options       (annotType.options),
-            'required      (annotType.required)
-          )
-
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+        val updatedAnnotationType = annotType.copy(id = replyStudy.get.annotationTypes.head.id)
+        val updatedStudy = study.copy(version         = study.version + 1,
+                                      annotationTypes = Set(updatedAnnotationType),
+                                      timeModified    = Some(OffsetDateTime.now))
+        replyStudy.get must matchStudy (updatedStudy)
+        studyRepository.getByKey(study.id) mustSucceed { repoStudy =>
+          repoStudy must matchStudy (updatedStudy)
         }
       }
 
-      it("fail when adding annotation type and study ID does not exist") {
-        checkInvalidStudyId(annotationTypeToJsonNoId(factory.createAnnotationType), urlAddAnnotationType)
+      describe("fail when adding annotation type and study ID does not exist") {
+        checkInvalidStudyIdSharedBehaviour(annotationTypeToJsonNoId(factory.createAnnotationType),
+                                           urlAddAnnotationType)
       }
 
-      it("fail when adding annotation type and an invalid version") {
-        updateWithInvalidVersion(annotationTypeToJsonNoId(factory.createAnnotationType),
-                                 urlAddAnnotationType)
+      describe("fail when adding annotation type and an invalid version") {
+
+        updateWithInvalidVersionSharedBehaviour(urlAddAnnotationType,
+                                                annotationTypeToJsonNoId(factory.createAnnotationType))
+
       }
 
-      it("fail when adding an annotation type on a non disabled study") {
-        List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
-          updateNonDisabledStudy(study,
-                                 annotationTypeToJsonNoId(factory.createAnnotationType),
-                                 urlAddAnnotationType)
-        }
+      describe("fail when adding an annotation type on a non disabled study") {
+
+        updateNonDisabledStudySharedBehaviour(annotationTypeToJsonNoId(factory.createAnnotationType),
+                                              urlAddAnnotationType)
       }
 
     }
@@ -661,7 +554,7 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy.copy(annotationTypes = Set(annotType))
         studyRepository.put(study)
 
-        val cmdJson = Json.obj(
+        val reqJson = Json.obj(
             "id"               -> study.id.id,
             "expectedVersion"  -> Some(study.version),
             "annotationTypeId" -> annotType.id,
@@ -670,58 +563,44 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             "valueType"        -> annotType.valueType,
             "options"          -> annotType.options,
             "required"         -> annotType.required)
-        val json = makeRequest(POST, uri("pannottype", study.id.id, annotType.id.id), json = cmdJson)
 
-        (json \ "status").as[String] must include ("success")
+        val reply = makeAuthRequest(POST, uri("pannottype", study.id.id, annotType.id.id), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        val jsonId = StudyId((json \ "data" \ "id").as[String])
-        jsonId must be (study.id)
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        studyRepository.getByKey(jsonId) mustSucceed { repoStudy =>
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (study.name),
-            'description (study.description)
-            )
-
-          repoStudy.annotationTypes must have size 1
-
-          repoStudy.annotationTypes.head.id.id must not be empty
-          repoStudy.annotationTypes.head must have (
-            'slug          (Slug.slugify(newName)),
-            'name          (newName),
-            'description   (annotType.description),
-            'valueType     (annotType.valueType),
-            'maxValueCount (annotType.maxValueCount),
-            'options       (annotType.options),
-            'required      (annotType.required)
-          )
-
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+        val updatedAnnotationType = annotType.copy(slug = Slug(newName),
+                                                   name = newName)
+        val updatedStudy = study.copy(version         = study.version + 1,
+                                      annotationTypes = Set(updatedAnnotationType),
+                                      timeModified    = Some(OffsetDateTime.now))
+        replyStudy.get must matchStudy (updatedStudy)
+        studyRepository.getByKey(study.id) mustSucceed { repoStudy =>
+          repoStudy must matchStudy (updatedStudy)
         }
       }
 
-      it("fail when updating annotation type and study ID does not exist") {
+      describe("fail when updating annotation type and study ID does not exist") {
         val annotType = factory.createAnnotationType
-        checkInvalidStudyId(annotationTypeToJson(annotType), urlUpdateAnnotationType(annotType))
+        checkInvalidStudyIdSharedBehaviour(annotationTypeToJson(annotType),
+                                           urlUpdateAnnotationType(annotType))
       }
 
-      it("fail when updating annotation type and an invalid version") {
+      describe("fail when updating annotation type and an invalid version") {
+
         val annotType = factory.createAnnotationType
-        updateWithInvalidVersion(annotationTypeToJson(factory.createAnnotationType),
-                                 urlUpdateAnnotationType(annotType))
+
+        updateWithInvalidVersionSharedBehaviour(urlUpdateAnnotationType(annotType),
+                                                annotationTypeToJson(annotType))
+
       }
 
-      it("fail when updating an annotation type on a non disabled study") {
+      describe("fail when updating an annotation type on a non disabled study") {
         val annotType = factory.createAnnotationType
-        List(factory.createEnabledStudy, factory.createRetiredStudy).foreach { study =>
-          updateNonDisabledStudy(study,
-                                 annotationTypeToJson(annotType),
-                                 urlUpdateAnnotationType(annotType))
-        }
+
+        updateNonDisabledStudySharedBehaviour(annotationTypeToJson(annotType),
+                                              urlUpdateAnnotationType(annotType))
       }
 
     }
@@ -733,25 +612,19 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy.copy(annotationTypes = Set(annotationType))
         studyRepository.put(study)
 
-        val json = makeRequest(DELETE, uri("pannottype", study.id.id, s"${study.version}/${annotationType.id}"))
+        val url = uri("pannottype", study.id.id, s"${study.version}/${annotationType.id}")
+        val reply = makeAuthRequest(DELETE, url).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        val jsonId = StudyId((json \ "data" \ "id").as[String])
-        jsonId must be (study.id)
-
-        studyRepository.getByKey(jsonId) mustSucceed { repoStudy =>
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (study.name),
-            'description (study.description)
-            )
-
-          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong - 1)
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+        val updatedStudy = study.copy(version         = study.version + 1,
+                                      annotationTypes = Set.empty[AnnotationType],
+                                      timeModified    = Some(OffsetDateTime.now))
+        replyStudy.get must matchStudy (updatedStudy)
+        studyRepository.getByKey(replyStudy.get.id) mustSucceed { repoStudy =>
+          repoStudy must matchStudy (updatedStudy)
         }
       }
 
@@ -761,23 +634,15 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val badVersion = study.version + 1
         studyRepository.put(study)
 
-        val json = makeRequest(DELETE,
-                               uri("pannottype", study.id.id, s"${badVersion}/${annotationType.id}"),
-                               BAD_REQUEST)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("expected version doesn't match current version")
+        val url = uri("pannottype", study.id.id, s"${badVersion}/${annotationType.id}")
+        val reply = makeAuthRequest(DELETE, url).value
+        reply must beBadRequestWithMessage("expected version doesn't match current version")
       }
 
       it("fail when removing annotation type and study ID does not exist") {
         val studyId = nameGenerator.next[Study]
-
-        val json = makeRequest(DELETE, uri(s"pannottype/$studyId/0/xyz"), NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex("IdNotFound.*study")
+        val reply = makeAuthRequest(DELETE, uri(s"pannottype/$studyId/0/xyz"))
+        reply.value must beNotFoundWithMessage("IdNotFound.*study")
       }
 
       it("fail when removing an annotation type that does not exist") {
@@ -786,13 +651,9 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy.copy(annotationTypes = Set(annotationType))
         studyRepository.put(study)
 
-        val json = makeRequest(DELETE,
-                               uri("pannottype", study.id.id, s"${study.version}/$badUniqueId"),
-                               NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must startWith ("annotation type does not exist")
+        val reply = makeAuthRequest(DELETE,
+                                    uri("pannottype", study.id.id, s"${study.version}/$badUniqueId"))
+        reply.value must beNotFoundWithMessage("annotation type does not exist")
       }
 
       it("fail when removing an annotation type on a non disabled study") {
@@ -800,16 +661,14 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val enabledStudy = factory.createEnabledStudy.copy(annotationTypes = Set(annotationType))
         val retiredStudy = factory.createRetiredStudy.copy(annotationTypes = Set(annotationType))
 
-        List(enabledStudy, retiredStudy).foreach { study =>
+        forAll(Table("studies", enabledStudy, retiredStudy)) { study =>
           studyRepository.put(study)
 
-          val json = makeRequest(DELETE,
-                                 uri("pannottype", study.id.id, s"${study.version}/${annotationType.id}"),
-                                 BAD_REQUEST)
+          val reply = makeAuthRequest(
+              DELETE,
+              uri("pannottype", study.id.id, s"${study.version}/${annotationType.id}"))
 
-          (json \ "status").as[String] must include ("error")
-
-          (json \ "message").as[String] must include regex("InvalidStatus: study not disabled")
+          reply.value must beBadRequestWithMessage("InvalidStatus: study not disabled")
         }
       }
 
@@ -826,27 +685,18 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
             specimenDefinitions = Set(factory.createCollectionSpecimenDefinition))
         collectionEventTypeRepository.put(cet)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri("enable", study.id.id), json = cmdJson)
+        val reqJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reply = makeAuthRequest(POST, uri("enable", study.id.id), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        val jsonId = StudyId((json \ "data" \ "id").as[String])
-        jsonId must be (study.id)
-
-        studyRepository.getByKey(jsonId) mustSucceed { repoStudy =>
-          repoStudy mustBe a[EnabledStudy]
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (study.name),
-            'description (study.description)
-            )
-
-          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+        study.enable.mustSucceed { updatedStudy =>
+          replyStudy.get must matchStudy (updatedStudy)
+          studyRepository.getByKey(replyStudy.get.id) mustSucceed { repoStudy =>
+            repoStudy must matchStudy (updatedStudy)
+          }
         }
       }
 
@@ -857,43 +707,46 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val cet = factory.createCollectionEventType
         collectionEventTypeRepository.put(cet)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri("enable", study.id.id), BAD_REQUEST, cmdJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("no collection specimen specs")
+        val reqJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reply = makeAuthRequest(POST, uri("enable", study.id.id), reqJson)
+        reply.value must beBadRequestWithMessage("no collection specimen specs")
       }
 
       it("not enable a study when it has no collection event types") {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri("enable", study.id.id), BAD_REQUEST, cmdJson)
+        val reqJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reply = makeAuthRequest(POST, uri("enable", study.id.id), reqJson)
+        reply.value must beBadRequestWithMessage("no collection event types")
+      }
 
-        (json \ "status").as[String] must include ("error")
+      it("not enable an already enabled study") {
+        val study = factory.createEnabledStudy
+        studyRepository.put(study)
 
-        (json \ "message").as[String] must include ("no collection event types")
+        val updateJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reply = makeAuthRequest(POST, uri("enable", study.id.id), updateJson).value
+        reply must beBadRequestWithMessage("InvalidStatus: study not disabled")
       }
 
       it("fail when enabling a study and the study ID is invalid") {
         val study = factory.createDisabledStudy
-        val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reqJson = Json.obj("expectedVersion" -> Some(study.version))
 
-        val json = makeRequest(POST, uri("enable", study.id.id), NOT_FOUND, json = cmdJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex("IdNotFound.*study")
+        val reply = makeAuthRequest(POST, uri("enable", study.id.id), reqJson)
+        reply.value must beNotFoundWithMessage("IdNotFound.*study")
       }
 
-      it("fail when enabling and study ID does not exit") {
-        checkInvalidStudyId(urlEnable)
+      describe("fail when enabling and study ID does not exit") {
+
+        checkInvalidStudyIdSharedBehaviour(JsNull, urlEnable)
       }
 
-      it("fail when enabling a study and the version is invalid") {
-        updateWithInvalidVersion(urlEnable)
+      describe("fail when enabling a study and the version is invalid") {
+
+        updateWithInvalidVersionSharedBehaviour(urlEnable)
+
       }
     }
 
@@ -903,36 +756,36 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createEnabledStudy
         studyRepository.put(study)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri("disable", study.id.id), json = cmdJson)
+        val reqJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reply = makeAuthRequest(POST, uri("disable", study.id.id), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        val jsonId = StudyId((json \ "data" \ "id").as[String])
-        jsonId must be (study.id)
-
-        studyRepository.getByKey(jsonId) mustSucceed { repoStudy =>
-          repoStudy mustBe a[DisabledStudy]
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (study.name),
-            'description (study.description)
-            )
-
-          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+        study.disable mustSucceed { updatedStudy =>
+          replyStudy.get must matchStudy (updatedStudy)
+          studyRepository.getByKey(replyStudy.get.id) mustSucceed { repoStudy =>
+            repoStudy must matchStudy (updatedStudy)
+          }
         }
       }
 
-      it("fail when disabling and study ID does not exit") {
-        checkInvalidStudyId(urlDisable)
+      it("not disable an already disabled study") {
+        val study = factory.createDisabledStudy
+        studyRepository.put(study)
+
+        val updateJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reply = makeAuthRequest(POST, uri("disable", study.id.id), updateJson).value
+        reply must beBadRequestWithMessage("InvalidStatus: study not enabled")
       }
 
-      it("fail when disabling a study and the version is invalid") {
-        updateWithInvalidVersion(urlDisable)
+      describe("fail when disabling and study ID does not exit") {
+        checkInvalidStudyIdSharedBehaviour(JsNull, urlDisable)
+      }
+
+      describe("fail when disabling a study and the version is invalid") {
+        updateWithInvalidVersionSharedBehaviour(urlDisable)
       }
     }
 
@@ -942,36 +795,37 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri("retire", study.id.id), json = cmdJson)
+        val reqJson = Json.obj("expectedVersion" -> Some(study.version))
 
-        (json \ "status").as[String] must include ("success")
+        val reply = makeAuthRequest(POST, uri("retire", study.id.id), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        val jsonId = StudyId((json \ "data" \ "id").as[String])
-        jsonId must be (study.id)
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        studyRepository.getByKey(jsonId) mustSucceed { repoStudy =>
-          repoStudy mustBe a[RetiredStudy]
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (study.name),
-            'description (study.description)
-            )
-
-          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+        study.retire mustSucceed { updatedStudy =>
+          replyStudy.get must matchStudy (updatedStudy)
+          studyRepository.getByKey(replyStudy.get.id) mustSucceed { repoStudy =>
+            repoStudy must matchStudy (updatedStudy)
+          }
         }
       }
 
-      it("fail when retiring and study ID does not exit") {
-        checkInvalidStudyId(urlRetire)
+      it("not retire an already retired study") {
+        val study = factory.createRetiredStudy
+        studyRepository.put(study)
+
+        val updateJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reply = makeAuthRequest(POST, uri("retire", study.id.id), updateJson).value
+        reply must beBadRequestWithMessage("InvalidStatus: study not disabled")
       }
 
-      it("fail when retiring a study and the version is invalid") {
-        updateWithInvalidVersion(urlRetire)
+      describe("fail when retiring and study ID does not exit") {
+        checkInvalidStudyIdSharedBehaviour(JsNull, urlRetire)
+      }
+
+      describe("fail when retiring a study and the version is invalid") {
+        updateWithInvalidVersionSharedBehaviour(urlRetire)
       }
     }
 
@@ -981,156 +835,167 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createRetiredStudy
         studyRepository.put(study)
 
-        val cmdJson = Json.obj("expectedVersion" -> Some(study.version))
-        val json = makeRequest(POST, uri("unretire", study.id.id), json = cmdJson)
+        val reqJson = Json.obj("expectedVersion" -> Some(study.version))
+        val reply = makeAuthRequest(POST, uri("unretire", study.id.id), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyStudy = (contentAsJson(reply) \ "data").validate[Study]
+        replyStudy must be (jsSuccess)
 
-        val jsonId = StudyId((json \ "data" \ "id").as[String])
-        jsonId must be (study.id)
-
-        studyRepository.getByKey(jsonId) mustSucceed { repoStudy =>
-          repoStudy mustBe a[DisabledStudy]
-          compareObj((json \ "data").as[JsObject], repoStudy)
-
-          repoStudy must have (
-            'id          (study.id),
-            'version     (study.version + 1),
-            'name        (study.name),
-            'description (study.description)
-            )
-
-          repoStudy.annotationTypes must have size (study.annotationTypes.size.toLong)
-          checkTimeStamps(repoStudy, OffsetDateTime.now, OffsetDateTime.now)
+        study.unretire mustSucceed { updatedStudy =>
+          replyStudy.get must matchStudy (updatedStudy)
+          studyRepository.getByKey(replyStudy.get.id) mustSucceed { repoStudy =>
+            repoStudy must matchStudy (updatedStudy)
+          }
         }
       }
 
-      it("fail when unretiring and study ID does not exit") {
-        checkInvalidStudyId(urlUnretire)
+      it("not unretire an already disabled study") {
+        val studyTable = Table("study", factory.createDisabledStudy, factory.createEnabledStudy)
+
+        forAll(studyTable) { study =>
+          studyRepository.put(study)
+          val updateJson = Json.obj("expectedVersion" -> Some(study.version))
+          val reply = makeAuthRequest(POST, uri("unretire", study.id.id), updateJson).value
+          reply must beBadRequestWithMessage("InvalidStatus: study not retired")
+        }
       }
 
-      it("fail when unretiring a study and the version is invalid") {
-        updateWithInvalidVersion(urlUnretire)
+      describe("fail when unretiring and study ID does not exit") {
+        checkInvalidStudyIdSharedBehaviour(JsNull, urlUnretire)
+      }
+
+      describe("fail when unretiring a study and the version is invalid") {
+        updateWithInvalidVersionSharedBehaviour(urlUnretire)
       }
     }
 
     describe("GET /api/studies/valuetypes") {
-      it("list all") {
-        val json = makeRequest(GET, uri("valuetypes"))
-        val values = (json \ "data").as[List[String]]
-        values.size must be > 0
+
+      it("list all value types") {
+        val reply = makeAuthRequest(GET, uri("valuetypes")).value
+        reply must beOkResponseWithJsonReply
+        val values = (contentAsJson(reply) \ "data").validate[List[String]]
+        values must be (jsSuccess)
+        values.get.size must be > 0
+        values.get.foreach { value =>
+          AnnotationValueType.withName(value)
+        }
       }
     }
 
     describe("GET /api/studies/anatomicalsrctypes") {
-      it("list all") {
-        val json = makeRequest(GET, uri("anatomicalsrctypes"))
-        val values = (json \ "data").as[List[String]]
-        values.size must be > 0
+      it("list all anatomical source types") {
+        val reply = makeAuthRequest(GET, uri("anatomicalsrctypes")).value
+        reply must beOkResponseWithJsonReply
+        val values = (contentAsJson(reply) \ "data").validate[List[String]]
+        values must be (jsSuccess)
+        values.get.size must be > 0
+        values.get.foreach { value =>
+          AnatomicalSourceType.withName(value)
+        }
       }
     }
 
     describe("GET /api/studies/specimentypes") {
-      it("list all") {
-        val json = makeRequest(GET, uri("specimentypes"))
-        val values = (json \ "data").as[List[String]]
-        values.size must be > 0
+      it("list all specimen types") {
+        val reply = makeAuthRequest(GET, uri("specimentypes")).value
+        reply must beOkResponseWithJsonReply
+        val values = (contentAsJson(reply) \ "data").validate[List[String]]
+        values must be (jsSuccess)
+        values.get.size must be > 0
+        values.get.foreach { value =>
+          SpecimenType.withName(value)
+        }
       }
     }
 
     describe("GET /api/studies/preservtypes") {
-      it("list all") {
-        val json = makeRequest(GET, uri("preservtypes"))
-        val values = (json \ "data").as[List[String]]
-        values.size must be > 0
+      it("list all preservation types") {
+        val reply = makeAuthRequest(GET, uri("preservtypes")).value
+        reply must beOkResponseWithJsonReply
+        val values = (contentAsJson(reply) \ "data").validate[List[String]]
+        values must be (jsSuccess)
+        values.get.size must be > 0
+        values.get.foreach { value =>
+          PreservationType.withName(value)
+        }
       }
     }
 
     describe("GET /api/studies/preservtemptypes ") {
-      it("list all") {
-        val json = makeRequest(GET, uri("preservtemptypes"))
-        val values = (json \ "data").as[List[String]]
-        values.size must be > 0
+      it("list all preservation temperatures") {
+        val reply = makeAuthRequest(GET, uri("preservtemptypes")).value
+        reply must beOkResponseWithJsonReply
+        val values = (contentAsJson(reply) \ "data").validate[List[String]]
+        values must be (jsSuccess)
+        values.get.size must be > 0
+        values.get.foreach { value =>
+          PreservationTemperature.withName(value)
+        }
       }
     }
 
     describe("GET /api/studies/sgvaluetypes ") {
-      it("list all") {
-        val json = makeRequest(GET, uri("sgvaluetypes"))
-        val jsonObj = (json \ "data").as[JsObject]
-          (jsonObj \ "anatomicalSourceType").as[List[String]].size        must be > 0
-          (jsonObj \ "preservationType").as[List[String]].size            must be > 0
-          (jsonObj \ "preservationTemperature").as[List[String]].size must be > 0
-          (jsonObj \ "specimenType").as[List[String]].size                must be > 0
+      it("list all specimen ") {
+        val reply = makeAuthRequest(GET, uri("sgvaluetypes")).value
+        reply must beOkResponseWithJsonReply
+        val json = contentAsJson(reply)
+
+        (json \ "data" \ "anatomicalSourceType").as[List[String]].size    must be > 0
+
+        (json \ "data" \ "preservationType").as[List[String]].size        must be > 0
+
+        (json \ "data" \ "preservationTemperature").as[List[String]].size must be > 0
+
+        (json \ "data" \ "specimenType").as[List[String]].size            must be > 0
       }
     }
 
     describe("GET /api/studies/names") {
 
-      it("list multiple study names in ascending order") {
+      def fixture = {
+        val _studies = List(factory.createDisabledStudy.copy(name = "ABC"),
+                            factory.createDisabledStudy.copy(name = "DEF"))
 
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
-
-        val studies = List(study2, study1)
         studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
+        _studies.foreach(studyRepository.put)
 
-        val json = makeRequest(GET, uri("names") + "?order=asc")
+        new {
+          val studies = _studies
+        }
+      }
 
-        (json \ "status").as[String] must include ("success")
-
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size studies.size.toLong
-
-        compareNameAndStateDto(jsonList(0), study1)
-        compareNameAndStateDto(jsonList(1), study2)
+      it("list multiple study names in ascending order") {
+        val f = fixture
+        val reply = makeAuthRequest(GET, uri("names") + "?order=asc").value
+        reply must beOkResponseWithJsonReply
+        val dtos = (contentAsJson(reply) \ "data" ).validate[Seq[NameAndStateDto]]
+        dtos must be (jsSuccess)
+        dtos.get must equal (Seq(NameAndStateDto(f.studies(0)), NameAndStateDto(f.studies(1))))
       }
 
       it("list single study when using a filter") {
-        val study1 = factory.createDisabledStudy.copy(name = "ABC")
-        val study2 = factory.createDisabledStudy.copy(name = "DEF")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri("names") + "?filter=name::ABC")
-
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 1
-
-        compareNameAndStateDto(jsonList(0), study1)
+        val f = fixture
+        val reply = makeAuthRequest(GET, uri("names") + "?filter=name::ABC").value
+        reply must beOkResponseWithJsonReply
+        val dtos = (contentAsJson(reply) \ "data" ).validate[Seq[NameAndStateDto]]
+        dtos must be (jsSuccess)
+        dtos.get must equal (Seq(NameAndStateDto(f.studies(0))))
       }
 
       it("list nothing when using a name filter for name not in system") {
-        val study1 = factory.createDisabledStudy.copy(name = "ABC")
-        val study2 = factory.createDisabledStudy.copy(name = "DEF")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri("names") + "?filter=name::xxx")
-                              (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 0
+        fixture // create studies to populate repository
+        val reply = makeAuthRequest(GET, uri("names") + "?filter=name::xxx").value
+        reply must beOkResponseWithJsonReply
+        val dtos = (contentAsJson(reply) \ "data" ).validate[Seq[NameAndStateDto]]
+        dtos must be (jsSuccess)
+        dtos.get must equal (Seq.empty[NameAndStateDto])
       }
 
       it("fail for invalid sort field") {
-        val study1 = factory.createDisabledStudy.copy(name = "ST1")
-        val study2 = factory.createDisabledStudy.copy(name = "ST2")
-
-        val studies = List(study2, study1)
-        studyRepository.removeAll
-        studies.map(study => studyRepository.put(study))
-
-        val json = makeRequest(GET, uri("names") + "?sort=xxxx", BAD_REQUEST)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("invalid sort field")
+        val reply = makeAuthRequest(GET, uri("names") + "?sort=xxxx").value
+        reply must beBadRequestWithMessage("invalid sort field")
       }
 
     }
@@ -1140,28 +1005,112 @@ class StudiesControllerSpec extends ControllerFixture with JsonHelper {
       it("list the centres associated with a study") {
         val study = factory.createEnabledStudy
         val location = factory.createLocation
-        val centre = factory.createEnabledCentre.copy(studyIds = Set(study.id), locations = Set(location))
+        val centre = factory.createEnabledCentre.copy(studyIds = Set(study.id),
+                                                      locations = Set(location))
 
-        studyRepository.put(study)
-        centreRepository.put(centre)
+        Set(study, centre).foreach(addToRepository)
 
-        val json = makeRequest(GET, uri("centres") + s"/${study.id}")
+        val reply = makeAuthRequest(GET, uri("centres") + s"/${study.id}").value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
-
-        val jsonCentreLocations = (json \ "data").as[List[JsObject]]
-        jsonCentreLocations must have length 1
-        val jsonCentreLocation  = jsonCentreLocations(0)
-
-        (jsonCentreLocation \ "centreId").as[String] must be (centre.id.id)
-
-        (jsonCentreLocation \ "locationId").as[String] must be (location.id.id)
-
-        (jsonCentreLocation \ "centreName").as[String] must be (centre.name)
-
-        (jsonCentreLocation \ "locationName").as[String] must be (location.name)
+        val dtos = (contentAsJson(reply) \ "data" ).validate[Seq[CentreLocation]]
+        dtos must be (jsSuccess)
+        dtos.get must equal (Seq(CentreLocation(centre, location)))
       }
 
+    }
+
+  }
+
+  private def updateWithInvalidVersionSharedBehaviour(urlFunc: Study => String, json: JsValue = JsNull) {
+
+    it("should return bad request") {
+      val study = factory.createDisabledStudy
+      studyRepository.put(study)
+      var requestJson = Json.obj("expectedVersion" -> Json.toJson(Some(study.version + 1)))
+      if (json != JsNull) {
+        requestJson = requestJson ++ json.as[JsObject]
+      }
+      val reply = makeAuthRequest(POST, urlFunc(study), requestJson)
+      reply.value must beBadRequestWithMessage("InvalidVersion")
+    }
+
+  }
+
+  private def updateNonDisabledStudySharedBehaviour(jsonField: JsObject,
+                                                    urlFunc:   Study => String): Unit = {
+    it("should return bad request") {
+
+      val studiesTable = Table(("study", "state"),
+                               (factory.createEnabledStudy, "enabled"),
+                               (factory.createRetiredStudy, "retored"))
+
+      forAll (studiesTable) { (study, label) =>
+        info(label)
+        studyRepository.put(study)
+        val requestJson = Json.obj("expectedVersion" -> Some(study.version)) ++ jsonField
+        val reply = makeAuthRequest(POST, urlFunc(study), requestJson)
+        reply.value must beBadRequestWithMessage ("InvalidStatus: study not disabled")
+      }
+    }
+
+  }
+
+  private def checkInvalidStudyIdSharedBehaviour(json: JsValue, urlFunc: Study => String): Unit = {
+
+    it("should return not found") {
+      val invalidStudy = factory.createDisabledStudy
+      var reqJson = Json.obj("expectedVersion" -> 0L)
+      if (json != JsNull) {
+        reqJson = reqJson ++ json.as[JsObject]
+      }
+      val reply = makeAuthRequest(POST, urlFunc(invalidStudy), reqJson).value
+      reply must beNotFoundWithMessage ("IdNotFound.*study")
+    }
+  }
+
+  private def listSingleStudy(offset:    Long = 0,
+                               maybeNext: Option[Int] = None,
+                               maybePrev: Option[Int] = None)
+                              (setupFunc: () => (Url, Study)) = {
+
+    it("list single study") {
+      val (url, expectedStudy) = setupFunc()
+      val reply = makeAuthRequest(GET, url.path).value
+      reply must beOkResponseWithJsonReply
+
+      val json = contentAsJson(reply)
+      json must beSingleItemResults(offset, maybeNext, maybePrev)
+
+      val replyStudies = (json \ "data" \ "items").validate[List[Study]]
+      replyStudies must be (jsSuccess)
+      replyStudies.get.foreach { _ must equal (expectedStudy) }
+    }
+  }
+
+  private def listMultipleStudies(offset:    Long = 0,
+                                  maybeNext: Option[Int] = None,
+                                  maybePrev: Option[Int] = None)
+                                 (setupFunc: () => (Url, List[Study])) = {
+
+    it("list multiple studies") {
+      val (url, expectedStudies) = setupFunc()
+
+      val reply = makeAuthRequest(GET, url.path).value
+      reply must beOkResponseWithJsonReply
+
+      val json = contentAsJson(reply)
+      json must beMultipleItemResults(offset = offset,
+                                      total = expectedStudies.size.toLong,
+                                      maybeNext = maybeNext,
+                                      maybePrev = maybePrev)
+
+      val replyStudies = (json \ "data" \ "items").validate[List[Study]]
+      replyStudies must be (jsSuccess)
+
+      (replyStudies.get zip expectedStudies).foreach { case (replyStudy, study) =>
+        replyStudy must equal (study)
+      }
     }
 
   }

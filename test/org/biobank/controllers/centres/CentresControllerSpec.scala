@@ -1,21 +1,30 @@
 package org.biobank.controllers.centres
 
 import java.time.OffsetDateTime
-import org.biobank.controllers.PagedResultsSpec
-import org.biobank.domain.JsonHelper
-import org.biobank.domain.Location
+import org.biobank.controllers.PagedResultsSharedSpec
+import org.biobank.domain.{JsonHelper, Location, Slug}
 import org.biobank.domain.centres._
-import org.biobank.domain.studies.Study
-import org.biobank.fixture.ControllerFixture
-import org.biobank.services.centres.CentreLocationInfo
+import org.biobank.domain.studies.{Study, StudyId}
+import org.biobank.dto.{CentreDto, NameAndStateDto}
+import org.biobank.fixture.{ControllerFixture, Url}
+import org.biobank.matchers.PagedResultsMatchers
+import org.biobank.services.centres.{CentreCountsByStatus, CentreLocation, CentreLocationInfo}
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
 
 /**
   * Tests the REST API for [[Centre]]s.
   */
-class CentresControllerSpec extends ControllerFixture with JsonHelper {
+class CentresControllerSpec
+    extends ControllerFixture
+    with JsonHelper
+    with PagedResultsSharedSpec
+    with PagedResultsMatchers {
+
   import org.biobank.TestUtils._
+  import org.biobank.matchers.JsonMatchers._
+  import org.biobank.matchers.EntityMatchers._
 
   private def uri(paths: String*): String = {
     val basePath = "/api/centres"
@@ -51,82 +60,6 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     }
   }
 
-  def checkInvalidCentreId(path: String, jsonField: JsObject): Unit = {
-    val invalidCentreId = nameGenerator.next[Centre]
-    val cmdJson = Json.obj("id"              -> nameGenerator.next[Centre],
-                           "expectedVersion" -> 0L) ++ jsonField
-
-    val json = makeRequest(POST, uri(path) + s"/$invalidCentreId", NOT_FOUND, cmdJson)
-
-    (json \ "status").as[String] must include ("error")
-
-    (json \ "message").as[String] must include regex ("IdNotFound.*centre")
-
-    ()
-  }
-
-  def checkInvalidCentreId(url: String): Unit = {
-    checkInvalidCentreId(url, Json.obj())
-  }
-
-  def updateWithInvalidVersion(path: String, jsonField: JsObject): Unit = {
-    val centre = factory.createDisabledCentre
-    centreRepository.put(centre)
-
-    val cmdJson = Json.obj("id"              -> centre.id.id,
-                           "expectedVersion" -> Some(centre.version + 1)) ++ jsonField
-
-    val json = makeRequest(POST, uri(centre, path), BAD_REQUEST, cmdJson)
-
-    (json \ "status").as[String] must include ("error")
-
-    (json \ "message").as[String] must include ("expected version doesn't match current version")
-
-    ()
-  }
-
-  def updateWithInvalidVersion(url: String): Unit = {
-    updateWithInvalidVersion(url, Json.obj())
-  }
-
-  def updateEnabledCentre(centre:    EnabledCentre,
-                          path:      String,
-                          jsonField: JsObject,
-                          urlExtra:  String = ""): Unit = {
-    val url = uri(centre, path) + urlExtra
-    centreRepository.put(centre)
-
-    val cmdJson = Json.obj("expectedVersion" -> Some(centre.version)) ++ jsonField
-
-    val json = makeRequest(POST, url, BAD_REQUEST, cmdJson)
-
-    (json \ "status").as[String] must include ("error")
-
-    (json \ "message").as[String] must include ("centre is not disabled")
-
-    ()
-  }
-
-  def validateJsonLocation(jsonObj: JsObject, location: Location): Unit = {
-    (jsonObj \ "id").as[String]             must not be empty
-
-    (jsonObj \ "name").as[String]           mustBe (location.name)
-
-    (jsonObj \ "street").as[String]         mustBe (location.street)
-
-    (jsonObj \ "city").as[String]           mustBe (location.city)
-
-    (jsonObj \ "province").as[String]       mustBe (location.province)
-
-    (jsonObj \ "postalCode").as[String]     mustBe (location.postalCode)
-
-    (jsonObj \ "poBoxNumber").asOpt[String] mustBe (location.poBoxNumber)
-
-    (jsonObj \ "countryIsoCode").as[String] mustBe (location.countryIsoCode)
-
-    ()
-  }
-
   describe("Centre REST API") {
 
     describe("GET /api/centres/:slug") {
@@ -134,218 +67,210 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       it("retrieve a centre") {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
-        val json = makeRequest(GET, uri(centre.slug.id))
+        val reply = makeAuthRequest(GET, uri(centre.slug.id)).value
+        reply must beOkResponseWithJsonReply
 
-
-        (json \ "status").as[String] must include ("success")
-
-        val jsonObj = (json \ "data").as[JsObject]
-        compareObj(jsonObj, centre)
+        val json = contentAsJson(reply)
+        val centreDto = (json \ "data").validate[CentreDto]
+        centreDto must be (jsSuccess)
+        centreDto.get must matchCentre(centre)
       }
 
       it("not read an invalid centre") {
         val centre = factory.createDisabledCentre
-
-        val json = makeRequest(GET, uri(centre), NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("EntityCriteriaNotFound: centre slug")
+        val reply = makeAuthRequest(GET, uri(centre)).value
+        reply must beNotFoundWithMessage("EntityCriteriaNotFound: centre slug")
       }
     }
 
     describe("GET /api/centres/search") {
 
       it("list none") {
-        PagedResultsSpec(this).emptyResults(uri("search"))
+        val url = new Url(uri("search"))
+        url must beEmptyResults
       }
 
-      it("list a centre") {
-        val centre = factory.createDisabledCentre
-        centreRepository.put(centre)
-        val jsonItem = PagedResultsSpec(this).singleItemResult(uri("search"))
-        compareObj(jsonItem, centre)
+      describe("list a centre") {
+
+        listSingleCentre() { () =>
+          val centre = factory.createDisabledCentre
+          centreRepository.put(centre)
+
+          (new Url(uri("search")), centre)
+        }
       }
 
-      it("list multiple centres") {
-        val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
-        centres.foreach(centreRepository.put)
+      describe("list multiple centres") {
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri("search"),
-          offset = 0,
-          total = centres.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
-        jsonItems must have size centres.size.toLong
-        compareObjs(jsonItems, centres)
+        listMultipleCentres() { () =>
+          val centres = List(factory.createDisabledCentre, factory.createDisabledCentre)
+          centres.foreach(centreRepository.put)
+
+          (new Url(uri("search")), centres.sortWith(_.name < _.name))
+        }
+
       }
 
-      it("list a single centre when filtered by name") {
-        val centres = List(factory.createDisabledCentre, factory.createEnabledCentre)
-        val centre = centres(0)
-        centres.foreach(centreRepository.put)
+      describe("list a single centre when filtered by name") {
 
-        val jsonItem = PagedResultsSpec(this).
-          singleItemResult(uri("search"), Map("filter" -> s"name::${centre.name}"))
-        compareObj(jsonItem, centres(0))
+        listSingleCentre() { () =>
+          val centres = List(factory.createDisabledCentre, factory.createEnabledCentre)
+          val centre = centres(0)
+          centres.foreach(centreRepository.put)
+
+          (new Url(uri("search") + s"?filter=name::${centre.name}"), centre)
+        }
+
       }
 
-      it("list a single disabled centre when filtered by state") {
-        val centres = List(factory.createDisabledCentre,
-                           factory.createEnabledCentre,
-                           factory.createEnabledCentre)
-        centres.foreach(centreRepository.put)
+      describe("list a single disabled centre when filtered by state") {
 
-        val jsonItem = PagedResultsSpec(this)
-          .singleItemResult(uri("search"), Map("filter" -> "state::disabled"))
-        compareObj(jsonItem, centres(0))
+        listSingleCentre() { () =>
+          val centres = List(factory.createDisabledCentre,
+                             factory.createEnabledCentre,
+                             factory.createEnabledCentre)
+          centres.foreach(centreRepository.put)
+          (new Url(uri("search") + s"?filter=state::disabled"), centres(0))
+        }
       }
 
-      it("list disabled centres when filtered by state") {
-        val centres = List(factory.createDisabledCentre,
-                           factory.createDisabledCentre,
-                           factory.createEnabledCentre,
-                           factory.createEnabledCentre)
-        centres.foreach(centreRepository.put)
+      describe("list centres when filtered by state") {
 
-        val expectedCentres = List(centres(0), centres(1))
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri("search"),
-          queryParams = Map("filter" -> "state::disabled"),
-          offset = 0,
-          total = expectedCentres.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        def commonSetup = {
+          val centres = List(factory.createDisabledCentre,
+                             factory.createDisabledCentre,
+                             factory.createEnabledCentre,
+                             factory.createEnabledCentre)
+          centres.foreach(centreRepository.put)
+          centres
+        }
 
-        jsonItems must have size expectedCentres.size.toLong
-        compareObjs(jsonItems, expectedCentres)
+        describe("for disabled") {
+
+          listMultipleCentres() { () =>
+            val centres = commonSetup
+            (new Url(uri("search") + s"?filter=state::disabled"),
+             centres.filter { c => c.state == Centre.disabledState  }.sortWith(_.name < _.name))
+          }
+
+        }
+
+        describe("for enabled") {
+
+          listMultipleCentres() { () =>
+            val centres = commonSetup
+            (new Url(uri("search") + s"?filter=state::enabled"),
+             centres.filter { c => c.state == Centre.enabledState  }.sortWith(_.name < _.name))
+          }
+
+        }
+
+        it("fail ith an invalid state name") {
+          val invalidStateName = "state::" + nameGenerator.next[Study]
+          val reply = makeAuthRequest(GET, uri("search") + s"?filter=$invalidStateName").value
+          reply must beNotFoundWithMessage ("InvalidState: entity state does not exist")
+        }
+
       }
 
-      it("list enabled centres when filtered by status") {
-        val centres = List(factory.createDisabledCentre,
-                           factory.createDisabledCentre,
-                           factory.createEnabledCentre,
-                           factory.createEnabledCentre)
-        centres.foreach(centreRepository.put)
+      describe("list centres sorted by name") {
 
-        val expectedCentres = List(centres(2), centres(3))
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri("search"),
-          queryParams = Map("filter" -> "state::enabled"),
-          offset = 0,
-          total = expectedCentres.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        def commonSetup = {
+          val centres = List(factory.createDisabledCentre.copy(name = "CTR3"),
+                             factory.createDisabledCentre.copy(name = "CTR2"),
+                             factory.createEnabledCentre.copy(name = "CTR1"),
+                             factory.createEnabledCentre.copy(name = "CTR0"))
+          centres.foreach(centreRepository.put)
+          centres
+        }
 
-        jsonItems must have size expectedCentres.size.toLong
-        compareObjs(jsonItems, expectedCentres)
+        describe("in ascending order") {
+
+          listMultipleCentres() { () =>
+            val centres = commonSetup
+            (new Url(uri("search") + s"?sort=name"), centres.sortWith(_.name < _.name))
+          }
+
+        }
+
+        describe("in decending order") {
+
+          listMultipleCentres() { () =>
+            val centres = commonSetup
+            (new Url(uri("search") + s"?sort=-name"), centres.sortWith(_.name > _.name))
+          }
+        }
+
       }
 
-      it("list centres sorted by name") {
-        val centres = List(factory.createDisabledCentre.copy(name = "CTR3"),
-                           factory.createDisabledCentre.copy(name = "CTR2"),
-                           factory.createEnabledCentre.copy(name = "CTR1"),
-                           factory.createEnabledCentre.copy(name = "CTR0"))
-        centres.foreach(centreRepository.put)
+      describe("list centres sorted by state") {
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri("search"),
-          queryParams = Map("sort" -> "name"),
-          offset = 0,
-          total = centres.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        def commonSetup = {
+          val centres = List(factory.createEnabledCentre, factory.createDisabledCentre)
+          centres.foreach(centreRepository.put)
+          centres
+        }
 
-        jsonItems must have size centres.size.toLong
-        compareObj(jsonItems(0), centres(3))
-        compareObj(jsonItems(1), centres(2))
-        compareObj(jsonItems(2), centres(1))
-        compareObj(jsonItems(3), centres(0))
+        describe("in ascending order") {
+
+          listMultipleCentres() { () =>
+            val centres = commonSetup
+            (new Url(uri("search") + s"?sort=state"), centres.sortWith(_.state.id < _.state.id))
+          }
+
+        }
+
+        describe("in decending order") {
+
+          listMultipleCentres() { () =>
+            val centres = commonSetup
+            (new Url(uri("search") + s"?sort=-state"), centres.sortWith(_.state.id > _.state.id))
+          }
+        }
+
+        it("fail on attempt to list centres filtered by an invalid state name") {
+          val invalidStateName = "state::" + nameGenerator.next[Study]
+          val reply = makeAuthRequest(GET, uri("search") + s"?filter=$invalidStateName")
+          reply.value must beNotFoundWithMessage("InvalidState: entity state does not exist")
+        }
+
       }
 
-      it("list centres sorted by state") {
-        val centres = List(factory.createEnabledCentre, factory.createDisabledCentre)
-        centres.foreach(centreRepository.put)
+      describe("list a single centre when using paged query") {
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri("search"),
-          queryParams = Map("sort" -> "state"),
-          offset = 0,
-          total = centres.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        def commonSetup = {
+          val centres = List(factory.createDisabledCentre.copy(name = "CTR3"),
+                             factory.createDisabledCentre.copy(name = "CTR2"),
+                             factory.createEnabledCentre.copy(name = "CTR1"),
+                             factory.createEnabledCentre.copy(name = "CTR0"))
+          centres.foreach(centreRepository.put)
+          centres
+        }
 
-        jsonItems must have size centres.size.toLong
-        compareObj(jsonItems(0), centres(1))
-        compareObj(jsonItems(1), centres(0))
+        describe("fist page") {
+
+          listSingleCentre(maybeNext = Some(2)) { () =>
+            val centres = commonSetup
+            (new Url(uri("search") + s"?sort=name&limit=1"), centres(3))
+          }
+
+        }
+
+        describe("last page") {
+
+          listSingleCentre(offset = 3, maybePrev = Some(3)) { () =>
+            val centres = commonSetup
+            (new Url(uri("search") + s"?sort=name&page=4&limit=1"), centres(0))
+          }
+
+        }
+
       }
 
-      it("list centres sorted by status in descending order") {
-        val centres = List(factory.createEnabledCentre, factory.createDisabledCentre)
-        centres.foreach(centreRepository.put)
+      describe("fail when using an invalid query parameters") {
 
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-          uri = uri("search"),
-          queryParams = Map("sort" -> "-state"),
-          offset = 0,
-          total = centres.size.toLong,
-          maybeNext = None,
-          maybePrev = None)
+        pagedQueryShouldFailSharedBehaviour(uri("search"))
 
-        jsonItems must have size centres.size.toLong
-        compareObj(jsonItems(0), centres(0))
-        compareObj(jsonItems(1), centres(1))
-      }
-
-      it("fail on attempt to list centres filtered by an invalid state name") {
-        val invalidStateName = "state::" + nameGenerator.next[Study]
-        val reply = makeRequest(GET,
-                                uri("search") + s"?filter=$invalidStateName",
-                                NOT_FOUND)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex (
-          "InvalidState: entity state does not exist")
-      }
-
-      it("list a single centre when using paged query") {
-        val centres = List(factory.createDisabledCentre.copy(name = "CTR3"),
-                           factory.createDisabledCentre.copy(name = "CTR2"),
-                           factory.createEnabledCentre.copy(name = "CTR1"),
-                           factory.createEnabledCentre.copy(name = "CTR0"))
-        centres.foreach(centreRepository.put)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-          uri = uri("search"),
-          queryParams = Map("sort" -> "name", "limit" -> "1"),
-          total = centres.size.toLong,
-          maybeNext = Some(2))
-
-        compareObj(jsonItem, centres(3))
-      }
-
-      it("list the last centre when using paged query") {
-        val centres = List(factory.createDisabledCentre.copy(name = "CTR3"),
-                           factory.createDisabledCentre.copy(name = "CTR2"),
-                           factory.createEnabledCentre.copy(name = "CTR1"),
-                           factory.createEnabledCentre.copy(name = "CTR0"))
-        centres.foreach(centreRepository.put)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-          uri = uri("search"),
-          queryParams = Map("sort" -> "name", "page" -> "4", "limit" -> "1"),
-          total = 4,
-          offset = 3,
-          maybeNext = None,
-          maybePrev = Some(3))
-
-        compareObj(jsonItem, centres(0))
-      }
-
-      it("fail when using an invalid query parameters") {
-        PagedResultsSpec(this).failWithInvalidParams(uri("search"))
       }
 
     }
@@ -353,11 +278,11 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
     describe("GET /api/centres/counts") {
 
       it("return empty counts") {
-        val json = makeRequest(GET, uri("counts"))
-        (json \ "status").as[String] must include ("success")
-        (json \ "data" \ "total").as[Long] must be (0)
-        (json \ "data" \ "disabledCount").as[Long] must be (0)
-        (json \ "data" \ "enabledCount").as[Long] must be (0)
+        val reply = makeAuthRequest(GET, uri("counts")).value
+        reply must beOkResponseWithJsonReply
+        val counts = (contentAsJson(reply) \ "data").validate[CentreCountsByStatus]
+        counts must be (jsSuccess)
+        counts.get must equal (CentreCountsByStatus(0, 0, 0))
       }
 
       it("return valid counts") {
@@ -365,11 +290,11 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
                            factory.createDisabledCentre,
                            factory.createEnabledCentre)
         centres.foreach(centreRepository.put)
-        val json = makeRequest(GET, uri("counts"))
-        (json \ "status").as[String] must include ("success")
-        (json \ "data" \ "total").as[Long] must be (3)
-        (json \ "data" \ "disabledCount").as[Long] must be (2)
-        (json \ "data" \ "enabledCount").as[Long] must be (1)
+        val reply = makeAuthRequest(GET, uri("counts")).value
+        reply must beOkResponseWithJsonReply
+        val counts = (contentAsJson(reply) \ "data").validate[CentreCountsByStatus]
+        counts must be (jsSuccess)
+        counts.get must equal (CentreCountsByStatus(3, 2, 1))
       }
 
     }
@@ -379,28 +304,18 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       it("add a centre") {
         val centre = factory.createDisabledCentre
         val addJson = Json.obj("name" -> centre.name, "description" -> centre.description)
-        val json = makeRequest(POST, uri(""), addJson)
+        val reply = makeAuthRequest(POST, uri(""), addJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val json = contentAsJson(reply)
+        val replyCentre = (json \ "data").validate[CentreDto]
+        replyCentre must be (jsSuccess)
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        val centreId = CentreId(jsonId)
-        jsonId.length must be > 0
+        val newCentreId = CentreId(replyCentre.get.id)
+        val updatedCentre = centre.copy(id = newCentreId)
 
-        centreRepository.getByKey(centreId) mustSucceed { repoCentre =>
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centreId),
-            'version     (0L),
-            'slug        (centre.slug.id),
-            'name        (centre.name),
-            'description (centre.description)
-            )
-
-          repoCentre.studyIds must have size 0
-          repoCentre.locations must have size 0
-          checkTimeStamps(repoCentre, OffsetDateTime.now, None)
+        centreRepository.getByKey(newCentreId) mustSucceed { repoCentre =>
+          repoCentre must equal (updatedCentre)
         }
       }
 
@@ -412,22 +327,16 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
       }
 
       it("not add a centre with a name that is too short") {
-        val addJson = Json.obj("name" -> "A")
-        val json = makeRequest(POST, uri(""), BAD_REQUEST, json = addJson)
-
-        (json \ "status").as[String] must include ("error")
+        val reply = makeAuthRequest(POST, uri(""), Json.obj("name" -> "A")).value
+        reply must beBadRequestWithMessage("InvalidName")
       }
 
       it("fail when adding a centre with a duplicate name") {
         val centre = factory.createDisabledCentre
         centreRepository.put(centre)
 
-        val addJson = Json.obj("name" -> centre.name)
-        val json = makeRequest(POST, uri(""), FORBIDDEN, json = addJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("centre with name already exists")
+        val reply = makeAuthRequest(POST, uri(""), Json.obj("name" -> centre.name)).value
+        reply must beForbiddenRequestWithMessage("EntityCriteriaError: centre with name already exists")
       }
     }
 
@@ -439,27 +348,21 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val updateJson = Json.obj("expectedVersion" -> Some(centre.version),
-                               "name"            -> newName)
-        val json = makeRequest(POST, uri(centre, "name"), json = updateJson)
+                                  "name"            -> newName)
+        val reply = makeAuthRequest(POST, uri(centre, "name"), updateJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val json = contentAsJson(reply)
+        val replyCentre = (json \ "data").validate[CentreDto]
+        replyCentre must be (jsSuccess)
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (centre.id.id)
-
+        val updatedCentre = centre.copy(version      = centre.version + 1,
+                                        name         = newName,
+                                        slug         = Slug(newName),
+                                        timeModified = Some(OffsetDateTime.now))
+        replyCentre.get must matchCentre(updatedCentre)
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centre.id),
-            'version     (centre.version + 1),
-            'name        (newName),
-            'description (centre.description)
-            )
-
-          repoCentre.studyIds must have size centre.studyIds.size.toLong
-          repoCentre.locations must have size centre.locations.size.toLong
-          checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
+          repoCentre must equal (updatedCentre)
         }
       }
 
@@ -471,27 +374,24 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
           }
 
         val duplicateName = centres(0).name
-
         val updateJson = Json.obj("expectedVersion" -> Some(centres(1).version),
-                               "name"            -> duplicateName)
-        val json = makeRequest(POST, uri(centres(1), "name"), FORBIDDEN, json = updateJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("centre with name already exists")
+                                  "name"            -> duplicateName)
+        val reply = makeAuthRequest(POST, uri(centres(1), "name"), updateJson).value
+        reply must beForbiddenRequestWithMessage("EntityCriteriaError: centre with name already exists")
       }
 
-      it("not update name on an invalid centre") {
-        checkInvalidCentreId("name", Json.obj("name" -> nameGenerator.next[Study]))
+      describe("not update name on an invalid centre") {
+        invalidCentreIdSharedBehaviour("name", Json.obj("name" -> nameGenerator.next[Study]))
       }
 
-      it("fail when updating name with invalid version") {
-        updateWithInvalidVersion("name", Json.obj("name" -> nameGenerator.next[Study]))
+      describe("fail when updating name with invalid version") {
+        updateWithInvalidVersionSharedBehaviour("name", Json.obj("name" -> nameGenerator.next[Study]))
       }
 
-      it("fail when updating name on an enabled centre") {
-        val centre = factory.createEnabledCentre
-        updateEnabledCentre(centre, "name", Json.obj("name" -> nameGenerator.next[Centre]))
+      describe("fail when updating name on an enabled centre") {
+        updateEnabledCentreSharedBehaviour { centre =>
+          (uri(centre, "name"), Json.obj("name" -> nameGenerator.next[Centre]))
+        }
       }
 
     }
@@ -504,41 +404,37 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val updateJson = Json.obj("expectedVersion" -> Some(centre.version),
-                               "description"     -> newDescription)
-        val json = makeRequest(POST, uri(centre, "description"), json = updateJson)
+                                  "description"     -> newDescription)
+        val reply = makeAuthRequest(POST, uri(centre, "description"), updateJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val json = contentAsJson(reply)
+        val replyCentre = (json \ "data").validate[CentreDto]
+        replyCentre must be (jsSuccess)
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (centre.id.id)
+        val updatedCentre = centre.copy(version      = centre.version + 1,
+                                        description  = Some(newDescription),
+                                        timeModified = Some(OffsetDateTime.now))
+        replyCentre.get must matchCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centre.id),
-            'version     (centre.version + 1),
-            'name        (centre.name),
-            'description (Some(newDescription))
-            )
-
-          repoCentre.studyIds must have size centre.studyIds.size.toLong
-          repoCentre.locations must have size centre.locations.size.toLong
-          checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
+          repoCentre must equal (updatedCentre)
         }
       }
 
-      it("not update description an invalid centre") {
-        checkInvalidCentreId("description", Json.obj("description" -> nameGenerator.next[Study]))
+      describe("not update description an invalid centre") {
+        invalidCentreIdSharedBehaviour("description", Json.obj("description" -> nameGenerator.next[Study]))
       }
 
-      it("fail when updating name with invalid version") {
-        updateWithInvalidVersion("description", Json.obj("description" -> nameGenerator.next[Study]))
+      describe("fail when updating name with invalid version") {
+        updateWithInvalidVersionSharedBehaviour("description",
+                                                Json.obj("description" -> nameGenerator.next[Study]))
       }
 
-      it("fail when updating description on an enabled centre") {
-        val centre = factory.createEnabledCentre
-        updateEnabledCentre(centre, "description", Json.obj("description" -> nameGenerator.next[Centre]))
+      describe("fail when updating description on an enabled centre") {
+        updateEnabledCentreSharedBehaviour { centre =>
+          (uri(centre, "description"), Json.obj("description" -> nameGenerator.next[Centre]))
+        }
       }
 
     }
@@ -551,26 +447,18 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val updateJson = Json.obj("expectedVersion" -> Some(centre.version))
-        val json = makeRequest(POST, uri(centre, "enable"), json = updateJson)
+        val reply = makeAuthRequest(POST, uri(centre, "enable"), updateJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (centre.id.id)
+        val json = contentAsJson(reply)
+        val replyCentre = (json \ "data").validate[CentreDto]
+        replyCentre must be (jsSuccess)
 
-        centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          repoCentre mustBe a[EnabledCentre]
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centre.id),
-            'version     (centre.version + 1),
-            'name        (centre.name),
-            'description (centre.description)
-            )
-
-          repoCentre.studyIds must have size centre.studyIds.size.toLong
-          repoCentre.locations must have size centre.locations.size.toLong
-          checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
+        centre.enable mustSucceed { updatedCentre =>
+          replyCentre.get must matchCentre(updatedCentre)
+          centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
+            repoCentre must equal (updatedCentre)
+          }
         }
       }
 
@@ -579,22 +467,24 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val updateJson = Json.obj("expectedVersion" -> Some(centre.version))
-        val json = makeRequest(POST, uri(centre, "enable"), BAD_REQUEST, updateJson)
+        val reply = makeAuthRequest(POST, uri(centre, "enable"), updateJson).value
+        reply must beBadRequestWithMessage("EntityCriteriaError.*not have locations")
+      }
 
-        (json \ "status").as[String] must include ("error")
+      it("not enable an already enabled centre") {
+        val centre = factory.createEnabledCentre
+        centreRepository.put(centre)
 
-        (json \ "message").as[String] must include regex ("EntityCriteriaError.*not have locations")
+        val updateJson = Json.obj("expectedVersion" -> Some(centre.version))
+        val reply = makeAuthRequest(POST, uri(centre, "enable"), updateJson).value
+        reply must beBadRequestWithMessage("InvalidStatus: centre is not disabled")
       }
 
       it("not enable an invalid centre") {
         val centre = factory.createDisabledCentre
-
         val updateJson = Json.obj("expectedVersion" -> Some(0L))
-        val json = makeRequest(POST, uri(centre, "enable"), NOT_FOUND, json = updateJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*centre")
+        val reply = makeAuthRequest(POST, uri(centre, "enable"), updateJson).value
+        reply must beNotFoundWithMessage("IdNotFound.*centre")
       }
 
     }
@@ -606,39 +496,36 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val updateJson = Json.obj("expectedVersion" -> Some(centre.version))
-        val json = makeRequest(POST, uri(centre, "disable"), json = updateJson)
+        val reply = makeAuthRequest(POST, uri(centre, "disable"), updateJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val json = contentAsJson(reply)
+        val replyCentre = (json \ "data").validate[CentreDto]
+        replyCentre must be (jsSuccess)
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (centre.id.id)
-
-        centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          repoCentre mustBe a[DisabledCentre]
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centre.id),
-            'version     (centre.version + 1),
-            'name        (centre.name),
-            'description (centre.description)
-            )
-
-          repoCentre.studyIds must have size centre.studyIds.size.toLong
-          repoCentre.locations must have size centre.locations.size.toLong
-          checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
+        centre.disable mustSucceed { updatedCentre =>
+          replyCentre.get must matchCentre(updatedCentre)
+          centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
+            repoCentre must equal (updatedCentre)
+          }
         }
+      }
+
+      it("not disable an already disabled centre") {
+        val centre = factory.createDisabledCentre
+        centreRepository.put(centre)
+
+        val updateJson = Json.obj("expectedVersion" -> Some(centre.version))
+        val reply = makeAuthRequest(POST, uri(centre, "disable"), updateJson).value
+        reply must beBadRequestWithMessage("InvalidStatus: centre is not enabled")
       }
 
       it("not disable an invalid centre") {
         val centre = factory.createDisabledCentre
 
         val updateJson = Json.obj("expectedVersion" -> Some(0L))
-        val json = makeRequest(POST, uri(centre, "disable"), NOT_FOUND, json = updateJson)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*centre")
+        val reply = makeAuthRequest(POST, uri(centre, "disable"), updateJson).value
+        reply must beNotFoundWithMessage("IdNotFound.*centre")
       }
 
     }
@@ -650,66 +537,38 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val location = factory.createLocation
-        val json = makeRequest(POST,
-                               uri(centre, "locations"),
-                               centreLocationToJson(centre, location))
+        val reply = makeAuthRequest(POST,
+                                    uri(centre, "locations"),
+                                    centreLocationToJson(centre, location)).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyDto = (contentAsJson(reply) \ "data").validate[CentreDto]
+        replyDto must be (jsSuccess)
 
-        val jsonLocations = (json \ "data" \ "locations").as[List[JsObject]]
-        jsonLocations must have length 1
-        validateJsonLocation(jsonLocations(0), location)
-
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (centre.id.id)
+        val newLocationId = replyDto.get.locations.head.id
+        val updatedCentre = centre.copy(version      = centre.version + 1,
+                                        locations    = Set(location.copy(id = newLocationId)),
+                                        timeModified = Some(OffsetDateTime.now))
+        replyDto.get must matchCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centre.id),
-            'version     (centre.version + 1),
-            'name        (centre.name),
-            'description (centre.description)
-            )
-
-          repoCentre.studyIds must have size centre.studyIds.size.toLong
-          repoCentre.locations must have size (1)
-          checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
-
-          val repoLocation = repoCentre.locations.head
-
-          repoLocation.id.id must not be empty
-          repoLocation must have (
-            'name           (location.name),
-            'street         (location.street),
-            'city           (location.city),
-            'province       (location.province),
-            'postalCode     (location.postalCode),
-            'poBoxNumber    (location.poBoxNumber),
-            'countryIsoCode (location.countryIsoCode)
-          )
-          ()
+          repoCentre must equal (updatedCentre)
         }
       }
 
       it("fail on attempt to add a location to an invalid centre") {
         val centre = factory.createDisabledCentre
         val location = factory.createLocation
-        val jsonResponse = makeRequest(POST,
-                                       uri(centre, "locations"),
-                                       NOT_FOUND,
-                                       centreLocationToJson(centre, location))
-
-        (jsonResponse \ "status").as[String] must include ("error")
-
-        (jsonResponse \ "message").as[String] must include regex ("IdNotFound.*centre")
+        val reply = makeAuthRequest(POST,
+                                    uri(centre, "locations"),
+                                    centreLocationToJson(centre, location)).value
+        reply must beNotFoundWithMessage("IdNotFound.*centre")
       }
 
-      it("fail when adding a location on an enabled centre") {
-        val centre = factory.createEnabledCentre
-        val location = factory.createLocation
-        updateEnabledCentre(centre, "locations", centreLocationToJson(centre, location))
+      describe("fail when adding a location on an enabled centre") {
+        updateEnabledCentreSharedBehaviour { centre =>
+          (uri(centre, "locations"), centreLocationToJson(centre, factory.createLocation))
+        }
       }
     }
 
@@ -721,105 +580,69 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val locationWithNewName = location.copy(name = nameGenerator.next[String])
+        val reply = makeAuthRequest(POST,
+                                    uri(centre, "locations") + s"/${location.id}",
+                                    centreLocationToUpdateJson(centre, locationWithNewName)).value
 
-        val json = makeRequest(POST,
-                               uri(centre, "locations") + s"/${location.id}",
-                               centreLocationToUpdateJson(centre, locationWithNewName))
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val json = contentAsJson(reply)
+        val replyDto = (json \ "data").validate[CentreDto]
+        replyDto must be (jsSuccess)
 
-        val jsonLocations = (json \ "data" \ "locations").as[List[JsObject]]
-        jsonLocations must have length 1
-        validateJsonLocation(jsonLocations(0), locationWithNewName)
-
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (centre.id.id)
+        val updatedCentre = centre.copy(version      = centre.version + 1,
+                                        locations    = Set(location),
+                                        timeModified = Some(OffsetDateTime.now))
+        replyDto.get must matchCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centre.id),
-            'version     (centre.version + 1),
-            'name        (centre.name),
-            'description (centre.description)
-            )
-
-          repoCentre.studyIds must have size centre.studyIds.size.toLong
-          repoCentre.locations must have size (centre.locations.size.toLong)
-          checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
-
-          repoCentre.locations.head must have (
-            'id             (locationWithNewName.id),
-            'name           (locationWithNewName.name),
-            'street         (locationWithNewName.street),
-            'city           (locationWithNewName.city),
-            'province       (locationWithNewName.province),
-            'postalCode     (locationWithNewName.postalCode),
-            'poBoxNumber    (locationWithNewName.poBoxNumber),
-            'countryIsoCode (locationWithNewName.countryIsoCode)
-          )
-          ()
+          repoCentre must equal (updatedCentre)
         }
       }
 
       it("fail on attempt to update a location on an invalid centre") {
         val location = factory.createLocation
         val centre = factory.createEnabledCentre.copy(locations = Set(location))
-        val jsonResponse = makeRequest(POST,
-                                       uri(centre, "locations") + s"/${location.id}",
-                                       NOT_FOUND,
-                                       centreLocationToUpdateJson(centre, location))
-
-        (jsonResponse \ "status").as[String] must include ("error")
-
-        (jsonResponse \ "message").as[String] must include regex ("IdNotFound.*centre")
+        val reply = makeAuthRequest(POST,
+                                    uri(centre, "locations") + s"/${location.id}",
+                                    centreLocationToUpdateJson(centre, location)).value
+        reply must beNotFoundWithMessage("IdNotFound.*centre")
       }
 
-      it("fail when updating a location on an enabled centre") {
-        val location = factory.createLocation
-        val centre = factory.createEnabledCentre.copy(locations = Set(location))
-        updateEnabledCentre(centre,
-                            "locations",
-                            centreLocationToUpdateJson(centre, location),
-                            s"/${location.id}")
+      describe("fail when updating a location on an enabled centre") {
+        updateEnabledCentreSharedBehaviour { centre =>
+          val location = factory.createLocation
+          (uri("locations", centre.id.id, location.id.id), centreLocationToUpdateJson(centre, location))
+        }
       }
     }
-
 
     describe("DELETE /api/centres/locations/:centreId/:ver/:locationId") {
 
       it("delete a location from a centre") {
         val locations = List(factory.createLocation, factory.createLocation)
         var locationsSet = locations.toSet
-        val centre: Centre = factory.createDisabledCentre.copy(locations = locationsSet)
+        val centre = factory.createDisabledCentre.copy(locations = locationsSet)
         centreRepository.put(centre)
 
         locations.zipWithIndex.foreach { case (location, index) =>
           val expectedVersion = centre.version + index
-          val json = makeRequest(DELETE,
-                                 uri(centre, "locations") + s"/$expectedVersion/${location.id}")
-
-          (json \ "status").as[String] must include ("success")
+          val url = uri(centre, "locations") + s"/$expectedVersion/${location.id}"
+          val reply = makeAuthRequest(DELETE, url).value
+          reply must beOkResponseWithJsonReply
 
           locationsSet = locationsSet - location
 
-          val jsonId = (json \ "data" \ "id").as[String]
-          jsonId must be (centre.id.id)
+          val updatedCentre = centre.copy(version      = expectedVersion + 1,
+                                          locations    = locationsSet,
+                                          timeModified = Some(OffsetDateTime.now))
+          val json = contentAsJson(reply)
+          val replyDto = (json \ "data").validate[CentreDto]
+          replyDto must be (jsSuccess)
+          replyDto.get must matchCentre(updatedCentre)
 
           centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-            compareObj((json \ "data").as[JsObject], repoCentre)
-
-            repoCentre must have (
-              'id          (centre.id),
-              'version     (expectedVersion + 1),
-              'name        (centre.name),
-              'description (centre.description)
-            )
-
-            repoCentre.studyIds must have size centre.studyIds.size.toLong
-            repoCentre.locations must have size locationsSet.size.toLong
-            checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
+            repoCentre must equal (updatedCentre)
           }
         }
       }
@@ -830,13 +653,9 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val centre2 = factory.createDisabledCentre
-        val json = makeRequest(DELETE,
-                               uri(centre2, "locations") + s"/${centre.version}/${location.id}",
-                               NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*centre")
+        val url = uri(centre2, "locations") + s"/${centre.version}/${location.id}"
+        val reply = makeAuthRequest(DELETE, url).value
+        reply must beNotFoundWithMessage("IdNotFound.*centre")
       }
 
       it("fail when deleting an invalid location from a centre") {
@@ -844,12 +663,9 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre.copy(locations = Set.empty)
         centreRepository.put(centre)
 
-        val json = makeRequest(DELETE,
-                               uri(centre, "locations") + s"/${centre.version}/${location.id}",
-                               NOT_FOUND)
-                              (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("location.*does not exist")
+        val url = uri(centre, "locations") + s"/${centre.version}/${location.id}"
+        val reply = makeAuthRequest(DELETE, url).value
+        reply must beNotFoundWithMessage("location.*does not exist")
       }
 
     }
@@ -863,53 +679,40 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val study = factory.createDisabledStudy
         studyRepository.put(study)
 
-        val json = makeRequest(POST,
-                               uri(centre, "studies"),
-                               Json.obj("expectedVersion" -> centre.version,
-                                        "studyId"         -> study.id))
+        val reqJson = Json.obj("expectedVersion" -> centre.version,
+                               "studyId"         -> study.id)
+        val reply = makeAuthRequest(POST, uri(centre, "studies"), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyDto = (contentAsJson(reply) \ "data").validate[CentreDto]
+        replyDto must be (jsSuccess)
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (centre.id.id)
+        val updatedCentre = centre.copy(version      = centre.version + 1,
+                                        studyIds     = Set(study.id),
+                                        timeModified = Some(OffsetDateTime.now))
+        replyDto.get must matchCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centre.id),
-            'version     (centre.version + 1),
-            'name        (centre.name),
-            'description (centre.description)
-            )
-
-          repoCentre.studyIds must have size (centre.studyIds.size.toLong + 1L)
-          repoCentre.locations must have size centre.locations.size.toLong
-          checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
+          repoCentre must equal (updatedCentre)
         }
       }
 
       it("fail when adding a study that does not exist") {
+        val study = factory.createDisabledStudy
         val centre = factory.createDisabledCentre.copy(studyIds = Set.empty)
         centreRepository.put(centre)
 
-        val study = factory.createDisabledStudy
-
-        val json = makeRequest(POST,
-                               uri(centre, "studies"),
-                               NOT_FOUND,
-                               Json.obj("expectedVersion" -> centre.version,
-                                        "studyId"         -> study.id))
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*study")
+        val reqJson = Json.obj("expectedVersion" -> centre.version,
+                               "studyId"         -> study.id)
+        val reply = makeAuthRequest(POST, uri(centre, "studies"), reqJson).value
+        reply must beNotFoundWithMessage("IdNotFound.*study")
       }
 
-      it("fail when adding a study on an enabled centre") {
-        val centre = factory.createEnabledCentre
-        val study = factory.createDisabledStudy
-        updateEnabledCentre(centre, "studies", Json.obj("studyId" -> study.id))
+      describe("fail when adding a study on an enabled centre") {
+        updateEnabledCentreSharedBehaviour { centre =>
+          val study = factory.createDisabledStudy
+          (uri(centre, "studies"), Json.obj("studyId" -> study.id))
+        }
       }
 
     }
@@ -923,26 +726,20 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre.copy(studyIds = Set(study.id))
         centreRepository.put(centre)
 
-        val json = makeRequest(DELETE, uri(centre, "studies") + s"/${centre.version}/${study.id.id}")
+        val url = uri(centre, "studies") + s"/${centre.version}/${study.id.id}"
+        val reply = makeAuthRequest(DELETE, url).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val updatedCentre = centre.copy(version      = centre.version + 1,
+                                        studyIds     = Set.empty[StudyId],
+                                        timeModified = Some(OffsetDateTime.now))
 
-        val jsonId = (json \ "data" \ "id").as[String]
-        jsonId must be (centre.id.id)
+        val replyDto = (contentAsJson(reply) \ "data").validate[CentreDto]
+        replyDto must be (jsSuccess)
+        replyDto.get must matchCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          compareObj((json \ "data").as[JsObject], repoCentre)
-
-          repoCentre must have (
-            'id          (centre.id),
-            'version     (centre.version + 1),
-            'name        (centre.name),
-            'description (centre.description)
-            )
-
-          repoCentre.studyIds must have size (centre.studyIds.size.toLong - 1)
-          repoCentre.locations must have size centre.locations.size.toLong
-          checkTimeStamps(repoCentre, centre.timeAdded, OffsetDateTime.now)
+          repoCentre must equal (updatedCentre)
         }
       }
 
@@ -951,13 +748,9 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createDisabledCentre.copy(studyIds = Set.empty)
         centreRepository.put(centre)
 
-        val json = makeRequest(DELETE,
-                               uri(centre, "studies") + s"/${centre.version}/$invalidStudyId",
-                               NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("IdNotFound.*study")
+        val url = uri(centre, "studies") + s"/${centre.version}/$invalidStudyId"
+        val reply = makeAuthRequest(DELETE, url).value
+        reply must beNotFoundWithMessage("IdNotFound.*study")
       }
 
       it("fail when removing a study on an enabled centre") {
@@ -967,56 +760,35 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         val centre = factory.createEnabledCentre.copy(studyIds = Set(study.id))
         centreRepository.put(centre)
 
-        val json = makeRequest(DELETE,
-                               uri(centre, "studies") + s"/${centre.version}/${study.id.id}",
-                               BAD_REQUEST)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("centre is not disabled")
+        val url = uri(centre, "studies") + s"/${centre.version}/${study.id.id}"
+        val reply = makeAuthRequest(DELETE, url).value
+        reply must beBadRequestWithMessage("centre is not disabled")
       }
 
     }
 
     describe("GET /api/centres/names") {
 
-      describe("must return centre names") {
+      it("must return centre names") {
+        val centres = (1 to 2).map {_ => factory.createDisabledCentre }
+        val nameDtos = centres.map(_.nameDto).toSeq
+        centres.foreach(centreRepository.put)
 
-        class Fixture {
-          val centres = (1 to 2).map {_ => factory.createDisabledCentre }
-          val nameDtos = centres.map(_.nameDto).toSeq
-          centres.foreach(centreRepository.put)
-        }
+        val sortTable = Table(
+            ("order", "dtos"),
+            ("name",  nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }),
+            ("-name", nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) > 0 }))
 
-        it("in ascending order") {
-          val f = new Fixture
-          val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }
+        forAll(sortTable) { (order, sortedDtos) =>
+          val reply = makeAuthRequest(GET, uri("names") + s"?sort=$order").value
+          reply must beOkResponseWithJsonReply
 
-          val json = makeRequest(GET, uri("names"))
+          val replyDtos = (contentAsJson(reply) \ "data").validate[List[NameAndStateDto]]
+          replyDtos must be (jsSuccess)
 
-          (json \ "status").as[String] must include ("success")
-
-          val jsonObjs = (json \ "data").as[List[JsObject]]
-
-          jsonObjs.size must be (nameDtos.size)
-          jsonObjs.zip(nameDtos).foreach { case (jsonObj, nameDtos) =>
-            compareObj(jsonObj, nameDtos)
-          }
-        }
-
-        it("in reverse order") {
-          val f = new Fixture
-          val nameDtos = f.nameDtos.sortWith { (a, b) => (a.name compareToIgnoreCase b.name) > 0 }
-
-          val json = makeRequest(GET, uri("names") + "?sort=-name")
-
-          (json \ "status").as[String] must include ("success")
-
-          val jsonObjs = (json \ "data").as[List[JsObject]]
-
-          jsonObjs.size must be (nameDtos.size)
-          jsonObjs.zip(nameDtos).foreach { case (jsonObj, nameDtos) =>
-            compareObj(jsonObj, nameDtos)
+          replyDtos.get.size must be (nameDtos.size)
+          replyDtos.get.zip(sortedDtos).foreach { case (replyDto, nameDto) =>
+            replyDto must equal (nameDto)
           }
         }
       }
@@ -1026,14 +798,16 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
         val centre = centres.head
 
-        val json = makeRequest(GET, uri("names") + s"?filter=name::${centre.name}")
+        val reply = makeAuthRequest(GET, uri("names") + s"?filter=name::${centre.name}").value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val replyDtos = (contentAsJson(reply) \ "data").validate[List[NameAndStateDto]]
+        replyDtos must be (jsSuccess)
 
-        val jsonObjs = (json \ "data").as[List[JsObject]]
-
-        jsonObjs.size must be (1)
-        compareObj(jsonObjs(0), centre.nameDto)
+        replyDtos.get.size must be (1)
+        replyDtos.get.foreach { replyDto =>
+          replyDto must equal (NameAndStateDto(centre))
+        }
       }
 
     }
@@ -1046,15 +820,18 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centreRepository.put(centre)
 
         val reqJson = Json.obj("filter" -> "", "limit" -> 10)
-        val reply = makeRequest(POST, uri("locations"), reqJson)
+        val reply = makeAuthRequest(POST, uri("locations"), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonObjs = (reply \ "data").as[List[JsObject]]
-
-        jsonObjs.size must be (1)
-        compareObj(jsonObjs(0),
-                   CentreLocationInfo(centre.id.id, location.id.id, centre.name, location.name))
+        val replyLocations = (contentAsJson(reply) \ "data").validate[List[CentreLocationInfo]]
+        replyLocations must be (jsSuccess)
+        replyLocations.get.size must be (1)
+        replyLocations.get.foreach { replyLocation =>
+          replyLocation must equal (CentreLocationInfo(centre.id.id,
+                                                       location.id.id,
+                                                       centre.name,
+                                                       location.name))
+        }
       }
 
       it("return centre locations filtered by name") {
@@ -1066,45 +843,134 @@ class CentresControllerSpec extends ControllerFixture with JsonHelper {
         centres.foreach(centreRepository.put)
 
         val reqJson = Json.obj("filter" -> location.name, "limit" -> 10)
-        val reply = makeRequest(POST, uri("locations"), reqJson)
+        val reply = makeAuthRequest(POST, uri("locations"), reqJson).value
+        reply must beOkResponseWithJsonReply
 
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonObjs = (reply \ "data").as[List[JsObject]]
-
-        jsonObjs.size must be (1)
-        compareObj(jsonObjs(0),
-                   CentreLocationInfo(centre.id.id, location.id.id, centre.name, location.name))
-      }
-
-      it("return centre locations sorted by name") {
-        val centres = (1 to 2).map {_ =>
-            factory.createDisabledCentre.copy(locations = Set(factory.createLocation))
-          }
-        centres.foreach(centreRepository.put)
-
-        val centreLocationsByName = centres.
-          map { centre =>
-            val location = centre.locations.head
-            CentreLocationInfo(centre.id.id, location.id.id, centre.name, location.name)
-          }.
-          toSeq.
-          sortWith { (a, b) => (a.name compareToIgnoreCase b.name) < 0 }.
-          toList
-
-        val reqJson = Json.obj("filter" -> "", "limit" -> 10)
-        val reply = makeRequest(POST, uri("locations"), reqJson)
-
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonObjs = (reply \ "data").as[List[JsObject]]
-
-        jsonObjs.size must be (centres.size)
-        jsonObjs.zip(centreLocationsByName).foreach { case (jsonObj, centreLocation) =>
-          compareObj(jsonObj, centreLocation)
+        val replyLocations = (contentAsJson(reply) \ "data").validate[List[CentreLocationInfo]]
+        replyLocations must be (jsSuccess)
+        replyLocations.get.size must be (1)
+        replyLocations.get.foreach { replyLocation =>
+          replyLocation must equal (CentreLocationInfo(centre.id.id,
+                                                       location.id.id,
+                                                       centre.name,
+                                                       location.name))
         }
       }
 
+      it("return centre locations sorted by name") {
+        val entities = (1 to 2).map { _ =>
+            val location = factory.createLocation
+            val centre = factory.createDisabledCentre.copy(locations = Set(location))
+            val centreLocation = CentreLocation(centre.id.id,
+                                                location.id.id,
+                                                centre.name,
+                                                location.name)
+            centreRepository.put(centre)
+            (centre, location, centreLocation)
+          }
+
+        val centreLocations = entities.map(t => t._3)
+          .sortWith { (a, b) => (a.locationName compareToIgnoreCase b.locationName) < 0 }
+
+        val reqJson = Json.obj("filter" -> "", "limit" -> 10)
+        val reply = makeAuthRequest(POST, uri("locations"), reqJson).value
+        reply must beOkResponseWithJsonReply
+
+        val replyLocations = (contentAsJson(reply) \ "data").validate[List[CentreLocationInfo]]
+        replyLocations must be (jsSuccess)
+        replyLocations.get.size must be (centreLocations.size)
+
+        replyLocations.get.zip(centreLocations).foreach { case (replyLocation, centreLocation) =>
+          replyLocation must equal (CentreLocationInfo(centreLocation))
+        }
+      }
+
+    }
+
+  }
+
+  private def invalidCentreIdSharedBehaviour(path: String, json: JsObject) = {
+
+    it("shoud return not found") {
+      val invalidCentreId = nameGenerator.next[Centre]
+      val requestJson = json ++ Json.obj("id"              -> nameGenerator.next[Centre],
+                                         "expectedVersion" -> 0L)
+      val reply = makeAuthRequest(POST, uri(path) + s"/$invalidCentreId", requestJson)
+      reply.value must beNotFoundWithMessage("IdNotFound.*centre")
+    }
+  }
+
+
+
+  private def updateWithInvalidVersionSharedBehaviour(path: String, json: JsObject) = {
+
+    it("should return bad request") {
+      val centre = factory.createDisabledCentre
+      centreRepository.put(centre)
+
+      val reqJson = Json.obj("id"              -> centre.id.id,
+                             "expectedVersion" -> Some(centre.version + 1)) ++ json
+
+      val reply = makeAuthRequest(POST, uri(centre, path), reqJson)
+      reply.value must beBadRequestWithMessage("expected version doesn't match current version")
+    }
+  }
+
+  private def updateEnabledCentreSharedBehaviour(func: Centre => (String, JsObject)) = {
+
+    it("should return bad request") {
+      val centre = factory.createEnabledCentre
+      centreRepository.put(centre)
+      val (url, json) = func(centre)
+
+      val reqJson = Json.obj("expectedVersion" -> Some(centre.version)) ++ json
+      val reply = makeAuthRequest(POST, url, reqJson)
+      reply.value must beBadRequestWithMessage("centre is not disabled")
+    }
+  }
+
+  private def listSingleCentre(offset:    Long = 0,
+                               maybeNext: Option[Int] = None,
+                               maybePrev: Option[Int] = None)
+                              (setupFunc: () => (Url, Centre)) = {
+
+    it("list single centre") {
+      val (url, expectedCentre) = setupFunc()
+      val reply = makeAuthRequest(GET, url.path).value
+      reply must beOkResponseWithJsonReply
+
+      val json = contentAsJson(reply)
+      json must beSingleItemResults(offset, maybeNext, maybePrev)
+
+      val dtosValidation = (json \ "data" \ "items").validate[List[CentreDto]]
+      dtosValidation must be (jsSuccess)
+      dtosValidation.get.foreach { _ must matchCentre(expectedCentre) }
+    }
+  }
+
+  private def listMultipleCentres(offset:    Long = 0,
+                                  maybeNext: Option[Int] = None,
+                                  maybePrev: Option[Int] = None)
+                                 (setupFunc: () => (Url, List[Centre])) = {
+
+    it("list multiple centres") {
+      val (url, expectedCentres) = setupFunc()
+
+      val reply = makeAuthRequest(GET, url.path).value
+      reply must beOkResponseWithJsonReply
+
+      val json = contentAsJson(reply)
+      json must beMultipleItemResults(offset = offset,
+                                      total = expectedCentres.size.toLong,
+                                      maybeNext = maybeNext,
+                                      maybePrev = maybePrev)
+
+      val dtosValidation = (json \ "data" \ "items").validate[List[CentreDto]]
+      dtosValidation must be (jsSuccess)
+
+      (dtosValidation.get zip expectedCentres).foreach { case (dto, centre) =>
+        dto must matchCentre(centre)
+      }
     }
 
   }

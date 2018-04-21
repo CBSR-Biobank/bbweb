@@ -1,6 +1,6 @@
 package org.biobank.fixture
 
-import org.biobank.Global
+import org.biobank._
 import org.biobank.controllers.CacheForTesting
 import org.biobank.domain._
 import org.biobank.domain.access._
@@ -9,13 +9,12 @@ import org.biobank.domain.participants._
 import org.biobank.domain.processing._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
+import org.biobank.matchers.ApiResultMatchers
 import org.biobank.services.PasswordHasher
 import org.scalatest._
-import org.scalatest.matchers._
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneServerPerTest
 import org.slf4j.{Logger, LoggerFactory}
-import play.api.Application
 import play.api.cache.{AsyncCacheApi, DefaultSyncCacheApi, SyncCacheApi}
 import play.api.inject.bind
 import play.api.inject.guice.GuiceApplicationBuilder
@@ -24,7 +23,10 @@ import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
 import scala.concurrent.{ Await, Future }
-import scala.util.matching.Regex
+
+class Url(val path: String) extends AnyVal {
+  override def toString: String = path
+}
 
 trait BbwebFakeApplication {
 
@@ -49,6 +51,10 @@ trait BbwebFakeApplication {
 
   def makeRequest(method: String, path: String): JsValue
 
+  protected def makeAuthRequest(method: String,
+                                path: String,
+                                json: JsValue = JsNull,
+                                token: String = "bbweb-test-token"): Option[Future[Result]]
 }
 
 /**
@@ -66,15 +72,15 @@ abstract class ControllerFixture
     with MustMatchers
     with OptionValues
     with BbwebFakeApplication
-    with HttpReplyMatchers {
+    with ApiResultMatchers {
 
-  override protected val log: Logger = LoggerFactory.getLogger(this.getClass)
+  protected val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   protected val nameGenerator = new NameGenerator(this.getClass())
 
   protected val factory = new Factory
 
-  override def newAppForTest(testData: TestData) =
+  override def newAppForTest(testData: org.scalatest.TestData) =
     new GuiceApplicationBuilder()
       .overrides(bind[SyncCacheApi].to[DefaultSyncCacheApi])
       .overrides(bind[AsyncCacheApi].to[CacheForTesting])
@@ -87,7 +93,7 @@ abstract class ControllerFixture
     } { response =>
       status(response) mustBe (OK)
       contentType(response) mustBe Some("application/json")
-      val json = Json.parse(contentAsString(response))
+      val json =contentAsJson(response)
 
       (json \ "data" \ "email").as[String] must be (email)
 
@@ -107,28 +113,25 @@ abstract class ControllerFixture
                            json:           JsValue,
                            token:          String): JsValue = {
 
-    makeAuthRequest(BbwebRequest(method, path, json, token)).fold {
-      fail("HTTP request returned NONE")
-    } { reply =>
-      status(reply) match {
-        case `expectedStatus` =>
-          val bodyText = contentAsString(reply)
-          if (bodyText.isEmpty) {
-            log.debug(s"reply: status: $reply,\nbodyText: EMPTY")
-            JsNull
-          } else {
-            contentType(reply) mustBe Some("application/json")
-            val jsonResult = contentAsJson(reply)
-            log.debug(s"reply: status: $reply,\nreply: ${Json.prettyPrint(jsonResult)}")
-            jsonResult
-          }
-        case code =>
-          contentType(reply) match {
-            case Some("application/json") => log.debug("reply: " + Json.prettyPrint(contentAsJson(reply)))
-            case _ => log.debug("reply: " + contentAsString(reply))
-          }
-          fail(s"bad HTTP status: status: $code, expected: $expectedStatus")
-      }
+    val reply = makeAuthRequest(method, path, json, token).value
+    status(reply) match {
+      case `expectedStatus` =>
+        val bodyText = contentAsString(reply)
+        if (bodyText.isEmpty) {
+          log.debug(s"reply: status: $reply,\nbodyText: EMPTY")
+          JsNull
+        } else {
+          contentType(reply) mustBe Some("application/json")
+          val jsonResult = contentAsJson(reply)
+          log.debug(s"reply: status: $reply,\nreply: ${Json.prettyPrint(jsonResult)}")
+          jsonResult
+        }
+      case code =>
+        contentType(reply) match {
+          case Some("application/json") => log.debug("reply: " + Json.prettyPrint(contentAsJson(reply)))
+          case _ => log.debug("reply: " + contentAsString(reply))
+        }
+        fail(s"bad HTTP status: status: $code, expected: $expectedStatus")
     }
   }
 
@@ -198,6 +201,26 @@ abstract class ControllerFixture
     }
   }
 
+  protected def makeAuthRequest(method: String,
+                                path: String,
+                                json: JsValue = JsNull,
+                                token: String = "bbweb-test-token"): Option[Future[Result]] = {
+    val cookie = Cookie("XSRF-TOKEN", token)
+    val fakeRequest = FakeRequest(method, path)
+      .withJsonBody(json)
+      .withHeaders("X-XSRF-TOKEN" -> token,
+                   "Set-Cookie"   -> Cookies.encodeCookieHeader(Seq(cookie)))
+      .withCookies(cookie)
+
+    if (json != JsNull) {
+      log.debug(s"request: ${method}, ${path},\n${Json.prettyPrint(json)}")
+    } else {
+      log.debug(s"request: ${method}, ${path}")
+    }
+
+    route(app, fakeRequest)
+  }
+
   protected def badRequest(method:      String = GET,
                            url:         String,
                            json:        JsValue = JsNull,
@@ -221,82 +244,6 @@ abstract class ControllerFixture
     (reply \ "message").as[String] must include ("expected version doesn't match current version")
 
     ()
-  }
-
-}
-
-trait HttpReplyMatchers {
-
-  case class BbwebRequest(method: String,
-                          path: String,
-                          json: JsValue = JsNull,
-                          token: String = "bbweb-test-token")
-
-  class NotFoundMessageMatcher(errMessage: Regex) extends Matcher[BbwebRequest] {
-    override def apply(left: BbwebRequest): MatchResult = {
-      makeAuthRequest(left).fold {
-        MatchResult(false, "request is invalid", "")
-      } { reply =>
-        val statusCode = status(reply)
-        statusCode match {
-          case NOT_FOUND =>
-            val bodyText = contentAsString(reply)
-            if (bodyText.isEmpty) {
-              MatchResult(false, "request has an empty body", "")
-            } else {
-              contentType(reply) match {
-                case Some("application/json") =>
-                  val json = contentAsJson(reply)
-                  val status = (json \ "status").as[String]
-                  val message = (json \ "message").as[String]
-
-                  val found = errMessage.findFirstIn(message) match {
-                      case Some(m) => true
-                      case None    => false
-                    }
-
-                  log.debug(s"reply: status: $status,\nbody: ${Json.prettyPrint(json)}")
-
-                  MatchResult(
-                    status.equals("error") && found,
-                    s"reply did not match: status: $status, message: $message, expectedMessage: $errMessage",
-                    s"reply matched: status: $status, message: $message, expectedMessage: $errMessage"
-                  )
-
-                case _ =>
-                  MatchResult(false, "request reply body is not in JSON format", "")
-              }
-            }
-
-          case _ =>
-            MatchResult(false, s"request status code invalid: $statusCode", "")
-
-        }
-      }
-    }
-  }
-
-  protected val log: Logger = LoggerFactory.getLogger(this.getClass)
-
-  implicit def app: Application
-
-  def beNotFoundWithMessage(errMessage: Regex) = new NotFoundMessageMatcher(errMessage)
-
-  def makeAuthRequest(request: BbwebRequest): Option[Future[Result]] = {
-    val cookie = Cookie("XSRF-TOKEN", request.token)
-    val fakeRequest = FakeRequest(request.method, request.path)
-      .withJsonBody(request.json)
-      .withHeaders("X-XSRF-TOKEN" -> request.token,
-                   "Set-Cookie"   -> Cookies.encodeCookieHeader(Seq(cookie)))
-      .withCookies(cookie)
-
-    if (request.json != JsNull) {
-      log.debug(s"request: ${request.method}, ${request.path},\n${Json.prettyPrint(request.json)}")
-    } else {
-      log.debug(s"request: ${request.method}, ${request.path}")
-    }
-
-    route(app, fakeRequest)
   }
 
 }

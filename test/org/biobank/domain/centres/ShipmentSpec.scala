@@ -10,6 +10,7 @@ import scala.language.reflectiveCalls
 class ShipmentSpec extends DomainSpec {
 
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -76,7 +77,7 @@ class ShipmentSpec extends DomainSpec {
             'timeUnpacked   (shipment.timeUnpacked)
           )
 
-          checkTimeStamps(s, OffsetDateTime.now, None)
+          s must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
         }
       }
 
@@ -93,7 +94,10 @@ class ShipmentSpec extends DomainSpec {
         packedShipment.state must be (Shipment.packedState)
         packedShipment.timePacked must be (Some(timePacked))
         packedShipment.version must be (shipment.version + 1)
-        checkTimeStamps(packedShipment, shipment.timeAdded, OffsetDateTime.now)
+
+        packedShipment must beEntityWithTimeStamps(shipment.timeAdded,
+                                                   Some(OffsetDateTime.now),
+                                                   5L)
       }
 
       it("to sent") {
@@ -105,7 +109,10 @@ class ShipmentSpec extends DomainSpec {
           s.state must be (Shipment.sentState)
           s.timeSent must be (Some(timeSent))
           s.version must be (shipment.version + 1)
-          checkTimeStamps(s, shipment.timeAdded, OffsetDateTime.now)
+
+          s must beEntityWithTimeStamps(shipment.timeAdded,
+                                        Some(OffsetDateTime.now),
+                                        5L)
         }
       }
 
@@ -118,7 +125,10 @@ class ShipmentSpec extends DomainSpec {
           s.state must be (Shipment.receivedState)
           s.timeReceived must be (Some(timeReceived))
           s.version must be (shipment.version + 1)
-          checkTimeStamps(s, shipment.timeAdded, OffsetDateTime.now)
+
+          s must beEntityWithTimeStamps(shipment.timeAdded,
+                                        Some(OffsetDateTime.now),
+                                        5L)
         }
       }
 
@@ -131,7 +141,10 @@ class ShipmentSpec extends DomainSpec {
           s.state must be (Shipment.unpackedState)
           s.timeUnpacked must be (Some(timeUnpacked))
           s.version must be (shipment.version + 1)
-          checkTimeStamps(s, shipment.timeAdded, OffsetDateTime.now)
+
+          s must beEntityWithTimeStamps(shipment.timeAdded,
+                                        Some(OffsetDateTime.now),
+                                        5L)
         }
       }
 
@@ -144,7 +157,10 @@ class ShipmentSpec extends DomainSpec {
           s.state must be (Shipment.completedState)
           s.timeCompleted must be (Some(timeCompleted))
           s.version must be (shipment.version + 1)
-          checkTimeStamps(s, shipment.timeAdded, OffsetDateTime.now)
+
+          s must beEntityWithTimeStamps(shipment.timeAdded,
+                                        Some(OffsetDateTime.now),
+                                        5L)
         }
       }
 
@@ -156,7 +172,10 @@ class ShipmentSpec extends DomainSpec {
         lostShipment mustBe a[LostShipment]
         lostShipment.state must be (Shipment.lostState)
         lostShipment.version must be (shipment.version + 1)
-        checkTimeStamps(lostShipment, shipment.timeAdded, OffsetDateTime.now)
+
+        lostShipment must beEntityWithTimeStamps(shipment.timeAdded,
+                                                 Some(OffsetDateTime.now),
+                                                 5L)
       }
 
     }
@@ -218,7 +237,10 @@ class ShipmentSpec extends DomainSpec {
           s.timePacked must be (Some(timePacked))
           s.timeSent must be (Some(timeSent))
           s.version must be (shipment.version + 1)
-          checkTimeStamps(s, shipment.timeAdded, OffsetDateTime.now)
+
+          s must beEntityWithTimeStamps(shipment.timeAdded,
+                                        Some(OffsetDateTime.now),
+                                        5L)
         }
       }
 
@@ -232,7 +254,10 @@ class ShipmentSpec extends DomainSpec {
           s.timeReceived must be (Some(timeReceived))
           s.timeUnpacked must be (Some(timeUnpacked))
           s.version must be (shipment.version + 1)
-          checkTimeStamps(s, shipment.timeAdded, OffsetDateTime.now)
+
+          s must beEntityWithTimeStamps(shipment.timeAdded,
+                                        Some(OffsetDateTime.now),
+                                        5L)
         }
       }
 

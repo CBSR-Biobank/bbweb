@@ -9,6 +9,7 @@ import scalaz.Scalaz._
 
 class ContainerSchemaSpec extends DomainSpec {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.EntityMatchers._
 
   val log = LoggerFactory.getLogger(this.getClass)
 
@@ -34,7 +35,8 @@ class ContainerSchemaSpec extends DomainSpec {
           'description (containerType.description)
         )
 
-        checkTimeStamps(s, OffsetDateTime.now, None)
+        s must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+
       }
     }
 
@@ -51,7 +53,7 @@ class ContainerSchemaSpec extends DomainSpec {
           'description (containerType.description)
         )
 
-        checkTimeStamps(updatedContainerType, OffsetDateTime.now, None)
+        updatedContainerType must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
     }
 
@@ -67,7 +69,7 @@ class ContainerSchemaSpec extends DomainSpec {
           'description (description)
         )
 
-        checkTimeStamps(updatedContainerType, OffsetDateTime.now, None)
+        updatedContainerType must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
       }
     }
 
