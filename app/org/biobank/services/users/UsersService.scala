@@ -167,7 +167,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
     Future {
       whenPermitted(requestUserId, PermissionId.UserRead) { () =>
         filterUsers(query.filter, query.sort).map {
-          _.map { u => NameAndStateDto(u.id, u.slug, u.name, u.state.id) }
+          _.map { u => NameAndStateDto(u.id, u.slug, u.name, u.state) }
         }
       }
     }
@@ -397,7 +397,7 @@ class UsersServiceImpl @javax.inject.Inject()(@Named("usersProcessor") val proce
           version      = user.version,
           timeAdded    = user.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
           timeModified = user.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
-          state        = user.state,
+          state        = user.state.id,
           slug         = user.slug,
           name         = user.name,
           email        = user.email,

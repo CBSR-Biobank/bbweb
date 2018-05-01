@@ -36,17 +36,11 @@ trait JsonMatchers {
   def containFieldThatMust[T <: JsValue: Manifest](expectedField: String, elemMatcher: Matcher[T]) =
     new Matcher[JsValue] {
       def apply(js: JsValue) = {
-        (js \ expectedField) match {
-          case JsDefined(value) =>
-            value match {
-              case v: T => elemMatcher(v)
-              case _ => MatchResult(false,
-                                    s"no such field $expectedField in $js",
-                                    s"field $expectedField found in $js")
-            }
+        (js \ expectedField).get match {
+          case v: T => elemMatcher(v)
           case _ => MatchResult(false,
-                                s"no such field $expectedField in $js",
-                                s"field $expectedField found in $js")
+                               s"no such field $expectedField in $js",
+                               s"field $expectedField found in $js")
         }
       }
     }

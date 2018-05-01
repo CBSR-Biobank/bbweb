@@ -26,7 +26,7 @@ package dto {
 
   object EntitySetDto {
 
-    implicit val entitySetInfoDtoWriter: Writes[EntitySetDto] = Json.writes[EntitySetDto]
+    implicit val entitySetInfoDtoFormat: Format[EntitySetDto] = Json.format[EntitySetDto]
 
   }
 
@@ -93,7 +93,7 @@ package dto {
                            version:      Long,
                            timeAdded:    String,
                            timeModified: Option[String],
-                           state:        EntityState,
+                           state:        String,
                            slug:         Slug,
                            name:         String,
                            email:        String,
@@ -103,7 +103,7 @@ package dto {
 
   object UserDto {
 
-    implicit val userDtoWriter: Writes[UserDto] = Json.writes[UserDto]
+    implicit val userDtoFormat: Format[UserDto] = Json.format[UserDto]
 
   }
 

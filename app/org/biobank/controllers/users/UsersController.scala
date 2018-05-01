@@ -25,7 +25,7 @@ object UsersController {
   final case class LoginCredentials(email: String, password: String) extends Command
 
   /** JSON reader for [[LoginCredentials]]. */
-  implicit val loginCredentialsReads: Reads[LoginCredentials] = Json.reads[LoginCredentials]
+  implicit val loginCredentialsFormat: Format[LoginCredentials] = Json.format[LoginCredentials]
 
   final case class PasswordUpdate(currentPassword: String, newPassword: String)
 

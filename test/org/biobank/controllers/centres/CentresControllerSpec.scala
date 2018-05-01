@@ -24,7 +24,8 @@ class CentresControllerSpec
 
   import org.biobank.TestUtils._
   import org.biobank.matchers.JsonMatchers._
-  import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.DtoMatchers._
+  //import org.biobank.matchers.EntityMatchers._
 
   private def uri(paths: String*): String = {
     val basePath = "/api/centres"
@@ -73,7 +74,7 @@ class CentresControllerSpec
         val json = contentAsJson(reply)
         val centreDto = (json \ "data").validate[CentreDto]
         centreDto must be (jsSuccess)
-        centreDto.get must matchCentre(centre)
+        centreDto.get must matchDtoToCentre(centre)
       }
 
       it("not read an invalid centre") {
@@ -314,6 +315,7 @@ class CentresControllerSpec
         val newCentreId = CentreId(replyCentre.get.id)
         val updatedCentre = centre.copy(id = newCentreId)
 
+        replyCentre.get must matchDtoToCentre(updatedCentre)
         centreRepository.getByKey(newCentreId) mustSucceed { repoCentre =>
           repoCentre must equal (updatedCentre)
         }
@@ -360,7 +362,7 @@ class CentresControllerSpec
                                         name         = newName,
                                         slug         = Slug(newName),
                                         timeModified = Some(OffsetDateTime.now))
-        replyCentre.get must matchCentre(updatedCentre)
+        replyCentre.get must matchDtoToCentre(updatedCentre)
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
           repoCentre must equal (updatedCentre)
         }
@@ -415,7 +417,7 @@ class CentresControllerSpec
         val updatedCentre = centre.copy(version      = centre.version + 1,
                                         description  = Some(newDescription),
                                         timeModified = Some(OffsetDateTime.now))
-        replyCentre.get must matchCentre(updatedCentre)
+        replyCentre.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
           repoCentre must equal (updatedCentre)
@@ -455,7 +457,7 @@ class CentresControllerSpec
         replyCentre must be (jsSuccess)
 
         centre.enable mustSucceed { updatedCentre =>
-          replyCentre.get must matchCentre(updatedCentre)
+          replyCentre.get must matchDtoToCentre(updatedCentre)
           centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
             repoCentre must equal (updatedCentre)
           }
@@ -504,7 +506,7 @@ class CentresControllerSpec
         replyCentre must be (jsSuccess)
 
         centre.disable mustSucceed { updatedCentre =>
-          replyCentre.get must matchCentre(updatedCentre)
+          replyCentre.get must matchDtoToCentre(updatedCentre)
           centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
             repoCentre must equal (updatedCentre)
           }
@@ -549,7 +551,7 @@ class CentresControllerSpec
         val updatedCentre = centre.copy(version      = centre.version + 1,
                                         locations    = Set(location.copy(id = newLocationId)),
                                         timeModified = Some(OffsetDateTime.now))
-        replyDto.get must matchCentre(updatedCentre)
+        replyDto.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
           repoCentre must equal (updatedCentre)
@@ -593,7 +595,7 @@ class CentresControllerSpec
         val updatedCentre = centre.copy(version      = centre.version + 1,
                                         locations    = Set(location),
                                         timeModified = Some(OffsetDateTime.now))
-        replyDto.get must matchCentre(updatedCentre)
+        replyDto.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
           repoCentre must equal (updatedCentre)
@@ -639,7 +641,7 @@ class CentresControllerSpec
           val json = contentAsJson(reply)
           val replyDto = (json \ "data").validate[CentreDto]
           replyDto must be (jsSuccess)
-          replyDto.get must matchCentre(updatedCentre)
+          replyDto.get must matchDtoToCentre(updatedCentre)
 
           centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
             repoCentre must equal (updatedCentre)
@@ -690,7 +692,7 @@ class CentresControllerSpec
         val updatedCentre = centre.copy(version      = centre.version + 1,
                                         studyIds     = Set(study.id),
                                         timeModified = Some(OffsetDateTime.now))
-        replyDto.get must matchCentre(updatedCentre)
+        replyDto.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
           repoCentre must equal (updatedCentre)
@@ -736,7 +738,7 @@ class CentresControllerSpec
 
         val replyDto = (contentAsJson(reply) \ "data").validate[CentreDto]
         replyDto must be (jsSuccess)
-        replyDto.get must matchCentre(updatedCentre)
+        replyDto.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
           repoCentre must equal (updatedCentre)
@@ -944,7 +946,7 @@ class CentresControllerSpec
 
       val dtosValidation = (json \ "data" \ "items").validate[List[CentreDto]]
       dtosValidation must be (jsSuccess)
-      dtosValidation.get.foreach { _ must matchCentre(expectedCentre) }
+      dtosValidation.get.foreach { _ must matchDtoToCentre(expectedCentre) }
     }
   }
 
@@ -969,7 +971,7 @@ class CentresControllerSpec
       dtosValidation must be (jsSuccess)
 
       (dtosValidation.get zip expectedCentres).foreach { case (dto, centre) =>
-        dto must matchCentre(centre)
+        dto must matchDtoToCentre(centre)
       }
     }
 

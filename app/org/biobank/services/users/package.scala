@@ -8,7 +8,7 @@ package users {
 
   object UserCountsByStatus {
 
-    implicit val userCountsByStatusWriter: Writes[UserCountsByStatus] = Json.writes[UserCountsByStatus]
+    implicit val userCountsByStatusForamt: Format[UserCountsByStatus] = Json.format[UserCountsByStatus]
   }
 
 }

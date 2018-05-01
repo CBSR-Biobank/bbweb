@@ -26,21 +26,17 @@ trait DateMatchers {
   private class TimeOptionWithinSeconds(timeMaybe: Option[OffsetDateTime], diffSeconds: Long)
       extends Matcher[Option[OffsetDateTime]] {
     override def apply(left: Option[OffsetDateTime]) = {
-      left match {
-        case Some(leftTime) =>
-          timeMaybe match {
-            case Some(time) =>
-              new TimeWithinSeconds(time, diffSeconds).apply(leftTime)
-            case None =>
-              MatchResult(false, "expected time is None and actual is not None", "")
-          }
-        case None =>
-          timeMaybe match {
-            case Some(actualTime) =>
-              MatchResult(false, "actual time is None and expected is not None", "")
-            case None =>
-              MatchResult(true, "actual time and expected time are both None", "")
-          }
+      (left, timeMaybe) match {
+        case (Some(leftTime), Some(time)) =>
+          beTimeWithinSeconds(time, diffSeconds)(leftTime)
+        case (None, Some(time)) =>
+          MatchResult(false, "expected time is None and actual is not None", "")
+        case (Some(leftTime), None) =>
+          MatchResult(false, "actual time is None and expected is not None", "")
+        case (None, None) =>
+          MatchResult(true,
+                      "actual time and expected time are both None",
+                      "actual time and expected time are both None")
       }
     }
   }

@@ -25,6 +25,9 @@ trait ApiResultMatchers { this: org.biobank.fixture.ControllerFixture =>
   def beNotFoundWithMessage(errMessage: String): Matcher[Future[Result]] =
     new NotFoundMessageMatcher(errMessage)
 
+  def beUnauthorizedNoContent: Matcher[Future[Result]] =
+    new ReplyWithNoContent(401)
+
   private class ReplyWithJsonStatus(htmlStatus: Int, jsonStatus: String) extends Matcher[Future[Result]] {
     override def apply(left: Future[Result]) = {
       val responseStatus = status(left)
@@ -48,15 +51,31 @@ trait ApiResultMatchers { this: org.biobank.fixture.ControllerFixture =>
 
           log.debug(s"response: status: $responseStatus,\njson: ${Json.prettyPrint(responseJson)}")
 
-          if (status != jsonStatus) {
-            MatchResult(false,
-                        "bad json status: got: {0}, expected: error",
-                        "got expected json status {0}",
-                        IndexedSeq(status))
-          } else {
-            MatchResult(true, "", "")
-          }
+          MatchResult(status == jsonStatus,
+                      "bad json status: got: {0}, expected: error",
+                      "got expected json status {0}",
+                      IndexedSeq(status))
         }
+      }
+    }
+  }
+
+  private class ReplyWithNoContent(htmlStatus: Int) extends Matcher[Future[Result]] {
+    override def apply(left: Future[Result]) = {
+      val responseStatus = status(left)
+      log.debug(s"response: status: $responseStatus")
+
+      if (responseStatus != htmlStatus) {
+        MatchResult(false,
+                    "got {0} while expecting {1}, response was {2}",
+                    "got expected status code {0}",
+                    IndexedSeq(responseStatus, htmlStatus, contentAsString(left)))
+      } else {
+        val responseString = contentAsString(left)
+        MatchResult(responseString.isEmpty,
+                    "bad response: got: {0}, expected: empty",
+                    "got expected reponse",
+                    IndexedSeq(responseString))
       }
     }
   }

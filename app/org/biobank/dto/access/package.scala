@@ -36,15 +36,15 @@ package access {
 
   }
 
-  final case class UserRoleDto(id:             String,
-                               version:        Long,
-                               slug: Slug,
-                               name:           String,
-                               childData:      Set[EntityInfoDto]) extends Dto
+  final case class UserRoleDto(id:        String,
+                               version:   Long,
+                               slug:      Slug,
+                               name:      String,
+                               childData: Set[EntityInfoDto]) extends Dto
 
   object UserRoleDto {
 
-    implicit val userRoleDtoWriter: Writes[UserRoleDto] = Json.writes[UserRoleDto]
+    implicit val userRoleDtoFormat: Format[UserRoleDto] = Json.format[UserRoleDto]
 
   }
 
@@ -61,7 +61,7 @@ package access {
 
   object MembershipDto {
 
-    implicit val membershipDtoWriter: Writes[MembershipDto] = Json.writes[MembershipDto]
+    implicit val membershipDtoFormat: Format[MembershipDto] = Json.format[MembershipDto]
 
   }
 
@@ -69,7 +69,7 @@ package access {
                                      version:      Long,
                                      timeAdded:    String,
                                      timeModified: Option[String],
-                                     slug: Slug,
+                                     slug:         Slug,
                                      name:         String,
                                      description:  Option[String],
                                      studyData:    EntitySetDto,
@@ -77,7 +77,7 @@ package access {
 
   object UserMembershipDto {
 
-    implicit val userMembershipDtoWriter: Writes[UserMembershipDto] = Json.writes[UserMembershipDto]
+    implicit val userMembershipDtoFormat: Format[UserMembershipDto] = Json.format[UserMembershipDto]
 
   }
 
