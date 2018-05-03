@@ -16,6 +16,12 @@ package dto {
 
   object EntityInfoDto {
 
+    @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
+    def apply[T <: ConcurrencySafeEntity[_] with HasSlug with HasName](entity: T)
+        : EntityInfoDto = {
+      EntityInfoDto(entity.id.toString, entity.slug, entity.name)
+    }
+
     def compareByName(a: EntityInfoDto, b: EntityInfoDto): Boolean = (a.name compareToIgnoreCase b.name) < 0
 
     implicit val entityInfoDtoFormat: Format[EntityInfoDto] = Json.format[EntityInfoDto]

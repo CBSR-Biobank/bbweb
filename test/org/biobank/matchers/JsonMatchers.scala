@@ -62,8 +62,8 @@ trait JsonMatchers {
   final private class IsJsSuccessMatcher[E] extends BeMatcher[JsResult[E]] {
     def apply(jsResult: JsResult[E]): MatchResult =
       MatchResult(jsResult.isSuccess,
-                  s"'$jsResult' was not an JsSuccess, but should have been.",
-                  s"'$jsResult' was an JsSuccess, but should *NOT* have been.")
+                  s"not a JsSuccess when it must have been: '$jsResult'",
+                  s"was a JsSuccess when it must *NOT* have been: '$jsResult'")
   }
 
   final private class ContainsKeyMatcher(expectedKey: String) extends Matcher[JsValue] {

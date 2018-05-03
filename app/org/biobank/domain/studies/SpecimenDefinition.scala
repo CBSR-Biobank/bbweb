@@ -128,17 +128,17 @@ trait SpecimenSpecValidations {
  * collection of [[domain.participants. Specimen Specimens]]. A specimen description is defined either for
  * specimen types collected from participants, or for specimen types that are processed.
  */
-final case class CollectionSpecimenDefinition(id:                          SpecimenDefinitionId,
-                                               slug: Slug,
-                                               name:                        String,
-                                               description:                 Option[String],
-                                               units:                       String,
-                                               anatomicalSourceType:        AnatomicalSourceType,
-                                               preservationType:            PreservationType,
-                                               preservationTemperature: PreservationTemperature,
-                                               specimenType:                SpecimenType,
-                                               maxCount:                    Int,
-                                               amount:                      BigDecimal)
+final case class CollectionSpecimenDefinition(id:                      SpecimenDefinitionId,
+                                              slug:                    Slug,
+                                              name:                    String,
+                                              description:             Option[String],
+                                              units:                   String,
+                                              anatomicalSourceType:    AnatomicalSourceType,
+                                              preservationType:        PreservationType,
+                                              preservationTemperature: PreservationTemperature,
+                                              specimenType:            SpecimenType,
+                                              maxCount:                Int,
+                                              amount:                  BigDecimal)
     extends SpecimenDefinition
 
 object CollectionSpecimenDefinition extends SpecimenSpecValidations {

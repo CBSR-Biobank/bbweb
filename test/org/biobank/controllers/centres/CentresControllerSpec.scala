@@ -8,7 +8,7 @@ import org.biobank.domain.studies.{Study, StudyId}
 import org.biobank.dto.{CentreDto, NameAndStateDto}
 import org.biobank.fixture.{ControllerFixture, Url}
 import org.biobank.matchers.PagedResultsMatchers
-import org.biobank.services.centres.{CentreCountsByStatus, CentreLocation, CentreLocationInfo}
+import org.biobank.services.centres.{CentreCountsByStatus, CentreLocationInfo}
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -25,7 +25,7 @@ class CentresControllerSpec
   import org.biobank.TestUtils._
   import org.biobank.matchers.JsonMatchers._
   import org.biobank.matchers.DtoMatchers._
-  //import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.EntityMatchers._
 
   private def uri(paths: String*): String = {
     val basePath = "/api/centres"
@@ -270,7 +270,7 @@ class CentresControllerSpec
 
       describe("fail when using an invalid query parameters") {
 
-        pagedQueryShouldFailSharedBehaviour(uri("search"))
+        pagedQueryShouldFailSharedBehaviour(() => new Url(uri("search")))
 
       }
 
@@ -317,7 +317,7 @@ class CentresControllerSpec
 
         replyCentre.get must matchDtoToCentre(updatedCentre)
         centreRepository.getByKey(newCentreId) mustSucceed { repoCentre =>
-          repoCentre must equal (updatedCentre)
+          repoCentre must matchCentre(updatedCentre)
         }
       }
 
@@ -364,7 +364,7 @@ class CentresControllerSpec
                                         timeModified = Some(OffsetDateTime.now))
         replyCentre.get must matchDtoToCentre(updatedCentre)
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          repoCentre must equal (updatedCentre)
+          repoCentre must matchCentre(updatedCentre)
         }
       }
 
@@ -420,7 +420,7 @@ class CentresControllerSpec
         replyCentre.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          repoCentre must equal (updatedCentre)
+          repoCentre must matchCentre(updatedCentre)
         }
       }
 
@@ -459,7 +459,7 @@ class CentresControllerSpec
         centre.enable mustSucceed { updatedCentre =>
           replyCentre.get must matchDtoToCentre(updatedCentre)
           centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-            repoCentre must equal (updatedCentre)
+            repoCentre must matchCentre(updatedCentre)
           }
         }
       }
@@ -508,7 +508,7 @@ class CentresControllerSpec
         centre.disable mustSucceed { updatedCentre =>
           replyCentre.get must matchDtoToCentre(updatedCentre)
           centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-            repoCentre must equal (updatedCentre)
+            repoCentre must matchCentre(updatedCentre)
           }
         }
       }
@@ -554,7 +554,7 @@ class CentresControllerSpec
         replyDto.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          repoCentre must equal (updatedCentre)
+          repoCentre must matchCentre(updatedCentre)
         }
       }
 
@@ -581,7 +581,8 @@ class CentresControllerSpec
         val centre = factory.createDisabledCentre.copy(locations = Set(location))
         centreRepository.put(centre)
 
-        val locationWithNewName = location.copy(name = nameGenerator.next[String])
+        val newName = nameGenerator.next[String]
+        val locationWithNewName = location.copy(name = newName)
         val reply = makeAuthRequest(POST,
                                     uri(centre, "locations") + s"/${location.id}",
                                     centreLocationToUpdateJson(centre, locationWithNewName)).value
@@ -592,13 +593,14 @@ class CentresControllerSpec
         val replyDto = (json \ "data").validate[CentreDto]
         replyDto must be (jsSuccess)
 
+        val updatedLocation = locationWithNewName.copy(slug = Slug(newName))
+
         val updatedCentre = centre.copy(version      = centre.version + 1,
-                                        locations    = Set(location),
+                                        locations    = Set(updatedLocation),
                                         timeModified = Some(OffsetDateTime.now))
         replyDto.get must matchDtoToCentre(updatedCentre)
-
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          repoCentre must equal (updatedCentre)
+          repoCentre must matchCentre(updatedCentre)
         }
       }
 
@@ -644,7 +646,7 @@ class CentresControllerSpec
           replyDto.get must matchDtoToCentre(updatedCentre)
 
           centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-            repoCentre must equal (updatedCentre)
+            repoCentre must matchCentre(updatedCentre)
           }
         }
       }
@@ -695,7 +697,7 @@ class CentresControllerSpec
         replyDto.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          repoCentre must equal (updatedCentre)
+          repoCentre must matchCentre(updatedCentre)
         }
       }
 
@@ -741,7 +743,7 @@ class CentresControllerSpec
         replyDto.get must matchDtoToCentre(updatedCentre)
 
         centreRepository.getByKey(centre.id) mustSucceed { repoCentre =>
-          repoCentre must equal (updatedCentre)
+          repoCentre must matchCentre(updatedCentre)
         }
       }
 
@@ -856,34 +858,6 @@ class CentresControllerSpec
                                                        location.id.id,
                                                        centre.name,
                                                        location.name))
-        }
-      }
-
-      it("return centre locations sorted by name") {
-        val entities = (1 to 2).map { _ =>
-            val location = factory.createLocation
-            val centre = factory.createDisabledCentre.copy(locations = Set(location))
-            val centreLocation = CentreLocation(centre.id.id,
-                                                location.id.id,
-                                                centre.name,
-                                                location.name)
-            centreRepository.put(centre)
-            (centre, location, centreLocation)
-          }
-
-        val centreLocations = entities.map(t => t._3)
-          .sortWith { (a, b) => (a.locationName compareToIgnoreCase b.locationName) < 0 }
-
-        val reqJson = Json.obj("filter" -> "", "limit" -> 10)
-        val reply = makeAuthRequest(POST, uri("locations"), reqJson).value
-        reply must beOkResponseWithJsonReply
-
-        val replyLocations = (contentAsJson(reply) \ "data").validate[List[CentreLocationInfo]]
-        replyLocations must be (jsSuccess)
-        replyLocations.get.size must be (centreLocations.size)
-
-        replyLocations.get.zip(centreLocations).foreach { case (replyLocation, centreLocation) =>
-          replyLocation must equal (CentreLocationInfo(centreLocation))
         }
       }
 

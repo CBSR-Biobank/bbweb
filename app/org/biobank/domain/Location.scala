@@ -53,7 +53,22 @@ final case class Location(id:             LocationId,
                           poBoxNumber:    Option[String],
                           countryIsoCode: String)
     extends IdentifiedValueObject[LocationId]
-    with HasName
+    with HasName {
+
+  override def toString: String =
+    s"""|${this.getClass.getSimpleName}: {
+        |  id:             $id,
+        |  slug:           $slug,
+        |  name:           $name,
+        |  street:         $street,
+        |  city:           $city,
+        |  province:       $province,
+        |  postalCode:     $postalCode,
+        |  poBoxNumber:    $poBoxNumber,
+        |  countryIsoCode: $countryIsoCode,
+        |}""".stripMargin
+
+}
 
 object Location {
   import org.biobank.CommonValidations._

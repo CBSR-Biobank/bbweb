@@ -45,17 +45,17 @@ trait CollectionEventTypeValidations extends StudyValidations {
   * @param annotationTypeData The [[AnnotationType]]s for a collection event type.
   *
   */
-final case class CollectionEventType(studyId:              StudyId,
-                                     id:                   CollectionEventTypeId,
-                                     version:              Long,
-                                     timeAdded:            OffsetDateTime,
-                                     timeModified:         Option[OffsetDateTime],
-                                     slug: Slug,
-                                     name:                 String,
-                                     description:          Option[String],
-                                     recurring:            Boolean,
+final case class CollectionEventType(studyId:             StudyId,
+                                     id:                  CollectionEventTypeId,
+                                     version:             Long,
+                                     timeAdded:           OffsetDateTime,
+                                     timeModified:        Option[OffsetDateTime],
+                                     slug:                Slug,
+                                     name:                String,
+                                     description:         Option[String],
+                                     recurring:           Boolean,
                                      specimenDefinitions: Set[CollectionSpecimenDefinition],
-                                     annotationTypes:      Set[AnnotationType])
+                                     annotationTypes:     Set[AnnotationType])
     extends ConcurrencySafeEntity[CollectionEventTypeId]
     with HasName
     with HasSlug

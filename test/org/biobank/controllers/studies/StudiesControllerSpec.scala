@@ -317,7 +317,7 @@ class StudiesControllerSpec
 
       describe("fail when using an invalid query parameters") {
 
-        pagedQueryShouldFailSharedBehaviour(uri("search"))
+        pagedQueryShouldFailSharedBehaviour(() => new Url(uri("search")))
 
       }
 
@@ -1084,7 +1084,7 @@ class StudiesControllerSpec
 
       val replyStudies = (json \ "data" \ "items").validate[List[Study]]
       replyStudies must be (jsSuccess)
-      replyStudies.get.foreach { _ must equal (expectedStudy) }
+      replyStudies.get.foreach { _ must matchStudy(expectedStudy) }
     }
   }
 
@@ -1109,7 +1109,7 @@ class StudiesControllerSpec
       replyStudies must be (jsSuccess)
 
       (replyStudies.get zip expectedStudies).foreach { case (replyStudy, study) =>
-        replyStudy must equal (study)
+        replyStudy must matchStudy(study)
       }
     }
 

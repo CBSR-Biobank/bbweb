@@ -1,8 +1,9 @@
 package org.biobank.matchers
 
 import java.time.OffsetDateTime
-import org.biobank.domain.ConcurrencySafeEntity
+import org.biobank.domain.{ConcurrencySafeEntity, Location}
 import org.biobank.domain.annotations._
+import org.biobank.domain.centres._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
 import org.scalatest.matchers.{MatchResult, Matcher}
@@ -45,6 +46,34 @@ trait EntityMatchers {
    * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
    * and `hashCode`.
    */
+  def matchCentre(centre: Centre) =
+    new Matcher[Centre] {
+      def apply(left: Centre) = {
+        val matchers = Map(
+            ("id"          -> (left.id equals centre.id)),
+            ("slug"        -> (left.slug equals centre.slug)),
+            ("state"       -> (left.state equals centre.state)),
+            ("name"        -> (left.name equals centre.name)),
+            ("description" -> (left.description equals centre.description)),
+            ("studyIds"    -> (left.studyIds equals centre.studyIds)),
+            ("locations"   -> (locationsMatch(left.locations, centre.locations)))) ++
+        entitiesAttrsMatch(centre, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "centres do not match for the folowing attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "centres match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, centre))
+      }
+    }
+
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
   def matchStudy(study: Study) =
     new Matcher[Study] {
       def apply(left: Study) = {
@@ -63,6 +92,36 @@ trait EntityMatchers {
                     "studies do not match for the folowing attributes: {0},\n: actual {1},\nexpected: {2}",
                     "studies match: actual: {1},\nexpected: {2}",
                     IndexedSeq(nonMatching.mkString(", "), left, study))
+      }
+    }
+
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
+  def matchCollectionEventType(eventType: CollectionEventType) =
+    new Matcher[CollectionEventType] {
+      def apply(left: CollectionEventType) = {
+        val matchers = Map(
+            ("id"              -> (left.id equals eventType.id)),
+            ("slug"            -> (left.slug equals eventType.slug)),
+            ("name"            -> (left.name equals eventType.name)),
+            ("description"     -> (left.description equals eventType.description)),
+            ("recurring"       -> (left.recurring equals eventType.recurring)),
+            ("specimenDefinitions" -> collectionSpecimenDefinitionsMatch(left.specimenDefinitions,
+                                                                        eventType.specimenDefinitions)),
+            ("annotationTypes" -> (annotationTypesMatch(left.annotationTypes,
+                                                       eventType.annotationTypes)))) ++
+        entitiesAttrsMatch(eventType, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "event types do not match for the folowing attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "event types match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, eventType))
       }
     }
 
@@ -124,6 +183,45 @@ trait EntityMatchers {
              (atOther.maxValueCount equals atToFind.maxValueCount) &&
              (atOther.options       equals atToFind.options) &&
              (atOther.required      equals atToFind.required))
+        }
+      }
+
+    maybeMatch.foldLeft(true) { (result, found) => result && found }
+  }
+
+  private def collectionSpecimenDefinitionsMatch(a: Set[CollectionSpecimenDefinition],
+                                                 b: Set[CollectionSpecimenDefinition]): Boolean = {
+    val maybeMatch = a.map { toFind =>
+        b.exists { other =>
+          ((other.id            equals toFind.id) &&
+             (other.slug          equals toFind.slug) &&
+             (other.name          equals toFind.name) &&
+             (other.description   equals toFind.description) &&
+             (other.units                   equals toFind.units) &&
+             (other.anatomicalSourceType    equals toFind.anatomicalSourceType) &&
+             (other.preservationType        equals toFind.preservationType) &&
+             (other.preservationTemperature equals toFind.preservationTemperature) &&
+             (other.specimenType            equals toFind.specimenType) &&
+             (other.maxCount                equals toFind.maxCount) &&
+             (other.amount                  equals toFind.amount))
+        }
+      }
+
+    maybeMatch.foldLeft(true) { (result, found) => result && found }
+  }
+
+  private def locationsMatch(a: Set[Location], b: Set[Location]): Boolean = {
+    val maybeMatch = a.map { toFind =>
+        b.exists { other =>
+          ((other.id               equals toFind.id) &&
+             (other.slug           equals toFind.slug) &&
+             (other.name           equals toFind.name) &&
+             (other.street         equals toFind.street) &&
+             (other.city           equals toFind.city) &&
+             (other.province       equals toFind.province) &&
+             (other.postalCode     equals toFind.postalCode) &&
+             (other.poBoxNumber    equals toFind.poBoxNumber) &&
+             (other.countryIsoCode equals toFind.countryIsoCode))
         }
       }
 
