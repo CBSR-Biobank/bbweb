@@ -1,4 +1,4 @@
-package org.biobank.fixture
+package org.biobank.fixtures
 
 import akka.actor._
 import akka.testkit.{TestKit, TestProbe}

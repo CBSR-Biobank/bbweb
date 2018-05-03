@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.containers._
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.slf4j.LoggerFactory
 import scala.language.reflectiveCalls
 import org.scalatest.prop.TableDrivenPropertyChecks._

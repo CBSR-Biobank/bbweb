@@ -2,7 +2,7 @@ package org.biobank.services.users
 
 import org.biobank.Global
 import org.biobank.domain.access._
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.users._
 

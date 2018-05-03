@@ -2,7 +2,7 @@ package org.biobank.domain
 
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 import org.biobank.domain.annotations._
 import org.biobank.domain.users._
 import org.biobank.domain.access._

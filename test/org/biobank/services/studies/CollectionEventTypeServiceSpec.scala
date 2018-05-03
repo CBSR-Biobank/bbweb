@@ -1,6 +1,6 @@
 package org.biobank.services.studies
 
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.domain.access._
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies._

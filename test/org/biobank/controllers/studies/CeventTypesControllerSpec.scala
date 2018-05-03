@@ -7,12 +7,12 @@ import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies._
 import org.biobank.dto._
-import org.biobank.fixture.{ControllerFixture, Url}
+import org.biobank.fixtures.{ControllerFixture, Url}
 import org.biobank.matchers.PagedResultsMatchers
 //import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.matchers.{MatchResult, Matcher}
-import play.api.mvc._
 import play.api.libs.json._
+import play.api.mvc._
 import play.api.test.Helpers._
 import scala.concurrent.Future
 

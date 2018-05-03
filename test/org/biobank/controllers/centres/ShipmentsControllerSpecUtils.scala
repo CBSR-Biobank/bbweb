@@ -3,21 +3,25 @@ package org.biobank.controllers.centres
 import java.time.OffsetDateTime
 import org.biobank.domain.JsonHelper
 import org.biobank.domain.centres._
+import org.biobank.fixtures.Url
 import play.api.libs.json._
 
 private[centres] trait ShipmentsControllerSpecUtils extends JsonHelper {
   import org.biobank.matchers.DateMatchers._
 
-  def uri(): String = "/api/shipments/"
+  protected def uri(paths: String*): Url = {
+    val baseUri = "/api/shipments"
+    val path = if (paths.isEmpty) baseUri
+               else baseUri + "/" + paths.mkString("/")
+    return new Url(path)
+  }
 
-  def uri(shipment: Shipment): String = uri + s"${shipment.id.id}"
+  protected def uri(shipment: Shipment): Url = uri(shipment.id.id)
 
-  def uri(path: String): String = uri + s"$path"
-
-  def uri(shipment: Shipment, path: String): String = uri(path) + s"/${shipment.id.id}"
+  protected def uri(shipment: Shipment, path: String): Url = uri(path, shipment.id.id)
 
   //------------ REMOVE THIS AFTER TESTING ---------------
-  def listUri: String = uri("list")
+  protected def listUri: Url = uri("list")
 
   def compareObjs(jsonList: List[JsObject], shipmentsMap: Map[ShipmentId, Shipment]) = {
     jsonList.foreach { jsonObj =>

@@ -6,7 +6,7 @@ import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.{ProcessingEventId, ProcessingEventInputSpecimen, ProcessingEventInputSpecimenId }
 import org.biobank.dto.SpecimenDto
-import org.biobank.fixture.ControllerFixture
+import org.biobank.fixtures.ControllerFixture
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._

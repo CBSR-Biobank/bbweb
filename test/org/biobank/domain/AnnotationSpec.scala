@@ -1,6 +1,6 @@
 package org.biobank.domain.participants
 
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.annotations._
 

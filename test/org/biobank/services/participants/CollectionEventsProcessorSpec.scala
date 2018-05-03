@@ -4,7 +4,7 @@ import akka.actor._
 import akka.pattern._
 import java.time.OffsetDateTime
 import javax.inject.{ Inject, Named }
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.domain.participants._
 import org.biobank.domain.studies.{StudyRepository, CollectionEventTypeRepository}
 import org.biobank.services._

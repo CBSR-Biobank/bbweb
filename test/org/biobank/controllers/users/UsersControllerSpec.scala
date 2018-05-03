@@ -8,7 +8,7 @@ import org.biobank.dto.access._
 import org.biobank.domain.access._
 import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.users._
-import org.biobank.fixture.{ControllerFixture, Url}
+import org.biobank.fixtures.{ControllerFixture, Url}
 import org.biobank.matchers.PagedResultsMatchers
 import org.biobank.services.users.UserCountsByStatus
 import org.scalatest.prop.TableDrivenPropertyChecks._

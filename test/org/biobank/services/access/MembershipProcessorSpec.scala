@@ -4,7 +4,7 @@ import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
 import org.biobank.Global
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.services._

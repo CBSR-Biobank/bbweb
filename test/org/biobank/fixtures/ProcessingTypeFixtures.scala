@@ -1,4 +1,4 @@
-package org.biobank.fixture
+package org.biobank.fixtures
 
 import org.biobank.domain.Factory
 import org.biobank.domain.studies._

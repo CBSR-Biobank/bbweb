@@ -69,42 +69,42 @@ sealed trait Specimen
                 specimenDesc:       CollectionSpecimenDefinition,
                 originLocationInfo: CentreLocationInfo,
                 locationInfo:       CentreLocationInfo): SpecimenDto =
-    SpecimenDto(id                       = this.id.id,
-                version                  = this.version,
-                timeAdded                = this.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                timeModified             = this.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
-                state                    = this.state,
-                slug                     = this.slug,
-                inventoryId              = this.inventoryId,
-                collectionEventId        = collectionEvent.id.id,
+    SpecimenDto(id                      = this.id.id,
+                version                 = this.version,
+                timeAdded               = this.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                timeModified            = this.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+                state                   = this.state.id,
+                slug                    = this.slug,
+                inventoryId             = this.inventoryId,
+                collectionEventId       = collectionEvent.id.id,
                 specimenDefinitionId    = this.specimenDefinitionId.id,
                 specimenDefinitionName  = specimenDesc.name,
                 specimenDefinitionUnits = specimenDesc.units,
-                originLocationInfo       = originLocationInfo,
-                locationInfo             = locationInfo,
-                containerId              = this.containerId.map(_.id),
-                positionId               = this.positionId.map(_.id),
-                timeCreated              = this.timeCreated,
-                amount                   = this.amount,
-                units                    = specimenDesc.units,
-                isDefaultAmount          = (this.amount == specimenDesc.amount),
-                eventTypeName            = eventTypeName)
+                originLocationInfo      = originLocationInfo,
+                locationInfo            = locationInfo,
+                containerId             = this.containerId.map(_.id),
+                positionId              = this.positionId.map(_.id),
+                timeCreated             = this.timeCreated.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                amount                  = this.amount,
+                units                   = specimenDesc.units,
+                isDefaultAmount         = (this.amount == specimenDesc.amount),
+                eventTypeName           = eventTypeName)
 
   override def toString: String =
     s"""|${this.getClass.getSimpleName}: {
-        |  id:                    $id
-        |  version:               $version
-        |  timeAdded:             $timeAdded
-        |  timeModified:          $timeModified
-        |  slug:                  $slug,
-        |  inventoryId:           $inventoryId
+        |  id:                   $id
+        |  version:              $version
+        |  timeAdded:            $timeAdded
+        |  timeModified:         $timeModified
+        |  slug:                 $slug,
+        |  inventoryId:          $inventoryId
         |  specimenDefinitionId: $specimenDefinitionId
-        |  originLocationId:      $originLocationId
-        |  locationId:            $locationId
-        |  containerId:           $containerId
-        |  positionId:            $positionId
-        |  timeCreated:           $timeCreated
-        |  amount:                $amount
+        |  originLocationId:     $originLocationId
+        |  locationId:           $locationId
+        |  containerId:          $containerId
+        |  positionId:           $positionId
+        |  timeCreated:          $timeCreated
+        |  amount:               $amount
         |}""".stripMargin
 }
 
@@ -170,19 +170,19 @@ trait SpecimenValidations {
 /**
  * A usable specimen is a specimen that can be used for processing.
  */
-final case class UsableSpecimen(id:                    SpecimenId,
-                                version:               Long,
-                                timeAdded:             OffsetDateTime,
-                                timeModified:          Option[OffsetDateTime],
-                                slug: Slug,
-                                inventoryId:           String,
+final case class UsableSpecimen(id:                   SpecimenId,
+                                version:              Long,
+                                timeAdded:            OffsetDateTime,
+                                timeModified:         Option[OffsetDateTime],
+                                slug:                 Slug,
+                                inventoryId:          String,
                                 specimenDefinitionId: SpecimenDefinitionId,
-                                originLocationId:      LocationId,
-                                locationId:            LocationId,
-                                containerId:           Option[ContainerId],
-                                positionId:            Option[ContainerSchemaPositionId],
-                                timeCreated:           OffsetDateTime,
-                                amount:                BigDecimal)
+                                originLocationId:     LocationId,
+                                locationId:           LocationId,
+                                containerId:          Option[ContainerId],
+                                positionId:           Option[ContainerSchemaPositionId],
+                                timeCreated:          OffsetDateTime,
+                                amount:               BigDecimal)
     extends { val state: EntityState = Specimen.usableState }
     with HasSlug
     with Specimen

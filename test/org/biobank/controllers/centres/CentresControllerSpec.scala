@@ -6,7 +6,7 @@ import org.biobank.domain.{JsonHelper, Location, Slug}
 import org.biobank.domain.centres._
 import org.biobank.domain.studies.{Study, StudyId}
 import org.biobank.dto.{CentreDto, NameAndStateDto}
-import org.biobank.fixture.{ControllerFixture, Url}
+import org.biobank.fixtures.{ControllerFixture, Url}
 import org.biobank.matchers.PagedResultsMatchers
 import org.biobank.services.centres.{CentreCountsByStatus, CentreLocationInfo}
 import org.scalatest.prop.TableDrivenPropertyChecks._

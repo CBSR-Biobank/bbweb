@@ -1,7 +1,7 @@
 package org.biobank.controllers.access
 
 import org.biobank.domain._
-import org.biobank.fixture.ControllerFixture
+import org.biobank.fixtures.ControllerFixture
 import play.api.libs.json._
 import play.api.test.Helpers._
 

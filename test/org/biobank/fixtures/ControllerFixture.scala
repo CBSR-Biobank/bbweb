@@ -1,4 +1,4 @@
-package org.biobank.fixture
+package org.biobank.fixtures
 
 import org.biobank._
 import org.biobank.controllers.CacheForTesting

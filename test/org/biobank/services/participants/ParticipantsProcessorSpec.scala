@@ -3,7 +3,7 @@ package org.biobank.services.participants
 import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.domain.studies.StudyRepository
 import org.biobank.domain.participants.ParticipantRepository
 import org.biobank.services._

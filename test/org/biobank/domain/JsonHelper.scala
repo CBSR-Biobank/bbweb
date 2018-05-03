@@ -344,7 +344,7 @@ trait JsonHelper extends MustMatchers with OptionValues {
 
     (json \ "timeAdded").as[String] must be (dto.timeAdded)
 
-    (json \ "timeModified").asOpt[OffsetDateTime] must beOptionalTimeWithinSeconds(dto.timeModified, 5L)
+    (json \ "timeModified").asOpt[String] must be (dto.timeModified)
 
     compareSpecimenDto((json \ "specimen").as[JsValue], dto.specimen)
   }

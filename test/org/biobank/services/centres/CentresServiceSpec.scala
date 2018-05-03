@@ -1,6 +1,6 @@
 package org.biobank.services.centres
 
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.centres._

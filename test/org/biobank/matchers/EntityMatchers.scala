@@ -57,7 +57,7 @@ trait EntityMatchers {
             ("description" -> (left.description equals centre.description)),
             ("studyIds"    -> (left.studyIds equals centre.studyIds)),
             ("locations"   -> (locationsMatch(left.locations, centre.locations)))) ++
-        entitiesAttrsMatch(centre, left)
+        entityAttrsMatch(centre, left)
 
         val nonMatching = matchers filter { case (k, v) => !v } keys
 
@@ -84,7 +84,7 @@ trait EntityMatchers {
             ("name"            -> (left.name equals study.name)),
             ("description"     -> (left.description equals study.description)),
             ("annotationTypes" -> (annotationTypesMatch(left.annotationTypes, study.annotationTypes)))) ++
-        entitiesAttrsMatch(study, left)
+        entityAttrsMatch(study, left)
 
         val nonMatching = matchers filter { case (k, v) => !v } keys
 
@@ -114,7 +114,7 @@ trait EntityMatchers {
                                                                         eventType.specimenDefinitions)),
             ("annotationTypes" -> (annotationTypesMatch(left.annotationTypes,
                                                        eventType.annotationTypes)))) ++
-        entitiesAttrsMatch(eventType, left)
+        entityAttrsMatch(eventType, left)
 
         val nonMatching = matchers filter { case (k, v) => !v } keys
 
@@ -135,13 +135,13 @@ trait EntityMatchers {
     new Matcher[User] {
       def apply(left: User) = {
         val matchers = Map(
-            ("id"              -> (left.id equals user.id)),
-            ("slug"            -> (left.slug equals user.slug)),
-            ("state"           -> (left.state equals user.state)),
+            ("id"           -> (left.id equals user.id)),
+            ("slug"         -> (left.slug equals user.slug)),
+            ("state"        -> (left.state equals user.state)),
             ("name"         -> (left.name equals user.name)),
             ("email"        -> (left.email equals user.email)),
-            ("avatarUrl"    -> (left.avatarUrl equals user.avatarUrl)))
-       entitiesAttrsMatch(user, left)
+            ("avatarUrl"    -> (left.avatarUrl equals user.avatarUrl))) ++
+          entityAttrsMatch(user, left)
 
         val nonMatching = matchers filter { case (k, v) => !v } keys
 
@@ -152,25 +152,66 @@ trait EntityMatchers {
       }
     }
 
-  // def optionalStringMatcher(strMaybe: Option[String]) =
-  //   new Matcher[Option[String]] {
-  //     def apply(left: Option[String]) =
-  //     (left, strMaybe) match {
-  //       case (Some(leftStr), Some(str)) =>
-  //         MatchResult(leftStr == str,
-  //                     "strings do not match: expected {0}, actual: {1}",
-  //                     "strings do match: expected {0}, actual: {1}",
-  //                     IndexedSeq(str, leftStr))
-  //       case (None, Some(time)) =>
-  //         MatchResult(false, "expected is None and actual is not None", "")
-  //       case (Some(leftTime), None) =>
-  //         MatchResult(false, "actual is None and expected is not None", "")
-  //       case (None, None) =>
-  //         MatchResult(true,
-  //                     "actual and expected time are both None",
-  //                     "actual and expected time are both None")
-  //     }
-  //   }
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
+  def matchShipment(shipment: Shipment) =
+    new Matcher[Shipment] {
+      def apply(left: Shipment) = {
+        val matchers = Map(
+            ("id"             -> (left.id equals shipment.id)),
+            ("state"          -> (left.state equals shipment.state)),
+            ("courierName"    -> (left.courierName equals shipment.courierName)),
+            ("trackingNumber" -> (left.trackingNumber equals shipment.trackingNumber)),
+            ("fromCentreId"   -> (left.fromCentreId equals shipment.fromCentreId)),
+            ("fromLocationId" -> (left.fromLocationId equals shipment.fromLocationId)),
+            ("toCentreId"     -> (left.toCentreId equals shipment.toCentreId)),
+            ("toLocationId"   -> (left.toLocationId equals shipment.toLocationId)),
+            ("timePacked"     -> (left.timePacked equals shipment.timePacked)),
+            ("timeSent"       -> (left.timeSent equals shipment.timeSent)),
+            ("timeReceived"   -> (left.timeReceived equals shipment.timeReceived)),
+            ("timeUnpacked"   -> (left.timeUnpacked equals shipment.timeUnpacked)),
+            ("timeCompleted"  -> (left.timeCompleted equals shipment.timeCompleted))) ++
+          entityAttrsMatch(shipment, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "shipments do not match for the following attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "shipments match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, shipment))
+      }
+    }
+
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
+  def matchShipmentSpecimen(shSpc: ShipmentSpecimen) =
+    new Matcher[ShipmentSpecimen] {
+      def apply(left: ShipmentSpecimen) = {
+        val matchers = Map(
+            ("id"                  -> (left.id equals shSpc.id)),
+            ("state"               -> (left.state equals shSpc.state)),
+            ("shipmentId"          -> (left.shipmentId equals shSpc.shipmentId)),
+            ("specimenId"          -> (left.specimenId equals shSpc.specimenId)),
+            ("state"               -> (left.state equals shSpc.state)),
+            ("shipmentContainerId" -> (left.shipmentContainerId equals shSpc.shipmentContainerId))) ++
+          entityAttrsMatch(shSpc, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "shipments do not match for the following attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "shipments match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, shSpc))
+      }
+    }
 
   private def annotationTypesMatch(a: Set[AnnotationType], b: Set[AnnotationType]): Boolean = {
     val maybeMatch = a.map { atToFind =>
@@ -228,7 +269,7 @@ trait EntityMatchers {
     maybeMatch.foldLeft(true) { (result, found) => result && found }
   }
 
-  private def entitiesAttrsMatch(a: ConcurrencySafeEntity[_], b: ConcurrencySafeEntity[_]) = {
+  private def entityAttrsMatch(a: ConcurrencySafeEntity[_], b: ConcurrencySafeEntity[_]) = {
     val timeAddedMatcher = beTimeWithinSeconds(a.timeAdded, 5L)(b.timeAdded)
 
     val timeModifiedMatcher = beOptionalTimeWithinSeconds(a.timeModified, 5L)(b.timeModified)

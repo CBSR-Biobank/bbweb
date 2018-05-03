@@ -6,7 +6,7 @@ import org.scalatest.matchers.{MatchResult, Matcher}
 import scala.concurrent.Future
 import scala.util.matching.Regex
 
-trait ApiResultMatchers { this: org.biobank.fixture.ControllerFixture =>
+trait ApiResultMatchers { this: org.biobank.fixtures.ControllerFixture =>
 
   import play.api.test.Helpers._
 

@@ -4,7 +4,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.centres.CentreRepository
 import org.biobank.domain.studies.{StudyId, StudyRepository}
 import org.biobank.domain.users._
-import org.biobank.fixture.{NameGenerator, ProcessorTestFixture}
+import org.biobank.fixtures.{NameGenerator, ProcessorTestFixture}
 import org.biobank.services.{FilterAndSortQuery, FilterString, PagedQuery, PasswordHasher, SortString}
 import org.biobank.services.access._
 import org.scalatest.concurrent.ScalaFutures

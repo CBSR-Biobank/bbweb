@@ -3,7 +3,7 @@ package org.biobank.domain.containerType
 import java.time.OffsetDateTime
 import org.biobank.domain.containers._
 import org.biobank.domain.DomainSpec
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 

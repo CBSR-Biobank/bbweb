@@ -4,7 +4,7 @@ import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.services.users.UserServiceFixtures
 import org.scalatest.prop.TableDrivenPropertyChecks._
 

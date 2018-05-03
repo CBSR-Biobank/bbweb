@@ -6,7 +6,7 @@ import javax.inject.{ Inject, Named }
 import org.biobank.Global
 import org.biobank.domain.ConcurrencySafeEntity
 import org.biobank.domain.studies._
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito

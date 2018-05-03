@@ -2,7 +2,7 @@ package org.biobank.domain.users
 
 import java.time.OffsetDateTime
 import org.biobank.domain.{DomainSpec, DomainValidation}
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 import org.slf4j.LoggerFactory
 
 /**

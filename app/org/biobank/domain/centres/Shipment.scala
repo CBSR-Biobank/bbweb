@@ -452,8 +452,8 @@ final case class PackedShipment(id:             ShipmentId,
 
   def send(timeSent: OffsetDateTime): DomainValidation[SentShipment] = {
     this.timePacked.
-      toSuccessNel(TimePackedUndefined.toString).
-      flatMap { timePacked =>
+      toSuccessNel(TimePackedUndefined.toString)
+      .flatMap { timePacked =>
         if (timeSent.isBefore(timePacked)) {
           TimeSentBeforePacked.failureNel[SentShipment]
         } else {
@@ -517,8 +517,8 @@ final case class SentShipment(id:             ShipmentId,
 
   def receive(timeReceived: OffsetDateTime): DomainValidation[ReceivedShipment] = {
     this.timeSent.
-      toSuccessNel(TimeSentUndefined.toString).
-      flatMap { timeSent =>
+      toSuccessNel(TimeSentUndefined.toString)
+      .flatMap { timeSent =>
         if (timeReceived.isBefore(timeSent)) {
           TimeReceivedBeforeSent.failureNel[ReceivedShipment]
         } else {
@@ -543,8 +543,8 @@ final case class SentShipment(id:             ShipmentId,
 
   def skipToUnpacked(timeReceived: OffsetDateTime, timeUnpacked: OffsetDateTime): DomainValidation[UnpackedShipment] = {
     this.timeSent.
-      toSuccessNel(TimeSentUndefined.toString).
-      flatMap { timeSent =>
+      toSuccessNel(TimeSentUndefined.toString)
+      .flatMap { timeSent =>
         if (timeReceived.isBefore(timeSent)) {
           TimeReceivedBeforeSent.failureNel[UnpackedShipment]
         } else if (timeUnpacked.isBefore(timeReceived)) {
@@ -627,8 +627,8 @@ final case class ReceivedShipment(id:             ShipmentId,
 
   def unpack(timeUnpacked: OffsetDateTime): DomainValidation[UnpackedShipment] = {
     this.timeReceived.
-      toSuccessNel(TimeReceivedUndefined.toString).
-      flatMap { timeReceived =>
+      toSuccessNel(TimeReceivedUndefined.toString)
+      .flatMap { timeReceived =>
         if (timeUnpacked.isBefore(timeReceived)) {
           TimeUnpackedBeforeReceived.failureNel[UnpackedShipment]
         } else {
@@ -692,8 +692,8 @@ final case class UnpackedShipment(id:             ShipmentId,
 
   def complete(timeCompleted: OffsetDateTime): DomainValidation[CompletedShipment] = {
     this.timeUnpacked.
-      toSuccessNel(TimeReceivedUndefined.toString).
-      flatMap { timeUnpacked =>
+      toSuccessNel(TimeReceivedUndefined.toString)
+      .flatMap { timeUnpacked =>
         if (timeCompleted.isBefore(timeUnpacked)) {
           TimeCompletedBeforeUnpacked.failureNel[CompletedShipment]
         } else {

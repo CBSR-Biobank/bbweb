@@ -1,7 +1,7 @@
 package org.biobank.domain.participants
 
 import java.time.OffsetDateTime
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 import org.biobank.domain._
 import org.biobank.domain.containers.{ ContainerId, ContainerSchemaPositionId }
 import org.biobank.domain.studies.SpecimenDefinitionId

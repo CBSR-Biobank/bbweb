@@ -3,6 +3,7 @@ package org.biobank.services.centres
 import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Named}
 import org.biobank.domain.LocationId
 import org.biobank.domain.centres._
@@ -63,12 +64,12 @@ trait ShipmentsService extends BbwebService {
                           shipmentSpecimenId: ShipmentSpecimenId)
       : ServiceValidation[ShipmentSpecimenDto]
 
-  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[Shipment]]
+  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]]
 
   def removeShipment(cmd: ShipmentRemoveCmd): Future[ServiceValidation[Boolean]]
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand):
-      Future[ServiceValidation[Shipment]]
+      Future[ServiceValidation[ShipmentDto]]
 
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
@@ -129,7 +130,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
             ShipmentDto.sort2Compare.get(sortExpressions(0).name).
               toSuccessNel(ServiceError(s"invalid sort field: ${sortExpressions(0).name}"))
           }
-          shipmentDtos <-shipments.map(shipmentToDto).toList.sequenceU
+          shipmentDtos <- filtered.map(shipmentToDto).toList.sequenceU
           result <- {
             val results = shipmentDtos.sortWith(sortFunc)
             val sortedResults = if (sortExpressions(0).order == AscendingOrder) results
@@ -207,7 +208,7 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
     }
   }
 
-  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[Shipment]] = {
+  def processCommand(cmd: ShipmentCommand): Future[ServiceValidation[ShipmentDto]] = {
     val validCommand = cmd match {
         case c: ShipmentRemoveCmd =>
           ServiceError(s"invalid service call: $cmd, use removeShipment").failureNel[Shipment]
@@ -215,13 +216,14 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
       }
 
     validCommand.fold(
-      err => Future.successful(err.failure[Shipment]),
+      err => Future.successful(err.failure[ShipmentDto]),
       _   => whenShipmentPermittedAsync(cmd) { () =>
         ask(processor, cmd).mapTo[ServiceValidation[ShipmentEvent]].map { validation =>
           for {
             event    <- validation
             shipment <- shipmentRepository.getByKey(ShipmentId(event.id))
-          } yield shipment
+            dto      <- shipmentToDto(shipment)
+          } yield dto
         }
       }
     )
@@ -236,13 +238,14 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
   }
 
   def processShipmentSpecimenCommand(cmd: ShipmentSpecimenCommand)
-      : Future[ServiceValidation[Shipment]] = {
+      : Future[ServiceValidation[ShipmentDto]] = {
     whenShipmentPermittedAsync(cmd) { () =>
       ask(processor, cmd).mapTo[ServiceValidation[ShipmentSpecimenEvent]].map { validation =>
         for {
           event    <- validation
           shipment <- shipmentRepository.getByKey(ShipmentId(event.shipmentId))
-        } yield shipment
+          dto      <- shipmentToDto(shipment)
+        } yield dto
       }
     }
   }
@@ -366,14 +369,15 @@ class ShipmentsServiceImpl @Inject() (@Named("shipmentsProcessor") val   process
   private def shipmentSpecimenToDto(requestUserId: UserId, shipmentSpecimen: ShipmentSpecimen)
       : ServiceValidation[ShipmentSpecimenDto] = {
     specimensService.get(requestUserId, shipmentSpecimen.specimenId).map { specimen =>
-      ShipmentSpecimenDto(id                  = shipmentSpecimen.id.id,
-                          version             = shipmentSpecimen.version,
-                          timeAdded           = shipmentSpecimen.timeAdded,
-                          timeModified        = shipmentSpecimen.timeModified,
-                          shipmentId          = shipmentSpecimen.shipmentId.id,
-                          shipmentContainerId = shipmentSpecimen.shipmentContainerId.map(id => id.id),
-                          state               = shipmentSpecimen.state.toString,
-                          specimen            = specimen)
+      ShipmentSpecimenDto(
+        id                  = shipmentSpecimen.id.id,
+        version             = shipmentSpecimen.version,
+        timeAdded           = shipmentSpecimen.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+        timeModified        = shipmentSpecimen.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+        shipmentId          = shipmentSpecimen.shipmentId.id,
+        shipmentContainerId = shipmentSpecimen.shipmentContainerId.map(id => id.id),
+        state               = shipmentSpecimen.state.toString,
+        specimen            = specimen)
     }
   }
 

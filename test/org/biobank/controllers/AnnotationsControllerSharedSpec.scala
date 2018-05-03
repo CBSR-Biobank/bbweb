@@ -3,7 +3,7 @@ package org.biobank.controllers
 import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies.{ EnabledStudy, Study }
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import scala.collection.mutable.ListBuffer
 import play.api.libs.json._
 import play.api.http.HttpVerbs._

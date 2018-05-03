@@ -1,7 +1,7 @@
 package org.biobank.domain
 
 import org.biobank.domain.annotations._
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 
 object AnnotationTypeSpecUtil {
 

@@ -3,7 +3,7 @@ package org.biobank.domain.centres
 import java.time.OffsetDateTime
 import org.biobank.domain.{ DomainSpec, DomainValidation }
 import org.biobank.domain.participants.SpecimenId
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 

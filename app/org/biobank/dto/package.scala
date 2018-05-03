@@ -1,6 +1,6 @@
 package org.biobank
 
-import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
 import org.biobank.domain._
 import org.biobank.domain.annotations.Annotation
 import org.biobank.domain.centres.Shipment
@@ -117,7 +117,7 @@ package dto {
                                version:                 Long,
                                timeAdded:               String,
                                timeModified:            Option[String],
-                               state:                   EntityState,
+                               state:                   String,
                                slug:                    Slug,
                                inventoryId:             String,
                                collectionEventId:       String,
@@ -128,32 +128,57 @@ package dto {
                                locationInfo:            CentreLocationInfo,
                                containerId:             Option[String],
                                positionId:              Option[String],
-                               timeCreated:             OffsetDateTime,
+                               timeCreated:             String,
                                amount:                  BigDecimal,
                                units:                   String,
                                isDefaultAmount:         Boolean,
-                               eventTypeName:           String)
+                               eventTypeName:           String) {
+    override def toString: String =
+      s"""|${this.getClass.getSimpleName}: {
+          |  id:                      $id,
+          |  version:                 $version,
+          |  timeAdded:               $timeAdded,
+          |  timeModified:            $timeModified,
+          |  state:                   $state,
+          |  slug:                    $slug,
+          |  inventoryId:             $inventoryId,
+          |  collectionEventId:       $collectionEventId,
+          |  specimenDefinitionId:    $specimenDefinitionId,
+          |  specimenDefinitionName:  $specimenDefinitionName,
+          |  specimenDefinitionUnits: $specimenDefinitionUnits,
+          |  originLocationInfo:      $originLocationInfo,
+          |  locationInfo:            $locationInfo,
+          |  containerId:             $containerId,
+          |  positionId:              $positionId,
+          |  timeCreated:             $timeCreated,
+          |  amount:                  $amount,
+          |  units:                   $units,
+          |  isDefaultAmount:         $isDefaultAmount,
+          |  eventTypeName:           $eventTypeName
+          |}""".stripMargin
+
+  }
 
   object SpecimenDto {
 
-    implicit val specimenDtoWriter: Writes[SpecimenDto] = Json.writes[SpecimenDto]
+    implicit val specimenDtoFormat: Format[SpecimenDto] = Json.format[SpecimenDto]
 
   }
 
   final case class ShipmentDto(id:               String,
                                version:          Long,
-                               timeAdded:        OffsetDateTime,
-                               timeModified:     Option[OffsetDateTime],
+                               timeAdded:        String,
+                               timeModified:     Option[String],
                                state:            String,
                                courierName:      String,
                                trackingNumber:   String,
                                fromLocationInfo: CentreLocationInfo,
                                toLocationInfo:   CentreLocationInfo,
-                               timePacked:       Option[OffsetDateTime],
-                               timeSent:         Option[OffsetDateTime],
-                               timeReceived:     Option[OffsetDateTime],
-                               timeUnpacked:     Option[OffsetDateTime],
-                               timeCompleted:    Option[OffsetDateTime],
+                               timePacked:       Option[String],
+                               timeSent:         Option[String],
+                               timeReceived:     Option[String],
+                               timeUnpacked:     Option[String],
+                               timeCompleted:    Option[String],
                                specimenCount:    Int,
                                containerCount:   Int)
 
@@ -173,22 +198,23 @@ package dto {
                toLocationInfo:   CentreLocationInfo,
                specimenCount:    Int,
                containerCount:   Int): ShipmentDto =
-      ShipmentDto(id               = shipment.id.id,
-                  version          = shipment.version,
-                  timeAdded        = shipment.timeAdded,
-                  timeModified     = shipment.timeModified,
-                  courierName      = shipment.courierName,
-                  trackingNumber   = shipment.trackingNumber,
-                  fromLocationInfo = fromLocationInfo,
-                  toLocationInfo   = toLocationInfo,
-                  timePacked       = shipment.timePacked,
-                  timeSent         = shipment.timeSent,
-                  timeReceived     = shipment.timeReceived,
-                  timeUnpacked     = shipment.timeUnpacked,
-                  timeCompleted    = shipment.timeCompleted,
-                  specimenCount    = specimenCount,
-                  containerCount   = containerCount,
-                  state            = shipment.state.id)
+      ShipmentDto(
+        id               = shipment.id.id,
+        version          = shipment.version,
+        timeAdded        = shipment.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+        timeModified     = shipment.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+        courierName      = shipment.courierName,
+        trackingNumber   = shipment.trackingNumber,
+        fromLocationInfo = fromLocationInfo,
+        toLocationInfo   = toLocationInfo,
+        timePacked       = shipment.timePacked.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+        timeSent         = shipment.timeSent.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+        timeReceived     = shipment.timeReceived.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+        timeUnpacked     = shipment.timeUnpacked.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+        timeCompleted    = shipment.timeCompleted.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+        specimenCount    = specimenCount,
+        containerCount   = containerCount,
+        state            = shipment.state.id)
 
     def compareByCourier(a: ShipmentDto, b: ShipmentDto): Boolean =
       (a.courierName compareToIgnoreCase b.courierName) < 0
@@ -205,18 +231,32 @@ package dto {
     def compareByToLocation(a: ShipmentDto, b: ShipmentDto): Boolean =
       (a.toLocationInfo.name compareToIgnoreCase b.toLocationInfo.name) < 0
 
-    implicit val shipmentDtoWriter: Writes[ShipmentDto] = Json.writes[ShipmentDto]
+    implicit val shipmentDtoFormat: Format[ShipmentDto] = Json.format[ShipmentDto]
 
   }
 
   final case class ShipmentSpecimenDto(id:                  String,
                                        version:             Long,
-                                       timeAdded:           OffsetDateTime,
-                                       timeModified:        Option[OffsetDateTime],
+                                       timeAdded:           String,
+                                       timeModified:        Option[String],
                                        state:               String,
                                        shipmentId:          String,
                                        shipmentContainerId: Option[String],
-                                       specimen:            SpecimenDto)
+                                       specimen:            SpecimenDto) {
+
+    override def toString: String =
+      s"""|${this.getClass.getSimpleName}: {
+          |  id:                  $id,
+          |  version:             $version,
+          |  timeAdded:           $timeAdded,
+          |  timeModified:        $timeModified,
+          |  state:               $state,
+          |  shipmentId:          $shipmentId,
+          |  shipmentContainerId: $shipmentContainerId,
+          |  specimen:            $specimen,
+          |}""".stripMargin
+
+ }
 
   object ShipmentSpecimenDto {
 
@@ -239,7 +279,7 @@ package dto {
     def compareByTimeCreated(a: ShipmentSpecimenDto, b: ShipmentSpecimenDto): Boolean =
       (a.specimen.timeCreated compareTo b.specimen.timeCreated) < 0
 
-    implicit val shipmentSpecimenDtoWriter: Writes[ShipmentSpecimenDto] = Json.writes[ShipmentSpecimenDto]
+    implicit val shipmentSpecimenDtoFormat: Format[ShipmentSpecimenDto] = Json.format[ShipmentSpecimenDto]
   }
 
 }

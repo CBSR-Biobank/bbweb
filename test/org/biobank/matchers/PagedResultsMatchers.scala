@@ -1,14 +1,14 @@
 package org.biobank.matchers
 
 import org.biobank.{SystemError, SystemValidation}
-import org.biobank.fixture.Url
+import org.biobank.fixtures.Url
 import org.scalatest.matchers._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
-trait PagedResultsMatchers extends ApiResultMatchers { this: org.biobank.fixture.ControllerFixture =>
+trait PagedResultsMatchers extends ApiResultMatchers { this: org.biobank.fixtures.ControllerFixture =>
 
   def beEmptyResults: Matcher[Url] = new EmptyResultsMatcher
 

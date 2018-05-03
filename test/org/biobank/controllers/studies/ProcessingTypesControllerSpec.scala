@@ -2,7 +2,7 @@ package org.biobank.controllers.studies
 
 import org.biobank.domain.JsonHelper
 //import org.biobank.domain.studies._
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls

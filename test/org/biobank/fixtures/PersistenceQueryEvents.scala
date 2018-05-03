@@ -1,4 +1,4 @@
-package org.biobank.fixture
+package org.biobank.fixtures
 
 import akka.NotUsed
 import akka.actor.ActorSystem

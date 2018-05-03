@@ -1,6 +1,6 @@
 package org.biobank.controllers
 
-import org.biobank.fixture.ControllerFixture
+import org.biobank.fixtures.ControllerFixture
 
 import play.api.libs.json._
 import play.api.test._

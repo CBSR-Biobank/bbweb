@@ -3,7 +3,7 @@ package org.biobank.domain.studies
 import java.time.OffsetDateTime
 import org.biobank.domain._
 import org.biobank.domain.annotations._
-import org.biobank.fixture.NameGenerator
+import org.biobank.fixtures.NameGenerator
 import org.slf4j.LoggerFactory
 import scalaz.Scalaz._
 

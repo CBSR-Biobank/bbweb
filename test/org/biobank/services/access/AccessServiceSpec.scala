@@ -1,6 +1,6 @@
 package org.biobank.services.access
 
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.domain.access._
 import org.biobank.domain.users.{ActiveUser, UserRepository}
 import org.biobank.domain.studies.{StudyId, StudyRepository}

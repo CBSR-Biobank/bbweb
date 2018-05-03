@@ -1,4 +1,4 @@
-package org.biobank.fixture
+package org.biobank.fixtures
 
 object IdGenerator {
   private val n = new java.util.concurrent.atomic.AtomicLong

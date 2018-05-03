@@ -3,7 +3,7 @@ package org.biobank.services.studies
 import akka.actor._
 import akka.pattern._
 import javax.inject.{ Inject, Named }
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.domain.studies._
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._

@@ -8,7 +8,7 @@ import org.biobank.domain.centres.ShipmentSpecFixtures
 import org.biobank.domain.studies.StudyRepository
 import org.biobank.domain.centres._
 import org.biobank.domain.participants._
-import org.biobank.fixture._
+import org.biobank.fixtures._
 import org.biobank.services._
 import org.mockito.ArgumentMatchers._
 import org.mockito.Mockito

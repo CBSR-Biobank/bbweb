@@ -7,7 +7,7 @@ import org.biobank.domain.annotations._
 import org.biobank.domain.{JsonHelper, Slug}
 import org.biobank.domain.studies._
 import org.biobank.dto.NameAndStateDto
-import org.biobank.fixture.{ControllerFixture, Url}
+import org.biobank.fixtures.{ControllerFixture, Url}
 import org.biobank.matchers.PagedResultsMatchers
 import org.biobank.services.centres.CentreLocation
 import org.biobank.services.studies.StudyCountsByStatus
