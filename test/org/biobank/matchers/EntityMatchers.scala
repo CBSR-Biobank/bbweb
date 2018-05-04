@@ -4,6 +4,7 @@ import java.time.OffsetDateTime
 import org.biobank.domain.{ConcurrencySafeEntity, Location}
 import org.biobank.domain.annotations._
 import org.biobank.domain.centres._
+import org.biobank.domain.participants._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
 import org.scalatest.matchers.{MatchResult, Matcher}
@@ -213,6 +214,31 @@ trait EntityMatchers {
       }
     }
 
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
+  def matchParticipant(participant: Participant) =
+    new Matcher[Participant] {
+      def apply(left: Participant) = {
+        val matchers = Map(
+            ("id"           -> (left.id equals participant.id)),
+            ("slug"         -> (left.slug equals participant.slug)),
+            ("uniqueId"     -> (left.uniqueId equals participant.uniqueId)),
+            ("annotations"  -> annotationsMatch(left.annotations, participant.annotations))) ++
+          entityAttrsMatch(participant, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "participants do not match for the following attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "participants match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, participant))
+      }
+    }
+
   private def annotationTypesMatch(a: Set[AnnotationType], b: Set[AnnotationType]): Boolean = {
     val maybeMatch = a.map { atToFind =>
         b.exists { atOther =>
@@ -224,6 +250,19 @@ trait EntityMatchers {
              (atOther.maxValueCount equals atToFind.maxValueCount) &&
              (atOther.options       equals atToFind.options) &&
              (atOther.required      equals atToFind.required))
+        }
+      }
+
+    maybeMatch.foldLeft(true) { (result, found) => result && found }
+  }
+
+  private def annotationsMatch(a: Set[Annotation], b: Set[Annotation]): Boolean = {
+    val maybeMatch = a.map { atToFind =>
+        b.exists { atOther =>
+          ((atOther.annotationTypeId  equals atToFind.annotationTypeId)  &&
+             (atOther.stringValue    equals atToFind.stringValue) &&
+             (atOther.numberValue    equals atToFind.numberValue) &&
+             (atOther.selectedValues equals atToFind.selectedValues))
         }
       }
 
