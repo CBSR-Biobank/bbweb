@@ -1,0 +1,7 @@
+-coverage
+-documentation
+-logs
+-node_modules
+-target
+-project
+-public
