@@ -239,6 +239,34 @@ trait EntityMatchers {
       }
     }
 
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
+  def matchCollectionEvent(collectionEvent: CollectionEvent) =
+    new Matcher[CollectionEvent] {
+      def apply(left: CollectionEvent) = {
+        val matchers = Map(
+            ("id"            -> (left.id equals collectionEvent.id)),
+            ("slug"          -> (left.slug equals collectionEvent.slug)),
+            ("participantId" -> (left.participantId equals collectionEvent.participantId)),
+            ("eventTypeId"   -> (left.collectionEventTypeId equals collectionEvent.collectionEventTypeId)),
+            ("visitNumber"   -> (left.visitNumber equals collectionEvent.visitNumber)),
+            ("timeCompleted" -> (left.timeCompleted equals collectionEvent.timeCompleted)),
+            ("annotations"   -> annotationsMatch(left.annotations, collectionEvent.annotations))) ++
+          entityAttrsMatch(collectionEvent, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "collectionEvents do not match for the following attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "collectionEvents match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, collectionEvent))
+      }
+    }
+
   private def annotationTypesMatch(a: Set[AnnotationType], b: Set[AnnotationType]): Boolean = {
     val maybeMatch = a.map { atToFind =>
         b.exists { atOther =>
