@@ -116,19 +116,19 @@ trait DtoMatchers {
           beTimeWithinSeconds(specimen.timeCreated, 5L)(OffsetDateTime.parse(left.timeCreated))
 
         val matchers = Map(
-            ("id"                      -> (left.id equals specimen.id.id)),
+            ("id"                      -> (left.id      equals specimen.id.id)),
             ("version"                 -> (left.version equals specimen.version)),
             ("timeAdded"               -> timeAddedMatcher.matches),
             ("timeModified"            -> optionalTimeWithinSeconds(left.timeModified,
                                                                    specimen.timeModified,
                                                                    5L).matches),
             ("state"                   -> (left.state equals specimen.state.id)),
-            ("inventoryId"             -> (left.inventoryId          equals specimen.inventoryId)),
-            ("specimenDefinitionId"    -> (left.specimenDefinitionId equals specimen.specimenDefinitionId)),
-            ("originLocationInfo"      -> (left.originLocationInfo.locationId equals specimen.originLocationId)),
-            ("locationInfo"            -> (left.locationInfo.locationId equals specimen.locationId)),
-            ("containerId"             -> (left.containerId          equals specimen.containerId)),
-            ("positionId"              -> (left.positionId           equals specimen.positionId)),
+            ("inventoryId"             -> (left.inventoryId                   equals specimen.inventoryId)),
+            ("specimenDefinitionId"    -> (left.specimenDefinitionId          equals specimen.specimenDefinitionId.id)),
+            ("originLocationInfo"      -> (left.originLocationInfo.locationId equals specimen.originLocationId.id)),
+            ("locationInfo"            -> (left.locationInfo.locationId       equals specimen.locationId.id)),
+            ("containerId"             -> (left.containerId                   equals specimen.containerId)),
+            ("positionId"              -> (left.positionId                    equals specimen.positionId)),
             ("timeCreated"             -> timeCreatedMatcher.matches))
 
         val nonMatching = matchers filter { case (k, v) => !v } keys

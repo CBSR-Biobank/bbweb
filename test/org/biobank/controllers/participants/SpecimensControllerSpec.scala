@@ -1,35 +1,43 @@
 package org.biobank.controllers.participants
 
 import java.time.OffsetDateTime
+import org.biobank.fixtures.Url
 import org.biobank.controllers._
-import org.biobank.domain.{JsonHelper, Slug}
+import org.biobank.domain.Slug
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.{ProcessingEventId, ProcessingEventInputSpecimen, ProcessingEventInputSpecimenId }
 import org.biobank.dto.SpecimenDto
 import org.biobank.fixtures.ControllerFixture
-import org.scalatest.prop.TableDrivenPropertyChecks._
+import org.biobank.matchers.PagedResultsMatchers
+import org.scalatest.matchers.{MatchResult, Matcher}
+import play.api.mvc._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
+import scala.concurrent.Future
 
-class SpecimensControllerSpec extends ControllerFixture with JsonHelper with SpecimenSpecFixtures {
+class SpecimensControllerSpec
+    extends ControllerFixture
+    with PagedResultsMatchers
+    with PagedResultsSharedSpec
+    with SpecimenSpecFixtures {
 
-  import org.biobank.TestUtils._
   import org.biobank.matchers.EntityMatchers._
-  import org.biobank.matchers.DateMatchers._
+  import org.biobank.matchers.DtoMatchers._
+  import org.biobank.matchers.JsonMatchers._
 
-  def uri(): String = "/api/participants/cevents/spcs"
+  private def uri(): String = "/api/participants/cevents/spcs"
 
-  def uri(collectionEvent: CollectionEvent): String =
+  private def uri(collectionEvent: CollectionEvent): String =
     uri + s"/${collectionEvent.id.id}"
 
-  def uriSlug(collectionEvent: CollectionEvent): String =
+  private def uriSlug(collectionEvent: CollectionEvent): String =
     uri + s"/${collectionEvent.slug}"
 
-  def uri(specimen: Specimen): String =
+  private def uri(specimen: Specimen): String =
     uri + s"/get/${specimen.slug}"
 
-  def uri(cevent: CollectionEvent, specimen: Specimen, version: Long): String =
+  private def uri(cevent: CollectionEvent, specimen: Specimen, version: Long): String =
     uri(cevent) + s"/${specimen.id.id}/$version"
 
   override def createEntities() = {
@@ -48,33 +56,23 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
     f
   }
 
-  def storeSpecimens(cevent: CollectionEvent, specimens: List[Specimen]) = {
+  private def storeSpecimens(cevent: CollectionEvent, specimens: List[Specimen]) = {
     specimens.foreach { specimen =>
       specimenRepository.put(specimen)
       ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))
     }
   }
 
-  def specimensToAddJson(specimens: List[Specimen]) = {
-    Json.obj(
-      "specimenData" ->
-        specimens.map { specimen =>
-          Json.obj(
-            "inventoryId"           -> specimen.inventoryId,
-            "specimenDefinitionId" -> specimen.specimenDefinitionId,
-            "timeCreated"           -> specimen.timeCreated,
-            "locationId"            -> specimen.locationId.id,
-            "amount"                -> specimen.amount)
-        }
-      )
-  }
-
-  def compareObjs(jsonList: List[JsObject], specimens: List[SpecimenDto]) = {
-    val specimensMap = specimens.map { specimen => (specimen.id, specimen) }.toMap
-    jsonList.foreach { jsonObj =>
-      val jsonId = (jsonObj \ "id").as[String]
-      compareObj(jsonObj, specimensMap(jsonId))
-    }
+  private def specimensToAddJson(specimens: List[Specimen]) = {
+    Json.obj("specimenData" -> specimens.map { specimen =>
+               Json.obj(
+                 "inventoryId"          -> specimen.inventoryId,
+                 "specimenDefinitionId" -> specimen.specimenDefinitionId,
+                 "timeCreated"          -> specimen.timeCreated,
+                 "locationId"           -> specimen.locationId.id,
+                 "amount"               -> specimen.amount)
+             }
+    )
   }
 
   describe("Specimens REST API") {
@@ -84,23 +82,20 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
       it("return a specimen") {
         val f = createEntitiesAndSpecimens
         val specimen = f.specimens.head
-        val specimenDto = f.specimenDtos.head
-        val json = makeRequest(GET, uri(specimen))
+        val reply = makeAuthRequest(GET, uri(specimen)).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
-
-        compareObj((json \ "data").get, specimenDto)
+        val dto = (contentAsJson(reply) \ "data").validate[SpecimenDto]
+        dto must be (jsSuccess)
+        dto.get must matchDtoToSpecimen(specimen)
       }
 
       it("fails for an invalid specimen ID") {
         val f = createEntitiesAndSpecimens
         val specimen = f.specimens.head.copy(slug = Slug(nameGenerator.next[Specimen]))
 
-        val json = makeRequest(GET, uri(specimen), NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex("EntityCriteriaNotFound: specimen slug")
+        val reply = makeAuthRequest(GET, uri(specimen)).value
+        reply must beNotFoundWithMessage("EntityCriteriaNotFound: specimen slug")
       }
 
     }
@@ -108,198 +103,131 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
     describe("GET /api/participants/cevents/spcs/:ceventId") {
 
       it("list none") {
-        val e = createEntities
-        PagedResultsSpec(this).emptyResults(uriSlug(e.cevent))
+        val f = createEntities
+        new Url(uriSlug(f.cevent)) must beEmptyResults
       }
 
-      it("lists all specimens for a collection event") {
-        val e = createEntitiesAndSpecimens
-
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uriSlug(e.cevent),
-            offset    = 0,
-            total     = e.specimens.size.toLong,
-            maybeNext = None,
-            maybePrev = None)
-        jsonItems must have size e.specimens.size.toLong
-
-        compareObjs(jsonItems, e.specimenDtos)
-      }
-
-      it("list specimens sorted by id") {
-        val e = createEntities
-        val specimens = List("id1", "id2").map { id =>
-            factory.createUsableSpecimen.copy(id = SpecimenId(id))
-          }
-
-        val specimenDtos = specimensToDtos(specimens,
-                                           e.cevent,
-                                           e.ceventType,
-                                           e.specimenDefinition,
-                                           e.centreLocationInfo,
-                                           e.centreLocationInfo)
-
-        storeSpecimens(e.cevent, specimens)
-
-        val sortExprs = Table("sort expressions", "inventoryId", "-inventoryId")
-        forAll(sortExprs) { sortExpr =>
-          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri         = uriSlug(e.cevent),
-              queryParams = Map("sort" -> sortExpr),
-              offset      = 0,
-              total       = specimens.size.toLong,
-              maybeNext   = None,
-              maybePrev   = None)
-
-          jsonItems must have size specimens.size.toLong
-          if (sortExpr == sortExprs(0)) {
-            compareObj(jsonItems(0), specimenDtos(0))
-            compareObj(jsonItems(1), specimenDtos(1))
-          } else {
-            compareObj(jsonItems(0), specimenDtos(1))
-            compareObj(jsonItems(1), specimenDtos(0))
-          }
+      describe("lists all specimens for a collection event") {
+        listMultipleSpecimens() { () =>
+          val e = createEntitiesAndSpecimens
+          (new Url(uriSlug(e.cevent)), e.specimens.sortBy(_.inventoryId))
         }
       }
 
-      it("list specimens sorted by time created") {
-        val e = createEntities
-        val specimens = List(1, 2).map { hour =>
-            factory.createUsableSpecimen.copy(timeCreated = OffsetDateTime.now.withHour(hour))
+      describe("list specimens sorted by inventory id") {
+
+        def commonSetup = {
+          val e = createEntities
+          val specimens = List("id1", "id2").map { id =>
+              factory.createUsableSpecimen.copy(id = SpecimenId(id))
+            }
+          storeSpecimens(e.cevent, specimens)
+          (e.cevent, specimens)
+        }
+
+        describe("sorted in ascending order") {
+          listMultipleSpecimens() { () =>
+            val (cevent, specimens) = commonSetup
+            (new Url(uriSlug(cevent) + "?sort=inventoryId"), specimens.sortBy(_.inventoryId))
           }
+        }
 
-        storeSpecimens(e.cevent, specimens)
-
-        val specimenDtos = specimensToDtos(specimens,
-                                           e.cevent,
-                                           e.ceventType,
-                                           e.specimenDefinition,
-                                           e.centreLocationInfo,
-                                           e.centreLocationInfo)
-
-        val sortExprs = Table("sort expressions", "timeCreated", "-timeCreated")
-        forAll(sortExprs) { sortExpr =>
-          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri         = uriSlug(e.cevent),
-              queryParams = Map("sort" -> sortExpr),
-              offset      = 0,
-              total       = specimens.size.toLong,
-              maybeNext   = None,
-              maybePrev   = None)
-
-          jsonItems must have size specimens.size.toLong
-          if (sortExpr == sortExprs(0)) {
-            compareObj(jsonItems(0), specimenDtos(0))
-            compareObj(jsonItems(1), specimenDtos(1))
-          } else {
-            compareObj(jsonItems(0), specimenDtos(1))
-            compareObj(jsonItems(1), specimenDtos(0))
+        describe("sorted in descending order") {
+          listMultipleSpecimens() { () =>
+            val (cevent, specimens) = commonSetup
+            (new Url(uriSlug(cevent) + "?sort=-inventoryId"), specimens.sortBy(_.inventoryId).reverse)
           }
+        }
+
+      }
+
+      describe("list specimens sorted by time created") {
+
+        def commonSetup = {
+          val e = createEntities
+          val specimens = List(1, 2).map { hour =>
+              factory.createUsableSpecimen.copy(timeCreated = OffsetDateTime.now.withHour(hour))
+            }
+          storeSpecimens(e.cevent, specimens)
+          (e.cevent, specimens)
+        }
+
+        describe("sorted in ascending order") {
+          listMultipleSpecimens() { () =>
+            val (cevent, specimens) = commonSetup
+            (new Url(uriSlug(cevent) + "?sort=timeCreated"), specimens.sortBy(_.timeCreated))
+          }
+        }
+
+        describe("sorted in descending order") {
+          listMultipleSpecimens() { () =>
+            val (cevent, specimens) = commonSetup
+            (new Url(uriSlug(cevent) + "?sort=-timeCreated"), specimens.sortBy(_.timeCreated).reverse)
+          }
+        }
+
+      }
+
+
+      describe("list specimens sorted by state") {
+
+        def commonSetup = {
+          val e = createEntities
+          val specimens = List(factory.createUsableSpecimen, factory.createUnusableSpecimen)
+          storeSpecimens(e.cevent, specimens)
+          (e.cevent, specimens)
+        }
+
+        describe("sorted in ascending order") {
+          listMultipleSpecimens() { () =>
+            val (cevent, specimens) = commonSetup
+            (new Url(uriSlug(cevent) + "?sort=state"), specimens.sortBy(_.state.id))
+          }
+        }
+
+        describe("sorted in descending order") {
+          listMultipleSpecimens() { () =>
+            val (cevent, specimens) = commonSetup
+            (new Url(uriSlug(cevent) + "?sort=-state"), specimens.sortBy(_.state.id).reverse)
+          }
+        }
+
+      }
+
+      describe("list the first specimen in a paged query") {
+        listSingleSpecimen(maybeNext = Some(2)) { () =>
+          val e = createEntities
+          val specimens = List("id1", "id2").map { id =>
+              factory.createUsableSpecimen.copy(id = SpecimenId(id))
+            }
+          storeSpecimens(e.cevent, specimens)
+          (new Url(uriSlug(e.cevent) + "?sort=inventoryId&limit=1"), specimens(0))
         }
       }
 
-      it("list specimens sorted by state") {
-        val e = createEntities
-        val specimens: List[Specimen] = List(factory.createUsableSpecimen,
-                                             factory.createUnusableSpecimen)
-
-        storeSpecimens(e.cevent, specimens)
-
-        val specimenDtos = specimensToDtos(specimens,
-                                           e.cevent,
-                                           e.ceventType,
-                                           e.specimenDefinition,
-                                           e.centreLocationInfo,
-                                           e.centreLocationInfo)
-
-        val sortExprs = Table("sort expressions", "state", "-state")
-        forAll(sortExprs) { sortExpr =>
-          val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-              uri         = uriSlug(e.cevent),
-              queryParams = Map("sort" -> sortExpr),
-              offset      = 0,
-              total       = specimens.size.toLong,
-              maybeNext   = None,
-              maybePrev   = None)
-
-          jsonItems must have size specimens.size.toLong
-          if (sortExpr == sortExprs(0)) {
-            compareObj(jsonItems(0), specimenDtos(1))
-            compareObj(jsonItems(1), specimenDtos(0))
-          } else {
-            compareObj(jsonItems(0), specimenDtos(0))
-            compareObj(jsonItems(1), specimenDtos(1))
-          }
+      describe("list the last specimen in a paged query") {
+        listSingleSpecimen(offset = 1, maybePrev = Some(1)) { () =>
+          val e = createEntities
+          val specimens = List("id1", "id2").map { id =>
+              factory.createUsableSpecimen.copy(id = SpecimenId(id))
+            }
+          storeSpecimens(e.cevent, specimens)
+          (new Url(uriSlug(e.cevent) + "?sort=inventoryId&page=2&limit=1"), specimens(1))
         }
       }
 
-      it("list the first specimen in a paged query") {
-        val e = createEntities
-        val specimens = List("id1", "id2").map { id =>
-            factory.createUsableSpecimen.copy(id = SpecimenId(id))
-          }
-
-        storeSpecimens(e.cevent, specimens)
-
-        val specimenDto = specimens(0).createDto(e.cevent,
-                                                 e.ceventType.name,
-                                                 e.specimenDefinition,
-                                                 e.centreLocationInfo,
-                                                 e.centreLocationInfo)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uriSlug(e.cevent),
-            queryParams = Map("sort" -> "inventoryId", "limit" -> "1"),
-            offset      = 0,
-            total       = specimens.size.toLong,
-            maybeNext   = Some(2))
-
-        compareObj(jsonItem, specimenDto)
+      describe("fail when using an invalid query parameters") {
+        pagedQueryShouldFailSharedBehaviour { () =>
+          val e = createEntities
+          new Url(uriSlug(e.cevent))
+        }
       }
 
-      it("list the last specimen in a paged query") {
-        val e = createEntities
-        val specimens = List("id1", "id2").map { id =>
-            factory.createUsableSpecimen.copy(id = SpecimenId(id))
-          }
-
-        storeSpecimens(e.cevent, specimens)
-
-        val specimenDto = specimens(1).createDto(e.cevent,
-                                                 e.ceventType.name,
-                                                 e.specimenDefinition,
-                                                 e.centreLocationInfo,
-                                                 e.centreLocationInfo)
-
-        val jsonItem = PagedResultsSpec(this).singleItemResult(
-            uri         = uriSlug(e.cevent),
-            queryParams = Map("sort" -> "inventoryId", "page" -> "2", "limit" -> "1"),
-            offset      = 1,
-            total       = specimens.size.toLong,
-            maybeNext   = None,
-            maybePrev   = Some(1))
-
-        compareObj(jsonItem, specimenDto)
-      }
-
-      it("fail when using an invalid query parameters") {
-        val e = createEntities
-        val url = uriSlug(e.cevent)
-
-        PagedResultsSpec(this).failWithNegativePageNumber(url)
-        PagedResultsSpec(this).failWithInvalidPageNumber(url)
-        PagedResultsSpec(this).failWithNegativePageSize(url)
-        PagedResultsSpec(this).failWithInvalidPageSize(url, 100);
-        PagedResultsSpec(this).failWithInvalidSort(url)
-      }
 
       it("fail for invalid collection event id") {
         val cevent = factory.createCollectionEvent
-        val json = makeRequest(GET, uriSlug(cevent), NOT_FOUND)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex ("EntityCriteriaNotFound: collection event slug")
+        val reply = makeAuthRequest(GET, uriSlug(cevent)).value
+        reply must beNotFoundWithMessage("EntityCriteriaNotFound: collection event slug")
       }
 
     }
@@ -309,53 +237,38 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
       it("add a specimen to a collection event") {
         val e = createEntities
         val specimen = factory.createUsableSpecimen
-        val json = makeRequest(POST, uri(e.cevent), specimensToAddJson(List(specimen)))
+        val reply = makeAuthRequest(POST, uri(e.cevent), specimensToAddJson(List(specimen))).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
-
-        val jsonObj = (json \ "data").as[JsObject]
-
-        compareObj(jsonObj, e.cevent)
+        val replyCevent = (contentAsJson(reply) \ "data").validate[CollectionEvent]
+        replyCevent must be (jsSuccess)
+        replyCevent.get must matchCollectionEvent(e.cevent)
 
         val repoSpecimens = ceventSpecimenRepository.withCeventId(e.cevent.id)
         repoSpecimens must have size 1
-        repoSpecimens.head.ceventId must be (e.cevent.id)
+        val repoSpecimen = repoSpecimens.head
+        repoSpecimen.ceventId must be (e.cevent.id)
 
-        specimenRepository.getByKey(repoSpecimens.head.specimenId) mustSucceed { repoSpecimen =>
-
-          repoSpecimen must have (
-            'inventoryId           (specimen.inventoryId),
-            'specimenDefinitionId (specimen.specimenDefinitionId),
-            'version               (specimen.version),
-            'originLocationId      (specimen.originLocationId),
-            'locationId            (specimen.locationId),
-            'containerId           (specimen.containerId),
-            'positionId            (specimen.positionId),
-            'amount                (specimen.amount)
-          )
-
-          repoSpecimen must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
-
-          repoSpecimen.timeCreated must beTimeWithinSeconds(specimen.timeCreated, 5L)
-        }
+        val updatedSpecimen = specimen.copy(id = repoSpecimen.specimenId,
+                                            timeAdded = OffsetDateTime.now)
+        updatedSpecimen must matchRepositorySpecimen
       }
 
       it("add more than one specimen to a collection event") {
         val e = createEntities
         val specimens = (1 to 2).map(_ => factory.createUsableSpecimen).toList
 
-        val json = makeRequest(POST, uri(e.cevent), specimensToAddJson(specimens))
+        val reply = makeAuthRequest(POST, uri(e.cevent), specimensToAddJson(specimens)).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
-
-        val jsonObj = (json \ "data").as[JsObject]
-
-        compareObj(jsonObj, e.cevent)
+        val replyCevent = (contentAsJson(reply) \ "data").validate[CollectionEvent]
+        replyCevent must be (jsSuccess)
+        replyCevent.get must matchCollectionEvent(e.cevent)
 
         val repoSpecimens = ceventSpecimenRepository.withCeventId(e.cevent.id)
         repoSpecimens must have size specimens.size.toLong
       }
-    }
+     }
 
     describe("DELETE  /participants/cevents/spcs/:ceventId/:spcId/:ver") {
 
@@ -365,9 +278,11 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
         specimenRepository.put(specimen)
         ceventSpecimenRepository.put(CeventSpecimen(e.cevent.id, specimen.id))
 
-        val json = makeRequest(DELETE, uri(e.cevent, specimen, specimen.version))
+        val reply = makeAuthRequest(DELETE, uri(e.cevent, specimen, specimen.version)).value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
+        val repoSpecimens = ceventSpecimenRepository.withCeventId(e.cevent.id)
+        repoSpecimens must have size 0
       }
 
       it("not remove a specimen which has been processed") {
@@ -381,14 +296,114 @@ class SpecimensControllerSpec extends ControllerFixture with JsonHelper with Spe
                                                 specimen.id)
         processingEventInputSpecimenRepository.put(peis)
 
-        val json = makeRequest(DELETE, uri(e.cevent, specimen, specimen.version), BAD_REQUEST)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include regex("specimen has child specimens.*")
+        val reply = makeAuthRequest(DELETE, uri(e.cevent, specimen, specimen.version)).value
+        reply must beBadRequestWithMessage("specimen has child specimens.*")
         }
     }
 
   }
 
+  private def listSingleSpecimen(offset:    Long = 0,
+                                 maybeNext: Option[Int] = None,
+                                 maybePrev: Option[Int] = None)
+                                (setupFunc: () => (Url, Specimen)) = {
+
+    it("list single specimen") {
+      val (url, expectedSpecimen) = setupFunc()
+      val reply = makeAuthRequest(GET, url.path).value
+      reply must beOkResponseWithJsonReply
+
+      val json = contentAsJson(reply)
+      json must beSingleItemResults(offset, maybeNext, maybePrev)
+
+      val dto = (json \ "data" \ "items").validate[List[SpecimenDto]]
+      dto must be (jsSuccess)
+      dto.get.foreach { _ must matchDtoToSpecimen(expectedSpecimen) }
+    }
+  }
+
+  private def listMultipleSpecimens(offset:    Long = 0,
+                                    maybeNext: Option[Int] = None,
+                                    maybePrev: Option[Int] = None)
+                                   (setupFunc: () => (Url, List[Specimen])) = {
+
+    it("list multiple specimens") {
+      val (url, expectedSpecimens) = setupFunc()
+
+      val reply = makeAuthRequest(GET, url.path).value
+      reply must beOkResponseWithJsonReply
+
+      val json = contentAsJson(reply)
+      json must beMultipleItemResults(offset = offset,
+                                      total = expectedSpecimens.size.toLong,
+                                      maybeNext = maybeNext,
+                                      maybePrev = maybePrev)
+
+      val dtos = (json \ "data" \ "items").validate[List[SpecimenDto]]
+      dtos must be (jsSuccess)
+
+      (dtos.get zip expectedSpecimens).foreach { case (dto, specimen) =>
+        dto must matchDtoToSpecimen(specimen)
+      }
+    }
+
+  }
+
+  def matchUpdatedSpecimen(specimen: Specimen) =
+    new Matcher[Future[Result]] {
+      def apply (left: Future[Result]) = {
+        val dto = (contentAsJson(left) \ "data").validate[SpecimenDto]
+        val jsSuccessMatcher = jsSuccess(dto)
+
+        if (!jsSuccessMatcher.matches) {
+          jsSuccessMatcher
+        } else {
+          val replyMatcher = matchDtoToSpecimen(specimen)(dto.get)
+
+          if (!replyMatcher.matches) {
+            MatchResult(false,
+                        s"reply does not match expected: ${replyMatcher.failureMessage}",
+                        s"reply matches expected: ${replyMatcher.failureMessage}")
+          } else {
+            matchDtoToRepositorySpecimen(dto.get)
+          }
+        }
+      }
+    }
+
+  def matchDtoToRepositorySpecimen =
+    new Matcher[SpecimenDto] {
+      def apply (left: SpecimenDto) = {
+        specimenRepository.getByKey(SpecimenId(left.id)).fold(
+          err => {
+            MatchResult(false, s"not found in repository: ${err.head}", "")
+
+          },
+          repoCet => {
+            val repoMatcher = matchDtoToSpecimen(repoCet)(left)
+            MatchResult(repoMatcher.matches,
+                        s"repository specimen does not match expected: ${repoMatcher.failureMessage}",
+                        s"repository specimen matches expected: ${repoMatcher.failureMessage}")
+          }
+        )
+      }
+    }
+
+  def matchRepositorySpecimen =
+    new Matcher[Specimen] {
+      def apply (left: Specimen) = {
+        specimenRepository.getByKey(left.id).fold(
+          err => {
+            MatchResult(false, s"not found in repository: ${err.head}", "")
+
+          },
+          repoCet => {
+            val repoMatcher = matchSpecimen(repoCet)(left)
+            MatchResult(repoMatcher.matches,
+                        s"repository specimen does not match expected: ${repoMatcher.failureMessage}",
+                        s"repository specimen matches expected: ${repoMatcher.failureMessage}")
+          }
+        )
+      }
+    }
 }

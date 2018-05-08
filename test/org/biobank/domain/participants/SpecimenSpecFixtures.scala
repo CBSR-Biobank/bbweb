@@ -1,7 +1,6 @@
 package org.biobank.domain.participants
 
 import org.biobank.domain.Factory
-import org.biobank.domain.studies.{ CollectionEventType, CollectionSpecimenDefinition }
 import scala.language.reflectiveCalls
 import org.biobank.services.centres.CentreLocationInfo
 
@@ -9,7 +8,7 @@ trait SpecimenSpecFixtures {
 
   protected val factory: Factory
 
-  def createEntities() = {
+  protected def createEntities() = {
     val _centre = factory.createEnabledCentre.copy(locations = Set(factory.createLocation))
     val _study = factory.createEnabledStudy
     val _specimenDefinition = factory.createCollectionSpecimenDefinition
@@ -36,7 +35,7 @@ trait SpecimenSpecFixtures {
     }
   }
 
-  def createEntitiesAndSpecimens() = {
+  protected def createEntitiesAndSpecimens() = {
     val entities = createEntities
 
     val _specimens = (1 to 2).map { _ => factory.createUsableSpecimen }.toList
@@ -49,26 +48,6 @@ trait SpecimenSpecFixtures {
       val ceventType         = entities.ceventType
       val cevent             = entities.cevent
       val specimens          = _specimens
-      val specimenDtos       = specimensToDtos(_specimens,
-                                               entities.cevent,
-                                               entities.ceventType,
-                                               entities.specimenDefinition,
-                                               entities.centreLocationInfo,
-                                               entities.centreLocationInfo)
     }
   }
-
-  def specimensToDtos(specimens:              List[Specimen],
-                      cevent:                 CollectionEvent,
-                      ceventType:             CollectionEventType,
-                      specimenDefinition:    CollectionSpecimenDefinition,
-                      fromCentreLocationInfo: CentreLocationInfo,
-                      toCentreLocationInfo:   CentreLocationInfo) =
-    specimens.map  { s =>
-      s.createDto(cevent,
-                  ceventType.name,
-                  specimenDefinition,
-                  fromCentreLocationInfo,
-                  toCentreLocationInfo)
-    }
 }

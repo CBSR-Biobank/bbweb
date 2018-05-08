@@ -27,7 +27,7 @@ trait SpecimensService extends BbwebService {
 
   def get(requestUserId: UserId, id: SpecimenId): ServiceValidation[SpecimenDto]
 
-  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Specimen]
+  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[SpecimenDto]
 
   def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[Specimen]
 
@@ -73,13 +73,14 @@ class SpecimensServiceImpl @Inject() (
     } yield dto
   }
 
-  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Specimen] = {
+  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[SpecimenDto] = {
     for {
       specimen       <- specimenRepository.getBySlug(slug)
       ceventSpecimen <- ceventSpecimenRepository.withSpecimenId(specimen.id)
       permitted      <- whenSpecimenPermitted(requestUserId,
                                               ceventSpecimen.ceventId)(_ => true.successNel[String])
-    } yield specimen
+      dto            <- specimenToDto(specimen)
+    } yield dto
   }
 
   def getByInventoryId(requestUserId: UserId, inventoryId: String): ServiceValidation[Specimen] = {

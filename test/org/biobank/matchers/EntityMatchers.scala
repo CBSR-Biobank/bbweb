@@ -267,6 +267,36 @@ trait EntityMatchers {
       }
     }
 
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
+  def matchSpecimen(specimen: Specimen) =
+    new Matcher[Specimen] {
+      def apply(left: Specimen) = {
+        val matchers = Map(
+            ("id"                   -> (left.id equals specimen.id)),
+            ("slug"                 -> (left.slug equals specimen.slug)),
+            ("inventoryId"          -> (left.inventoryId equals specimen.inventoryId)),
+            ("specimenDefinitionId" -> (left.specimenDefinitionId equals specimen.specimenDefinitionId)),
+            ("originLocationId"     -> (left.originLocationId equals specimen.originLocationId)),
+            ("locationId"           -> (left.locationId equals specimen.locationId)),
+            ("containerId"          -> (left.containerId equals specimen.containerId)),
+            ("timeCreated"          -> (left.timeCreated equals specimen.timeCreated)),
+            ("amount"               -> (left.amount equals specimen.amount))) ++
+          entityAttrsMatch(specimen, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "specimens do not match for the following attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "specimens match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, specimen))
+      }
+    }
+
   private def annotationTypesMatch(a: Set[AnnotationType], b: Set[AnnotationType]): Boolean = {
     val maybeMatch = a.map { atToFind =>
         b.exists { atOther =>
