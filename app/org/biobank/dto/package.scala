@@ -12,7 +12,15 @@ package dto {
 
   trait Dto
 
-  final case class EntityInfoDto(id: String, slug: Slug, name: String)
+  final case class EntityInfoDto(id: String, slug: Slug, name: String) {
+
+    override def toString: String =
+      s"""|${this.getClass.getSimpleName}: {
+          |  id:   $id,
+          |  slug: $slug,
+          |  name: $name
+          |}""".stripMargin
+  }
 
   object EntityInfoDto {
 

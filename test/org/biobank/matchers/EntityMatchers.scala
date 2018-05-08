@@ -2,6 +2,7 @@ package org.biobank.matchers
 
 import java.time.OffsetDateTime
 import org.biobank.domain.{ConcurrencySafeEntity, Location}
+import org.biobank.domain.access._
 import org.biobank.domain.annotations._
 import org.biobank.domain.centres._
 import org.biobank.domain.participants._
@@ -297,6 +298,41 @@ trait EntityMatchers {
       }
     }
 
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
+  def matchRole(role: Role) =
+    new Matcher[Role] {
+      def apply(left: Role) = {
+        val matchers = Map(("userIds" -> (left.userIds equals role.userIds))) ++
+        accessItemsMatch(left, role) ++
+        entityAttrsMatch(role, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "roles do not match for the following attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "roles match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, role))
+      }
+    }
+
+  def matchAccessItem(accessItem: AccessItem) =
+    new Matcher[AccessItem] {
+      def apply(left: AccessItem) = {
+        val matchers = accessItemsMatch(left, accessItem) ++ entityAttrsMatch(accessItem, left)
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "accessItems do not match for the following attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "accessItems match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, accessItem))
+      }
+    }
+
   private def annotationTypesMatch(a: Set[AnnotationType], b: Set[AnnotationType]): Boolean = {
     val maybeMatch = a.map { atToFind =>
         b.exists { atOther =>
@@ -374,6 +410,17 @@ trait EntityMatchers {
     Map(("version"      -> (a.version equals b.version)),
         ("timeAdded"    -> (timeAddedMatcher.matches)),
         ("timeModified" -> (timeModifiedMatcher.matches)))
+  }
+
+  private def accessItemsMatch(a: AccessItem, b: AccessItem) = {
+    Map(
+      ("id"          -> (a.id          equals b.id)),
+      ("slug"        -> (a.slug        equals b.slug)),
+      ("name"        -> (a.name        equals b.name)),
+      ("description" -> (a.description equals b.description)),
+      ("parentIds"   -> (a.parentIds   equals b.parentIds)),
+      ("childrenIds" -> (a.childrenIds equals b.childrenIds))
+    )
   }
 
 }

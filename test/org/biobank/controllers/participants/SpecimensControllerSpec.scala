@@ -1,20 +1,18 @@
 package org.biobank.controllers.participants
 
 import java.time.OffsetDateTime
-import org.biobank.fixtures.Url
 import org.biobank.controllers._
 import org.biobank.domain.Slug
 import org.biobank.domain.participants._
 import org.biobank.domain.processing.{ProcessingEventId, ProcessingEventInputSpecimen, ProcessingEventInputSpecimenId }
+import org.biobank.fixtures.Url
 import org.biobank.dto.SpecimenDto
 import org.biobank.fixtures.ControllerFixture
 import org.biobank.matchers.PagedResultsMatchers
 import org.scalatest.matchers.{MatchResult, Matcher}
-import play.api.mvc._
 import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
-import scala.concurrent.Future
 
 class SpecimensControllerSpec
     extends ControllerFixture
@@ -22,8 +20,8 @@ class SpecimensControllerSpec
     with PagedResultsSharedSpec
     with SpecimenSpecFixtures {
 
-  import org.biobank.matchers.EntityMatchers._
   import org.biobank.matchers.DtoMatchers._
+  import org.biobank.matchers.EntityMatchers._
   import org.biobank.matchers.JsonMatchers._
 
   private def uri(): String = "/api/participants/cevents/spcs"
@@ -349,47 +347,7 @@ class SpecimensControllerSpec
 
   }
 
-  def matchUpdatedSpecimen(specimen: Specimen) =
-    new Matcher[Future[Result]] {
-      def apply (left: Future[Result]) = {
-        val dto = (contentAsJson(left) \ "data").validate[SpecimenDto]
-        val jsSuccessMatcher = jsSuccess(dto)
-
-        if (!jsSuccessMatcher.matches) {
-          jsSuccessMatcher
-        } else {
-          val replyMatcher = matchDtoToSpecimen(specimen)(dto.get)
-
-          if (!replyMatcher.matches) {
-            MatchResult(false,
-                        s"reply does not match expected: ${replyMatcher.failureMessage}",
-                        s"reply matches expected: ${replyMatcher.failureMessage}")
-          } else {
-            matchDtoToRepositorySpecimen(dto.get)
-          }
-        }
-      }
-    }
-
-  def matchDtoToRepositorySpecimen =
-    new Matcher[SpecimenDto] {
-      def apply (left: SpecimenDto) = {
-        specimenRepository.getByKey(SpecimenId(left.id)).fold(
-          err => {
-            MatchResult(false, s"not found in repository: ${err.head}", "")
-
-          },
-          repoCet => {
-            val repoMatcher = matchDtoToSpecimen(repoCet)(left)
-            MatchResult(repoMatcher.matches,
-                        s"repository specimen does not match expected: ${repoMatcher.failureMessage}",
-                        s"repository specimen matches expected: ${repoMatcher.failureMessage}")
-          }
-        )
-      }
-    }
-
-  def matchRepositorySpecimen =
+  private def matchRepositorySpecimen =
     new Matcher[Specimen] {
       def apply (left: Specimen) = {
         specimenRepository.getByKey(left.id).fold(

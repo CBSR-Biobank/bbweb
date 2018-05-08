@@ -675,7 +675,7 @@ class UsersControllerSpec
         roleDtos must be (jsSuccess)
 
         roleDtos.get.size must be (1)
-        roleDtos.get.foreach { _ must matchDtoToRole (updatedRole) }
+        roleDtos.get.foreach { _ must matchDtoToUserRole (updatedRole) }
       }
 
       it("cannot add the same role more than once") {

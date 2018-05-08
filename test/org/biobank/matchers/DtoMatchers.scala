@@ -21,7 +21,9 @@ trait DtoMatchers {
   def matchDtoToCentre(centre: Centre) =
     new Matcher[CentreDto] {
       def apply(left: CentreDto) = {
-        val dtoStudyIds = left.studyNames.map { s => StudyId(s.id)  }
+        val dtoStudyIds = left.studyNames
+          .map { s => StudyId(s.id)  }
+          .toList.sortBy(_.id)
 
         val timeAddedMatcher =
           beTimeWithinSeconds(centre.timeAdded, 5L)(OffsetDateTime.parse(left.timeAdded))
@@ -38,7 +40,7 @@ trait DtoMatchers {
             ("state"        -> (left.state equals centre.state.id)),
             ("name"         -> (left.name equals centre.name)),
             ("description"  -> (left.description equals centre.description)),
-            ("studyIds"     -> (dtoStudyIds equals centre.studyIds)),
+            ("studyIds"     -> (dtoStudyIds equals centre.studyIds.toList.sortBy(_.id))),
             ("locations"    -> (left.locations equals centre.locations)))
 
         val nonMatching = matchers filter { case (k, v) => !v } keys
@@ -199,6 +201,85 @@ trait DtoMatchers {
     }
 
   def matchDtoToRole(role: Role) =
+    new Matcher[RoleDto] {
+      def apply(left: RoleDto) = {
+        val dtoUserIds = left.userData.toList.map { ud => UserId(ud.id) }.sortBy(_.id)
+        val dtoParentIds = left.parentData.toList.map { pd => AccessItemId(pd.id) }.sortBy(_.id)
+        val dtoChildrenIds = left.childData.toList.map { cd => AccessItemId(cd.id) }.sortBy(_.id)
+
+        val matchers = Map(
+            ("id"          -> (left.id equals role.id.id)),
+            ("version"     -> (left.version equals role.version)),
+            ("slug"        -> (left.slug equals role.slug)),
+            ("name"        -> (left.name equals role.name)),
+            ("description" -> (left.description equals role.description)),
+            ("userIds"     -> (dtoUserIds equals role.userIds.toList.sortBy(_.id))),
+            ("parentIds"   -> (dtoParentIds equals role.parentIds.toList.sortBy(_.id))),
+            ("childrenIds" -> (dtoChildrenIds equals role.childrenIds.toList.sortBy(_.id))))
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "dto does not match role for the following attributes: {0},\ndto: {1},\nrole: {2}",
+                    "dto matches role: dto: {1},\nrole: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, role))
+      }
+    }
+
+  def matchEntityInfoDtoToRole(role: Role) =
+    new Matcher[EntityInfoDto] {
+      def apply(left: EntityInfoDto) = {
+        val matchers = Map(
+            ("id"          -> (left.id equals role.id.id)),
+            ("slug"        -> (left.slug equals role.slug)),
+            ("name"        -> (left.name equals role.name)))
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(
+          nonMatching.size <= 0,
+          "entity info dto does not match role for the following attributes: {0},\ndto: {1},\nrole: {2}",
+          "entity info dto matches role: dto: {1},\nrole: {2}",
+          IndexedSeq(nonMatching.mkString(", "), left, role))
+      }
+    }
+
+  def matchDtoToAccessItem(role: AccessItem) =
+    new Matcher[AccessItemNameDto] {
+      def apply(left: AccessItemNameDto) = {
+        val matchers = Map(
+            ("id"             -> (left.id equals role.id.id)),
+            ("slug"           -> (left.slug equals role.slug)),
+            ("name"           -> (left.name equals role.name)),
+            ("accessItemType" -> (left.accessItemType equals role.accessItemType.id)))
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "dto does not match role for the following attributes: {0},\ndto: {1},\nrole: {2}",
+                    "dto matches role: dto: {1},\nrole: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, role))
+      }
+    }
+
+  def matchEntityInfoDtoToMembership(role: Membership) =
+    new Matcher[EntityInfoDto] {
+      def apply(left: EntityInfoDto) = {
+        val matchers = Map(
+            ("id"             -> (left.id equals role.id.id)),
+            ("slug"           -> (left.slug equals role.slug)),
+            ("name"           -> (left.name equals role.name)))
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "dto does not match role for the following attributes: {0},\ndto: {1},\nrole: {2}",
+                    "dto matches role: dto: {1},\nrole: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, role))
+      }
+    }
+
+  def matchDtoToUserRole(role: Role) =
     new Matcher[UserRoleDto] {
       def apply(left: UserRoleDto) = {
         val matchers = Map(
@@ -213,6 +294,40 @@ trait DtoMatchers {
                     "dto does not match role for the following attributes: {0},\ndto: {1},\nrole: {2}",
                     "dto matches role: dto: {1},\nrole: {2}",
                     IndexedSeq(nonMatching.mkString(", "), left, role))
+      }
+    }
+
+  def matchDtoToMembership(membership: Membership) =
+    new Matcher[MembershipDto] {
+      def apply(left: MembershipDto) = {
+        val timeAddedMatcher =
+          beTimeWithinSeconds(membership.timeAdded, 5L)(OffsetDateTime.parse(left.timeAdded))
+
+        val timeModifiedMatcher = beOptionalTimeWithinSeconds(membership.timeModified, 5L)
+          .apply(left.timeModified.map(OffsetDateTime.parse))
+
+        val dtoUserIds = left.userData.map { ud => ud.id}.toList.sorted
+        val studyEntitySetMatcher = matchDtoToEntitySetDto(membership.studyData)(left.studyData)
+        val centreEntitySetMatcher = matchDtoToEntitySetDto(membership.centreData)(left.centreData)
+
+        val matchers = Map(
+            ("id"           -> (left.id equals membership.id.id)),
+            ("version"      -> (left.version equals membership.version)),
+            ("timeAdded"    -> timeAddedMatcher.matches),
+            ("timeModified" -> (timeModifiedMatcher.matches)),
+            ("slug"         -> (left.slug equals membership.slug)),
+            ("name"         -> (left.name equals membership.name)),
+            ("description"  -> (left.description equals membership.description)),
+            ("userIds"      -> (dtoUserIds equals membership.userIds.toList.sortBy(_.id))),
+            ("studyData"    -> (studyEntitySetMatcher.matches)),
+            ("centreData"   -> (centreEntitySetMatcher.matches)))
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "dto does not match membership for the following attributes: {0},\ndto: {1},\nrole: {2}",
+                    "dto matches membership: dto: {1},\nrole: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, membership))
       }
     }
 

@@ -6,6 +6,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.centres._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
+import org.biobank.dto._
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
 import play.api.test.Helpers._
@@ -21,6 +22,7 @@ class AccessControllerMembershipSpec
     with UserFixtures
     with Inside {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.DtoMatchers._
   import org.biobank.matchers.EntityMatchers._
 
   class MembershipFixture {
@@ -321,7 +323,12 @@ class AccessControllerMembershipSpec
       val createEntity = (name: String) => factory.createMembership.copy(name = name)
       val baseUrl = uri("memberships", "names")
 
-      it should behave like accessEntityNameSharedBehaviour(createEntity, baseUrl)
+      it should behave like accessEntityNameSharedBehaviour(createEntity, baseUrl) {
+        (dtos: List[EntityInfoDto], memberships: List[Membership]) =>
+        (dtos zip memberships).foreach { case (dto, membership) =>
+          dto must matchEntityInfoDtoToMembership(membership)
+        }
+      }
     }
 
     describe("POST /api/access/memberships/name/:membershipId") {

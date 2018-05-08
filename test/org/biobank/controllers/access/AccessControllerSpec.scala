@@ -5,11 +5,17 @@ import org.biobank.controllers.PagedResultsSpec
 import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.users._
-import org.biobank.dto.EntityInfoDto
+import org.biobank.fixtures.Url
+import org.biobank.matchers.PagedResultsMatchers
+import org.biobank.dto._
+import org.biobank.dto.access._
+import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.Inside
+import play.api.mvc._
 import play.api.libs.json._
 import play.api.test.Helpers._
+import scala.concurrent.Future
 
 /**
  * Tests the roles and permissions REST API for [[User Access]].
@@ -20,9 +26,12 @@ class AccessControllerSpec
     extends AccessControllerSpecCommon
     with JsonHelper
     with UserFixtures
+    with PagedResultsMatchers
     with Inside {
   import org.biobank.TestUtils._
+  import org.biobank.matchers.DtoMatchers._
   import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.JsonMatchers._
 
   class ActiveUserFixture {
     val user = factory.createActiveUser
@@ -47,30 +56,25 @@ class AccessControllerSpec
 
       it("list the first page of roles") {
         val limit = 5
-        val jsonItems = PagedResultsSpec(this).multipleItemsResult(
-            uri       = uri("roles") + s"?limit=$limit",
-            offset    = 0,
-            total     = RoleId.maxId.toLong,
-            maybeNext = Some(2),
-            maybePrev = None)
-        jsonItems must have size limit.toLong
-        jsonItems
-          .map { json => (json \ "id").as[String] }
-          .foreach { jsonId => RoleId.withName(jsonId) }
+        val reply = makeAuthRequest(GET, uri("roles") + s"?limit=$limit").value
+        reply must beOkResponseWithJsonReply
+
+        val json = contentAsJson(reply)
+        json must beMultipleItemResults(offset    = 0,
+                                        total     = RoleId.maxId.toLong,
+                                        maybeNext = Some(2),
+                                        maybePrev = None)
+
+        val dtos = (json \ "data" \ "items").validate[List[RoleDto]]
+        dtos must be (jsSuccess)
       }
 
-      it("list a single role filtered by name") {
-        accessItemRepository.getByKey(AccessItemId(RoleId.ShippingUser.toString)) mustSucceed { role =>
-          val jsonItem = PagedResultsSpec(this)
-            .singleItemResult(uri("roles"), Map("filter" -> s"'name::${role.name}'"))
+      describe("list a single role filtered by name") {
+        listSingleRole() { () =>
+          val role = accessItemRepository.getRole(AccessItemId(RoleId.ShippingUser.toString))
+            .toOption.value
 
-          (jsonItem \ "accessItemType").as[String] must be (AccessItem.roleAccessItemType.toString)
-
-          (jsonItem \ "name").as[String] must be (role.name)
-
-          (jsonItem \ "parentData").as[Set[EntityInfoDto]].size must be > 0
-
-          (jsonItem \ "childData").as[Set[EntityInfoDto]].size must be > 0
+          (new Url(uri("roles") + s"?filter='name::${role.name}'"), role)
         }
       }
 
@@ -79,22 +83,18 @@ class AccessControllerSpec
         val role = factory.createRole.copy(name = name)
         accessItemRepository.put(role)
 
-        val jsonItems = PagedResultsSpec(this)
-          .multipleItemsResult(uri         = uri("roles"),
-                               queryParams = Map("sort" -> "name"),
-                               offset      = 0,
-                               total       = RoleId.maxId.toLong + 1,
-                               maybeNext = Some(2),
-                               maybePrev = None)
-        val firstJsonItem = jsonItems(0)
+        val reply = makeAuthRequest(GET, uri("roles") + s"?sort=name").value
+        reply must beOkResponseWithJsonReply
 
-        (firstJsonItem \ "accessItemType").as[String] must be (AccessItem.roleAccessItemType.toString)
+        val json = contentAsJson(reply)
+        json must beMultipleItemResults(offset    = 0,
+                                        total     = RoleId.maxId.toLong + 1,
+                                        maybeNext = Some(2),
+                                        maybePrev = None)
 
-        (firstJsonItem \ "name").as[String] must be (name)
-
-        (firstJsonItem \ "parentData").as[Set[EntityInfoDto]].size must be (0)
-
-        (firstJsonItem \ "childData").as[Set[EntityInfoDto]].size must be (0)
+        val dtos = (json \ "data" \ "items").validate[List[RoleDto]]
+        dtos must be (jsSuccess)
+        dtos.get(0) must matchDtoToRole (role)
       }
 
       it("fail when using an invalid query parameters") {
@@ -106,15 +106,23 @@ class AccessControllerSpec
     describe("GET /api/access/roles/names") {
       val createEntity = (name: String) => factory.createRole.copy(name = name)
       val baseUrl = uri("roles", "names")
-
-      it should behave like accessEntityNameSharedBehaviour(createEntity, baseUrl)
+      it must behave like accessEntityNameSharedBehaviour(createEntity, baseUrl) {
+        (dtos: List[EntityInfoDto], roles: List[Role]) =>
+        (dtos zip roles).foreach { case (dto, role) =>
+          dto must matchEntityInfoDtoToRole(role)
+        }
+      }
     }
 
     describe("GET /api/access/items/names") {
       val createEntity = (name: String) => factory.createPermission.copy(name = name)
       val baseUrl = uri("items", "names")
-
-      it should behave like accessEntityNameSharedBehaviour(createEntity, baseUrl)
+      it should behave like accessEntityNameSharedBehaviour(createEntity, baseUrl) {
+          (replyAccessItemNames: List[AccessItemNameDto], accessItems: List[AccessItem]) =>
+          (replyAccessItemNames zip accessItems).foreach { case (replyAccessItemName, accessItem) =>
+            replyAccessItemName must matchDtoToAccessItem(accessItem)
+          }
+        }
     }
 
     describe("POST /api/access/roles") {
@@ -131,47 +139,31 @@ class AccessControllerSpec
         val f = new RoleFixture
         val json = roleToAddJson(f.role)
 
-        val reply = makeRequest(POST, uri("roles"), json)
+        val reply = makeAuthRequest(POST, uri("roles"), json).value
+        reply must beOkResponseWithJsonReply
 
-        (reply \ "status").as[String] must include ("success")
+        val jsonId = (contentAsJson(reply) \ "data" \ "id").validate[AccessItemId]
+        jsonId must be (jsSuccess)
 
-        val jsonId = (reply \ "data" \ "id").as[String]
-        val itemId = AccessItemId(jsonId)
-        jsonId.length must be > 0
-
-        accessItemRepository.getByKey(itemId) mustSucceed { item =>
-          inside(item) { case repoRole: Role =>
-            compareObj((reply \ "data").as[JsObject], repoRole)
-            repoRole must have (
-              'id             (itemId),
-              'version        (0L)
-            )
-            repoRole.userIds must contain (f.user.id)
-            repoRole must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
-          }
-        }
+        val updatedRole = f.role.copy(id = jsonId.get,
+                                      timeAdded = OffsetDateTime.now)
+        reply must matchUpdatedRole (updatedRole)
       }
 
       it("fails when adding a second role with a name that already exists") {
         val f = new RoleFixture
         val json = roleToAddJson(f.role)
         accessItemRepository.put(f.role)
-        val reply = makeRequest(POST, uri("roles"), BAD_REQUEST, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex("EntityCriteriaError: name already used:")
+        val reply = makeAuthRequest(POST, uri("roles"), json).value
+        reply must beBadRequestWithMessage("EntityCriteriaError: name already used:")
       }
 
       it("attempt to create role fails if user does not exist") {
         val f = new RoleFixture
         userRepository.remove(f.user)
         val json = roleToAddJson(f.role)
-        val reply = makeRequest(POST, uri("roles"), NOT_FOUND, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex("IdNotFound: user id")
+        val reply = makeAuthRequest(POST, uri("roles"), json).value
+        reply must beNotFoundWithMessage("IdNotFound: user id")
       }
 
       it("attempt to create membership fails if parent does not exist") {
@@ -179,11 +171,8 @@ class AccessControllerSpec
         val parentRole = factory.createRole
         val role = f.role.copy(parentIds = Set(parentRole.id))
         val json = roleToAddJson(role)
-        val reply = makeRequest(POST, uri("roles"), NOT_FOUND, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex("IdNotFound: role id")
+        val reply = makeAuthRequest(POST, uri("roles"), json).value
+        reply must beNotFoundWithMessage("IdNotFound: role id")
       }
 
       it("attempt to create membership fails if child does not exist") {
@@ -191,11 +180,8 @@ class AccessControllerSpec
         val childRole = factory.createRole
         val role = f.role.copy(childrenIds = Set(childRole.id))
         val json = roleToAddJson(role)
-        val reply = makeRequest(POST, uri("roles"), NOT_FOUND, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex("IdNotFound: access item id")
+        val reply = makeAuthRequest(POST, uri("roles"), json).value
+        reply must beNotFoundWithMessage("IdNotFound: access item id")
       }
 
     }
@@ -212,25 +198,14 @@ class AccessControllerSpec
         val json = updateNameJson(f.role, newName)
 
         accessItemRepository.put(f.role)
-        val reply = makeRequest(POST, uri("roles", "name", f.role.id.id), json)
+        val reply = makeAuthRequest(POST, uri("roles", "name", f.role.id.id), json).value
+        reply must beOkResponseWithJsonReply
 
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonId = (reply \ "data" \ "id").as[String]
-        val itemId = AccessItemId(jsonId)
-        jsonId.length must be > 0
-
-        accessItemRepository.getByKey(itemId) mustSucceed { item =>
-          inside(item) { case repoRole: Role =>
-            compareObj((reply \ "data").as[JsObject], repoRole)
-            repoRole must have (
-              'id             (itemId),
-              'version        (f.role.version + 1),
-              'name           (newName)
-            )
-            repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
-          }
-        }
+        val updatedRole = f.role.copy(version      = f.role.version + 1,
+                                      slug         = Slug(newName),
+                                      name         = newName,
+                                      timeModified = Some(OffsetDateTime.now))
+        reply must matchUpdatedRole (updatedRole)
       }
 
       it("fails when updating to name already used by another role") {
@@ -239,11 +214,8 @@ class AccessControllerSpec
         val json = updateNameJson(f.role, role.name)
 
         Set(f.role, role).foreach(addToRepository)
-        val reply = makeRequest(POST, uri("roles", "name", f.role.id.id), BAD_REQUEST, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex("EntityCriteriaError: name already used:")
+        val reply = makeAuthRequest(POST, uri("roles", "name", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("EntityCriteriaError: name already used:")
       }
 
       it("fail when updating to something with less than 2 characters") {
@@ -251,11 +223,8 @@ class AccessControllerSpec
         val json = updateNameJson(f.role, "a")
 
         accessItemRepository.put(f.role)
-        val reply = makeRequest(POST, uri("roles", "name", f.role.id.id), BAD_REQUEST, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must startWith ("InvalidName")
+        val reply = makeAuthRequest(POST, uri("roles", "name", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("InvalidName")
       }
 
       it("fail when updating and role ID does not exist") {
@@ -271,7 +240,8 @@ class AccessControllerSpec
         val json = updateNameJson(f.role, nameGenerator.next[Role]) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         accessItemRepository.put(f.role)
-        hasInvalidVersion(POST, uri("roles", "name", f.role.id.id), json)
+        val reply = makeAuthRequest(POST, uri("roles", "name", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("expected version doesn't match current version")
       }
 
     }
@@ -292,25 +262,13 @@ class AccessControllerSpec
           val json = updateDescriptionJson(f.role, newDescription)
 
           accessItemRepository.put(f.role)
-          val reply = makeRequest(POST, uri("roles", "description", f.role.id.id), json)
+          val reply = makeAuthRequest(POST, uri("roles", "description", f.role.id.id), json).value
+          reply must beOkResponseWithJsonReply
 
-          (reply \ "status").as[String] must include ("success")
-
-          val jsonId = (reply \ "data" \ "id").as[String]
-          val itemId = AccessItemId(jsonId)
-          jsonId.length must be > 0
-
-          accessItemRepository.getByKey(itemId) mustSucceed { item =>
-            inside(item) { case repoRole: Role =>
-              compareObj((reply \ "data").as[JsObject], repoRole)
-              repoRole must have (
-                'id             (itemId),
-                'version        (f.role.version + 1),
-                'description    (newDescription)
-              )
-              repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
-            }
-          }
+          val updatedRole = f.role.copy(version      = f.role.version + 1,
+                                        description  = newDescription,
+                                        timeModified = Some(OffsetDateTime.now))
+          reply must matchUpdatedRole (updatedRole)
         }
       }
 
@@ -327,7 +285,8 @@ class AccessControllerSpec
         val json = updateDescriptionJson(f.role, Some(nameGenerator.next[Role])) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         accessItemRepository.put(f.role)
-        hasInvalidVersion(POST, uri("roles") + s"/description/${f.role.id}", json)
+        val reply = makeAuthRequest(POST, uri("roles") + s"/description/${f.role.id}", json).value
+        reply must beBadRequestWithMessage("expected version doesn't match current version")
       }
 
     }
@@ -344,25 +303,13 @@ class AccessControllerSpec
         val json = addUserJson(f.role, user)
 
         Set(f.role, user).foreach(addToRepository)
-        val reply = makeRequest(POST, uri("roles", "user", f.role.id.id), json)
+        val reply = makeAuthRequest(POST, uri("roles", "user", f.role.id.id), json).value
+        reply must beOkResponseWithJsonReply
 
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonId = (reply \ "data" \ "id").as[String]
-        val itemId = AccessItemId(jsonId)
-        jsonId.length must be > 0
-
-        accessItemRepository.getByKey(itemId) mustSucceed { item =>
-          inside(item) { case repoRole: Role =>
-            compareObj((reply \ "data").as[JsObject], repoRole)
-            repoRole must have (
-              'id             (itemId),
-              'version        (f.role.version + 1)
-            )
-            repoRole.userIds must contain (user.id)
-            repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
-          }
-        }
+        val updatedRole = f.role.copy(version      = f.role.version + 1,
+                                      userIds      = f.role.userIds + user.id,
+                                      timeModified = Some(OffsetDateTime.now))
+        reply must matchUpdatedRole (updatedRole)
       }
 
       it("cannot add the same user more than once") {
@@ -370,11 +317,8 @@ class AccessControllerSpec
         val json = addUserJson(f.role, f.user)
 
         accessItemRepository.put(f.role)
-        val reply = makeRequest(POST, uri("roles", "user", f.role.id.id), BAD_REQUEST, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("user ID is already in role")
+        val reply = makeAuthRequest(POST, uri("roles", "user", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("user ID is already in role")
       }
 
       it("cannot add a user that does not exist") {
@@ -383,11 +327,8 @@ class AccessControllerSpec
         val json = addUserJson(f.role, user)
 
         accessItemRepository.put(f.role)
-        val reply = makeRequest(POST, uri("roles", "user", f.role.id.id), NOT_FOUND, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("IdNotFound: user id")
+        val reply = makeAuthRequest(POST, uri("roles", "user", f.role.id.id), json).value
+        reply must beNotFoundWithMessage("IdNotFound: user id")
       }
 
       it("fail when updating and role ID does not exist") {
@@ -395,10 +336,8 @@ class AccessControllerSpec
         val user = factory.createRegisteredUser
         val json = addUserJson(f.role, user)
         userRepository.put(user)
-        val reply = makeAuthRequest(POST,
-                                    uri("roles", "user", f.role.id.id),
-                                    json)
-        reply.value must beNotFoundWithMessage("IdNotFound: role id")
+        val reply = makeAuthRequest(POST, uri("roles", "user", f.role.id.id), json).value
+        reply must beNotFoundWithMessage("IdNotFound: role id")
 
       }
 
@@ -408,7 +347,8 @@ class AccessControllerSpec
         val json = addUserJson(f.role, user) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         Set(f.role, user).foreach(addToRepository)
-        hasInvalidVersion(POST, uri("roles", "user", f.role.id.id), json)
+        val reply = makeAuthRequest(POST, uri("roles", "user", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("expected version doesn't match current version")
       }
 
     }
@@ -425,25 +365,13 @@ class AccessControllerSpec
         val json = addParentRoleJson(f.role, parentRole)
 
         Set(f.role, parentRole).foreach(addToRepository)
-        val reply = makeRequest(POST, uri("roles", "parent", f.role.id.id), json)
+        val reply = makeAuthRequest(POST, uri("roles", "parent", f.role.id.id), json).value
+        reply must beOkResponseWithJsonReply
 
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonId = (reply \ "data" \ "id").as[String]
-        val itemId = AccessItemId(jsonId)
-        jsonId.length must be > 0
-
-        accessItemRepository.getByKey(itemId) mustSucceed { item =>
-          inside(item) { case repoRole: Role =>
-            compareObj((reply \ "data").as[JsObject], repoRole)
-            repoRole must have (
-              'id             (itemId),
-              'version        (f.role.version + 1)
-            )
-            repoRole.parentIds must contain (parentRole.id)
-            repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
-          }
-        }
+        val updatedRole = f.role.copy(version      = f.role.version + 1,
+                                      parentIds    = f.role.parentIds + parentRole.id,
+                                      timeModified = Some(OffsetDateTime.now))
+        reply must matchUpdatedRole (updatedRole)
       }
 
       it("cannot add self as a parent role") {
@@ -451,11 +379,8 @@ class AccessControllerSpec
         val json = addParentRoleJson(f.role, f.role)
 
         Set(f.role).foreach(addToRepository)
-        val reply = makeRequest(POST, uri("roles", "parent", f.role.id.id), BAD_REQUEST, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("parent ID cannot be self")
+        val reply = makeAuthRequest(POST, uri("roles", "parent", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("parent ID cannot be self")
       }
 
       it("cannot add the same parent role more than once") {
@@ -465,11 +390,8 @@ class AccessControllerSpec
         val json = addParentRoleJson(role, parentRole)
 
         Set(role, parentRole).foreach(addToRepository)
-        val reply = makeRequest(POST, uri("roles", "parent", role.id.id), BAD_REQUEST, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("parent ID is already in role")
+        val reply = makeAuthRequest(POST, uri("roles", "parent", role.id.id), json).value
+        reply must beBadRequestWithMessage("parent ID is already in role")
       }
 
       it("cannot add a parent role that does not exist") {
@@ -478,11 +400,8 @@ class AccessControllerSpec
         val json = addParentRoleJson(f.role, parentRole)
 
         Set(f.role).foreach(addToRepository)
-        val reply = makeRequest(POST, uri("roles", "parent", f.role.id.id), NOT_FOUND, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex(s"IdNotFound: access item id.*${parentRole.id.id}")
+        val reply = makeAuthRequest(POST, uri("roles", "parent", f.role.id.id), json).value
+        reply must beNotFoundWithMessage(s"IdNotFound: access item id.*${parentRole.id.id}")
       }
 
       it("fail when updating and role ID does not exist") {
@@ -502,7 +421,8 @@ class AccessControllerSpec
         val json = addParentRoleJson(f.role, parentRole) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         Set(f.role, parentRole).foreach(addToRepository)
-        hasInvalidVersion(POST, uri("roles", "parent", f.role.id.id), json)
+        val reply = makeAuthRequest(POST, uri("roles", "parent", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("expected version doesn't match current version")
       }
 
     }
@@ -523,25 +443,13 @@ class AccessControllerSpec
           val json = addChildJson(f.role, child)
 
           Set(f.role, child).foreach(addToRepository)
-          val reply = makeRequest(POST, uri("roles", "child", f.role.id.id), json)
+          val reply = makeAuthRequest(POST, uri("roles", "child", f.role.id.id), json).value
+          reply must beOkResponseWithJsonReply
 
-          (reply \ "status").as[String] must include ("success")
-
-          val jsonId = (reply \ "data" \ "id").as[String]
-          val itemId = AccessItemId(jsonId)
-          jsonId.length must be > 0
-
-          accessItemRepository.getByKey(itemId) mustSucceed { item =>
-            inside(item) { case repoRole: Role =>
-              compareObj((reply \ "data").as[JsObject], repoRole)
-              repoRole must have (
-                'id             (itemId),
-                'version        (f.role.version + 1)
-              )
-              repoRole.childrenIds must contain (child.id)
-              repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
-            }
-          }
+          val updatedRole = f.role.copy(version      = f.role.version + 1,
+                                        childrenIds  = f.role.childrenIds + child.id,
+                                        timeModified = Some(OffsetDateTime.now))
+          reply must matchUpdatedRole (updatedRole)
         }
       }
 
@@ -550,11 +458,8 @@ class AccessControllerSpec
         val json = addChildJson(f.role, f.role)
 
         Set(f.role).foreach(addToRepository)
-        val reply = makeRequest(POST, uri("roles", "child", f.role.id.id), BAD_REQUEST, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("child ID cannot be self")
+        val reply = makeAuthRequest(POST, uri("roles", "child", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("child ID cannot be self")
       }
 
       it("cannot add the same child role more than once") {
@@ -568,11 +473,8 @@ class AccessControllerSpec
           val json = addChildJson(role, child)
 
           Set(role, child).foreach(addToRepository)
-          val reply = makeRequest(POST, uri("roles", "child", role.id.id), BAD_REQUEST, json)
-
-          (reply \ "status").as[String] must include ("error")
-
-          (reply \ "message").as[String] must include ("child ID is already in role")
+          val reply = makeAuthRequest(POST, uri("roles", "child", role.id.id), json).value
+          reply must beBadRequestWithMessage("child ID is already in role")
         }
       }
 
@@ -582,11 +484,8 @@ class AccessControllerSpec
         val json = addChildJson(f.role, child)
 
         Set(f.role).foreach(addToRepository)
-        val reply = makeRequest(POST, uri("roles", "child", f.role.id.id), NOT_FOUND, json)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include regex(s"IdNotFound: access item id.*${child.id.id}")
+        val reply = makeAuthRequest(POST, uri("roles", "child", f.role.id.id), json).value
+        reply must beNotFoundWithMessage(s"IdNotFound: access item id.*${child.id.id}")
       }
 
       it("fail when updating and role ID does not exist") {
@@ -594,10 +493,8 @@ class AccessControllerSpec
         val child = factory.createRole
         val json = addChildJson(f.role, child)
         accessItemRepository.put(child)
-        val reply = makeAuthRequest(POST,
-                                    uri("roles", "child", f.role.id.id),
-                                    json)
-        reply.value must beNotFoundWithMessage("IdNotFound: role id")
+        val reply = makeAuthRequest(POST, uri("roles", "child", f.role.id.id), json).value
+        reply must beNotFoundWithMessage("IdNotFound: role id")
       }
 
       it("fail when updating with invalid version") {
@@ -606,7 +503,8 @@ class AccessControllerSpec
         val json = addChildJson(f.role, child) ++
         Json.obj("expectedVersion" -> Some(f.role.version + 10L))
         Set(f.role, child).foreach(addToRepository)
-        hasInvalidVersion(POST, uri("roles", "child", f.role.id.id), json)
+        val reply = makeAuthRequest(POST, uri("roles", "child", f.role.id.id), json).value
+        reply must beBadRequestWithMessage("expected version doesn't match current version")
       }
 
     }
@@ -620,25 +518,13 @@ class AccessControllerSpec
       val url = uri("roles", "user", f.role.id.id, f.role.version.toString, f.user.id.id)
 
       addToRepository(f.role)
-      val reply = makeRequest(DELETE, url)
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beOkResponseWithJsonReply
 
-      (reply \ "status").as[String] must include ("success")
-
-      val jsonId = (reply \ "data" \ "id").as[String]
-      val itemId = AccessItemId(jsonId)
-      jsonId.length must be > 0
-
-      accessItemRepository.getByKey(itemId) mustSucceed { item =>
-        inside(item) { case repoRole: Role =>
-          compareObj((reply \ "data").as[JsObject], repoRole)
-          repoRole must have (
-            'id             (itemId),
-            'version        (f.role.version + 1)
-          )
-          repoRole.userIds must not contain (f.user.id)
-          repoRole must beEntityWithTimeStamps(f.role.timeAdded, Some(OffsetDateTime.now), 5L)
-        }
-      }
+      val updatedRole = f.role.copy(version      = f.role.version + 1,
+                                    userIds      = f.role.userIds - f.user.id,
+                                    timeModified = Some(OffsetDateTime.now))
+      reply must matchUpdatedRole (updatedRole)
     }
 
     it("cannot remove a user not in the role") {
@@ -646,11 +532,8 @@ class AccessControllerSpec
       val user = factory.createRegisteredUser
       Set(f.role, user).map(addToRepository)
       val url = uri("roles", "user", f.role.id.id, f.role.version.toString, user.id.id)
-      val reply = makeRequest(DELETE, url, BAD_REQUEST)
-
-      (reply \ "status").as[String] must include ("error")
-
-      (reply \ "message").as[String] must include ("user ID is not in role")
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beBadRequestWithMessage("user ID is not in role")
     }
 
     it("cannot remove a user that does not exist") {
@@ -658,11 +541,8 @@ class AccessControllerSpec
       val user = factory.createRegisteredUser
       Set(f.role).map(addToRepository)
       val url = uri("roles", "user", f.role.id.id, f.role.version.toString, user.id.id)
-      val reply = makeRequest(DELETE, url, NOT_FOUND)
-
-      (reply \ "status").as[String] must include ("error")
-
-      (reply \ "message").as[String] must include ("IdNotFound: user id")
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beNotFoundWithMessage ("IdNotFound: user id")
     }
 
     it("fail when removing and role ID does not exist") {
@@ -671,8 +551,8 @@ class AccessControllerSpec
       val url = uri("roles", "user", f.role.id.id, f.role.version.toString, user.id.id)
       Set(user).map(addToRepository)
 
-      val reply = makeAuthRequest(DELETE, url)
-      reply.value must beNotFoundWithMessage("IdNotFound: role id")
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beNotFoundWithMessage("IdNotFound: role id")
     }
 
     it("fail when removing with invalid version") {
@@ -680,7 +560,8 @@ class AccessControllerSpec
       val user = factory.createRegisteredUser
       val url = uri("roles", "user", f.role.id.id, (f.role.version + 10L).toString, user.id.id)
       Set(f.role, user).map(addToRepository)
-      hasInvalidVersion(DELETE, url)
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beBadRequestWithMessage("expected version doesn't match current version")
     }
 
   }
@@ -694,25 +575,13 @@ class AccessControllerSpec
       val url = uri("roles", "parent", role.id.id, role.version.toString, parentRole.id.id)
 
       Set(role, parentRole).foreach(addToRepository)
-      val reply = makeRequest(DELETE, url)
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must be
 
-      (reply \ "status").as[String] must include ("success")
-
-      val jsonId = (reply \ "data" \ "id").as[String]
-      val itemId = AccessItemId(jsonId)
-      jsonId.length must be > 0
-
-      accessItemRepository.getByKey(itemId) mustSucceed { item =>
-        inside(item) { case repoRole: Role =>
-          compareObj((reply \ "data").as[JsObject], repoRole)
-          repoRole must have (
-            'id             (itemId),
-            'version        (role.version + 1)
-          )
-          repoRole.parentIds must not contain (parentRole.id)
-          repoRole must beEntityWithTimeStamps(role.timeAdded, Some(OffsetDateTime.now), 5L)
-        }
-      }
+      val updatedRole = f.role.copy(version      = f.role.version + 1,
+                                    parentIds    = f.role.parentIds - parentRole.id,
+                                    timeModified = Some(OffsetDateTime.now))
+      reply must matchUpdatedRole (updatedRole)
     }
 
     it("cannot remove a parent role not in the role") {
@@ -720,11 +589,8 @@ class AccessControllerSpec
       val parentRole = factory.createRole
       Set(f.role, parentRole).map(addToRepository)
       val url = uri("roles", "parent", f.role.id.id, f.role.version.toString, parentRole.id.id)
-      val reply = makeRequest(DELETE, url, BAD_REQUEST)
-
-      (reply \ "status").as[String] must include ("error")
-
-      (reply \ "message").as[String] must include ("parent ID not in role")
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beBadRequestWithMessage("parent ID not in role")
     }
 
     it("cannot remove a parent role that does not exist") {
@@ -732,11 +598,8 @@ class AccessControllerSpec
       val parentRole = factory.createRole
       Set(f.role).map(addToRepository)
       val url = uri("roles", "parent", f.role.id.id, f.role.version.toString, parentRole.id.id)
-      val reply = makeRequest(DELETE, url, NOT_FOUND)
-
-      (reply \ "status").as[String] must include ("error")
-
-      (reply \ "message").as[String] must include ("IdNotFound: access item id")
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beNotFoundWithMessage("IdNotFound: access item id")
     }
 
     it("fail when removing and role ID does not exist") {
@@ -744,8 +607,8 @@ class AccessControllerSpec
       val parentRole = factory.createRole
       val url = uri("roles", "parent", f.role.id.id, f.role.version.toString, parentRole.id.id)
       Set(parentRole).map(addToRepository)
-      val reply = makeAuthRequest(DELETE, url)
-      reply.value must beNotFoundWithMessage("IdNotFound: role id")
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beNotFoundWithMessage("IdNotFound: role id")
     }
 
     it("fail when removing with invalid version") {
@@ -753,7 +616,8 @@ class AccessControllerSpec
       val parentRole = factory.createRole
       val url = uri("roles", "parent", f.role.id.id, (f.role.version + 10L).toString, parentRole.id.id)
       Set(f.role, parentRole).map(addToRepository)
-      hasInvalidVersion(DELETE, url)
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beBadRequestWithMessage("expected version doesn't match current version")
     }
 
   }
@@ -770,25 +634,12 @@ class AccessControllerSpec
         val url = uri("roles", "child", role.id.id, role.version.toString, child.id.id)
 
         Set(role, child).foreach(addToRepository)
-        val reply = makeRequest(DELETE, url)
+        val reply = makeAuthRequest(DELETE, url).value
 
-        (reply \ "status").as[String] must include ("success")
-
-        val jsonId = (reply \ "data" \ "id").as[String]
-        val itemId = AccessItemId(jsonId)
-        jsonId.length must be > 0
-
-        accessItemRepository.getByKey(itemId) mustSucceed { item =>
-          inside(item) { case repoRole: Role =>
-            compareObj((reply \ "data").as[JsObject], repoRole)
-            repoRole must have (
-              'id             (itemId),
-              'version        (role.version + 1)
-            )
-            repoRole.childrenIds must not contain (child.id)
-            repoRole must beEntityWithTimeStamps(role.timeAdded, Some(OffsetDateTime.now), 5L)
-          }
-        }
+        val updatedRole = f.role.copy(version      = f.role.version + 1,
+                                      childrenIds  = f.role.childrenIds - child.id,
+                                      timeModified = Some(OffsetDateTime.now))
+        reply must matchUpdatedRole (updatedRole)
       }
     }
   }
@@ -800,11 +651,11 @@ class AccessControllerSpec
       val url = uri("roles", f.role.id.id, f.role.version.toString)
 
       accessItemRepository.put(f.role)
-      val reply = makeRequest(DELETE, url)
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beOkResponseWithJsonReply
 
-      (reply \ "status").as[String] must include ("success")
-
-      (reply \ "data").as[Boolean] must be (true)
+      val result = (contentAsJson(reply) \ "data").validate[Boolean]
+      result must be (jsSuccess)
 
       accessItemRepository.getByKey(f.role.id) mustFail ("IdNotFound: access item id.*")
     }
@@ -812,17 +663,78 @@ class AccessControllerSpec
     it("cannot remove a role that does not exist") {
       val f = new RoleFixture
       val url = uri("roles", f.role.id.id, f.role.version.toString)
-      val reply = makeAuthRequest(DELETE, url)
-      reply.value must beNotFoundWithMessage("IdNotFound: role id")
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beNotFoundWithMessage("IdNotFound: role id")
     }
 
     it("fail when removing with invalid version") {
       val f = new RoleFixture
       val url = uri("roles", f.role.id.id, (f.role.version + 10L).toString)
       accessItemRepository.put(f.role)
-      hasInvalidVersion(DELETE, url)
+      val reply = makeAuthRequest(DELETE, url).value
+      reply must beBadRequestWithMessage("expected version doesn't match current version")
     }
 
   }
+
+  private def listSingleRole(offset:    Long = 0,
+                             maybeNext:    Option[Int] = None,
+                             maybePrev: Option[Int] = None)
+                            (setupFunc: () => (Url, Role)) = {
+
+    it("list single role") {
+      val (url, expectedRole) = setupFunc()
+      val reply = makeAuthRequest(GET, url.path).value
+      reply must beOkResponseWithJsonReply
+
+      val json = contentAsJson(reply)
+      json must beSingleItemResults(offset, maybeNext, maybePrev)
+
+      val replyDtos = (json \ "data" \ "items").validate[List[RoleDto]]
+      replyDtos must be (jsSuccess)
+      replyDtos.get.foreach { _ must matchDtoToRole (expectedRole) }
+    }
+  }
+
+  // matches the updated role against the DTO returned by the server and the role in the repository
+  private def matchUpdatedRole(role: Role) =
+    new Matcher[Future[Result]] {
+      def apply (left: Future[Result]) = {
+        val dto = (contentAsJson(left) \ "data").validate[RoleDto]
+        val jsSuccessMatcher = jsSuccess(dto)
+
+        if (!jsSuccessMatcher.matches) {
+          jsSuccessMatcher
+        } else {
+          val replyMatcher = matchDtoToRole(role)(dto.get)
+
+          if (!replyMatcher.matches) {
+            MatchResult(false,
+                        s"reply does not match expected: ${replyMatcher.failureMessage}",
+                        s"reply matches expected: ${replyMatcher.failureMessage}")
+          } else {
+            matchRepositoryRole(role)
+          }
+        }
+      }
+    }
+
+  private def matchRepositoryRole =
+    new Matcher[Role] {
+      def apply (left: Role) = {
+        accessItemRepository.getRole(left.id).fold(
+          err => {
+            MatchResult(false, s"not found in repository: ${err.head}", "")
+
+          },
+          repoCet => {
+            val repoMatcher = matchRole(repoCet)(left)
+            MatchResult(repoMatcher.matches,
+                        s"repository role does not match expected: ${repoMatcher.failureMessage}",
+                        s"repository role matches expected: ${repoMatcher.failureMessage}")
+          }
+        )
+      }
+    }
 
 }

@@ -15,7 +15,7 @@ package access {
     def compareByName(a: AccessItemNameDto, b: AccessItemNameDto): Boolean =
       (a.name compareToIgnoreCase b.name) < 0
 
-    implicit val accessItemNameDtoWriter: Writes[AccessItemNameDto] = Json.writes[AccessItemNameDto]
+    implicit val accessItemNameDtoFormat: Format[AccessItemNameDto] = Json.format[AccessItemNameDto]
   }
 
   final case class RoleDto(id:             String,
@@ -23,16 +23,32 @@ package access {
                            timeAdded:      String,
                            timeModified:   Option[String],
                            accessItemType: String,
-                           slug: Slug,
+                           slug:           Slug,
                            name:           String,
                            description:    Option[String],
                            userData:       Set[EntityInfoDto],
                            parentData:     Set[EntityInfoDto],
-                           childData:      Set[EntityInfoDto]) extends Dto
+                           childData:      Set[EntityInfoDto]) extends Dto {
+
+    override def toString: String =
+      s"""|${this.getClass.getSimpleName}: {
+          |  id:             $id,
+          |  version:        $version,
+          |  timeAdded:      $timeAdded,
+          |  timeModified:   $timeModified,
+          |  accessItemType: $accessItemType,
+          |  slug:           $slug,
+          |  name:           $name,
+          |  description:    $description,
+          |  userData:       $userData,
+          |  parentData:     $parentData,
+          |  childData:      $childData
+          |}""".stripMargin
+  }
 
   object RoleDto {
 
-    implicit val roleDtoWriter: Writes[RoleDto] = Json.writes[RoleDto]
+    implicit val roleDtoFormat: Format[RoleDto] = Json.format[RoleDto]
 
   }
 

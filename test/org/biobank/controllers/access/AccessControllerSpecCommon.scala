@@ -9,60 +9,60 @@ trait AccessControllerSpecCommon
     extends ControllerFixture
     with JsonHelper {
 
+  import org.biobank.matchers.JsonMatchers._
+
   protected def uri(paths: String*): String = {
     val basePath = "/api/access"
     if (paths.isEmpty) basePath
     else s"$basePath/" + paths.mkString("/")
   }
 
-  def accessEntityNameSharedBehaviour[T <: ConcurrencySafeEntity[_] with HasName with HasSlug]
-    (createEntity: String => T, baseUrl: String) {
+  def accessEntityNameSharedBehaviour[D, T <: ConcurrencySafeEntity[_] with HasName with HasSlug](
+    createEntity: String => T,
+    baseUrl: String
+  ) (
+    matchItems: (List[D], List[T]) => Unit
+  ) (
+    implicit reads: Reads[D]
+  ) {
 
       it("list multiple item names in ascending order") {
         val items = List(createEntity("ITEM2"),
-                         createEntity("ITEM1"))
+                         createEntity("ITEM1")).sortBy(_.name)
         items.foreach(addToRepository)
 
-        val json = makeRequest(GET, baseUrl + "?filter=name:like:ITEM&order=asc")
+        val reply = makeAuthRequest(GET, baseUrl + "?filter=name:like:ITEM&order=asc").value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
-
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size items.size.toLong
-
-        compareNameDto(jsonList(0), items(1))
-        compareNameDto(jsonList(1), items(0))
+        val replyEntities = (contentAsJson(reply) \ "data").validate[List[D]]
+        replyEntities must be (jsSuccess)
+        matchItems(replyEntities.get, items)
       }
 
       it("list single study when using a filter") {
         val items = List(createEntity("ITEM2"),
-                         createEntity("ITEM1"))
+                         createEntity("ITEM1")).sortBy(_.name)
         items.foreach(addToRepository)
 
-        val json = makeRequest(GET, baseUrl + "?filter=name::ITEM1")
+        val reply = makeAuthRequest(GET, baseUrl + "?filter=name::ITEM1").value
+        reply must beOkResponseWithJsonReply
 
-        (json \ "status").as[String] must include ("success")
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 1
-
-        compareNameDto(jsonList(0), items(1))
+        val replyEntities = (contentAsJson(reply) \ "data").validate[List[D]]
+        replyEntities must be (jsSuccess)
+        matchItems(replyEntities.get, items)
       }
 
       it("list nothing when using a name filter for name not in system") {
-        val json = makeRequest(GET, baseUrl + "?filter=name::abc123")
-
-        (json \ "status").as[String] must include ("success")
-
-        val jsonList = (json \ "data").as[List[JsObject]]
-        jsonList must have size 0
+        val reply = makeAuthRequest(GET, baseUrl + "?filter=name::abc123").value
+        reply must beOkResponseWithJsonReply
+        val replyEntities = (contentAsJson(reply) \ "data").validate[List[D]]
+        replyEntities must be (jsSuccess)
+        replyEntities.get must have size 0
       }
 
       it("fail for invalid sort field") {
-        val json = makeRequest(GET, baseUrl + "?sort=xxxx", BAD_REQUEST)
-
-        (json \ "status").as[String] must include ("error")
-
-        (json \ "message").as[String] must include ("invalid sort field")
+        val reply = makeAuthRequest(GET, baseUrl + "?sort=xxxx").value
+        reply must beBadRequestWithMessage("invalid sort field")
       }
 
   }

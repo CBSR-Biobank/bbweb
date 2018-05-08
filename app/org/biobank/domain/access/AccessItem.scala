@@ -149,6 +149,7 @@ sealed trait AccessItem
         |  version:        $version,
         |  timeAdded:      $timeAdded,
         |  timeModified:   $timeModified,
+        |  slug:           $slug,
         |  name:           $name,
         |  description:    $description,
         |  accessItemType: $accessItemType
