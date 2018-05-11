@@ -6,13 +6,13 @@ import org.biobank.domain.studies.{ EnabledStudy, Study }
 import org.biobank.fixtures._
 import scala.collection.mutable.ListBuffer
 import play.api.libs.json._
-import play.api.http.HttpVerbs._
-import play.api.http.Status._
+import play.api.test.Helpers._
 
 trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnnotations[_]]
-    extends ControllerFixture
-    with JsonHelper {
+    extends ControllerFixture { this: ControllerFixture =>
+
   import org.biobank.AnnotationTestUtils._
+  import org.biobank.matchers.JsonMatchers._
 
   protected val nameGenerator: NameGenerator
 
@@ -58,43 +58,33 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       val annotTypeData = createAnnotationsAndTypes
       val addedAnnotations = ListBuffer.empty[Annotation]
 
-      var entity = createEntity(annotTypeData.keys.toSet, Set.empty)
+      val entity = createEntity(annotTypeData.keys.toSet, Set.empty)
       entity.annotations must have size 0
 
-      annotTypeData.values.foreach { annotation =>
-        val json = makeRequest(POST,
-                               updateUri(entity),
-                               Json.obj("expectedVersion" -> entity.version) ++
-                                 annotationToJson(annotation))
-
-        (json \ "status").as[String] must include ("success")
+      annotTypeData.values.zipWithIndex.foreach { case (annotation, index) =>
+        val reply = makeAuthRequest(POST,
+                                    updateUri(entity),
+                                    Json.obj("expectedVersion" -> (entity.version + index))
+                                      ++ annotationToJson(annotation)).value
+        reply must beOkResponseWithJsonReply
 
         addedAnnotations += annotation
 
-        val jsonAnnotations = (json \ "data" \ "annotations").as[List[JsObject]]
-        jsonAnnotations must have size addedAnnotations.size.toLong
-
-        jsonAnnotations.foreach { jsonAnnotation =>
-          val jsonAnnotationTypeId = (jsonAnnotation \ "annotationTypeId").as[String]
-          val foundAnnotation = addedAnnotations.find(x => x.annotationTypeId.id == jsonAnnotationTypeId).value
-          compareAnnotation(jsonAnnotation, foundAnnotation)
-        }
-
-        entityFromRepository(entity.id.toString).map(entity = _)
+        val replyAnnotations = (contentAsJson(reply) \ "data" \ "annotations").validate[List[Annotation]]
+        replyAnnotations must be (jsSuccess)
+        replyAnnotations.get.sortBy(_.annotationTypeId.id) must equal (
+          addedAnnotations.sortBy(_.annotationTypeId.id))
       }
     }
 
     it(s"fail when adding annotation and ${entityName} parent does not have annotation types") {
       val annotation = factory.createAnnotation
       val entity = createEntity(Set.empty, Set(annotation))
-      val json = makeRequest(POST,
-                             updateUri(entity),
-                             NOT_FOUND,
-                             Json.obj("expectedVersion" -> entity.version) ++ annotationToJson(annotation))
-
-      (json \ "status").as[String] must include ("error")
-
-      (json \ "message").as[String] must include regex "does not have annotation type"
+      val reply = makeAuthRequest(POST,
+                                  updateUri(entity),
+                                  Json.obj("expectedVersion" -> entity.version)
+                                    ++ annotationToJson(annotation)).value
+      reply must beNotFoundWithMessage("does not have annotation type")
     }
 
     it("fail when adding annotation and annotation has invalid annotation type id") {
@@ -104,31 +94,21 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
 
       val entity = createEntity(Set(annotationType), Set(annotation))
 
-      val json = makeRequest(POST,
-                             updateUri(entity),
-                             NOT_FOUND,
-                             Json.obj("expectedVersion" -> entity.version) ++
-                               annotationToJson(annotation))
-
-      (json \ "status").as[String] must include ("error")
-
-      (json \ "message").as[String] must include regex "does not have annotation type"
+      val reply = makeAuthRequest(POST,
+                                  updateUri(entity),
+                                  Json.obj("expectedVersion" -> entity.version)
+                                    ++ annotationToJson(annotation)).value
+      reply must beNotFoundWithMessage("does not have annotation type")
     }
 
     it("fail when adding annotation with an invalid version") {
       val annotation = factory.createAnnotation
-
       val entity = createEntity(Set.empty, Set(annotation))
-
-      val json = makeRequest(POST,
-                             updateUri(entity),
-                             BAD_REQUEST,
-                             Json.obj("expectedVersion" -> (entity.version + 1)) ++
-                               annotationToJson(annotation))
-
-      (json \ "status").as[String] must include ("error")
-
-      (json \ "message").as[String] must include ("expected version doesn't match current version")
+      val reply = makeAuthRequest(POST,
+                                  updateUri(entity),
+                                  Json.obj("expectedVersion" -> (entity.version + 1))
+                               ++ annotationToJson(annotation)).value
+      reply must beBadRequestWithMessage("expected version doesn't match current version")
     }
 
   }
@@ -139,29 +119,23 @@ trait AnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with HasAnno
       val annotationType = factory.createAnnotationType
       val annotation = factory.createAnnotation
       val entity = createEntity(Set(annotationType), Set(annotation))
-
-      val json = makeRequest(
+      val reply = makeAuthRequest(
           DELETE,
-          updateUri(entity) + s"/${annotation.annotationTypeId}/${entity.version}")
-
-      (json \ "status").as[String] must include ("success")
-
-      (json \ "data" \ "annotations").as[List[JsObject]] must have size 0
+          updateUri(entity) + s"/${annotation.annotationTypeId}/${entity.version}").value
+      reply must beOkResponseWithJsonReply
+      val replyAnnotations = (contentAsJson(reply) \ "data" \ "annotations").validate[List[Annotation]]
+      replyAnnotations must be (jsSuccess)
+      replyAnnotations.get must be (List.empty[Annotation])
     }
 
     it("fail when attempting to remove a required annotation") {
       val annotationType = factory.createAnnotationType.copy(required = true)
       val annotation = factory.createAnnotation
       val entity = createEntity(Set(annotationType), Set(annotation))
-
-      val json = makeRequest(
+      val reply = makeAuthRequest(
           DELETE,
-          updateUri(entity) + s"/${annotation.annotationTypeId}/${entity.version}",
-          BAD_REQUEST)
-
-      (json \ "status").as[String] must include ("error")
-
-      (json \ "message").as[String] must include ("annotation is required")
+          updateUri(entity) + s"/${annotation.annotationTypeId}/${entity.version}").value
+      reply must beBadRequestWithMessage("annotation is required")
     }
   }
 
@@ -212,16 +186,11 @@ trait StudyAnnotationsControllerSharedSpec[T <: ConcurrencySafeEntity[_] with Ha
 
     def updateOnNonEnabledStudy(study: Study, entity: T, annotation: Annotation) {
       study must not be an [EnabledStudy]
-
-      val json = makeRequest(POST,
-                             updateUri(entity),
-                             BAD_REQUEST,
-                             Json.obj("expectedVersion" -> entity.version) ++
-                               annotationToJson(annotation))
-
-      (json \ "status").as[String] must include ("error")
-
-      (json \ "message").as[String] must include regex("InvalidStatus: study not enabled")
+      val reply = makeAuthRequest(POST,
+                                  updateUri(entity),
+                                  Json.obj("expectedVersion" -> entity.version) ++
+                                    annotationToJson(annotation)).value
+      reply must beBadRequestWithMessage("InvalidStatus: study not enabled")
 
       ()
     }

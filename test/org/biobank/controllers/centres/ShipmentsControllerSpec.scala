@@ -129,7 +129,7 @@ class ShipmentsControllerSpec
         forAll(centreFilters(f.fromCentre, f.toCentre)) { centreNameFilter =>
           forAll(states) { state =>
             info(s"$state shipment")
-            val url = listUri.path + s"?filter=$centreNameFilter;state::$state"
+            val url = uri("list").path + s"?filter=$centreNameFilter;state::$state"
             val reply = makeAuthRequest(GET, url).value
             reply must beOkResponseWithJsonReply
 
@@ -148,7 +148,7 @@ class ShipmentsControllerSpec
           val shipmentStates = List(Shipment.createdState, Shipment.unpackedState)
           val f = allShipmentsFixture
           f.shipments.values.foreach(shipmentRepository.put)
-          val url = new Url(listUri.path +
+          val url = new Url(uri("list").path +
                               s"""?filter=state:in:(${shipmentStates.mkString(",")})&sort=state""")
           val expectedShipments = List(f.shipments(Shipment.createdState),
                                        f.shipments(Shipment.unpackedState))
@@ -158,13 +158,13 @@ class ShipmentsControllerSpec
 
       it("fail when using an invalid filter string") {
         val invalidFilterString = "xxx"
-        val reply = makeAuthRequest(GET, listUri + s"?filter=$invalidFilterString").value
+        val reply = makeAuthRequest(GET, uri("list") + s"?filter=$invalidFilterString").value
         reply must beBadRequestWithMessage("could not parse filter expression:")
       }
 
       it("fail when using an invalid state filter") {
         val invalidStateName = nameGenerator.next[Shipment]
-        val reply = makeAuthRequest(GET, listUri + s"?filter=state::$invalidStateName").value
+        val reply = makeAuthRequest(GET, uri("list") + s"?filter=state::$invalidStateName").value
         reply must beNotFoundWithMessage("shipment state does not exist:")
       }
 
@@ -174,7 +174,7 @@ class ShipmentsControllerSpec
           f.shipmentMap.values.foreach(shipmentRepository.put)
           val shipment = f.shipmentMap.values.head
           val filter = s"courierName::${shipment.courierName}"
-          (new Url(listUri.path + s"?filter=$filter"), shipment)
+          (new Url(uri("list").path + s"?filter=$filter"), shipment)
         }
       }
 
@@ -188,7 +188,7 @@ class ShipmentsControllerSpec
           shipmentRepository.put(shipment)
           shipmentRepository.put(shipments(1).copy(courierName = "DEF"))
 
-          (new Url(listUri.path + s"?filter=$filter"), shipment)
+          (new Url(uri("list").path + s"?filter=$filter"), shipment)
         }
       }
 
@@ -202,7 +202,7 @@ class ShipmentsControllerSpec
           shipments.foreach(shipmentRepository.put)
           val filter = s"""courierName:in:(${courierNames.mkString(",")})"""
 
-          (new Url(listUri.path + s"?filter=$filter"), List(shipments(0), shipments(1)))
+          (new Url(uri("list").path + s"?filter=$filter"), List(shipments(0), shipments(1)))
         }
       }
 
@@ -211,7 +211,7 @@ class ShipmentsControllerSpec
           val f = createdShipmentsFixture(2)
           f.shipmentMap.values.foreach(shipmentRepository.put)
           val shipment = f.shipmentMap.values.head
-          val url = new Url(listUri.path + s"?filter=trackingNumber::${shipment.trackingNumber}")
+          val url = new Url(uri("list").path + s"?filter=trackingNumber::${shipment.trackingNumber}")
           (url, shipment)
         }
       }
@@ -223,7 +223,7 @@ class ShipmentsControllerSpec
           val shipment = shipments(0)
           val filter = s"""courierName::${shipment.courierName};trackingNumber::${shipment.trackingNumber}"""
           shipments.foreach(shipmentRepository.put)
-          (new Url(listUri.path + s"?filter=$filter"), shipment)
+          (new Url(uri("list").path + s"?filter=$filter"), shipment)
         }
       }
 
@@ -242,14 +242,14 @@ class ShipmentsControllerSpec
 
         describe("sorted in ascending order") {
           listMultipleShipments() { () =>
-            (new Url(listUri.path + s"?sort=courierName"),
+            (new Url(uri("list").path + s"?sort=courierName"),
              commonSetup.sortWith(_.courierName < _.courierName))
           }
         }
 
         describe("sorted in descending order") {
           listMultipleShipments() { () =>
-            (new Url(listUri.path + s"?sort=-courierName"),
+            (new Url(uri("list").path + s"?sort=-courierName"),
              commonSetup.sortWith(_.courierName > _.courierName))
           }
         }
@@ -271,14 +271,14 @@ class ShipmentsControllerSpec
 
         describe("sorted in ascending order") {
           listMultipleShipments() { () =>
-            (new Url(listUri.path + s"?sort=trackingNumber"),
+            (new Url(uri("list").path + s"?sort=trackingNumber"),
              commonSetup.sortWith(_.trackingNumber < _.trackingNumber))
           }
         }
 
         describe("sorted in descending order") {
           listMultipleShipments() { () =>
-            (new Url(listUri.path + s"?sort=-trackingNumber"),
+            (new Url(uri("list").path + s"?sort=-trackingNumber"),
              commonSetup.sortWith(_.trackingNumber > _.trackingNumber))
           }
         }
@@ -300,14 +300,14 @@ class ShipmentsControllerSpec
         describe("for first shipment") {
           listSingleShipment(maybeNext = Some(2)) { () =>
             val shipments = commonSetup
-            (new Url(listUri.path + s"?sort=courierName&limit=1"), shipments(2))
+            (new Url(uri("list").path + s"?sort=courierName&limit=1"), shipments(2))
           }
         }
 
         describe("for last shipment") {
           listSingleShipment(offset = 2, maybePrev = Some(2)) { () =>
             val shipments = commonSetup
-            (new Url(listUri.path + s"?sort=courierName&page=3&limit=1"), shipments(1))
+            (new Url(uri("list").path + s"?sort=courierName&page=3&limit=1"), shipments(1))
           }
         }
       }
@@ -320,12 +320,12 @@ class ShipmentsControllerSpec
           val filter = s"trackingNumber:like:b"
           shipmentRepository.put(shipment)
           shipmentRepository.put(shipments(1).copy(trackingNumber = "DEF"))
-          (new Url(listUri.path + s"?filter=$filter"), shipment)
+          (new Url(uri("list").path + s"?filter=$filter"), shipment)
         }
       }
 
       describe("fail when using an invalid query parameters") {
-        pagedQueryShouldFailSharedBehaviour(() => listUri)
+        pagedQueryShouldFailSharedBehaviour(() => uri("list"))
       }
 
     }

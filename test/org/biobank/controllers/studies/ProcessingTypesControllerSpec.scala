@@ -1,16 +1,13 @@
 package org.biobank.controllers.studies
 
-import org.biobank.domain.JsonHelper
 //import org.biobank.domain.studies._
 import org.biobank.fixtures._
-import play.api.libs.json._
 import play.api.test.Helpers._
 import scala.language.reflectiveCalls
 
 class ProcessingTypesControllerSpec
     extends ControllerFixture
-    with ProcessingTypeFixtures
-    with JsonHelper {
+    with ProcessingTypeFixtures {
 
   private def uri(paths: String*): String = {
     if (paths.isEmpty) "/api/studies/cetypes"
@@ -111,11 +108,11 @@ class ProcessingTypesControllerSpec
         val f = collectedSpecimenDerivationFixtures
         addToRepository(f.processingType)
 
-        val reply = makeRequest(GET, uri(f.study.slug.id, f.processingType.slug.id))
+        val reply = makeAuthRequest(GET, uri(f.study.slug.id, f.processingType.slug.id)).value
+        reply must beOkResponseWithJsonReply
 
-        (reply \ "status").as[String] must include ("success")
-        val jsonObj = (reply \ "data").as[JsObject]
-        compareObj(jsonObj, f.processingType)
+        //val jsonObj = (contentAsJson(reply) \ "data").as[JsObject]
+        //compareObj(jsonObj, f.processingType)
       }
 
       it("fail for an invalid study ID") {

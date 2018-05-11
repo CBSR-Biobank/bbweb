@@ -1,7 +1,7 @@
 package org.biobank.controllers.access
 
 import java.time.OffsetDateTime
-import org.biobank.controllers.PagedResultsSpec
+import org.biobank.controllers.PagedResultsSharedSpec
 import org.biobank.domain._
 import org.biobank.domain.access._
 import org.biobank.domain.users._
@@ -24,8 +24,8 @@ import scala.concurrent.Future
  */
 class AccessControllerSpec
     extends AccessControllerSpecCommon
-    with JsonHelper
     with UserFixtures
+    with PagedResultsSharedSpec
     with PagedResultsMatchers
     with Inside {
   import org.biobank.TestUtils._
@@ -97,10 +97,9 @@ class AccessControllerSpec
         dtos.get(0) must matchDtoToRole (role)
       }
 
-      it("fail when using an invalid query parameters") {
-        PagedResultsSpec(this).failWithInvalidParams(uri("roles"))
+      describe("fail when using an invalid query parameters") {
+        pagedQueryShouldFailSharedBehaviour(() => new Url(uri("roles")))
       }
-
     }
 
     describe("GET /api/access/roles/names") {

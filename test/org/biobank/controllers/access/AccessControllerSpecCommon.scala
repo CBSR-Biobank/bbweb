@@ -6,8 +6,7 @@ import play.api.libs.json._
 import play.api.test.Helpers._
 
 trait AccessControllerSpecCommon
-    extends ControllerFixture
-    with JsonHelper {
+    extends ControllerFixture {
 
   import org.biobank.matchers.JsonMatchers._
 

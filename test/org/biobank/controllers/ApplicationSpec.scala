@@ -22,8 +22,10 @@ class ApplicationSpec extends ControllerFixture {
     }
 
     it("return initial aggregate counts") {
-      val json = makeRequest(GET, "/api/dtos/counts")
-      val jsonObj = (json \ "data").as[JsObject]
+      val reply = makeAuthRequest(GET, "/api/dtos/counts").value
+      reply must beOkResponseWithJsonReply
+
+      val jsonObj = (contentAsJson(reply) \ "data").as[JsObject]
 
       (jsonObj \ "studies").as[Int] mustBe (0)
 
@@ -37,8 +39,10 @@ class ApplicationSpec extends ControllerFixture {
       centreRepository.put(factory.createDisabledCentre)
       userRepository.put(factory.createRegisteredUser)
 
-      val json = makeRequest(GET, "/api/dtos/counts")
-      val jsonObj = (json \ "data").as[JsObject]
+      val reply = makeAuthRequest(GET, "/api/dtos/counts").value
+      reply must beOkResponseWithJsonReply
+
+      val jsonObj = (contentAsJson(reply) \ "data").as[JsObject]
 
       (jsonObj \ "studies").as[Int] mustBe (1)
 

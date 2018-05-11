@@ -2,11 +2,11 @@ package org.biobank.controllers.studies
 
 import java.time.OffsetDateTime
 import org.biobank.controllers._
-import org.biobank.domain.{JsonHelper, Slug}
+import org.biobank.domain.Slug
 import org.biobank.domain.annotations._
 import org.biobank.domain.studies._
 import org.biobank.dto._
-import org.biobank.fixtures.{ControllerFixture, Url}
+import org.biobank.fixtures._
 import org.biobank.matchers.PagedResultsMatchers
 import org.scalatest.matchers.{MatchResult, Matcher}
 import play.api.libs.json._
@@ -16,7 +16,7 @@ import scala.concurrent.Future
 
 class CeventTypesControllerSpec
     extends ControllerFixture
-    with JsonHelper
+    with AnnotationTypeJson
     with PagedResultsSharedSpec
     with PagedResultsMatchers {
 
@@ -511,8 +511,7 @@ class CeventTypesControllerSpec
 
         val reqJson = Json.obj("id"              -> cet.id.id,
                                "studyId"         -> cet.studyId.id,
-                               "expectedVersion" -> Some(cet.version)) ++
-        annotationTypeToJsonNoId(annotType)
+                               "expectedVersion" -> Some(cet.version)) ++ annotationTypeToJsonNoId(annotType)
 
         val reply = makeAuthRequest(POST, urlAddAnnotationType(cet).path, reqJson).value
         reply must beOkResponseWithJsonReply
@@ -572,8 +571,7 @@ class CeventTypesControllerSpec
 
         val reqJson = Json.obj("id"              -> cet.id.id,
                                "studyId"         -> cet.studyId.id,
-                               "expectedVersion" -> Some(cet.version)) ++
-        annotationTypeToJson(updatedAnnotationType)
+                               "expectedVersion" -> Some(cet.version)) ++ annotationTypeToJson(updatedAnnotationType)
 
         val url = urlAddAnnotationType(cet) + s"/${annotationType.id}"
         val reply = makeAuthRequest(POST, url, reqJson).value
@@ -1044,7 +1042,7 @@ class CeventTypesControllerSpec
 
   }
 
-  def matchUpdatedEventType(eventType: CollectionEventType) =
+  private def matchUpdatedEventType(eventType: CollectionEventType) =
     new Matcher[Future[Result]] {
       def apply (left: Future[Result]) = {
         val replyEventType = (contentAsJson(left) \ "data").validate[CollectionEventType]
@@ -1066,7 +1064,7 @@ class CeventTypesControllerSpec
       }
     }
 
-  def matchRepositoryEventType =
+  private def matchRepositoryEventType =
     new Matcher[CollectionEventType] {
       def apply (left: CollectionEventType) = {
         collectionEventTypeRepository.getByKey(left.id).fold(
@@ -1083,5 +1081,23 @@ class CeventTypesControllerSpec
         )
       }
     }
+
+  protected def collectionSpecimenDefinitionToJson(desc: CollectionSpecimenDefinition): JsObject = {
+    Json.obj("id"                      -> desc.id,
+             "slug"                    -> desc.slug,
+             "name"                    -> desc.name,
+             "description"             -> desc.description,
+             "units"                   -> desc.units,
+             "anatomicalSourceType"    -> desc.anatomicalSourceType.toString,
+             "preservationType"        -> desc.preservationType.toString,
+             "preservationTemperature" -> desc.preservationTemperature.toString,
+             "specimenType"            -> desc.specimenType.toString,
+             "maxCount"                -> desc.maxCount,
+             "amount"                  -> desc.amount)
+  }
+
+  protected def collectionSpecimenDefinitionToJsonNoId(spec: CollectionSpecimenDefinition): JsObject = {
+    collectionSpecimenDefinitionToJson(spec) - "id"
+  }
 
 }

@@ -2,19 +2,20 @@ package org.biobank.controllers.users
 
 import java.time.OffsetDateTime
 import org.biobank.Global
-import org.biobank.controllers.PagedResultsSpec
+import org.biobank.controllers.PagedResultsSharedSpec
 import org.biobank.dto._
 import org.biobank.dto.access._
 import org.biobank.domain.access._
-import org.biobank.domain.{JsonHelper, Slug}
+import org.biobank.domain.Slug
 import org.biobank.domain.users._
 import org.biobank.fixtures.{ControllerFixture, Url}
 import org.biobank.matchers.PagedResultsMatchers
 import org.biobank.services.users.UserCountsByStatus
-import org.scalatest.prop.TableDrivenPropertyChecks._
 import org.scalatest.Inside
+import org.scalatest.matchers.{MatchResult, Matcher}
+import org.scalatest.prop.TableDrivenPropertyChecks._
 import play.api.libs.json._
-import play.api.mvc.{Cookie, Cookies, Result}
+import play.api.mvc._
 import play.api.mvc.Result
 import play.api.test.Helpers._
 import play.api.test._
@@ -28,14 +29,15 @@ import scala.concurrent.Future
  */
 class UsersControllerSpec
     extends ControllerFixture
-    with JsonHelper
     with UserFixtures
+    with PagedResultsSharedSpec
     with PagedResultsMatchers
     with Inside {
+
   import org.biobank.TestUtils._
-  import org.biobank.matchers.JsonMatchers._
   import org.biobank.matchers.EntityMatchers._
   import org.biobank.matchers.DtoMatchers._
+  import org.biobank.matchers.JsonMatchers._
 
   class activeUserFixture {
     val user = factory.createActiveUser
@@ -197,10 +199,10 @@ class UsersControllerSpec
         }
       }
 
-      it("fail when using an invalid query parameters") {
-        PagedResultsSpec(this).failWithInvalidParams(uri("search"))
-      }
 
+      describe("fail when using an invalid query parameters") {
+        pagedQueryShouldFailSharedBehaviour(() => new Url(uri("search")))
+      }
     }
 
     describe("GET /api/users/names") {
@@ -618,29 +620,33 @@ class UsersControllerSpec
       }
 
       describe("when activating a user") {
+        userChangeStateSharedBehaviour { () =>
+          val user = factory.createRegisteredUser
+          val updatedUser = user.activate.toOption.value
+          val wrongStateUsers = List[User](factory.createActiveUser, factory.createLockedUser)
 
-        userChangeStateSharedBehaviour(factory.createRegisteredUser,
-                                       List[User](factory.createActiveUser, factory.createLockedUser),
-                                       "activate",
-                                       "active")
-
+          (user, updatedUser, wrongStateUsers, "activate", "active")
+        }
       }
 
       describe("when locking a user") {
+        userChangeStateSharedBehaviour { () =>
+          val user = factory.createActiveUser
+          val updatedUser = user.lock.toOption.value
+          val wrongStateUsers = List[User](factory.createLockedUser)
 
-        userChangeStateSharedBehaviour(factory.createActiveUser,
-                                       List[User](factory.createLockedUser),
-                                       "lock",
-                                       "locked")
-
+          (user, updatedUser, wrongStateUsers, "lock", "locked")
+        }
       }
 
       describe("when unlocking a user") {
+        userChangeStateSharedBehaviour { () =>
+          val user = factory.createLockedUser
+          val updatedUser = user.unlock.toOption.value
+          val wrongStateUsers = List[User](factory.createActiveUser, factory.createRegisteredUser)
 
-        userChangeStateSharedBehaviour(factory.createLockedUser,
-                                       List[User](factory.createActiveUser, factory.createRegisteredUser),
-                                       "unlock",
-                                       "active")
+          (user, updatedUser, wrongStateUsers, "unlock", "active")
+        }
       }
 
     }
@@ -1211,39 +1217,18 @@ class UsersControllerSpec
 
   }
 
-  def userChangeStateSharedBehaviour(user:            User,
-                                     wrongStateUsers: List[User],
-                                     stateAction:     String,
-                                     newState:        String) {
+  def userChangeStateSharedBehaviour[T <: User](setupFunc: () => (T, T, List[T], String, String)) {
 
-    it(s"can $stateAction a user") {
+    it(s"can change state on a user") {
+      val (user, updatedUser, wrongStateUsers, stateAction, newState) = setupFunc()
       userRepository.put(user)
       val reply = makeUpdateRequest(user, "state", JsString(stateAction)).value
       reply must beOkResponseWithJsonReply
-
-      val json = contentAsJson(reply)
-                              (json \ "status").as[String] must be ("success")
-
-      (json \ "data" \ "version").as[Int] must be(user.version + 1)
-
-      (json \ "data" \ "state").as[String] must be(newState)
-
-      userRepository.getByKey(user.id) mustSucceed { repoUser =>
-        compareObj((json \ "data").as[JsObject], repoUser)
-
-        repoUser must have (
-          'id          (user.id),
-          'version     (user.version + 1),
-          'name        (user.name),
-          'email       (user.email),
-          'avatarUrl   (user.avatarUrl),
-          'state       (newState))
-
-        repoUser must beEntityWithTimeStamps(user.timeAdded, Some(OffsetDateTime.now), 5L)
-      }
+      reply must matchUpdatedUser(updatedUser)
     }
 
     it("must not change a user's state with an invalid version number") {
+      val (user, updatedUser, wrongStateUsers, stateAction, newState) = setupFunc()
       userRepository.put(user)
       val json = Json.obj("expectedVersion" -> (user.version + 10L),
                           "property"        -> "state",
@@ -1253,6 +1238,7 @@ class UsersControllerSpec
     }
 
     it("must not change a user to the wrong state") {
+      val (user, updatedUser, wrongStateUsers, stateAction, newState) = setupFunc()
       forAll(Table("user in wrong state", wrongStateUsers:_*)) { user =>
         info(s"must not $stateAction a user currently in ${user.state} state")
         userRepository.put(user)
@@ -1359,5 +1345,45 @@ class UsersControllerSpec
     }
 
   }
+
+  private def matchUpdatedUser(user: User) =
+    new Matcher[Future[Result]] {
+      def apply (left: Future[Result]) = {
+        val replyUser = (contentAsJson(left) \ "data").validate[UserDto]
+        val jsSuccessMatcher = jsSuccess(replyUser)
+
+        if (!jsSuccessMatcher.matches) {
+          jsSuccessMatcher
+        } else {
+          val replyMatcher = matchDtoToUser(user)(replyUser.get)
+
+          if (!replyMatcher.matches) {
+            MatchResult(false,
+                        s"reply does not match expected: ${replyMatcher.failureMessage}",
+                        s"reply matches expected: ${replyMatcher.failureMessage}")
+          } else {
+            matchRepositoryUser(user)
+          }
+        }
+      }
+    }
+
+  private def matchRepositoryUser =
+    new Matcher[User] {
+      def apply (left: User) = {
+        userRepository.getByKey(left.id).fold(
+          err => {
+            MatchResult(false, s"not found in repository: ${err.head}", "")
+
+          },
+          repoCet => {
+            val repoMatcher = matchUser(left)(repoCet)
+            MatchResult(repoMatcher.matches,
+                        s"repository event type does not match expected: ${repoMatcher.failureMessage}",
+                        s"repository event type matches expected: ${repoMatcher.failureMessage}")
+          }
+        )
+      }
+    }
 
 }

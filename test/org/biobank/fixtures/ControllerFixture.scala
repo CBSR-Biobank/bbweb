@@ -28,35 +28,6 @@ class Url(val path: String) extends AnyVal {
   override def toString: String = path
 }
 
-trait BbwebFakeApplication {
-
-  def makeRequest(method:         String,
-                  path:           String,
-                  expectedStatus: Int,
-                  json:           JsValue,
-                  token:          String): JsValue
-
-  def makeRequest(method:         String,
-                  path:           String,
-                  expectedStatus: Int,
-                  json:           JsValue): JsValue
-
-  def makeRequest(method:         String,
-                  path:           String,
-                  expectedStatus: Int): JsValue
-
-  def makeRequest(method: String,
-                  path:   String,
-                  json:   JsValue): JsValue
-
-  def makeRequest(method: String, path: String): JsValue
-
-  protected def makeAuthRequest(method: String,
-                                path: String,
-                                json: JsValue = JsNull,
-                                token: String = "bbweb-test-token"): Option[Future[Result]]
-}
-
 /**
  * This trait allows a test suite to run tests on a Play Framework fake application.
  *
@@ -71,7 +42,6 @@ abstract class ControllerFixture
     with BeforeAndAfter
     with MustMatchers
     with OptionValues
-    with BbwebFakeApplication
     with ApiResultMatchers {
 
   protected val log: Logger = LoggerFactory.getLogger(this.getClass)
@@ -105,57 +75,6 @@ abstract class ControllerFixture
         case None =>    ""
       }
     }
-  }
-
-  override def makeRequest(method:         String,
-                           path:           String,
-                           expectedStatus: Int,
-                           json:           JsValue,
-                           token:          String): JsValue = {
-
-    val reply = makeAuthRequest(method, path, json, token).value
-    status(reply) match {
-      case `expectedStatus` =>
-        val bodyText = contentAsString(reply)
-        if (bodyText.isEmpty) {
-          log.debug(s"reply: status: $reply,\nbodyText: EMPTY")
-          JsNull
-        } else {
-          contentType(reply) mustBe Some("application/json")
-          val jsonResult = contentAsJson(reply)
-          log.debug(s"reply: status: $reply,\nreply: ${Json.prettyPrint(jsonResult)}")
-          jsonResult
-        }
-      case code =>
-        contentType(reply) match {
-          case Some("application/json") => log.debug("reply: " + Json.prettyPrint(contentAsJson(reply)))
-          case _ => log.debug("reply: " + contentAsString(reply))
-        }
-        fail(s"bad HTTP status: status: $code, expected: $expectedStatus")
-    }
-  }
-
-  def makeRequest(method:         String,
-                  path:           String,
-                  expectedStatus: Int,
-                  json:           JsValue = JsNull): JsValue = {
-    makeRequest(method, path, expectedStatus, json, "bbweb-test-token")
-  }
-
-  def makeRequest(method:         String,
-                  path:           String,
-                  expectedStatus: Int): JsValue = {
-    makeRequest(method, path, expectedStatus, JsNull, "bbweb-test-token")
-  }
-
-  def makeRequest(method: String,
-                  path:   String,
-                  json:   JsValue): JsValue = {
-    makeRequest(method, path, OK, json, "bbweb-test-token")
-  }
-
-  def makeRequest(method: String, path: String): JsValue = {
-    makeRequest(method, path, OK, JsNull, "bbweb-test-token")
   }
 
   // for the following getters: a new application is created for each test, therefore,
@@ -202,9 +121,9 @@ abstract class ControllerFixture
   }
 
   protected def makeAuthRequest(method: String,
-                                path: String,
-                                json: JsValue = JsNull,
-                                token: String = "bbweb-test-token"): Option[Future[Result]] = {
+                              path: String,
+                              json: JsValue = JsNull,
+                              token: String = "bbweb-test-token"): Option[Future[Result]] = {
     val cookie = Cookie("XSRF-TOKEN", token)
     val fakeRequest = FakeRequest(method, path)
       .withJsonBody(json)
@@ -219,31 +138,6 @@ abstract class ControllerFixture
     }
 
     route(app, fakeRequest)
-  }
-
-  protected def badRequest(method:      String = GET,
-                           url:         String,
-                           json:        JsValue = JsNull,
-                           errMsgRegex: String): Unit = {
-    val reply = makeRequest(method, url, BAD_REQUEST, json)
-
-    (reply \ "status").as[String] must include ("error")
-
-    (reply \ "message").as[String] must include regex(errMsgRegex)
-
-    ()
-  }
-
-  protected def hasInvalidVersion(method: String,
-                                  url:    String,
-                                  json:   JsValue = JsNull): Unit = {
-    val reply = makeRequest(method, url, BAD_REQUEST, json)
-
-    (reply \ "status").as[String] must include ("error")
-
-    (reply \ "message").as[String] must include ("expected version doesn't match current version")
-
-    ()
   }
 
 }

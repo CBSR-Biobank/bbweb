@@ -4,10 +4,10 @@ import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSharedSpec
 import org.biobank.domain._
 import org.biobank.domain.annotations._
-import org.biobank.domain.{JsonHelper, Slug}
+import org.biobank.domain.Slug
 import org.biobank.domain.studies._
 import org.biobank.dto.NameAndStateDto
-import org.biobank.fixtures.{ControllerFixture, Url}
+import org.biobank.fixtures._
 import org.biobank.matchers.PagedResultsMatchers
 import org.biobank.services.centres.CentreLocation
 import org.biobank.services.studies.StudyCountsByStatus
@@ -21,7 +21,7 @@ import scala.language.reflectiveCalls
  */
 class StudiesControllerSpec
     extends ControllerFixture
-    with JsonHelper
+    with AnnotationTypeJson
     with PagedResultsSharedSpec
     with PagedResultsMatchers {
 
@@ -316,9 +316,7 @@ class StudiesControllerSpec
       }
 
       describe("fail when using an invalid query parameters") {
-
         pagedQueryShouldFailSharedBehaviour(() => new Url(uri("search")))
-
       }
 
     }

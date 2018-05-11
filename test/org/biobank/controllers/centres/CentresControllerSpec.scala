@@ -2,7 +2,7 @@ package org.biobank.controllers.centres
 
 import java.time.OffsetDateTime
 import org.biobank.controllers.PagedResultsSharedSpec
-import org.biobank.domain.{JsonHelper, Location, Slug}
+import org.biobank.domain.{Location, Slug}
 import org.biobank.domain.centres._
 import org.biobank.domain.studies.{Study, StudyId}
 import org.biobank.dto.{CentreDto, NameAndStateDto}
@@ -18,7 +18,6 @@ import play.api.test.Helpers._
   */
 class CentresControllerSpec
     extends ControllerFixture
-    with JsonHelper
     with PagedResultsSharedSpec
     with PagedResultsMatchers {
 
@@ -33,11 +32,11 @@ class CentresControllerSpec
     else s"$basePath/" + paths.mkString("/")
   }
 
-  def uri(centre: Centre): String = uri(centre.id.id)
+  private def uri(centre: Centre): String = uri(centre.id.id)
 
-  def uri(centre: Centre, path: String): String = uri(path, centre.id.id)
+  private def uri(centre: Centre, path: String): String = uri(path, centre.id.id)
 
-  def centreLocationToJson(centre: Centre, location: Location): JsObject = {
+  private def centreLocationToJson(centre: Centre, location: Location): JsObject = {
     Json.obj(
       "expectedVersion" -> centre.version,
       "name"            -> location.name,
@@ -49,16 +48,8 @@ class CentresControllerSpec
       "countryIsoCode"  -> location.countryIsoCode)
   }
 
-  def centreLocationToUpdateJson(centre: Centre, location: Location): JsObject = {
+  private def centreLocationToUpdateJson(centre: Centre, location: Location): JsObject = {
     centreLocationToJson(centre, location) ++ Json.obj("locationId" -> location.id.id)
-  }
-
-  def compareObjs(jsonList: List[JsObject], centres: List[Centre]) = {
-    val centresMap = centres.map { centre => (centre.id, centre) }.toMap
-    jsonList.foreach { jsonObj =>
-      val jsonId = CentreId((jsonObj \ "id").as[String])
-      compareObj(jsonObj, centresMap(jsonId))
-    }
   }
 
   describe("Centre REST API") {
@@ -323,9 +314,8 @@ class CentresControllerSpec
 
       it("add a centre with no description") {
         val addJson = Json.obj("name" -> nameGenerator.next[String])
-        val json = makeRequest(POST, uri(""), addJson)
-
-        (json \ "status").as[String] must include ("success")
+        val reply = makeAuthRequest(POST, uri(""), addJson).value
+        reply must beOkResponseWithJsonReply
       }
 
       it("not add a centre with a name that is too short") {

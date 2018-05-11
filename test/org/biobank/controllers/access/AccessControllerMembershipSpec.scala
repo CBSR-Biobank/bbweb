@@ -473,11 +473,8 @@ class AccessControllerMembershipSpec
       it("cannot add the same study more than once") {
         val f = new MembershipFixture
         val reqJson = addStudyJson(f.membership, f.study)
-        val reply = makeRequest(POST, uri("memberships") + s"/study/${f.membership.id}", BAD_REQUEST, reqJson)
-
-        (reply \ "status").as[String] must include ("error")
-
-        (reply \ "message").as[String] must include ("study ID is already in membership")
+        val reply = makeAuthRequest(POST, uri("memberships") + s"/study/${f.membership.id}", reqJson).value
+        reply must beBadRequestWithMessage("study ID is already in membership")
       }
 
       it("cannot add a study that does not exist") {

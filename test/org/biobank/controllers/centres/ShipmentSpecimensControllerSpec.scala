@@ -154,7 +154,7 @@ class ShipmentSpecimensControllerSpec
       }
 
       describe("fail when using an invalid query parameters") {
-        pagedQueryShouldFailSharedBehaviour(() => listUri)
+        pagedQueryShouldFailSharedBehaviour(() => uri("list"))
       }
     }
 
