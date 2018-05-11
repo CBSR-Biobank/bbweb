@@ -333,6 +333,28 @@ trait EntityMatchers {
       }
     }
 
+  def matchMembership(membership: Membership) =
+    new Matcher[Membership] {
+      def apply(left: Membership) = {
+        val matchers = Map(
+            ("id"          -> (left.id          equals membership.id)),
+            ("slug"        -> (left.slug        equals membership.slug)),
+            ("name"        -> (left.name        equals membership.name)),
+            ("description" -> (left.description equals membership.description)),
+            ("userIds"     -> (left.userIds     equals membership.userIds)),
+            ("studyData"   -> (left.studyData   equals membership.studyData)),
+            ("centreData"  -> (left.centreData  equals membership.centreData))
+          )
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "memberships do not match for the following attributes: {0},\n: actual {1},\nexpected: {2}",
+                    "memberships match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, membership))
+      }
+    }
+
   private def annotationTypesMatch(a: Set[AnnotationType], b: Set[AnnotationType]): Boolean = {
     val maybeMatch = a.map { atToFind =>
         b.exists { atOther =>

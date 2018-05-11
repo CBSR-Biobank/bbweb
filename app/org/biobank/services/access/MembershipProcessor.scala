@@ -347,7 +347,9 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
                                      event.getNameUpdated.getVersion) {
       (membership, _, time) =>
       membership.withName(event.getNameUpdated.getName).map { updated =>
-        membershipRepository.put(updated.copy(timeModified = Some(time)))
+        membershipRepository.put(
+          updated.copy(slug         = membershipRepository.uniqueSlugFromStr(updated.name),
+                       timeModified = Some(time)))
         true
       }
     }

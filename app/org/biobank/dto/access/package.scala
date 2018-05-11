@@ -68,12 +68,27 @@ package access {
                                  version:      Long,
                                  timeAdded:    String,
                                  timeModified: Option[String],
-                                 slug: Slug,
+                                 slug:         Slug,
                                  name:         String,
                                  description:  Option[String],
                                  userData:     Set[EntityInfoDto],
                                  studyData:    EntitySetDto,
-                                 centreData:   EntitySetDto) extends Dto
+                                 centreData:   EntitySetDto) extends Dto {
+       override def toString: String =
+      s"""|${this.getClass.getSimpleName}: {
+          |  id:             $id,
+          |  version:        $version,
+          |  timeAdded:      $timeAdded,
+          |  timeModified:   $timeModified,
+          |  slug:           $slug,
+          |  name:           $name,
+          |  description:    $description,
+          |  userData:       $userData,
+          |  studyData:      $studyData,
+          |  centreData:     $centreData
+          |}""".stripMargin
+
+  }
 
   object MembershipDto {
 

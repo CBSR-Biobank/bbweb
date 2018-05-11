@@ -306,7 +306,7 @@ trait DtoMatchers {
         val timeModifiedMatcher = beOptionalTimeWithinSeconds(membership.timeModified, 5L)
           .apply(left.timeModified.map(OffsetDateTime.parse))
 
-        val dtoUserIds = left.userData.map { ud => ud.id}.toList.sorted
+        val dtoUserIds = left.userData.map { ud => UserId(ud.id)}.toList.sortBy(_.id)
         val studyEntitySetMatcher = matchDtoToEntitySetDto(membership.studyData)(left.studyData)
         val centreEntitySetMatcher = matchDtoToEntitySetDto(membership.centreData)(left.centreData)
 

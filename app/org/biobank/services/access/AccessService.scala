@@ -254,19 +254,19 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
     }
   }
 
-   def getMemberships(requestUserId: UserId, query: PagedQuery)
-       : Future[ServiceValidation[PagedResults[MembershipDto]]] = {
-     Future {
-       whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
-         for {
-           memberships <- getMembershipsInternal(query.filter, query.sort)
-           validPage <- query.validPage(memberships.size)
-           dtos        <- memberships.map(membershipToDto).toList.sequenceU
-           result      <- PagedResults.create(dtos, query.page, query.limit)
-         } yield result
-       }
-     }
-   }
+  def getMemberships(requestUserId: UserId, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[MembershipDto]]] = {
+    Future {
+      whenPermitted(requestUserId, PermissionId.MembershipRead) { () =>
+        for {
+          memberships <- getMembershipsInternal(query.filter, query.sort)
+          validPage <- query.validPage(memberships.size)
+          dtos        <- memberships.map(membershipToDto).toList.sequenceU
+          result      <- PagedResults.create(dtos, query.page, query.limit)
+        } yield result
+      }
+    }
+  }
 
   def getMembershipNames(requestUserId: UserId, query: FilterAndSortQuery)
       : Future[ServiceValidation[Seq[EntityInfoDto]]] = {
