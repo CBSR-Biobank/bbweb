@@ -407,17 +407,16 @@ class StudiesServiceSpec
     describe("studies membership") {
 
       it("user has access to all studies corresponding his membership") {
-        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+        val f = new UsersWithStudyAccessFixture
         val secondStudy = factory.createDisabledStudy  // should show up in results
         addToRepository(secondStudy)
 
-        val f = new UsersWithStudyAccessFixture
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 10)
         studiesService.getStudies(f.allStudiesAdminUser.id, query).futureValue
           .mustSucceed { reply =>
             reply.items must have size (2)
-            val studyIds = reply.items.map(c => c.id)
-            studyIds must contain (f.study.id)
-            studyIds must contain (secondStudy.id)
+            val studyIds = reply.items.map(c => c.id).sortBy(_.id)
+            studyIds must equal (List(f.study.id, secondStudy.id).sortBy(_.id))
           }
       }
 

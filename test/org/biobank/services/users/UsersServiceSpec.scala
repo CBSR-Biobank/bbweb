@@ -126,7 +126,7 @@ class UsersServiceSpec
       }
 
       it("retrieve users") {
-        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 10)
         val f = usersFixture
         usersService.getUsers(f.adminUser.id, query).futureValue
           .mustSucceed { results =>
@@ -215,7 +215,7 @@ class UsersServiceSpec
         Set(f.user, f.study, membership).foreach(addToRepository)
         usersService.getUserStudies(f.user.id, query).futureValue mustSucceed { reply =>
           reply must have size (1)
-          reply must contain (f.study.id)
+          reply.foreach(_.id must be (f.study.id.id))
         }
       }
 
@@ -226,7 +226,7 @@ class UsersServiceSpec
         Set(f.user, f.study, f.membership).foreach(addToRepository)
         usersService.getUserStudies(f.user.id, query).futureValue mustSucceed { reply =>
           reply must have size (1)
-          reply must contain (f.study.id)
+          reply.foreach(_.id must be (f.study.id.id))
         }
       }
 

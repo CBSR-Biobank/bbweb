@@ -361,16 +361,15 @@ class CentresServiceSpec
 
       it("user has access to all centres corresponding his membership") {
         val secondCentre = factory.createDisabledCentre  // should show up in results
-        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 1)
+        val query = PagedQuery(new FilterString(""), new SortString(""), 0 , 10)
         addToRepository(secondCentre)
 
         val f = new UsersWithCentreAccessFixture
         centresService.getCentres(f.allCentresAdminUser.id, query).futureValue.mustSucceed { reply =>
-            reply.items must have size (2)
-            val centreIds = reply.items.map(c => c.id)
-            centreIds must contain (f.centre.id.id)
-            centreIds must contain (secondCentre.id.id)
-          }
+          reply.items must have size (2)
+          val centreIds = reply.items.map(c => c.id).sorted
+          centreIds must equal (List(f.centre.id.id, secondCentre.id.id).sorted)
+        }
       }
 
       it("user has access only to centres corresponding his membership") {

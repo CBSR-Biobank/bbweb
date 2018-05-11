@@ -56,7 +56,7 @@ class CentreSpec extends DomainSpec {
         updatedCentre.studyIds must have size 0
         updatedCentre.locations must have size 0
 
-        updatedCentre must beEntityWithTimeStamps(OffsetDateTime.now, None, 5L)
+        updatedCentre must beEntityWithTimeStamps(OffsetDateTime.now, Some(OffsetDateTime.now), 5L)
       }
     }
 

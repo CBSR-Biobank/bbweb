@@ -339,10 +339,9 @@ class ShipmentsServiceSpec
 
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          shipmentsService.getShipment(user.id, f.shipment.id)
-            .mustSucceed { specimen =>
-              specimen.id must be (f.shipment.id)
-            }
+          shipmentsService.getShipment(user.id, f.shipment.id) mustSucceed { dto =>
+            dto.id must be (f.shipment.id.id)
+          }
         }
       }
 
@@ -395,9 +394,7 @@ class ShipmentsServiceSpec
         forAll (f.usersCanAddOrUpdateTable) { (user, label) =>
           info(label)
           shipmentsService.getShipmentSpecimen(user.id, f.shipment.id, shipmentSpecimen.id)
-            .mustSucceed { reply =>
-              reply.id must be (shipmentSpecimen.id)
-            }
+            .mustSucceed { _.id must be (shipmentSpecimen.id.id) }
         }
       }
 
@@ -508,9 +505,8 @@ class ShipmentsServiceSpec
           info(label)
           forAll(updateCommandsTable(user.id, f.shipment)) { cmd =>
             shipmentRepository.put(f.shipment) // restore it to it's previous state
-            shipmentsService.processCommand(cmd).futureValue mustSucceed { reply =>
-              reply.id must be (f.shipment.id)
-            }
+            shipmentsService.processCommand(cmd).futureValue
+              .mustSucceed { _.id must be (f.shipment.id.id) }
           }
         }
       }
@@ -541,9 +537,7 @@ class ShipmentsServiceSpec
             }
 
             addToRepository(shipment)
-            shipmentsService.processCommand(cmd).futureValue mustSucceed { reply =>
-              reply.id must be (shipment.id)
-            }
+            shipmentsService.processCommand(cmd).futureValue mustSucceed { _.id must be (shipment.id.id) }
           }
         }
       }
@@ -583,9 +577,7 @@ class ShipmentsServiceSpec
             }
 
             val v = shipmentsService.processShipmentSpecimenCommand(cmd).futureValue
-            v mustSucceed { reply =>
-              reply.id must be (f.shipment.id)
-            }
+            v mustSucceed { _.id must be (f.shipment.id.id) }
           }
         }
       }

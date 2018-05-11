@@ -118,10 +118,7 @@ class SpecimensServiceSpec
         val f = new UsersWithSpecimenAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          specimensService.get(user.id, f.specimen.id)
-            .mustSucceed { specimen =>
-              specimen.id must be (f.specimen.id)
-            }
+          specimensService.get(user.id, f.specimen.id).mustSucceed { _.id must be (f.specimen.id.id) }
         }
       }
 
