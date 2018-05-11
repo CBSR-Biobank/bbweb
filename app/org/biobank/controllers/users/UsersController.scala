@@ -186,8 +186,8 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
         updateEntity => {
           updateEntityJsonToCommand(updateEntity).fold(
             errors => {
-              val errMsgs = errors.list.toList.mkString(", ")
-              Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> errMsgs)))
+              val message = (JsError.toJson(errors) \ "obj" \ 0 \ "msg" \ 0).as[String]
+              Future.successful(BadRequest(Json.obj("status" -> "error", "message" -> message)))
             },
             command => validationReply(usersService.processCommand(command))
           )
@@ -231,81 +231,57 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
       processCommand(cmd)
     }
 
-  private def updateEntityJsonToCommand(json: UpdateEntityJson)
-      : ControllerValidation[UserModifyCommand] = {
-
-    def jsonError(): ControllerValidation[UserModifyCommand]  = {
-      ControllerError(s"could not parse value for ${json.property}: ${json.newValue}")
-        .failureNel[UserModifyCommand]
-    }
-
+  private def updateEntityJsonToCommand(json: UpdateEntityJson): JsResult[UserModifyCommand] = {
     json.property match {
       case "name" =>
-        json.newValue.validate[String].fold(
-          error => jsonError,
-          newName => {
-            UpdateUserNameCmd(sessionUserId   = json.sessionUserId,
-                              id              = json.id,
-                              expectedVersion = json.expectedVersion,
-                              name            = newName).successNel[String]
-          }
-        )
-      case "email" =>
-        json.newValue.validate[String].fold(
-          error => jsonError,
-          newEmail => {
-            UpdateUserEmailCmd(sessionUserId   = json.sessionUserId,
-                               id              = json.id,
-                               expectedVersion = json.expectedVersion,
-                               email           = newEmail).successNel[String]
-          }
-        )
-      case "password" =>
-        json.newValue.validate[PasswordUpdate].fold(
-          error => jsonError,
-          passwordInfo => {
-            UpdateUserPasswordCmd(sessionUserId   = json.sessionUserId,
-                                  id              = json.id,
-                                  expectedVersion = json.expectedVersion,
-                                  currentPassword = passwordInfo.currentPassword,
-                                  newPassword     = passwordInfo.newPassword).successNel[String]
-          }
-        )
-      case "avatarUrl" =>
-        json.newValue.validate[String].fold(
-          error => jsonError,
-          newValue => {
-            val url = if (newValue.isEmpty) None else Some(newValue)
-            UpdateUserAvatarUrlCmd(sessionUserId   = json.sessionUserId,
-                                   id              = json.id,
-                                   expectedVersion = json.expectedVersion,
-                                   avatarUrl       = url).successNel[String]
-          }
-        )
-      case "state" =>
-        json.newValue.validate[String].fold(
-          error => jsonError,
-          stateAction => {
-            stateAction match {
-              case "activate" =>
-                ActivateUserCmd(sessionUserId   = json.sessionUserId,
-                                id              = json.id,
-                                expectedVersion = json.expectedVersion).successNel[String]
-              case "lock" =>
-                LockUserCmd(sessionUserId   = json.sessionUserId,
+        json.newValue.validate[String].map { newName =>
+          UpdateUserNameCmd(sessionUserId   = json.sessionUserId,
                             id              = json.id,
-                            expectedVersion = json.expectedVersion).successNel[String]
-              case "unlock" =>
-                UnlockUserCmd(sessionUserId   = json.sessionUserId,
+                            expectedVersion = json.expectedVersion,
+                            name            = newName)
+        }
+      case "email" =>
+        json.newValue.validate[String].map { newEmail =>
+          UpdateUserEmailCmd(sessionUserId   = json.sessionUserId,
+                             id              = json.id,
+                             expectedVersion = json.expectedVersion,
+                             email           = newEmail)
+        }
+      case "password" =>
+        json.newValue.validate[PasswordUpdate].map { passwordInfo =>
+          UpdateUserPasswordCmd(sessionUserId   = json.sessionUserId,
+                                id              = json.id,
+                                expectedVersion = json.expectedVersion,
+                                currentPassword = passwordInfo.currentPassword,
+                                newPassword     = passwordInfo.newPassword)
+        }
+      case "avatarUrl" =>
+        json.newValue.validate[String].map { newValue =>
+          val url = if (newValue.isEmpty) None else Some(newValue)
+          UpdateUserAvatarUrlCmd(sessionUserId   = json.sessionUserId,
+                                 id              = json.id,
+                                 expectedVersion = json.expectedVersion,
+                                 avatarUrl       = url)
+        }
+      case "state" =>
+        json.newValue.validate[String].map { stateAction =>
+          stateAction match {
+            case "activate" =>
+              ActivateUserCmd(sessionUserId   = json.sessionUserId,
                               id              = json.id,
-                              expectedVersion = json.expectedVersion).successNel[String]
-            }
+                              expectedVersion = json.expectedVersion)
+            case "lock" =>
+              LockUserCmd(sessionUserId   = json.sessionUserId,
+                          id              = json.id,
+                          expectedVersion = json.expectedVersion)
+            case "unlock" =>
+              UnlockUserCmd(sessionUserId   = json.sessionUserId,
+                            id              = json.id,
+                            expectedVersion = json.expectedVersion)
           }
-        )
+        }
       case _ =>
-        ControllerError(s"user does not support updates to property ${json.property}")
-          .failureNel[UserModifyCommand]
-    }
+        JsError(JsonValidationError(s"user does not support updates to property ${json.property}"))    }
   }
 
   private def processCommand(cmd: UserCommand) = {

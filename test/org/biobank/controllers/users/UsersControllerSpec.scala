@@ -1290,7 +1290,7 @@ class UsersControllerSpec
     user
   }
 
-  def makeUpdateRequest(user: User, property: String, newValue: JsValue): Option[Future[Result]] = {
+  private def makeUpdateRequest(user: User, property: String, newValue: JsValue): Option[Future[Result]] = {
     var json = Json.obj("expectedVersion" -> user.version,
                         "property"        -> property)
 

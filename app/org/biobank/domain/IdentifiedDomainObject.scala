@@ -16,6 +16,5 @@ trait IdentifiedDomainObject[T] {
 
   override def hashCode: Int = this.id.hashCode + 41
 
-
   override def toString: String = id.toString
 }

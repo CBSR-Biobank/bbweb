@@ -6,7 +6,6 @@ import org.biobank.domain._
 import org.biobank.domain.annotations._
 import play.api.libs.json._
 import scalaz.Scalaz._
-import scalaz.Validation.FlatMap._
 
 /**
  * Predicates that can be used to filter collections of [[CollectionEventType]]s.
@@ -19,6 +18,8 @@ trait CollectionEventTypePredicates extends HasNamePredicates[CollectionEventTyp
 }
 
 trait CollectionEventTypeValidations extends StudyValidations {
+
+  case object CollectionEventTypeIdRequired extends ValidationKey
 
   case object MaxCountInvalid extends ValidationKey
 
@@ -61,7 +62,8 @@ final case class CollectionEventType(studyId:             StudyId,
     with HasSlug
     with HasOptionalDescription
     with HasStudyId
-    with HasAnnotationTypes {
+    with HasAnnotationTypes
+    with HasSpecimenDefinitions[CollectionSpecimenDefinition] {
   import org.biobank.CommonValidations._
   import org.biobank.domain.DomainValidations._
 
@@ -110,41 +112,29 @@ final case class CollectionEventType(studyId:             StudyId,
   // replaces a previous one with the same unique id if it exists
   //
   // fails if there is another with the same name
-  def withSpecimenDefinition(specimenDesc: CollectionSpecimenDefinition)
+  def withSpecimenDefinition(specimenDefinition: CollectionSpecimenDefinition)
       : DomainValidation[CollectionEventType] = {
-    for {
-      nameNotUsed <- {
-        specimenDefinitions
-          .find { x => (x.name == specimenDesc.name) && (x.id != specimenDesc.id) }
-          .fold
-          { true.successNel[DomainError] }
-          { _ => DomainError(s"specimen spec name already used: ${specimenDesc.name}").failureNel[Boolean] }
-      }
-      specValid <- CollectionSpecimenDefinition.validate(specimenDesc)
-    } yield copy(specimenDefinitions = specimenDefinitions - specimenDesc + specimenDesc,
-                 version       = version + 1,
-                 timeModified  = Some(OffsetDateTime.now))
+    checkAddSpecimenDefinition(specimenDefinition).map { _ =>
+      val newDefinitions = specimenDefinitions - specimenDefinition + specimenDefinition
+      copy(specimenDefinitions =  newDefinitions,
+           version             = version + 1,
+           timeModified        = Some(OffsetDateTime.now))
+    }
   }
 
-  def removeSpecimenDefinition(specimenDescId: SpecimenDefinitionId)
+  def removeSpecimenDefinition(specimenDefinitionId: SpecimenDefinitionId)
       : DomainValidation[CollectionEventType] = {
-    specimenDefinitions
-      .find { x => x.id == specimenDescId }
-      .fold
-      { DomainError(s"specimen spec does not exist: $specimenDescId").failureNel[CollectionEventType] }
-      { specimenDesc =>
-        copy(specimenDefinitions = specimenDefinitions - specimenDesc,
-             version       = version + 1,
-             timeModified  = Some(OffsetDateTime.now)).successNel[DomainError]
+    checkRemoveSpecimenDefinition(specimenDefinitionId)
+      .map { specimenDefinition =>
+        val newSpecimenDefinitions = specimenDefinitions - specimenDefinition
+        copy(specimenDefinitions = newSpecimenDefinitions,
+             version         = version + 1,
+             timeModified    = Some(OffsetDateTime.now))
       }
   }
 
   def hasSpecimenDefinitions(): Boolean = {
     ! specimenDefinitions.isEmpty
-  }
-
-  def specimenDesc(id: SpecimenDefinitionId): DomainValidation[CollectionSpecimenDefinition] = {
-    specimenDefinitions.find(_.id == id).toSuccessNel("specimen description not found")
   }
 
   override def toString: String =

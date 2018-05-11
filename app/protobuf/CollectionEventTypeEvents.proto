@@ -75,14 +75,14 @@ message CollectionEventTypeEvent {
   optional string time          = 4;
 
   oneof event_type {
-    Added                       added                    = 5;
-    Removed                     removed                  = 6;
-    NameUpdated                 nameUpdated              = 7;
-    DescriptionUpdated          descriptionUpdated       = 8;
-    RecurringUpdated            recurringUpdated         = 9;
-    AnnotationTypeAdded         annotationTypeAdded      = 10;
-    AnnotationTypeUpdated       annotationTypeUpdated    = 11;
-    AnnotationTypeRemoved       annotationTypeRemoved    = 12;
+    Added                      added                     = 5;
+    Removed                    removed                   = 6;
+    NameUpdated                nameUpdated               = 7;
+    DescriptionUpdated         descriptionUpdated        = 8;
+    RecurringUpdated           recurringUpdated          = 9;
+    AnnotationTypeAdded        annotationTypeAdded       = 10;
+    AnnotationTypeUpdated      annotationTypeUpdated     = 11;
+    AnnotationTypeRemoved      annotationTypeRemoved     = 12;
     SpecimenDefinitionAdded    specimenDefinitionAdded   = 13;
     SpecimenDefinitionUpdated  specimenDefinitionUpdated = 14;
     SpecimenDefinitionRemoved  specimenDefinitionRemoved = 15;

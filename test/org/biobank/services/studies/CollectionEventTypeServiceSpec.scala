@@ -21,11 +21,11 @@ class CollectionEventTypeServiceSpec
   import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 
   class UsersCeventTypeFixture extends UsersWithStudyAccessFixture {
-    val specimenDesc = factory.createCollectionSpecimenDefinition
+    val specimenDefinition = factory.createCollectionSpecimenDefinition
     val annotationType = factory.createAnnotationType
     val ceventType = factory.createCollectionEventType
       .copy(studyId              = study.id,
-            specimenDefinitions = Set(specimenDesc),
+            specimenDefinitions = Set(specimenDefinition),
             annotationTypes      = Set(annotationType))
     collectionEventTypeRepository.put(ceventType)
   }
@@ -47,7 +47,7 @@ class CollectionEventTypeServiceSpec
   private def updateCommandsTable(sessionUserId:  UserId,
                                   study:          Study,
                                   ceventType:     CollectionEventType,
-                                  specimenDesc:   CollectionSpecimenDefinition,
+                                  specimenDefinition:   CollectionSpecimenDefinition,
                                   annotationType: AnnotationType) = {
     Table("collection event type update commands",
           UpdateCollectionEventTypeNameCmd(
@@ -95,22 +95,22 @@ class CollectionEventTypeServiceSpec
             studyId                     = study.id.id,
             id                          = ceventType.id.id,
             expectedVersion             = ceventType.version,
-            name                        = specimenDesc.name,
-            description                 = specimenDesc.description,
-            units                       = specimenDesc.units,
-            anatomicalSourceType        = specimenDesc.anatomicalSourceType,
-            preservationType            = specimenDesc.preservationType,
-            preservationTemperature = specimenDesc.preservationTemperature,
-            specimenType                = specimenDesc.specimenType,
-            maxCount                    = specimenDesc.maxCount,
-            amount                      = specimenDesc.amount
+            name                        = specimenDefinition.name,
+            description                 = specimenDefinition.description,
+            units                       = specimenDefinition.units,
+            anatomicalSourceType        = specimenDefinition.anatomicalSourceType,
+            preservationType            = specimenDefinition.preservationType,
+            preservationTemperature = specimenDefinition.preservationTemperature,
+            specimenType                = specimenDefinition.specimenType,
+            maxCount                    = specimenDefinition.maxCount,
+            amount                      = specimenDefinition.amount
           ),
           RemoveCollectionSpecimenDefinitionCmd(
             sessionUserId         = sessionUserId.id,
             studyId               = study.id.id,
             id                    = ceventType.id.id,
             expectedVersion       = ceventType.version,
-            specimenDefinitionId = specimenDesc.id.id
+            specimenDefinitionId = specimenDefinition.id.id
           )
     )
   }
@@ -246,7 +246,7 @@ class CollectionEventTypeServiceSpec
           forAll(updateCommandsTable(user.id,
                                      f.study,
                                      f.ceventType,
-                                     f.specimenDesc,
+                                     f.specimenDefinition,
                                      f.annotationType)) { cmd =>
             val ceventType = cmd match {
                 case _: CollectionEventTypeAddAnnotationTypeCmd =>
@@ -271,7 +271,7 @@ class CollectionEventTypeServiceSpec
           forAll(updateCommandsTable(user.id,
                                      f.study,
                                      f.ceventType,
-                                     f.specimenDesc,
+                                     f.specimenDefinition,
                                      f.annotationType)) { cmd =>
             ceventTypeService.processCommand(cmd).futureValue mustFail "Unauthorized"
           }

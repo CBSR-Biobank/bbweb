@@ -66,7 +66,7 @@ sealed trait Specimen
 
   def createDto(collectionEvent:    CollectionEvent,
                 eventTypeName:      String,
-                specimenDesc:       CollectionSpecimenDefinition,
+                specimenDefinition:       CollectionSpecimenDefinition,
                 originLocationInfo: CentreLocationInfo,
                 locationInfo:       CentreLocationInfo): SpecimenDto =
     SpecimenDto(id                      = this.id.id,
@@ -78,16 +78,16 @@ sealed trait Specimen
                 inventoryId             = this.inventoryId,
                 collectionEventId       = collectionEvent.id.id,
                 specimenDefinitionId    = this.specimenDefinitionId.id,
-                specimenDefinitionName  = specimenDesc.name,
-                specimenDefinitionUnits = specimenDesc.units,
+                specimenDefinitionName  = specimenDefinition.name,
+                specimenDefinitionUnits = specimenDefinition.units,
                 originLocationInfo      = originLocationInfo,
                 locationInfo            = locationInfo,
                 containerId             = this.containerId.map(_.id),
                 positionId              = this.positionId.map(_.id),
                 timeCreated             = this.timeCreated.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 amount                  = this.amount,
-                units                   = specimenDesc.units,
-                isDefaultAmount         = (this.amount == specimenDesc.amount),
+                units                   = specimenDefinition.units,
+                isDefaultAmount         = (this.amount == specimenDefinition.amount),
                 eventTypeName           = eventTypeName)
 
   override def toString: String =

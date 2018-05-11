@@ -14,17 +14,28 @@ class ProcessingTypesRouter @Inject()(controller: ProcessingTypesController) ext
     case GET(p"/${slug(studySlug)}/${slug(procTypeSlug)}") =>
       controller.get(studySlug, procTypeSlug)
 
+    case GET(p"/${slug(studySlug)}") =>
+      controller.list(studySlug)
+
     case POST(p"/snapshot") =>
       controller.snapshot
 
     case POST(p"/${studyId(sId)}") =>
       controller.addProcessingType(sId)
 
-    case PUT(p"/${studyId(sId)}/${procTypeId(ptId)}") =>
-      controller.updateProcessingType(sId, ptId)
+    case POST(p"/update/${studyId(sId)}/${procTypeId(ptId)}") =>
+      controller.update(sId, ptId)
+
+    case POST(p"/annottype/${procTypeId(ptId)}") =>
+      controller.addAnnotationType(ptId)
+
+    case POST(p"/annottype/${procTypeId(ptId)}/$annotationTypeId") =>
+      controller.updateAnnotationType(ptId, annotationTypeId)
 
     case DELETE(p"/${studyId(sId)}/${procTypeId(ptId)}/${long(ver)}") =>
       controller.removeProcessingType(sId, ptId, ver)
 
+    case DELETE(p"/annottype/${studyId(id)}/${procTypeId(ptId)}/${long(ver)}/$annotationTypeId") =>
+      controller.removeAnnotationType(id, ptId, ver, annotationTypeId)
   }
 }

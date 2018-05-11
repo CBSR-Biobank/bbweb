@@ -53,6 +53,8 @@ trait StudiesService extends BbwebService {
 
   def getStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[Study]
 
+  def getDisabledStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[DisabledStudy]
+
   def getStudyBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Study]
 
   def getStudyNames(requestUserId: UserId, query: FilterAndSortQuery)
@@ -180,6 +182,15 @@ class StudiesServiceImpl @Inject()(
                              Some(studyId),
                              None) { () =>
       studyRepository.getByKey(studyId)
+    }
+  }
+
+  def getDisabledStudy(requestUserId: UserId, studyId: StudyId): ServiceValidation[DisabledStudy] = {
+    getStudy(requestUserId, studyId).flatMap { study =>
+      study match {
+        case s: DisabledStudy => s.successNel[String]
+        case s => InvalidStatus(s"study not disabled: $id").failureNel[DisabledStudy]
+      }
     }
   }
 

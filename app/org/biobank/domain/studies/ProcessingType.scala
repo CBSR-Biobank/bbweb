@@ -6,6 +6,7 @@ import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.containers._
 import play.api.libs.json._
+import scala.util.Try
 import scalaz.Scalaz._
 
 /**
@@ -28,20 +29,85 @@ trait ProcessingTypeValidations extends StudyValidations {
 
   case object ContainerTypeIdRequired extends ValidationKey
 
+  case object SpecimenDefinitionIdRequired extends ValidationKey
+
   case object InvalidPositiveNumber extends ValidationKey
 }
 
+class InputSpecimenDefinitionType(val id: String) extends AnyVal {
+  override def toString: String = id
+}
+
+sealed trait SpecimenProcessingInfo extends ProcessingTypeValidations {
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
+
+  val expectedChange:       BigDecimal
+  val count:                Int
+  val containerTypeId:      Option[ContainerTypeId]
+
+  def validate(): DomainValidation[Boolean] = {
+    (validatePositiveNumber(expectedChange, InvalidPositiveNumber) |@|
+       validatePositiveNumber(count, InvalidPositiveNumber) |@|
+       validateIdOption(containerTypeId, ContainerTypeIdRequired)) { case _ => true }
+
+  }
+}
+
+final case class InputSpecimenInfo(expectedChange:       BigDecimal,
+                                   count:                Int,
+                                   containerTypeId:      Option[ContainerTypeId],
+                                   definitionType:       InputSpecimenDefinitionType,
+                                   entityId:             IdentifiedDomainObject[_],
+                                   specimenDefinitionId: SpecimenDefinitionId)
+    extends SpecimenProcessingInfo
+    with CollectionEventTypeValidations {
+
+  import org.biobank.CommonValidations._
+  import org.biobank.domain.DomainValidations._
+
+  override def validate(): DomainValidation[Boolean] = {
+    val idValidationKey: ValidationKey =
+      if (definitionType == ProcessingType.collectedDefinition) CollectionEventTypeIdRequired
+      else ProcessingTypeIdRequired
+
+    (super.validate |@|
+       validateNonEmptyString(entityId.toString, idValidationKey) |@|
+       validateId(specimenDefinitionId, SpecimenDefinitionIdRequired)) { case _ => true }
+  }
+
+}
+
+final case class OutputSpecimenInfo(expectedChange:     BigDecimal,
+                                    count:              Int,
+                                    containerTypeId:    Option[ContainerTypeId],
+                                    specimenDefinition: ProcessedSpecimenDefinition)
+    extends SpecimenProcessingInfo {
+
+  override def validate(): DomainValidation[Boolean] = {
+    (super.validate |@| ProcessedSpecimenDefinition.validate(specimenDefinition)) { case _ => true }
+  }
+}
+
+final case class SpecimenProcessing(input: InputSpecimenInfo, output: OutputSpecimenInfo) {
+
+  def validate(): DomainValidation[Boolean] = {
+    (input.validate |@| output.validate) { case _ => true }
+  }
+}
+
 /**
- * Records a regularly preformed specimen processing procedure. It defines and allows for
- * recording of procedures performed on different types of [[domain.participants.Specimen Specimen]]s.
+ * Records a regularly preformed specimen processing procedure. It defines and allows for recording of
+ * procedures performed on different types of [[domain.participants.Specimen Specimen]]s.
  *
  * For speicmen processing to take place, a study must have at least one processing type defined.
  *
- * @param enabled A processing type should have enabled set to `TRUE` when processing of the contained specimen types is
- * taking place. However, throughout the lifetime of the study, it may be decided to stop a processing type
- * in favour of another. In this case enabled is set to `FALSE`.
+ * @param enabled A processing type should have enabled set to `TRUE` when processing of the contained
+ * specimen types is taking place. However, throughout the lifetime of the study, it may be decided to stop a
+ * processing type in favour of another. In this case enabled is set to `FALSE`.
  *
- * @param expectedInputChange The expected amount to be removed from each input. If the value is not required then use a value of zero.
+ * @param expectedInputChange The expected amount to be removed from each input. If the value is not required
+ * then use a value of zero.
  *
  * @param expectedOutputChange The expected amount to be added to each output. If the value is not required
  * then use a value of zero.
@@ -59,23 +125,17 @@ trait ProcessingTypeValidations extends StudyValidations {
  * @param annotationTypes The [[domain.studies.AnnotationType AnnotationType]]s for recorded for this
  * processing type.
  */
-final case class ProcessingType(studyId:               StudyId,
-                                id:                    ProcessingTypeId,
-                                version:               Long,
-                                timeAdded:             OffsetDateTime,
-                                timeModified:          Option[OffsetDateTime],
-                                slug:                  Slug,
-                                name:                  String,
-                                description:           Option[String],
-                                enabled:               Boolean,
-                                expectedInputChange:   BigDecimal,
-                                expectedOutputChange:  BigDecimal,
-                                inputCount:            Int,
-                                outputCount:           Int,
-                                specimenDerivation:    SpecimenDerivation,
-                                inputContainerTypeId:  Option[ContainerTypeId],
-                                outputContainerTypeId: Option[ContainerTypeId],
-                                annotationTypes:       Set[AnnotationType])
+final case class ProcessingType(studyId:            StudyId,
+                                id:                 ProcessingTypeId,
+                                version:            Long,
+                                timeAdded:          OffsetDateTime,
+                                timeModified:       Option[OffsetDateTime],
+                                slug:               Slug,
+                                name:               String,
+                                description:        Option[String],
+                                enabled:            Boolean,
+                                specimenProcessing: SpecimenProcessing,
+                                annotationTypes:    Set[AnnotationType])
     extends ConcurrencySafeEntity[ProcessingTypeId]
     with HasUniqueName
     with HasSlug
@@ -122,36 +182,60 @@ final case class ProcessingType(studyId:               StudyId,
   /** Updates the expected input change. */
   def withExpectedInputChange(change: BigDecimal): DomainValidation[ProcessingType] = {
     validatePositiveNumber(change, InvalidPositiveNumber) map { _ =>
-      copy(expectedInputChange = change,
-           version             = version + 1,
-           timeModified        = Some(OffsetDateTime.now))
+      withInputSpecimenProcessing(specimenProcessing.input.copy(expectedChange = change))
     }
   }
 
   /** Updates the expected output change. */
   def withExpectedOutputChange(change: BigDecimal): DomainValidation[ProcessingType] = {
     validatePositiveNumber(change, InvalidPositiveNumber) map { _ =>
-      copy(expectedOutputChange = change,
-           version             = version + 1,
-           timeModified        = Some(OffsetDateTime.now))
+      withOutputSpecimenProcessing(specimenProcessing.output.copy(expectedChange = change))
     }
   }
 
   /** Updates the input count. */
   def withInputCount(count: Int): DomainValidation[ProcessingType] = {
     validatePositiveNumber(count, InvalidPositiveNumber) map { _ =>
-      copy(inputCount   = count,
-           version      = version + 1,
-           timeModified = Some(OffsetDateTime.now))
+      withInputSpecimenProcessing(specimenProcessing.input.copy(count = count))
     }
   }
 
   /** Updates the output count. */
   def withOutputCount(count: Int): DomainValidation[ProcessingType] = {
     validatePositiveNumber(count, InvalidPositiveNumber) map { _ =>
-      copy(outputCount  = count,
-           version      = version + 1,
-           timeModified = Some(OffsetDateTime.now))
+      withOutputSpecimenProcessing(specimenProcessing.output.copy(count = count))
+    }
+  }
+
+  /** Updates the input container type. */
+  def withInputContainerType(containerTypeId: Option[ContainerTypeId])
+      : DomainValidation[ProcessingType] = {
+    withInputSpecimenProcessing(specimenProcessing.input.copy(containerTypeId = containerTypeId))
+      .successNel[String]
+  }
+
+  /** Updates the output container type. */
+  def withOutputContainerType(containerTypeId: Option[ContainerTypeId])
+      : DomainValidation[ProcessingType] = {
+    withOutputSpecimenProcessing(specimenProcessing.output.copy(containerTypeId = containerTypeId))
+      .successNel[String]
+  }
+
+  def withInputSpecimenDefinition(definitionType: InputSpecimenDefinitionType,
+                                  id: IdentifiedDomainObject[_],
+                                  specimenDefinitionId: SpecimenDefinitionId)
+      : DomainValidation[ProcessingType] = {
+    val input = specimenProcessing.input.copy(definitionType       = definitionType,
+                                              entityId             = id,
+                                              specimenDefinitionId = specimenDefinitionId)
+    withInputSpecimenProcessing(input).successNel[String]
+  }
+
+  def withOutputSpecimenDefinition(specimenDefinition: ProcessedSpecimenDefinition)
+      : DomainValidation[ProcessingType] = {
+    ProcessedSpecimenDefinition.validate(specimenDefinition).map { sd =>
+      val input = specimenProcessing.output.copy(specimenDefinition = specimenDefinition)
+      withOutputSpecimenProcessing(input)
     }
   }
 
@@ -174,69 +258,141 @@ final case class ProcessingType(studyId:               StudyId,
     }
   }
 
+  private def withInputSpecimenProcessing(input: InputSpecimenInfo): ProcessingType = {
+    copy(specimenProcessing = specimenProcessing.copy(input = input),
+         version            = version + 1,
+         timeModified       = Some(OffsetDateTime.now))
+  }
+
+  private def withOutputSpecimenProcessing(output: OutputSpecimenInfo): ProcessingType = {
+    copy(specimenProcessing = specimenProcessing.copy(output = output),
+         version            = version + 1,
+         timeModified       = Some(OffsetDateTime.now))
+  }
+
   override def toString: String =
     s"""|ProcessingType:{
-        |  studyId:               $studyId,
-        |  id:                    $id,
-        |  timeAdded:             $timeAdded,
-        |  timeModified:          $timeModified,
-        |  version:               $version,
-        |  name:                  $name,
-        |  description:           $description,
-        |  enabled:               $enabled,
-        |  expectedInputChange:   $expectedInputChange,
-        |  expectedOutputChange:  $expectedOutputChange,
-        |  inputCount:            $inputCount,
-        |  outputCount:           $outputCount,
-        |  specimenDerivation:    $specimenDerivation,
-        |  inputContainerTypeId:  $inputContainerTypeId,
-        |  outputContainerTypeId: $outputContainerTypeId
-        |  annotationTypes:       { $annotationTypes }
+        |  studyId:            $studyId,
+        |  id:                 $id,
+        |  timeAdded:          $timeAdded,
+        |  timeModified:       $timeModified,
+        |  version:            $version,
+        |  name:               $name,
+        |  description:        $description,
+        |  enabled:            $enabled,
+        |  specimenProcessing: $specimenProcessing,
+        |  annotationTypes:    { $annotationTypes }
         |}""".stripMargin
+}
+
+object InputSpecimenInfo {
+
+  implicit val inputSpecimenInfoFormat: Format[InputSpecimenInfo] = new Format[InputSpecimenInfo] {
+
+      override def reads(json: JsValue): JsResult[InputSpecimenInfo] = {
+        for {
+          expectedChange       <- (json \ "expectedChange").validate[String]
+          validExpectedChange  <- {
+            Try(BigDecimal(expectedChange)).toOption match {
+              case None => JsError("error: could not parse json for 'expectedChange'")
+              case Some(value) => JsSuccess(value)
+            }
+          }
+          count                <- (json \ "count").validate[Int]
+          containerTypeId      <- (json \ "containerTypeId").validateOpt[ContainerTypeId]
+          definitionType       <- (json \ "definitionType").validate[String]
+          validDefinitionType  <- {
+            definitionType match {
+            case ProcessingType.collectedDefinition.id => JsSuccess(ProcessingType.collectedDefinition)
+            case ProcessingType.processedDefinition.id => JsSuccess(ProcessingType.processedDefinition)
+            case _ => JsError("error: could not parse json to 'definitionType'")
+        }
+          }
+          entityId             <- (json \ "entityId").validate[String]
+          specimenDefinitionId <- (json \ "specimenDefinitionId").validate[SpecimenDefinitionId]
+        } yield {
+          val id: IdentifiedDomainObject[_] =
+            if (validDefinitionType == ProcessingType.collectedDefinition) CollectionEventTypeId(entityId)
+            else ProcessingTypeId(entityId)
+          InputSpecimenInfo(validExpectedChange,
+                            count,
+                            containerTypeId,
+                            validDefinitionType,
+                            id,
+                            specimenDefinitionId)
+        }
+      }
+
+      override def writes(specimenInfo: InputSpecimenInfo): JsValue =
+        Json.obj("expectedChange"       -> specimenInfo.expectedChange.toString,
+                 "count"                -> specimenInfo.count,
+                 "containerTypeId"      -> specimenInfo.containerTypeId.map(_.id),
+                 "definitionType"       -> specimenInfo.definitionType.id,
+                 "entityId"             -> specimenInfo.entityId.toString,
+                 "specimenDefinitionId" -> specimenInfo.specimenDefinitionId)
+    }
+
+}
+
+object OutputSpecimenInfo {
+
+  implicit val outputSpecimenInfoFormat: Format[OutputSpecimenInfo] = new Format[OutputSpecimenInfo] {
+
+      override def reads(json: JsValue): JsResult[OutputSpecimenInfo] = {
+        for {
+          expectedChange       <- (json \ "expectedChange").validate[String]
+          validExpectedChange  <- {
+            Try(BigDecimal(expectedChange)).toOption match {
+              case None => JsError("error: could not parse json for 'expectedChange'")
+              case Some(value) => JsSuccess(value)
+            }
+          }
+          count                <- (json \ "count").validate[Int]
+          containerTypeId      <- (json \ "containerTypeId").validateOpt[ContainerTypeId]
+          specimenDefinition   <- (json \ "specimenDefinition").validate[ProcessedSpecimenDefinition]
+        } yield {
+          OutputSpecimenInfo(validExpectedChange, count, containerTypeId, specimenDefinition)
+        }
+      }
+
+      override def writes(specimenInfo: OutputSpecimenInfo): JsValue =
+        Json.obj("expectedChange"     -> specimenInfo.expectedChange.toString,
+                 "count"              -> specimenInfo.count,
+                 "containerTypeId"    -> specimenInfo.containerTypeId.map(_.id),
+                 "specimenDefinition" -> specimenInfo.specimenDefinition)
+    }
+
 }
 
 object ProcessingType extends ProcessingTypeValidations {
   import org.biobank.CommonValidations._
   import org.biobank.domain.DomainValidations._
 
+  val collectedDefinition: InputSpecimenDefinitionType = new InputSpecimenDefinitionType("collected")
+
+  val processedDefinition: InputSpecimenDefinitionType = new InputSpecimenDefinitionType("processed")
+
+  implicit val specimenProcessingFormat: Format[SpecimenProcessing] = Json.format[SpecimenProcessing]
+
   implicit val processingTypeFormat: Format[ProcessingType] =
     Json.format[ProcessingType]
 
-  def create(studyId:               StudyId,
-             id:                    ProcessingTypeId,
-             version:               Long,
-             name:                  String,
-             description:           Option[String],
-             enabled:               Boolean,
-             expectedInputChange:   BigDecimal,
-             expectedOutputChange:  BigDecimal,
-             inputCount:            Int,
-             outputCount:           Int,
-             specimenDerivation:    SpecimenDerivation,
-             inputContainerTypeId:  Option[ContainerTypeId],
-             outputContainerTypeId: Option[ContainerTypeId],
-             annotationTypes:       Set[AnnotationType])
+  def create(studyId:            StudyId,
+             id:                 ProcessingTypeId,
+             version:            Long,
+             name:               String,
+             description:        Option[String],
+             enabled:            Boolean,
+             specimenProcessing: SpecimenProcessing,
+             annotationTypes:    Set[AnnotationType])
       : DomainValidation[ProcessingType] = {
 
-    def validateNumbers(): DomainValidation[Boolean] = {
-      (validatePositiveNumber(expectedOutputChange, InvalidPositiveNumber) |@|
-         validatePositiveNumber(expectedInputChange, InvalidPositiveNumber) |@|
-         validatePositiveNumber(outputCount, InvalidPositiveNumber) |@|
-         validatePositiveNumber(inputCount, InvalidPositiveNumber)) { case _ => true  }
-    }
-
-    /*
-     * Scalaz applicative builders can only be used with up to 12 parameters.
-     */
     (validateId(studyId, StudyIdRequired) |@|
        validateId(id, ProcessingTypeIdRequired) |@|
        validateVersion(version) |@|
        validateNonEmptyString(name, NameRequired) |@|
        validateNonEmptyStringOption(description, InvalidDescription) |@|
-       validateNumbers() |@|
-       specimenDerivation.validate() |@|
-       validateIdOption(inputContainerTypeId, ContainerTypeIdRequired) |@|
-       validateIdOption(outputContainerTypeId, ContainerTypeIdRequired) |@|
+       specimenProcessing.validate() |@|
        annotationTypes.toList.traverseU(AnnotationType.validate)) { case _ =>
         ProcessingType(studyId               = studyId,
                        id                    = id,
@@ -247,13 +403,7 @@ object ProcessingType extends ProcessingTypeValidations {
                        name                  = name,
                        description           = description,
                        enabled               = enabled,
-                       expectedInputChange   = expectedInputChange,
-                       expectedOutputChange  = expectedOutputChange,
-                       inputCount            = inputCount,
-                       outputCount           = outputCount,
-                       specimenDerivation    = specimenDerivation,
-                       inputContainerTypeId  = inputContainerTypeId,
-                       outputContainerTypeId = outputContainerTypeId,
+                       specimenProcessing    = specimenProcessing,
                        annotationTypes       = annotationTypes)
 
     }

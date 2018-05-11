@@ -571,7 +571,8 @@ class CeventTypesControllerSpec
 
         val reqJson = Json.obj("id"              -> cet.id.id,
                                "studyId"         -> cet.studyId.id,
-                               "expectedVersion" -> Some(cet.version)) ++ annotationTypeToJson(updatedAnnotationType)
+                               "expectedVersion" -> Some(cet.version)) ++
+          annotationTypeToJson(updatedAnnotationType)
 
         val url = urlAddAnnotationType(cet) + s"/${annotationType.id}"
         val reply = makeAuthRequest(POST, url, reqJson).value
@@ -879,7 +880,7 @@ class CeventTypesControllerSpec
 
         val url = uri("spcdesc", f.study.id.id, cet.id.id, cet.version.toString, badUniqueId)
         val reply = makeAuthRequest(DELETE, url.path).value
-        reply must beNotFoundWithMessage("specimen spec does not exist")
+        reply must beNotFoundWithMessage("specimen definition does not exist")
       }
 
 

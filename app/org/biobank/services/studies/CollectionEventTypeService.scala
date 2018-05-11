@@ -74,8 +74,6 @@ class CollectionEventTypeServiceImpl @Inject()(
     with AccessChecksSerivce
     with ServicePermissionChecks {
 
-  import org.biobank.CommonValidations._
-
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
   def eventTypeWithId(requestUserId:         UserId,
@@ -157,7 +155,7 @@ class CollectionEventTypeServiceImpl @Inject()(
             ServiceError(s"invalid service call: $cmd, use processRemoveCommand").failureNel[DisabledStudy]
           case c => c.successNel[String]
         }
-        study <- getDisabledStudy(cmd.sessionUserId, cmd.studyId)
+        study <- studiesService.getDisabledStudy(UserId(cmd.sessionUserId), StudyId(cmd.studyId))
       } yield study
 
     v.fold(
@@ -177,7 +175,7 @@ class CollectionEventTypeServiceImpl @Inject()(
   }
 
   def processRemoveCommand(cmd: RemoveCollectionEventTypeCmd): Future[ServiceValidation[Boolean]] = {
-    getDisabledStudy(cmd.sessionUserId, cmd.studyId).fold(
+    studiesService.getDisabledStudy(UserId(cmd.sessionUserId), StudyId(cmd.studyId)).fold(
       err => Future.successful(err.failure[Boolean]),
       study => whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId),
                                              PermissionId.StudyUpdate,
@@ -230,16 +228,6 @@ class CollectionEventTypeServiceImpl @Inject()(
       study  <- studiesService.getStudy(sessionUserId, studyId)
       result <- fn(study)
     } yield result
-  }
-
-  private def getDisabledStudy(sessionUserId: String,
-                               studyId:       String): ServiceValidation[DisabledStudy] = {
-    studiesService.getStudy(UserId(sessionUserId), StudyId(studyId)).flatMap { study =>
-      study match {
-        case s: DisabledStudy => s.successNel[String]
-        case s => InvalidStatus(s"study not disabled: $id").failureNel[DisabledStudy]
-      }
-    }
   }
 
   private def getEventTypes(studyId: StudyId, filter: FilterString)

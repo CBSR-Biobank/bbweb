@@ -232,7 +232,8 @@ class CollectionEventTypeSpec extends DomainSpec with AnnotationTypeSetSharedSpe
       val specimenDefinition2 = factory.createCollectionSpecimenDefinition.copy(name = specimenDefinition.name)
       val cet = factory.createCollectionEventType.copy(specimenDefinitions = Set(specimenDefinition))
 
-      cet.withSpecimenDefinition(specimenDefinition2) mustFail "specimen spec name already used.*"
+      cet.withSpecimenDefinition(specimenDefinition2)
+        .mustFail("EntityCriteriaError: specimen definition name already used.*")
     }
   }
 

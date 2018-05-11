@@ -666,7 +666,7 @@ class TestData @Inject() (config:         Configuration,
         val centreId = CentreId(s"${centreName}_id")
         val locationId = LocationId(s"${centreId}:Primary")
 
-        BbpspTestData.CollectionSpecimenDefinitions.zipWithIndex.map { case (specimenDesc, specimenIndex) =>
+        BbpspTestData.CollectionSpecimenDefinitions.zipWithIndex.map { case (specimenDefinition, specimenIndex) =>
           val reverseHash = BbpspTestData.EventHashids.decode(event.id.id)
           val participantIndex = reverseHash(0)
           val eventIndex = reverseHash(1)
@@ -680,7 +680,7 @@ class TestData @Inject() (config:         Configuration,
                          timeModified          = None,
                          slug                  = Slug(inventoryId),
                          inventoryId           = inventoryId,
-                         specimenDefinitionId = specimenDesc.id,
+                         specimenDefinitionId = specimenDefinition.id,
                          originLocationId      = locationId,
                          locationId            = locationId,
                          containerId           = None,

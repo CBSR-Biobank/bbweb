@@ -59,19 +59,19 @@ object EventUtils {
     )
   }
 
-  def specimenDefinitionToEvent(specimenDesc: CollectionSpecimenDefinition):
+  def specimenDefinitionToEvent(specimenDefinition: CollectionSpecimenDefinition):
       CollectionEventTypeEvent.SpecimenDefinition = {
     CollectionEventTypeEvent.SpecimenDefinition().update(
-      _.id                      := specimenDesc.id.id,
-      _.name                    := specimenDesc.name,
-      _.optionalDescription     := specimenDesc.description,
-      _.units                   := specimenDesc.units,
-      _.anatomicalSourceType    := specimenDesc.anatomicalSourceType.toString,
-      _.preservationType        := specimenDesc.preservationType.toString,
-      _.preservationTemperature := specimenDesc.preservationTemperature.toString,
-      _.specimenType            := specimenDesc.specimenType.toString,
-      _.maxCount                := specimenDesc.maxCount,
-      _.amount                  := specimenDesc.amount.doubleValue
+      _.id                      := specimenDefinition.id.id,
+      _.name                    := specimenDefinition.name,
+      _.optionalDescription     := specimenDefinition.description,
+      _.units                   := specimenDefinition.units,
+      _.anatomicalSourceType    := specimenDefinition.anatomicalSourceType.toString,
+      _.preservationType        := specimenDefinition.preservationType.toString,
+      _.preservationTemperature := specimenDefinition.preservationTemperature.toString,
+      _.specimenType            := specimenDefinition.specimenType.toString,
+      _.maxCount                := specimenDefinition.maxCount,
+      _.amount                  := specimenDefinition.amount.doubleValue
     )
   }
 

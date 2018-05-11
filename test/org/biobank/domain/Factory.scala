@@ -191,19 +191,19 @@ class Factory {
     specimenSpec
   }
 
-  def createProcessingSpecimenDefinition(): ProcessingSpecimenDefinition = {
+  def createProcessedSpecimenDefinition(): ProcessedSpecimenDefinition = {
     val name = faker.Lorem.sentence(3)
-    val specimenSpec = ProcessingSpecimenDefinition(
-        id                      = SpecimenDefinitionId(nextIdentityAsString[ProcessingSpecimenDefinition]),
+    val specimenSpec = ProcessedSpecimenDefinition(
+        id                      = SpecimenDefinitionId(nextIdentityAsString[ProcessedSpecimenDefinition]),
         slug                    = Slug(name),
         name                    = name,
-        description             = Some(nameGenerator.next[ProcessingSpecimenDefinition]),
+        description             = Some(nameGenerator.next[ProcessedSpecimenDefinition]),
         units                   = nameGenerator.next[String],
         anatomicalSourceType    = AnatomicalSourceType.Blood,
         preservationType        = PreservationType.FreshSpecimen,
         preservationTemperature = PreservationTemperature.Minus80celcius,
         specimenType            = SpecimenType.FilteredUrine)
-    domainObjects = domainObjects + (classOf[ProcessingSpecimenDefinition] -> specimenSpec)
+    domainObjects = domainObjects + (classOf[ProcessedSpecimenDefinition] -> specimenSpec)
     specimenSpec
   }
 
@@ -254,7 +254,21 @@ class Factory {
 
   def createProcessingType(): ProcessingType = {
     val disabledStudy = defaultDisabledStudy
-    val name = faker.Lorem.sentence(1)
+    val name = faker.Lorem.sentence(2)
+
+    val input = InputSpecimenInfo(expectedChange       = BigDecimal(1.0),
+                                  count                = 1,
+                                  containerTypeId      = None,
+                                  definitionType       = ProcessingType.collectedDefinition,
+                                  entityId             = CollectionEventTypeId(""),
+                                  specimenDefinitionId = SpecimenDefinitionId(""))
+    val output = OutputSpecimenInfo(expectedChange     = BigDecimal(1.0),
+                                    count              = 1,
+                                    containerTypeId    = None,
+                                    specimenDefinition = defaultProcessedSpecimenDefinition)
+
+    val specimenProcessing = SpecimenProcessing(input, output)
+
     val processingType        = ProcessingType(
         id                    = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
         studyId               = disabledStudy.id,
@@ -265,15 +279,7 @@ class Factory {
         name                  = name,
         description           = Some(faker.Lorem.sentence(4)),
         enabled               = false,
-        expectedInputChange   = BigDecimal(1.0),
-        expectedOutputChange  = BigDecimal(1.0),
-        inputCount            = 1,
-        outputCount           = 1,
-        specimenDerivation    = CollectedSpecimenDerivation(CollectionEventTypeId(""),
-                                                            SpecimenDefinitionId(""),
-                                                            defaultProcessingSpecimenDefinition),
-        inputContainerTypeId  = None,
-        outputContainerTypeId = None,
+        specimenProcessing    = specimenProcessing,
         annotationTypes       = Set.empty)
 
     domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
@@ -636,8 +642,8 @@ class Factory {
     defaultObject(classOf[CollectionSpecimenDefinition], createCollectionSpecimenDefinition)
   }
 
-  def defaultProcessingSpecimenDefinition: ProcessingSpecimenDefinition = {
-    defaultObject(classOf[ProcessingSpecimenDefinition], createProcessingSpecimenDefinition)
+  def defaultProcessedSpecimenDefinition: ProcessedSpecimenDefinition = {
+    defaultObject(classOf[ProcessedSpecimenDefinition], createProcessedSpecimenDefinition)
   }
 
   def defaultAnnotationType: AnnotationType = {

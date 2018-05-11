@@ -33,10 +33,14 @@ trait ApiResultMatchers { this: org.biobank.fixtures.ControllerFixture =>
       val responseStatus = status(left)
 
       if (responseStatus != htmlStatus) {
+        val content = if (contentType(left) == Some("application/json"))
+                        Json.prettyPrint(contentAsJson(left))
+                      else
+                        contentAsString(left)
         MatchResult(false,
                     "got {0} while expecting {1}, response was {2}",
                     "got expected status code {0}",
-                    IndexedSeq(responseStatus, htmlStatus, contentAsString(left)))
+                    IndexedSeq(responseStatus, htmlStatus, content))
       } else {
         val respContentType = contentType(left)
 
@@ -66,10 +70,14 @@ trait ApiResultMatchers { this: org.biobank.fixtures.ControllerFixture =>
       log.debug(s"response: status: $responseStatus")
 
       if (responseStatus != htmlStatus) {
-        MatchResult(false,
+        val content = if (contentType(left) == Some("application/json"))
+                        Json.prettyPrint(contentAsJson(left))
+                      else
+                        contentAsString(left)
+           MatchResult(false,
                     "got {0} while expecting {1}, response was {2}",
                     "got expected status code {0}",
-                    IndexedSeq(responseStatus, htmlStatus, contentAsString(left)))
+                    IndexedSeq(responseStatus, htmlStatus, content))
       } else {
         val responseString = contentAsString(left)
         MatchResult(responseString.isEmpty,
@@ -97,7 +105,7 @@ trait ApiResultMatchers { this: org.biobank.fixtures.ControllerFixture =>
           regex.findFirstIn(message) != None,
           "message does not contain expected regex: got: {0}, expected: {1}, reponse was {2}",
           "message contains expected regex: got: {0}, expected: {1}, reponse was {2}",
-          IndexedSeq(error.messageRegex, message, Json.prettyPrint(responseJson)))
+          IndexedSeq(message, error.messageRegex, Json.prettyPrint(responseJson)))
       }
     }
   }

@@ -118,7 +118,9 @@ libraryDependencies ++= Seq(
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
     "org.codehaus.janino"         %  "janino"                              % "3.0.8"   % "test",
     "org.mockito"                 %  "mockito-core"                        % "2.18.0"  % "test",
-    "it.bitbl"                    %% "scala-faker"                         % "0.4"     % "test"
+    "it.bitbl"                    %% "scala-faker"                         % "0.4"     % "test",
+    "com.chuusai"                 %% "shapeless"                           % "2.3.3"   % "test",
+    "org.gnieh"                   %% "diffson-play-json"                  % "3.0.0"   % "test"
   )
 
 routesGenerator := InjectedRoutesGenerator

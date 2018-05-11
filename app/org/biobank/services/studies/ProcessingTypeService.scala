@@ -32,8 +32,8 @@ trait ProcessingTypeService extends BbwebService {
                            studySlug:          Slug,
                            processingTypeSlug: Slug): ServiceValidation[ProcessingType]
 
-  def processingTypesForStudy(requestUserId: UserId, studyId: StudyId)
-      : ServiceValidation[Set[ProcessingType]]
+  def processingTypesForStudy(requestUserId: UserId, studySlug: Slug, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[ProcessingType]]]
 
   def processCommand(cmd: ProcessingTypeCommand): Future[ServiceValidation[ProcessingType]]
 
@@ -66,78 +66,82 @@ class ProcessingTypeServiceImpl @Inject() (
     }
   }
 
-  def list(requestUserId: UserId,
-           studyId:       StudyId,
-           filter:        FilterString,
-           sort:          SortString): ServiceValidation[Seq[ProcessingType]] = {
-    whenPermittedAndIsMember(requestUserId,
-                             PermissionId.StudyRead,
-                             Some(studyId),
-                             None) { () =>
-      val sortStr = if (sort.expression.isEmpty) new SortString("name")
-                    else sort
-
+  def processingTypesForStudy(requestUserId: UserId, studySlug: Slug, query: PagedQuery)
+      : Future[ServiceValidation[PagedResults[ProcessingType]]] = {
+    Future {
       for {
-        study           <- studiesService.getStudy(requestUserId, studyId)
-        processingTypes <- getEventTypes(studyId, filter)
-        sortExpressions <- { QuerySortParser(sortStr).
-                              toSuccessNel(ServiceError(s"could not parse sort expression: $sort")) }
-        firstSort       <- { sortExpressions.headOption.
-                              toSuccessNel(ServiceError("at least one sort expression is required")) }
-        sortFunc        <- { ProcessingType.sort2Compare.get(firstSort.name).
-                              toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
-      } yield {
-        val result = processingTypes.toSeq.sortWith(sortFunc)
-        if (firstSort.order == AscendingOrder) result
-        else result.reverse
-      }
+        study     <- studiesService.getStudyBySlug(requestUserId, studySlug)
+        types     <- queryInternal(study.id, query.filter, query.sort)
+        validPage <- query.validPage(types.size)
+        results   <- PagedResults.create(types, query.page, query.limit)
+      } yield results
     }
   }
 
+  def processCommand(cmd: ProcessingTypeCommand): Future[ServiceValidation[ProcessingType]] = {
+    val v = for {
+        validCommand <- {
+          cmd match {
+              case c: RemoveProcessingTypeCmd =>
+                ServiceError(s"invalid service call: $cmd").failureNel[DisabledStudy]
+              case c => c.successNel[String]
+            }
+        }
+        study <- studiesService.getDisabledStudy(UserId(cmd.sessionUserId), StudyId(cmd.studyId))
+      } yield study
 
-
-  def processingTypesForStudy(requestUserId: UserId, studyId: StudyId)
-      : ServiceValidation[Set[ProcessingType]] = {
-    whenPermittedAndIsMember(requestUserId,
-                             PermissionId.StudyRead,
-                             Some(studyId),
-                             None) { () =>
-      withStudy(requestUserId, studyId) { study =>
-        processingTypeRepository.allForStudy(study.id).successNel[String]
-      }
-    }
-  }
-
-  def processCommand(cmd: ProcessingTypeCommand)
-      : Future[ServiceValidation[ProcessingType]] = {
-    cmd match {
-      case c: RemoveProcessingTypeCmd =>
-        Future.successful(ServiceError(s"invalid service call: $cmd").failureNel[ProcessingType])
-      case _ =>
+    v.fold(
+      err => Future.successful(err.failure[ProcessingType]),
+      study => whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId),
+                                            PermissionId.StudyUpdate,
+                                            Some(study.id),
+                                            None) { () =>
         ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]].map { validation =>
           for {
             event  <- validation
             result <- processingTypeRepository.getByKey(ProcessingTypeId(event.id))
           } yield result
         }
+      }
+    )
+  }
+
+  def processRemoveCommand(cmd: ProcessingTypeCommand): Future[ServiceValidation[Boolean]] = {
+    studiesService.getDisabledStudy(UserId(cmd.sessionUserId), StudyId(cmd.studyId)).fold(
+      err => Future.successful(err.failure[Boolean]),
+      study => whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId),
+                                            PermissionId.StudyUpdate,
+                                            Some(study.id),
+                                            None) { () =>
+        ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]]
+          .map { validation => validation.map(_ => true) }
+      }
+    )
+  }
+
+  private def queryInternal(studyId: StudyId,
+                            filter: FilterString,
+                            sort: SortString)
+      : ServiceValidation[Seq[ProcessingType]] = {
+    val sortStr = if (sort.expression.isEmpty) new SortString("name")
+                  else sort
+
+    for {
+      processingTypes <- getProcessingTypes(studyId, filter)
+      sortExpressions <- { QuerySortParser(sortStr).
+                           toSuccessNel(ServiceError(s"could not parse sort expression: $sortStr")) }
+      firstSort       <- { sortExpressions.headOption.
+                           toSuccessNel(ServiceError("at least one sort expression is required")) }
+      sortFunc        <- { ProcessingType.sort2Compare.get(firstSort.name).
+                           toSuccessNel(ServiceError(s"invalid sort field: ${firstSort.name}")) }
+    } yield {
+      val result = processingTypes.toSeq.sortWith(sortFunc)
+      if (firstSort.order == AscendingOrder) result
+      else result.reverse
     }
   }
 
-  def processRemoveCommand(cmd: ProcessingTypeCommand)
-      : Future[ServiceValidation[Boolean]] =
-    ask(processor, cmd).mapTo[ServiceValidation[ProcessingTypeEvent]]
-      .map { validation => validation.map(_ => true) }
-
-  private def withStudy[T](sessionUserId: UserId,
-                           studyId:       StudyId)
-                       (fn: Study => ServiceValidation[T]): ServiceValidation[T] = {
-    for {
-      study  <- studiesService.getStudy(sessionUserId, studyId)
-      result <- fn(study)
-    } yield result
-  }
-
-  private def getEventTypes(studyId: StudyId, filter: FilterString)
+  private def getProcessingTypes(studyId: StudyId, filter: FilterString)
       : ServiceValidation[Set[ProcessingType]] = {
     val allProcessingTypes = processingTypeRepository.allForStudy(studyId).toSet
     ProcessingTypeFilter.filterProcessingTypes(allProcessingTypes, filter)

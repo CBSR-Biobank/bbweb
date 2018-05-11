@@ -1,6 +1,7 @@
 package org.biobank.matchers
 
 import java.time.OffsetDateTime
+import gnieh.diffson.playJson._
 import org.biobank.domain.{ConcurrencySafeEntity, Location}
 import org.biobank.domain.access._
 import org.biobank.domain.annotations._
@@ -9,6 +10,7 @@ import org.biobank.domain.participants._
 import org.biobank.domain.studies._
 import org.biobank.domain.users._
 import org.scalatest.matchers.{MatchResult, Matcher}
+import play.api.libs.json._
 
 trait EntityMatchers {
 
@@ -124,6 +126,38 @@ trait EntityMatchers {
                     "event types do not match for the folowing attributes: {0},\n: actual {1},\nexpected: {2}",
                     "event types match: actual: {1},\nexpected: {2}",
                     IndexedSeq(nonMatching.mkString(", "), left, eventType))
+      }
+    }
+
+  /**
+   * This matcher allows for time differences in `timeAdded` and `timeModified` of 5 seconds.
+   *
+   * The `equals` matcher, from scalatest, cannot be used since ConcurrencySafeEntity overrides `equals`
+   * and `hashCode`.
+   */
+  def matchProcessingType(processingType: ProcessingType) =
+    new Matcher[ProcessingType] {
+      def apply(left: ProcessingType) = {
+        val matchers = Map(
+            ("id"                 -> (left.id          equals processingType.id)),
+            ("slug"               -> (left.slug        equals processingType.slug)),
+            ("name"               -> (left.name        equals processingType.name)),
+            ("description"        -> (left.description equals processingType.description)),
+            ("enabled"            -> (left.enabled     equals processingType.enabled)),
+            ("annotationTypes"    -> (annotationTypesMatch(left.annotationTypes,
+                                                          processingType.annotationTypes)))
+          ) ++
+        inputSpecimenInfosMatch(left, processingType) ++
+        outputSpecimenInfosMatch(left, processingType) ++
+        entityAttrsMatch(processingType, left)
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "event types do not match for the folowing attributes: {0},\n: diff: {1}",
+                    "event types match: actual: {1},\nexpected: {2}",
+                    IndexedSeq(nonMatching.mkString(", "),
+                               JsonDiff.diff(Json.toJson(processingType), Json.toJson(left), true)))
       }
     }
 
@@ -442,6 +476,55 @@ trait EntityMatchers {
       ("description" -> (a.description equals b.description)),
       ("parentIds"   -> (a.parentIds   equals b.parentIds)),
       ("childrenIds" -> (a.childrenIds equals b.childrenIds))
+    )
+  }
+
+  private def inputSpecimenInfosMatch(a: ProcessingType, b: ProcessingType) = {
+    val aIsi = a.specimenProcessing.input
+    val bIsi = b.specimenProcessing.input
+    Map(
+      ("input.expectedChange"       -> (aIsi.expectedChange       equals bIsi.expectedChange)),
+      ("input.count"                -> (aIsi.count                equals bIsi.count)),
+      ("input.containerTypeId"      -> (aIsi.containerTypeId      equals bIsi.containerTypeId)),
+      ("input.definitionType"       -> (aIsi.definitionType       equals bIsi.definitionType)),
+      ("input.entityId"             -> (aIsi.entityId             equals bIsi.entityId)),
+      ("input.specimenDefinitionId" -> (aIsi.specimenDefinitionId equals bIsi.specimenDefinitionId)),
+    )
+  }
+
+  private def outputSpecimenInfosMatch(a: ProcessingType, b: ProcessingType) = {
+    val aOsi = a.specimenProcessing.output
+    val bOsi = b.specimenProcessing.output
+    Map(
+      ("output.expectedChange"  -> (aOsi.expectedChange equals bOsi.expectedChange)),
+      ("output.count"           -> (aOsi.count equals bOsi.count)),
+      ("output.containerTypeId" -> (aOsi.containerTypeId equals bOsi.containerTypeId)),
+    ) ++
+    outputSpecimenDefinitionsMatch(a, b)
+  }
+
+  private def outputSpecimenDefinitionsMatch(a: ProcessingType, b: ProcessingType) = {
+    val aOsd = a.specimenProcessing.output.specimenDefinition
+    val bOsd = b.specimenProcessing.output.specimenDefinition
+    Map(
+      ("output.specimenDefinition.id"                      ->
+         (aOsd.id                      equals bOsd.id)),
+      ("output.specimenDefinition.slug"                    ->
+         (aOsd.slug                    equals bOsd.slug)),
+      ("output.specimenDefinition.name"                    ->
+         (aOsd.name                    equals bOsd.name)),
+      ("output.specimenDefinition.description"             ->
+         (aOsd.description             equals bOsd.description)),
+      ("output.specimenDefinition.units"                   ->
+         (aOsd.units                   equals bOsd.units)),
+      ("output.specimenDefinition.anatomicalSourceType"    ->
+         (aOsd.anatomicalSourceType    equals bOsd.anatomicalSourceType)),
+      ("output.specimenDefinition.preservationType"        ->
+         (aOsd.preservationType        equals bOsd.preservationType)),
+      ("output.specimenDefinition.preservationTemperature" ->
+         (aOsd.preservationTemperature equals bOsd.preservationTemperature)),
+      ("output.specimenDefinition.specimenType"            ->
+         (aOsd.specimenType            equals bOsd.specimenType))
     )
   }
 

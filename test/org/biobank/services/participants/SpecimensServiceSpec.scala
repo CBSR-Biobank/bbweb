@@ -25,7 +25,7 @@ class SpecimensServiceSpec
     val location = factory.createLocation
     val centre = factory.createEnabledCentre.copy(studyIds = Set(enabledStudy.id),
                                                   locations = Set(location))
-    val specimen = factory.createUsableSpecimen.copy(specimenDefinitionId = specimenDesc.id,
+    val specimen = factory.createUsableSpecimen.copy(specimenDefinitionId = specimenDefinition.id,
                                                      locationId = location.id)
     Set(specimen, centre).foreach(addToRepository)
     ceventSpecimenRepository.put(CeventSpecimen(cevent.id, specimen.id))

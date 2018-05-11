@@ -58,14 +58,14 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
   override def receiveRecover: Receive = {
     case event: CollectionEventTypeEvent =>
       event.eventType match {
-        case et: EventType.Added                      => applyAddedEvent(event)
-        case et: EventType.Removed                    => applyRemovedEvent(event)
-        case et: EventType.NameUpdated                => applyNameUpdatedEvent(event)
-        case et: EventType.DescriptionUpdated         => applyDescriptionUpdatedEvent(event)
-        case et: EventType.RecurringUpdated           => applyRecurringUpdatedEvent(event)
-        case et: EventType.AnnotationTypeAdded        => applyAnnotationTypeAddedEvent(event)
-        case et: EventType.AnnotationTypeUpdated      => applyAnnotationTypeUpdatedEvent(event)
-        case et: EventType.AnnotationTypeRemoved      => applyAnnotationTypeRemovedEvent(event)
+        case et: EventType.Added                     => applyAddedEvent(event)
+        case et: EventType.Removed                   => applyRemovedEvent(event)
+        case et: EventType.NameUpdated               => applyNameUpdatedEvent(event)
+        case et: EventType.DescriptionUpdated        => applyDescriptionUpdatedEvent(event)
+        case et: EventType.RecurringUpdated          => applyRecurringUpdatedEvent(event)
+        case et: EventType.AnnotationTypeAdded       => applyAnnotationTypeAddedEvent(event)
+        case et: EventType.AnnotationTypeUpdated     => applyAnnotationTypeUpdatedEvent(event)
+        case et: EventType.AnnotationTypeRemoved     => applyAnnotationTypeRemovedEvent(event)
         case et: EventType.SpecimenDefinitionAdded   => applySpecimenDefinitionAddedEvent(event)
         case et: EventType.SpecimenDefinitionUpdated => applySpecimenDefinitionUpdatedEvent(event)
         case et: EventType.SpecimenDefinitionRemoved => applySpecimenDefinitionRemovedEvent(event)
@@ -297,7 +297,7 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                         cet: CollectionEventType)
       : ServiceValidation[CollectionEventTypeEvent] = {
     for {
-      specimenDesc <- CollectionSpecimenDefinition.create(cmd.name,
+      specimenDefinition <- CollectionSpecimenDefinition.create(cmd.name,
                                                           cmd.description,
                                                           cmd.units,
                                                           cmd.anatomicalSourceType,
@@ -306,20 +306,20 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                                           cmd.specimenType,
                                                           cmd.maxCount,
                                                           cmd.amount)
-      updatedCet <- cet.withSpecimenDefinition(specimenDesc)
+      updatedCet <- cet.withSpecimenDefinition(specimenDefinition)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                      := cet.studyId.id,
       _.sessionUserId                                := cmd.sessionUserId,
       _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.specimenDefinitionAdded.version             := cmd.expectedVersion,
-      _.specimenDefinitionAdded.specimenDefinition := EventUtils.specimenDefinitionToEvent(specimenDesc))
+      _.specimenDefinitionAdded.specimenDefinition := EventUtils.specimenDefinitionToEvent(specimenDefinition))
   }
 
   private def updateSepcimenSpecCmdToEvent(cmd: UpdateCollectionSpecimenDefinitionCmd,
                                            cet: CollectionEventType)
       : ServiceValidation[CollectionEventTypeEvent] = {
     for {
-      specimenDesc <- {
+      specimenDefinition <- {
         CollectionSpecimenDefinition(SpecimenDefinitionId(cmd.specimenDefinitionId),
                                      Slug(cmd.name),
                                      cmd.name,
@@ -332,13 +332,13 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
                                      cmd.maxCount,
                                      cmd.amount).successNel[String]
       }
-      updatedCet <- cet.withSpecimenDefinition(specimenDesc)
+      updatedCet <- cet.withSpecimenDefinition(specimenDefinition)
     } yield CollectionEventTypeEvent(cet.id.id).update(
       _.studyId                                      := cet.studyId.id,
       _.sessionUserId                                := cmd.sessionUserId,
       _.time                                         := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.specimenDefinitionUpdated.version            := cmd.expectedVersion,
-      _.specimenDefinitionUpdated.specimenDefinition := EventUtils.specimenDefinitionToEvent(specimenDesc))
+      _.specimenDefinitionUpdated.specimenDefinition := EventUtils.specimenDefinitionToEvent(specimenDefinition))
   }
 
   private def removeSpecimenDefinitionCmdToEvent(cmd: RemoveCollectionSpecimenDefinitionCmd,
@@ -447,8 +447,6 @@ class CollectionEventTypeProcessor @javax.inject.Inject() (
     onValidEventAndVersion(event,
                            event.eventType.isNameUpdated,
                            event.getNameUpdated.getVersion) { (cet, eventTime) =>
-
-
       val v = cet.withName(event.getNameUpdated.getName).map { updated =>
           updated.copy(slug = collectionEventTypeRepository.uniqueSlugFromStr(updated.name))
         }
