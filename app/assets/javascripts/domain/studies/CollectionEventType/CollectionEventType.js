@@ -1,3 +1,4 @@
+
 /*
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -22,14 +23,15 @@ function CollectionEventTypeFactory($q,
   const SCHEMA = ConcurrencySafeEntity.createDerivedSchema({
     'id': 'CollectionEventType',
     'properties': {
-      'slug':                 { 'type': 'string' },
-      'name':                 { 'type': 'string' },
-      'description':          { 'type': [ 'string', 'null' ] },
-      'recurring':            { 'type': 'boolean' },
+      'studyId':             { 'type': 'string' },
+      'slug':                { 'type': 'string' },
+      'name':                { 'type': 'string' },
+      'description':         { 'type': [ 'string', 'null' ] },
+      'recurring':           { 'type': 'boolean' },
       'specimenDefinitions': { 'type': 'array', 'items': { '$ref': 'CollectionSpecimenDefinition' } },
-      'annotationTypes':      { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
+      'annotationTypes':     { 'type': 'array', 'items': { '$ref': 'AnnotationType' } }
     },
-    'required': [ 'slug', 'name', 'recurring' ]
+    'required': [ 'studyId', 'slug', 'name', 'recurring' ]
   });
 
   /**
@@ -47,6 +49,12 @@ function CollectionEventTypeFactory($q,
    * @param {Object} collectionEventType the collection event type JSON returned by the server.
    *
    * @param {Study} options.study the study this collection even type belongs to.
+   *
+   * @param {Array<domain.studies.CollectionSpecimenDefinition>} options.specimenDefinitions the specimen
+   * definitions defined for this collection event type.
+   *
+   * @param {Array<domain.annotations.AnnotationType>} options.annotationTypes the annotation types defined
+   * for this collection event type.
    */
   class CollectionEventType extends HasAnnotationTypesMixin(ConcurrencySafeEntity) {
 
@@ -74,7 +82,7 @@ function CollectionEventTypeFactory($q,
        */
 
       /**
-       * True if this collection events of this type occur more than once for the duration of the study.
+       * True if collection events of this type occur more than once for the duration of the study.
        *
        * @name domain.studies.CollectionEventType#recurring
        * @type {boolean}
@@ -140,8 +148,7 @@ function CollectionEventTypeFactory($q,
     }
 
     /**
-     * Creates a CollectionEventType, but first it validates <tt>obj</tt> to ensure that it has a valid
-     * schema.
+     * Creates a CollectionEventType, but first it validates `obj` to ensure that it has a valid schema.
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
@@ -164,16 +171,16 @@ function CollectionEventTypeFactory($q,
           options.annotationTypes = obj.annotationTypes
             .map(annotationType => AnnotationType.create(annotationType));
         } catch (e) {
-          throw new DomainError('invalid annotation types from server: ' + validation.message);
+          throw new DomainError('invalid annotation types from server: ' + e.message);
         }
       }
 
-      if (obj.specimenDefinitions) {
+      if (obj.specimenDefinition) {
         try {
           options.specimenDefinitions = obj.specimenDefinitions
             .map((specimenDefinition) => CollectionSpecimenDefinition.create(specimenDefinition));
         } catch (e) {
-          throw new DomainError('invalid specimen specs from server: ' + validation.message);
+          throw new DomainError('invalid specimen definitions from server: ' + e.message);
         }
       }
 
@@ -181,8 +188,8 @@ function CollectionEventTypeFactory($q,
     }
 
     /**
-     * Creates a CollectionEventType from a server reply but first validates that <tt>obj</tt> has a valid
-     * schema. <i>Meant to be called from within promise code.</i>
+     * Creates a CollectionEventType from a server reply but first validates that `obj` has a valid
+     * schema. *Meant to be called from within promise code*.
      *
      * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
      * this class. Objects of this type are usually returned by the server's REST API.
@@ -216,7 +223,7 @@ function CollectionEventTypeFactory($q,
     }
 
     /**
-     * Fetches all collection event types for a {@link domain.studies.Study|Study}.
+     * Fetches collection event types for a {@link domain.studies.Study|Study}.
      *
      * @param {string} studySlug the slug of the study the collection event types belongs to.
      *

@@ -83,7 +83,7 @@
     "dist-build": "webpack --config webpack.dist.config.js --display-modules --progress",
     "jsdoc": "jsdoc --configure jsdoc.json",
     "start": "webpack --config webpack.dev.config.js --profile --progress --colors",
-    "test": "karma start karma.conf.js",
+    "test": "karma start --reporters failed karma.conf.js",
     "test-run": "karma run karma.conf.js",
     "test-single-run": "karma start --single-run --no-auto-watch --log-level info --reporters dots karma.conf.js",
     "test-coverage": "TEST_MODE=coverage karma start karma.conf.js",

@@ -1,4 +1,8 @@
-/*
+/**
+ * Jasmine shared behaviour.
+ *
+ * @namespace test.behaviours.entityInfoSharedBehaviour
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
@@ -6,6 +10,11 @@
 import _ from 'lodash'
 
 /**
+ * Common behaviour for test suites that test {@link domain.EntityInfo EntityInfo}.
+ *
+ * @function entityInfoCreateSharedBehaviour
+ * @memberOf test.behaviours.entityInfoSharedBehaviour
+ *
  * @param {object} context The context to use to test the behaviour. See below for required fields.
  *
  * @param {constructor} context.constructor The constructor function for the entity to test.
@@ -45,6 +54,11 @@ function entityInfoCreateSharedBehaviour(context) {
 }
 
 /**
+ * Common behaviour for test suites that list objects of type {@link domain.EntityInfo EntityInfo}.
+ *
+ * @function entityInfoListSharedBehaviour
+ * @memberOf test.behaviours.entityInfoSharedBehaviour
+ *
  * @param {object} context The context to use to test the behaviour. See below for required fields.
  *
  * @param {constructor} context.constructor The constructor function for the entity to test.

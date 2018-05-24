@@ -54,12 +54,32 @@ sealed trait SpecimenProcessingInfo extends ProcessingTypeValidations {
   }
 }
 
-final case class InputSpecimenInfo(expectedChange:       BigDecimal,
-                                   count:                Int,
-                                   containerTypeId:      Option[ContainerTypeId],
-                                   definitionType:       InputSpecimenDefinitionType,
-                                   entityId:             IdentifiedDomainObject[_],
-                                   specimenDefinitionId: SpecimenDefinitionId)
+/**
+ * Defines the input specimen information for a [[domain.studies.ProcessingType]]
+ *
+ * @param expectedChange The expected amount to be removed from each input. If the value is not required
+ * then use a value of zero.
+ *
+ * @param count The number of expected specimens when the processing is carried out.
+ *
+ * @param containerTypeId The [[domain.containers.ContainerType ContainerType]] that the input
+ * [[domain.participants.Specimen Specimens]] are stored into. This is an optional field.
+ *
+ * @param definitionType Where the input specimen originates from: one of [[InputSpecimenDefinitionType]].
+ *
+ * @parma entityId The entity that contains the [[domain.studies.SpecimenDefinition SpecimenDefinition]] the
+ * input [[domain.participants.Specimen Specimens]] comes from. Can be either a
+ * [[domain.studies.CollectionEventType CollectionEventType]] or a [[domain.studies.ProcessingType
+ * ProcessingType]].
+ *
+ * @param specimenDefinitionId The ID of the input [[domain.studies.SpecimenDefinition SpecimenDefinition]].
+ */
+final case class InputSpecimenProcessing(expectedChange:       BigDecimal,
+                                         count:                Int,
+                                         containerTypeId:      Option[ContainerTypeId],
+                                         definitionType:       InputSpecimenDefinitionType,
+                                         entityId:             IdentifiedDomainObject[_],
+                                         specimenDefinitionId: SpecimenDefinitionId)
     extends SpecimenProcessingInfo
     with CollectionEventTypeValidations {
 
@@ -78,10 +98,25 @@ final case class InputSpecimenInfo(expectedChange:       BigDecimal,
 
 }
 
-final case class OutputSpecimenInfo(expectedChange:     BigDecimal,
-                                    count:              Int,
-                                    containerTypeId:    Option[ContainerTypeId],
-                                    specimenDefinition: ProcessedSpecimenDefinition)
+/**
+ * Defines the output specimen information for a [[domain.studies.ProcessingType]]
+ *
+ * @param expectedChange The expected amount to be added to each output. If the value is not required
+ * then use a value of zero.
+ *
+ * @param count The number of resulting specimens when the processing is carried out. A value of zero
+ * for output count implies that the count is the same as the input count.
+ *
+ * @param containerTypeId The [[domain.containers.ContainerType ContainerType]] that the output
+ * [[domain.participants.Specimen Specimens]] are stored into. This is an optional field.
+ *
+ * @param specimenDefinition Details for how the processed specimen is derived.
+ *
+ */
+final case class OutputSpecimenProcessing(expectedChange:     BigDecimal,
+                                          count:              Int,
+                                          containerTypeId:    Option[ContainerTypeId],
+                                          specimenDefinition: ProcessedSpecimenDefinition)
     extends SpecimenProcessingInfo {
 
   override def validate(): DomainValidation[Boolean] = {
@@ -89,7 +124,7 @@ final case class OutputSpecimenInfo(expectedChange:     BigDecimal,
   }
 }
 
-final case class SpecimenProcessing(input: InputSpecimenInfo, output: OutputSpecimenInfo) {
+final case class SpecimenProcessing(input: InputSpecimenProcessing, output: OutputSpecimenProcessing) {
 
   def validate(): DomainValidation[Boolean] = {
     (input.validate |@| output.validate) { case _ => true }
@@ -98,29 +133,15 @@ final case class SpecimenProcessing(input: InputSpecimenInfo, output: OutputSpec
 
 /**
  * Records a regularly preformed specimen processing procedure. It defines and allows for recording of
- * procedures performed on different types of [[domain.participants.Specimen Specimen]]s.
+ * procedures performed on different types of [[domain.participants.Specimen Specimens]].
  *
- * For speicmen processing to take place, a study must have at least one processing type defined.
+ * For specimen processing to take place, a study must have at least one processing type defined.
  *
  * @param enabled A processing type should have enabled set to `TRUE` when processing of the contained
  * specimen types is taking place. However, throughout the lifetime of the study, it may be decided to stop a
  * processing type in favour of another. In this case enabled is set to `FALSE`.
  *
- * @param expectedInputChange The expected amount to be removed from each input. If the value is not required
- * then use a value of zero.
- *
- * @param expectedOutputChange The expected amount to be added to each output. If the value is not required
- * then use a value of zero.
- *
- * @param inputCount  The number of expected specimens when the processing is carried out.
- *
- * @param outputCount The number of resulting specimens when the processing is carried out. A value of zero
- * for output count implies that the count is the same as the input count.
- *
- * @param specimenDerivation Details for how the processed specimen is derived.
- *
- * @param outputContainerTypeId The [[domain.containers.ContainerType ContainerType]] that the output
- * [[domian.participants.Specimen Specimens]] are stored into. This is an optional field.
+ * @param specimenProcessing Details for how the processed specimen is derived.
  *
  * @param annotationTypes The [[domain.studies.AnnotationType AnnotationType]]s for recorded for this
  * processing type.
@@ -258,13 +279,13 @@ final case class ProcessingType(studyId:            StudyId,
     }
   }
 
-  private def withInputSpecimenProcessing(input: InputSpecimenInfo): ProcessingType = {
+  private def withInputSpecimenProcessing(input: InputSpecimenProcessing): ProcessingType = {
     copy(specimenProcessing = specimenProcessing.copy(input = input),
          version            = version + 1,
          timeModified       = Some(OffsetDateTime.now))
   }
 
-  private def withOutputSpecimenProcessing(output: OutputSpecimenInfo): ProcessingType = {
+  private def withOutputSpecimenProcessing(output: OutputSpecimenProcessing): ProcessingType = {
     copy(specimenProcessing = specimenProcessing.copy(output = output),
          version            = version + 1,
          timeModified       = Some(OffsetDateTime.now))
@@ -285,11 +306,11 @@ final case class ProcessingType(studyId:            StudyId,
         |}""".stripMargin
 }
 
-object InputSpecimenInfo {
+object InputSpecimenProcessing {
 
-  implicit val inputSpecimenInfoFormat: Format[InputSpecimenInfo] = new Format[InputSpecimenInfo] {
+  implicit val inputSpecimenInfoFormat: Format[InputSpecimenProcessing] = new Format[InputSpecimenProcessing] {
 
-      override def reads(json: JsValue): JsResult[InputSpecimenInfo] = {
+      override def reads(json: JsValue): JsResult[InputSpecimenProcessing] = {
         for {
           expectedChange       <- (json \ "expectedChange").validate[String]
           validExpectedChange  <- {
@@ -314,7 +335,7 @@ object InputSpecimenInfo {
           val id: IdentifiedDomainObject[_] =
             if (validDefinitionType == ProcessingType.collectedDefinition) CollectionEventTypeId(entityId)
             else ProcessingTypeId(entityId)
-          InputSpecimenInfo(validExpectedChange,
+          InputSpecimenProcessing(validExpectedChange,
                             count,
                             containerTypeId,
                             validDefinitionType,
@@ -323,7 +344,7 @@ object InputSpecimenInfo {
         }
       }
 
-      override def writes(specimenInfo: InputSpecimenInfo): JsValue =
+      override def writes(specimenInfo: InputSpecimenProcessing): JsValue =
         Json.obj("expectedChange"       -> specimenInfo.expectedChange.toString,
                  "count"                -> specimenInfo.count,
                  "containerTypeId"      -> specimenInfo.containerTypeId.map(_.id),
@@ -334,11 +355,11 @@ object InputSpecimenInfo {
 
 }
 
-object OutputSpecimenInfo {
+object OutputSpecimenProcessing {
 
-  implicit val outputSpecimenInfoFormat: Format[OutputSpecimenInfo] = new Format[OutputSpecimenInfo] {
+  implicit val outputSpecimenInfoFormat: Format[OutputSpecimenProcessing] = new Format[OutputSpecimenProcessing] {
 
-      override def reads(json: JsValue): JsResult[OutputSpecimenInfo] = {
+      override def reads(json: JsValue): JsResult[OutputSpecimenProcessing] = {
         for {
           expectedChange       <- (json \ "expectedChange").validate[String]
           validExpectedChange  <- {
@@ -351,11 +372,11 @@ object OutputSpecimenInfo {
           containerTypeId      <- (json \ "containerTypeId").validateOpt[ContainerTypeId]
           specimenDefinition   <- (json \ "specimenDefinition").validate[ProcessedSpecimenDefinition]
         } yield {
-          OutputSpecimenInfo(validExpectedChange, count, containerTypeId, specimenDefinition)
+          OutputSpecimenProcessing(validExpectedChange, count, containerTypeId, specimenDefinition)
         }
       }
 
-      override def writes(specimenInfo: OutputSpecimenInfo): JsValue =
+      override def writes(specimenInfo: OutputSpecimenProcessing): JsValue =
         Json.obj("expectedChange"     -> specimenInfo.expectedChange.toString,
                  "count"              -> specimenInfo.count,
                  "containerTypeId"    -> specimenInfo.containerTypeId.map(_.id),

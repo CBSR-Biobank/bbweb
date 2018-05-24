@@ -9,7 +9,7 @@ import _ from 'lodash';
 /* @ngInject */
 function StudyAnnotationTypesServiceFactory(biobankApi) {
 
-  /**
+  /*
    * Service to access study annotation types.
    */
   function StudyAnnotationTypesService(annotationTypeUri) {

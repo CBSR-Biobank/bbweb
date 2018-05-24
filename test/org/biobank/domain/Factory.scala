@@ -256,13 +256,13 @@ class Factory {
     val disabledStudy = defaultDisabledStudy
     val name = faker.Lorem.sentence(2)
 
-    val input = InputSpecimenInfo(expectedChange       = BigDecimal(1.0),
+    val input = InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
                                   count                = 1,
                                   containerTypeId      = None,
                                   definitionType       = ProcessingType.collectedDefinition,
                                   entityId             = CollectionEventTypeId(""),
                                   specimenDefinitionId = SpecimenDefinitionId(""))
-    val output = OutputSpecimenInfo(expectedChange     = BigDecimal(1.0),
+    val output = OutputSpecimenProcessing(expectedChange     = BigDecimal(1.0),
                                     count              = 1,
                                     containerTypeId    = None,
                                     specimenDefinition = defaultProcessedSpecimenDefinition)

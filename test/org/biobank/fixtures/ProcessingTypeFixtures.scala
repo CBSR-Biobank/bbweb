@@ -13,7 +13,7 @@ trait ProcessingTypeFixtures {
     val collectionEventType = factory.createCollectionEventType.copy(
         specimenDefinitions = Set(collectedSpecimenDefinition))
 
-    val input = InputSpecimenInfo(expectedChange       = BigDecimal(1.0),
+    val input = InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
                                   count                = 1,
                                   containerTypeId      = None,
                                   definitionType       = ProcessingType.collectedDefinition,
@@ -39,7 +39,7 @@ trait ProcessingTypeFixtures {
     val inputProcessingType = f.processingType
     val inputSpecimenDefinition = inputProcessingType.specimenProcessing.output.specimenDefinition
     val outputSpecimenDefinition = factory.createProcessedSpecimenDefinition
-    val input = InputSpecimenInfo(expectedChange       = BigDecimal(1.0),
+    val input = InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
                                   count                = 1,
                                   containerTypeId      = None,
                                   definitionType       = ProcessingType.processedDefinition,

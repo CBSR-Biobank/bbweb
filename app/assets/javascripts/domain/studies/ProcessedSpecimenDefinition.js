@@ -7,13 +7,13 @@
  * AngularJS Factory
  */
 /* @ngInject */
-function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
+function ProcessedSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
 
   /*
    * Used for validation.
    */
   const SCHEMA = {
-    'id': 'CollectionSpecimenDefinition',
+    'id': 'ProcessedSpecimenDefinition',
     'type': 'object',
     'properties': {
       'id':                      { 'type': 'string' },
@@ -24,9 +24,7 @@ function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
       'anatomicalSourceType':    { 'type': 'string' },
       'preservationType':        { 'type': 'string' },
       'preservationTemperature': { 'type': 'string' },
-      'specimenType':            { 'type': 'string' },
-      'maxCount':                { 'type': 'integer', 'minimum': 1 },
-      'amount':                  { 'type': 'number', 'minimum':  0 }
+      'specimenType':            { 'type': 'string' }
 
     },
     'required': [
@@ -37,9 +35,7 @@ function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
       'anatomicalSourceType',
       'preservationType',
       'preservationTemperature',
-      'specimenType',
-      'maxCount',
-      'amount'
+      'specimenType'
     ]
   }
 
@@ -52,7 +48,7 @@ function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
    *
    * @memberOf domain.studies
    */
-  class CollectionSpecimenDefinition extends DomainEntity {
+  class ProcessedSpecimenDefinition extends DomainEntity {
 
     /**
      * @param {object} obj - An initialization object whose properties are the same as the members from
@@ -61,48 +57,34 @@ function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
     constructor(obj) {
       /**
        * A short identifying name.
-       * @name domain.studies.CollectionSpecimenDefinition#name
+       * @name domain.studies.ProcessedSpecimenDefinition#name
        * @type string
        */
 
       /**
        * Specifies how the specimen amount is measured (e.g. volume, weight, length, etc.).
-       * @name domain.studies.CollectionSpecimenDefinition#units
+       * @name domain.studies.ProcessedSpecimenDefinition#units
        * @type {string}
        */
 
       /**
-       * @name domain.studies.CollectionSpecimenDefinition#anatomicalSourceType
+       * @name domain.studies.ProcessedSpecimenDefinition#anatomicalSourceType
        * @type {domain.AnatomicalSourceType.AnatomicalSourceType}
        */
 
       /**
-       * @name domain.studies.CollectionSpecimenDefinition#preservationType
+       * @name domain.studies.ProcessedSpecimenDefinition#preservationType
        * @type {domain.PreservationType.PreservationType}
        */
 
       /**
-       * @name domain.studies.CollectionSpecimenDefinition#preservationTemperature
+       * @name domain.studies.ProcessedSpecimenDefinition#preservationTemperature
        * @type {domain.PreservationTemperature.PreservationTemperature}
        */
 
       /**
-       * @name domain.studies.CollectionSpecimenDefinition#specimenType
+       * @name domain.studies.ProcessedSpecimenDefinition#specimenType
        * @type {domain.studies.SpecimenType.SpecimenType}
-       */
-
-      /**
-       * The amount per specimen, measured in units, to be collected.
-       * @name domain.studies.CollectionSpecimenDefinition#amount
-       * @type {number}
-       * @see #units
-       */
-
-      /**
-       * The number of specimens to be collected.
-       * @name domain.studies.CollectionSpecimenDefinition#maxCount
-       * @type {number}
-       * @see #units
        */
 
       super(Object.assign(
@@ -130,18 +112,18 @@ function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
     }
 
     static create(obj) {
-      var validation = CollectionSpecimenDefinition.isValid(obj);
+      var validation = ProcessedSpecimenDefinition.isValid(obj);
 
       if (!validation.valid) {
         $log.error('invalid object from server: ' + validation.message);
         throw new DomainError('invalid object from server: ' + validation.message);
       }
-      return new CollectionSpecimenDefinition(obj);
+      return new ProcessedSpecimenDefinition(obj);
     }
   }
 
-  return CollectionSpecimenDefinition;
+  return ProcessedSpecimenDefinition;
 }
 
-export default ngModule => ngModule.factory('CollectionSpecimenDefinition',
-                                           CollectionSpecimenDefinitionFactory)
+export default ngModule => ngModule.factory('ProcessedSpecimenDefinition',
+                                           ProcessedSpecimenDefinitionFactory)

@@ -195,7 +195,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
         val cmdInput = cmd.specimenProcessing.input
         val cmdOutput = cmd.specimenProcessing.output
 
-        val input = studies.InputSpecimenInfo(
+        val input = studies.InputSpecimenProcessing(
           expectedChange       = cmdInput.expectedChange,
           count                = cmdInput.count,
           containerTypeId      = cmdInput.containerTypeId.map(ContainerTypeId.apply),
@@ -215,7 +215,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
             preservationTemperature = cmdDefinition.preservationTemperature,
             specimenType            = cmdDefinition.specimenType)
 
-        val output = studies.OutputSpecimenInfo(
+        val output = studies.OutputSpecimenProcessing(
           expectedChange     = cmdOutput.expectedChange,
           count              = cmdOutput.count,
           containerTypeId    = cmdOutput.containerTypeId.map(ContainerTypeId.apply),
@@ -535,7 +535,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
       val input =
         if (addedEvent.inputSpecimenDefinitionType.isCollected) {
           val collected = addedEvent.getCollected
-          studies.InputSpecimenInfo(
+          studies.InputSpecimenProcessing(
             expectedChange       = addedEvent.getExpectedInputChange,
             count                = addedEvent.getInputCount,
             containerTypeId      = inputContainerTypeId,
@@ -544,7 +544,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
             specimenDefinitionId = SpecimenDefinitionId(collected.getSpecimenDefinitionId))
         } else {
           val processed = addedEvent.getProcessed
-          studies.InputSpecimenInfo(
+          studies.InputSpecimenProcessing(
             expectedChange       = addedEvent.getExpectedInputChange,
             count                = addedEvent.getInputCount,
             containerTypeId      = inputContainerTypeId,
@@ -553,7 +553,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
             specimenDefinitionId = SpecimenDefinitionId(processed.getSpecimenDefinitionId))
         }
 
-      val output = studies.OutputSpecimenInfo(
+      val output = studies.OutputSpecimenProcessing(
           expectedChange     = addedEvent.getExpectedOutputChange,
           count              = addedEvent.getOutputCount,
           containerTypeId    = outputContainerTypeId,

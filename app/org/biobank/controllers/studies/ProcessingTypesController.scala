@@ -160,7 +160,7 @@ class ProcessingTypesController @Inject() (
                                  containerTypeId = containerTypeIdMaybe)
         }
       case "inputSpecimenDefinition" =>
-        json.newValue.validate[InputSpecimenInfo].map { newValue =>
+        json.newValue.validate[InputSpecimenProcessing].map { newValue =>
           UpdateInputSpecimenDefinitionCmd(sessionUserId        = json.sessionUserId,
                                            studyId              = json.studyId,
                                            id                   = json.id,

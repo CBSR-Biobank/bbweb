@@ -6,27 +6,26 @@ import _ from 'lodash';
 import faker  from 'faker';
 import moment from 'moment';
 
-const STRING_SYMBOL                     = Symbol('string'),
-      ENTITY_NAME_PROCESSING_TYPE       = Symbol('processingType'),
-      ENTITY_NAME_SPECIMEN_LINK_TYPE    = Symbol('specimenLinkType'),
-      ENTITY_NAME_COLLECTION_EVENT_TYPE = Symbol('collectionEventType'),
-      ENTITY_NAME_SPECIMEN_GROUP        = Symbol('specimenGroup'),
-      ENTITY_NAME_ANNOTATION_TYPE       = Symbol('annotationType'),
-      ENTITY_NAME_STUDY                 = Symbol('study'),
-      ENTITY_NAME_PARTICIPANT           = Symbol('participant'),
-      ENTITY_NAME_COLLECTION_EVENT      = Symbol('collectionEvent'),
-      ENTITY_NAME_SPECIMEN              = Symbol('specimen'),
-      ENTITY_NAME_CENTRE                = Symbol('centre'),
-      ENTITY_NAME_LOCATION              = Symbol('location'),
-      ENTITY_NAME_SHIPMENT              = Symbol('shipment'),
-      ENTITY_NAME_SHIPMENT_SPECIMEN     = Symbol('shipmentSpecimen'),
-      ENTITY_NAME_USER                  = Symbol('user'),
-      ENTITY_NAME_MEMBERSHIP_BASE       = Symbol('membershipBase'),
-      ENTITY_NAME_MEMBERSHIP            = Symbol('membership'),
-      ENTITY_NAME_ACCESS_ITEM           = Symbol('accessItem'),
-      ENTITY_NAME_ROLE                  = Symbol('role'),
-      ENTITY_NAME_PERMISSION            = Symbol('permission')
-
+const STRING_SYMBOL                             = Symbol('string');
+const ENTITY_NAME_STUDY                         = Symbol('study');
+const ENTITY_NAME_COLLECTION_EVENT_TYPE         = Symbol('collectionEventType');
+const ENTITY_NAME_COLLECTED_SPECIMEN_DEFINITION = Symbol('collectedSpecimenDefinition');
+const ENTITY_NAME_ANNOTATION_TYPE               = Symbol('annotationType');
+const ENTITY_NAME_PROCESSING_TYPE               = Symbol('processingType');
+const ENTITY_NAME_PROCESSED_SPECIMEN_DEFINITION = Symbol('processedSpecimenDefinition');
+const ENTITY_NAME_PARTICIPANT                   = Symbol('participant');
+const ENTITY_NAME_COLLECTION_EVENT              = Symbol('collectionEvent');
+const ENTITY_NAME_SPECIMEN                      = Symbol('specimen');
+const ENTITY_NAME_CENTRE                        = Symbol('centre');
+const ENTITY_NAME_LOCATION                      = Symbol('location');
+const ENTITY_NAME_SHIPMENT                      = Symbol('shipment');
+const ENTITY_NAME_SHIPMENT_SPECIMEN             = Symbol('shipmentSpecimen');
+const ENTITY_NAME_USER                          = Symbol('user');
+const ENTITY_NAME_MEMBERSHIP_BASE               = Symbol('membershipBase');
+const ENTITY_NAME_MEMBERSHIP                    = Symbol('membership');
+const ENTITY_NAME_ACCESS_ITEM                   = Symbol('accessItem');
+const ENTITY_NAME_ROLE                          = Symbol('role');
+const ENTITY_NAME_PERMISSION                    = Symbol('permission');
 
 const defaultEntities = new Map();
 
@@ -173,39 +172,53 @@ class Factory {
     return defaultEntities.get(entityName)
   }
 
-  specimenLinkType(options = {}) {
-    const processingType = this.defaultProcessingType(),
-          defaults = {
-            id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN_LINK_TYPE),
-            processingTypeId:      processingType.id,
-            expectedInputChange:   faker.random.number({precision: 0.5}),
-            expectedOutputChange:  faker.random.number({precision: 0.5}),
-            inputGroupId:          null,
-            outputGroupId:         null,
-            inputCount:            faker.random.number(5) + 1,
-            outputCount:           faker.random.number(5) + 1,
-            inputContainerTypeId:  null,
-            outputContainerTypeId: null
-          },
-          validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-          slt = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
-
-    this.updateDefaultEntity(ENTITY_NAME_SPECIMEN_LINK_TYPE, slt);
-    return slt;
+  inputSpecimenProcessing(options = {}) {
+    const specimenDefinition =  this.processedSpecimenDefinition();
+    const collectionEventType = this.collectionEventType({
+      specimenDefinitions: [ specimenDefinition ]
+    });
+    const defaults = {
+      expectedChange:       1.0,
+      count:                1,
+      containerTypeId:      null,
+      definitionType:       'collected',
+      entityId:             collectionEventType.id,
+      specimenDefinitionId: specimenDefinition.id
+    };
+    const validKeys = Object.keys(defaults);
+    return Object.assign(defaults, _.pick(options, validKeys));
   }
 
-  defaultSpecimenLinkType() {
-    return this.defaultEntity(ENTITY_NAME_SPECIMEN_LINK_TYPE, this.specimenLinkType);
+  outputSpecimenProcessing(options = {}) {
+    const defaults = {
+      expectedChange:     1.0,
+      count:              1,
+      containerTypeId:    null,
+      specimenDefinition: this.processedSpecimenDefinition()
+    };
+    const validKeys = Object.keys(defaults);
+    return Object.assign(defaults, _.pick(options, validKeys));
+  }
+
+  specimenProcessing(options = {}) {
+    const defaults = {
+      input:   this.inputSpecimenProcessing(),
+      output:  this.outputSpecimenProcessing()
+    };
+    const validKeys = Object.keys(defaults);
+    return Object.assign(defaults, _.pick(options, validKeys));
   }
 
   processingType(options = {}) {
-    var study = this.defaultStudy(),
+    const study = this.defaultStudy(),
         defaults = Object.assign(
           {
-            id:          domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE),
-            studyId:     study.id,
-            description: faker.lorem.sentences(4),
-            enabled:     false
+            id:                 domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE),
+            studyId:            study.id,
+            description:        faker.lorem.sentences(4),
+            enabled:            false,
+            specimenProcessing: this.specimenProcessing(),
+            annotationTypes:    []
           },
           nameAndSlug()
         ),
@@ -223,15 +236,15 @@ class Factory {
    * Returns a collection event type as returned by the server.
    */
   collectionEventType(options = {}) {
-    var study = this.defaultStudy(),
+    const study = this.defaultStudy(),
         defaults = Object.assign(
           {
-            id:                   domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
-            studyId:              study.id,
-            description:          faker.lorem.sentences(4),
+            id:                  domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
+            studyId:             study.id,
+            description:         faker.lorem.sentences(4),
             specimenDefinitions: [],
-            annotationTypes:      [],
-            recurring:            false
+            annotationTypes:     [],
+            recurring:           false
           },
           nameAndSlug()
         ),
@@ -261,33 +274,8 @@ class Factory {
     return faker.random.arrayElement(Object.values(this.SpecimenType));
   }
 
-  specimenGroup(options = {}) {
-    var study = this.defaultStudy(),
-        defaults = Object.assign(
-          {
-            id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
-            studyId:                     study.id,
-            description:                 faker.lorem.sentences(4),
-            units:                       'mL',
-            anatomicalSourceType:        this.randomAnatomicalSourceType(),
-            preservationType:            this.randomPreservationType(),
-            preservationTemperature: this.randomPreservationTemperature(),
-            specimenType:                this.randomSpecimenType()
-          },
-          nameAndSlug()
-        ),
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        sg = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
-    this.updateDefaultEntity(ENTITY_NAME_SPECIMEN_GROUP, sg);
-    return sg;
-  }
-
-  defaultSpecimenGroup() {
-    return this.defaultEntity(ENTITY_NAME_SPECIMEN_GROUP, this.specimenGroup);
-  }
-
   study(options = {}) {
-    var defaults = Object.assign({ id:              domainEntityNameNext(ENTITY_NAME_STUDY),
+    const defaults = Object.assign({ id:              domainEntityNameNext(ENTITY_NAME_STUDY),
                                    description:     faker.lorem.sentences(4),
                                    annotationTypes: [],
                                    state:           this.StudyState.DISABLED
@@ -340,19 +328,17 @@ class Factory {
    * have annotations based on the study's, unless options.annotationTypes is defined.
    */
   participant(options = {}) {
-    var study = this.defaultStudy(),
-        uniqueId = domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
-        defaults = {
-          id:          domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
-          studyId:     study.id,
-          slug:        slugify(uniqueId),
-          uniqueId:    uniqueId,
-          annotations: []
-        },
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        p;
-
-    p = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    const study = this.defaultStudy();
+    const uniqueId = domainEntityNameNext(ENTITY_NAME_PARTICIPANT);
+    const defaults = {
+      id:          domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
+      studyId:     study.id,
+      slug:        slugify(uniqueId),
+      uniqueId:    uniqueId,
+      annotations: []
+    };
+    const validKeys = this.commonFieldNames.concat(Object.keys(defaults));
+    const p = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
 
     if (!options.annotations) {
       // assign annotation types
@@ -467,7 +453,7 @@ class Factory {
   }
 
   centre(options = {}) {
-    var defaults = Object.assign({ id:          domainEntityNameNext(ENTITY_NAME_CENTRE),
+    const defaults = Object.assign({ id:          domainEntityNameNext(ENTITY_NAME_CENTRE),
                                    description: this.stringNext(),
                                    state:       this.CentreState.DISABLED,
                                    studyNames:  [],
@@ -485,7 +471,7 @@ class Factory {
   }
 
   shipment(options = {}) {
-    var loc = this.location(),
+    const loc = this.location(),
         ctr = this.centre({ locations: [ loc ]}),
         locationInfo = {
           centreId: ctr.id,
@@ -512,7 +498,7 @@ class Factory {
   }
 
   shipmentSpecimen(options = {}) {
-    var shipment = this.defaultShipment(),
+    const shipment = this.defaultShipment(),
         specimen = this.defaultSpecimen(),
         defaults = { id:           domainEntityNameNext(ENTITY_NAME_SHIPMENT),
                      state:        this.ShipmentItemState.PRESENT,
@@ -559,16 +545,18 @@ class Factory {
    * multiple selection.
    */
   annotationType(options = {}) {
-    var defaults = Object.assign({ id:            domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE),
-                                   description:   null,
-                                   valueType:     this.AnnotationValueType.TEXT,
-                                   options:       [],
-                                   maxValueCount: this.AnnotationMaxValueCount.NONE,
-                                   required:      false
-                                 },
-                                 nameAndSlug()),
-        validKeys = Object.keys(defaults),
-        at;
+    const defaults = Object.assign(
+      {
+        id:            domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE),
+        description:   null,
+        valueType:     this.AnnotationValueType.TEXT,
+        options:       [],
+        maxValueCount: this.AnnotationMaxValueCount.NONE,
+        required:      false
+      },
+      nameAndSlug()
+    );
+    const validKeys = Object.keys(defaults);
 
     if (!options.valueType) {
       options.valueType = this.AnnotationValueType.TEXT;
@@ -584,12 +572,11 @@ class Factory {
       }
     }
 
-    at = Object.assign(defaults, _.pick(options, validKeys));
-    return at;
+    return Object.assign(defaults, _.pick(options, validKeys));
   }
 
   allAnnotationTypes() {
-    var annotationTypes = Object.values(this.AnnotationValueType)
+    const annotationTypes = Object.values(this.AnnotationValueType)
         .map((valueType) => this.annotationType({ valueType: valueType }));
     annotationTypes.push(this.annotationType({
       valueType:     this.AnnotationValueType.SELECT,
@@ -600,19 +587,34 @@ class Factory {
   }
 
   collectionSpecimenDefinition(options = {}) {
-    var defaults = Object.assign({ id:                          domainEntityNameNext(ENTITY_NAME_SPECIMEN_GROUP),
-                                   description:                 faker.lorem.sentences(4),
-                                   units:                       'mL',
-                                   anatomicalSourceType:        this.randomAnatomicalSourceType(),
-                                   preservationType:            this.randomPreservationType(),
-                                   preservationTemperature: this.randomPreservationTemperature(),
-                                   specimenType:                this.randomSpecimenType(),
-                                   maxCount:                    1,
-                                   amount:                      0.5
-                                 },
-                                 nameAndSlug()),
-        validKeys = Object.keys(defaults),
-        spec = Object.assign(defaults, _.pick(options, validKeys));
+    const defaults = Object.assign(
+      this.processedSpecimenDefinition(),
+      {
+        id:       domainEntityNameNext(ENTITY_NAME_COLLECTED_SPECIMEN_DEFINITION),
+        maxCount: 1,
+        amount:   0.5
+      }
+    );
+    const validKeys = Object.keys(defaults);
+    const spec = Object.assign(defaults, _.pick(options, validKeys));
+    return spec;
+  }
+
+  processedSpecimenDefinition(options = {}) {
+    const defaults = Object.assign(
+      {
+        id:                          domainEntityNameNext(ENTITY_NAME_PROCESSED_SPECIMEN_DEFINITION),
+        description:                 faker.lorem.sentences(4),
+        units:                       'mL',
+        anatomicalSourceType:        this.randomAnatomicalSourceType(),
+        preservationType:            this.randomPreservationType(),
+        preservationTemperature: this.randomPreservationTemperature(),
+        specimenType:                this.randomSpecimenType()
+      },
+      nameAndSlug()
+    );
+    const validKeys = Object.keys(defaults);
+    const spec = Object.assign(defaults, _.pick(options, validKeys));
     return spec;
   }
 
@@ -620,7 +622,7 @@ class Factory {
    * @param options.value The value for the annotation.
    */
   annotation(options = {}, annotationType = {}) {
-    var defaults = { annotationTypeId: null,
+    const defaults = { annotationTypeId: null,
                      stringValue:      null,
                      numberValue:      null,
                      selectedValues:   []
@@ -697,7 +699,7 @@ class Factory {
 
   annotations(annotationTypes) {
     return annotationTypes.map((annotationType) => {
-      var value = this.valueForAnnotation(annotationType);
+      const value = this.valueForAnnotation(annotationType);
       return this.annotation({ value: value }, annotationType);
     });
   }
@@ -706,7 +708,7 @@ class Factory {
    * This is a value object, so it does not have the common fields.
    */
   location(options = {}) {
-    var defaults = Object.assign({ id:             domainEntityNameNext(ENTITY_NAME_LOCATION),
+    const defaults = Object.assign({ id:             domainEntityNameNext(ENTITY_NAME_LOCATION),
                                    street:         faker.address.streetAddress(),
                                    city:           faker.address.city(),
                                    province:       faker.address.state(),
@@ -788,7 +790,7 @@ class Factory {
   }
 
   role(options = {}) {
-    var defaults  = Object.assign({ userData: [ this.entityInfo() ] }, accessItemDefaults.call(this)),
+    const defaults  = Object.assign({ userData: [ this.entityInfo() ] }, accessItemDefaults.call(this)),
         validKeys = Object.keys(defaults),
         role      = Object.assign({}, defaults, this.accessItem(options), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_ROLE, role);
@@ -806,7 +808,7 @@ class Factory {
   }
 
   permission(options = {}) {
-    var defaults   = accessItemDefaults.call(this),
+    const defaults   = accessItemDefaults.call(this),
         validKeys  = Object.keys(defaults),
         permission = Object.assign({}, defaults, this.accessItem(options), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_PERMISSION, permission);

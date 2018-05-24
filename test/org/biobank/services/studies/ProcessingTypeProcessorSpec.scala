@@ -87,7 +87,7 @@ class ProcessingTypesProcessorSpec extends ProcessorTestFixture with ProcessingT
     it("allow recovery from journal", PersistenceTest) {
       val f = collectedSpecimenDefinitionFixtures
       val input = f.processingType.specimenProcessing.input
-      val cmdInput = ProcessingTypeCommands.InputSpecimenInfo(
+      val cmdInput = ProcessingTypeCommands.InputSpecimenProcessing(
           expectedChange       = input.expectedChange,
           count                = input.count,
           containerTypeId      = input.containerTypeId.map(_.id),
@@ -106,7 +106,7 @@ class ProcessingTypesProcessorSpec extends ProcessorTestFixture with ProcessingT
           specimenType            = specimenDefinition.specimenType)
 
       val output = f.processingType.specimenProcessing.output
-      val cmdOutput = ProcessingTypeCommands.OutputSpecimenInfo(
+      val cmdOutput = ProcessingTypeCommands.OutputSpecimenProcessing(
         expectedChange     = output.expectedChange,
         count              = output.count,
         containerTypeId    = output.containerTypeId.map(_.id),

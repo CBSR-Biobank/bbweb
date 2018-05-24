@@ -33,19 +33,19 @@ object ProcessingTypeCommands {
                                       preservationTemperature: PreservationTemperature,
                                       specimenType:            SpecimenType)
 
-  final case class InputSpecimenInfo(expectedChange:       BigDecimal,
+  final case class InputSpecimenProcessing(expectedChange:       BigDecimal,
                                      count:                Int,
                                      containerTypeId:      Option[String],
                                      definitionType:       String,
                                      entityId:             String,
                                      specimenDefinitionId: String)
 
-  final case class OutputSpecimenInfo(expectedChange:     BigDecimal,
+  final case class OutputSpecimenProcessing(expectedChange:     BigDecimal,
                                       count:              Int,
                                       containerTypeId:    Option[String],
                                       specimenDefinition: SpecimenDefinition)
 
-  final case class SpecimenProcessing(input: InputSpecimenInfo, output: OutputSpecimenInfo)
+  final case class SpecimenProcessing(input: InputSpecimenProcessing, output: OutputSpecimenProcessing)
 
   final case class AddProcessingTypeCmd(sessionUserId:      String,
                                         studyId:            String,
@@ -156,9 +156,9 @@ object ProcessingTypeCommands {
 
   implicit val specimenDefinitionFormat: Format[SpecimenDefinition] = Json.format[SpecimenDefinition]
 
-  implicit val inputSpecimenInfoFormat: Format[InputSpecimenInfo] = Json.format[InputSpecimenInfo]
+  implicit val inputSpecimenInfoFormat: Format[InputSpecimenProcessing] = Json.format[InputSpecimenProcessing]
 
-  implicit val outputSpecimenInfoFormat: Format[OutputSpecimenInfo] = Json.format[OutputSpecimenInfo]
+  implicit val outputSpecimenInfoFormat: Format[OutputSpecimenProcessing] = Json.format[OutputSpecimenProcessing]
 
   implicit val specimenProcessingFormat: Format[SpecimenProcessing] = Json.format[SpecimenProcessing]
 

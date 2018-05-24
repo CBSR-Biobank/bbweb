@@ -41,6 +41,7 @@ describe('CollectionEventType', function() {
       this.failTest = (error) => {
         expect(error).toBeUndefined();
       };
+
       /*
        * Returns 3 collection event types, each one with a different missing field.
        */
@@ -59,17 +60,13 @@ describe('CollectionEventType', function() {
           },
           {
             cet: this.Factory.collectionEventType({ annotationTypes: [ badAnnotationType ]}),
-                errMsg : 'annotationTypes.*Missing required property'
+            errMsg : 'annotationTypes.*Missing required property'
           }
         ];
       };
 
-      this.url = url;
-
-      //---
-
-      function url() {
-        const args = [ 'studies/cetypes' ].concat(_.toArray(arguments));
+      this.url = (...paths) => {
+        const args = [ 'studies/cetypes' ].concat(paths);
         return EntityTestSuiteMixin.url.apply(null, args);
       }
     });
@@ -98,10 +95,10 @@ describe('CollectionEventType', function() {
     }).toThrowError(/invalid collection event type from server/);
   });
 
-  it('fails when creating from a bad json specimen spec', function() {
+  it('fails when creating from a bad json specimen definition', function() {
     var jsonSpec = _.omit(this.Factory.collectionSpecimenDefinition(), 'name'),
         badJsonCet = Object.assign(this.Factory.collectionEventType(this.jsonStudy),
-                              { specimenDefinitions: [ jsonSpec ] });
+                                   { specimenDefinitions: [ jsonSpec ] });
 
     expect(() => CollectionEventType.create(badJsonCet))
       .toThrowError(/specimenDefinitions.*Missing required property/);
@@ -110,7 +107,7 @@ describe('CollectionEventType', function() {
   it('fails when creating from bad json annotation type data', function() {
     var jsonAnnotType = _.omit(this.Factory.annotationType(), 'name'),
         badJsonCet = Object.assign(this.Factory.collectionEventType(this.jsonStudy),
-                              { annotationTypes: [ jsonAnnotType ] });
+                                   { annotationTypes: [ jsonAnnotType ] });
 
     expect(() => CollectionEventType.create(badJsonCet))
       .toThrowError(/annotationTypes.*Missing required property/);
@@ -161,14 +158,11 @@ describe('CollectionEventType', function() {
   });
 
   it('fails when listing collection event types and they have a bad format', function() {
-    // assigns result of this.$httpBackend.whenGET() to variable so that the response
-    // can be changed inside the loop
     var data = this.getBadCollectionEventTypes(),
-        url = this.url(this.jsonStudy.slug),
-        reqHandler = this.$httpBackend.whenGET(url);
+        url = this.url(this.jsonStudy.slug);
 
     data.forEach((item) => {
-      reqHandler.respond(this.reply(this.Factory.pagedResult([ item.cet ])));
+      this.$httpBackend.expectGET(url).respond(this.reply(this.Factory.pagedResult([ item.cet ])));
       CollectionEventType.list(this.jsonStudy.slug).then(getFail).catch(shouldFail);
       this.$httpBackend.flush();
 
@@ -258,7 +252,7 @@ describe('CollectionEventType', function() {
                       this.failTest.bind(this));
   });
 
-  describe('for specimen specs', function() {
+  describe('for specimen definitions', function() {
 
     beforeEach(function() {
       this.jsonSpec = this.Factory.collectionSpecimenDefinition();
@@ -284,7 +278,7 @@ describe('CollectionEventType', function() {
       this.$httpBackend.flush();
     });
 
-    it('throws an error when attempting to remove an invalid specimen spec', function () {
+    it('throws an error when attempting to remove an invalid specimen definition', function () {
       this.cet.specimenDefinitions = [];
       expect(() => {
         this.cet.removeSpecimenDefinition(this.jsonSpec).then(this.expectCet).catch(this.failTest);
@@ -310,7 +304,7 @@ describe('CollectionEventType', function() {
                              _.omit(this.jsonAnnotType, 'id'),
                              this.url('annottype', this.cet.id),
                              Object.assign(_.omit(this.jsonAnnotType, 'id'),
-                                      { studyId: this.cet.studyId }),
+                                           { studyId: this.cet.studyId }),
                              this.jsonCet,
                              this.expectCet,
                              this.failTest);
