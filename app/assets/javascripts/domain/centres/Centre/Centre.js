@@ -16,7 +16,7 @@ function CentreFactory($q,
                        StudyName,
                        Location) {
 
-  /**
+  /*
    * Used for validation.
    */
   const SCHEMA = ConcurrencySafeEntity.createDerivedSchema({

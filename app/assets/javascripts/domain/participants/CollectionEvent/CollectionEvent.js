@@ -20,7 +20,7 @@ function CollectionEventFactory($q,
                                 biobankApi,
                                 HasAnnotations) {
 
-  /**
+  /*
    * Used to validate the fields of a plain object that contains default fields.
    *
    * @see  CollectionEvent.create() and CollectionEvent.asyncCreate.

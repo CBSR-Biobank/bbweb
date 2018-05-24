@@ -34,6 +34,7 @@ function AccessItemFactory($q,
   /**
    * A base class for User Access Management objects.
    * @memberOf domain.access
+   * @abstratct
    */
   class AccessItem extends ConcurrencySafeEntity {
 

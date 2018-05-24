@@ -22,7 +22,7 @@ function adminCentresUiRouterConfig($stateProvider) {
 
   $stateProvider
     .state('home.admin.centres', {
-      /** The entry state */
+      /* The entry state */
       url: '/centres',
       views: {
         'main@': {
@@ -31,14 +31,14 @@ function adminCentresUiRouterConfig($stateProvider) {
       }
     })
     .state('home.admin.centres.add', {
-      /** Adds a centre */
+      /* Adds a centre */
       url: '/add',
       views: {
         'main@': 'centreAdd'
       }
     })
     .state('home.admin.centres.centre', {
-      /** virtual state for viewing a centre */
+      /* virtual state for viewing a centre */
       abstract: true,
       url: '/{centreSlug}',
       resolve: {
@@ -49,28 +49,28 @@ function adminCentresUiRouterConfig($stateProvider) {
       }
     })
     .state('home.admin.centres.centre.summary', {
-      /** for viewing the summary for a centre */
+      /* for viewing the summary for a centre */
       url: '/summary',
       views: {
         'centreDetails': 'centreSummary'
       }
     })
     .state('home.admin.centres.centre.locations', {
-      /** shows the locations for a centre */
+      /* shows the locations for a centre */
       url: '/locations',
       views: {
         'centreDetails': 'locationsPanel'
       }
     })
     .state('home.admin.centres.centre.locations.locationAdd', {
-      /** adds a loction to a centre */
+      /* adds a loction to a centre */
       url: '/add',
       views: {
         'main@': 'centreLocationAdd'
       }
     })
     .state('home.admin.centres.centre.locations.locationView', {
-      /** views a single location on a centre */
+      /* views a single location on a centre */
       url: '/view/:locationSlug',
       resolve: {
         location: resolveLocation
@@ -80,7 +80,7 @@ function adminCentresUiRouterConfig($stateProvider) {
       }
     })
     .state('home.admin.centres.centre.studies', {
-      /** shows the studies associated with a centre */
+      /* shows the studies associated with a centre */
       url: '/studies',
       views: {
         'centreDetails': 'centreStudiesPanel'

@@ -7,7 +7,7 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/**
+/*
  * Allows the user to add items to a shipment.
  *
  * A task progress bar is used to give feedback to the user that this is one step in a multi-step process.
@@ -69,7 +69,7 @@ function ShipmentAddItemsController($q,
     });
   }
 
-  /**
+  /*
    * Invoked by user when all items have been added to the shipment and it is now packed.
    */
   function tagAsPacked() {

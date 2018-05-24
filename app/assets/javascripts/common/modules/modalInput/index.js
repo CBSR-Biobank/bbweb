@@ -184,6 +184,7 @@ class ModalInputService {
  * Opens a modal and allows the user to add or modify a value.
  *
  * @callback modalInput
+ * @memberOf common.modules.modalInput
  *
  * @param {string} title The title to display in the modal popup.
  *

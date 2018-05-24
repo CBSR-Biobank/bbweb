@@ -29,7 +29,7 @@ function ProcessingDtoFactory(funutils,
                                   validationService.hasKeys.apply(null, requiredKeys))),
     _.identity);
 
-  /**
+  /*
    * An object that contains a list of all the processingTypes, specimenLinkTypes,
    * specimenLinkAnnotationTypes, and specimenGroups for a study.
    */
@@ -60,7 +60,7 @@ function ProcessingDtoFactory(funutils,
     self.specimenGroups = obj.specimenGroups.map((serverSg) => new SpecimenGroup(serverSg));
   }
 
-  /**
+  /*
    * Used by promise code, so it must return an error rather than throw one.
    */
   ProcessingDto.create = function (obj) {

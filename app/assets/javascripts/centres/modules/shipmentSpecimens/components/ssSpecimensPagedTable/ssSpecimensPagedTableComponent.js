@@ -1,4 +1,8 @@
-/*
+/**
+ * AngularJS Component used for displaying shipment specimens.
+ *
+ * @namespace centres.components.ssSpecimensPagedTable
+ *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
@@ -8,7 +12,9 @@ var _ = require('lodash');
 /**
  * Displays Shipment Specimens in a table.
  *
- * @param {string} defaultSortField - The column to initially sort by.
+ * @memberOf centres.components.ssSpecimensPagedTable
+ *
+ * * @param {string} defaultSortField - The column to initially sort by.
  *
  * @param {int} refresh - Increment this counter refresh the table.
  *
@@ -65,7 +71,7 @@ function Controller($controller, BbwebError) {
     vm.actionSelected    = actionSelected;
   }
 
-  /**
+  /*
    * Parent components can trigger a table reload by updating the "refresh" binding.
    */
   function onChanges() {
@@ -74,7 +80,7 @@ function Controller($controller, BbwebError) {
     }
   }
 
-  /**
+  /*
    * Called by Smart Table to get the table data.
    */
   function getTableData(tableState, controller) {
@@ -100,7 +106,7 @@ function Controller($controller, BbwebError) {
     });
   }
 
-  /**
+  /*
    * Forces table data to be reloaded.
    */
   function reloadTableData() {

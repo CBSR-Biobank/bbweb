@@ -6,9 +6,6 @@
 import _ from 'lodash'
 import angular from 'angular'
 
-/**
- *
- */
 function processingTypesPanelDirective() {  // eslint-disable-line no-unused-vars
   var directive = {
     require: '^tab',
@@ -62,14 +59,14 @@ function ProcessingTypesPanelCtrl($scope,
     return panel.add();
   }
 
-  /**
+  /*
    * Displays a processing type in a modal.
    */
   function information(processingType) {
     return new ProcessingTypeViewer(processingType);
   }
 
-  /**
+  /*
    * Switches state to update a processing type.
    */
   function update(processingType) {

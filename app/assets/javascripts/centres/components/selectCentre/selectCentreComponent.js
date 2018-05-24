@@ -57,7 +57,7 @@ function SelectCentreController() {
     });
   }
 
-  /**
+  /*
    * Called when user enters text into the 'name filter'.
    */
   function nameFilterUpdated() {

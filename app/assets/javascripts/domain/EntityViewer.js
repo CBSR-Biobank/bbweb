@@ -3,13 +3,10 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/**
- * Factory for EntityViewer.
- */
 /* @ngInject */
 function EntityViewerFactory($uibModal) {
 
-  /**
+  /*
    * Used to display a domain entity in a modal.
    *
    * The modal will display all the attributes added with method 'addAttribute' and also the
@@ -30,7 +27,7 @@ function EntityViewerFactory($uibModal) {
     this.items.push({ label: label, value: value});
   };
 
-  /**
+  /*
    * @param data an array of objects with 2 attributes: name and value.
    */
   EntityViewer.prototype.showModal = function () {
