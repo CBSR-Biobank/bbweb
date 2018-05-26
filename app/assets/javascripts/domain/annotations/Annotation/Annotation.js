@@ -5,6 +5,7 @@
 
 import _ from 'lodash'
 
+/* @ngInject */
 function AnnotationFactory($log, AnnotationValueType, DomainEntity, DomainError) {
 
   const SCHEMA = {

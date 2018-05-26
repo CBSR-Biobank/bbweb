@@ -38,8 +38,8 @@ class CollectionController {
     ]
 
     this.Study.collectionStudies()
-      .then(reply => {
-        this.isCollectionAllowed = (reply.items.length > 0);
+      .then(studyNames => {
+        this.isCollectionAllowed = (studyNames.length > 0);
       })
       .catch(this.resourceErrorService.checkUnauthorized())
   }

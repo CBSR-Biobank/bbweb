@@ -17,6 +17,7 @@ function StudyFactory($q,
                       ConcurrencySafeEntity,
                       DomainError,
                       StudyState,
+                      StudyName,
                       AnnotationType) {
 
   /*
@@ -213,7 +214,7 @@ function StudyFactory($q,
                         (value) => value === '');
 
       return biobankApi.get(Study.url('search'), params)
-        .then(Study.createStudiesFromPagedResult);
+        .then(Study.createStudiesFromNames);
     }
 
     /** @private */
@@ -264,7 +265,16 @@ function StudyFactory($q,
                         (value) => value === '');
 
       return biobankApi.get(Study.url('collectionStudies'), params)
-        .then(Study.createStudiesFromPagedResult);
+        .then((studyNames) => {
+          const deferred = $q.defer();
+          try {
+            studyNames = studyNames.map((obj) => StudyName.create(obj));
+            deferred.resolve(studyNames);
+          } catch (e) {
+            deferred.reject('invalid studies from server');
+          }
+          return deferred.promise;
+        });
     }
 
     /**

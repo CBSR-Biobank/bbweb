@@ -27,7 +27,7 @@ function SelectStudyController($state, gettextCatalog, modalService) {
 
     vm.nameFilter        = '';
     vm.updateStudies     = updateStudies;
-    vm.pagedResult       = {};
+    vm.studyNames        = [];
     vm.nameFilterUpdated = nameFilterUpdated;
     vm.pageChanged       = pageChanged;
     vm.clearFilter       = clearFilter;
@@ -47,7 +47,7 @@ function SelectStudyController($state, gettextCatalog, modalService) {
   }
 
   function getDisplayState() {
-    return (vm.pagedResult.total > 0) ? vm.displayStates.HAVE_RESULTS : vm.displayStates.NO_RESULTS;
+    return (vm.studyNames.length > 0) ? vm.displayStates.HAVE_RESULTS : vm.displayStates.NO_RESULTS;
   }
 
   function updateStudies() {
@@ -58,11 +58,12 @@ function SelectStudyController($state, gettextCatalog, modalService) {
     }
 
     vm.pagerOptions.filter += 'state::enabled';
-    vm.getStudies()(vm.pagerOptions).then(function (pagedResult) {
-      vm.pagedResult = pagedResult;
-      vm.displayState = getDisplayState();
-      vm.showPagination = getShowPagination();
-    });
+    vm.getStudies()(vm.pagerOptions)
+      .then(studyNames => {
+        vm.studyNames = studyNames;
+        vm.displayState = getDisplayState();
+        vm.showPagination = getShowPagination();
+      });
   }
 
   /*
@@ -107,8 +108,7 @@ function SelectStudyController($state, gettextCatalog, modalService) {
   }
 
   function getShowPagination() {
-    return (vm.displayState === vm.displayStates.HAVE_RESULTS) &&
-      (vm.pagedResult.maxPages > 1);
+    return (vm.displayState === vm.displayStates.HAVE_RESULTS) && (vm.studyNames.length > 1);
   }
 }
 
@@ -150,15 +150,15 @@ const selectStudyComponent = {
 
 /**
  * The callback function used by {@link collection.components.selectStudy.selectStudyComponent
- * selectStudyComponent} to retrieve {@link domain.studies.Study Studies}.
+ * selectStudyComponent} to retrieve the list of {@link domain.studies.Study Studies}.
  *
  * @callback collection.components.selectStudy.GetStudies
  *
  * @param {common.controllers.PagedListController.PagerOptions} options - the pager options used to retrieve
  * studies.
  *
- * @returns {Promise<common.controllers.PagedListController.PagedResult<domain.studies.Study>>} A promise
- * with items of type {@link domain.studies.Study Study}.
+ * @returns {Promise<Array<domain.studies.StudyName>>} A promise with items of type {@link
+ * domain.studies.StudyName StudyName}.
  */
 
 /**
@@ -167,7 +167,7 @@ const selectStudyComponent = {
  *
  * @callback collection.components.selectStudy.StudySelected
  *
- * @param {domain.studies.Study} study - the study selected by the user.
+ * @param {domain.studies.StudyName} study - the study selected by the user.
  *
  * @returns {undefined}
  */

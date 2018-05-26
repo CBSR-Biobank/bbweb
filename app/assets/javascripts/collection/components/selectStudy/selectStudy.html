@@ -12,7 +12,7 @@
   </ul>
 
   <ul class="list-group" ng-if="vm.displayState === vm.displayStates.HAVE_RESULTS">
-    <li class="list-group-item" ng-repeat="study in vm.pagedResult.items">
+    <li class="list-group-item" ng-repeat="study in vm.studyNames">
       <a href="" ng-click="vm.studySelected(study)">
         <strong>
           <span ng-bind-html="vm.studyGlyphicon(study)"></span>
@@ -27,7 +27,7 @@
     <ul uib-pagination
         class="pagination-sm"
         boundary-links="true"
-        total-items="vm.pagedResult.total"
+        total-items="vm.studyNames.length"
         items-per-page="vm.pagerOptions.limit"
         ng-model="vm.pagerOptions.page"
         ng-change="vm.pageChanged()"

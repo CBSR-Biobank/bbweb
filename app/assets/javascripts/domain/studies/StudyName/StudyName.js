@@ -83,6 +83,17 @@ function StudyNameFactory($q,
       return (this.state === StudyState.RETIRED);
     }
 
+    /**
+     * Returns all locations for all the centres associated with this study.
+     *
+     * @returns {Promise<Array<domain.centres.CentreLocationDto>>} A promise.
+     *
+     * @see [Centre.centreLocationToNames()]{@link domain.centres.Centre.centreLocationToNames}
+     */
+    allLocations() {
+      return biobankApi.get(biobankApi.url('studies', 'centres', this.id));
+    }
+
     static url(...paths) {
       const allPaths = [ 'studies' , 'names' ].concat(paths);
       return super.url(...allPaths);
