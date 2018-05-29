@@ -6,10 +6,8 @@
  */
 /* global PRODUCTION, DEVELOPMENT */
 
-import 'jquery';
-import 'bootstrap/dist/js/bootstrap';
 import 'bootstrap/dist/css/bootstrap.css';
-import 'angular-toastr/dist/angular-toastr.min.css';
+import 'angular-toastr/dist/angular-toastr.css';
 import '../stylesheets/main.less';
 
 // node modules

@@ -1,29 +1,32 @@
 /* global module */
 
-const webpack      = require('webpack'),
-      commonConfig = require('./webpack.config'),
-      _            = require('lodash');
+const webpack              = require('webpack');
+const commonConfig         = require('./webpack.config');
+const _                    = require('lodash');
 
 const config = _.cloneDeep(commonConfig);
 
-// see http://cheng.logdown.com/posts/2016/03/25/679045
+config.mode = 'development';
+//config.devtool = 'inline-source-map';
 config.devtool = 'eval-source-map';
 
-config.plugins = [
+config.plugins = config.plugins.concat([
   new webpack.DefinePlugin({
     PRODUCTION:  JSON.stringify(false),
-    DEVELOPMENT: JSON.stringify(false)
-  }),
-  // Adds webpack HMR support. It act's like livereload,
-  // reloading page after webpack rebuilt modules.
-  // It also updates stylesheets and inline assets without page reloading.
-  new webpack.HotModuleReplacementPlugin()
-];
+    DEVELOPMENT: JSON.stringify(false),
+    'process.env': {
+      'NODE_ENV': JSON.stringify('development')
+    }
+  })
+]);
 
+config.optimization = {};
+
+config.watch = true;
 config.watchOptions = {
   ignored: /node_modules/,
   aggregateTimeout: 300,
-  poll: 1000
+  poll: true
 };
 
 module.exports = config;

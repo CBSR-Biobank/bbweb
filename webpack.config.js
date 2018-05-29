@@ -1,9 +1,9 @@
 /* global module, __dirname */
 /* eslint no-process-env: "off" */
 
-const path = require('path'),
-      webpack = require('webpack'),
-      CleanWebpackPlugin = require('clean-webpack-plugin');
+const path = require('path');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const CleanWebpackPlugin = require('clean-webpack-plugin');
 
 const config = {
   context: __dirname,
@@ -11,9 +11,9 @@ const config = {
     index: './app/assets/javascripts/app.js'
   },
   output: {
-    filename: 'js/[name].bundle.js',
-    chunkFilename: '[name].bundle.js',
     path: path.resolve(__dirname, 'public'),
+    filename: 'js/[name].bundle.js',
+    chunkFilename: 'js/[name].bundle.js',
     publicPath: '/assets/'
   },
   module: {
@@ -29,34 +29,26 @@ const config = {
       },
       {
         test: /\.js$/,
-        exclude: path.resolve(__dirname, 'node_modules'),
-        loader: 'babel-loader',
-        options: {
-          presets: [ 'env' ]
+        exclude: /node_modules/,
+        use: {
+          loader: 'babel-loader'
         }
-      },
-      {
-        test: /\.css$/,
-        use: [
-          { loader: 'style-loader' },
-          {
-            loader: 'css-loader',
-            options: { sourceMap: true }
-          }
-        ]
       },
       {
         test: /\.less$/,
         use: [
           { loader: 'style-loader' },
-          {
-            loader: 'css-loader',
-            options: { sourceMap: true }
-          },
-          {
-            loader: 'less-loader',
-            options: { sourceMap: true }
-          }
+          MiniCssExtractPlugin.loader,
+          { loader: 'css-loader' },
+          { loader: 'less-loader' }
+        ]
+      },
+      {
+        test: /\.css$/,
+        use: [
+          'style-loader',
+          MiniCssExtractPlugin.loader,
+          'css-loader'
         ]
       },
       {
@@ -72,9 +64,10 @@ const config = {
         test: /\.(png|jpg|jpeg|gif|svg|eot|woff|woff2|ttf)$/,
         use: [
           {
-            loader: 'url-loader',
+            loader: 'file-loader',
             options: {
-              limit: 8192
+              name: '[name].[ext]',
+              outputPath: 'fonts/'
             }
           }
         ]
@@ -88,6 +81,9 @@ const config = {
     modules: ['node_modules']
   },
   plugins : [
+    new MiniCssExtractPlugin({
+      filename: 'css/[name].css'
+    }),
     new CleanWebpackPlugin([
       'public/*.hot-update.js',
       'public/*.hot-update.json',
@@ -96,27 +92,30 @@ const config = {
       'public/*.svg',
       'public/*.ttf',
       'public/stats.html',
+      'public/report.html',
       'public/css',
       'public/js'
-    ]),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'vendor',
-      minChunks: function (module) {
-        // this assumes your vendor imports exist in the node_modules directory
-        return module.context && module.context.indexOf('node_modules') !== -1;
-      }
-    }),
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'manifest',
-      minChunks: Infinity
-    }),
-    new webpack.ProvidePlugin({
-      jQuery: 'jquery',
-      $: 'jquery',
-      jquery: 'jquery'
-    })
+    ])
   ],
-
+  optimization: {
+    splitChunks: {
+      cacheGroups: {
+        styles: {
+          name: 'styles',
+          test: /\.css$/,
+          chunks: 'all',
+          enforce: true
+        },
+        vendors: {
+          test: /\/node_modules\//,
+          name: 'vendors',
+          chunks: 'all'
+        }
+      }
+    },
+    noEmitOnErrors: false,
+    concatenateModules: true
+  },
   performance: {
     hints: 'warning', // enum
     maxAssetSize: 200000, // int (in bytes),

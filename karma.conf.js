@@ -5,12 +5,12 @@
  * Karma configuration
  */
 
-/* global process, module, __dirname */
+/* global process, module, __dirname, env, argv */
 /* eslint no-process-env: "off" */
 
-const path = require('path'),
-      webpackTestConfig = require('./webpack.test.config'),
-      webpackTestCoverageConfig = require('./webpack.test.coverage.config');
+const path = require('path');
+const webpackTestConfig = require('./webpack.test.config');
+const webpackTestCoverageConfig = require('./webpack.test.coverage.config');
 
 if (!process.env.CHROME_BIN || (process.env.CHROME_BIN === '')) {
   process.env.CHROME_BIN = require('puppeteer').executablePath();

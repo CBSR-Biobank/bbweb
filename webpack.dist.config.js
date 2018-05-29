@@ -1,10 +1,12 @@
 /* global module */
 
-const webpack = require('webpack'),
-      config  = require('./webpack.config'),
-      BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
-//, CompressionPlugin = require('compression-webpack-plugin');
+const webpack = require('webpack');
+const config  = require('./webpack.config');
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require("optimize-css-assets-webpack-plugin");
 
+config.mode = 'production';
 config.cache = false;
 config.devtool = 'cheap-module-source-map';
 
@@ -21,25 +23,21 @@ config.plugins = config.plugins.concat([
     }
   }),
 
-  new webpack.optimize.UglifyJsPlugin({
-    ie8: false,
+  new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+]);
+
+config.optimization.minimizer = [
+  new UglifyJsPlugin({
+    cache: true,
     parallel: true,
-    exclude: [/\.min\.js$/gi], // skip pre-minified libs
-    mangle: true,
-    compress: {
-      warnings: false // Suppress uglification warnings
-    },
-    output: {
-      comments: false,
-      beautify: false
+    sourceMap: true,
+    uglifyOptions: {
+      ecma: 5,
+      warnings: true
     }
   }),
-  new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
-  new webpack.NoEmitOnErrorsPlugin(),
-  new webpack.SourceMapDevToolPlugin({
-    filename: 'js/[name].bundle.js.map',
-    exclude: ['js/vendor.bundle.js']
-  })
-]);
+  new OptimizeCSSAssetsPlugin({})
+];
+
 
 module.exports = config;
