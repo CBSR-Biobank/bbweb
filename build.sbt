@@ -1,4 +1,5 @@
 import com.typesafe.config._
+import java.nio.file.Files
 
 val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 
@@ -14,9 +15,45 @@ def excludeSpecs2(module: ModuleID): ModuleID =
   module.excludeAll(ExclusionRule(organization = "org.specs2", name = "specs2"))
     .exclude("com.novocode", "junit-interface")
 
+lazy val copyLogbackTest = taskKey[Unit]("copyLogbackTest")
+lazy val copyTestData = taskKey[Unit]("copyTestData")
+lazy val copyEmailConf = taskKey[Unit]("copyEmailConf")
+lazy val developmentInit = taskKey[Unit]("developmentInit")
+
+def copyTemplate(templateName: String, destName: String): Unit = {
+  val template = new File(templateName)
+  val dest = new File(destName)
+  if (dest.exists) {
+    println(s"file $destName already exists")
+  } else {
+    Files.copy(template.toPath, dest.toPath)
+    println(s"file $templateName copied to $destName")
+  }
+}
+
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, DebianPlugin)
-  .settings(libraryDependencies ~= (_.map(excludeSpecs2)))
+  .settings(
+    libraryDependencies ~= (_.map(excludeSpecs2)),
+
+    copyLogbackTest := {
+      copyTemplate("conf/logback-test.xml.template", "conf/logback-test.xml")
+    },
+
+    copyTestData := {
+      copyTemplate("conf/testdata.conf.template", "conf/testdata.conf")
+    },
+
+    copyEmailConf := {
+      copyTemplate("conf/email.conf.template", "conf/email.conf")
+    },
+
+    developmentInit := {
+      copyLogbackTest.value
+      copyTestData.value
+      copyEmailConf.value
+    }
+  )
 
 maintainer in Linux := "Canadian BioSample Repository <tech@biosample.ca>"
 
@@ -49,8 +86,6 @@ scalacOptions in Compile ++= Seq(
 scalacOptions in (Compile,doc) ++= Seq("-groups", "-implicits")
 
 fork in Test := true
-
-//javaOptions ++= Seq("-Xmx1024M", "-XX:MaxPermSize=512m")
 
 javaOptions in Test ++=  Seq(
     "-Xms512M",
