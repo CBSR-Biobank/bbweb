@@ -273,7 +273,11 @@ describe('Membership', function() {
           url = this.url(membership.id, membership.version);
 
       this.$httpBackend.expectDELETE(url).respond(this.reply(true));
-      membership.remove();
+      membership.remove()
+      .then((result) => {
+        expect(result).toBeTrue();
+      })
+      .catch(failTest);
       this.$httpBackend.flush();
     });
 

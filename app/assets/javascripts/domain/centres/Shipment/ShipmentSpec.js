@@ -590,7 +590,11 @@ describe('Shipment domain object:', function() {
         url          = this.url(shipment.id, shipment.version);
 
     this.$httpBackend.expectDELETE(url).respond(this.reply(true));
-    shipment.remove();
+    shipment.remove()
+      .then((result) => {
+        expect(result).toBeTrue();
+      })
+      .catch(failTest);
     this.$httpBackend.flush();
   });
 

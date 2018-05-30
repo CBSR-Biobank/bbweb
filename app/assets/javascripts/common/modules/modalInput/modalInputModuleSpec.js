@@ -599,14 +599,18 @@ describe('modalInputModule', function() {
       var err = 'select options not provided';
       this.modalInput.selectMultiple('', '', '', { });
       this.$rootScope.$digest();
-      expect(this.$exceptionHandler.errors[0][0].message).toEqual(err);
+      // the exception handler could contain more than one error
+      const errMessages = this.$exceptionHandler.errors.map(err => err[0].message);
+      expect(errMessages).toContain(err);
     });
 
     it('throws an exception if default value is not an array', function() {
       var err = 'defaultValue is not an array';
       this.modalInput.selectMultiple('', '', '', { selectOptions: this.options });
       this.$rootScope.$digest();
-      expect(this.$exceptionHandler.errors[1][0].message).toEqual(err);
+      // the exception handler could contain more than one error
+      const errMessages = this.$exceptionHandler.errors.map(err => err[0].message);
+      expect(errMessages).toContain(err);
     });
 
   });

@@ -27,7 +27,6 @@ describe('Component: selectStudy', function() {
           `<select-study
               header="${panelHeader}"
               get-studies="vm.getStudies"
-              limit="vm.limit"
               message-no-results="No results match the criteria."
               icon="glyphicon-ok-circle"
               on-study-selected="vm.onStudySelected">
@@ -40,31 +39,26 @@ describe('Component: selectStudy', function() {
         _.range(numStudies).map(() => this.Study.create(this.Factory.study()));
 
       this.createGetStudiesFn = (studies) =>
-        (pagerOptions) => this.$q.when(Object.assign(this.Factory.pagedResult(studies, pagerOptions),
-                                               { items: studies.slice(0, pagerOptions.limit) }));
+        () => this.$q.when(studies);
     });
   });
 
   it('displays the list of studies', function() {
-    var studies = this.createStudies(20),
-        limit = studies.length / 2;
+    var studies = this.createStudies(20);
 
     this.createController({
-      getStudies: this.createGetStudiesFn(studies),
-      limit: limit
+      getStudies: this.createGetStudiesFn(studies)
     });
 
-    expect(this.element.find('li.list-group-item').length).toBe(limit);
+    expect(this.element.find('li.list-group-item').length).toBe(studies.length);
     expect(this.element.find('input').length).toBe(1);
   });
 
   it('displays the pannel header correctly', function() {
-    var studies = this.createStudies(20),
-        limit = studies.length / 2;
+    var studies = this.createStudies(20);
 
     this.createController({
-      getStudies: this.createGetStudiesFn(studies),
-      limit: limit
+      getStudies: this.createGetStudiesFn(studies)
     });
     expect(this.element.find('h3').text()).toBe(panelHeader);
   });
@@ -73,19 +67,16 @@ describe('Component: selectStudy', function() {
     var studies = this.createStudies(20);
 
     this.createController({
-      getStudies: this.createGetStudiesFn(studies),
-      limit: studies.length
+      getStudies: this.createGetStudiesFn(studies)
     });
     expect(this.element.find('input').length).toBe(1);
   });
 
   it('displays pagination controls', function() {
-    var studies = this.createStudies(20),
-        limit = studies.length / 2;
+    var studies = this.createStudies(20);
 
     this.createController({
-      getStudies: this.createGetStudiesFn(studies),
-      limit: limit
+      getStudies: this.createGetStudiesFn(studies)
     });
 
     expect(this.controller.showPagination).toBe(true);
@@ -93,12 +84,10 @@ describe('Component: selectStudy', function() {
   });
 
   it('updates to name filter cause studies to be re-loaded', function() {
-    var studies = this.createStudies(20),
-        limit = studies.length / 2;
+    var studies = this.createStudies(20);
 
     this.createController({
-      getStudies: this.createGetStudiesFn(studies),
-      limit: limit
+      getStudies: this.createGetStudiesFn(studies)
     });
 
     spyOn(this.controller, 'getStudies').and.callThrough();
@@ -114,12 +103,10 @@ describe('Component: selectStudy', function() {
   });
 
   it('page change causes studies to be re-loaded', function() {
-    var studies = this.createStudies(20),
-        limit = studies.length / 2;
+    var studies = this.createStudies(20);
 
     this.createController({
-      getStudies: this.createGetStudiesFn(studies),
-      limit: limit
+      getStudies: this.createGetStudiesFn(studies)
     });
 
     spyOn(this.controller, 'getStudies').and.callThrough();
@@ -128,12 +115,10 @@ describe('Component: selectStudy', function() {
   });
 
   it('clear filter causes studies to be re-loaded', function() {
-    var studies = this.createStudies(20),
-        limit = studies.length / 2;
+    var studies = this.createStudies(20);
 
     this.createController({
-      getStudies: this.createGetStudiesFn(studies),
-      limit: limit
+      getStudies: this.createGetStudiesFn(studies)
     });
 
     spyOn(this.controller, 'getStudies').and.callThrough();
@@ -143,12 +128,10 @@ describe('Component: selectStudy', function() {
 
   it('studyGlyphicon returns valid image tag', function() {
     var studies = this.createStudies(20),
-        limit = studies.length / 2,
         studyToNavigateTo = studies[0];
 
     this.createController({
-      getStudies: this.createGetStudiesFn(studies),
-      limit: limit
+      getStudies: this.createGetStudiesFn(studies)
     });
 
     expect(this.controller.studyGlyphicon(studyToNavigateTo))
@@ -173,7 +156,6 @@ describe('Component: selectStudy', function() {
 
       this.createController({
         getStudies:      this.createGetStudiesFn([]),
-        limit:           1,
         onStudySelected: onStudySelected
       });
 
@@ -192,8 +174,7 @@ describe('Component: selectStudy', function() {
       spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
 
       this.createController({
-        getStudies: this.createGetStudiesFn([]),
-        limit: 1
+        getStudies: this.createGetStudiesFn([])
       });
 
       this.controller.studySelected(this.study);

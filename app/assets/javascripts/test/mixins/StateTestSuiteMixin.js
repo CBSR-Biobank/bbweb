@@ -24,6 +24,7 @@ let StateTestSuiteMixin = {
   injectDependencies: function (...dependencies) {
     const allDependencies = dependencies.concat([
       '$q',
+      '$cookies',
       '$location',
       '$rootScope',
       'userService',
@@ -38,6 +39,10 @@ let StateTestSuiteMixin = {
    * {@link domain.users.User User}.
    */
   initAuthentication: function  () {
+    // the following line bypasses initialization in userService
+    //this.$cookies.remove('XSRF-TOKEN');
+    this.userService.init = jasmine.createSpy().and.returnValue(null);
+
     const user = this.Factory.user();
     this.userService.requestCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(user));
   },

@@ -365,7 +365,6 @@ class Factory {
             id:                      domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT),
             participantId:           participant.id,
             participantSlug:         participant.slug,
-            collectionEventType:     collectionEventType,
             collectionEventTypeId:   collectionEventType.id,
             collectionEventTypeSlug: collectionEventType.slug,
             timeCompleted:           moment(faker.date.recent(10)).format(),

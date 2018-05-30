@@ -42,7 +42,7 @@ describe('Component: ceventView', function() {
       this.collectionEvent = new this.CollectionEvent(this.jsonCevent);
       this.pagedResult     = this.Factory.pagedResult([ this.collectionEvent ]);
 
-      this.collectionEventWithAnnotation = (valueType, maxValueCount = 0) => {
+      this.fixture = (valueType, maxValueCount = 0) => {
         const jsonAnnotationType  = this.Factory.annotationType({ valueType: valueType,
                                                                   maxValueCount: maxValueCount }),
               jsonCeventType      = this.Factory.collectionEventType({ annotationTypes: [ jsonAnnotationType ]}),
@@ -51,7 +51,13 @@ describe('Component: ceventView', function() {
               jsonCevent          = this.Factory.collectionEvent({ collectionEvent: jsonCeventType,
                                                                    annotations: [ jsonAnnotation ]});
 
-        return this.CollectionEvent.create(jsonCevent);
+        return {
+          study:               this.Study.create(this.Factory.defaultStudy()),
+          participant:         this.Participant.create(this.Factory.participant()),
+          collectionEventType: this.CollectionEventType.create(jsonCeventType),
+          collectionEvent:     this.CollectionEvent.create(Object.assign(
+            jsonCevent, { collectionEventType: jsonCeventType }))
+        };
       };
 
       this.createController = (study, participant, collectionEventType, collectionEvent) => {
@@ -80,17 +86,13 @@ describe('Component: ceventView', function() {
   });
 
   it('has valid scope', function() {
-    const collectionEvent =
-          this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                             this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-          collectionEventType = collectionEvent.collectionEventType,
-          participant = this.Participant.create(this.Factory.participant()),
-          study = this.Study.create(this.Factory.defaultStudy());
+    const f = this.fixture(this.AnnotationValueType.SELECT,
+                           this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
-    this.createController(study, participant, collectionEventType, collectionEvent);
+    this.createController(f.study, f.participant, f.collectionEventType, f.collectionEvent);
 
-    expect(this.controller.collectionEventType).toBe(collectionEventType);
-    expect(this.controller.collectionEvent).toBe(collectionEvent);
+    expect(this.controller.collectionEventType).toBe(f.collectionEventType);
+    expect(this.controller.collectionEvent).toBe(f.collectionEvent);
     expect(this.controller.panelOpen).toBeTrue();
 
     expect(this.controller.editTimeCompleted).toBeFunction();
@@ -99,13 +101,10 @@ describe('Component: ceventView', function() {
   });
 
   it('panel can be closed and opened', function() {
-    const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                               this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-          collectionEventType = collectionEvent.collectionEventType,
-          participant = this.Participant.create(this.Factory.participant()),
-          study = this.Study.create(this.Factory.defaultStudy());
+    const f = this.fixture(this.AnnotationValueType.SELECT,
+                           this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
-    this.createController(study, participant, collectionEventType, collectionEvent);
+    this.createController(f.study, f.participant, f.collectionEventType, f.collectionEvent);
     this.controller.panelButtonClicked();
     this.scope.$digest();
     expect(this.controller.panelOpen).toBeFalse();
@@ -143,18 +142,14 @@ describe('Component: ceventView', function() {
     describe('updates to a text annotation', function () {
 
       beforeEach(function () {
-        const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.TEXT),
-              study           = this.Study.create(this.Factory.defaultStudy()),
-              participant     = this.Participant.create(this.Factory.participant());
-
-        context.entityInstance           = collectionEvent;
+        const f = this.fixture(this.AnnotationValueType.TEXT);
+        context.entityInstance           = f.collectionEvent;
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'text';
-        context.annotation               = collectionEvent.annotations[0];
+        context.annotation               = f.collectionEvent.annotations[0];
         context.newValue                 = faker.random.word();
-
         context.createController = () =>
-          this.createController(study, participant, collectionEvent.collectionEventType, collectionEvent);
+          this.createController(f.study, f.participant, f.collectionEventType, f.collectionEvent);
       });
 
       sharedBehaviour(context);
@@ -164,19 +159,15 @@ describe('Component: ceventView', function() {
     describe('updates to a date time annotation', function () {
 
       beforeEach(function () {
-        const newValue        = faker.date.recent(10),
-              collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.DATE_TIME),
-              study           = this.Study.create(this.Factory.defaultStudy()),
-              participant     = this.Participant.create(this.Factory.participant());
-
-        context.entityInstance           = collectionEvent;
+        const f = this.fixture(this.AnnotationValueType.DATE_TIME);
+        const newValue = faker.date.recent(10);
+        context.entityInstance           = f.collectionEvent;
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'dateTime';
-        context.annotation               = collectionEvent.annotations[0];
+        context.annotation               = f.collectionEvent.annotations[0];
         context.newValue                 = { date: newValue, time: newValue };
-
         context.createController = () =>
-          this.createController(study, participant, collectionEvent.collectionEventType, collectionEvent);
+          this.createController(f.study, f.participant, f.collectionEventType, f.collectionEvent);
       });
 
       sharedBehaviour(context);
@@ -186,18 +177,14 @@ describe('Component: ceventView', function() {
     describe('updates to a number annotation', function () {
 
       beforeEach(function () {
-        const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER),
-              study           = this.Study.create(this.Factory.defaultStudy()),
-              participant     = this.Participant.create(this.Factory.participant());
-
-        context.entityInstance           = collectionEvent;
+        const f = this.fixture(this.AnnotationValueType.NUMBER);
+        context.entityInstance           = f.collectionEvent;
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'number';
-        context.annotation               = collectionEvent.annotations[0];
+        context.annotation               = f.collectionEvent.annotations[0];
         context.newValue                 = 10;
-
         context.createController = () =>
-          this.createController(study, participant, collectionEvent.collectionEventType, collectionEvent);
+          this.createController(f.study, f.participant, f.collectionEventType, f.collectionEvent);
       });
 
       sharedBehaviour(context);
@@ -207,19 +194,15 @@ describe('Component: ceventView', function() {
     describe('updates to a single select annotation', function () {
 
       beforeEach(function () {
-        const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                   this.AnnotationMaxValueCount.SELECT_SINGLE),
-              study           = this.Study.create(this.Factory.defaultStudy()),
-              participant     = this.Participant.create(this.Factory.participant());
-
-        context.entityInstance           = collectionEvent;
+        const f = this.fixture(this.AnnotationValueType.SELECT,
+                           this.AnnotationMaxValueCount.SELECT_SINGLE);
+        context.entityInstance           = f.collectionEvent;
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'select';
-        context.annotation               = collectionEvent.annotations[0];
-        context.newValue                 = collectionEvent.annotations[0].annotationType.options[0];
-
+        context.annotation               = f.collectionEvent.annotations[0];
+        context.newValue                 = f.collectionEvent.annotations[0].annotationType.options[0];
         context.createController = () =>
-          this.createController(study, participant, collectionEvent.collectionEventType, collectionEvent);
+          this.createController(f.study, f.participant, f.collectionEventType, f.collectionEvent);
       });
 
       sharedBehaviour(context);
@@ -229,19 +212,15 @@ describe('Component: ceventView', function() {
     describe('updates to a multiple select annotation', function () {
 
       beforeEach(function () {
-        const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                   this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-              study           = this.Study.create(this.Factory.defaultStudy()),
-              participant     = this.Participant.create(this.Factory.participant());
-
-        context.entityInstance           = collectionEvent;
+        const f = this.fixture(this.AnnotationValueType.SELECT,
+                           this.AnnotationMaxValueCount.SELECT_MULTIPLE);
+        context.entityInstance           = f.collectionEvent;
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'selectMultiple';
-        context.annotation               = collectionEvent.annotations[0];
-        context.newValue                 = collectionEvent.annotations[0].annotationType.options;
-
+        context.annotation               = f.collectionEvent.annotations[0];
+        context.newValue                 = f.collectionEvent.annotations[0].annotationType.options;
         context.createController = () =>
-          this.createController(study, participant, collectionEvent.collectionEventType, collectionEvent);
+          this.createController(f.study, f.participant, f.collectionEventType, f.collectionEvent);
       });
 
       sharedBehaviour(context);
@@ -258,12 +237,12 @@ describe('Component: ceventView', function() {
         this.injectDependencies('CollectionEvent',
                                 'modalInput',
                                 'notificationsService');
-        this.collectionEvent = this.collectionEventWithAnnotation(
-          this.AnnotationValueType.SELECT,
-          this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
-        this.study = this.Study.create(this.Factory.defaultStudy());
+        const f = this.fixture(this.AnnotationValueType.SELECT,
+                               this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
+        this.collectionEvent = f.collectionEvent;
+        this.study = f.study;
       });
 
 
@@ -308,14 +287,16 @@ describe('Component: ceventView', function() {
   describe('when removing a collection event', function() {
 
     beforeEach(function() {
-      this.collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.NUMBER);
-      this.study = this.Study.create(this.Factory.defaultStudy());
+      const f = this.fixture(this.AnnotationValueType.SELECT,
+                             this.AnnotationMaxValueCount.SELECT_MULTIPLE);
+
+      this.collectionEvent = f.collectionEvent;
+      this.study = f.study;
     });
 
     it('can remove the collection event when cevent has no specimens', function() {
-      const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                 this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-            collectionEventType = collectionEvent.collectionEventType;
+      const f = this.fixture(this.AnnotationValueType.SELECT,
+                             this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
       this.Specimen.list =
         jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [] }));
@@ -332,7 +313,7 @@ describe('Component: ceventView', function() {
       this.$state.go =
         jasmine.createSpy('state.go').and.returnValue(null);
 
-      this.createController(this.study, this.participant, collectionEventType, collectionEvent);
+      this.createController(this.study, this.participant, f.collectionEventType, f.collectionEvent);
       this.controller.remove();
       this.scope.$digest();
       expect(this.CollectionEvent.prototype.remove).toHaveBeenCalled();
@@ -341,11 +322,10 @@ describe('Component: ceventView', function() {
     });
 
     it('cannot remove the collection event due to server error', function() {
-      const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                 this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-            collectionEventType = collectionEvent.collectionEventType;
+      const f = this.fixture(this.AnnotationValueType.SELECT,
+                             this.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
-      this.createController(this.study, this.participant, collectionEventType, collectionEvent);
+      this.createController(this.study, this.participant, f.collectionEventType, f.collectionEvent);
 
       this.Specimen.list =
         jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [] }));
@@ -370,10 +350,9 @@ describe('Component: ceventView', function() {
     });
 
     it('can NOT remove the collection event when cevent HAS specimens', function() {
-      const collectionEvent = this.collectionEventWithAnnotation(this.AnnotationValueType.SELECT,
-                                                                 this.AnnotationMaxValueCount.SELECT_MULTIPLE),
-            collectionEventType = collectionEvent.collectionEventType,
-            specimen = new this.Specimen(this.Factory.specimen());
+      const f = this.fixture(this.AnnotationValueType.SELECT,
+                             this.AnnotationMaxValueCount.SELECT_MULTIPLE);
+      const specimen = new this.Specimen(this.Factory.specimen());
 
       this.Specimen.list =
         jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [ specimen ] }));
@@ -381,7 +360,7 @@ describe('Component: ceventView', function() {
       this.modalService.modalOk =
         jasmine.createSpy('modalOk').and.returnValue(this.$q.when('OK'));
 
-      this.createController(this.study, this.participant, collectionEventType, collectionEvent);
+      this.createController(this.study, this.participant, f.collectionEventType, f.collectionEvent);
       this.controller.remove();
       this.scope.$digest();
       expect(this.modalService.modalOk).toHaveBeenCalled();

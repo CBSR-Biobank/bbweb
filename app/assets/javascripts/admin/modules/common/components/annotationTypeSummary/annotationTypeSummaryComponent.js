@@ -8,8 +8,8 @@
  */
 
 /**
- * An AngularJS component that displays summary information about an {@link domain.annotations.AnnotationType} in
- * a list item within a Bootstrap panel.
+ * An AngularJS component that displays summary information about an {@link domain.annotations.AnnotationType}
+ * in a list item within a Bootstrap panel.
  *
  * @memberOf admin.common.components.annotationTypeSummary
  *
@@ -17,21 +17,10 @@
  */
 const annotationTypeSummaryComponent = {
   template: require('./annotationTypeSummary.html'),
-  controller: AnnotationTypeSummaryController,
   controllerAs: 'vm',
   bindings: {
     annotationType: '<'
   }
 };
 
-function AnnotationTypeSummaryController() {
-  var vm = this;
-  vm.$onInit = onInit;
-
-  //--
-
-  function onInit() {
-  }
-}
-
-export default ngModule => ngModule.component('annotationTypeSummary', annotationTypeSummaryComponent)
+export default ngModule => ngModule.component('annotationTypeSummary', annotationTypeSummaryComponent);

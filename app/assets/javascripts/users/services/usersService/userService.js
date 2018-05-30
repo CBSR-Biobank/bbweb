@@ -33,7 +33,7 @@ class userService {
    * @private
    */
   init() {
-    var token = this.$cookies.get('XSRF-TOKEN');
+    const token = this.$cookies.get('XSRF-TOKEN');
 
     if (!token) { return; }
 

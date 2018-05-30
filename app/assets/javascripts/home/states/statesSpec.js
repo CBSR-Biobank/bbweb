@@ -20,7 +20,7 @@ describe('states', function() {
                               '$httpBackend',
                               '$state');
 
-      this.initAuthentication()
+      this.initAuthentication();
     })
   })
 

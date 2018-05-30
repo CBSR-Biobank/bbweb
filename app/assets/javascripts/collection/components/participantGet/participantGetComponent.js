@@ -7,7 +7,7 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-const patientDoesNotExistRe = /EntityCriteriaNotFound: participant with unique ID does not exist/,
+const patientDoesNotExistRe = /EntityCriteriaNotFound: participant slug/,
       studyMismatchRe = /EntityCriteriaError: participant not in study/i;
 
 /*

@@ -16,7 +16,8 @@ describe('User', function() {
     angular.mock.inject(function() {
       Object.assign(this, EntityTestSuiteMixin, ServerReplyMixin);
 
-      this.injectDependencies('$httpBackend',
+      this.injectDependencies('$rootScope',
+                              '$httpBackend',
                               'User',
                               'UserState',
                               'Factory');
@@ -361,10 +362,10 @@ describe('User', function() {
       user.removeRole(rawUserRole.id)
         .then(failTest)
         .catch(error => {
-          console.log(error);
+          expect(error).not.toBeUndefined();
         });
-    })
-
+      this.$rootScope.$digest();
+    });
 
   });
 

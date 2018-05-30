@@ -117,8 +117,7 @@ describe('unpackedShipmentUnpackComponent', function() {
     });
 
     it('when INVALID inventory IDs are entered', function() {
-      var self = this,
-          shipment = this.createShipment(),
+      var shipment = this.createShipment(),
           errors = [
             this.errorReply('EntityCriteriaError: invalid inventory Ids: xxxx'),
             this.errorReply('EntityCriteriaError: specimens not in this shipment: xxxx'),
@@ -128,25 +127,25 @@ describe('unpackedShipmentUnpackComponent', function() {
           ],
           tableRefreshCount;
 
-      spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
+      this.modalService.modalOk = jasmine.createSpy().and.returnValues(...errors);
 
       this.createController(shipment);
       this.controller.inventoryIds = this.Factory.stringNext() + ','  + this.Factory.stringNext();
       tableRefreshCount = this.controller.refreshTable;
 
-      errors.forEach(function (error, index) {
+      errors.forEach((error, index) => {
         var args;
 
-        self.Shipment.prototype.tagSpecimensAsReceived =
-          jasmine.createSpy().and.returnValue(self.$q.reject(error));
+        this.Shipment.prototype.tagSpecimensAsReceived =
+          jasmine.createSpy().and.returnValue(this.$q.reject(error));
 
-        self.controller.onInventoryIdsSubmit();
-        self.scope.$digest();
-        expect(self.controller.refreshTable).toBe(tableRefreshCount);
-        expect(self.modalService.modalOk.calls.count()).toBe(index + 1);
+        this.controller.onInventoryIdsSubmit();
+        this.scope.$digest();
+        expect(this.controller.refreshTable).toBe(tableRefreshCount);
+        expect(this.modalService.modalOk.calls.count()).toBe(index + 1);
 
         // check that modal message contains the invalid inventory ID
-        args = self.modalService.modalOk.calls.argsFor(index);
+        args = this.modalService.modalOk.calls.argsFor(index);
         if (args[0] === 'Invalid inventory IDs') {
           expect(args[1]).toContain('xxx');
         }

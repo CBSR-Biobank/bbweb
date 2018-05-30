@@ -1,22 +1,22 @@
 <div class="form-group row"
      ng-class="{ 'has-error' : annotationSubForm.annotationSelectValue.$invalid &&
-               !annotationSubForm.$pristine }">
+            !annotationSubForm.$pristine }">
   <label class="col-md-2 form-control-label">{{vm.annotation.annotationType.name}}</label>
   <div class="col-md-10">
     <div ng-repeat="value in vm.annotation.value">
-      <label>
-        <input type="checkbox"
-               name="annotationSelectValue"
-               ng-model="vm.value.checked"
-               ng-true-value="true"
-               ng-false-value="false"
-               ng-required="vm.annotation.required && !vm.annotation.someSelected()">
-        <span>{{value.name}}</span>
-      </label>
+      <input type="checkbox"
+             name="annotationSelectValue_{{value.name}}"
+             ng-model="value.checked"
+             ng-required="vm.annotation.required && !vm.annotation.someSelected()">
+      <label>{{value.name}}</label>
     </div>
   </div>
   <div class="col-md-offset-2 col-md-10"
        ng-messages="annotationSubForm.annotationSelectValue.$error">
     <div ng-message="required" class="help-block" translate>Please make a selection</div>
   </div>
+</div>
+
+<div class="row">
+  <div class="col-xs-12"><pre>Form: {{vm.annotation.value | json}}</pre></div>
 </div>

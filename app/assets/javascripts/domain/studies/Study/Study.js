@@ -214,7 +214,7 @@ function StudyFactory($q,
                         (value) => value === '');
 
       return biobankApi.get(Study.url('search'), params)
-        .then(Study.createStudiesFromNames);
+        .then(Study.createStudiesFromPagedResult);
     }
 
     /** @private */

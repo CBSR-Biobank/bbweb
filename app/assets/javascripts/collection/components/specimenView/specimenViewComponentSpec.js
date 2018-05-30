@@ -69,6 +69,11 @@ describe('specimenViewComponent', function() {
   it('has valid scope', function() {
     var entities = this.createEntities();
     this.createController.apply(this, Object.values(entities));
+
+    expect(this.scope.vm.study).toBe(entities.study);
+    expect(this.scope.vm.participant).toBe(entities.participant);
+    expect(this.scope.vm.collectionEvent).toBe(entities.collectionEvent);
+    expect(this.scope.vm.specimen).toBe(entities.specimen);
   });
 
   it('user can return to previous page', function() {

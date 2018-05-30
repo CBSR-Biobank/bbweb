@@ -14,8 +14,8 @@ class CeventTypesRouter @Inject()(controller: CeventTypesController) extends Sim
     case GET(p"/inuse/${slug(s)}") =>
       controller.inUse(s)
 
-    case GET(p"/names/${slug(s)}") =>
-      controller.listNames(s)
+    case GET(p"/names/${studyId(sId)}") =>
+      controller.listNames(sId)
 
     case GET(p"/${slug(studySlug)}/${slug(ceventTypeSlug)}") =>
       controller.get(studySlug, ceventTypeSlug)

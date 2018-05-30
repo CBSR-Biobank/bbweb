@@ -25,12 +25,27 @@ describe('Service: userService', function() {
 
       this.jsonUser = this.Factory.user();
       this.user = this.User.create(this.jsonUser);
+      this.$httpBackend.whenGET(this.url('users/authenticate')).respond(this.reply(this.jsonUser));
+
+      this.doLogin = (token, user) => {
+        const email = 'test@test.com';
+        const password = 'test';
+
+        this.$httpBackend.expectPOST(this.url('users/login'), { email, password })
+          .respond(this.reply(this.jsonUser));
+
+        this.userService.login(email, password).then(function(reply) {
+          expect(_.isEqual(reply, user));
+        });
+        this.$httpBackend.flush();
+      };
     });
   });
 
   afterEach(function() {
     this.$httpBackend.verifyNoOutstandingExpectation();
     this.$httpBackend.verifyNoOutstandingRequest();
+    this.$cookies.remove('XSRF-TOKEN');
   });
 
   describe('service initialization', function () {
@@ -40,19 +55,13 @@ describe('Service: userService', function() {
      * when the test starts.
      */
     it('should allow a user to re-connect', function() {
-      var userService;
-
       this.$cookies.put('XSRF-TOKEN', this.Factory.stringNext());
-      this.$httpBackend.expectGET(this.url('users/authenticate')).respond(this.reply(this.jsonUser));
-
-      userService = this.$injector.get('userService');
+      const userService = this.$injector.get('userService');
       this.$httpBackend.flush();
       expect(userService.getCurrentUser()).toEqual(jasmine.any(this.User));
     });
 
     it('should not allow a user to re-connect when authentication fails', function() {
-      var userService;
-
       // 401 cause the http interceptor to intercept the request.
       //
       // the interceptor displays a modal to the user stating the session expired
@@ -63,7 +72,7 @@ describe('Service: userService', function() {
       this.$httpBackend.expectGET(this.url('users/authenticate'))
         .respond(401, this.errorReply('simulated auth failure'));
 
-      userService = this.$injector.get('userService');
+      const userService = this.$injector.get('userService');
       this.$httpBackend.flush();
       expect(userService.getCurrentUser()).toBeUndefined();
     });
@@ -76,42 +85,27 @@ describe('Service: userService', function() {
     });
 
     it('should return the user that is logged in after a session timeout', function() {
-      var self = this;
-
-      this.$httpBackend.expectGET(this.url('users/authenticate')).respond(this.reply(this.jsonUser));
-      self.userService.sessionTimeout();
-      self.userService.requestCurrentUser().then(function (reply) {
-        expect(reply).toEqual(jasmine.any(self.User));
+      this.userService.sessionTimeout();
+      this.userService.requestCurrentUser().then(reply => {
+        expect(reply).toEqual(jasmine.any(this.User));
       });
       this.$httpBackend.flush();
     });
 
     describe('logging in', function() {
 
-      var doLogin = function (token, user) {
-        const email = 'test@test.com',
-              password = 'test';
-        this.$httpBackend.expectPOST(this.url('users/login'), { email, password })
-          .respond(this.reply(this.jsonUser));
-
-        this.userService.login(email, password).then(function(reply) {
-          expect(_.isEqual(reply, user));
-        });
-        this.$httpBackend.flush();
-      };
-
       it('should allow a user to login', function () {
         var token = this.Factory.stringNext;
-        doLogin.call(this, token, this.user);
+        this.doLogin(token, this.user);
+        expect(this.userService.getCurrentUser()).not.toBeUndefined();
       });
 
       it('should return the user that is logged in', function() {
-        var self = this,
-            token = this.Factory.stringNext;
+        const token = this.Factory.stringNext;
 
-        doLogin.call(self, token, self.user);
-        self.userService.requestCurrentUser().then(function (reply) {
-          expect(reply).toEqual(jasmine.any(self.User));
+        this.doLogin(token, this.user);
+        this.userService.requestCurrentUser().then(reply => {
+          expect(reply).toEqual(jasmine.any(this.User));
         });
       });
 
@@ -121,6 +115,7 @@ describe('Service: userService', function() {
       this.$httpBackend.expectPOST(this.url('users/logout')).respond(this.reply('success'));
       this.userService.logout();
       this.$httpBackend.flush();
+      expect(this.userService.getCurrentUser()).toBeUndefined();
     });
 
     it('should allow changing a password', function() {

@@ -375,6 +375,8 @@ describe('membershipViewComponent', function() {
             });
           this.scope.$digest()
           expect(context.entityNameClass.list).toHaveBeenCalled()
+        } else {
+          expect().nothing();
         }
       })
 

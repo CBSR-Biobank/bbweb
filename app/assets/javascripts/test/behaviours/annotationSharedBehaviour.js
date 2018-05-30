@@ -97,6 +97,7 @@ export default function annotationSharedBehaviour(context) {
          const entities = this.createEntities(context);
 
          if (entities.annotationTypeJson.valueType !== this.AnnotationValueType.SELECT) {
+           expect().nothing();
            return;
          }
 
@@ -157,6 +158,7 @@ export default function annotationSharedBehaviour(context) {
       const entities = this.createEntities(context);
 
       if (entities.annotationTypeJson.valueType === this.AnnotationValueType.SELECT) {
+        expect().nothing();
         return;
       }
 
@@ -171,6 +173,7 @@ export default function annotationSharedBehaviour(context) {
 
       if ((entities.annotationTypeJson.valueType !== this.AnnotationValueType.TEXT) &&
           (entities.annotationTypeJson.valueType !== this.AnnotationValueType.DATE_TIME)) {
+        expect().nothing();
         return;
       }
 

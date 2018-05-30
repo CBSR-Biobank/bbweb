@@ -7,7 +7,7 @@
  * AngularJS Factory
  */
 /* @ngInject */
-function ProcessedSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
+function ProcessedSpecimenDefinitionFactory($log, DomainEntity) {
 
   /*
    * Used for validation.
@@ -111,15 +111,6 @@ function ProcessedSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
       return [];
     }
 
-    static create(obj) {
-      var validation = ProcessedSpecimenDefinition.isValid(obj);
-
-      if (!validation.valid) {
-        $log.error('invalid object from server: ' + validation.message);
-        throw new DomainError('invalid object from server: ' + validation.message);
-      }
-      return new ProcessedSpecimenDefinition(obj);
-    }
   }
 
   return ProcessedSpecimenDefinition;

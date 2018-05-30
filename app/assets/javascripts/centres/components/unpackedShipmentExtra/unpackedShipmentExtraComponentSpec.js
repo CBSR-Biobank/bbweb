@@ -131,7 +131,7 @@ describe('unpackedShipmentExtraComponent', function() {
           ],
           tableRefreshCount;
 
-      spyOn(this.modalService, 'modalOk').and.returnValues.apply(null, errors);
+      spyOn(this.modalService, 'modalOk').and.returnValues(...errors);
 
       this.createController(shipment);
       this.controller.inventoryIds = this.Factory.stringNext() + ','  + this.Factory.stringNext();

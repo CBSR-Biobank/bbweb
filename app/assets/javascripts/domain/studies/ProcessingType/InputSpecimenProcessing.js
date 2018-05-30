@@ -6,9 +6,7 @@
 /* @ngInject */
 function InputSpecimenProcessingFactory($log,
                                         biobankApi,
-                                        SpecimenProcessingInfo,
-                                        DomainEntity,
-                                        DomainError) {
+                                        SpecimenProcessingInfo) {
 
   /*
    * Used for validating plain objects.
@@ -89,24 +87,6 @@ function InputSpecimenProcessingFactory($log,
      */
     static additionalSchemas() {
       return [];
-    }
-
-    /**
-     * Creates an InputSpecimenProcessing object, but first it validates `obj` to ensure that it has a valid
-     * schema.
-     *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
-     *
-     * @returns {domain.studies.InputSpecimenProcessing} An object containing the input specimen information.
-     */
-    static create(obj) {
-      var validation = InputSpecimenProcessing.isValid(obj);
-      if (!validation.valid) {
-        $log.error(validation.message);
-        throw new DomainError(validation.message);
-      }
-      return new InputSpecimenProcessing(obj);
     }
 
   }

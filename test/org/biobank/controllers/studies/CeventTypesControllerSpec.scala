@@ -175,7 +175,7 @@ class CeventTypesControllerSpec
         val dtos = eventTypes.sortWith(_.name < _.name).map(EntityInfoDto(_))
         eventTypes.foreach(addToRepository)
 
-        val reply = makeAuthRequest(GET, uri("names", f.study.slug.id) + "?order=asc").value
+        val reply = makeAuthRequest(GET, uri("names", f.study.id.id) + "?order=asc").value
         reply must beOkResponseWithJsonReply
 
         val replyDtos = (contentAsJson(reply) \ "data").validate[List[EntityInfoDto]]
@@ -190,7 +190,7 @@ class CeventTypesControllerSpec
                              f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val reply = makeAuthRequest(GET, uri() + s"/names/${f.study.slug}?filter=name::ET1").value
+        val reply = makeAuthRequest(GET, uri() + s"/names/${f.study.id}?filter=name::ET1").value
         reply must beOkResponseWithJsonReply
 
         val replyDtos = (contentAsJson(reply) \ "data").validate[List[EntityInfoDto]]
@@ -206,7 +206,7 @@ class CeventTypesControllerSpec
                              f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val reply = makeAuthRequest(GET, uri() + s"/names/${f.study.slug}?filter=name::xxx").value
+        val reply = makeAuthRequest(GET, uri() + s"/names/${f.study.id}?filter=name::xxx").value
         reply must beOkResponseWithJsonReply
 
         val replyDtos = (contentAsJson(reply) \ "data").validate[List[EntityInfoDto]]
@@ -220,7 +220,7 @@ class CeventTypesControllerSpec
                              f.eventTypes(1).copy(name = "ET2"))
         eventTypes.foreach(addToRepository)
 
-        val reply = makeAuthRequest(GET, uri() + s"/names/${f.study.slug}?sort=xxx").value
+        val reply = makeAuthRequest(GET, uri() + s"/names/${f.study.id}?sort=xxx").value
         reply must beBadRequestWithMessage("invalid sort field")
       }
     }

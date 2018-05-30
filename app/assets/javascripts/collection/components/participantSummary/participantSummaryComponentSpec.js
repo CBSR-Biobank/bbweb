@@ -124,15 +124,11 @@ describe('Component: participantSummary', function() {
         var self = this,
             participant = self.participantWithAnnotation(self.AnnotationValueType.TEXT);
 
-        context.createController           = createController;
+        context.createController         = () => this.createController(self.study, participant);
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'text';
         context.annotation               = participant.annotations[0];
         context.newValue                 = faker.random.word();
-
-        function createController() {
-          return self.createController(self.study, participant);
-        }
       });
 
       annotationUpdateSharedBehaviour(context);
@@ -145,15 +141,11 @@ describe('Component: participantSummary', function() {
         var self = this,
             participant = self.participantWithAnnotation(self.AnnotationValueType.DATE_TIME);
 
-        context.createController           = createController;
+        context.createController         = () => this.createController(self.study, participant);
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'dateTime';
         context.annotation               = participant.annotations[0];
         context.newValue                 = faker.date.recent(10);
-
-        function createController() {
-          return self.createController(self.study, participant);
-        }
       });
 
       annotationUpdateSharedBehaviour(context);
@@ -166,15 +158,11 @@ describe('Component: participantSummary', function() {
         var self = this,
             participant = self.participantWithAnnotation(self.AnnotationValueType.NUMBER);
 
-        context.createController           = createController;
+        context.createController         = () => this.createController(self.study, participant);
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'number';
         context.annotation               = participant.annotations[0];
         context.newValue                 = 10;
-
-        function createController() {
-          return self.createController(self.study, participant);
-        }
       });
 
       annotationUpdateSharedBehaviour(context);
@@ -188,15 +176,11 @@ describe('Component: participantSummary', function() {
             participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
                                                          self.AnnotationMaxValueCount.SELECT_SINGLE);
 
-        context.createController           = createController;
+        context.createController         = () => this.createController(self.study, participant);
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'select';
         context.annotation               = participant.annotations[0];
         context.newValue                 = participant.annotations[0].annotationType.options[0];
-
-        function createController() {
-          return self.createController(self.study, participant);
-        }
       });
 
       annotationUpdateSharedBehaviour(context);
@@ -210,15 +194,11 @@ describe('Component: participantSummary', function() {
             participant = self.participantWithAnnotation(self.AnnotationValueType.SELECT,
                                                          self.AnnotationMaxValueCount.SELECT_MULTIPLE);
 
-        context.createController           = createController;
+        context.createController         = () => this.createController(self.study, participant);
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'selectMultiple';
         context.annotation               = participant.annotations[0];
         context.newValue                 = participant.annotations[0].annotationType.options;
-
-        function createController() {
-          return self.createController(self.study, participant);
-        }
       });
 
       annotationUpdateSharedBehaviour(context);

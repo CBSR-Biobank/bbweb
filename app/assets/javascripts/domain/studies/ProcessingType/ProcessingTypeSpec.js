@@ -400,7 +400,11 @@ describe('ProcessingType', function() {
                                             f.processingType.version))
       .respond(this.reply(true));
 
-    f.processingType.remove();
+    f.processingType.remove()
+      .then((result) => {
+        expect(result).toBeTrue();
+      })
+      .catch(this.failTest.bind(this));
     this.$httpBackend.flush();
   });
 

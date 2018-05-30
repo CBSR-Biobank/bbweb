@@ -16,8 +16,8 @@
     <div class="col-md-8">
       <select class="form-control"
               name="eventTypeId"
-              ng-model="vm.eventTypeId"
-              ng-options="eventType.id as eventType.name for eventType in vm.collectionEventTypeNames |
+              ng-model="vm.eventTypeSlug"
+              ng-options="eventType.slug as eventType.name for eventType in vm.collectionEventTypeNames |
                           orderBy: 'name'"
               ng-change="vm.updateCollectionEventType()"
               required>

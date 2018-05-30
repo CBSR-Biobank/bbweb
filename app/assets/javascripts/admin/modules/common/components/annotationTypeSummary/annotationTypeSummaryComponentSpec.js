@@ -6,7 +6,7 @@
  */
 /* global angular */
 
-import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
+import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ngModule from '../../index'
 
 describe('annotationTypeSummaryComponent', function() {
@@ -14,22 +14,31 @@ describe('annotationTypeSummaryComponent', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function () {
-      Object.assign(this, TestSuiteMixin);
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$componentController',
                               'AnnotationType',
                               'Factory');
+
+      this.annotationType = new this.AnnotationType(this.Factory.annotationType());
+
+      this.createController = (annotationType = this.annotationType) => {
+        ComponentTestSuiteMixin.createController.call(
+          this,
+          `<annotation-type-summary
+              annotation-type="vm.annotationType">
+           </annotation-type-summary>`,
+          {
+            annotationType
+          },
+          'ceventsList');
+      };
     });
   });
 
-  it('can be created', function () {
-    this.$componentController(
-      'annotationTypeSummary',
-      null,
-      {
-        annotationType: new this.AnnotationType(this.Factory.annotationType()),
-        test: 'xxx'
-      });
+  it('has valid scope', function() {
+    this.createController();
+    expect(this.scope.vm.annotationType).toBe(this.annotationType);
   });
 
 });

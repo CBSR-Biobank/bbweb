@@ -203,7 +203,11 @@ describe('CollectionEventType', function() {
         url = this.url(this.jsonStudy.id, ceventType.id, ceventType.version);
 
     this.$httpBackend.expectDELETE(url).respond(this.reply(true));
-    ceventType.remove();
+    ceventType.remove()
+      .then((result) => {
+        expect(result).toBeTrue();
+      })
+      .catch(this.failTest);
     this.$httpBackend.flush();
   });
 

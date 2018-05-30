@@ -228,7 +228,9 @@ describe('Role', function() {
     reqJson.childIds  = jsonRole.childData.map(getEntityDataIds);
 
     this.$httpBackend.expectPOST(this.url(), reqJson).respond(this.reply(jsonRole));
-    role.add().then(this.expectMembership).catch(failTest);
+    role.add()
+      .then(this.expectRole)
+      .catch(failTest);
     this.$httpBackend.flush();
 
     function getEntityDataIds(entityInfo) {
@@ -239,12 +241,16 @@ describe('Role', function() {
   describe('when attempting to remove a role', function() {
 
     it('the role should be removed', function() {
-      const role = this.Role.create(this.Factory.role()),
-            url = this.url(role.id, role.version)
+      const role = this.Role.create(this.Factory.role());
+      const url = this.url(role.id, role.version);
 
-      this.$httpBackend.expectDELETE(url).respond(this.reply(true))
+      this.$httpBackend.expectDELETE(url).respond(this.reply(true));
       role.remove()
-      this.$httpBackend.flush()
+        .then((result) => {
+          expect(result).toBeTrue();
+        })
+        .catch(failTest);
+      this.$httpBackend.flush();
     })
 
     it('if the role is new it cannot be removed', function() {

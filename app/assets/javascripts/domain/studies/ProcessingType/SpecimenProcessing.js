@@ -8,8 +8,7 @@ function SpecimenProcessingFactory($log,
                                    biobankApi,
                                    InputSpecimenProcessing,
                                    OutputSpecimenProcessing,
-                                   DomainEntity,
-                                   DomainError) {
+                                   DomainEntity) {
 
   /*
    * Used for validating plain objects.
@@ -75,24 +74,6 @@ function SpecimenProcessingFactory($log,
       return [ InputSpecimenProcessing.schema(), OutputSpecimenProcessing.schema() ]
         .concat(InputSpecimenProcessing.additionalSchemas())
         .concat(OutputSpecimenProcessing.additionalSchemas());
-    }
-
-    /**
-     * Creates a SpecimenProcessing object, but first it validates `obj` to ensure that it has a valid schema.
-     *
-     * @param {object} [obj={}] - An initialization object whose properties are the same as the members from
-     * this class. Objects of this type are usually returned by the server's REST API.
-     *
-     * @returns {domain.studies.InputSpecimenProcessing} An object containing the specimen processing
-     * information.
-     */
-    static create(obj) {
-      var validation = SpecimenProcessing.isValid(obj);
-      if (!validation.valid) {
-        $log.error(validation.message);
-        throw new DomainError(validation.message);
-      }
-      return new SpecimenProcessing(obj);
     }
 
   }

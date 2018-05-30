@@ -138,11 +138,13 @@ describe('annotationsInputModule', function() {
     this.createController([ annotation ]);
 
     // has the right number of check boxes
-    expect(this.element.find('input').length).toBe(3);
+    expect(this.element.find('input').length).toBe(annotationType.options.length);
+    expect(this.element.find('label').length).toBe(annotationType.options.length + 1);
 
-    expect(this.element.find('label span').eq(0)).toHaveText(annotationType.options[0]);
-    expect(this.element.find('label span').eq(1)).toHaveText(annotationType.options[1]);
-    expect(this.element.find('label span').eq(2)).toHaveText(annotationType.options[2]);
+    expect(this.element.find('label').eq(0)).toHaveText(annotationType.name);
+    expect(this.element.find('label').eq(1)).toHaveText(annotationType.options[0]);
+    expect(this.element.find('label').eq(2)).toHaveText(annotationType.options[1]);
+    expect(this.element.find('label').eq(3)).toHaveText(annotationType.options[2]);
   });
 
   // For a required SELECT MULTIPLE annotation type
@@ -164,10 +166,13 @@ describe('annotationsInputModule', function() {
        expect(this.element.find('input').length).toBe(annotationType.options.length);
 
        _.range(annotationType.options.length).forEach((inputNum) => {
-         this.element.find('input').eq(inputNum).click();
-         expect(this.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(true);
-         this.element.find('input').eq(inputNum).click();
-         expect(this.scope.form.annotationSubForm.annotationSelectValue.$valid).toBe(false);
+         const formInputName = 'annotationSelectValue_' + annotationType.options[inputNum];
+         const formInput = this.scope.form.annotationSubForm[formInputName];
+
+         this.element.find('input').eq(inputNum).click().trigger('change');
+         expect(formInput.$valid).toBe(true);
+         this.element.find('input').eq(inputNum).click().trigger('change');
+         expect(formInput.$valid).toBe(false);
        });
      });
 

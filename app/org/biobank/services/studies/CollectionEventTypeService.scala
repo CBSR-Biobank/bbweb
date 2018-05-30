@@ -52,6 +52,11 @@ trait CollectionEventTypeService extends BbwebService {
   def listNamesByStudySlug(requestUserId: UserId, studySlug: Slug, query: FilterAndSortQuery)
       : Future[ServiceValidation[Seq[EntityInfoDto]]]
 
+  def listNamesByStudyId(requestUserId: UserId,
+                         studyId:       StudyId,
+                         query:         FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[EntityInfoDto]]]
+
   def processCommand(cmd: CollectionEventTypeCommand)
       : Future[ServiceValidation[CollectionEventType]]
 
@@ -133,6 +138,20 @@ class CollectionEventTypeServiceImpl @Inject()(
        } yield results
      }
    }
+
+  def listNamesByStudyId(requestUserId: UserId,
+                         studyId:       StudyId,
+                         query:         FilterAndSortQuery)
+      : Future[ServiceValidation[Seq[EntityInfoDto]]] = {
+    Future {
+      for {
+        study <- studiesService.getStudy(requestUserId, studyId)
+        types <- queryInternal(requestUserId, study.id, query.filter, query.sort)
+      } yield {
+        types.map { t => EntityInfoDto(t.id.id, t.slug, t.name) }
+      }
+    }
+  }
 
   def listNamesByStudySlug(requestUserId: UserId,
                            studySlug:     Slug,

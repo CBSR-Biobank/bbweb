@@ -36,11 +36,9 @@ function SelectStudyController($state, gettextCatalog, modalService) {
     vm.studySelected     = studySelected;
     vm.showPagination    = getShowPagination();
 
-    vm.pagerOptions = {
+    vm.filterSortOptions = {
       filter: '',
-      sort:   'name', // must be lower case
-      page:   1,
-      limit:  vm.limit
+      sort:   'name'
     };
 
     updateStudies();
@@ -51,14 +49,14 @@ function SelectStudyController($state, gettextCatalog, modalService) {
   }
 
   function updateStudies() {
-    if (vm.pagerOptions.filter) {
-      vm.pagerOptions.filter += ';';
+    if (vm.filterSortOptions.filter) {
+      vm.filterSortOptions.filter += ';';
     } else {
-      vm.pagerOptions.filter = '';
+      vm.filterSortOptions.filter = '';
     }
 
-    vm.pagerOptions.filter += 'state::enabled';
-    vm.getStudies()(vm.pagerOptions)
+    vm.filterSortOptions.filter += 'state::enabled';
+    vm.getStudies()(vm.filterSortOptions)
       .then(studyNames => {
         vm.studyNames = studyNames;
         vm.displayState = getDisplayState();
@@ -71,11 +69,11 @@ function SelectStudyController($state, gettextCatalog, modalService) {
    */
   function nameFilterUpdated() {
     if (!_.isUndefined(vm.nameFilter) && (vm.nameFilter !== '')) {
-      vm.pagerOptions.filter = 'name:like:' + vm.nameFilter;
+      vm.filterSortOptions.filter = 'name:like:' + vm.nameFilter;
     } else {
-      vm.pagerOptions.filter = '';
+      vm.filterSortOptions.filter = '';
     }
-    vm.pagerOptions.page = 1;
+    vm.filterSortOptions.page = 1;
     updateStudies();
   }
 
@@ -86,7 +84,7 @@ function SelectStudyController($state, gettextCatalog, modalService) {
   function clearFilter() {
     vm.nameFilter = '';
     vm.nameFilterWildcard = '';
-    vm.pagerOptions.filter = null;
+    vm.filterSortOptions.filter = null;
     updateStudies();
   }
 
@@ -154,8 +152,7 @@ const selectStudyComponent = {
  *
  * @callback collection.components.selectStudy.GetStudies
  *
- * @param {common.controllers.PagedListController.PagerOptions} options - the pager options used to retrieve
- * studies.
+ * @param {object} options - the filter and sort options used to retrieve studies.
  *
  * @returns {Promise<Array<domain.studies.StudyName>>} A promise with items of type {@link
  * domain.studies.StudyName StudyName}.

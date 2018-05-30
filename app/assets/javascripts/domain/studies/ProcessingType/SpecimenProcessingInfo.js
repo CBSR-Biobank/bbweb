@@ -56,21 +56,6 @@ function SpecimenProcessingInfoFactory($log,
      */
 
     /**
-     * @private
-     * @return {object} The JSON schema for this class.
-     */
-    static schema() {
-      return SCHEMA;
-    }
-
-    /**
-     * @private
-     */
-    static additionalSchemas() {
-      return [];
-    }
-
-    /**
      * @protected
      */
     static create(obj) { // eslint-disable-line no-unused-vars

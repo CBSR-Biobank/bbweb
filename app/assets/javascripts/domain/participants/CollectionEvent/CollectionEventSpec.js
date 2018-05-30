@@ -534,7 +534,11 @@ describe('CollectionEvent', function() {
 
     this.$httpBackend.expectDELETE(url).respond(this.reply(true));
 
-    cevent.remove();
+    cevent.remove()
+      .then((result) => {
+        expect(result).toBeTrue();
+      })
+      .catch(this.failTest);
     this.$httpBackend.flush();
   });
 
@@ -550,7 +554,8 @@ describe('CollectionEvent', function() {
             collectionEvenType: jsonCet,
             annotations: [ annotation ]
           }),
-          cevent = this.CollectionEvent.create(jsonCevent);
+          cevent = this.CollectionEvent.create(Object.assign(jsonCevent,
+                                                             { collectionEventType: jsonCet }));
 
       context.entityType     = this.CollectionEvent;
       context.entity         = cevent;

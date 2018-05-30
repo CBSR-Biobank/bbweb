@@ -24,7 +24,7 @@ define(['lodash'], function (_) {
    *
    * @param {object} context.response The response from the server.
    */
-  function entityWithAnnotationsSharedSpec(context) {
+  function entityWithAnnotationsSharedBehaviour(context) {
 
     describe('(shared)', function () {
 
@@ -82,5 +82,5 @@ define(['lodash'], function (_) {
     }
   }
 
-  return entityWithAnnotationsSharedSpec;
+  return entityWithAnnotationsSharedBehaviour;
 });

@@ -22,6 +22,7 @@ function SpecimenFactory($q,
                          DomainEntity,
                          ConcurrencySafeEntity,
                          DomainError,
+                         CollectionEvent,
                          biobankApi,
                          centreLocationInfoSchema) {
 
@@ -305,7 +306,8 @@ function SpecimenFactory($q,
         result.locationId = specimen.locationInfo.locationId;
         return result;
       });
-      return biobankApi.post(Specimen.url(ceventId), json);
+      return biobankApi.post(Specimen.url(ceventId), json)
+        .then(reply => CollectionEvent.create(reply));
     }
 
     /**

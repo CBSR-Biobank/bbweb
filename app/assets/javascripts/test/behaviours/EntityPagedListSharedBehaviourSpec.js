@@ -54,7 +54,10 @@ export default function sharedBehaviour(context) {
       });
 
       it('updates items when name state filter is updated', function() {
-        if (!context.validFilters.includes('stateFilter')) { return; }
+        if (!context.validFilters.includes('stateFilter')) {
+          expect().nothing();
+          return;
+        }
 
         context.createController(0);
 
@@ -109,7 +112,10 @@ export default function sharedBehaviour(context) {
     });
 
     it('has valid display state when there are no entities for criteria', function() {
-      if (!context.validFilters.includes('stateFilter')) { return; }
+      if (!context.validFilters.includes('stateFilter')) {
+        expect().nothing();
+        return;
+      }
 
       context.createController(0);
 
@@ -120,7 +126,10 @@ export default function sharedBehaviour(context) {
     });
 
     it('has valid display state when there are entities for criteria', function() {
-      if (!context.validFilters.includes('stateFilter')) { return; }
+      if (!context.validFilters.includes('stateFilter')) {
+        expect().nothing();
+        return;
+      }
 
       context.createController(1);
       this.controller.updateSearchFilter('stateFilter')(context.stateFilterValue);

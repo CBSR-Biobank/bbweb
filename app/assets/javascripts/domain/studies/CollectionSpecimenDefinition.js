@@ -7,7 +7,7 @@
  * AngularJS Factory
  */
 /* @ngInject */
-function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
+function CollectionSpecimenDefinitionFactory($log, DomainEntity) {
 
   /*
    * Used for validation.
@@ -129,15 +129,6 @@ function CollectionSpecimenDefinitionFactory($log, DomainEntity, DomainError) {
       return [];
     }
 
-    static create(obj) {
-      var validation = CollectionSpecimenDefinition.isValid(obj);
-
-      if (!validation.valid) {
-        $log.error('invalid object from server: ' + validation.message);
-        throw new DomainError('invalid object from server: ' + validation.message);
-      }
-      return new CollectionSpecimenDefinition(obj);
-    }
   }
 
   return CollectionSpecimenDefinition;

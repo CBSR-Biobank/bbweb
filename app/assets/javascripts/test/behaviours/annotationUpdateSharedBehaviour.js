@@ -78,18 +78,17 @@ define(function () {
       });
 
       it('throws an exception if annotation is invalid', function() {
-        var self = this,
-            annotation = {
-              annotationType: {
-                name: ''
-              },
-              getLabel: function () { return null; }
-            };
+        var annotation = {
+          annotationType: {
+            name: ''
+          },
+          getLabel: function () { return null; }
+        };
 
         context.createController.call(this);
 
-        expect(function () {
-          self.controller[context.controllerUpdateFuncName](annotation);
+        expect(() => {
+          this.controller[context.controllerUpdateFuncName](annotation);
         }).toThrowError(/invalid annotation type/);
       });
 

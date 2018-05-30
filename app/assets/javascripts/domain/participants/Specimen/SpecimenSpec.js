@@ -33,7 +33,7 @@ describe('Specimen', function() {
       this.jsonSpecimen = this.Factory.specimen();
 
       // used by promise tests
-      this.expectSpecimen = (entity) => {
+      this.expectCollectionEvent= (entity) => {
         expect(entity).toEqual(jasmine.any(this.CollectionEvent));
       };
 
@@ -228,7 +228,9 @@ describe('Specimen', function() {
 
     this.$httpBackend.expectPOST(this.url(cevent.id), json).respond(this.reply(jsonCevent));
 
-    this.Specimen.add(cevent.id, specimens);
+    this.Specimen.add(cevent.id, specimens)
+      .then(this.expectCollectionEvent)
+      .catch(this.failtest);
     this.$httpBackend.flush();
   });
 
@@ -283,7 +285,11 @@ describe('Specimen', function() {
 
     specimen.collectionEventId = cevent.id;
     this.$httpBackend.expectDELETE(url).respond(this.reply(true));
-    specimen.remove(cevent.id);
+    specimen.remove(cevent.id)
+      .then(reply => {
+        expect(reply).toBeTrue();
+      })
+      .catch(this.failTest);
     this.$httpBackend.flush();
   });
 

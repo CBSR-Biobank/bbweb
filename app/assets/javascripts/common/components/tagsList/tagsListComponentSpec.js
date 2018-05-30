@@ -24,9 +24,9 @@ describe('tagsListComponent', function() {
           ComponentTestSuiteMixin.createController.call(
             this,
             `<tags-list tag-data="vm.tagData"
-                      ${tagClassAttr}
-                      on-tag-selected="vm.onTagSelected">
-           </tags-input>`,
+                       ${tagClassAttr}
+                       on-tag-selected="vm.onTagSelected">
+             </tags-input>`,
             {
               tagData,
               onTagSelected
@@ -43,7 +43,6 @@ describe('tagsListComponent', function() {
 
       this.tagData = this.createTagInfo(1)
       this.tagSelected = jasmine.createSpy('tagSelected').and.returnValue(null)
-
     })
   })
 
@@ -70,9 +69,9 @@ describe('tagsListComponent', function() {
     })
 
     it('onTagSelected can be null', function() {
-      this.tagSelected = undefined
-      this.createController()
-      this.controller.tagSelected(this.tagData[0])
+      this.createController(this.tagData, undefined, null);
+      this.controller.tagSelected(this.tagData[0]);
+      expect(this.tagSelected).not.toHaveBeenCalled();
     })
 
   })

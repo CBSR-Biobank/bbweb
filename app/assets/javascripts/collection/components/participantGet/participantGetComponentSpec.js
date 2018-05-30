@@ -87,7 +87,7 @@ describe('Component: participantGet', function() {
       var uniqueId = this.Factory.stringNext(),
           errorMsg = {
             status:  'error',
-            message: 'EntityCriteriaNotFound: participant with unique ID does not exist: xxx'
+            message: 'EntityCriteriaNotFound: participant slug'
           };
 
       this.createController();
@@ -109,7 +109,7 @@ describe('Component: participantGet', function() {
       var uniqueId = this.Factory.stringNext(),
           errorMsg = {
             status:  'error',
-            message: 'EntityCriteriaNotFound: participant with unique ID does not exist: xxx'
+            message: 'EntityCriteriaNotFound: participant slug'
           };
 
       this.createController();

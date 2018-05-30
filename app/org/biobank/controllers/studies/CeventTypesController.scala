@@ -50,14 +50,14 @@ class CeventTypesController @Inject() (
     }
   }
 
-  def listNames(studySlug: Slug): Action[Unit] = {
+  def listNames(studyId: StudyId): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
       FilterAndSortQueryHelper(request.rawQueryString).fold(
         err => {
           validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
         },
         query => {
-          validationReply(service.listNamesByStudySlug(request.authInfo.userId, studySlug, query))
+          validationReply(service.listNamesByStudyId(request.authInfo.userId, studyId, query))
         }
       )
     }
