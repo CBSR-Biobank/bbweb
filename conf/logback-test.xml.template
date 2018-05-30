@@ -20,12 +20,10 @@
   <logger name="org.biobank" level="INFO" />
   <logger name="org.biobank.domain" level="INFO" />
   <logger name="org.biobank.service" level="INFO" />
-  <logger name="org.biobank.fixture" level="INFO" />
-  <logger name="org.biobank.controllers" level="INFO" />
+  <logger name="org.biobank.fixtures" level="INFO" />
 
   <!--
-  <logger name="org.biobank.controllers.centres" level="DEBUG" />
-  <logger name="com.google" level="INFO" />
+  <logger name="org.biobank.controllers" level="DEBUG" />
   <logger name="play" level="INFO" />
   <logger name="net.sf.ehcache" level="INFO" />
   <logger name="io.netty" level="INFO" />

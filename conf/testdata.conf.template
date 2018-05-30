@@ -2,3 +2,4 @@
 application.testData.load=false
 application.testData.loadSpecimens=false
 application.testData.loadShipments=false
+application.testData.loadAccessData=false
