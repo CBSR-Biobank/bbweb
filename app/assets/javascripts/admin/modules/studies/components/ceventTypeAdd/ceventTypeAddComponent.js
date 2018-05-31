@@ -7,44 +7,60 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function CeventTypeAddController($state,
-                                 gettextCatalog,
-                                 CollectionEventType,
-                                 domainNotificationService,
-                                 notificationsService) {
-  var vm = this;
-  vm.$onInit = onInit;
+class CeventTypeAddController {
 
-  //---
-
-  function onInit() {
-    vm.ceventType  = new CollectionEventType({}, { study: vm.study });
-    vm.returnState = 'home.admin.studies.study.collection';
-
-    vm.title       = gettextCatalog.getString('Add Collection Event');
-    vm.submit      = submit;
-    vm.cancel      = cancel;
+  constructor($state,
+              gettextCatalog,
+              CollectionEventType,
+              breadcrumbService,
+              domainNotificationService,
+              notificationsService) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $state,
+                    gettextCatalog,
+                    CollectionEventType,
+                    breadcrumbService,
+                    domainNotificationService,
+                    notificationsService
+                  });
   }
 
-  function submit() {
-    vm.ceventType.add().then(submitSuccess).catch(submitError);
+  $onInit() {
+    this.ceventType  = new this.CollectionEventType({}, { study: this.study });
+    this.returnState = 'home.admin.studies.study.collection';
+
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.studies'),
+      this.breadcrumbService.forStateWithFunc(
+        `home.admin.studies.study.collection({ studySlug: "${this.study.slug}" })`,
+        () => this.study.name),
+      this.breadcrumbService.forStateWithFunc(
+        'home.admin.studies.study.collection.ceventTypeAdd',
+        () => this.gettextCatalog.getString('Add collection event'))
+    ];
+  }
+
+  submit() {
+    this.ceventType.add().then(submitSuccess).catch(submitError);
 
     function submitSuccess() {
-      notificationsService.submitSuccess();
-      return $state.go(vm.returnState, {}, { reload: true });
+      this.notificationsService.submitSuccess();
+      return this.$state.go(this.returnState, {}, { reload: true });
     }
 
     function submitError(error) {
-      domainNotificationService.updateErrorModal(error, gettextCatalog.getString('collection event type'));
+      this.domainNotificationService.updateErrorModal(
+        error,
+        this.gettextCatalog.getString('collection event type'));
     }
   }
 
-  function cancel() {
-    return $state.go(vm.returnState);
+  cancel() {
+    return this.$state.go(this.returnState);
   }
 
 }
