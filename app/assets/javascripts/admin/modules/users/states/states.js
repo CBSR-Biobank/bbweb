@@ -30,15 +30,6 @@ function adminUsersUiRouterConfig($stateProvider) {
         'main@': 'manageUsers'
       }
     })
-    .state('home.admin.access.users.user', {
-      url: '/:slug',
-      resolve: {
-        user: resolveUser
-      },
-      views: {
-        'main@': 'userProfile'
-      }
-    })
     .state('home.admin.access.roles', {
       url: '/roles',
       views: {
@@ -75,13 +66,6 @@ function adminUsersUiRouterConfig($stateProvider) {
         'main@': 'membershipView'
       }
     });
-
-  /* @ngInject */
-  function resolveUser($transition$, User, resourceErrorService) {
-    const slug = $transition$.params().slug
-    return User.get(slug)
-      .catch(resourceErrorService.goto404(`user slug not found: ${slug}`))
-  }
 
   /* @ngInject */
   function resolveRole($transition$, Role, resourceErrorService) {

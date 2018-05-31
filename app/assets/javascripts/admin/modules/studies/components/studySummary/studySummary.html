@@ -2,40 +2,60 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       {{vm.study.name}}
-      <span class="pull-right">
-        <button class="btn btn-xs btn-success"
-                ng-click="vm.changeState('enable')"
-                uib-tooltip="{{'Enable'|translate}}"
-                ng-if="vm.study.isDisabled()"
-                ng-disabled="!vm.isEnableAllowed">
-          <i class="glyphicon glyphicon-ok-circle"></i>
-          <translate>Enable</translate>
+      <span class="pull-right"
+            uib-dropdown is-open="vm.studySummaryMenu.isopen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="studySummaryMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
         </button>
 
-        <button class="btn btn-xs btn-danger"
-                ng-click="vm.changeState('disable')"
-                uib-tooltip="{{'Disable'|translate}}"
-                ng-if="vm.study.isEnabled()">
-          <i class="glyphicon glyphicon-cog"></i>
-          <translate>Disable</translate>
-        </button>
-
-        <button class="btn btn-xs btn-danger"
-                ng-click="vm.changeState('retire')"
-                uib-tooltip="{{'Retire'|translate}}"
-                ng-if="vm.study.isDisabled()">
-          <i class="glyphicon glyphicon-arrow-down"></i>
-          <translate>Retire</translate>
-        </button>
-
-        <button class="btn btn-xs btn-danger"
-                ng-click="vm.changeState('unretire')"
-                uib-tooltip="{{'Unretire'|translate}}"
-                ng-if="vm.study.isRetired()">
-          <i class="glyphicon glyphicon-arrow-up"></i>
-          <translate>Unretire</translate>
-        </button>
-
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="studySummaryMenu">
+          <li role="menuitem" ng-if="vm.study.isDisabled()">
+            <a href
+               ng-click="vm.changeState('enable')">
+              <i class="glyphicon glyphicon-ok-circle text-success"></i>
+              <translate>Enable this study</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-if="vm.study.isEnabled()">
+            <a href
+               ng-click="vm.changeState('disable')">
+              <i class="glyphicon glyphicon-ok-circle text-danger"></i>
+              <translate>Disable this study</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-if="vm.study.isDisabled()">
+            <a href
+               ng-click="vm.changeState('retire')">
+              <i class="glyphicon glyphicon-arrow-down text-danger"></i>
+              <translate>Retire this study</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-if="vm.study.isRetired()">
+            <a href
+               ng-click="vm.changeState('unretire')">
+              <i class="glyphicon glyphicon-arrow-down text-danger"></i>
+              <translate>Unretire this study</translate>
+            </a>
+          </li>
+          <li class="divider" ng-if="vm.study.isDisabled()"></li>
+          <li role="menuitem" ng-if="vm.study.isDisabled()">
+            <a href
+               ng-click="vm.editName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update name</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-if="vm.study.isDisabled()">
+            <a href
+               ng-click="vm.editDescription()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update description</translate>
+            </a>
+          </li>
+        </ul>
       </span>
     </h3>
   </div>
@@ -45,16 +65,8 @@
         <div class="col-md-2">
           <strong translate>Name:</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.study.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit name'|translate}}"
-                  ng-click="vm.editName()"
-                  ng-if="vm.study.isDisabled()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -66,9 +78,7 @@
         <div class="col-md-10">
           <truncate-toggle text="vm.study.description"
                            toggle-length="vm.descriptionToggleLength"
-                           text-empty-warning="{{'Description not entered yet.'|translate}}"
-                           allow-edit="vm.study.isDisabled()"
-                           on-edit="vm.editDescription()">
+                           text-empty-warning="{{'Description not entered yet.'|translate}}">
           </truncate-toggle>
         </div>
       </div>

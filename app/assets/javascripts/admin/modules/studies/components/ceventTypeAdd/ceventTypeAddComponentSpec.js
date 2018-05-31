@@ -58,8 +58,7 @@ describe('Component: ceventTypeAdd', function() {
     this.scope.$digest();
 
     expect(notificationsService.submitSuccess).toHaveBeenCalled();
-    expect($state.go).toHaveBeenCalledWith(
-      'home.admin.studies.study.collection', {}, { reload: true });
+    expect($state.go).toHaveBeenCalledWith('^', {}, { reload: true });
   });
 
   it('on submit error, displays an error modal', function() {
@@ -92,7 +91,7 @@ describe('Component: ceventTypeAdd', function() {
 
     this.controller.cancel();
     this.scope.$digest();
-    expect(state.go).toHaveBeenCalledWith('home.admin.studies.study.collection');
+    expect(state.go).toHaveBeenCalledWith('^');
   });
 
 });

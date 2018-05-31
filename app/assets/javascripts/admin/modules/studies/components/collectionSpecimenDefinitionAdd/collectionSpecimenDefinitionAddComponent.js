@@ -24,6 +24,7 @@ class CollectionSpecimenDefinitionAddController {
               PreservationTemperature,
               SpecimenType,
               breadcrumbService) {
+    'ngInject';
     Object.assign(this,
                   {
                     $state,

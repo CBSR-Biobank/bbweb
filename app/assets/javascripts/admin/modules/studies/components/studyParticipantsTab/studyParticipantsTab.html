@@ -10,12 +10,26 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       <translate>Annotations</translate>
-      <button class="btn btn-xs btn-primary pull-right"
-              uib-tooltip="{{'Add an annotation to be recorded for participants of this study'|translate}}"
-              ng-click="vm.add()"
-              ng-if="vm.study.isDisabled()">
-        Add annotation <i class="glyphicon glyphicon-plus"></i>
-      </button>
+      <span class="pull-right"
+            uib-dropdown is-open="vm.annotationTypesMenu.isopen"
+            ng-if="vm.study.isDisabled()">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="annotationTypesMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="annotationTypesMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.add()">
+              <i class="glyphicon glyphicon-plus text-primary"></i>
+              <translate>Add an annotation</translate>
+            </a>
+          </li>
+        </ul>
+      </span>
     </h3>
   </div>
   <ul class="list-group">
@@ -39,11 +53,12 @@
           <annotation-type-summary annotation-type="annotationType"></annotation-type-summary>
         </div>
         <div class="col-md-2">
-          <update-remove-buttons on-update="vm.editAnnotationType(annotationType)"
-                                 on-remove="vm.removeAnnotationType(annotationType)"
-                                 update-button-enabled="vm.study.isDisabled()"
-                                 remove-button-enabled="vm.study.isDisabled()">
-          </update-remove-buttons>
+          <annotation-type-menu annotation-type="annotationType"
+                                allow-changes="vm.study.isDisabled()"
+                                on-view="vm.editAnnotationType.bind(vm)"
+                                on-update="vm.editAnnotationType.bind(vm)"
+                                on-remove="vm.removeAnnotationType.bind(vm)">
+          </annotation-type-menu>
         </div>
       </div>
     </li>

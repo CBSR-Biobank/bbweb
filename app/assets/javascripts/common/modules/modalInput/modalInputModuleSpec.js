@@ -104,11 +104,18 @@ describe('modalInputModule', function() {
                      this.label,
                      { required: true });
       this.scope.form.subForm.value.$setViewValue(null);
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.vm.value).toBeNull();
+      expect(this.scope.form.$valid).toBeFalse();
 
       // check that it becomes valid
+      this.scope.form.subForm.value.$setViewValue(true);
+      expect(this.scope.vm.value).toBeTrue();
+      expect(this.scope.form.$valid).toBeTrue();
+
+      // check that it can be set to false
       this.scope.form.subForm.value.$setViewValue(false);
-      expect(this.scope.form.$valid).toBe(true);
+      expect(this.scope.vm.value).toBeFalse();
+      expect(this.scope.form.$valid).toBeTrue();
 
       this.dismiss(this.modal, 'closed in test');
       expect(this.$document).toHaveModalsOpen(0);
@@ -142,7 +149,8 @@ describe('modalInputModule', function() {
       expect(this.modalElement).not.toHaveHelpBlocks();
 
       expect(this.modalElement.scope().vm.value).toBeDate();
-      expect(new Date(this.modalElement.scope().vm.value)).toEqual(this.date);
+      expect(this.scope.vm.value).toBeDate();
+     expect(new Date(this.modalElement.scope().vm.value)).toEqual(this.date);
 
       this.dismiss(this.modal, 'closed in test');
       expect(this.$document).toHaveModalsOpen(0);
@@ -157,7 +165,7 @@ describe('modalInputModule', function() {
 
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
 
       this.dismiss(this.modal, 'closed in test');
       expect(this.$document).toHaveModalsOpen(0);
@@ -191,6 +199,23 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      const email = this.Factory.emailNext();
+      const options = { required: true };
+      this.openModal(this.modalInput.email,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     options);
+      expect(this.modalElement).toHaveValuesInControllerScope({ options });
+      this.scope.form.subForm.value.$setViewValue(email);
+      expect(this.scope.form.$valid).toBe(true);
+      expect(this.scope.vm.value).toBe(email);
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when using required option and input is empty', function() {
       const options = { required: true };
       this.openModal(this.modalInput.email,
@@ -200,7 +225,8 @@ describe('modalInputModule', function() {
                      options);
       expect(this.modalElement).toHaveValuesInControllerScope({ options });
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
+      expect(this.scope.vm.value).toBeUndefined();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -208,12 +234,14 @@ describe('modalInputModule', function() {
     });
 
     it('form is invalid when input is an invalid email', function() {
+      const invalidValue = this.Factory.stringNext();
       this.openModal(this.modalInput.email,
                      this.defaultValue,
                      this.title,
                      this.label);
-      this.scope.form.subForm.value.$setViewValue('xxx');
-      expect(this.scope.form.$valid).toBe(false);
+      this.scope.form.subForm.value.$setViewValue(invalidValue);
+      expect(this.scope.form.$valid).toBeFalse();
+      expect(this.scope.vm.value).toBeUndefined();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -248,6 +276,21 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      this.openModal(this.modalInput.naturalNumber,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     { required: true });
+      expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
+      this.scope.form.subForm.value.$setViewValue(1);
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value).toBe(1);
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when using required option and input is empty', function() {
       this.openModal(this.modalInput.naturalNumber,
                      this.defaultValue,
@@ -256,7 +299,7 @@ describe('modalInputModule', function() {
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -270,7 +313,7 @@ describe('modalInputModule', function() {
                      this.label);
       expect(this.$document).toHaveModalsOpen(1);
       this.scope.form.subForm.value.$setViewValue('-1');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -305,6 +348,21 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      this.openModal(this.modalInput.number,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     { required: true });
+      expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
+      this.scope.form.subForm.value.$setViewValue(-1);
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value).toBe(-1);
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when using required option and input is empty', function() {
       this.openModal(this.modalInput.number,
                      this.defaultValue,
@@ -313,7 +371,7 @@ describe('modalInputModule', function() {
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -326,7 +384,7 @@ describe('modalInputModule', function() {
                      this.title,
                      this.label);
       this.scope.form.subForm.value.$setViewValue('xxx');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
 
       this.dismiss(this.modal, 'closed in test');
       expect(this.$document).toHaveModalsOpen(0);
@@ -367,6 +425,22 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      const newPassword = this.Factory.stringNext();
+      this.openModal(this.modalInput.password,
+                     this.defaultValue,
+                     this.title,
+                     this.label);
+      this.scope.form.subForm.currentPassword.$setViewValue(newPassword);
+      this.scope.form.subForm.newPassword.$setViewValue(newPassword);
+      this.scope.form.subForm.confirmPassword.$setViewValue(newPassword);
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value.newPassword).toBe(newPassword);
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when new password and confirm password do not match', function() {
       this.openModal(this.modalInput.password,
                      this.defaultValue,
@@ -374,7 +448,7 @@ describe('modalInputModule', function() {
                      this.label);
       this.scope.form.subForm.newPassword.$setViewValue('abcabcabc');
       this.scope.form.subForm.confirmPassword.$setViewValue('xyzxyzxyz');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -409,6 +483,22 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      const newValue = '1.1';
+      this.openModal(this.modalInput.positiveFloat,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     { required: true });
+      expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
+      this.scope.form.subForm.value.$setViewValue(newValue);
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value).toBe(parseFloat(newValue));
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when using required option and input is empty', function() {
       this.openModal(this.modalInput.positiveFloat,
                      this.defaultValue,
@@ -417,7 +507,7 @@ describe('modalInputModule', function() {
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -430,7 +520,7 @@ describe('modalInputModule', function() {
                      this.title,
                      this.label);
       this.scope.form.subForm.value.$setViewValue('xxx');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -443,7 +533,7 @@ describe('modalInputModule', function() {
                      this.title,
                      this.label);
       this.scope.form.subForm.value.$setViewValue('-1.00');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -488,6 +578,30 @@ describe('modalInputModule', function() {
       expect(self.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      this.openModal(this.modalInput.select,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     {
+                       required: true,
+                       selectOptions: this.options
+                     });
+
+      expect(this.$document).toHaveModalsOpen(1);
+
+      expect(this.modalElement).toHaveModalTitle(this.title);
+      expect(this.modalElement).toHaveLabelStartWith(this.label);
+      expect(this.modalElement).toHaveValuesInControllerScope({ value: this.defaultValue });
+
+      this.scope.form.subForm.value.$setViewValue(this.options[0]);
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value).toBe(this.options[0]);
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when a value is required and nothing selected', function() {
       this.openModal(this.modalInput.select,
                      this.defaultValue,
@@ -505,7 +619,7 @@ describe('modalInputModule', function() {
       expect(this.modalElement).toHaveValuesInControllerScope({ value: this.defaultValue });
 
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -548,6 +662,36 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      this.openModal(this.modalInput.selectMultiple,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     {
+                       required: true,
+                       selectOptions: this.options
+                     });
+
+      expect(this.$document).toHaveModalsOpen(1);
+
+      expect(this.modalElement).toHaveModalTitle(this.title);
+      expect(this.modalElement).toHaveLabelStartWith(this.label);
+      expect(this.modalElement).toHaveInputs(this.options.length);
+
+      this.options.forEach((option, index) => {
+        this.scope.form.subForm['selectValue_' + option].$setViewValue((index % 2) === 0);
+      });
+
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value).toBeArrayOfSize(this.options.length);
+      this.scope.vm.value.forEach((value, index) => {
+        expect(value.checked).toBe((index % 2) === 0);
+      });
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid if a value is required and nothing selected', function() {
       this.openModal(this.modalInput.selectMultiple,
                      this.defaultValue,
@@ -572,8 +716,9 @@ describe('modalInputModule', function() {
         value.checked = false;
       });
       this.scope.$digest();
-      this.scope.form.subForm.selectValue.$setViewValue(false);
-      expect(this.scope.form.$valid).toBe(false);
+      const formInputName = 'selectValue_' + this.options[0];
+      this.scope.form.subForm[formInputName].$setViewValue(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -641,6 +786,22 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      const newValue = this.Factory.stringNext();
+      this.openModal(this.modalInput.text,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     { required: true });
+      expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
+      this.scope.form.subForm.value.$setViewValue(newValue);
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value).toBe(newValue);
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when using required option and input is empty', function() {
       this.openModal(this.modalInput.text,
                      this.defaultValue,
@@ -649,7 +810,7 @@ describe('modalInputModule', function() {
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -667,7 +828,7 @@ describe('modalInputModule', function() {
 
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { minLength: minLength } });
       this.scope.form.subForm.value.$setViewValue('x');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -729,6 +890,22 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      const newValue = this.Factory.stringNext();
+      this.openModal(this.modalInput.textArea,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     { required: true });
+      expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
+      this.scope.form.subForm.value.$setViewValue(newValue);
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value).toBe(newValue);
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when using required option and input is empty', function() {
       this.openModal(this.modalInput.textArea,
                      this.defaultValue,
@@ -737,7 +914,7 @@ describe('modalInputModule', function() {
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -773,6 +950,22 @@ describe('modalInputModule', function() {
       expect(this.$document).toHaveModalsOpen(0);
     });
 
+    it('parent controller has valid value', function() {
+      const newUrl = this.Factory.urlNext();
+      this.openModal(this.modalInput.url,
+                     this.defaultValue,
+                     this.title,
+                     this.label,
+                     { required: true });
+      expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
+      this.scope.form.subForm.value.$setViewValue(newUrl);
+      expect(this.scope.form.$valid).toBeTrue();
+      expect(this.scope.vm.value).toBe(newUrl);
+
+      this.dismiss(this.modal, 'closed in test');
+      expect(this.$document).toHaveModalsOpen(0);
+    });
+
     it('form is invalid when using required option and input is empty', function() {
       this.openModal(this.modalInput.url,
                      this.defaultValue,
@@ -781,7 +974,7 @@ describe('modalInputModule', function() {
                      { required: true });
       expect(this.modalElement).toHaveValuesInControllerScope({ options: { required: true } });
       this.scope.form.subForm.value.$setViewValue('');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss(this.modal, 'closed in test');
@@ -794,7 +987,7 @@ describe('modalInputModule', function() {
                      this.title,
                      this.label);
       this.scope.form.subForm.value.$setViewValue('xxx');
-      expect(this.scope.form.$valid).toBe(false);
+      expect(this.scope.form.$valid).toBeFalse();
       expect(this.modalElement).toHaveHelpBlocks();
 
       this.dismiss( this.modal, 'closed in test');

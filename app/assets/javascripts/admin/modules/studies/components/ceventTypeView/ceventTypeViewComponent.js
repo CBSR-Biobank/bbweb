@@ -7,195 +7,188 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-
 import _ from 'lodash'
 
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function CeventTypeViewController($scope,
-                                  $state,
-                                  gettextCatalog,
-                                  modalService,
-                                  modalInput,
-                                  domainNotificationService,
-                                  notificationsService,
-                                  CollectionEventAnnotationTypeRemove) {
-  var vm = this;
-  vm.$onInit = onInit;
-  vm.annotationTypeRemove = new CollectionEventAnnotationTypeRemove();
+class CeventTypeViewController {
 
-  //--
-
-  function onInit() {
-    vm.isPanelCollapsed     = false;
-
-    vm.editName                  = editName;
-    vm.editDescription           = editDescription;
-    vm.editRecurring             = editRecurring;
-    vm.editSpecimenDefinition   = editSpecimenDefinition;
-    vm.editAnnotationType        = editAnnotationType;
-    vm.removeAnnotationType      = removeAnnotationType;
-    vm.addAnnotationType         = addAnnotationType;
-    vm.removeSpecimenDefinition = removeSpecimenDefinition;
-    vm.addSpecimenDefinition    = addSpecimenDefinition;
-    vm.addSpecimenDefinition    = addSpecimenDefinition;
-    vm.panelButtonClicked        = panelButtonClicked;
-    vm.removeCeventType          = removeCeventType;
+  constructor($scope,
+              $state,
+              gettextCatalog,
+              modalService,
+              modalInput,
+              domainNotificationService,
+              notificationsService,
+              CollectionEventAnnotationTypeRemove) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $scope,
+                    $state,
+                    gettextCatalog,
+                    modalService,
+                    modalInput,
+                    domainNotificationService,
+                    notificationsService,
+                    CollectionEventAnnotationTypeRemove
+                  });
+    this.annotationTypeRemove = new CollectionEventAnnotationTypeRemove();
   }
 
-  function postUpdate(message, title, timeout) {
+  $onInit() {
+    this.isPanelCollapsed = false;
+    this.allowChanges = this.study.isDisabled();
+    this.hasSpecimenDefinitions = (this.collectionEventType.specimenDefinitions.length > 0);
+  }
+
+  postUpdate(message, title, timeout) {
     timeout = timeout || 1500;
-    return function (ceventType) {
-      vm.collectionEventType = ceventType;
-      notificationsService.success(message, title, timeout);
+    return (ceventType) => {
+      this.collectionEventType = ceventType;
+      this.notificationsService.success(message, title, timeout);
     };
   }
 
-  function editName() {
-    modalInput.text(gettextCatalog.getString('Edit Event Type name'),
-                    gettextCatalog.getString('Name'),
-                    vm.collectionEventType.name,
-                    { required: true, minLength: 2 }).result
-      .then(function (name) {
-        vm.collectionEventType.updateName(name)
+  editName() {
+    this.modalInput.text(this.gettextCatalog.getString('Edit Event name'),
+                         this.gettextCatalog.getString('Name'),
+                         this.collectionEventType.name,
+                         { required: true, minLength: 2 }).result
+      .then(name => {
+        this.collectionEventType.updateName(name)
           .then(ceventType => {
-            $scope.$emit('collection-event-type-updated', ceventType);
-            postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                       gettextCatalog.getString('Change successful'))(ceventType);
-            $state.go($state.current.name,
-                      {
-                        studySlug:      vm.study.slug,
-                        ceventTypeSlug: ceventType.slug
-                      },
-                      { reload: true });
+            this.$scope.$emit('collection-event-type-updated', ceventType);
+            this.postUpdate(this.gettextCatalog.getString('Name changed successfully.'),
+                            this.gettextCatalog.getString('Change successful'))(ceventType);
+            this.$state.go(this.$state.current.name,
+                           {
+                             studySlug:      this.study.slug,
+                             ceventTypeSlug: ceventType.slug
+                           },
+                           { reload: true });
           })
-          .catch(notificationsService.updateError);
+          .catch(this.notificationsService.updateError);
       });
   }
 
-  function editDescription() {
-    modalInput.textArea(gettextCatalog.getString('Edit Event Type description'),
-                        gettextCatalog.getString('Description'),
-                        vm.collectionEventType.description
-                       ).result
-      .then(function (description) {
-        vm.collectionEventType.updateDescription(description)
-          .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+  editDescription() {
+    this.modalInput.textArea(this.gettextCatalog.getString('Edit Event description'),
+                             this.gettextCatalog.getString('Description'),
+                             this.collectionEventType.description)
+      .result
+      .then(description => {
+        this.collectionEventType.updateDescription(description)
+          .then(this.postUpdate(this.gettextCatalog.getString('Description changed successfully.'),
+                                this.gettextCatalog.getString('Change successful')))
+          .catch(this.notificationsService.updateError);
       });
   }
 
-  function editRecurring() {
-    modalInput.boolean(gettextCatalog.getString('Edit Event Type recurring'),
-                       gettextCatalog.getString('Recurring'),
-                       vm.collectionEventType.recurring.toString()
-                      ).result
-      .then(function (recurring) {
-        vm.collectionEventType.updateRecurring(recurring === 'true')
-          .then(function (ceventType) {
-            $scope.$emit('collection-event-type-updated', ceventType);
-            postUpdate(gettextCatalog.getString('Recurring changed successfully.'),
-                       gettextCatalog.getString('Change successful'))(ceventType);
+  editRecurring() {
+    this.modalInput.boolean(this.gettextCatalog.getString('Edit Event recurring'),
+                            this.gettextCatalog.getString('Recurring'),
+                            this.collectionEventType.recurring)
+      .result
+      .then(recurring => {
+        this.collectionEventType.updateRecurring(recurring)
+          .then(ceventType => {
+            this.$scope.$emit('collection-event-type-updated', ceventType);
+            this.postUpdate(this.gettextCatalog.getString('Recurring changed successfully.'),
+                            this.gettextCatalog.getString('Change successful'))(ceventType);
           })
-          .catch(notificationsService.updateError);
+          .catch(this.notificationsService.updateError);
       });
   }
 
-  function addAnnotationType() {
-    $state.go('home.admin.studies.study.collection.ceventType.annotationTypeAdd');
+  addAnnotationType() {
+    this.$state.go('home.admin.studies.study.collection.ceventType.annotationTypeAdd');
   }
 
-  function addSpecimenDefinition() {
-    $state.go('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd');
+  addSpecimenDefinition() {
+    this.$state.go('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd');
   }
 
-  function editAnnotationType(annotType) {
-    $state.go('home.admin.studies.study.collection.ceventType.annotationTypeView',
-              { annotationTypeSlug: annotType.slug });
+  editAnnotationType(annotType) {
+    this.$state.go('home.admin.studies.study.collection.ceventType.annotationTypeView',
+                   { annotationTypeSlug: annotType.slug });
   }
 
-  function removeAnnotationType(annotationType) {
-    if (_.includes(vm.annotationTypeIdsInUse, annotationType.id)) {
-      vm.annotationTypeRemove.removeInUseModal(annotationType, vm.annotationTypeName);
+  removeAnnotationType(annotationType) {
+    if (_.includes(this.annotationTypeIdsInUse, annotationType.id)) {
+      this.annotationTypeRemove.removeInUseModal(annotationType, this.annotationTypeName);
     } else {
-      if (!vm.study.isDisabled()) {
+      if (!this.study.isDisabled()) {
         throw new Error('modifications not allowed');
       }
 
-      vm.annotationTypeRemove.remove(
+      this.annotationTypeRemove.remove(
         annotationType,
-        () => vm.collectionEventType.removeAnnotationType(annotationType)
-          .then(collectionEventType => {
-            vm.collectionEventType = collectionEventType;
-            notificationsService.success(gettextCatalog.getString('Annotation removed'));
-          }));
+        () => this.collectionEventType.removeAnnotationType(annotationType)
+      ).then(collectionEventType => {
+        this.collectionEventType = collectionEventType;
+        this.notificationsService.success(this.gettextCatalog.getString('Annotation removed'));
+      });
     }
   }
 
-  function editSpecimenDefinition(specimenDefinition) {
-    $state.go('home.admin.studies.study.collection.ceventType.specimenDefinitionView',
-              { specimenDefinitionSlug: specimenDefinition.slug });
+  editSpecimenDefinition(specimenDefinition) {
+    this.$state.go('home.admin.studies.study.collection.ceventType.specimenDefinitionView',
+                   { specimenDefinitionSlug: specimenDefinition.slug });
   }
 
-  function removeSpecimenDefinition(specimenDefinition) {
-    if (!vm.study.isDisabled()) {
+  removeSpecimenDefinition(specimenDefinition) {
+    if (!this.study.isDisabled()) {
       throw new Error('modifications not allowed');
     }
 
-    return domainNotificationService.removeEntity(
+    const removePromiseFunc = () => this.collectionEventType.removeSpecimenDefinition(specimenDefinition)
+          .then(collectionEventType => {
+            this.collectionEventType = collectionEventType;
+            this.notificationsService.success(this.gettextCatalog.getString('Specimen removed'));
+            this.$state.reload();
+          });
+
+    return this.domainNotificationService.removeEntity(
       removePromiseFunc,
-      gettextCatalog.getString('Remove specimen'),
-      gettextCatalog.getString('Are you sure you want to remove specimen {{name}}?',
-                               { name: specimenDefinition.name }),
-      gettextCatalog.getString('Remove failed'),
-      gettextCatalog.getString('Specimen {{name} cannot be removed',
-                               { name: specimenDefinition.name }));
-
-    function removePromiseFunc() {
-      return vm.collectionEventType.removeSpecimenDefinition(specimenDefinition)
-        .then(function (collectionEventType) {
-          vm.collectionEventType = collectionEventType;
-          notificationsService.success(gettextCatalog.getString('Specimen removed'));
-          $state.reload();
-        });
-    }
+      this.gettextCatalog.getString('Remove specimen'),
+      this.gettextCatalog.getString('Are you sure you want to remove specimen {{name}}?',
+                                    { name: specimenDefinition.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString('Specimen {{name} cannot be removed',
+                                    { name: specimenDefinition.name }));
   }
 
-  function panelButtonClicked() {
-    vm.isPanelCollapsed = !vm.isPanelCollapsed;
+  panelButtonClicked() {
+    this.isPanelCollapsed = !this.isPanelCollapsed;
   }
 
-  function removeCeventType() {
-    vm.collectionEventType.inUse().then(function (inUse) {
+  removeCeventType() {
+    this.collectionEventType.inUse().then(inUse => {
       if (inUse) {
-        modalService.modalOk(
-          gettextCatalog.getString('Collection event in use'),
-          gettextCatalog.getString(
-            'This collection event cannot be removed since one or more participants are using it. ' +
+        this.modalService.modalOk(
+          this.gettextCatalog.getString('Event in use'),
+          this.gettextCatalog.getString(
+            'This event cannot be removed since one or more participants are using it. ' +
               'If you still want to remove it, the participants using it have to be modified ' +
               'to no longer use it.'));
       } else {
-        domainNotificationService.removeEntity(
+        const promiseFn = () => this.collectionEventType.remove()
+              .then(() => {
+                this.notificationsService.success(
+                  this.gettextCatalog.getString('Event removed'));
+                this.$state.go('^', {}, { reload: true });
+              });
+
+        this.domainNotificationService.removeEntity(
           promiseFn,
-          gettextCatalog.getString('Remove collection event'),
-          gettextCatalog.getString(
-            'Are you sure you want to remove collection event with name <strong>{{name}}</strong>?',
-            { name: vm.collectionEventType.name }),
-          gettextCatalog.getString('Remove failed'),
-          gettextCatalog.getString('Collection event with name {{name}} cannot be removed',
-                                   { name: vm.collectionEventType.name }));
+          this.gettextCatalog.getString('Remove event'),
+          this.gettextCatalog.getString(
+            'Are you sure you want to remove event with name <strong>{{name}}</strong>?',
+            { name: this.collectionEventType.name }),
+          this.gettextCatalog.getString('Remove failed'),
+          this.gettextCatalog.getString('Event with name {{name}} cannot be removed',
+                                        { name: this.collectionEventType.name }));
       }
     });
-
-    function promiseFn() {
-      return vm.collectionEventType.remove().then(function () {
-        notificationsService.success(gettextCatalog.getString('Collection event removed'));
-        $state.go('home.admin.studies.study.collection', {}, { reload: true });
-      });
-    }
   }
 }
 
@@ -221,4 +214,30 @@ const ceventTypeViewComponent = {
   }
 };
 
-export default ngModule => ngModule.component('ceventTypeView', ceventTypeViewComponent)
+function resolveCollectionEventType($transition$, study, CollectionEventType, resourceErrorService) {
+  'ngInject';
+  const slug = $transition$.params().ceventTypeSlug
+  return CollectionEventType.get(study.slug, slug)
+    .catch(resourceErrorService.goto404(
+      `collection event type ID not found: studyId/${study.slug}, ceventTypeSlug/${slug}`))
+}
+
+function stateConfig($stateProvider, $urlRouterProvider) {
+  'ngInject';
+  $stateProvider.state('home.admin.studies.study.collection.ceventType', {
+    url: '/events/{ceventTypeSlug}',
+    resolve: {
+      collectionEventType: resolveCollectionEventType
+    },
+    views: {
+      'ceventTypeDetails': 'ceventTypeView'
+    }
+  });
+  $urlRouterProvider.otherwise('/');
+}
+
+export default ngModule => {
+  ngModule
+    .config(stateConfig)
+    .component('ceventTypeView', ceventTypeViewComponent);
+}

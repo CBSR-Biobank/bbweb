@@ -275,9 +275,7 @@ describe('ceventTypeViewComponent', function() {
 
       expect(this.domainNotificationService.removeEntity).toHaveBeenCalled();
       expect(this.notificationsService.success).toHaveBeenCalled();
-      expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection',
-                                                  {},
-                                                  { reload: true });
+      expect(this.$state.go).toHaveBeenCalledWith('^', {}, { reload: true });
     });
 
     it('user is informed if it cannot be removed', function() {

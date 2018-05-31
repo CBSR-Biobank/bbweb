@@ -1,0 +1,33 @@
+<span class="pull-right"
+      uib-dropdown is-open="vm.annotationTypeMenu_{{vm.annotationType.id}}.isopen">
+  <button class="btn btn-xs btn-default dropdown-toggle"
+          type="button"
+          id="annotationTypeMenu"
+          uib-dropdown-toggle>
+    <span class="glyphicon glyphicon-option-vertical"></span>
+  </button>
+
+  <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="annotationTypeMenu">
+    <li role="menuitem" ng-if="!vm.allowChanges">
+      <a href
+         ng-click="vm.view()">
+        <i class="glyphicon glyphicon-edit text-primary"></i>
+        <translate>View this annotation</translate>
+      </a>
+    </li>
+    <li role="menuitem" ng-if="vm.allowChanges">
+      <a href
+         ng-click="vm.update()">
+        <i class="glyphicon glyphicon-edit text-primary"></i>
+        <translate>Update this annotation</translate>
+      </a>
+    </li>
+    <li role="menuitem" ng-if="vm.allowChanges">
+      <a href
+         ng-click="vm.remove()">
+        <i class="glyphicon glyphicon-remove text-danger"></i>
+        <translate>Remove this annotation</translate>
+      </a>
+    </li>
+  </ul>
+</span>

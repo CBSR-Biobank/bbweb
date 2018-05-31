@@ -4,20 +4,17 @@
     <label for="selectValue" class="col-md-2 form-control-label">{{vm.label}}:</label>
     <div class="col-md-10">
       <div ng-repeat="value in vm.value">
-        <label>
-          <input type="checkbox"
-                 name="selectValue"
-                 ng-model="value.checked"
-                 ng-true-value="true"
-                 ng-false-value="false"
-                 ng-required="vm.options.required && !vm.multipleSelectSomeSelected()">
-          {{value.name}}
-        </label>
+        <input type="checkbox"
+               name="selectValue_{{value.name}}"
+               ng-model="value.checked"
+               ng-change="vm.valueChanged()"
+               ng-required="vm.options.required && !vm.multipleSelectSomeSelected()">
+        <label>{{value.name}}</label>
       </div>
     </div>
     <!-- DO NOT USE ng-if here for ng-messages, instead always display the help block -->
     <div class="col-md-offset-2 col-md-10"
-         ng-messages="subForm.selectValue.$error"
+         ng-messages="subForm.$error"
          role="alert">
       <div ng-message="required" class="help-block" translate>A selection is required</div>
     </div>

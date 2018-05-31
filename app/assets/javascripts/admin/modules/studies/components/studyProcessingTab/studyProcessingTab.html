@@ -1,7 +1,42 @@
 <study-not-disabled-warning study="vm.study"></study-not-disabled-warning>
-<uib-accordion close-others="false">
-  <processing-types-panel
-     study="vm.study"
-     processing-types="vm.processingDto.processingTypes">
-  </processing-types-panel>
-</uib-accordion>
+
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <translate>Processing</translate>
+
+      <div class="btn-group pull-right" uib-dropdown is-open="status.isopen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="dropdownMenu1"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="dropdownMenu1">
+          <li role="menuitem">
+            <a ui-sref='home.admin.studies.study.processing.addType'>
+              <i class="glyphicon glyphicon-plus"></i>
+              <translate>Add a processed specimen</translate>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </h3>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <p class="text-primary" translate>
+        Defines the processing done on collected specimens.
+      </p>
+    </li>
+    <li class="list-group-item" ng-if="!vm.hasProcessingTypes">
+      <div class="alert alert-warning">
+        Specimen processing has not been defined for this study yet.
+      </div>
+    </li>
+    <li class="list-group-item" ng-if="vm.hasProcessingTypes">
+      <p translate>The following specimens are processed:</p>
+    </li>
+  </ul>
+</div>

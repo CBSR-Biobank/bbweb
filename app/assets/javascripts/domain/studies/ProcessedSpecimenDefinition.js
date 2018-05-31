@@ -43,7 +43,7 @@ function ProcessedSpecimenDefinitionFactory($log, DomainEntity) {
    * Used to configure a *Specimen Type* used by a {@link domain.studies.Study Study}.
    *
    * It records ownership, summary, storage, and classification information that applies to an entire group or
-   * collection of {@link domain.participants.Specimen Specimens}. A *Collection Specimen Description* is
+   * collection of {@link domain.participants.Specimen Specimens}. A *Collection Specimen Definition* is
    * defined for specimen types collected from participants.
    *
    * @memberOf domain.studies

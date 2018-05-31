@@ -7,6 +7,21 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+class AnnotationTypeSummaryController {
+
+  constructor(annotationValueTypeLabelService) {
+    'ngInject';
+    Object.assign(this, { annotationValueTypeLabelService });
+  }
+
+  $onInit() {
+    this.annotationTypeValueTypeLabel =
+      this.annotationValueTypeLabelService.valueTypeToLabelFunc(this.annotationType.valueType,
+                                                                this.annotationType.isSingleSelect());
+  }
+
+}
+
 /**
  * An AngularJS component that displays summary information about an {@link domain.annotations.AnnotationType}
  * in a list item within a Bootstrap panel.
@@ -17,6 +32,7 @@
  */
 const annotationTypeSummaryComponent = {
   template: require('./annotationTypeSummary.html'),
+  controller: AnnotationTypeSummaryController,
   controllerAs: 'vm',
   bindings: {
     annotationType: '<'

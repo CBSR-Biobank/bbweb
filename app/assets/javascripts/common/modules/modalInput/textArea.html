@@ -1,18 +1,16 @@
 <ng-form name="subForm">
-  <div class="form-group row"
+  <div class="form-group"
        ng-class="{ 'has-error' : subForm.value.$invalid && !subForm.value.$pristine }">
-    <label for="value" class="col-md-3 form-control-label">{{vm.label}}:</label>
-    <div class="col-md-9">
-      <textarea cols="40"
-                rows="10"
-                name="value"
-                class="form-control"
-                ng-model="vm.value"
-                focus-me="true"
-                ng-required="vm.options.required"></textarea>
-    </div>
-    <div class="col-md-offset-3 col-md-9"
-         ng-messages="subForm.value.$error"
+    <label for="value">{{vm.label}}</label>
+    <textarea cols="40"
+              rows="10"
+              name="value"
+              class="form-control"
+              ng-model="vm.value"
+              focus-me="true"
+              ng-change="vm.valueChanged()"
+              ng-required="vm.options.required"></textarea>
+    <div ng-messages="subForm.value.$error"
          ng-if="subForm.value.$dirty"
          role="alert">
       <div ng-message="required" class="help-block" translate>Some text is required</div>

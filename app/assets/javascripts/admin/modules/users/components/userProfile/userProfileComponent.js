@@ -213,4 +213,29 @@ const userProfileComponent = {
   }
 };
 
-export default ngModule => ngModule.component('userProfile', userProfileComponent)
+function resolveUser($transition$, User, resourceErrorService) {
+  'ngInject';
+  const slug = $transition$.params().slug
+  return User.get(slug)
+    .catch(resourceErrorService.goto404(`user slug not found: ${slug}`))
+}
+
+function stateConfig($stateProvider, $urlRouterProvider) {
+  'ngInject';
+  $stateProvider.state('home.admin.access.users.user', {
+    url: '/:slug',
+    resolve: {
+      user: resolveUser
+    },
+    views: {
+      'main@': 'userProfile'
+    }
+  });
+  $urlRouterProvider.otherwise('/');
+}
+
+export default ngModule => {
+  ngModule
+    .config(stateConfig)
+    .component('userProfile', userProfileComponent)
+}

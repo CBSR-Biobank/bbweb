@@ -1,18 +1,16 @@
 <ng-form name="subForm">
-  <div class="form-group row"
+  <div class="form-group"
        ng-class="{ 'has-error' : subForm.value.$invalid && !subForm.value.$pristine }">
-    <label for="bool" class="col-md-2 form-control-label">{{vm.label}}:</label>
-    <div class="col-md-10">
-      <select class="form-control"
-              name="value"
-              ng-model="vm.value"
-              ng-options="option for option in vm.options.selectOptions"
-              ng-required="vm.options.required">
-        <option value="" translate>-- make a selection --</option>
-      </select>
-    </div>
-    <div class="col-md-offset-2 col-md-10"
-         ng-messages="subForm.value.$error"
+    <label for="bool">{{vm.label}}</label>
+    <select class="form-control"
+            name="value"
+            ng-model="vm.value"
+            ng-options="option for option in vm.options.selectOptions"
+            ng-change="vm.valueChanged()"
+            ng-required="vm.options.required">
+      <option value="" translate>-- make a selection --</option>
+    </select>
+    <div ng-messages="subForm.value.$error"
          ng-if="subForm.value.$dirty"
          role="alert">
       <div ng-message="required" class="help-block" translate>A selection is required</div>

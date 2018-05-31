@@ -12,63 +12,74 @@
     <modal-input-boolean ng-switch-when="boolean"
                          label="{{vm.label}}"
                          value="vm.value"
-                         options="vm.options">
+                         options="vm.options"
+                         on-change="vm.valueChanged.bind(vm)">
     </modal-input-boolean>
     <modal-input-date-time ng-switch-when="dateTime"
                            label="{{vm.label}}"
                            value="vm.value"
-                           options="vm.options">
+                           options="vm.options"
+                           on-change="vm.valueChanged.bind(vm)">
     </modal-input-date-time>
     <modal-input-email ng-switch-when="email"
                        label="{{vm.label}}"
                        value="vm.value"
-                       options="vm.options">
+                       options="vm.options"
+                       on-change="vm.valueChanged.bind(vm)">
     </modal-input-email>
     <modal-input-natural-number ng-switch-when="naturalNumber"
                                 label="{{vm.label}}"
                                 value="vm.value"
-                                options="vm.options">
+                                options="vm.options"
+                                on-change="vm.valueChanged.bind(vm)">
     </modal-input-natural-number>
     <modal-input-number ng-switch-when="number"
                         label="{{vm.label}}"
                         value="vm.value"
-                        options="vm.options">
+                        options="vm.options"
+                        on-change="vm.valueChanged.bind(vm)">
     </modal-input-number>
     <modal-input-password ng-switch-when="password"
                           label="{{vm.label}}"
                           value="vm.value"
-                          options="vm.options">
+                          options="vm.options"
+                          on-change="vm.valueChanged.bind(vm)">
     </modal-input-password>
     <modal-input-positive-float ng-switch-when="positiveFloat"
                                 label="{{vm.label}}"
                                 value="vm.value"
-                                options="vm.options">
+                                options="vm.options"
+                                on-change="vm.valueChanged.bind(vm)">
     </modal-input-positive-float>
     <modal-input-select          ng-switch-when="select"
                                  label="{{vm.label}}"
                                  value="vm.value"
-                                 options="vm.options">
+                                 options="vm.options"
+                                 on-change="vm.valueChanged.bind(vm)">
     </modal-input-select>
     <modal-input-select-multiple ng-switch-when="selectMultiple"
                                  label="{{vm.label}}"
                                  value="vm.value"
-                                 options="vm.options">
-
+                                 options="vm.options"
+                                 on-change="vm.valueChanged.bind(vm)">
     </modal-input-select-multiple>
     <modal-input-text ng-switch-when="text"
                       label="{{vm.label}}"
                       value="vm.value"
-                      options="vm.options">
+                      options="vm.options"
+                      on-change="vm.valueChanged.bind(vm)">
     </modal-input-text>
     <modal-input-text-area ng-switch-when="textArea"
                            label="{{vm.label}}"
                            value="vm.value"
-                           options="vm.options">
+                           options="vm.options"
+                           on-change="vm.valueChanged.bind(vm)">
     </modal-input-text-area>
     <modal-input-url ng-switch-when="url"
                      label="{{vm.label}}"
                      value="vm.value"
-                     options="vm.options">
+                     options="vm.options"
+                     on-change="vm.valueChanged.bind(vm)">
     </modal-input-url>
 
   </form>

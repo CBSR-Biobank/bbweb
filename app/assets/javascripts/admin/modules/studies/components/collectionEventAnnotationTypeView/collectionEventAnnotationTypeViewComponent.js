@@ -9,82 +9,100 @@
 
 import _ from 'lodash'
 
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function CollectionEventAnnotationTypeViewController($q,
-                                                     $state,
-                                                     CollectionEventType,
-                                                     gettextCatalog,
-                                                     notificationsService,
-                                                     breadcrumbService) {
-  var vm = this;
-  vm.$onInit = onInit;
+class CollectionEventAnnotationTypeViewController {
 
-  //---
+  constructor($q,
+              $state,
+              CollectionEventType,
+              CollectionEventAnnotationTypeRemove,
+              gettextCatalog,
+              notificationsService,
+              breadcrumbService) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $q,
+                    $state,
+                    CollectionEventType,
+                    gettextCatalog,
+                    notificationsService,
+                    breadcrumbService
+                  });
+    this.annotationTypeRemove = new CollectionEventAnnotationTypeRemove();
+  }
 
-  function onInit() {
-    const studySlug = vm.study.slug,
-          slug = vm.collectionEventType.slug
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.studies'),
-      breadcrumbService.forStateWithFunc(
+  $onInit() {
+    const studySlug = this.study.slug,
+          slug = this.collectionEventType.slug
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.studies'),
+      this.breadcrumbService.forStateWithFunc(
+        `home.admin.studies.study.collection({ studySlug: "${studySlug}" })`,
+        () => this.study.name),
+      this.breadcrumbService.forStateWithFunc(
         `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
-        () => vm.study.name + ': ' + vm.collectionEventType.name),
-      breadcrumbService.forStateWithFunc(
+        () => this.collectionEventType.name),
+      this.breadcrumbService.forStateWithFunc(
         'home.admin.studies.study.collection.ceventType.annotationTypeView',
         () => {
-          if (_.isUndefined(vm.annotationType)) {
-            return gettextCatalog.getString('Error');
+          if (_.isUndefined(this.annotationType)) {
+            return this.gettextCatalog.getString('Error');
           }
-          return gettextCatalog.getString('Event annotation: {{name}}',
-                                          { name: vm.annotationType.name });
+          return this.gettextCatalog.getString('Annotation: {{name}}', { name: this.annotationType.name });
         })
     ];
 
-    vm.onUpdate = onUpdate;
-
     // reload the collection event type in case changes were made to it
-    CollectionEventType.get(vm.study.slug, vm.collectionEventType.slug)
-      .then(function (ceventType) {
-        vm.collectionEventType = ceventType;
+    this.CollectionEventType.get(this.study.slug, this.collectionEventType.slug)
+      .then(ceventType => {
+        this.collectionEventType = ceventType;
       });
   }
 
-  function onUpdate(attr, annotationType) {
-    return vm.collectionEventType.updateAnnotationType(annotationType)
-      .then(postUpdate)
-      .catch(notificationsService.updateError)
-      .then(notifySuccess)
+  onUpdate(attr, annotationType) {
+    return this.collectionEventType.updateAnnotationType(annotationType)
+      .then(collectionEventType => {
+        this.collectionEventType = collectionEventType;
+        this.annotationType = _.find(this.collectionEventType.annotationTypes,
+                                     { id: this.annotationType.id });
+        if (_.isUndefined(this.annotationType)) {
+          return this.$q.reject('could not update annotation type');
+        }
+
+        return this.$q.when(true);
+      })
+      .catch(error => {
+        this.notificationsService.updateError(error);
+      })
+      .then(() => this.notificationsService.success(
+        this.gettextCatalog.getString('Annotation type changed successfully.'),
+        this.gettextCatalog.getString('Change successful'),
+        1500))
       .then(() => {
         if (attr === 'name') {
           // reload the state so that the URL gets updated
-          $state.go($state.current.name,
-                    { annotationTypeSlug: vm.annotationType.slug },
-                    { reload: true  })
+          this.$state.go(this.$state.current.name,
+                         { annotationTypeSlug: this.annotationType.slug },
+                         { reload: true  })
         }
       });
   }
 
-  function postUpdate(collectionEventType) {
-    vm.collectionEventType = collectionEventType;
-    vm.annotationType = _.find(vm.collectionEventType.annotationTypes, { id: vm.annotationType.id });
-    if (_.isUndefined(vm.annotationType)) {
-      return $q.reject('could not update annotation type');
+  removeRequest() {
+    if (!this.study.isDisabled()) {
+      throw new Error('modifications not allowed');
     }
 
-    return $q.when(true);
-  }
-
-  function notifySuccess() {
-    return notificationsService.success(
-      gettextCatalog.getString('Annotation type changed successfully.'),
-      gettextCatalog.getString('Change successful'),
-      1500);
-  }
+    this.annotationTypeRemove.remove(
+      this.annotationType,
+      () => this.collectionEventType.removeAnnotationType(this.annotationType)
+    ).then(() => {
+      this.notificationsService.success(this.gettextCatalog.getString('Annotation removed'));
+      this.$state.go('^', {}, { reload: true });
+    });
+}
 
 }
 

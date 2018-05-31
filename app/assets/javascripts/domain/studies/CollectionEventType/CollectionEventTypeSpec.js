@@ -343,8 +343,8 @@ describe('CollectionEventType', function() {
   });
 
   it('inUse has valid URL and returns FALSE', function() {
-    var cet     = new this.CollectionEventType(this.Factory.collectionEventType());
-    this.$httpBackend.whenGET(this.url('inuse', cet.id)).respond(this.reply(false));
+    var cet = new this.CollectionEventType(this.Factory.collectionEventType());
+    this.$httpBackend.whenGET(this.url('inuse', cet.slug)).respond(this.reply(false));
     cet.inUse()
       .then((reply) => {
         expect(reply).toBe(false);
@@ -355,7 +355,7 @@ describe('CollectionEventType', function() {
 
   it('inUse has valid URL and returns TRUE', function() {
     var cet     = new this.CollectionEventType(this.Factory.collectionEventType());
-    this.$httpBackend.whenGET(this.url('inuse', cet.id)).respond(this.reply(true));
+    this.$httpBackend.whenGET(this.url('inuse', cet.slug)).respond(this.reply(true));
     cet.inUse()
       .then((reply) => {
         expect(reply).toBe(true);

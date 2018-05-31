@@ -7,70 +7,77 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/* @ngInject */
-function AnnotationTypeViewController($state,
-                                      gettextCatalog,
-                                      modalInput,
-                                      annotationTypeUpdateModal,
-                                      annotationValueTypeLabelService) {
-  var vm = this;
-  vm.$onInit = onInit;
+class AnnotationTypeViewController {
 
-  //--
-
-  function onInit() {
-    vm.annotationTypeValueTypeLabel =
-      annotationValueTypeLabelService.valueTypeToLabelFunc(vm.annotationType.valueType,
-                                                           vm.annotationType.isSingleSelect());
-
-    vm.editName             = editName;
-    vm.editRequired         = editRequired;
-    vm.editDescription      = editDescription;
-    vm.editSelectionOptions = editSelectionOptions;
-    vm.back                 = back;
+  constructor($state,
+              gettextCatalog,
+              modalInput,
+              annotationTypeUpdateModal,
+              annotationValueTypeLabelService) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $state,
+                    gettextCatalog,
+                    modalInput,
+                    annotationTypeUpdateModal,
+                    annotationValueTypeLabelService
+                  });
   }
 
-  function editName() {
-    modalInput.text(gettextCatalog.getString('Edit Annotation name'),
-                    gettextCatalog.getString('Name'),
-                    vm.annotationType.name,
-                    { required: true, minLength: 2 }).result
+  $onInit() {
+    this.annotationTypeValueTypeLabel =
+      this.annotationValueTypeLabelService.valueTypeToLabelFunc(this.annotationType.valueType,
+                                                                this.annotationType.isSingleSelect());
+  }
+
+  editName() {
+    this.modalInput.text(this.gettextCatalog.getString('Update Annotation Name'),
+                         this.gettextCatalog.getString('Name'),
+                         this.annotationType.name,
+                         { required: true, minLength: 2 }).result
       .then(function (name) {
-        vm.annotationType.name = name;
-        vm.onUpdate()('name', vm.annotationType);
+        this.annotationType.name = name;
+        this.onUpdate()('name', this.annotationType);
       });
   }
 
-  function editDescription() {
-    modalInput.textArea(gettextCatalog.getString('Edit Annotation description'),
-                        gettextCatalog.getString('Description'),
-                        vm.annotationType.description)
+  editDescription() {
+    this.modalInput.textArea(this.gettextCatalog.getString('Update Annotation Description'),
+                             this.gettextCatalog.getString('Description'),
+                             this.annotationType.description)
       .result.then(function (description) {
-        var annotationType = Object.assign({}, vm.annotationType, { description: description });
-        vm.onUpdate()('description', annotationType);
+        var annotationType = Object.assign({}, this.annotationType, { description: description });
+        this.onUpdate()('description', annotationType);
       });
   }
 
-  function editRequired() {
-    modalInput.boolean(gettextCatalog.getString('Edit Annotation required'),
-                       gettextCatalog.getString('Required'),
-                       vm.annotationType.required.toString(),
-                       { required: true }).result
+  editRequired() {
+    this.modalInput.boolean(this.gettextCatalog.getString('Update Annotation Required'),
+                            this.gettextCatalog.getString('Required'),
+                            this.annotationType.required,
+                            { required: true }).result
       .then(function (required) {
-        vm.annotationType.required = (required === 'true' );
-        vm.onUpdate()('required', vm.annotationType);
+        this.annotationType.required = required;
+        this.onUpdate()('required', this.annotationType);
       });
   }
 
-  function editSelectionOptions() {
-    annotationTypeUpdateModal.openModal(vm.annotationType).result.then(function (options) {
-      var annotationType = Object.assign({}, vm.annotationType, { options: options });
-      vm.onUpdate()(annotationType);
+  editSelectionOptions() {
+    this.annotationTypeUpdateModal.openModal(this.annotationType).result.then(function (options) {
+      var annotationType = Object.assign({}, this.annotationType, { options: options });
+      this.onUpdate()(annotationType);
     });
   }
 
-  function back() {
-    $state.go('^', {}, { reload: true });
+  removeRequest() {
+    if (this.onRemove()) {
+      this.onRemove()(this.annotationType);
+    }
+  }
+
+  back() {
+    this.$state.go('^', {}, { reload: true });
   }
 
 }
@@ -94,7 +101,8 @@ const annotationTypeViewComponent = {
   bindings: {
     annotationType: '<',
     readOnly:       '<',
-    onUpdate:       '&'
+    onUpdate:       '&',
+    onRemove:       '&'
   }
 };
 

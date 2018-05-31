@@ -28,8 +28,7 @@ class CeventTypeAddController {
   }
 
   $onInit() {
-    this.ceventType  = new this.CollectionEventType({}, { study: this.study });
-    this.returnState = 'home.admin.studies.study.collection';
+    this.ceventType = new this.CollectionEventType({}, { study: this.study });
 
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),
@@ -45,22 +44,19 @@ class CeventTypeAddController {
   }
 
   submit() {
-    this.ceventType.add().then(submitSuccess).catch(submitError);
-
-    function submitSuccess() {
-      this.notificationsService.submitSuccess();
-      return this.$state.go(this.returnState, {}, { reload: true });
-    }
-
-    function submitError(error) {
-      this.domainNotificationService.updateErrorModal(
-        error,
-        this.gettextCatalog.getString('collection event type'));
-    }
+    this.ceventType.add()
+      .then(() => {
+        this.notificationsService.submitSuccess();
+        return this.$state.go('^', {}, { reload: true });
+      })
+      .catch(error => {
+        this.domainNotificationService.updateErrorModal(error,
+                                                        this.gettextCatalog.getString('collection event type'));
+    });
   }
 
   cancel() {
-    return this.$state.go(this.returnState);
+    return this.$state.go('^');
   }
 
 }

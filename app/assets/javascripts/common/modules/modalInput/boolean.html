@@ -1,10 +1,19 @@
 <ng-form name="subForm">
   <div class="form-group row">
-    <label for="bool" class="col-md-2 form-control-label">{{vm.label}}:</label>
+    <label for="bool" class="col-md-2 form-control-label">{{vm.label}}</label>
     <div class="col-md-10">
-      <input name="value" type="radio" value="true" ng-model="vm.value" ng-required="vm.options.required"/>
+      <input name="value"
+             type="radio"
+             ng-model="vm.value"
+             ng-value="true"
+             ng-change="vm.valueChanged()"
+             ng-required="vm.options.required"/>
       <translate>Yes</translate>
-      <input name="value" type="radio" value="false" ng-model="vm.value" />
+      <input name="value"
+             type="radio"
+             ng-change="vm.valueChanged()"
+             ng-model="vm.value"
+             ng-value="false" />
       <translate>No</translate>
     </div>
   </div>

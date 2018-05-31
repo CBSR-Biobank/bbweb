@@ -1,17 +1,15 @@
 <ng-form name="subForm">
-  <div class="form-group row"
+  <div class="form-group"
        ng-class="{ 'has-error' : form.value.$invalid && !form.value.$pristine }">
-    <label for="email" class="col-md-3 form-control-label">{{vm.label}}:</label>
-    <div class="col-md-9">
-      <input name="value"
-             type="email"
-             class="form-control"
-             ng-model="vm.value"
-             focus-me="true"
-             ng-required="vm.options.required" />
-    </div>
-    <div class="col-md-offset-3 col-md-9"
-         ng-messages="subForm.value.$error"
+    <label for="email">{{vm.label}}</label>
+    <input name="value"
+           type="email"
+           class="form-control"
+           ng-model="vm.value"
+           focus-me="true"
+           ng-change="vm.valueChanged()"
+           ng-required="vm.options.required" />
+    <div ng-messages="subForm.value.$error"
          ng-if="subForm.value.$dirty"
          role="alert">
       <div ng-message="required" class="help-block" translate>An email address is required</div>

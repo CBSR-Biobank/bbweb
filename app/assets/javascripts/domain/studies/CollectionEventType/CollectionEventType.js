@@ -346,7 +346,7 @@ function CollectionEventTypeFactory($q,
     }
 
     inUse() {
-      return biobankApi.get(CollectionEventType.url('inuse', this.id));
+      return biobankApi.get(CollectionEventType.url('inuse', this.slug));
     }
   }
 

@@ -7,19 +7,26 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function StudyProcessingTabController($scope) {
-  var vm = this;
-  vm.$onInit = onInit;
+class StudyProcessingTabController {
 
-  //--
+  constructor($scope,
+              ProcessingType) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $scope,
+                    ProcessingType
+                  });
+  }
 
-  function onInit() {
-    // updates the selected tab in 'studyViewDirective' which is the parent directive
-    $scope.$emit('tabbed-page-update', 'tab-selected');
+  $onInit() {
+    // updates the selected tab in 'studyViewDirective' which is the parent component
+    this.$scope.$emit('tabbed-page-update', 'tab-selected');
+
+    this.ProcessingType.list(this.study.slug)
+      .then(reply => {
+        this.hasProcessingTypes = (reply.total > 0);
+      });
   }
 
 }
@@ -37,9 +44,23 @@ const studyProcessingTabComponent = {
   controller: StudyProcessingTabController,
   controllerAs: 'vm',
   bindings: {
-    study:         '<',
-    processingDto: '<'
+    study: '<'
   }
 };
 
-export default ngModule => ngModule.component('studyProcessingTab', studyProcessingTabComponent)
+function stateConfig($stateProvider, $urlRouterProvider) {
+  'ngInject';
+  $stateProvider.state('home.admin.studies.study.processing', {
+    url: '/processing',
+    views: {
+      'studyDetails': 'studyProcessingTab'
+    }
+  });
+  $urlRouterProvider.otherwise('/');
+}
+
+export default ngModule => {
+  ngModule
+    .config(stateConfig)
+    .component('studyProcessingTab', studyProcessingTabComponent)
+}

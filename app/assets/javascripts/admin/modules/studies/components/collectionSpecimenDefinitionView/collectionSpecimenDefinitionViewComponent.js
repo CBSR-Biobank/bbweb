@@ -1,197 +1,216 @@
-/**
- * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
- *
- * @namespace admin.studies.components.collectionSpecimenDefinitionView
- *
- * @author Nelson Loyola <loyola@ualberta.ca>
- * @copyright 2018 Canadian BioSample Repository (CBSR)
- */
+class CollectionSpecimenDefinitionViewController {
 
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function CollectionSpecimenDefinitionViewController($state,
-                                                     gettextCatalog,
-                                                     modalInput,
-                                                     notificationsService,
-                                                     CollectionEventType,
-                                                     CollectionSpecimenDefinition,
-                                                     AnatomicalSourceType,
-                                                     PreservationType,
-                                                     PreservationTemperature,
-                                                     SpecimenType,
-                                                     breadcrumbService) {
-  var vm = this;
-  vm.$onInit = onInit;
+  constructor($state,
+              gettextCatalog,
+              modalInput,
+              notificationsService,
+              CollectionEventType,
+              CollectionSpecimenDefinition,
+              AnatomicalSourceType,
+              PreservationType,
+              PreservationTemperature,
+              SpecimenType,
+              domainNotificationService,
+              breadcrumbService) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $state,
+                    gettextCatalog,
+                    modalInput,
+                    notificationsService,
+                    CollectionEventType,
+                    CollectionSpecimenDefinition,
+                    AnatomicalSourceType,
+                    PreservationType,
+                    PreservationTemperature,
+                    SpecimenType,
+                    domainNotificationService,
+                    breadcrumbService
+                  });
+  }
 
-  //--
+  $onInit() {
+    const studySlug = this.study.slug;
+    const slug = this.collectionEventType.slug;
 
-  function onInit() {
-    const studySlug = vm.study.slug,
-          slug = vm.collectionEventType.slug
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.studies'),
-      breadcrumbService.forStateWithFunc(
+    this.allowEdit = this.study.isDisabled();
+
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.studies'),
+      this.breadcrumbService.forStateWithFunc(
+        `home.admin.studies.study.collection({ studySlug: "${studySlug}" })`,
+        () => this.study.name),
+      this.breadcrumbService.forStateWithFunc(
         `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
-        () => vm.study.name + ': ' + vm.collectionEventType.name),
-      breadcrumbService.forStateWithFunc(
+        () => this.collectionEventType.name),
+      this.breadcrumbService.forStateWithFunc(
         'home.admin.studies.study.collection.ceventType.specimenDefinitionView',
-        () => vm.specimenDefinition.name)
+        () => this.specimenDefinition.name)
     ];
 
-    vm.returnState = {
+    this.returnState = {
       name: 'home.admin.studies.study.collection.ceventType',
-      param: { ceventTypeId: vm.collectionEventType.id }
+      param: { ceventTypeId: this.collectionEventType.id }
     };
 
-    vm.editName                    = editName;
-    vm.editDescription             = editDescription;
-    vm.editAnatomicalSource        = editAnatomicalSource;
-    vm.editPreservationType        = editPreservationType;
-    vm.editPreservationTemperature = editPreservationTemperature;
-    vm.editSpecimenType            = editSpecimenType;
-    vm.editUnits                   = editUnits;
-    vm.editAmount                  = editAmount;
-    vm.editMaxCount                = editMaxCount;
-    vm.back                        = back;
-
     // reload the collection event type in case changes were made to it
-    CollectionEventType.get(studySlug, slug)
-      .then(function (ceventType) {
-        vm.collectionEventType = ceventType;
+    this.CollectionEventType.get(studySlug, slug)
+      .then(ceventType => {
+        this.collectionEventType = ceventType;
       });
   }
 
-  function notifySuccess() {
-    return notificationsService.success(gettextCatalog.getString('Annotation type changed successfully.'),
-                                        gettextCatalog.getString('Change successful'),
-                                        1500);
-  }
-
-  function updateCollectionEventType() {
-    return vm.collectionEventType.updateSpecimenDefinition(vm.specimenDefinition)
-      .then(function (collectionEventType) {
-        vm.collectionEventType = collectionEventType;
+  updateCollectionEventType() {
+    return this.collectionEventType.updateSpecimenDefinition(this.specimenDefinition)
+      .then((collectionEventType) => {
+        this.collectionEventType = collectionEventType;
       })
-      .then(notifySuccess)
-      .catch(notificationsService.updateError);
-  }
-
-  function editName() {
-    modalInput.text(gettextCatalog.getString('Specimen spec name'),
-                    gettextCatalog.getString('Name'),
-                    vm.specimenDefinition.name,
-                    { required: true, minLength: 2 }).result
-      .then(function (name) {
-        vm.specimenDefinition.name = name;
-        return updateCollectionEventType();
+      .then(() => this.notificationsService.success(
+        this.gettextCatalog.getString('Specimen changed successfully.'),
+        this.gettextCatalog.getString('Change successful'),
+        1500))
+      .catch(error => {
+        this.notificationsService.updateError(error);
       });
   }
 
-  function editDescription() {
-    modalInput.textArea(gettextCatalog.getString('Specimen spec description'),
-                        gettextCatalog.getString('Description'),
-                        vm.specimenDefinition.description).result
-      .then(function (description) {
-        vm.specimenDefinition.description = description;
-        return updateCollectionEventType();
+  editName() {
+    this.modalInput.text(this.gettextCatalog.getString('Specimen name'),
+                         this.gettextCatalog.getString('Name'),
+                         this.specimenDefinition.name,
+                         { required: true, minLength: 2 }).result
+      .then((name) => {
+        this.specimenDefinition.name = name;
+        return this.updateCollectionEventType();
       });
   }
 
-  function editAnatomicalSource() {
-    modalInput.select(gettextCatalog.getString('Specimen spec anatomical source'),
-                      gettextCatalog.getString('Anatomical source'),
-                      vm.specimenDefinition.anatomicalSourceType,
+  editDescription() {
+    this.modalInput.textArea(this.gettextCatalog.getString('Specimen description'),
+                        this.gettextCatalog.getString('Description'),
+                        this.specimenDefinition.description).result
+      .then((description) => {
+        this.specimenDefinition.description = description;
+        return this.updateCollectionEventType();
+      });
+  }
+
+  editAnatomicalSource() {
+    this.modalInput.select(this.gettextCatalog.getString('Specimen anatomical source'),
+                      this.gettextCatalog.getString('Anatomical source'),
+                      this.specimenDefinition.anatomicalSourceType,
                       {
                         required: true,
-                        selectOptions: Object.values(AnatomicalSourceType)
+                        selectOptions: Object.values(this.AnatomicalSourceType)
                       }).result
-      .then(function (selection) {
-        vm.specimenDefinition.anatomicalSourceType = selection;
-        return updateCollectionEventType();
+      .then((selection) => {
+        this.specimenDefinition.anatomicalSourceType = selection;
+        return this.updateCollectionEventType();
       });
   }
 
-  function editPreservationType() {
-    modalInput.select(gettextCatalog.getString('Specimen spec preservation type'),
-                      gettextCatalog.getString('Preservation type'),
-                      vm.specimenDefinition.preservationType,
+  editPreservationType() {
+    this.modalInput.select(this.gettextCatalog.getString('Specimen preservation type'),
+                      this.gettextCatalog.getString('Preservation type'),
+                      this.specimenDefinition.preservationType,
                       {
                         required: true,
-                        selectOptions: Object.values(PreservationType)
+                        selectOptions: Object.values(this.PreservationType)
                       }).result
-      .then(function (selection) {
-        vm.specimenDefinition.preservationType = selection;
-        return updateCollectionEventType();
+      .then((selection) => {
+        this.specimenDefinition.preservationType = selection;
+        return this.updateCollectionEventType();
       });
   }
 
-  function editPreservationTemperature() {
-    modalInput.select(gettextCatalog.getString('Specimen spec preservation temperature'),
-                      gettextCatalog.getString('Preservation temperature'),
-                      vm.specimenDefinition.preservationTemperature,
+  editPreservationTemperature() {
+    this.modalInput.select(this.gettextCatalog.getString('Specimen preservation temperature'),
+                      this.gettextCatalog.getString('Preservation temperature'),
+                      this.specimenDefinition.preservationTemperature,
                       {
                         required: true,
-                        selectOptions: Object.values(PreservationTemperature)
+                        selectOptions: Object.values(this.PreservationTemperature)
                       }).result
-      .then(function (selection) {
-        vm.specimenDefinition.preservationTemperature = selection;
-        return updateCollectionEventType();
+      .then((selection) => {
+        this.specimenDefinition.preservationTemperature = selection;
+        return this.updateCollectionEventType();
       });
   }
 
-  function editSpecimenType() {
-    modalInput.select(gettextCatalog.getString('Specimen spec - specimen type'),
-                      gettextCatalog.getString('Sepcimen type'),
-                      vm.specimenDefinition.specimenType,
+  editSpecimenType() {
+    this.modalInput.select(this.gettextCatalog.getString('Specimen - specimen type'),
+                      this.gettextCatalog.getString('Sepcimen type'),
+                      this.specimenDefinition.specimenType,
                       {
                         required: true,
-                        selectOptions: Object.values(SpecimenType)
+                        selectOptions: Object.values(this.SpecimenType)
                       }).result
-      .then(function (selection) {
-        vm.specimenDefinition.specimenType = selection;
-        return updateCollectionEventType();
+      .then((selection) => {
+        this.specimenDefinition.specimenType = selection;
+        return this.updateCollectionEventType();
       });
   }
 
-  function editUnits() {
-    modalInput.text(gettextCatalog.getString('Specimen spec units'),
-                    gettextCatalog.getString('Units'),
-                    vm.specimenDefinition.units,
+  editUnits() {
+    this.modalInput.text(this.gettextCatalog.getString('Specimen units'),
+                    this.gettextCatalog.getString('Units'),
+                    this.specimenDefinition.units,
                     { required: true }).result
-      .then(function (units) {
-        vm.specimenDefinition.units = units;
-        return updateCollectionEventType();
+      .then((units) => {
+        this.specimenDefinition.units = units;
+        return this.updateCollectionEventType();
       });
   }
 
-  function editAmount() {
-    modalInput.positiveFloat(gettextCatalog.getString('Specimen spec amount'),
-                             gettextCatalog.getString('Amount'),
-                             vm.specimenDefinition.amount,
+  editAmount() {
+    this.modalInput.positiveFloat(this.gettextCatalog.getString('Specimen amount'),
+                             this.gettextCatalog.getString('Amount'),
+                             this.specimenDefinition.amount,
                              { required: true, positiveFloat: true }).result
-      .then(function (value) {
-        vm.specimenDefinition.amount = value;
-        return updateCollectionEventType();
+      .then((value) => {
+        this.specimenDefinition.amount = value;
+        return this.updateCollectionEventType();
       });
   }
 
-  function editMaxCount() {
-    modalInput.naturalNumber(gettextCatalog.getString('Specimen spec max count'),
-                             gettextCatalog.getString('Max count'),
-                             vm.specimenDefinition.maxCount,
+  editMaxCount() {
+    this.modalInput.naturalNumber(this.gettextCatalog.getString('Specimen max count'),
+                             this.gettextCatalog.getString('Max count'),
+                             this.specimenDefinition.maxCount,
                              { required: true, naturalNumber: true, min: 1 }).result
-      .then(function (value) {
-        vm.specimenDefinition.maxCount = value;
-        return updateCollectionEventType();
+      .then((value) => {
+        this.specimenDefinition.maxCount = value;
+        return this.updateCollectionEventType();
       });
   }
 
-  function back() {
-    $state.go(vm.returnState.name, vm.returnState.param);
+  removeRequest() {
+    if (!this.study.isDisabled()) {
+      throw new Error('modifications not allowed');
+    }
+
+    const removePromiseFunc =
+          () => this.collectionEventType.removeSpecimenDefinition(this.specimenDefinition)
+          .then(() => {
+            this.notificationsService.success(this.gettextCatalog.getString('Specimen removed'));
+            this.$state.go(this.returnState.name, this.returnState.param, { reload: true });
+          });
+
+    return this.domainNotificationService.removeEntity(
+      removePromiseFunc,
+      this.gettextCatalog.getString('Remove specimen'),
+      this.gettextCatalog.getString('Are you sure you want to remove specimen {{name}}?',
+                                    { name: this.specimenDefinition.name }),
+      this.gettextCatalog.getString('Remove failed'),
+      this.gettextCatalog.getString('Specimen {{name} cannot be removed',
+                                    { name: this.specimenDefinition.name }));
+  }
+
+  back() {
+    this.$state.go(this.returnState.name, this.returnState.param);
   }
 
 }

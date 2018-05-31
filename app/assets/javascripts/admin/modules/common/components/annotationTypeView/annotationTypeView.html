@@ -1,6 +1,58 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{{vm.annotationType.name}}</h3>
+    <h3 class="panel-title">
+      {{vm.annotationType.name}}
+      <span class="pull-right"
+            uib-dropdown is-open="vm.annotationTypeMenu.isopen"
+            ng-if="!vm.readOnly">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="annotationTypeMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="annotationTypeMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update name</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editDescription()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update description</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editRequired()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update required</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-if="vm.annotationType.isValueTypeSelect()">
+            <a href
+               ng-click="vm.editSelectionOptions()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update selections</translate>
+            </a>
+          </li>
+          <li class="divider"></li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.removeRequest()">
+              <i class="glyphicon glyphicon-remove text-danger"></i>
+              <translate>Remove annotation</translate>
+            </a>
+          </li>
+
+        </ul>
+      </span>
+    </h3>
   </div>
   <ul class="list-group">
     <li class="list-group-item">
@@ -8,16 +60,8 @@
         <div class="col-md-2">
           <strong translate>Name:</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.annotationType.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit name'|translate}}"
-                  ng-click="vm.editName()"
-                  ng-if="!vm.readOnly">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -27,12 +71,9 @@
           <strong translate>Description:</strong>
         </div>
         <div class="col-md-10">
-          <truncate-toggle
-            text="vm.annotationType.description"
-            toggle-length="60"
-            text-empty-warning="{{'Description not entered yet.'|translate}}"
-            allow-edit="!vm.readOnly"
-            on-edit="vm.editDescription()">
+          <truncate-toggle text="vm.annotationType.description"
+                           toggle-length="60"
+                           text-empty-warning="{{'Description not entered yet.'|translate}}">
           </truncate-toggle>
         </div>
       </div>
@@ -42,16 +83,8 @@
         <div class="col-md-2">
           <strong translate>Required:</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.annotationType.required | yesNo}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit required'|translate}}"
-                  ng-click="vm.editRequired()"
-                  ng-if="!vm.readOnly">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -70,15 +103,12 @@
         <div class="col-md-2">
           <strong translate>Selections:</strong>
         </div>
-        <div class="col-md-8">
-          {{vm.annotationType.options.join(', ')}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add selection option'|translate}}"
-                  ng-click="vm.editSelectionOptions()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
+        <div class="col-md-10">
+          <ul style="list-style-position: inside;padding-left:0">
+            <li ng-repeat="option in vm.annotationType.options">
+              {{option}}
+            </li>
+          </ul>
         </div>
       </div>
     </li>

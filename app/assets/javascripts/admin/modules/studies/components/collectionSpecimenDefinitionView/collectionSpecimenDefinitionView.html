@@ -1,10 +1,90 @@
 <breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
 <div class="page-header">
-  <h1>{{vm.study.name}} <small translate>Collection Specimen Description</small></h1>
+  <h1>{{vm.study.name}} <small translate>Collection Specimen</small></h1>
 </div>
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title">{{vm.specimenDefinition.name}}</h3>
+    <h3 class="panel-title">
+      {{vm.specimenDefinition.name}}
+      <span class="pull-right"
+            uib-dropdown is-open="vm.specimenDefinitionMenu.isopen"
+            ng-if="!vm.readOnly">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="specimenDefinitionMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="specimenDefinitionMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update name</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editAnatomicalSource()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update anatomical source</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editPreservationType()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update Preservation type</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editPreservationTemperature()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update preservation temperature</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editSpecimenType()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update specimen type</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editUnits()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update units</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editAmount()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update amount</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editMaxCount()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update max count</translate>
+            </a>
+          </li>
+          <li class="divider"></li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.removeRequest()">
+              <i class="glyphicon glyphicon-remove text-danger"></i>
+              <translate>Remove specimen</translate>
+            </a>
+          </li>
+
+        </ul>
+      </span>
+    </h3>
   </div>
   <ul class="list-group">
     <li class="list-group-item">
@@ -12,15 +92,8 @@
         <div class="col-md-3">
           <strong translate>Name:</strong>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-9">
           {{vm.specimenDefinition.name}}
-        </div>
-        <div class="col-md-3">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit name'|translate}}"
-                  ng-click="vm.editName()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -33,9 +106,7 @@
           <truncate-toggle
              text="vm.specimenDefinition.description"
              toggle-length="60"
-             text-empty-warning="{{'Description not entered yet.'|translate}}"
-             allow-edit="true"
-             on-edit="vm.editDescription()">
+             text-empty-warning="{{'Description not entered yet.'|translate}}">
           </truncate-toggle>
         </div>
       </div>
@@ -45,15 +116,8 @@
         <div class="col-md-3">
           <strong translate>Anatomical source:</strong>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-9">
           {{vm.specimenDefinition.anatomicalSourceType}}
-        </div>
-        <div class="col-md-3">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit anatomical source'|translate}}"
-                  ng-click="vm.editAnatomicalSource()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -62,15 +126,8 @@
         <div class="col-md-3">
           <strong translate>Preservation type:</strong>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-9">
           {{vm.specimenDefinition.preservationType}}
-        </div>
-        <div class="col-md-3">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit preservation type'|translate}}"
-                  ng-click="vm.editPreservationType()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -79,15 +136,8 @@
         <div class="col-md-3">
           <strong translate>Preservation temperature:</strong>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-9">
           {{vm.specimenDefinition.preservationTemperature}}
-        </div>
-        <div class="col-md-3">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit preservation temperature'|translate}}"
-                  ng-click="vm.editPreservationTemperature()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -96,15 +146,8 @@
         <div class="col-md-3">
           <strong translate>Specimen type:</strong>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-9">
           {{vm.specimenDefinition.specimenType}}
-        </div>
-        <div class="col-md-3">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit specimen type'|translate}}"
-                  ng-click="vm.editSpecimenType()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -113,15 +156,8 @@
         <div class="col-md-3">
           <strong translate>Units:</strong>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-9">
           {{vm.specimenDefinition.units}}
-        </div>
-        <div class="col-md-3">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit units'|translate}}"
-                  ng-click="vm.editUnits()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -130,15 +166,8 @@
         <div class="col-md-3">
           <strong translate>Amount:</strong>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-9">
           {{vm.specimenDefinition.amount}}
-        </div>
-        <div class="col-md-3">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit amount'|translate}}"
-                  ng-click="vm.editAmount()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -147,15 +176,8 @@
         <div class="col-md-3">
           <strong translate>Max count:</strong>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-9">
           {{vm.specimenDefinition.maxCount}}
-        </div>
-        <div class="col-md-3">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit max count'|translate}}"
-                  ng-click="vm.editMaxCount()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>

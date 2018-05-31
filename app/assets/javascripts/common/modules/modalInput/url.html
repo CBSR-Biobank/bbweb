@@ -1,16 +1,14 @@
 <ng-form name="subForm">
-  <div class="form-group row">
-    <label for="url" class="col-md-3 form-control-label">{{vm.label}}:</label>
-    <div class="col-md-9">
-      <input name="value"
-             type="url"
-             class="form-control"
-             ng-model="vm.value"
-             focus-me="true"
-             ng-required="vm.options.required" />
-    </div>
-    <div class="col-md-offset-3 col-md-9"
-         ng-messages="subForm.value.$error"
+  <div class="form-group">
+    <label for="url">{{vm.label}}</label>
+    <input name="value"
+           type="url"
+           class="form-control"
+           ng-model="vm.value"
+           focus-me="true"
+           ng-change="vm.valueChanged()"
+           ng-required="vm.options.required" />
+    <div ng-messages="subForm.value.$error"
          ng-if="subForm.value.$dirty"
          role="alert">
       <div ng-message="required" class="help-block" translate>A URL is required</div>

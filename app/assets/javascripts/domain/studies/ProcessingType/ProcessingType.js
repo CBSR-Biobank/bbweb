@@ -218,8 +218,8 @@ function ProcessingTypeFactory($q,
      *
      * @param {string} studySlug the slug of the study the processing types belongs to.
      *
-     * @returns {Promise<Array<domain.studies.ProcessingType>>} An array of processing types within
-     * a promise.
+     * @returns {Promise<common.controllers.PagedListController.PagedResult<domain.studies.ProcessingType>>}
+     * A paged result containing processing types wrapped in a promise.
      */
     static list(studySlug, options = {}) {
       const url = ProcessingType.url(studySlug),

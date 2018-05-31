@@ -4,5 +4,6 @@
 </div>
 <annotation-type-view annotation-type="vm.annotationType"
                       read-only="!vm.study.isDisabled()"
-                      on-update="vm.onUpdate">
+                      on-update="vm.onUpdate.bind(vm)"
+                      on-remove="vm.removeRequest.bind(vm)">
 </annotation-type-view>

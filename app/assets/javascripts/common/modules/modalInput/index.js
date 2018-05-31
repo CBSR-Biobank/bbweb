@@ -134,6 +134,10 @@ class ModalInputService {
         }
       }
 
+      valueChanged(newValue) {
+        this.value = newValue;
+      }
+
       okPressed() {
         modal.close(this.value);
       }
@@ -155,10 +159,6 @@ class ModalInputService {
           name: opt,
           checked: _.includes(this.defaultValue, opt)
         }));
-      }
-
-      multipleSelectSomeSelected() {
-        return (_.find(this.value, { checked: true }) !== undefined);
       }
 
       dateTimeOnEdit(datetime) {
@@ -214,13 +214,26 @@ function init() {
   });
 
   function modalInputComponentGenerator(type) {
+    class ModalInputComponentController {
+
+      valueChanged() {
+        this.onChange()(this.value);
+      }
+
+      multipleSelectSomeSelected() {
+        return (_.find(this.value, { checked: true }) !== undefined);
+      }
+    }
+
     const component = {
       template: require('./' + type + '.html'),
+      controller: ModalInputComponentController,
       controllerAs: 'vm',
       bindings: {
         label:   '@',
         value:   '<',
-        options: '<'
+        options: '<',
+        onChange: '&'
       }
     }
     return component;
