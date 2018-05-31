@@ -20,6 +20,7 @@ class CollectionEventAnnotationTypeAddController extends AnnotationTypeAddContro
               modalService,
               breadcrumbService,
               gettextCatalog) {
+    'ngInject';
     super($state,
           notificationsService,
           domainNotificationService,
