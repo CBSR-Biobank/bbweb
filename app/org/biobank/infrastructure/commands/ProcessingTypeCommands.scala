@@ -34,11 +34,11 @@ object ProcessingTypeCommands {
                                       specimenType:            SpecimenType)
 
   final case class InputSpecimenProcessing(expectedChange:       BigDecimal,
-                                     count:                Int,
-                                     containerTypeId:      Option[String],
-                                     definitionType:       String,
-                                     entityId:             String,
-                                     specimenDefinitionId: String)
+                                           count:                Int,
+                                           containerTypeId:      Option[String],
+                                           definitionType:       String,
+                                           entityId:             String,
+                                           specimenDefinitionId: String)
 
   final case class OutputSpecimenProcessing(expectedChange:     BigDecimal,
                                       count:              Int,

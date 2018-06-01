@@ -31,48 +31,63 @@ function InputSpecimenProcessingFactory($log,
    */
   class InputSpecimenProcessing extends SpecimenProcessingInfo {
 
-    /**
-     * The expected amount to be removed.
-     *
-     * @name domain.studies.SpecimenProcessingInfo#expectedChange
-     * @type {number}
-     */
 
-    /**
-     * The number of input specimens involved in processing.
-     *
-     * @name domain.studies.SpecimenProcessingInfo#count
-     * @type {integer}
-     */
+    constructor(obj = {}) {
+      /**
+       * The expected amount to be removed.
+       *
+       * @name domain.studies.SpecimenProcessingInfo#expectedChange
+       * @type {number}
+       */
 
-    /**
-     * The container type the input specimens are stored in.
-     *
-     * @name domain.studies.SpecimenProcessingInfo#containerTypeId
-     * @type {string}
-     * @default null
-     */
+      /**
+       * The number of input specimens involved in processing.
+       *
+       * @name domain.studies.SpecimenProcessingInfo#count
+       * @type {integer}
+       */
 
-    /**
-     * Whether the input specimen is a collected or processed specimen.
-     *
-     * @name domain.studies.InputSpecimenProcessing#definitionType
-     * @type {string}
-     */
+      /**
+       * The container type the input specimens are stored in.
+       *
+       * @name domain.studies.SpecimenProcessingInfo#containerTypeId
+       * @type {string}
+       * @default null
+       */
 
-    /**
-     * The ID of the entity that defines the specimen definition.
-     *
-     * @name domain.studies.InputSpecimenProcessing#entityId
-     * @type {string}
-     */
+      /**
+       * Whether the input specimen is a collected or processed specimen.
+       *
+       * @name domain.studies.InputSpecimenProcessing#definitionType
+       * @type {string}
+       */
 
-    /**
-     * The container type the input specimens are stored in.
-     *
-     * @name domain.studies.InputSpecimenProcessing#specimenDefinitionId
-     * @type {string}
-     */
+      /**
+       * The ID of the entity that defines the specimen definition.
+       *
+       * @name domain.studies.InputSpecimenProcessing#entityId
+       * @type {string}
+       */
+
+      /**
+       * The container type the input specimens are stored in.
+       *
+       * @name domain.studies.InputSpecimenProcessing#specimenDefinitionId
+       * @type {string}
+       */
+
+      super(Object.assign(
+        {
+          expectedChange:       undefined,
+          count:                undefined,
+          containerTypeId:      null,
+          definitionType:       undefined,
+          entityId:             undefined,
+          specimenDefinitionId: undefined
+        },
+        obj
+      ));
+    }
 
     /**
      * @private
@@ -87,6 +102,18 @@ function InputSpecimenProcessingFactory($log,
      */
     static additionalSchemas() {
       return [];
+    }
+
+    setDefinitionType(isCollected) {
+      this.definitionType = isCollected ? 'collected' : 'processed';
+    }
+
+    isCollected() {
+      return (this.definitionType && this.definitionType === 'collected');
+    }
+
+    isProcessed() {
+      return (this.definitionType && this.definitionType === 'processed');
     }
 
   }

@@ -100,14 +100,8 @@ function adminStudiesUiRouterConfig($stateProvider) {
         'main@': 'collectionEventAnnotationTypeView'
       }
     })
-    .state('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd', {
-      url: '/spcdescs/add',
-      views: {
-        'main@': 'collectionSpecimenDefinitionAdd'
-      }
-    })
     .state('home.admin.studies.study.collection.ceventType.specimenDefinitionView', {
-      url: '/spcdescs/{specimenDefinitionSlug}',
+      url: '/spcdefs/{specimenDefinitionSlug}',
       resolve: {
         specimenDefinition: resolveSpcimenDescription
       },
@@ -142,8 +136,8 @@ function adminStudiesUiRouterConfig($stateProvider) {
   /* @ngInject */
   function resolveSpcimenDescription($q, $transition$, collectionEventType, resourceErrorService) {
     const slug = $transition$.params().specimenDefinitionSlug,
-          spcDescription = _.find(collectionEventType.specimenDefinitions, { slug }),
-          result = spcDescription ? $q.when(spcDescription) : $q.reject('invalid specimen-definition ID')
+          spcDefinition = _.find(collectionEventType.specimenDefinitions, { slug }),
+          result = spcDefinition ? $q.when(spcDefinition) : $q.reject('invalid specimen-definition ID')
     return result.catch(resourceErrorService.goto404(`invalid event-type specimen-definition ID: ${slug}`))
   }
 

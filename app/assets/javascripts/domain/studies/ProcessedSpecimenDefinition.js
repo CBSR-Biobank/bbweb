@@ -89,14 +89,13 @@ function ProcessedSpecimenDefinitionFactory($log, DomainEntity) {
 
       super(Object.assign(
         {
-          name: '',
-          description: null,
-          anatomicalSourceType: '',
-          preservationType: '',
-          preservationTemperature: '',
-          specimenType: '',
-          units: null,
-          maxCount: null
+          name:                    undefined,
+          description:             undefined,
+          anatomicalSourceType:    undefined,
+          preservationType:        undefined,
+          preservationTemperature: undefined,
+          specimenType:            undefined,
+          units:                   undefined
         },
         obj));
     }

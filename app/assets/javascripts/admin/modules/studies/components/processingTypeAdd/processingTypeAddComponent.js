@@ -35,10 +35,6 @@ class ProcessingTypeAddController {
     ];
   }
 
-  cancel() {
-    return this.$state.go('^');
-  }
-
 }
 
 /**

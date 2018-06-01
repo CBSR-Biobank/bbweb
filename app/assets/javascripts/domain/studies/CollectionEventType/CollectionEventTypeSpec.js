@@ -268,7 +268,7 @@ describe('CollectionEventType', function() {
       this.updateEntity(this.cet,
                         'addSpecimenDefinition',
                         _.omit(this.jsonSpec, 'id'),
-                        this.url('spcdesc', this.cet.id),
+                        this.url('spcdef', this.cet.id),
                         Object.assign(_.omit(this.jsonSpec, 'id'), { studyId: this.cet.studyId }),
                         this.jsonCet,
                         this.expectCet.bind(this),
@@ -276,7 +276,7 @@ describe('CollectionEventType', function() {
     });
 
     it('should remove a specimen description', function () {
-      var url = this.url('spcdesc', this.cet.studyId, this.cet.id, this.cet.version, this.jsonSpec.id);
+      var url = this.url('spcdef', this.cet.studyId, this.cet.id, this.cet.version, this.jsonSpec.id);
       this.$httpBackend.whenDELETE(url).respond(this.reply(this.jsonCet));
       this.cet.removeSpecimenDefinition(this.jsonSpec).then(this.expectCet).catch(this.failTest);
       this.$httpBackend.flush();

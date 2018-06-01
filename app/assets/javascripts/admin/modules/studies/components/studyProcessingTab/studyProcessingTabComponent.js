@@ -22,11 +22,6 @@ class StudyProcessingTabController {
   $onInit() {
     // updates the selected tab in 'studyViewDirective' which is the parent component
     this.$scope.$emit('tabbed-page-update', 'tab-selected');
-
-    this.ProcessingType.list(this.study.slug)
-      .then(reply => {
-        this.hasProcessingTypes = (reply.total > 0);
-      });
   }
 
 }

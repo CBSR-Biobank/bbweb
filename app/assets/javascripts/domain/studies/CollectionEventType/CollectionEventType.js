@@ -301,12 +301,12 @@ function CollectionEventTypeFactory($q,
     }
 
     addSpecimenDefinition(specimenDefinition) {
-      return this.update(CollectionEventType.url('spcdesc', this.id),
+      return this.update(CollectionEventType.url('spcdef', this.id),
                          Object.assign({ studyId: this.studyId }, _.omit(specimenDefinition, 'id')));
     }
 
     updateSpecimenDefinition(specimenDefinition) {
-      return this.update(CollectionEventType.url('spcdesc', this.id, specimenDefinition.id),
+      return this.update(CollectionEventType.url('spcdef', this.id, specimenDefinition.id),
                          Object.assign({ studyId: this.studyId }, specimenDefinition));
     }
 
@@ -317,7 +317,7 @@ function CollectionEventTypeFactory($q,
         throw new DomainError('specimen description with ID not present: ' + specimenDefinition.id);
       }
 
-      const url = CollectionEventType.url('spcdesc',
+      const url = CollectionEventType.url('spcdef',
                                           this.studyId,
                                           this.id,
                                           this.version,

@@ -105,8 +105,8 @@ function ProcessingTypeFactory($q,
 
       super(Object.assign(
         {
-          studyId:     null,
-          name:        '',
+          studyId:     undefined,
+          name:        undefined,
           description: null,
           enabled:     false
         },
@@ -244,6 +244,18 @@ function ProcessingTypeFactory($q,
         }
         return deferred.promise;
       });
+    }
+
+    /**
+     * Sorts an array of Proecessing Types by name.
+     *
+     * @param {Array<ProcessingType>} processingTypes The array to sort.
+     *
+     * @return {Array<ProcessingType>} A new array sorted by name.
+     */
+    static sortByName(processingTypes) {
+      return _.sortBy(processingTypes,
+                      (processingType) => processingType.name);
     }
 
     add() {

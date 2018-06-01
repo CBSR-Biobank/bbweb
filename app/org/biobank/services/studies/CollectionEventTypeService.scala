@@ -9,7 +9,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.studies._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.users.UserId
-import org.biobank.dto.EntityInfoDto
+import org.biobank.dto.{EntityInfoDto, SpecimenDefinitionNames}
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 import org.biobank.infrastructure.events.CollectionEventTypeEvents._
@@ -48,6 +48,9 @@ trait CollectionEventTypeService extends BbwebService {
                       studySlug:     Slug,
                       pagedQuery:    PagedQuery)
       : Future[ServiceValidation[PagedResults[CollectionEventType]]]
+
+  def specimenDefinitionsForStudy(requestUserId: UserId, studySlug: Slug)
+      : Future[ServiceValidation[Set[SpecimenDefinitionNames]]]
 
   def listNamesByStudySlug(requestUserId: UserId, studySlug: Slug, query: FilterAndSortQuery)
       : Future[ServiceValidation[Seq[EntityInfoDto]]]
@@ -139,7 +142,30 @@ class CollectionEventTypeServiceImpl @Inject()(
      }
    }
 
-  def listNamesByStudyId(requestUserId: UserId,
+  def specimenDefinitionsForStudy(requestUserId: UserId, studySlug: Slug)
+      : Future[ServiceValidation[Set[SpecimenDefinitionNames]]] = {
+     Future {
+       for {
+         study      <- studiesService.getStudyBySlug(requestUserId, studySlug)
+         eventTypes <- queryInternal(requestUserId, study.id, new FilterString(""), new SortString(""))
+       } yield {
+         eventTypes
+           .filter { !_.specimenDefinitions.isEmpty }
+           .map { eventType =>
+             val definitionNames = eventType.specimenDefinitions.map { definition =>
+                 EntityInfoDto(definition.id.id, definition.slug, definition.name)
+               }
+             SpecimenDefinitionNames(eventType.id.id,
+                                     eventType.slug,
+                                     eventType.name,
+                                     definitionNames)
+           }
+           .toSet
+       }
+     }
+   }
+
+ def listNamesByStudyId(requestUserId: UserId,
                          studyId:       StudyId,
                          query:         FilterAndSortQuery)
       : Future[ServiceValidation[Seq[EntityInfoDto]]] = {

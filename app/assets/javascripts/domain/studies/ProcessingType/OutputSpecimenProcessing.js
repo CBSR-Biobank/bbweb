@@ -30,34 +30,49 @@ function OutputSpecimenProcessingFactory($log,
    */
   class OutputSpecimenProcessing extends SpecimenProcessingInfo {
 
-    /**
-     * The expected amount to be added.
-     *
-     * @name domain.studies.OutputSpecimenProcessing#expectedChange
-     * @type {number}
-     */
 
-    /**
-     * The number of output specimens involved in processing.
-     *
-     * @name domain.studies.OutputSpecimenProcessing#count
-     * @type {integer}
-     */
+    constructor(obj = {}) {
+      /**
+       * The expected amount to be added.
+       *
+       * @name domain.studies.OutputSpecimenProcessing#expectedChange
+       * @type {number}
+       */
 
-    /**
-     * The container type the output specimens are stored in.
-     *
-     * @name domain.studies.OutputSpecimenProcessing#containerTypeId
-     * @type {string}
-     * @default null
-     */
+      /**
+       * The number of output specimens involved in processing.
+       *
+       * @name domain.studies.OutputSpecimenProcessing#count
+       * @type {integer}
+       */
 
-    /**
-     * The container type the output specimen definition.
-     *
-     * @name domain.studies.OutputSpecimenProcessing#specimenDefinition
-     * @type {domain.studies.ProcessedSpecimenDefinition}
-     */
+      /**
+       * The container type the output specimens are stored in.
+       *
+       * @name domain.studies.OutputSpecimenProcessing#containerTypeId
+       * @type {string}
+       * @default null
+       */
+
+      /**
+       * The container type the output specimen definition.
+       *
+       * @name domain.studies.OutputSpecimenProcessing#specimenDefinition
+       * @type {domain.studies.ProcessedSpecimenDefinition}
+       */
+
+      super(Object.assign(
+        {
+          expectedChange:     undefined,
+          count:              undefined,
+          containerTypeId:    null,
+          specimenDefinition: undefined
+        },
+        obj
+      ));
+
+      this.specimenDefinition = new ProcessedSpecimenDefinition(obj.specimenDefinition);
+    }
 
     /**
      * @private

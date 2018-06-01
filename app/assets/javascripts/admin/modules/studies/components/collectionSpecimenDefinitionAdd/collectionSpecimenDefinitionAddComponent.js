@@ -47,8 +47,11 @@ class CollectionSpecimenDefinitionAddController {
       this.breadcrumbService.forState('home.admin'),
       this.breadcrumbService.forState('home.admin.studies'),
       this.breadcrumbService.forStateWithFunc(
+        `home.admin.studies.study.collection({ studySlug: "${studySlug}" })`,
+        () => this.study.name),
+      this.breadcrumbService.forStateWithFunc(
         `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
-        () => this.study.name + ': ' + this.collectionEventType.name),
+        () => this.collectionEventType.name),
       this.breadcrumbService.forStateWithFunc(
         'home.admin.studies.study.collection.ceventType.specimenDefinitionView',
         () => this.gettextCatalog.getString('Add collection specimen'))
@@ -96,4 +99,19 @@ const collectionSpecimenDefinitionAddComponent = {
   }
 };
 
-export default ngModule => ngModule.component('collectionSpecimenDefinitionAdd', collectionSpecimenDefinitionAddComponent)
+function stateConfig($stateProvider, $urlRouterProvider) {
+  'ngInject';
+  $stateProvider.state('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd', {
+    url: '/spcdefs/add',
+    views: {
+      'main@': 'collectionSpecimenDefinitionAdd'
+    }
+  });
+  $urlRouterProvider.otherwise('/');
+}
+
+export default ngModule => {
+  ngModule
+    .config(stateConfig)
+    .component('collectionSpecimenDefinitionAdd', collectionSpecimenDefinitionAddComponent);
+}

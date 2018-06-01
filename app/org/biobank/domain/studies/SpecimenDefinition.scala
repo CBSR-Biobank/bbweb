@@ -144,7 +144,7 @@ final case class CollectionSpecimenDefinition(id:                      SpecimenD
 object CollectionSpecimenDefinition extends SpecimenDefinitionValidations {
   import org.biobank.CommonValidations._
 
-  implicit val collectionSpecimenDefinitionWrites: Format[CollectionSpecimenDefinition] =
+  implicit val collectionSpecimenDefinitionFormat: Format[CollectionSpecimenDefinition] =
     Json.format[CollectionSpecimenDefinition]
 
   val hashidsSalt: String = "biobank-collection-event-types"

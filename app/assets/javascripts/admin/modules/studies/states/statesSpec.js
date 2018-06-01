@@ -200,7 +200,7 @@ describe('study admin collection states', function() {
     })
 
   describe(
-    'navigating to `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/add`',
+    'navigating to `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdefs/add`',
     function () {
 
       beforeEach(function() {
@@ -209,21 +209,21 @@ describe('study admin collection states', function() {
 
      it('should go to valid state', function() {
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when({}))
-        this.gotoUrl('/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/add')
+        this.gotoUrl('/admin/studies/study-id-1/collection/events/event-type-id-1/spcdefs/add')
         expect(this.$state.current.name)
           .toBe('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd')
       })
 
       it('should go to the 404 state when an invalid eventId is used', function() {
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'))
-        this.gotoUrl('/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/add')
+        this.gotoUrl('/admin/studies/study-id-1/collection/events/event-type-id-1/spcdefs/add')
         expect(this.$state.current.name).toBe('404')
       })
 
     })
 
   describe(
-    'navigating to `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/spcedesc-id-1`',
+    'navigating to `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdefs/spcedesc-id-1`',
     function () {
 
       beforeEach(function() {
@@ -231,13 +231,13 @@ describe('study admin collection states', function() {
       });
 
       it('should go to valid state', function() {
-        const jsonSpcDesc   = this.Factory.collectionSpecimenDefinition(),
-              jsonEventType = this.Factory.collectionEventType({ specimenDefinitions: [ jsonSpcDesc ]}),
+        const jsonSpcdef   = this.Factory.collectionSpecimenDefinition(),
+              jsonEventType = this.Factory.collectionEventType({ specimenDefinitions: [ jsonSpcdef ]}),
               eventType     = this.CollectionEventType.create(jsonEventType)
 
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(eventType))
         this.gotoUrl(
-          `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/${jsonSpcDesc.slug}`)
+          `/admin/studies/study-id-1/collection/events/event-type-id-1/spcdefs/${jsonSpcdef.slug}`)
         expect(this.$state.current.name)
           .toBe('home.admin.studies.study.collection.ceventType.specimenDefinitionView')
       })
@@ -247,7 +247,7 @@ describe('study admin collection states', function() {
               eventType     = this.CollectionEventType.create(jsonEventType)
 
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(eventType))
-        this.gotoUrl('/admin/studies/study-id-1/collection/events/event-type-id-1/spcdescs/spcedesc-id-1')
+        this.gotoUrl('/admin/studies/study-id-1/collection/events/event-type-id-1/spcdefs/spcedesc-id-1')
         expect(this.$state.current.name).toBe('404')
       })
 

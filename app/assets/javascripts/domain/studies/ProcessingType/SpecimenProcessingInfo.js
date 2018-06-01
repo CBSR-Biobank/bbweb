@@ -16,8 +16,8 @@ function SpecimenProcessingInfoFactory($log,
     'id': 'SpecimenProcessingInfo',
     'type': 'object',
     'properties': {
-      'expectedChange':  { 'type': 'number' },
-      'count':           { 'type': 'integer' },
+      'expectedChange':  { 'type': 'number', 'minimum':  0 },
+      'count':           { 'type': 'integer', 'minimum':  1 },
       'containerTypeId': { 'type': [ 'string', 'null' ] }
     },
     'required': [ 'expectedChange', 'count', 'containerTypeId' ]

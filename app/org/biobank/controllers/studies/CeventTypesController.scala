@@ -63,6 +63,19 @@ class CeventTypesController @Inject() (
     }
   }
 
+  def specimenDefinitions(studySlug: Slug): Action[Unit] = {
+    action.async(parse.empty) { implicit request =>
+      PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
+        err => {
+          validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
+        },
+        pagedQuery => {
+          validationReply(service.specimenDefinitionsForStudy(request.authInfo.userId, studySlug))
+        }
+      )
+    }
+  }
+
   def inUse(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(service.eventTypeInUse(request.authInfo.userId, slug))

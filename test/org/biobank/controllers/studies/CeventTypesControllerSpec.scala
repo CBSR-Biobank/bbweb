@@ -24,11 +24,17 @@ class CeventTypesControllerSpec
   import org.biobank.matchers.EntityMatchers._
   import org.biobank.matchers.JsonMatchers._
 
-  class EventTypeFixture(numEventTypes: Int = 1) {
+  class EventTypeFixture(numEventTypes: Int = 1,
+                         hasSpecimenDefinition: Boolean = false) {
     val study = factory.createDisabledStudy
     val eventTypes = (0 until numEventTypes)
       .map {_ =>
-        factory.createCollectionEventType.copy(studyId = study.id)
+        val specimenDefinitions =
+          if (hasSpecimenDefinition) Set(factory.createCollectionSpecimenDefinition)
+          else Set.empty[CollectionSpecimenDefinition]
+
+        factory.createCollectionEventType.copy(studyId = study.id,
+                                               specimenDefinitions = specimenDefinitions)
       }
       .toList
 
@@ -46,13 +52,13 @@ class CeventTypesControllerSpec
   private def urlDescription(cet: CollectionEventType)             = uri("description", cet.id.id)
   private def urlRecurring(cet: CollectionEventType)               = uri("recurring", cet.id.id)
   private def urlAddAnnotationType(cet: CollectionEventType)       = uri("annottype", cet.id.id)
-  private def urlAddSepecimenDescription(cet: CollectionEventType) = uri("spcdesc", cet.id.id)
+  private def urlAddSepecimenDescription(cet: CollectionEventType) = uri("spcdef", cet.id.id)
 
   private def urlUpdateAnnotationType(cet: CollectionEventType, annotType: AnnotationType) =
     uri("annottype", cet.id.id, annotType.id.id)
 
   private def urlUpdateSpecimenDefinition(cet: CollectionEventType, sd: SpecimenDefinition) =
-    uri("spcdesc", cet.id.id, sd.id.id)
+    uri("spcdef", cet.id.id, sd.id.id)
 
   private def cetToAddCmd(cet: CollectionEventType) = {
     Json.obj("studyId"              -> cet.studyId.id,
@@ -78,14 +84,14 @@ class CeventTypesControllerSpec
         replyCet.get must matchCollectionEventType(cet)
       }
 
-      it("fail for an invalid study ID") {
+      it("fail for an invalid study slug") {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
         val reply = makeAuthRequest(GET, uri(study.slug.id, cet.slug.id).path).value
         reply must beNotFoundWithMessage("EntityCriteriaNotFound.*study slug")
       }
 
-      it("fail for an invalid collection event type id") {
+      it("fail for an invalid collection event type slug") {
         val study = factory.createDisabledStudy
         val cet = factory.createCollectionEventType
         studyRepository.put(study)
@@ -223,6 +229,39 @@ class CeventTypesControllerSpec
         val reply = makeAuthRequest(GET, uri() + s"/names/${f.study.id}?sort=xxx").value
         reply must beBadRequestWithMessage("invalid sort field")
       }
+    }
+
+    describe("GET /api/studies/cetypes/spcdef/:studySlug") {
+
+      it("can retrieve specimen definitions for a study") {
+        val f = new EventTypeFixture(2, true)
+        val expectedReply = f.eventTypes
+          .sortBy(_.name)
+          .map { eventType =>
+            val definitionNames = eventType.specimenDefinitions.map { definition =>
+                EntityInfoDto(definition.id.id, definition.slug, definition.name)
+              }
+            SpecimenDefinitionNames(eventType.id.id,
+                                    eventType.slug,
+                                    eventType.name,
+                                    definitionNames)
+          }
+          .toList
+
+        val reply = makeAuthRequest(GET, uri("spcdef", f.study.slug.id).path).value
+        reply must beOkResponseWithJsonReply
+
+        val replyDtos = (contentAsJson(reply) \ "data").validate[List[SpecimenDefinitionNames]]
+        replyDtos must be (jsSuccess)
+        replyDtos.get must equal (expectedReply)
+      }
+
+      it("fail for an invalid study slug") {
+        val study = factory.createDisabledStudy
+        val reply = makeAuthRequest(GET, uri("spcdef", study.slug.id).path).value
+        reply must beNotFoundWithMessage("EntityCriteriaNotFound.*study slug")
+      }
+
     }
 
     describe("POST /api/studies/cetypes/:studyId") {
@@ -696,7 +735,7 @@ class CeventTypesControllerSpec
 
     }
 
-    describe("POST /api/studies/cetypes/spcdesc/:id") {
+    describe("POST /api/studies/cetypes/spcdef/:id") {
 
       it("add a specimen spec") {
         val f = new EventTypeFixture
@@ -758,7 +797,7 @@ class CeventTypesControllerSpec
       }
     }
 
-    describe("POST /api/studies/cetypes/spcdesc/:cetId/:specimenDefinitionId") {
+    describe("POST /api/studies/cetypes/spcdef/:cetId/:specimenDefinitionId") {
 
       it("update a specimen definition") {
         val f = new EventTypeFixture
@@ -824,7 +863,7 @@ class CeventTypesControllerSpec
       }
     }
 
-    describe("DELETE /api/studies/cetypes/spcdesc/:id/:ver/:uniqueId") {
+    describe("DELETE /api/studies/cetypes/spcdef/:id/:ver/:uniqueId") {
 
       it("remove an specimen spec") {
         val f = new EventTypeFixture
@@ -832,7 +871,7 @@ class CeventTypesControllerSpec
         val specimenDefinition = factory.createCollectionSpecimenDefinition
         collectionEventTypeRepository.put(cet.copy(specimenDefinitions = Set(specimenDefinition)))
 
-        val url = uri("spcdesc", f.study.id.id, cet.id.id, cet.version.toString, specimenDefinition.id.id)
+        val url = uri("spcdef", f.study.id.id, cet.id.id, cet.version.toString, specimenDefinition.id.id)
         val reply = makeAuthRequest(DELETE, url.path).value
         reply must beOkResponseWithJsonReply
         val updatedCet = cet.copy(version             = cet.version + 1,
@@ -848,7 +887,7 @@ class CeventTypesControllerSpec
         collectionEventTypeRepository.put(cet.copy(specimenDefinitions = Set(specimenDefinition)))
 
         val badVersion = cet.version + 1
-        val url = uri("spcdesc", f.study.id.id, cet.id.id, badVersion.toString, specimenDefinition.id.id)
+        val url = uri("spcdef", f.study.id.id, cet.id.id, badVersion.toString, specimenDefinition.id.id)
         val reply = makeAuthRequest(DELETE, url.path).value
         reply must beBadRequestWithMessage("expected version doesn't match current version")
       }
@@ -857,7 +896,7 @@ class CeventTypesControllerSpec
         val studyId = nameGenerator.next[Study]
         val cetId = nameGenerator.next[CollectionEventType]
 
-        val reply = makeAuthRequest(DELETE, uri("spcdesc", studyId, cetId, "0", "xyz").path).value
+        val reply = makeAuthRequest(DELETE, uri("spcdef", studyId, cetId, "0", "xyz").path).value
         reply must beNotFoundWithMessage("IdNotFound.*study")
       }
 
@@ -866,7 +905,7 @@ class CeventTypesControllerSpec
         studyRepository.put(study)
         val cetId = nameGenerator.next[CollectionEventType]
 
-        val reply = makeAuthRequest(DELETE, uri("spcdesc", study.id.id, cetId, "0", "xyz").path).value
+        val reply = makeAuthRequest(DELETE, uri("spcdef", study.id.id, cetId, "0", "xyz").path).value
         reply must beNotFoundWithMessage("IdNotFound.*collection event type")
       }
 
@@ -878,7 +917,7 @@ class CeventTypesControllerSpec
 
         collectionEventTypeRepository.put(cet.copy(specimenDefinitions = Set(specimenDefinition)))
 
-        val url = uri("spcdesc", f.study.id.id, cet.id.id, cet.version.toString, badUniqueId)
+        val url = uri("spcdef", f.study.id.id, cet.id.id, cet.version.toString, badUniqueId)
         val reply = makeAuthRequest(DELETE, url.path).value
         reply must beNotFoundWithMessage("specimen definition does not exist")
       }
@@ -893,7 +932,7 @@ class CeventTypesControllerSpec
                                                            specimenDefinitions = Set(specimenDefinition))
           collectionEventTypeRepository.put(cet)
 
-          val url = uri("spcdesc", study.id.id, cet.id.id, cet.version.toString, specimenDefinition.id.id)
+          val url = uri("spcdef", study.id.id, cet.id.id, cet.version.toString, specimenDefinition.id.id)
           val reply = makeAuthRequest(DELETE, url.path).value
           reply must beBadRequestWithMessage("InvalidStatus: study not disabled")
         }

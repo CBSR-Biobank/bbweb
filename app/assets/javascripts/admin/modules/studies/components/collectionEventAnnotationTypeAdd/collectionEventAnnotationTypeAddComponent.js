@@ -41,8 +41,11 @@ class CollectionEventAnnotationTypeAddController extends AnnotationTypeAddContro
       this.breadcrumbService.forState('home.admin'),
       this.breadcrumbService.forState('home.admin.studies'),
       this.breadcrumbService.forStateWithFunc(
+        `home.admin.studies.study.collection({ studySlug: "${studySlug}" })`,
+        () => this.study.name),
+      this.breadcrumbService.forStateWithFunc(
         `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
-        () => this.study.name + ': ' + this.collectionEventType.name),
+        () => this.collectionEventType.name),
       this.breadcrumbService.forStateWithFunc(
         'home.admin.studies.study.collection.ceventType.annotationTypeView',
         () => this.gettextCatalog.getString('Add annotation'))

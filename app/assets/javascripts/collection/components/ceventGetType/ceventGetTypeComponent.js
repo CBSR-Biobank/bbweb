@@ -15,12 +15,14 @@ class CeventGetTypeController {
   constructor($state,
               CollectionEventTypeName,
               CollectionEvent,
+              breadcrumbService,
               gettextCatalog) {
     'ngInject'
     Object.assign(this, {
       $state,
       CollectionEventTypeName,
       CollectionEvent,
+      breadcrumbService,
       gettextCatalog
     })
   }
@@ -30,7 +32,20 @@ class CeventGetTypeController {
                                                { id: this.participant.uniqueId })
     this.CollectionEventTypeName.list(this.study.id).then((reply) => {
       this.collectionEventTypeNames = reply
-    })
+    });
+
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.collection'),
+      this.breadcrumbService.forStateWithFunc('home.collection.study', () => this.study.name),
+      this.breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents',
+        () => this.gettextCatalog.getString('Participant {{uniqueId}}',
+                                           { uniqueId: this.participant.uniqueId })),
+      this.breadcrumbService.forStateWithFunc(
+        'home.collection.study.participant.cevents.add',
+        () => this.gettextCatalog.getString('Select event type'))
+    ];
   }
 
   updateCollectionEventType() {

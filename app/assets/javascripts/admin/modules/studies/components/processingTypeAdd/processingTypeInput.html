@@ -1,0 +1,135 @@
+<progress-tracker task-data="vm.progressInfo"></progress-tracker>
+<form class="form-horizontal voffset4" name="ptForm" novalidate>
+
+  <!-- INPUT ENTITY -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : ptForm.name.$invalid && !ptForm.name.$pristine }">
+    <label for="name" class="col-md-2 form-control-label" translate>Source</label>
+    <div class="col-md-5">
+      <input name="collectedSpecimen"
+             type="radio"
+             ng-model="vm.inputTypeIsCollected"
+             ng-value="true"
+             ng-change="vm.collectedSpecimen()"
+             focus-me="true"
+             required />
+      <translate>Collected specimen</translate>
+    </div>
+    <div class="col-md-5">
+      <input name="processedSpecimen"
+             type="radio"
+             ng-model="vm.inputTypeIsCollected"
+             ng-value="false"
+             ng-change="vm.processedSpecimen()"
+             required />
+      <translate>Processed specimen</translate>
+    </div>
+  </div>
+
+  <!-- COLLECTION EVENT TYPE -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : ptForm.eventType.$invalid &&
+              !ptForm.eventType.$pristine }"
+       ng-if="vm.inputTypeIsCollected">
+    <label for="eventType" class="col-md-2 form-control-label" translate>Event</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="eventType"
+              ng-model="vm.eventType"
+              ng-options="et as et.name for et in vm.eventTypes"
+              ng-change="vm.updateCollectionEventType()"
+              required>
+        <option value="">-- choose event --</option>
+      </select>
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="ptForm.eventType.$error"
+         ng-if="ptForm.eventType.$dirty">
+      <div ng-message="required" class="help-block" translate>Please select an event</div>
+    </div>
+  </div>
+
+  <!-- SPECIMEN DEFINITION -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : ptForm.definition.$invalid && !ptForm.definition.$pristine }"
+       ng-if="vm.inputTypeIsCollected">
+    <label for="definition" class="col-md-2 form-control-label" translate>Specimen</label>
+    <div class="col-md-10">
+      <select class="form-control"
+              name="definition"
+              ng-model="vm.specimenDefinition"
+              ng-options="def as def.name for def in vm.eventType.specimenDefinitionNames""
+              ng-disabled="!vm.eventType"
+              required>
+        <option value="">-- choose specimen --</option>
+      </select>
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="ptForm.definition.$error"
+         ng-if="ptForm.definition.$dirty">
+      <div ng-message="required" class="help-block" translate>Please select a specimen event</div>
+    </div>
+  </div>
+
+  <!-- EXPECTED CHANGE -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : ptForm.expectedChange.$invalid && !ptForm.expectedChange.$pristine }"
+       ng-if="vm.inputTypeIsCollected || vm.inputTypeIsProcessed">
+    <label for="units" class="col-md-2 form-control-label" translate>Expected Change</label>
+    <div class="col-md-10">
+      <input name="expectedChange"
+             type="number"
+             class="form-control"
+             ng-model="vm.expectedChange"
+             placeholder="{{'the amount removed from this specimen'|translate}}"
+             ng-disabled="!vm.eventType"
+             positive-float
+             required/>
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="ptForm.expectedChange.$error"
+         ng-if="ptForm.expectedChange.$dirty">
+      <div ng-message="required" class="help-block" translate>Expected change is required</div>
+    </div>
+  </div>
+
+  <!-- COUNT -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : ptForm.count.$invalid && !ptForm.count.$pristine }"
+       ng-if="vm.inputTypeIsCollected || vm.inputTypeIsProcessed">
+    <label for="units" class="col-md-2 form-control-label" translate>Specimen Count</label>
+    <div class="col-md-10">
+      <input name="count"
+             type="number"
+             class="form-control"
+             ng-model="vm.count"
+             placeholder="{{'the number of specimens that are required'|translate}}"
+             ng-disabled="!vm.eventType"
+             natural-number
+             required/>
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="ptForm.count.$error"
+         ng-if="ptForm.count.$dirty">
+      <div ng-message="required" class="help-block" translate>Specimen count is required</div>
+    </div>
+  </div>
+
+  <!-- BUTTONS  -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <button type="button" class="btn btn-warning" ng-click="vm.previous()" translate>
+        <i class="glyphicon glyphicon-chevron-left"></i> Previous step
+      </button>
+      <button type="button"
+              class="btn btn-primary"
+              ng-disabled="ptForm.$invalid"
+              ng-click="vm.next()" translate>
+        Next step <i class="glyphicon glyphicon-chevron-right"></i>
+      </button>
+       <button type="button" class="btn" ng-click="vm.cancel()" translate>
+         <i class="glyphicon glyphicon-remove"></i> Cancel
+       </button>
+    </div>
+  </div>
+</form>

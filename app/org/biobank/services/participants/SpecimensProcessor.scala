@@ -290,9 +290,9 @@ class SpecimensProcessor @Inject() (
   private def validateSpecimenInfo(specimenData: List[SpecimenInfo], ceventType: CollectionEventType)
       : ServiceValidation[Boolean] = {
 
-    val cmdSpcDescIds = specimenData.map(s => SpecimenDefinitionId(s.specimenDefinitionId)).toSet
-    val ceventDescId  = ceventType.specimenDefinitions.map(s => s.id).toSet
-    val notBelonging  = cmdSpcDescIds.diff(ceventDescId)
+    val cmdSpcDefIds = specimenData.map(s => SpecimenDefinitionId(s.specimenDefinitionId)).toSet
+    val ceventDefId  = ceventType.specimenDefinitions.map(s => s.id).toSet
+    val notBelonging  = cmdSpcDefIds.diff(ceventDefId)
 
     if (notBelonging.isEmpty) true.successNel[String]
     else EntityCriteriaError("specimen descriptions do not belong to collection event type: "

@@ -17,6 +17,9 @@ class CeventTypesRouter @Inject()(controller: CeventTypesController) extends Sim
     case GET(p"/names/${studyId(sId)}") =>
       controller.listNames(sId)
 
+    case GET(p"/spcdef/${slug(studySlug)}") =>
+      controller.specimenDefinitions(studySlug)
+
     case GET(p"/${slug(studySlug)}/${slug(ceventTypeSlug)}") =>
       controller.get(studySlug, ceventTypeSlug)
 
@@ -35,13 +38,13 @@ class CeventTypesRouter @Inject()(controller: CeventTypesController) extends Sim
     case POST(p"/recurring/${ceventTypeId(cetId)}") =>
       controller.updateRecurring(cetId)
 
-    case POST(p"/spcdesc/${ceventTypeId(cetId)}") =>
+    case POST(p"/spcdef/${ceventTypeId(cetId)}") =>
       controller.addSpecimenDefinition(cetId)
 
-    case POST(p"/spcdesc/${ceventTypeId(cetId)}/$sdId") =>
+    case POST(p"/spcdef/${ceventTypeId(cetId)}/$sdId") =>
       controller.updateSpecimenDefinition(cetId, sdId)
 
-    case DELETE(p"/spcdesc/${studyId(id)}/${ceventTypeId(cetId)}/${long(ver)}/$sdId") =>
+    case DELETE(p"/spcdef/${studyId(id)}/${ceventTypeId(cetId)}/${long(ver)}/$sdId") =>
       controller.removeSpecimenDefinition(id, cetId, ver, sdId)
 
     case POST(p"/annottype/${ceventTypeId(cetId)}") =>

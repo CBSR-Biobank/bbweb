@@ -84,6 +84,18 @@ package dto {
 
   }
 
+  final case class SpecimenDefinitionNames(id:                      String,
+                                           slug:                    Slug,
+                                           name:                    String,
+                                           specimenDefinitionNames: Set[EntityInfoDto])
+
+  object SpecimenDefinitionNames {
+
+    implicit val specimenDefinitionNamesFormat: Format[SpecimenDefinitionNames] =
+      Json.format[SpecimenDefinitionNames]
+
+  }
+
   final case class CollectionEventDto(id:                      String,
                                       participantId:           String,
                                       participantSlug:         String,

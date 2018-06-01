@@ -6,7 +6,6 @@ import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.containers._
 import play.api.libs.json._
-import scala.util.Try
 import scalaz.Scalaz._
 
 /**
@@ -308,17 +307,12 @@ final case class ProcessingType(studyId:            StudyId,
 
 object InputSpecimenProcessing {
 
-  implicit val inputSpecimenInfoFormat: Format[InputSpecimenProcessing] = new Format[InputSpecimenProcessing] {
+  implicit val inputSpecimenInfoFormat: Format[InputSpecimenProcessing] =
+    new Format[InputSpecimenProcessing] {
 
       override def reads(json: JsValue): JsResult[InputSpecimenProcessing] = {
         for {
-          expectedChange       <- (json \ "expectedChange").validate[String]
-          validExpectedChange  <- {
-            Try(BigDecimal(expectedChange)).toOption match {
-              case None => JsError("error: could not parse json for 'expectedChange'")
-              case Some(value) => JsSuccess(value)
-            }
-          }
+          expectedChange       <- (json \ "expectedChange").validate[BigDecimal]
           count                <- (json \ "count").validate[Int]
           containerTypeId      <- (json \ "containerTypeId").validateOpt[ContainerTypeId]
           definitionType       <- (json \ "definitionType").validate[String]
@@ -335,17 +329,17 @@ object InputSpecimenProcessing {
           val id: IdentifiedDomainObject[_] =
             if (validDefinitionType == ProcessingType.collectedDefinition) CollectionEventTypeId(entityId)
             else ProcessingTypeId(entityId)
-          InputSpecimenProcessing(validExpectedChange,
-                            count,
-                            containerTypeId,
-                            validDefinitionType,
-                            id,
-                            specimenDefinitionId)
+          InputSpecimenProcessing(expectedChange,
+                                  count,
+                                  containerTypeId,
+                                  validDefinitionType,
+                                  id,
+                                  specimenDefinitionId)
         }
       }
 
       override def writes(specimenInfo: InputSpecimenProcessing): JsValue =
-        Json.obj("expectedChange"       -> specimenInfo.expectedChange.toString,
+        Json.obj("expectedChange"       -> specimenInfo.expectedChange,
                  "count"                -> specimenInfo.count,
                  "containerTypeId"      -> specimenInfo.containerTypeId.map(_.id),
                  "definitionType"       -> specimenInfo.definitionType.id,
@@ -361,23 +355,17 @@ object OutputSpecimenProcessing {
 
       override def reads(json: JsValue): JsResult[OutputSpecimenProcessing] = {
         for {
-          expectedChange       <- (json \ "expectedChange").validate[String]
-          validExpectedChange  <- {
-            Try(BigDecimal(expectedChange)).toOption match {
-              case None => JsError("error: could not parse json for 'expectedChange'")
-              case Some(value) => JsSuccess(value)
-            }
-          }
+          expectedChange       <- (json \ "expectedChange").validate[BigDecimal]
           count                <- (json \ "count").validate[Int]
           containerTypeId      <- (json \ "containerTypeId").validateOpt[ContainerTypeId]
           specimenDefinition   <- (json \ "specimenDefinition").validate[ProcessedSpecimenDefinition]
         } yield {
-          OutputSpecimenProcessing(validExpectedChange, count, containerTypeId, specimenDefinition)
+          OutputSpecimenProcessing(expectedChange, count, containerTypeId, specimenDefinition)
         }
       }
 
       override def writes(specimenInfo: OutputSpecimenProcessing): JsValue =
-        Json.obj("expectedChange"     -> specimenInfo.expectedChange.toString,
+        Json.obj("expectedChange"     -> specimenInfo.expectedChange,
                  "count"              -> specimenInfo.count,
                  "containerTypeId"    -> specimenInfo.containerTypeId.map(_.id),
                  "specimenDefinition" -> specimenInfo.specimenDefinition)

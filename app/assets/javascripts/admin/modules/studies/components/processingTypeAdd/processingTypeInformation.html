@@ -1,0 +1,63 @@
+<progress-tracker task-data="vm.progressInfo"></progress-tracker>
+<form class="form-horizontal voffset4" name="ptForm" novalidate>
+
+  <!-- NAME -->
+  <div class="form-group"
+       ng-class="{ 'has-error' : ptForm.name.$invalid && !ptForm.name.$pristine }">
+    <label for="name" class="col-md-2 form-control-label" translate>Name</label>
+    <div class="col-md-10">
+      <input name="name"
+             type="text"
+             class="form-control"
+             ng-model="vm.name"
+             ng-minlength="2"
+             placeholder="{{'A short name for this processing step'|translate}}"
+             focus-me="true"
+             required/>
+    </div>
+    <div class="col-md-offset-2 col-md-10"
+         ng-messages="ptForm.name.$error"
+         ng-if="ptForm.name.$dirty">
+      <div ng-message="minlength" class="help-block" translate>Name is too short</div>
+    </div>
+  </div>
+
+  <!-- DESCRIPTION -->
+  <div class="form-group">
+    <label for="description" class="col-md-2 form-control-label" translate>Description</label>
+    <div class="col-md-10">
+      <textarea name="description"
+                class="form-control"
+                rows="10"
+                ng-model="vm.description"
+                placeholder="{{'A description for this processing step (optional)'|translate}}"></textarea>
+    </div>
+  </div>
+
+  <!-- ENABLED -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <input name="enabled"
+             type="checkbox"
+             ng-model="vm.enabled">
+      <translate translate-context="whether or not this processing is enabled">
+        Enabled
+      </translate>
+    </div>
+  </div>
+
+  <!-- BUTTONS  -->
+  <div class="form-group">
+    <div class="col-md-offset-2 col-md-10">
+      <button type="button"
+              class="btn btn-primary"
+              ng-disabled="ptForm.$invalid"
+              ng-click="vm.next()" translate>
+        Next step <i class="glyphicon glyphicon-chevron-right"></i>
+      </button>
+      <button type="button" class="btn" ng-click="vm.cancel()" translate>
+        <i class="glyphicon glyphicon-remove"></i> Cancel
+      </button>
+    </div>
+  </div>
+</form>
