@@ -1,24 +1,18 @@
-import _ from 'lodash';
-
 class ProcessingTypeInput {
 
   constructor($state,
               ProcessingTypeAdd,
-              ProcessingTypeAddTasks,
-              CollectionEventType,
-              CollectionEventTypeName,
-              biobankApi) {
+              ProcessingTypeAddTasks) {
     'ngInject';
     Object.assign(this,
                   {
                     $state,
                     ProcessingTypeAdd,
-                    ProcessingTypeAddTasks,
-                    CollectionEventType,
-                    CollectionEventTypeName,
-                    biobankApi
+                    ProcessingTypeAddTasks
                   });
     this.inputType = undefined;
+    this.processingTypes = [];
+    this.haveProcessingTypes = false;
   }
 
   $onInit() {
@@ -35,69 +29,15 @@ class ProcessingTypeInput {
       this.goToPreviousState(true);
       return;
     }
-
-    const input = this.ProcessingTypeAdd.processingType.specimenProcessing.input;
-    if (input.definitionType !== undefined) {
-      this.inputTypeIsCollected = input.isCollected();
-    }
-
-    if (this.inputTypeIsCollected) {
-      this.ProcessingTypeAdd.getCollectedSpecimenDefinitions(this.study)
-        .then(reply => {
-          this.eventTypes = reply;
-          this.eventType = _.find(this.eventTypes, { id: input.entityId });
-          if (this.eventType !== undefined) {
-            this.specimenDefinition = _.find(this.eventType.specimenDefinitionNames,
-                                             { id: input.specimenDefinitionId });
-          }
-          this.commonInit();
-        })
-    }
   }
 
-  collectedSpecimen() {
-    this.eventType = undefined;
-    this.ProcessingTypeAdd.getCollectedSpecimenDefinitions(this.study)
-      .then(reply => {
-        this.eventTypes = reply;
-        this.eventType = (reply.length === 1) ? reply[0].slug : undefined;
-        this.commonInit();
-      })
+  getCollectionSpecimenDefinitions() {
+    return this.ProcessingTypeAdd.getCollectionSpecimenDefinitions(this.study);
   }
 
-  commonInit() {
-    const input = this.ProcessingTypeAdd.processingType.specimenProcessing.input;
-    this.expectedChange  = input.expectedChange;
-    this.count           = input.count;
-    this.containerTypeId = input.containerTypeId;
+  getProcessedSpecimenDefinitions() {
+    return this.ProcessingTypeAdd.getProcessedSpecimenDefinitions(this.study);
   }
-
-  processedSpecimen() {
-    console.log(this.inputTypeIsCollected);
-    this.eventType = undefined;
-  }
-
-  updateCollectionEventType() {
-    this.specimenDefinition = undefined;
-  }
-
-  assignValues() {
-    const input = this.ProcessingTypeAdd.processingType.specimenProcessing.input;
-
-    if (this.inputTypeIsCollected) {
-      input.setDefinitionType(true);
-      input.entityId = this.eventType.id;
-      input.specimenDefinitionId = this.specimenDefinition.id;
-    } else if (this.inputTypeIsProcessed) {
-      input.setDefinitionType(false);
-      input.entityId = this.processingType.id;
-      input.specimenDefinitionId = this.processingType.output.specimenDefinition.id;
-    }
-
-    input.expectedChange  = this.expectedChange;
-    input.count           = this.count;
-    input.containerTypeId = this.containerTypeId;
-   }
 
   goToPreviousState(initialize) {
     this.$state.go('home.admin.studies.study.processing.addType.information',
@@ -107,13 +47,13 @@ class ProcessingTypeInput {
                    });
   }
 
-  previous() {
-    this.assignValues();
+  previous(processingType) {
+    this.ProcessingTypeAdd.processingType = processingType;
     this.goToPreviousState(false);
   }
 
-  next() {
-    this.assignValues();
+  next(processingType) {
+    this.ProcessingTypeAdd.processingType = processingType;
     this.$state.go('home.admin.studies.study.processing.addType.output');
   }
 

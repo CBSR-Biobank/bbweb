@@ -37,8 +37,14 @@ class ProcessingTypesController @Inject() (
   protected val PageSizeMax = 10
 
   def get(studySlug: Slug, procTypeSlug: Slug): Action[Unit] =
-    action(parse.empty) { implicit request =>
+    action.async(parse.empty) { implicit request =>
       val processingType = service.processingTypeBySlug(request.authInfo.userId, studySlug, procTypeSlug)
+      validationReply(processingType)
+    }
+
+  def getById(studyId: StudyId, processingTypeId: ProcessingTypeId): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      val processingType = service.processingTypeById(request.authInfo.userId, studyId, processingTypeId)
       validationReply(processingType)
     }
 
@@ -54,6 +60,16 @@ class ProcessingTypesController @Inject() (
       )
     }
   }
+
+  def inUse(slug: Slug): Action[Unit] =
+    action(parse.empty) { implicit request =>
+      validationReply(service.processingTypeInUse(request.authInfo.userId, slug))
+    }
+
+  def specimenDefinitions(studyId: StudyId): Action[Unit] =
+    action.async(parse.empty) { implicit request =>
+      validationReply(service.specimenDefinitionsForStudy(request.authInfo.userId, studyId))
+    }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
@@ -125,57 +141,29 @@ class ProcessingTypesController @Inject() (
                            expectedVersion = json.expectedVersion,
                            enabled         = newValue)
         }
-      case change @ ("expectedInputChange" | "expectedOutputChange") =>
-        val inputType = if (change == "expectedInputChange") specimenProcessingInput
-                                 else specimenProcessingOutput
-        json.newValue.validate[BigDecimal].map { newValue =>
-          UpdateExpectedChangeCmd(sessionUserId   = json.sessionUserId,
-                                  studyId         = json.studyId,
-                                  id              = json.id,
-                                  expectedVersion = json.expectedVersion,
-                                  inputType       = inputType,
-                                  expectedChange  = newValue)
-        }
-      case count @ ("inputCount" | "outputCount") =>
-        val inputType = if (count == "inputCount") specimenProcessingInput
-                                 else specimenProcessingOutput
-        json.newValue.validate[Int].map { newValue =>
-          UpdateCountCmd(sessionUserId   = json.sessionUserId,
-                         studyId         = json.studyId,
-                         id              = json.id,
-                         expectedVersion = json.expectedVersion,
-                         inputType       = inputType,
-                         count           = newValue)
-        }
-      case container @ ("inputContainerType" | "outputContainerType") =>
-        val inputType = if (container == "inputContainerType") specimenProcessingInput
-                                 else specimenProcessingOutput
-        json.newValue.validate[String].map { newValue =>
-          val containerTypeIdMaybe = if (newValue.isEmpty) None else Some(newValue)
-          UpdateContainerTypeCmd(sessionUserId   = json.sessionUserId,
-                                 studyId         = json.studyId,
-                                 id              = json.id,
-                                 expectedVersion = json.expectedVersion,
-                                 inputType       = inputType,
-                                 containerTypeId = containerTypeIdMaybe)
-        }
-      case "inputSpecimenDefinition" =>
+      case "inputSpecimenProcessing" =>
         json.newValue.validate[InputSpecimenProcessing].map { newValue =>
-          UpdateInputSpecimenDefinitionCmd(sessionUserId        = json.sessionUserId,
+          UpdateInputSpecimenProcessingCmd(sessionUserId        = json.sessionUserId,
                                            studyId              = json.studyId,
                                            id                   = json.id,
                                            expectedVersion      = json.expectedVersion,
+                                           expectedChange       = newValue.expectedChange,
+                                           count                = newValue.count,
+                                           containerTypeId      = newValue.containerTypeId,
                                            definitionType       = newValue.definitionType,
                                            entityId             = newValue.entityId,
                                            specimenDefinitionId = newValue.specimenDefinitionId)
         }
-      case "outputSpecimenDefinition" =>
-        json.newValue.validate[SpecimenDefinition].map { newValue =>
-          UpdateOutputSpecimenDefinitionCmd(sessionUserId      = json.sessionUserId,
+      case "outputSpecimenProcessing" =>
+        json.newValue.validate[OutputSpecimenProcessing].map { newValue =>
+          UpdateOutputSpecimenProcessingCmd(sessionUserId      = json.sessionUserId,
                                             studyId            = json.studyId,
                                             id                 = json.id,
                                             expectedVersion    = json.expectedVersion,
-                                            specimenDefinition = newValue)
+                                            expectedChange     = newValue.expectedChange,
+                                            count              = newValue.count,
+                                            containerTypeId    = newValue.containerTypeId,
+                                            specimenDefinition = newValue.specimenDefinition)
         }
       case _ =>
         JsError(JsonValidationError(s"processing type does not support updates to property ${json.property}"))

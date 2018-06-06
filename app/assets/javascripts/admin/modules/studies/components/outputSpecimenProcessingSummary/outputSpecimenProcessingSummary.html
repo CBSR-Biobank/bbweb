@@ -1,0 +1,48 @@
+<div class="row">
+  <div class="col-md-12">
+    <strong>
+      {{vm.output.specimenDefinition.name}}
+    </strong>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <small class="text-muted">
+      <translate>Anatomical source:</translate>
+      <strong>{{ vm.output.specimenDefinition.anatomicalSourceType }}</strong>
+    </small>
+  </div>
+  <div class="col-md-4">
+    <small class="text-muted">
+      <translate>Type:</translate>
+      <strong>{{ vm.output.specimenDefinition.specimenType }}</strong>
+    </small>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-8">
+    <small class="text-muted">
+      <translate>Preservation Type:</translate>
+      <strong>{{ vm.output.specimenDefinition.preservationType }} ({{vm.output.specimenDefinition.preservationTemperature}})</strong>
+    </small>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-4">
+    <small class="text-info">
+      <translate>Excpected change:</translate>
+      <strong>{{ vm.output.expectedChange }} {{ vm.output.specimenDefinition.units }}</strong>
+    </small>
+  </div>
+  <div class="col-md-4">
+    <small class="text-info">
+      <translate>Count:</translate>
+      <strong>{{ vm.output.count }}</strong>
+    </small>
+  </div>
+</div>
+<div class="row" ng-if="vm.output.specimenDefinition.description">
+  <div class="col-md-12">
+    <p>{{vm.output.specimenDefinition.description | truncate:100}}</p>
+  </div>
+</div>

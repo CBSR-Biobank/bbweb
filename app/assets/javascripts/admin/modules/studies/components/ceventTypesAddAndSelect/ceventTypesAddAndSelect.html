@@ -2,7 +2,7 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       <translate translate-context="used to list collection events">Events</translate>
-      <span class="btn-group pull-right">
+      <span class="btn-group pull-right" ng-if="vm.addAllowed">
         <button class="btn btn-xs btn-default"
                 uib-tooltip="{{'add collection event'|translate}}"
                 ng-click="vm.add()">

@@ -1,8 +1,10 @@
 <study-not-disabled-warning study="vm.study"></study-not-disabled-warning>
 <div class="row">
   <div class="col-md-3">
-    <cevent-types-add-and-select study="vm.study"
-                                 collection-event-types="vm.collectionEventTypes">
+    <cevent-types-add-and-select
+      study="vm.study"
+      collection-event-types="vm.collectionEventTypes"
+      add-allowed="vm.study.isDisabled()">
     </cevent-types-add-and-select>
   </div>
   <div class="col-md-9">

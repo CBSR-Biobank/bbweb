@@ -25,11 +25,9 @@ function ShipmentViewLostController($state,
     modalService.modalOkCancel(
       gettextCatalog.getString('Please confirm'),
       gettextCatalog.getString('Are you sure you return this shipment to <b>Sent</b> state?'))
-      .then(function () {
-        return vm.shipment.send(vm.shipment.timeSent)
-          .catch(notificationsService.updateErrorAndReject);
-      })
-      .then(function () {
+      .then(() => vm.shipment.send(vm.shipment.timeSent))
+      .catch(err => notificationsService.updateError(err))
+      .then(() => {
         $state.go('home.shipping.shipment', { shipmentId: vm.shipment.id }, { reload: true });
       });
   }

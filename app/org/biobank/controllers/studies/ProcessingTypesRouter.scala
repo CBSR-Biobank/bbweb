@@ -11,6 +11,15 @@ class ProcessingTypesRouter @Inject()(controller: ProcessingTypesController) ext
 
   override def routes: Routes = {
 
+    case GET(p"/id/${studyId(sId)}/${procTypeId(ptId)}") =>
+      controller.getById(sId, ptId)
+
+    case GET(p"/inuse/${slug(s)}") =>
+      controller.inUse(s)
+
+    case GET(p"/spcdefs/${studyId(sId)}") =>
+      controller.specimenDefinitions(sId)
+
     case GET(p"/${slug(studySlug)}/${slug(procTypeSlug)}") =>
       controller.get(studySlug, procTypeSlug)
 

@@ -101,6 +101,36 @@ class CeventTypesControllerSpec
 
     }
 
+    describe("GET /api/studies/cetypes/id/:studyId/:eventTypeId") {
+
+      it("get a collection event type by ID") {
+        val f = new EventTypeFixture
+        val cet = f.eventTypes(0)
+        val reply = makeAuthRequest(GET, uri("id", f.study.id.id, cet.id.id).path).value
+        reply must beOkResponseWithJsonReply
+
+        val replyCet = (contentAsJson(reply) \ "data").validate[CollectionEventType]
+        replyCet must be (jsSuccess)
+        replyCet.get must matchCollectionEventType(cet)
+      }
+
+      it("fail for an invalid study ID") {
+        val study = factory.createDisabledStudy
+        val cet = factory.createCollectionEventType
+        val reply = makeAuthRequest(GET, uri("id", study.id.id, cet.id.id).path).value
+        reply must beNotFoundWithMessage("IdNotFound.*study id")
+      }
+
+      it("fail for an invalid collection event type ID") {
+        val study = factory.createDisabledStudy
+        val cet = factory.createCollectionEventType
+        studyRepository.put(study)
+        val reply = makeAuthRequest(GET, uri("id", study.id.id, cet.id.id).path).value
+        reply must beNotFoundWithMessage("IdNotFound.*collection event type")
+      }
+
+    }
+
     describe("GET /api/studies/cetypes") {
 
       it("list none") {
@@ -231,7 +261,7 @@ class CeventTypesControllerSpec
       }
     }
 
-    describe("GET /api/studies/cetypes/spcdef/:studySlug") {
+    describe("GET /api/studies/cetypes/spcdefs/:studySlug") {
 
       it("can retrieve specimen definitions for a study") {
         val f = new EventTypeFixture(2, true)
@@ -241,24 +271,24 @@ class CeventTypesControllerSpec
             val definitionNames = eventType.specimenDefinitions.map { definition =>
                 EntityInfoDto(definition.id.id, definition.slug, definition.name)
               }
-            SpecimenDefinitionNames(eventType.id.id,
+            CollectionSpecimenDefinitionNames(eventType.id.id,
                                     eventType.slug,
                                     eventType.name,
                                     definitionNames)
           }
           .toList
 
-        val reply = makeAuthRequest(GET, uri("spcdef", f.study.slug.id).path).value
+        val reply = makeAuthRequest(GET, uri("spcdefs", f.study.slug.id).path).value
         reply must beOkResponseWithJsonReply
 
-        val replyDtos = (contentAsJson(reply) \ "data").validate[List[SpecimenDefinitionNames]]
+        val replyDtos = (contentAsJson(reply) \ "data").validate[List[CollectionSpecimenDefinitionNames]]
         replyDtos must be (jsSuccess)
         replyDtos.get must equal (expectedReply)
       }
 
       it("fail for an invalid study slug") {
         val study = factory.createDisabledStudy
-        val reply = makeAuthRequest(GET, uri("spcdef", study.slug.id).path).value
+        val reply = makeAuthRequest(GET, uri("spcdefs", study.slug.id).path).value
         reply must beNotFoundWithMessage("EntityCriteriaNotFound.*study slug")
       }
 

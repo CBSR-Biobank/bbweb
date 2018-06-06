@@ -7,6 +7,7 @@ import org.biobank.domain.annotations._
 import org.biobank.domain.containers._
 import play.api.libs.json._
 import scalaz.Scalaz._
+import scalaz.Validation.FlatMap._
 
 /**
  * Predicates that can be used to filter collections of [[ProcessingType]]s.
@@ -24,7 +25,7 @@ trait ProcessingTypeValidations extends StudyValidations {
 
   case object ProcessedSpecimenDefinitionIdRequired extends ValidationKey
 
-  case object CollectedSpecimenDefinitionIdRequired extends ValidationKey
+  case object CollectionSpecimenDefinitionIdRequired extends ValidationKey
 
   case object ContainerTypeIdRequired extends ValidationKey
 
@@ -91,8 +92,20 @@ final case class InputSpecimenProcessing(expectedChange:       BigDecimal,
       else ProcessingTypeIdRequired
 
     (super.validate |@|
+       validateDefinitionType(definitionType) |@|
        validateNonEmptyString(entityId.toString, idValidationKey) |@|
        validateId(specimenDefinitionId, SpecimenDefinitionIdRequired)) { case _ => true }
+  }
+
+  private def validateDefinitionType(definitionType: InputSpecimenDefinitionType)
+      : DomainValidation[InputSpecimenDefinitionType] = {
+    if ((definitionType.id == ProcessingType.collectedDefinition.id) ||
+          (definitionType.id == ProcessingType.processedDefinition.id)) {
+      ProcessingType.processedDefinition.successNel[String]
+    } else {
+      DomainError(s"invalid input specimen definition type: ${definitionType.id}")
+        .failureNel[InputSpecimenDefinitionType]
+    }
   }
 
 }
@@ -162,7 +175,8 @@ final case class ProcessingType(studyId:            StudyId,
     with HasOptionalDescription
     with HasStudyId
     with HasAnnotationTypes
-    with ProcessingTypeValidations {
+    with ProcessingTypeValidations
+    with CollectionEventTypeValidations {
   import org.biobank.CommonValidations._
   import org.biobank.domain.DomainValidations._
 
@@ -199,63 +213,37 @@ final case class ProcessingType(studyId:            StudyId,
          timeModified = Some(OffsetDateTime.now))
   }
 
-  /** Updates the expected input change. */
-  def withExpectedInputChange(change: BigDecimal): DomainValidation[ProcessingType] = {
-    validatePositiveNumber(change, InvalidPositiveNumber) map { _ =>
-      withInputSpecimenProcessing(specimenProcessing.input.copy(expectedChange = change))
+  def withInputSpecimenProcessing(input: InputSpecimenProcessing)
+      : DomainValidation[ProcessingType] = {
+    val entityIdValidator: DomainValidation[IdentifiedValueObject[_]] =
+      if (input.definitionType == ProcessingType.collectedDefinition) {
+        validateId(CollectionEventTypeId(input.entityId.toString), CollectionEventTypeIdRequired)
+      } else if (input.definitionType == ProcessingType.processedDefinition) {
+        validateId(ProcessingTypeId(input.entityId.toString), ProcessingTypeIdRequired)
+      } else {
+        DomainError(s"invalid definition type: ${input.definitionType}")
+          .failureNel[IdentifiedValueObject[_]]
+      }
+
+    (validatePositiveNumber(input.expectedChange, InvalidPositiveNumber) |@|
+       validatePositiveNumber(input.count, InvalidPositiveNumber) |@|
+       validateIdOption(input.containerTypeId, ContainerTypeIdRequired) |@|
+       entityIdValidator) { case _ =>
+        copy(specimenProcessing = specimenProcessing.copy(input = input),
+             version            = version + 1,
+             timeModified       = Some(OffsetDateTime.now))
     }
   }
 
-  /** Updates the expected output change. */
-  def withExpectedOutputChange(change: BigDecimal): DomainValidation[ProcessingType] = {
-    validatePositiveNumber(change, InvalidPositiveNumber) map { _ =>
-      withOutputSpecimenProcessing(specimenProcessing.output.copy(expectedChange = change))
-    }
-  }
-
-  /** Updates the input count. */
-  def withInputCount(count: Int): DomainValidation[ProcessingType] = {
-    validatePositiveNumber(count, InvalidPositiveNumber) map { _ =>
-      withInputSpecimenProcessing(specimenProcessing.input.copy(count = count))
-    }
-  }
-
-  /** Updates the output count. */
-  def withOutputCount(count: Int): DomainValidation[ProcessingType] = {
-    validatePositiveNumber(count, InvalidPositiveNumber) map { _ =>
-      withOutputSpecimenProcessing(specimenProcessing.output.copy(count = count))
-    }
-  }
-
-  /** Updates the input container type. */
-  def withInputContainerType(containerTypeId: Option[ContainerTypeId])
+  def withOutputSpecimenProcessing(output: OutputSpecimenProcessing)
       : DomainValidation[ProcessingType] = {
-    withInputSpecimenProcessing(specimenProcessing.input.copy(containerTypeId = containerTypeId))
-      .successNel[String]
-  }
-
-  /** Updates the output container type. */
-  def withOutputContainerType(containerTypeId: Option[ContainerTypeId])
-      : DomainValidation[ProcessingType] = {
-    withOutputSpecimenProcessing(specimenProcessing.output.copy(containerTypeId = containerTypeId))
-      .successNel[String]
-  }
-
-  def withInputSpecimenDefinition(definitionType: InputSpecimenDefinitionType,
-                                  id: IdentifiedDomainObject[_],
-                                  specimenDefinitionId: SpecimenDefinitionId)
-      : DomainValidation[ProcessingType] = {
-    val input = specimenProcessing.input.copy(definitionType       = definitionType,
-                                              entityId             = id,
-                                              specimenDefinitionId = specimenDefinitionId)
-    withInputSpecimenProcessing(input).successNel[String]
-  }
-
-  def withOutputSpecimenDefinition(specimenDefinition: ProcessedSpecimenDefinition)
-      : DomainValidation[ProcessingType] = {
-    ProcessedSpecimenDefinition.validate(specimenDefinition).map { sd =>
-      val input = specimenProcessing.output.copy(specimenDefinition = specimenDefinition)
-      withOutputSpecimenProcessing(input)
+    (validatePositiveNumber(output.expectedChange, InvalidPositiveNumber) |@|
+       validatePositiveNumber(output.count, InvalidPositiveNumber) |@|
+       validateIdOption(output.containerTypeId, ContainerTypeIdRequired) |@|
+       ProcessedSpecimenDefinition.validate(output.specimenDefinition)) { case _ =>
+        copy(specimenProcessing = specimenProcessing.copy(output = output),
+             version            = version + 1,
+             timeModified       = Some(OffsetDateTime.now))
     }
   }
 
@@ -278,18 +266,6 @@ final case class ProcessingType(studyId:            StudyId,
     }
   }
 
-  private def withInputSpecimenProcessing(input: InputSpecimenProcessing): ProcessingType = {
-    copy(specimenProcessing = specimenProcessing.copy(input = input),
-         version            = version + 1,
-         timeModified       = Some(OffsetDateTime.now))
-  }
-
-  private def withOutputSpecimenProcessing(output: OutputSpecimenProcessing): ProcessingType = {
-    copy(specimenProcessing = specimenProcessing.copy(output = output),
-         version            = version + 1,
-         timeModified       = Some(OffsetDateTime.now))
-  }
-
   override def toString: String =
     s"""|ProcessingType:{
         |  studyId:            $studyId,
@@ -306,6 +282,37 @@ final case class ProcessingType(studyId:            StudyId,
 }
 
 object InputSpecimenProcessing {
+
+  def create(expectedChange:       BigDecimal,
+             count:                Int,
+             containerTypeId:      Option[ContainerTypeId],
+             definitionType:       String,
+             entityId:             String,
+             specimenDefinitionId: String): DomainValidation[InputSpecimenProcessing] = {
+    for {
+      dt <- validateDefinitionType(definitionType)
+      eId: IdentifiedDomainObject[String] = {
+        if (dt == ProcessingType.collectedDefinition) CollectionEventTypeId(entityId)
+        else ProcessingTypeId(entityId)
+      }
+      input = InputSpecimenProcessing(expectedChange       = expectedChange,
+                                      count                = count,
+                                      containerTypeId      = containerTypeId,
+                                      definitionType       = dt,
+                                      entityId             = eId,
+                                      specimenDefinitionId = SpecimenDefinitionId(specimenDefinitionId))
+      valid <- input.validate
+    } yield input
+  }
+
+  private def validateDefinitionType(str: String): DomainValidation[InputSpecimenDefinitionType] = {
+    if (str == ProcessingType.collectedDefinition.id)
+      ProcessingType.collectedDefinition.successNel[String]
+    else if (str == ProcessingType.processedDefinition.id)
+      ProcessingType.processedDefinition.successNel[String]
+    else
+      DomainError(s"invalid input specimen definition type: $str").failureNel[InputSpecimenDefinitionType]
+  }
 
   implicit val inputSpecimenInfoFormat: Format[InputSpecimenProcessing] =
     new Format[InputSpecimenProcessing] {
@@ -350,6 +357,18 @@ object InputSpecimenProcessing {
 }
 
 object OutputSpecimenProcessing {
+
+  def create(expectedChange:     BigDecimal,
+             count:              Int,
+             containerTypeId:    Option[ContainerTypeId],
+             specimenDefinition: ProcessedSpecimenDefinition)
+      : DomainValidation[OutputSpecimenProcessing] = {
+    val output = OutputSpecimenProcessing(expectedChange     = expectedChange,
+                                          count              = count,
+                                          containerTypeId    = containerTypeId,
+                                          specimenDefinition = specimenDefinition)
+    output.validate.map { _ => output }
+  }
 
   implicit val outputSpecimenInfoFormat: Format[OutputSpecimenProcessing] = new Format[OutputSpecimenProcessing] {
 

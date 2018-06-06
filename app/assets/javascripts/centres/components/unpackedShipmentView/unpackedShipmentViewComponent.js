@@ -111,7 +111,7 @@ class UnpackedShipmentViewController extends TabbedPageController {
       this.gettextCatalog.getString('Please confirm'),
       this.gettextCatalog.getString('Are you sure you want to place this shipment in <b>Received</b> state?'))
       .then(() => this.shipment.receive(this.shipment.timeReceived))
-      .catch(this.notificationsService.updateErrorAndReject)
+      .catch(err => this.notificationsService.updateError(err))
       .then(() => {
         this.$state.go('home.shipping.shipment', { shipmentId: this.shipment.id }, { reload: true });
       });

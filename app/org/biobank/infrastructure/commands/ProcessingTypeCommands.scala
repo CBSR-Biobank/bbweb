@@ -18,13 +18,6 @@ object ProcessingTypeCommands {
       with HasIdentity
       with HasExpectedVersion
 
-  class SpecimenProcessingType(val id: String) extends AnyVal {
-    override def toString: String = id
-  }
-
-  val specimenProcessingInput: SpecimenProcessingType  = new SpecimenProcessingType("input")
-  val specimenProcessingOutput: SpecimenProcessingType = new SpecimenProcessingType("output")
-
   final case class SpecimenDefinition(name:                    String,
                                       description:             Option[String],
                                       units:                   String,
@@ -41,9 +34,9 @@ object ProcessingTypeCommands {
                                            specimenDefinitionId: String)
 
   final case class OutputSpecimenProcessing(expectedChange:     BigDecimal,
-                                      count:              Int,
-                                      containerTypeId:    Option[String],
-                                      specimenDefinition: SpecimenDefinition)
+                                            count:              Int,
+                                            containerTypeId:    Option[String],
+                                            specimenDefinition: SpecimenDefinition)
 
   final case class SpecimenProcessing(input: InputSpecimenProcessing, output: OutputSpecimenProcessing)
 
@@ -76,43 +69,25 @@ object ProcessingTypeCommands {
                                     enabled:         Boolean)
       extends ProcessingTypeModifyCommand
 
-  final case class UpdateExpectedChangeCmd(sessionUserId:   String,
-                                           studyId:         String,
-                                           id:              String,
-                                           expectedVersion: Long,
-                                           inputType:       SpecimenProcessingType,
-                                           expectedChange:  BigDecimal)
-      extends ProcessingTypeModifyCommand
-
-  final case class UpdateCountCmd(sessionUserId:   String,
-                                  studyId:         String,
-                                  id:              String,
-                                  expectedVersion: Long,
-                                  inputType:       SpecimenProcessingType,
-                                  count:           Int)
-      extends ProcessingTypeModifyCommand
-
-  final case class UpdateContainerTypeCmd(sessionUserId:   String,
-                                          studyId:         String,
-                                          id:              String,
-                                          expectedVersion: Long,
-                                          inputType:       SpecimenProcessingType,
-                                          containerTypeId: Option[String])
-      extends ProcessingTypeModifyCommand
-
-  final case class UpdateInputSpecimenDefinitionCmd(sessionUserId:        String,
+  final case class UpdateInputSpecimenProcessingCmd(sessionUserId:        String,
                                                     studyId:              String,
                                                     id:                   String,
                                                     expectedVersion:      Long,
+                                                    expectedChange:       BigDecimal,
+                                                    count:                Int,
+                                                    containerTypeId:      Option[String],
                                                     definitionType:       String,
                                                     entityId:             String,
                                                     specimenDefinitionId: String)
       extends ProcessingTypeModifyCommand
 
-  final case class UpdateOutputSpecimenDefinitionCmd(sessionUserId:      String,
+  final case class UpdateOutputSpecimenProcessingCmd(sessionUserId:      String,
                                                      studyId:            String,
                                                      id:                 String,
                                                      expectedVersion:    Long,
+                                                     expectedChange:     BigDecimal,
+                                                     count:              Int,
+                                                     containerTypeId:    Option[String],
                                                      specimenDefinition: SpecimenDefinition)
       extends ProcessingTypeModifyCommand
 

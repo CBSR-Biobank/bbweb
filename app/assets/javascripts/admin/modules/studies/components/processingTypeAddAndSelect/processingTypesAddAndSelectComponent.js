@@ -74,7 +74,7 @@ class ProcessingTypesAddAndSelectController {
   }
 
   select(processingType) {
-    this.$state.go('home.admin.studies.study.proessing.processingType',
+    this.$state.go('home.admin.studies.study.processing.viewType',
               { processingTypeSlug: processingType.slug });
   }
 
@@ -105,7 +105,9 @@ const processingTypesAddAndSelectComponent = {
   controller: ProcessingTypesAddAndSelectController,
   controllerAs: 'vm',
   bindings: {
-    study: '<'
+    study:           '<',
+    processingTypes: '<',
+    addAllowed:      '<'
   }
 }
 

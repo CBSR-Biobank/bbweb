@@ -130,6 +130,7 @@ class ProcessingTypeServiceSpec
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
           processingTypeService.processingTypeBySlug(user.id, f.study.slug, f.inputProcessingType.slug)
+            .futureValue
             .mustSucceed { result =>
               result.id must be (f.inputProcessingType.id)
             }
@@ -142,12 +143,14 @@ class ProcessingTypeServiceSpec
         processingTypeService.processingTypeBySlug(f.noMembershipUser.id,
                                                    f.study.slug,
                                                    f.inputProcessingType.slug)
+          .futureValue
           .mustFail("Unauthorized")
 
         info("no permission user")
         processingTypeService.processingTypeBySlug(f.nonStudyPermissionUser.id,
                                                    f.study.slug,
                                                    f.inputProcessingType.slug)
+          .futureValue
           .mustFail("Unauthorized")
 
       }

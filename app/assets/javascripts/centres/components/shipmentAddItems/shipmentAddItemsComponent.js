@@ -78,13 +78,9 @@ function ShipmentAddItemsController($q,
                                  gettextCatalog.getString('Time packed'),
                                  vm.timePacked,
                                  { required: true }).result
-        .then(function (timePacked) {
-          return vm.shipment.pack(timeService.dateAndTimeToUtcString(timePacked))
-            .then(function (shipment) {
-              return $state.go('home.shipping.shipment', { shipmentId: shipment.id});
-            })
-            .catch(notificationsService.updateErrorAndReject);
-        });
+        .then(timePacked => vm.shipment.pack(timeService.dateAndTimeToUtcString(timePacked)))
+        .catch(err => notificationsService.updateError(err))
+        .then(shipment => $state.go('home.shipping.shipment', { shipmentId: shipment.id}));
     });
   }
 

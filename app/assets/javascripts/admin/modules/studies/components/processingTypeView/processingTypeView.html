@@ -1,0 +1,205 @@
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      {{vm.processingType.name}}
+
+      <span class="pull-right"
+            uib-dropdown is-open="vm.processingMenu.isopen"
+            ng-if="vm.allowChanges">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="eventTypeMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="eventTypeMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update name</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editDescription()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update description</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editEnabled()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update enabled</translate>
+            </a>
+          </li>
+          <li class="divider"></li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.addAnnotationType()"
+               ng-disabled="vm.study.isDisabled()">
+              <i class="glyphicon glyphicon-plus text-primary"></i>
+              <translate>Add an annotation</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.removeProcessingType()"
+               ng-disabled="vm.study.isDisabled()">
+              <i class="glyphicon glyphicon-remove text-danger"></i>
+              <translate>Remove this processing step</translate>
+            </a>
+          </li>
+        </ul>
+      </span>
+    </h3>
+  </div>
+  <div uib-collapse="vm.isPanelCollapsed" class="panel-collapse">
+    <ul class="list-group">
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-2">
+            <strong translate>Name:</strong>
+          </div>
+          <div class="col-md-10">
+            {{vm.processingType.name}}
+          </div>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-2">
+            <strong translate>Description:</strong>
+          </div>
+          <div class="col-md-10">
+            <truncate-toggle
+              text="vm.processingType.description"
+              toggle-length="60"
+              text-empty-warning="{{'Description not entered yet.'|translate}}">
+            </truncate-toggle>
+          </div>
+        </div>
+      </li>
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-2">
+            <strong translate>Enabled:</strong>
+          </div>
+          <div class="col-md-10">{{vm.processingType.enabled | yesNo}}</div>
+        </div>
+      </li>
+      <li class="list-group-item" ng-repeat="annotationType in vm.processingType.annotationTypes">
+        <div class="row">
+          <div class="col-md-2">
+            <strong translate>Annotation:</strong>
+          </div>
+          <div class="col-md-8">
+            <annotation-type-summary annotation-type="annotationType"></annotation-type-summary>
+          </div>
+          <div class="col-md-2">
+            <annotation-type-menu annotation-type="annotationType"
+                                  allow-changes="vm.allowChanges"
+                                  on-view="vm.editAnnotationType.bind(vm)"
+                                  on-update="vm.editAnnotationType.bind(vm)"
+                                  on-remove="vm.removeAnnotationType.bind(vm)">
+            </annotation-type-menu>
+          </div>
+        </div>
+      </li>
+    </ul>
+    <status-line time-added="vm.processingType.timeAdded"
+                 time-modified="vm.processingType.timeModified">
+    </status-line>
+  </div>
+</div>
+
+<!-- -INPUT -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <translate>Input specimen</translate>
+
+      <span class="pull-right"
+            uib-dropdown is-open="vm.inputMenu.isopen"
+            ng-if="vm.allowChanges">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="specimenMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu"
+            uib-dropdown-menu role="menu"
+            aria-labelledby="specimenMenu">
+          <li role="menuitem">
+            <a href ng-click="vm.inputSpecimenUpdate()">
+              <i class="glyphicon glyphicon-plus text-primary"></i>
+              <translate>Make changes to this specimen</translate>
+            </a>
+          </li>
+        </ul>
+      </span>
+
+    </h4>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-12">
+          <input-specimen-processing-summary
+            input="vm.processingType.specimenProcessing.input"
+            input-entity="vm.inputEntity"
+            specimen-definition="vm.inputSpecimenDefinition">
+          </input-specimen-processing-summary>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>
+
+<!-- -OUTPUT -->
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h4 class="panel-title">
+      <translate>Output specimen</translate>
+
+      <span class="pull-right"
+            uib-dropdown is-open="vm.outputMenu.isopen"
+            ng-if="vm.allowChanges">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="specimenMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu"
+            uib-dropdown-menu role="menu"
+            aria-labelledby="specimenMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.outputSpecimenUpdate()">
+              <i class="glyphicon glyphicon-plus text-primary"></i>
+              <translate>Make changes to this specimen</translate>
+            </a>
+          </li>
+        </ul>
+      </span>
+
+    </h4>
+  </div>
+  <ul class="list-group">
+    <li class="list-group-item">
+      <div class="row">
+        <div class="col-md-12">
+          <output-specimen-processing-summary
+            output="vm.processingType.specimenProcessing.output">
+          </output-specimen-processing-summary>
+        </div>
+      </div>
+    </li>
+  </ul>
+</div>

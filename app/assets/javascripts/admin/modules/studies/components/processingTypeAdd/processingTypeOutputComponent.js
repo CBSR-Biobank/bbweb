@@ -3,26 +3,20 @@ class ProcessingTypeOutput {
   constructor($state,
               ProcessingTypeAdd,
               ProcessingTypeAddTasks,
-              AnatomicalSourceType,
-              PreservationType,
-              PreservationTemperature,
-              SpecimenType) {
+              modalService,
+              gettextCatalog,
+              domainNotificationService) {
     'ngInject';
     Object.assign(this,
                   {
                     $state,
                     ProcessingTypeAdd,
                     ProcessingTypeAddTasks,
-                    AnatomicalSourceType,
-                    PreservationType,
-                    PreservationTemperature,
-                    SpecimenType
+                    modalService,
+                    gettextCatalog,
+                    domainNotificationService
                   });
 
-    this.anatomicalSourceTypes = Object.values(this.AnatomicalSourceType);
-    this.preservTypes          = Object.values(this.PreservationType);
-    this.preservTempTypes      = Object.values(this.PreservationTemperature);
-    this.specimenTypes         = Object.values(this.SpecimenType);
   }
 
   $onInit() {
@@ -37,19 +31,6 @@ class ProcessingTypeOutput {
       this.goToFirstState(true);
       return;
     }
-
-    const output = this.ProcessingTypeAdd.processingType.specimenProcessing.output;
-
-    this.expectedChange          = output.expectedChange;
-    this.count                   = output.count;
-    this.containerTypeId         = output.containerTypeId;
-    this.name                    = output.specimenDefinition.name;
-    this.description             = output.specimenDefinition.description;
-    this.units                   = output.specimenDefinition.units;
-    this.anatomicalSourceType    = output.specimenDefinition.anatomicalSourceType;
-    this.preservationType        = output.specimenDefinition.preservationType;
-    this.preservationTemperature = output.specimenDefinition.preservationTemperature;
-    this.specimenType            = output.specimenDefinition.specimenType;
   }
 
   goToFirstState() {
@@ -60,33 +41,28 @@ class ProcessingTypeOutput {
                    });
   }
 
-  assignValues() {
-   const output = this.ProcessingTypeAdd.processingType.specimenProcessing.output;
-
-    output.expectedChange                             = this.expectedChange;
-    output.count                                      = this.count;
-    output.containerTypeId                            = this.containerTypeId;
-    output.specimenDefinition.name                    = this.name;
-    output.specimenDefinition.description             = this.description;
-    output.specimenDefinition.units                   = this.units;
-    output.specimenDefinition.anatomicalSourceType    = this.anatomicalSourceType;
-    output.specimenDefinition.preservationType        = this.preservationType;
-    output.specimenDefinition.preservationTemperature = this.preservationTemperature;
-    output.specimenDefinition.specimenType            = this.specimenType;
-
-  }
-
   previous() {
-    this.assignValues();
     this.$state.go('home.admin.studies.study.processing.addType.input');
   }
 
   submit() {
-    this.assignValues();
     this.ProcessingTypeAdd.processingType.add()
       .then(() => {
         this.$state.go('home.admin.studies.study.processing');
-      });
+      })
+      .catch(error => {
+        if ((typeof error.message === 'string') && (error.message.indexOf('name already exists') > -1)) {
+          this.modalService.modalOk(
+            this.gettextCatalog.getString('Cannot Add'),
+            this.gettextCatalog.getString(
+              'The name <b>{{name}}</b> has already been used. Please use another name.',
+              { name : this.ProcessingTypeAdd.processingType.name }));
+        } else {
+          this.domainNotificationService.updateErrorModal(
+            error,
+            this.gettextCatalog.getString('processing type'));
+        }
+    });
   }
 
   cancel() {

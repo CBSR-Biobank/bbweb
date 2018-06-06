@@ -14,6 +14,8 @@ trait ProcessingTypeRepository
   def withId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : DomainValidation[ProcessingType]
 
+  def processingTypeInUse(processingTypeId: ProcessingTypeId): Boolean
+
   def allForStudy(studyId: StudyId): Set[ProcessingType]
 
 }
@@ -45,6 +47,11 @@ class ProcessingTypeRepositoryImpl
         }
       }
     } yield pt
+  }
+
+  def processingTypeInUse(processingTypeId: ProcessingTypeId): Boolean = {
+    // FIXME: this needs to be implemented
+    false
   }
 
   def allForStudy(studyId: StudyId): Set[ProcessingType] = {

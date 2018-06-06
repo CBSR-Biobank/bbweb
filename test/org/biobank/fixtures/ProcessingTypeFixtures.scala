@@ -9,16 +9,16 @@ trait ProcessingTypeFixtures {
 
   private class SpecimenDefinitionFixtures {
     val study = factory.createDisabledStudy
-    val collectedSpecimenDefinition = factory.createCollectionSpecimenDefinition
+    val collectionSpecimenDefinition = factory.createCollectionSpecimenDefinition
     val collectionEventType = factory.createCollectionEventType.copy(
-        specimenDefinitions = Set(collectedSpecimenDefinition))
+        specimenDefinitions = Set(collectionSpecimenDefinition))
 
     val input = InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
-                                  count                = 1,
-                                  containerTypeId      = None,
-                                  definitionType       = ProcessingType.collectedDefinition,
-                                  entityId             = collectionEventType.id,
-                                  specimenDefinitionId = collectedSpecimenDefinition.id)
+                                        count                = 1,
+                                        containerTypeId      = None,
+                                        definitionType       = ProcessingType.collectedDefinition,
+                                        entityId             = collectionEventType.id,
+                                        specimenDefinitionId = collectionSpecimenDefinition.id)
 
     private val _processingType = factory.createProcessingType
     private val specimenProcessing = _processingType.specimenProcessing.copy(input = input)
@@ -26,9 +26,9 @@ trait ProcessingTypeFixtures {
     val processingType = _processingType.copy(specimenProcessing = specimenProcessing)
   }
 
-  protected class CollectedSpecimenDefinitionFixtures {
+  protected class CollectionSpecimenDefinitionFixtures {
     private val f = new SpecimenDefinitionFixtures
-    val collectedSpecimenDefinition = f.collectedSpecimenDefinition
+    val collectionSpecimenDefinition = f.collectionSpecimenDefinition
     val collectionEventType = f.collectionEventType
     val processingType = f.processingType
     val study = f.study
@@ -40,11 +40,11 @@ trait ProcessingTypeFixtures {
     val inputSpecimenDefinition = inputProcessingType.specimenProcessing.output.specimenDefinition
     val outputSpecimenDefinition = factory.createProcessedSpecimenDefinition
     val input = InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
-                                  count                = 1,
-                                  containerTypeId      = None,
-                                  definitionType       = ProcessingType.processedDefinition,
-                                  entityId             = inputProcessingType.id,
-                                  specimenDefinitionId = inputSpecimenDefinition.id)
+                                        count                = 1,
+                                        containerTypeId      = None,
+                                        definitionType       = ProcessingType.processedDefinition,
+                                        entityId             = inputProcessingType.id,
+                                        specimenDefinitionId = inputSpecimenDefinition.id)
 
     private val _processingType = factory.createProcessingType
     private val specimenProcessing = _processingType.specimenProcessing.copy(input = input)

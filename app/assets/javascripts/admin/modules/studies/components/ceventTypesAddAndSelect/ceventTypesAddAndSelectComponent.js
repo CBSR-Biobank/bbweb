@@ -113,7 +113,8 @@ const ceventTypesAddAndSelectComponent = {
   controllerAs: 'vm',
   bindings: {
     study:                '<',
-    collectionEventTypes: '<'
+    collectionEventTypes: '<',
+    addAllowed:           '<'
   }
 }
 

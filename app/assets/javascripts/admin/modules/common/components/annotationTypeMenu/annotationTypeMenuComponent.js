@@ -1,3 +1,11 @@
+/**
+ * AngularJS Component used {@link domain.studies.Study Study} administration.
+ *
+ * @namespace admin.studies.components.annotationTypeMenu
+ *
+ * @author Nelson Loyola <loyola@ualberta.ca>
+ * @copyright 2018 Canadian BioSample Repository (CBSR)
+ */
 class AnnotationTypeMenuController {
 
   constructor() {
@@ -28,9 +36,10 @@ class AnnotationTypeMenuController {
 }
 
 /**
- * An AngularJS component that
+ * An AngularJS component that displays a context menu for {@link domain.annotations.AnnotationType
+ * AnnotationTypes}.
  *
- * @memberOf
+ * @memberOf admin.studies.components.annotationTypeMenu
  */
 const annotationTypeMenuComponent = {
   template: require('./annotationTypeMenu.html'),
@@ -38,10 +47,10 @@ const annotationTypeMenuComponent = {
   controllerAs: 'vm',
   bindings: {
     annotationType: '<',
-    allowChanges: '<',
-    onView: '&',
-    onUpdate: '&',
-    onRemove: '&'
+    allowChanges:   '<',
+    onView:         '&',
+    onUpdate:       '&',
+    onRemove:       '&'
   }
 };
 

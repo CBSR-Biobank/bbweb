@@ -1,0 +1,13 @@
+<div class="modal-header">
+  <h3 class="modal-title" translate>Change Input Specimen</h3>
+</div>
+<div class="modal-body">
+  <processing-type-input-form
+    processing-type="vm.processingType"
+    get-collection-specimen-definitions="vm.getCollectionSpecimenDefinitions.bind(vm)"
+    get-processed-specimen-definitions="vm.getProcessedSpecimenDefinitions.bind(vm)"
+    button-config="2-button"
+    on-submit="vm.okPressed.bind(vm)"
+    on-cancel="vm.closePressed.bind(vm)">
+  </processing-type-input-form>
+</div>

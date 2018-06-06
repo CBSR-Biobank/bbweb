@@ -17,28 +17,32 @@ message ProcessingTypeEvent {
     optional string specimenType            = 8;
   }
 
-  message InputSpecimenDefinitionType {
-    optional string definitionType       = 1;
-    optional string entityId             = 2;
-    optional string specimenDefinitionId = 3;
+  message InputSpecimenProcessing {
+    optional double expectedChange       = 1;
+    optional int32  count                = 2;
+    optional string containerTypeId      = 3;
+    optional string definitionType       = 4;
+    optional string entityId             = 5;
+    optional string specimenDefinitionId = 6;
+  }
+
+  message OutputSpecimenProcessing {
+    optional double             expectedChange     = 1;
+    optional int32              count              = 2;
+    optional string             containerTypeId    = 3;
+    optional SpecimenDefinition specimenDefinition = 4;
   }
 
   message Added {
-    optional string             studyId                  = 1;
-    optional string             name                     = 2;
-    optional string             description              = 3;
-    optional bool               enabled                  = 4;
-    optional double             expectedInputChange      = 5;
-    optional double             expectedOutputChange     = 6;
-    optional int32              inputCount               = 7;
-    optional int32              outputCount              = 8;
-    optional string             inputContainerTypeId     = 9;
-    optional string             outputContainerTypeId    = 10;
-    optional SpecimenDefinition outputSpecimenDefinition = 11;
+    optional string                   studyId                  = 1;
+    optional string                   name                     = 2;
+    optional string                   description              = 3;
+    optional bool                     enabled                  = 4;
+    optional OutputSpecimenProcessing outputSpecimenProcessing = 5;
 
-    oneof input_specimen_definition_type {
-      InputSpecimenDefinitionType collected = 13;
-      InputSpecimenDefinitionType processed = 14;
+    oneof specimen_definition_type {
+      InputSpecimenProcessing collected = 6;
+      InputSpecimenProcessing processed = 7;
     }
   }
 
@@ -57,33 +61,18 @@ message ProcessingTypeEvent {
     optional bool   enabled          = 2;
   }
 
-  message ExpectedChangeUpdated {
-    optional int64  version        = 1;
-    optional double expectedChange = 2;
-  }
-
-  message CountUpdated {
-    optional int64  version = 1;
-    optional int32  count   = 2;
-  }
-
-  message ContainerTypeUpdated {
-    optional int64  version         = 1;
-    optional string containerTypeId = 2;
-  }
-
-  message InputSpecimenDefinitionTypeUpdated {
+  message InputSpecimenProcessingUpdated {
     optional int64  version          = 1;
 
     oneof specimen_definition_type {
-      InputSpecimenDefinitionType collected = 2;
-      InputSpecimenDefinitionType processed = 3;
+      InputSpecimenProcessing collected = 2;
+      InputSpecimenProcessing processed = 3;
     }
   }
 
-  message OutputSpecimenDefinitionTypeUpdated {
-    optional int64              version            = 1;
-    optional SpecimenDefinition specimenDefinition = 2;
+  message OutputSpecimenProcessingUpdated {
+    optional int64                    version                  = 1;
+    optional OutputSpecimenProcessing outputSpecimenProcessing = 2;
   }
 
   message AnnotationTypesUpdated {
@@ -110,21 +99,15 @@ message ProcessingTypeEvent {
   optional string time          = 4;
 
   oneof event_type {
-    Added                               added                           = 5;
-    NameUpdated                         nameUpdated                     = 6;
-    DescriptionUpdated                  descriptionUpdated              = 7;
-    EnabledUpdated                      enabledUpdated                  = 8;
-    ExpectedChangeUpdated               expectedInputChangeUpdated      = 9;
-    ExpectedChangeUpdated               expectedOutputChangeUpdated     = 10;
-    CountUpdated                        inputCountUpdated               = 11;
-    CountUpdated                        outputCountUpdated              = 12;
-    ContainerTypeUpdated                inputContainerTypeUpdated       = 14;
-    ContainerTypeUpdated                outputContainerTypeUpdated      = 15;
-    InputSpecimenDefinitionTypeUpdated  inputSpecimenDefinitionUpdated  = 16;
-    OutputSpecimenDefinitionTypeUpdated outputSpecimenDefinitionUpdated = 17;
-    AnnotationTypeAdded                 annotationTypeAdded             = 18;
-    AnnotationTypeUpdated               annotationTypeUpdated           = 19;
-    AnnotationTypeRemoved               annotationTypeRemoved           = 20;
-    Removed                             removed                         = 21;
+    Added                           added                           = 5;
+    NameUpdated                     nameUpdated                     = 6;
+    DescriptionUpdated              descriptionUpdated              = 7;
+    EnabledUpdated                  enabledUpdated                  = 8;
+    InputSpecimenProcessingUpdated  inputSpecimenProcessingUpdated  = 9;
+    OutputSpecimenProcessingUpdated outputSpecimenProcessingUpdated = 10;
+    AnnotationTypeAdded             annotationTypeAdded             = 11;
+    AnnotationTypeUpdated           annotationTypeUpdated           = 12;
+    AnnotationTypeRemoved           annotationTypeRemoved           = 13;
+    Removed                         removed                         = 14;
   }
 }

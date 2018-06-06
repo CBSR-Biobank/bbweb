@@ -214,6 +214,20 @@ function ProcessingTypeFactory($q,
     }
 
     /**
+     * Retrieves a ProcessingType from the server.
+     *
+     * @param {string} studyId the ID of the study this processing type belongs to.
+     *
+     * @param {string} id the ID of the processing type to retrieve.
+     *
+     * @returns {Promise<domain.studies.ProcessingType>} The processing type within a promise.
+     */
+    static getById(studyId, id) {
+      return biobankApi.get(ProcessingType.url('id', studyId, id))
+        .then(reply => ProcessingType.asyncCreate(reply));
+    }
+
+    /**
      * Fetches processing types for a {@link domain.studies.Study|Study}.
      *
      * @param {string} studySlug the slug of the study the processing types belongs to.
@@ -249,9 +263,9 @@ function ProcessingTypeFactory($q,
     /**
      * Sorts an array of Proecessing Types by name.
      *
-     * @param {Array<ProcessingType>} processingTypes The array to sort.
+     * @param {Array<domain.studies.ProcessingType>} processingTypes The array to sort.
      *
-     * @return {Array<ProcessingType>} A new array sorted by name.
+     * @return {Array<domain.studies.ProcessingType>} A new array sorted by name.
      */
     static sortByName(processingTypes) {
       return _.sortBy(processingTypes,
@@ -303,7 +317,7 @@ function ProcessingTypeFactory($q,
      */
     updateInputSpecimenDefinition(input) {
       return this.update(ProcessingType.url('update', this.studyId, this.id),
-                         { property: 'inputSpecimenDefinition', newValue: input });
+                         { property: 'inputSpecimenProcessing', newValue: input });
     }
 
     /**
@@ -311,7 +325,7 @@ function ProcessingTypeFactory($q,
      */
     updateOutputSpecimenDefinition(output) {
       return this.update(ProcessingType.url('update', this.studyId, this.id),
-                         { property: 'outputSpecimenDefinition', newValue: output });
+                         { property: 'outputSpecimenProcessing', newValue: output });
     }
 
     /**
@@ -344,6 +358,10 @@ function ProcessingTypeFactory($q,
      */
     update(path, reqJson) {
       return super.update(path, reqJson).then(ProcessingType.asyncCreate);
+    }
+
+    inUse() {
+      return biobankApi.get(ProcessingType.url('inuse', this.slug));
     }
 
   }

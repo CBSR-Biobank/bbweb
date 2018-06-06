@@ -84,15 +84,27 @@ package dto {
 
   }
 
-  final case class SpecimenDefinitionNames(id:                      String,
-                                           slug:                    Slug,
-                                           name:                    String,
-                                           specimenDefinitionNames: Set[EntityInfoDto])
+  final case class CollectionSpecimenDefinitionNames(id:                      String,
+                                                     slug:                    Slug,
+                                                     name:                    String,
+                                                     specimenDefinitionNames: Set[EntityInfoDto])
 
-  object SpecimenDefinitionNames {
+  object CollectionSpecimenDefinitionNames {
 
-    implicit val specimenDefinitionNamesFormat: Format[SpecimenDefinitionNames] =
-      Json.format[SpecimenDefinitionNames]
+    implicit val specimenDefinitionNamesFormat: Format[CollectionSpecimenDefinitionNames] =
+      Json.format[CollectionSpecimenDefinitionNames]
+
+  }
+
+  final case class ProcessedSpecimenDefinitionNames(id:                     String,
+                                                    slug:                   Slug,
+                                                    name:                   String,
+                                                    specimenDefinitionName: EntityInfoDto)
+
+  object ProcessedSpecimenDefinitionNames {
+
+    implicit val specimenDefinitionNamesFormat: Format[ProcessedSpecimenDefinitionNames] =
+      Json.format[ProcessedSpecimenDefinitionNames]
 
   }
 

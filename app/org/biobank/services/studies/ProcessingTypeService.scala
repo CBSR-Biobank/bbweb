@@ -8,6 +8,7 @@ import org.biobank.domain.Slug
 import org.biobank.domain.access._
 import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
+import org.biobank.dto.{EntityInfoDto, ProcessedSpecimenDefinitionNames}
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.commands.ProcessingTypeCommands._
 import org.biobank.infrastructure.events.ProcessingTypeEvents._
@@ -28,12 +29,19 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[ProcessingTypeServiceImpl])
 trait ProcessingTypeService extends BbwebService {
 
-  def processingTypeBySlug(requestUserId:      UserId,
-                           studySlug:          Slug,
-                           processingTypeSlug: Slug): ServiceValidation[ProcessingType]
+  def processingTypeById(requestUserId: UserId, studyId: StudyId, processingTypeId: ProcessingTypeId)
+      : Future[ServiceValidation[ProcessingType]]
+
+  def processingTypeBySlug(requestUserId: UserId, studySlug: Slug, processingTypeSlug: Slug)
+      : Future[ServiceValidation[ProcessingType]]
 
   def processingTypesForStudy(requestUserId: UserId, studySlug: Slug, query: PagedQuery)
       : Future[ServiceValidation[PagedResults[ProcessingType]]]
+
+  def processingTypeInUse(requestUserId: UserId, slug: Slug): ServiceValidation[Boolean]
+
+  def specimenDefinitionsForStudy(requestUserId: UserId, studyId: StudyId)
+      : Future[ServiceValidation[Set[ProcessedSpecimenDefinitionNames]]]
 
   def processCommand(cmd: ProcessingTypeCommand): Future[ServiceValidation[ProcessingType]]
 
@@ -58,11 +66,21 @@ class ProcessingTypeServiceImpl @Inject() (
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def processingTypeBySlug(requestUserId:      UserId,
-                           studySlug:          Slug,
-                           processingTypeSlug: Slug): ServiceValidation[ProcessingType] = {
-    studiesService.getStudyBySlug(requestUserId, studySlug).flatMap { study =>
-      processingTypeRepository.getBySlug(processingTypeSlug)
+  def processingTypeById(requestUserId: UserId, studyId: StudyId, processingTypeId: ProcessingTypeId)
+      : Future[ServiceValidation[ProcessingType]] = {
+    Future {
+      studiesService.getStudy(requestUserId, studyId).flatMap { study =>
+        processingTypeRepository.getByKey(processingTypeId)
+      }
+    }
+  }
+
+  def processingTypeBySlug(requestUserId: UserId, studySlug: Slug, processingTypeSlug: Slug)
+      : Future[ServiceValidation[ProcessingType]] = {
+    Future {
+      studiesService.getStudyBySlug(requestUserId, studySlug).flatMap { study =>
+        processingTypeRepository.getBySlug(processingTypeSlug)
+      }
     }
   }
 
@@ -75,6 +93,36 @@ class ProcessingTypeServiceImpl @Inject() (
         validPage <- query.validPage(types.size)
         results   <- PagedResults.create(types, query.page, query.limit)
       } yield results
+    }
+  }
+
+  def processingTypeInUse(requestUserId: UserId, slug: Slug): ServiceValidation[Boolean] = {
+    processingTypeRepository.getBySlug(slug).flatMap { processingType =>
+      whenPermittedAndIsMember(requestUserId,
+                               PermissionId.StudyRead,
+                               Some(processingType.studyId),
+                               None) { () =>
+        processingTypeRepository.processingTypeInUse(processingType.id).successNel[String]
+      }
+    }
+  }
+
+ def specimenDefinitionsForStudy(requestUserId: UserId, studyId: StudyId)
+      : Future[ServiceValidation[Set[ProcessedSpecimenDefinitionNames]]] = {
+    Future {
+      for {
+        study           <- studiesService.getStudy(requestUserId, studyId)
+        processingTypes <- queryInternal(study.id, new FilterString(""), new SortString(""))
+      } yield {
+         processingTypes.map { processingType =>
+           val definition = processingType.specimenProcessing.output.specimenDefinition
+           ProcessedSpecimenDefinitionNames(
+             processingType.id.id,
+             processingType.slug,
+             processingType.name,
+             EntityInfoDto(definition.id.id, definition.slug, definition.name))
+         }.toSet
+       }
     }
   }
 

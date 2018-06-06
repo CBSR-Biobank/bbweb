@@ -1,10 +1,25 @@
 <study-not-disabled-warning study="vm.study"></study-not-disabled-warning>
-<div class="row">
+
+<!-- -HAVE COLLECTION EVET TYPES -->
+<div class="row" ng-if="vm.haveCollectionEventTypes">
   <div class="col-md-3">
-    <processing-types-add-and-select study="vm.study">
+    <processing-types-add-and-select
+      study="vm.study"
+      processing-types="vm.processingType"
+      add-allowed="vm.study.isDisabled()">
     </processing-types-add-and-select>
   </div>
   <div class="col-md-9">
-    <div ui-view="ceventTypeDetails"></div>
+    <div ui-view="processingTypeDetails"></div>
   </div>
+</div>
+
+<!-- -DONT HAVE COLLECTION EVET TYPES -->
+<div class="alert alert-warning" role="alert"  ng-if="!vm.haveCollectionEventTypes">
+  <span class="glyphicon glyphicon-warning-sign"></span>
+  <span class="sr-only">Error:</span>
+  <translate>
+    No collection events have been defined for this study.
+    Processing steps cannot be added until collection events are added.
+  </translate>
 </div>

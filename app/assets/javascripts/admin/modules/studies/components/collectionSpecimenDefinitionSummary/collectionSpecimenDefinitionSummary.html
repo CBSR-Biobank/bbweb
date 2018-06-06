@@ -6,62 +6,42 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-md-3">
+  <div class="col-md-4">
     <small class="text-muted">
       <translate>Anatomical source:</translate>
-    </small>
-  </div>
-  <div class="col-md-3">
-    <small class="text-muted">
       <strong>{{ vm.specimenDefinition.anatomicalSourceType }}</strong>
     </small>
   </div>
-  <div class="col-md-3">
+  <div class="col-md-6">
     <small class="text-muted">
       <translate>Type:</translate>
-    </small>
-  </div>
-  <div class="col-md-3">
-    <small class="text-muted">
       <strong>{{ vm.specimenDefinition.specimenType }}</strong>
     </small>
   </div>
 </div>
 <div class="row">
-  <div class="col-md-3">
-    <small class="text-muted">
-      <translate>Preservation Type:</translate>
-    </small>
-  </div>
-  <div class="col-md-9">
-    <small class="text-muted">
-      <strong>{{ vm.specimenDefinition.preservationType }}: {{ vm.specimenDefinition.preservationTemperature }}</strong>
-    </small>
-  </div>
-</div>
-<div class="row">
-  <div class="col-md-3">
+  <div class="col-md-4">
     <small class="text-info">
       <translate>Amount:</translate>
-    </small>
-  </div>
-  <div class="col-md-3">
-    <small class="text-info">
       <strong>{{ vm.specimenDefinition.amount }} {{ vm.specimenDefinition.units }}</strong>
     </small>
   </div>
-  <div class="col-md-3">
+  <div class="col-md-4">
     <small class="text-info">
       <translate>Max Count:</translate>
-    </small>
-  </div>
-  <div class="col-md-3">
-    <small class="text-info">
       <strong>{{ vm.specimenDefinition.maxCount }}</strong>
     </small>
   </div>
 </div>
 <div class="row">
+  <div class="col-md-8">
+    <small class="text-muted">
+      <translate>Preservation Type:</translate>
+      <strong>{{ vm.specimenDefinition.preservationType }} ({{vm.specimenDefinition.preservationTemperature}})</strong>
+    </small>
+  </div>
+</div>
+<div class="row" ng-if="vm.specimenDefinition.description">
   <div class="col-md-12">
     <p>{{vm.specimenDefinition.description | truncate:100}}</p>
   </div>

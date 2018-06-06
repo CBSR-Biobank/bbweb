@@ -34,10 +34,10 @@
   </div>
   <ul class="list-group">
     <li class="list-group-item">
-      <p class="text-primary" translate>
+      <span class="text-primary" translate>
         Participant annotations allow a study to collect custom named and defined pieces of data for each
         participant. Annotations are optional and are not required to be defined.
-      </p>
+      </span>
     </li>
     <li class="list-group-item" ng-if="vm.study.annotationTypes.length <= 0">
       <div class="alert alert-warning">
@@ -45,7 +45,7 @@
       </div>
     </li>
     <li class="list-group-item" ng-if="vm.study.annotationTypes.length > 0">
-      <p translate>The following annotations have been entered:</p>
+      <translate>The following annotations have been entered:</translate>
     </li>
     <li class="list-group-item" ng-repeat="annotationType in vm.study.annotationTypes">
       <div class="row">

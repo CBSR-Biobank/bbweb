@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 /**
  * AngularJS Component for {@link domain.studies.Study Study} administration.
  *
@@ -10,18 +12,35 @@
 class StudyProcessingTabController {
 
   constructor($scope,
-              ProcessingType) {
+              ProcessingType,
+              CollectionEventType) {
     'ngInject';
     Object.assign(this,
                   {
                     $scope,
-                    ProcessingType
+                    ProcessingType,
+                    CollectionEventType
                   });
+    this.haveCollectionEventTypes = false;
   }
 
   $onInit() {
     // updates the selected tab in 'studyViewDirective' which is the parent component
     this.$scope.$emit('tabbed-page-update', 'tab-selected');
+
+    this.$scope.$on('collection-event-type-updated', (event, updatedProcessingType) => {
+      event.stopPropagation();
+      const processingTypes =
+            _.filter(this.collectionEventTypes,
+                     processingType => processingType.id !== updatedProcessingType.id);
+      processingTypes.push(updatedProcessingType);
+      this.processingTypes = this.ProcessingType.sortByName(processingTypes);
+    });
+
+    this.CollectionEventType.list(this.study.slug)
+      .then(pagedResult => {
+        this.haveCollectionEventTypes = (pagedResult.total > 0);
+      });
   }
 
 }

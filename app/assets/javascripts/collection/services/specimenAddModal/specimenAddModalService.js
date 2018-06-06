@@ -55,7 +55,6 @@ class SpecimenAddModalService {
     /*
      * The controller used by this modal.
      */
-    /* @ngInject */
     class ModalController {
 
       constructor($uibModalInstance, $scope) {

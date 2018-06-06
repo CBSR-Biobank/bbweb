@@ -35,6 +35,12 @@ class CeventTypesController @Inject() (
       validationReply(ceventType)
     }
 
+  def getById(studyId: StudyId, eventTypeId: CollectionEventTypeId): Action[Unit] =
+    action(parse.empty) { implicit request =>
+      val ceventType = service.eventTypeWithId(request.authInfo.userId, studyId, eventTypeId)
+      validationReply(ceventType)
+    }
+
   def list(studySlug: Slug): Action[Unit] = {
     action.async(parse.empty) { implicit request =>
       PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(

@@ -9,7 +9,7 @@ import org.biobank.domain.access._
 import org.biobank.domain.studies._
 import org.biobank.domain.participants.CollectionEventRepository
 import org.biobank.domain.users.UserId
-import org.biobank.dto.{EntityInfoDto, SpecimenDefinitionNames}
+import org.biobank.dto.{EntityInfoDto, CollectionSpecimenDefinitionNames}
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 import org.biobank.infrastructure.events.CollectionEventTypeEvents._
@@ -30,9 +30,8 @@ import scalaz.Validation.FlatMap._
 @ImplementedBy(classOf[CollectionEventTypeServiceImpl])
 trait CollectionEventTypeService extends BbwebService {
 
-  def eventTypeWithId(requestUserId:         UserId,
-                      studyId:               StudyId,
-                      eventTypeId: CollectionEventTypeId): ServiceValidation[CollectionEventType]
+  def eventTypeWithId(requestUserId: UserId, studyId: StudyId, eventTypeId: CollectionEventTypeId)
+      : ServiceValidation[CollectionEventType]
 
   def eventTypeBySlug(requestUserId: UserId,
                       studySlug:     Slug,
@@ -50,7 +49,7 @@ trait CollectionEventTypeService extends BbwebService {
       : Future[ServiceValidation[PagedResults[CollectionEventType]]]
 
   def specimenDefinitionsForStudy(requestUserId: UserId, studySlug: Slug)
-      : Future[ServiceValidation[Set[SpecimenDefinitionNames]]]
+      : Future[ServiceValidation[Set[CollectionSpecimenDefinitionNames]]]
 
   def listNamesByStudySlug(requestUserId: UserId, studySlug: Slug, query: FilterAndSortQuery)
       : Future[ServiceValidation[Seq[EntityInfoDto]]]
@@ -84,9 +83,8 @@ class CollectionEventTypeServiceImpl @Inject()(
 
   val log: Logger = LoggerFactory.getLogger(this.getClass)
 
-  def eventTypeWithId(requestUserId:         UserId,
-                      studyId:               StudyId,
-                      eventTypeId: CollectionEventTypeId): ServiceValidation[CollectionEventType] = {
+  def eventTypeWithId(requestUserId: UserId, studyId: StudyId, eventTypeId: CollectionEventTypeId)
+      : ServiceValidation[CollectionEventType] = {
     whenPermittedAndIsMember(requestUserId,
                              PermissionId.StudyRead,
                              Some(studyId),
@@ -143,7 +141,7 @@ class CollectionEventTypeServiceImpl @Inject()(
    }
 
   def specimenDefinitionsForStudy(requestUserId: UserId, studySlug: Slug)
-      : Future[ServiceValidation[Set[SpecimenDefinitionNames]]] = {
+      : Future[ServiceValidation[Set[CollectionSpecimenDefinitionNames]]] = {
      Future {
        for {
          study      <- studiesService.getStudyBySlug(requestUserId, studySlug)
@@ -155,7 +153,7 @@ class CollectionEventTypeServiceImpl @Inject()(
              val definitionNames = eventType.specimenDefinitions.map { definition =>
                  EntityInfoDto(definition.id.id, definition.slug, definition.name)
                }
-             SpecimenDefinitionNames(eventType.id.id,
+             CollectionSpecimenDefinitionNames(eventType.id.id,
                                      eventType.slug,
                                      eventType.name,
                                      definitionNames)
