@@ -14,7 +14,8 @@ class CeventTypeAddController {
               CollectionEventType,
               breadcrumbService,
               domainNotificationService,
-              notificationsService) {
+              notificationsService,
+              modalService) {
     'ngInject';
     Object.assign(this,
                   {
@@ -23,7 +24,8 @@ class CeventTypeAddController {
                     CollectionEventType,
                     breadcrumbService,
                     domainNotificationService,
-                    notificationsService
+                    notificationsService,
+                    modalService
                   });
   }
 
@@ -50,8 +52,17 @@ class CeventTypeAddController {
         return this.$state.go('^', {}, { reload: true });
       })
       .catch(error => {
-        this.domainNotificationService.updateErrorModal(error,
-                                                        this.gettextCatalog.getString('collection event type'));
+        if ((typeof error.message === 'string') && (error.message.indexOf('name already exists') > -1)) {
+          this.modalService.modalOk(
+            this.gettextCatalog.getString('Cannot Add'),
+            this.gettextCatalog.getString(
+              'The name <b>{{name}}</b> has already been used. Please use another name.',
+              { name : this.ceventType.name }));
+        } else {
+          this.domainNotificationService.updateErrorModal(
+            error,
+            this.gettextCatalog.getString('collection event type'));
+        }
     });
   }
 
