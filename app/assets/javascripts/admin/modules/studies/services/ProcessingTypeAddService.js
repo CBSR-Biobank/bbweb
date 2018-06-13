@@ -23,6 +23,8 @@ class ProcessingTypeAddService {
 
   init() {
     this.processingType = new this.ProcessingType();
+    this.eventTypes = undefined;
+    this.processingTypes = undefined;
   }
 
   // used in case user reloads page
@@ -39,7 +41,7 @@ class ProcessingTypeAddService {
   getCollectionSpecimenDefinitions(study) {
     const deferred = this.$q.defer()
     if (this.eventTypes === undefined) {
-      this.biobankApi.get(this.biobankApi.url('/studies/cetypes/spcdefs', study.slug))
+      this.biobankApi.get(this.biobankApi.url('studies/cetypes/spcdefs', study.slug))
         .then((reply) => {
           this.eventTypes = reply;
           deferred.resolve(this.eventTypes);
@@ -53,7 +55,7 @@ class ProcessingTypeAddService {
   getProcessedSpecimenDefinitions(study) {
     const deferred = this.$q.defer()
     if (this.processingTypes === undefined) {
-      this.biobankApi.get(this.biobankApi.url('/studies/proctypes/spcdefs', study.id))
+      this.biobankApi.get(this.biobankApi.url('studies/proctypes/spcdefs', study.id))
         .then((reply) => {
           this.processingTypes = reply;
           deferred.resolve(this.processingTypes);

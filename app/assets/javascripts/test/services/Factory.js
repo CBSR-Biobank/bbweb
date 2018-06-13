@@ -39,6 +39,10 @@ const domainEntityNameNext = function (domainEntityType = STRING_SYMBOL) {
   return _.uniqueId(domainEntityType.toString() + '_');
 }
 
+const domainEntityIdNext = function (domainEntityType = STRING_SYMBOL) {
+  return slugify(domainEntityNameNext(domainEntityType));
+}
+
 const stringNext = function () {
   return domainEntityNameNext();
 }
@@ -46,7 +50,7 @@ const stringNext = function () {
 const membershipBaseDefaults = function () {
   return Object.assign(
     {
-      id:           domainEntityNameNext(ENTITY_NAME_MEMBERSHIP_BASE),
+      id:           domainEntityIdNext(ENTITY_NAME_MEMBERSHIP_BASE),
       description:  faker.lorem.sentences(4),
       studyData:    this.entitySet(),
       centreData:   this.entitySet()
@@ -58,7 +62,7 @@ const membershipBaseDefaults = function () {
 const accessItemDefaults = function () {
   return Object.assign(
     {
-      id:           domainEntityNameNext(ENTITY_NAME_ACCESS_ITEM),
+      id:           domainEntityIdNext(ENTITY_NAME_ACCESS_ITEM),
       description:  faker.lorem.sentences(4),
       parentData:   [ this.entityInfo() ],
       childData:    [ this.entityInfo() ]
@@ -210,20 +214,23 @@ class Factory {
   }
 
   processingType(options = {}) {
-    const study = this.defaultStudy(),
-        defaults = Object.assign(
-          {
-            id:                 domainEntityNameNext(ENTITY_NAME_PROCESSING_TYPE),
-            studyId:            study.id,
-            description:        faker.lorem.sentences(4),
-            enabled:            false,
-            specimenProcessing: this.specimenProcessing(),
-            annotationTypes:    []
-          },
-          nameAndSlug()
-        ),
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        pt = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    options.specimenProcessing= Object.assign(this.specimenProcessing(), options.specimenProcessing || {});
+
+    const study = this.defaultStudy();
+    const defaults = Object.assign(
+      {
+        id:                 domainEntityIdNext(ENTITY_NAME_PROCESSING_TYPE),
+        studyId:            study.id,
+        description:        faker.lorem.sentences(4),
+        enabled:            false,
+        specimenProcessing: this.specimenProcessing(),
+        annotationTypes:    []
+      },
+      nameAndSlug()
+    );
+    const validKeys = this.commonFieldNames.concat(Object.keys(defaults));
+    const pt = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+
     this.updateDefaultEntity(ENTITY_NAME_PROCESSING_TYPE, pt);
     return pt;
   }
@@ -239,7 +246,7 @@ class Factory {
     const study = this.defaultStudy(),
         defaults = Object.assign(
           {
-            id:                  domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
+            id:                  domainEntityIdNext(ENTITY_NAME_COLLECTION_EVENT_TYPE),
             studyId:             study.id,
             description:         faker.lorem.sentences(4),
             specimenDefinitions: [],
@@ -275,15 +282,17 @@ class Factory {
   }
 
   study(options = {}) {
-    const defaults = Object.assign({ id:              domainEntityNameNext(ENTITY_NAME_STUDY),
-                                   description:     faker.lorem.sentences(4),
-                                   annotationTypes: [],
-                                   state:           this.StudyState.DISABLED
-                                 },
-                                 nameAndSlug()
-                                ),
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        s = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    const defaults = Object.assign(
+      {
+        id:              domainEntityIdNext(ENTITY_NAME_STUDY),
+        description:     faker.lorem.sentences(4),
+        annotationTypes: [],
+        state:           this.StudyState.DISABLED
+      },
+      nameAndSlug()
+    );
+    const validKeys = this.commonFieldNames.concat(Object.keys(defaults));
+    const s = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_STUDY, s);
     return s;
   }
@@ -331,7 +340,7 @@ class Factory {
     const study = this.defaultStudy();
     const uniqueId = domainEntityNameNext(ENTITY_NAME_PARTICIPANT);
     const defaults = {
-      id:          domainEntityNameNext(ENTITY_NAME_PARTICIPANT),
+      id:          domainEntityIdNext(ENTITY_NAME_PARTICIPANT),
       studyId:     study.id,
       slug:        slugify(uniqueId),
       uniqueId:    uniqueId,
@@ -362,7 +371,7 @@ class Factory {
           collectionEventType = this.defaultCollectionEventType(),
           visitNumber = 1,
           defaults = {
-            id:                      domainEntityNameNext(ENTITY_NAME_COLLECTION_EVENT),
+            id:                      domainEntityIdNext(ENTITY_NAME_COLLECTION_EVENT),
             participantId:           participant.id,
             participantSlug:         participant.slug,
             collectionEventTypeId:   collectionEventType.id,
@@ -416,22 +425,24 @@ class Factory {
   }
 
   specimen(options = {}) {
-    const ceventType = this.collectionEventType({ specimenDefinitions: [ this.collectionSpecimenDefinition() ] }),
-          ctr = this.centre({ locations: [ this.location() ]}),
-          inventoryId = domainEntityNameNext(ENTITY_NAME_SPECIMEN),
-          defaults = {
-            id:                    domainEntityNameNext(ENTITY_NAME_SPECIMEN),
-            slug:                  slugify(inventoryId),
-            inventoryId:           inventoryId,
-            specimenDefinitionId: null,
-            originLocationInfo:    null,
-            locationInfo:          null,
-            timeCreated:           moment(faker.date.recent(10)).format(),
-            amount:                1,
-            state:                 this.SpecimenState.USABLE,
-            eventTypeName:         ceventType.name
-          },
-          validKeys = this.commonFieldNames.concat(Object.keys(defaults))
+    const ceventType = this.collectionEventType({
+      specimenDefinitions: [ this.collectionSpecimenDefinition() ]
+    });
+    const ctr = this.centre({ locations: [ this.location() ]});
+    const inventoryId = domainEntityNameNext(ENTITY_NAME_SPECIMEN);
+    const defaults = {
+      id:                    domainEntityIdNext(ENTITY_NAME_SPECIMEN),
+      slug:                  slugify(inventoryId),
+      inventoryId:           inventoryId,
+      specimenDefinitionId: null,
+      originLocationInfo:    null,
+      locationInfo:          null,
+      timeCreated:           moment(faker.date.recent(10)).format(),
+      amount:                1,
+      state:                 this.SpecimenState.USABLE,
+      eventTypeName:         ceventType.name
+    };
+    const validKeys = this.commonFieldNames.concat(Object.keys(defaults))
 
     if (ceventType.specimenDefinitions && (ceventType.specimenDefinitions.length > 0)) {
       defaults.specimenDefinitionId = ceventType.specimenDefinitions[0].id;
@@ -452,15 +463,17 @@ class Factory {
   }
 
   centre(options = {}) {
-    const defaults = Object.assign({ id:          domainEntityNameNext(ENTITY_NAME_CENTRE),
-                                   description: this.stringNext(),
-                                   state:       this.CentreState.DISABLED,
-                                   studyNames:  [],
-                                   locations:   []
-                                 },
-                                 nameAndSlug()),
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        c = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    const defaults = Object.assign(
+      {
+        id:          domainEntityIdNext(ENTITY_NAME_CENTRE),
+        description: this.stringNext(),
+        state:       this.CentreState.DISABLED,
+        studyNames:  [],
+        locations:   []
+      },
+      nameAndSlug());
+    const validKeys = this.commonFieldNames.concat(Object.keys(defaults));
+    const c = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_CENTRE, c);
     return c;
   }
@@ -497,15 +510,16 @@ class Factory {
   }
 
   shipmentSpecimen(options = {}) {
-    const shipment = this.defaultShipment(),
-        specimen = this.defaultSpecimen(),
-        defaults = { id:           domainEntityNameNext(ENTITY_NAME_SHIPMENT),
-                     state:        this.ShipmentItemState.PRESENT,
-                     shipmentId:   shipment.id,
-                     specimen:     specimen
-                   },
-        validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-        ss = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
+    const shipment = this.defaultShipment();
+    const specimen = this.defaultSpecimen();
+    const defaults = {
+      id:           domainEntityIdNext(ENTITY_NAME_SHIPMENT),
+      state:        this.ShipmentItemState.PRESENT,
+      shipmentId:   shipment.id,
+      specimen:     specimen
+    };
+    const validKeys = this.commonFieldNames.concat(Object.keys(defaults));
+        const ss = Object.assign(defaults, this.commonFields(), _.pick(options, validKeys));
     this.updateDefaultEntity(ENTITY_NAME_SHIPMENT_SPECIMEN, ss);
     return ss;
   }
@@ -515,15 +529,17 @@ class Factory {
   }
 
   user(options =  { membership: undefined }) {
-    const defaults = Object.assign({ id:        domainEntityNameNext(ENTITY_NAME_USER),
-                                     email:     this.stringNext(),
-                                     avatarUrl: null,
-                                     state:     this.UserState.REGISTERED,
-                                     roles:     []
-                                   },
-                                   nameAndSlug()),
-          validKeys = this.commonFieldNames.concat(Object.keys(defaults)),
-          u = Object.assign(defaults, this.commonFields(),
+    const defaults = Object.assign(
+      {
+        id:        domainEntityIdNext(ENTITY_NAME_USER),
+        email:     this.stringNext(),
+        avatarUrl: null,
+        state:     this.UserState.REGISTERED,
+        roles:     []
+      },
+      nameAndSlug());
+    const validKeys = this.commonFieldNames.concat(Object.keys(defaults));
+    const u = Object.assign(defaults, this.commonFields(),
                             _.pick(options, validKeys));
     if (options.membership) {
       Object.assign(u, { membership: this.userMembership(options.membership) });
@@ -546,7 +562,7 @@ class Factory {
   annotationType(options = {}) {
     const defaults = Object.assign(
       {
-        id:            domainEntityNameNext(ENTITY_NAME_ANNOTATION_TYPE),
+        id:            domainEntityIdNext(ENTITY_NAME_ANNOTATION_TYPE),
         description:   null,
         valueType:     this.AnnotationValueType.TEXT,
         options:       [],
@@ -589,7 +605,7 @@ class Factory {
     const defaults = Object.assign(
       this.processedSpecimenDefinition(),
       {
-        id:       domainEntityNameNext(ENTITY_NAME_COLLECTED_SPECIMEN_DEFINITION),
+        id:       domainEntityIdNext(ENTITY_NAME_COLLECTION_SPECIMEN_DEFINITION),
         maxCount: 1,
         amount:   0.5
       }
@@ -599,10 +615,36 @@ class Factory {
     return spec;
   }
 
+  collectionSpecimenDefinitionNames(...eventTypes) {
+    return eventTypes.map(eventType => ({
+          id:                      eventType.id,
+          slug:                    eventType.slug,
+          name:                    eventType.name,
+          specimenDefinitionNames: eventType.specimenDefinitions.map(sd => ({
+            id:   sd.id,
+            slug: sd.slug,
+            name: sd.name
+          }))
+    }));
+  }
+
+  processedSpecimenDefinitionNames(...processingTypes) {
+    return processingTypes.map( processingType => ({
+      id:                     processingType.id,
+      slug:                   processingType.slug,
+      name:                   processingType.name,
+      specimenDefinitionName: {
+        id:   processingType.specimenProcessing.output.specimenDefinition.id,
+        slug: processingType.specimenProcessing.output.specimenDefinition.slug,
+        name: processingType.specimenProcessing.output.specimenDefinition.name
+      }
+    }));
+  }
+
   processedSpecimenDefinition(options = {}) {
     const defaults = Object.assign(
       {
-        id:                          domainEntityNameNext(ENTITY_NAME_PROCESSED_SPECIMEN_DEFINITION),
+        id:                          domainEntityIdNext(ENTITY_NAME_PROCESSED_SPECIMEN_DEFINITION),
         description:                 faker.lorem.sentences(4),
         units:                       'mL',
         anatomicalSourceType:        this.randomAnatomicalSourceType(),
@@ -707,17 +749,19 @@ class Factory {
    * This is a value object, so it does not have the common fields.
    */
   location(options = {}) {
-    const defaults = Object.assign({ id:             domainEntityNameNext(ENTITY_NAME_LOCATION),
-                                   street:         faker.address.streetAddress(),
-                                   city:           faker.address.city(),
-                                   province:       faker.address.state(),
-                                   postalCode:     faker.address.zipCode(),
-                                   poBoxNumber:    faker.address.zipCode(),
-                                   countryIsoCode: faker.address.country()
-                                 },
-                                 nameAndSlug()),
-        validKeys = Object.keys(defaults),
-        at = Object.assign(defaults, _.pick(options, validKeys));
+    const defaults = Object.assign(
+      {
+        id:             domainEntityIdNext(ENTITY_NAME_LOCATION),
+        street:         faker.address.streetAddress(),
+        city:           faker.address.city(),
+        province:       faker.address.state(),
+        postalCode:     faker.address.zipCode(),
+        poBoxNumber:    faker.address.zipCode(),
+        countryIsoCode: faker.address.country()
+      },
+      nameAndSlug());
+    const validKeys = Object.keys(defaults);
+    const at = Object.assign(defaults, _.pick(options, validKeys));
     return at;
   }
 

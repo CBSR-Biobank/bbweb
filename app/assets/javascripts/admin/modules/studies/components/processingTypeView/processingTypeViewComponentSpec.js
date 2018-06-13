@@ -7,271 +7,411 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import _ from 'lodash';
+import ProcessingTypeFixture from 'test/fixtures/ProcessingTypeFixture';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import entityUpdateSharedBehaviour from 'test/behaviours/entityUpdateSharedBehaviour';
 import ngModule from '../../index'
 
-describe('ceventTypeViewComponent', function() {
+describe('processingTypeViewComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      Object.assign(this, ComponentTestSuiteMixin);
+      Object.assign(this, ComponentTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
-                              '$compile',
+                              '$httpBackend',
                               '$state',
                               'Study',
                               'StudyState',
                               'CollectionEventType',
-                              'CollectionSpecimenDefinition',
+                              'ProcessingType',
                               'AnnotationType',
+                              'ProcessingTypeInputModal',
+                              'ProcessingTypeOutputModal',
+                              'StudyState',
                               'notificationsService',
                               'domainNotificationService',
                               'modalService',
                               'Factory');
 
-      this.jsonStudy              = this.Factory.study();
-      this.jsonCet                = this.Factory.collectionEventType(this.jsonStudy);
-      this.study                  = new this.Study(this.jsonStudy);
-      this.collectionEventType    = new this.CollectionEventType(this.jsonCet);
+      this.processingTypeFixture = new ProcessingTypeFixture(this.Factory,
+                                                             this.Study,
+                                                             this.CollectionEventType,
+                                                             this.ProcessingType);
 
       this.$state.reload = jasmine.createSpy().and.returnValue(null);
       this.$state.go = jasmine.createSpy().and.returnValue(null);
 
-      this.createController = (study = this.study,
-                               collectionEventType = this.collectionEventType) => {
-        this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
-
+      this.createController = (fixture, processingType) => {
         ComponentTestSuiteMixin.createController.call(
           this,
-          '<cevent-type-view study="vm.study" collection-event-type="vm.ceventType"></cevent-type-view>',
+          `<processing-type-view
+              study="vm.study"
+              processing-type="vm.processingType">
+           </processing-type-view>`,
           {
-            study:      study,
-            ceventType: collectionEventType
+            study:          fixture.study,
+            processingType: processingType
           },
-          'ceventTypeView');
+          'processingTypeView');
       };
+
+      this.createControllerForCollected = (fixture, processingType, plainReply) => {
+        const url = this.url('studies/cetypes/id',
+                             fixture.study.id,
+                             processingType.specimenProcessing.input.entityId);
+        this.$httpBackend.expectGET(url).respond(this.reply(plainReply));
+        this.createController(fixture, processingType);
+        this.$httpBackend.flush();
+      }
+
+      this.createControllerForProcessed = (fixture, processingType, plainReply) => {
+        const url = this.url('studies/proctypes/id',
+                             fixture.study.id,
+                             processingType.specimenProcessing.input.entityId);
+        this.$httpBackend.expectGET(url).respond(this.reply(plainReply));
+        this.createController(fixture, processingType);
+        this.$httpBackend.flush();
+      }
     });
   });
 
-  it('scope should be valid', function() {
-    this.createController();
-    expect(this.controller.collectionEventType).toBe(this.collectionEventType);
+  afterEach(function() {
+    this.$httpBackend.verifyNoOutstandingExpectation();
+    this.$httpBackend.verifyNoOutstandingRequest();
   });
 
-  it('calling addAnnotationType should change to the correct state', function() {
-    this.createController();
-    this.controller.addAnnotationType();
-    this.scope.$digest();
-    expect(this.$state.go)
-      .toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType.annotationTypeAdd');
-  });
+  describe('scope should be valid', function() {
 
-  it('calling addSpecimenDefinition should change to the correct state', function() {
-    this.createController();
-    this.controller.addSpecimenDefinition();
-    this.scope.$digest();
-    expect(this.$state.go)
-      .toHaveBeenCalledWith('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd');
-  });
+    it('when processing type is from a collected specimen', function() {
+      const f = this.processingTypeFixture.fixture();
+      const processingType = f.processingTypesFromCollected[0].processingType;
 
-  it('calling editAnnotationType should change to the correct state', function() {
-    var annotType = new this.AnnotationType(this.Factory.annotationType());
+      expect(processingType.specimenProcessing.input.entityId)
+        .toBe(f.eventTypes[0].plainEventType.id);
 
-    this.createController();
-    this.controller.editAnnotationType(annotType);
-    this.scope.$digest();
-    expect(this.$state.go).toHaveBeenCalledWith(
-      'home.admin.studies.study.collection.ceventType.annotationTypeView',
-      { annotationTypeSlug: annotType.slug });
-  });
-
-  describe('updates to name', function () {
-
-    var context = {};
-
-    beforeEach(function () {
-      var self = this;
-      context.entity             = this.CollectionEventType;
-      context.createController   = function () { self.createController(); };
-      context.updateFuncName     = 'updateName';
-      context.controllerFuncName = 'editName';
-      context.modalInputFuncName = 'text';
-      context.newValue           = this.Factory.stringNext();
+      this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+      expect(this.controller.processingType).toBe(processingType);
     });
 
-    entityUpdateSharedBehaviour(context);
+    it('when processing type is from a processed specimen', function() {
+      const f = this.processingTypeFixture.fixture();
+      const processingType = f.processingTypesFromProcessed[0].processingType;
 
-  });
+      expect(processingType.specimenProcessing.input.entityId)
+        .toBe(f.processingTypesFromCollected[0].plainProcessingType.id);
 
-  describe('updates to description', function () {
-
-    var context = {};
-
-    beforeEach(function () {
-      var self = this;
-      context.entity             = this.CollectionEventType;
-      context.createController   = function () { self.createController(); };
-      context.updateFuncName     = 'updateDescription';
-      context.controllerFuncName = 'editDescription';
-      context.modalInputFuncName = 'textArea';
-      context.newValue           = this.Factory.stringNext();
+      this.createControllerForProcessed(f,
+                                        processingType,
+                                        f.processingTypesFromCollected[0].plainProcessingType);
+      expect(this.controller.processingType).toBe(processingType);
     });
 
-    entityUpdateSharedBehaviour(context);
-
   });
 
-  describe('updates to recurring', function () {
+  describe('when modifying', function() {
+    const context = {};
 
-    var context = {};
+    beforeEach(function() {
+      context.createController = () => {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromProcessed[0].processingType;
+        this.createControllerForProcessed(f,
+                                          processingType,
+                                          f.processingTypesFromCollected[0].plainProcessingType);
+      };
 
-    beforeEach(function () {
-      var self = this;
-      context.entity             = this.CollectionEventType;
-      context.createController   = function () { self.createController(); };
-      context.updateFuncName     = 'updateRecurring';
-      context.controllerFuncName = 'editRecurring';
-      context.modalInputFuncName = 'boolean';
-      context.newValue           = false;
     });
 
-    entityUpdateSharedBehaviour(context);
+    describe('updates to name', function () {
 
-  });
-
-  it('editing a specimen description changes to correct state', function() {
-    var specimenDefinition =
-        new this.CollectionSpecimenDefinition(this.Factory.collectionSpecimenDefinition());
-
-    this.createController();
-    this.controller.editSpecimenDefinition(specimenDefinition);
-    this.scope.$digest();
-    expect(this.$state.go).toHaveBeenCalledWith(
-      'home.admin.studies.study.collection.ceventType.specimenDefinitionView',
-      { specimenDefinitionSlug: specimenDefinition.slug });
-  });
-
-  describe('removing a specimen description', function() {
-
-    it('can be removed when in valid state', function() {
-      var modalService = this.$injector.get('modalService'),
-          jsonSpecimenDefinition = this.Factory.collectionSpecimenDefinition(),
-          jsonCeventType = this.Factory.collectionEventType(
-            { specimenDefinitions: [ jsonSpecimenDefinition ]}),
-          ceventType = this.CollectionEventType.create(jsonCeventType);
-
-      spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
-      spyOn(this.CollectionEventType.prototype, 'removeSpecimenDefinition')
-        .and.returnValue(this.$q.when(ceventType));
-
-      this.createController();
-      this.controller.modificationsAllowed = true;
-      this.controller.removeSpecimenDefinition(ceventType.specimenDefinitions[0]);
-      this.scope.$digest();
-
-      expect(this.domainNotificationService.removeEntity).toHaveBeenCalled();
-      expect(this.CollectionEventType.prototype.removeSpecimenDefinition).toHaveBeenCalled();
-    });
-
-    it('throws an error if study is not disabled', function() {
-      var self = this,
-          specimenDefinition = new self.CollectionSpecimenDefinition(
-            self.Factory.collectionSpecimenDefinition());
-
-      spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
-
-      _([self.StudyState.ENABLED, self.StudyState.RETIRED]).forEach(function (state) {
-        self.study.state = state;
-        self.createController();
-        expect(function () {
-          self.controller.removeSpecimenDefinition(specimenDefinition);
-        }).toThrowError('modifications not allowed');
+      beforeEach(function () {
+        context.entity             = this.ProcessingType;
+        context.updateFuncName     = 'updateName';
+        context.controllerFuncName = 'editName';
+        context.modalInputFuncName = 'text';
+        context.newValue           = this.Factory.stringNext();
       });
+
+      entityUpdateSharedBehaviour(context);
+
     });
 
-  });
+    describe('updates to description', function () {
 
-  describe('removing an annotation type', function() {
-
-    it('can be removed when in valid state', function() {
-      var modalService = this.$injector.get('modalService'),
-          jsonAnnotType = this.Factory.annotationType(),
-          jsonCeventType = this.Factory.collectionEventType({ annotationTypes: [ jsonAnnotType ]}),
-          ceventType = this.CollectionEventType.create(jsonCeventType);
-
-      spyOn(modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      spyOn(this.CollectionEventType.prototype, 'removeAnnotationType')
-        .and.returnValue(this.$q.when(ceventType));
-
-      this.createController();
-      this.controller.annotationTypeIdsInUse = [];
-      this.controller.removeAnnotationType(ceventType.annotationTypes[0]);
-      this.scope.$digest();
-
-      expect(modalService.modalOkCancel).toHaveBeenCalled();
-      expect(this.CollectionEventType.prototype.removeAnnotationType).toHaveBeenCalled();
-    });
-
-    it('throws an error if modifications are not allowed', function() {
-      var annotationType = new this.AnnotationType(this.Factory.annotationType());
-
-      spyOn(this.modalService, 'modalOk').and.returnValue(null);
-      spyOn(this.CollectionEventType.prototype, 'removeAnnotationType').and.callThrough();
-
-      this.createController();
-      this.controller.annotationTypeIdsInUse = [ annotationType.id ];
-      this.controller.removeAnnotationType(annotationType);
-
-      expect(this.modalService.modalOk).toHaveBeenCalled();
-      expect(this.CollectionEventType.prototype.removeAnnotationType).not.toHaveBeenCalled();
-    });
-
-    it('throws an error if study is not disabled', function() {
-      var self = this,
-          annotationType = new this.AnnotationType(this.Factory.annotationType());
-
-      spyOn(self.domainNotificationService, 'removeEntity').and.returnValue(self.$q.when('OK'));
-
-      _([self.StudyState.ENABLED, self.StudyState.RETIRED]).forEach(function (state) {
-        self.createController();
-        self.study.state = state;
-
-        expect(function () {
-          self.controller.removeAnnotationType(annotationType);
-        }).toThrowError('modifications not allowed');
+      beforeEach(function () {
+        context.entity             = this.ProcessingType;
+        context.updateFuncName     = 'updateDescription';
+        context.controllerFuncName = 'editDescription';
+        context.modalInputFuncName = 'textArea';
+        context.newValue           = this.Factory.stringNext();
       });
+
+      entityUpdateSharedBehaviour(context);
+
+    });
+
+    describe('updates to enabled', function () {
+
+      beforeEach(function () {
+        context.entity             = this.ProcessingType;
+        context.updateFuncName     = 'updateEnabled';
+        context.controllerFuncName = 'editEnabled';
+        context.modalInputFuncName = 'boolean';
+        context.newValue           = false;
+      });
+
+      entityUpdateSharedBehaviour(context);
+
+    });
+
+    it('calling addAnnotationType should change to the correct state', function() {
+      context.createController();
+      this.controller.addAnnotationType();
+      this.scope.$digest();
+      expect(this.$state.go)
+        .toHaveBeenCalledWith('home.admin.studies.study.processing.viewType.annotationTypeAdd');
+    });
+
+    it('calling editAnnotationType should change to the correct state', function() {
+      var annotType = new this.AnnotationType(this.Factory.annotationType());
+
+      context.createController();
+      this.controller.editAnnotationType(annotType);
+      this.scope.$digest();
+      expect(this.$state.go).toHaveBeenCalledWith(
+        'home.admin.studies.study.processing.viewType.annotationTypeView',
+        { annotationTypeSlug: annotType.slug });
+    });
+
+    describe('removing an annotation type', function() {
+
+      it('can be removed when in valid state', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+
+        expect(processingType.specimenProcessing.input.entityId)
+          .toBe(f.eventTypes[0].plainEventType.id);
+        expect(processingType.annotationTypes).toBeNonEmptyArray();
+
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+
+        this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
+        const url = this.url('studies/proctypes/annottype',
+                             f.study.id,
+                             processingType.id,
+                             processingType.version,
+                             processingType.annotationTypes[0].id);
+
+        this.$httpBackend.expectDELETE(url)
+          .respond(this.reply(f.processingTypesFromCollected[0].plainProcessingType));
+
+        this.controller.annotationTypeIdsInUse = [];
+        this.controller.removeAnnotationType(processingType.annotationTypes[0]);
+        this.scope.$digest();
+
+        expect(this.modalService.modalOkCancel).toHaveBeenCalled();
+        this.$httpBackend.flush();
+      });
+
+      it('throws an error if modifications are not allowed', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+        var annotationType = new this.AnnotationType(this.Factory.annotationType());
+
+        this.modalService.modalOk = jasmine.createSpy().and.returnValue(this.$q.when('OK'));
+
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+        this.controller.annotationTypeIdsInUse = [ annotationType.id ];
+        this.controller.removeAnnotationType(annotationType);
+        expect(this.modalService.modalOk).toHaveBeenCalled();
+      });
+
+      it('throws an error if study is not disabled', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+        var annotationType = new this.AnnotationType(this.Factory.annotationType());
+
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+        this.controller.annotationTypeIdsInUse = [ ];
+
+        [this.StudyState.ENABLED, this.StudyState.RETIRED].forEach(state => {
+          f.study.state = state
+
+          expect(() => {
+            this.controller.removeAnnotationType(annotationType);
+          }).toThrowError(/modifications not allowed/);
+        });
+      });
+
+    });
+
+    describe('for updates to the input specimen', function() {
+
+      it('update request is sent to server', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+        const input = processingType.specimenProcessing.input;
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+
+        this.ProcessingTypeInputModal.open = jasmine.createSpy()
+          .and.returnValue({ result: this.$q.when(input) });
+
+        const url = this.url('studies/proctypes/update', processingType.studyId, processingType.id);
+        this.$httpBackend
+          .expectPOST(url,
+                      {
+                        property: 'inputSpecimenProcessing',
+                        expectedVersion: processingType.version,
+                        newValue: input
+                      })
+          .respond(this.reply(f.processingTypesFromCollected[0].plainProcessingType));
+
+        this.controller.inputSpecimenUpdate();
+        this.$httpBackend.flush();
+        expect(this.ProcessingTypeInputModal.open)
+          .toHaveBeenCalledWith(f.study, processingType);
+      });
+
+      it('user can press cancel button on modal', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+
+        this.ProcessingTypeInputModal.open = jasmine.createSpy()
+          .and.returnValue({ result: this.$q.reject('cancel') });
+
+        this.notificationsService.updateError = jasmine.createSpy().and.callThrough();
+        this.controller.inputSpecimenUpdate();
+
+        expect(this.notificationsService.updateError).not.toHaveBeenCalled();
+      });
+
+      it('displays a notification if the server replies with a failure', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+        const input = processingType.specimenProcessing.input;
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+
+        this.ProcessingTypeInputModal.open = jasmine.createSpy()
+          .and.returnValue({ result: this.$q.when(input) });
+
+        const url = this.url('studies/proctypes/update', processingType.studyId, processingType.id);
+        this.$httpBackend
+          .expectPOST(url,
+                      {
+                        property: 'inputSpecimenProcessing',
+                        expectedVersion: processingType.version,
+                        newValue: input
+                      })
+          .respond(400, this.errorReply());
+        this.notificationsService.updateError = jasmine.createSpy().and.callThrough();
+
+        this.controller.inputSpecimenUpdate();
+        this.$httpBackend.flush();
+
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
+      });
+
+    });
+
+    describe('for updates to the output specimen', function() {
+
+      it('update request is sent to server', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+        const output = processingType.specimenProcessing.output;
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+
+        this.ProcessingTypeOutputModal.open = jasmine.createSpy()
+          .and.returnValue({ result: this.$q.when(output) });
+
+        const url = this.url('studies/proctypes/update', processingType.studyId, processingType.id);
+        this.$httpBackend
+          .expectPOST(url,
+                      {
+                        property: 'outputSpecimenProcessing',
+                        expectedVersion: processingType.version,
+                        newValue: output
+                      })
+          .respond(this.reply(f.processingTypesFromCollected[0].plainProcessingType));
+
+        this.controller.outputSpecimenUpdate();
+        this.$httpBackend.flush();
+        expect(this.ProcessingTypeOutputModal.open)
+          .toHaveBeenCalledWith(f.study, processingType);
+      });
+
+      it('user can press cancel button on modal', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+
+        this.ProcessingTypeOutputModal.open = jasmine.createSpy()
+          .and.returnValue({ result: this.$q.reject('cancel') });
+
+        this.notificationsService.updateError = jasmine.createSpy().and.callThrough();
+        this.controller.outputSpecimenUpdate();
+
+        expect(this.notificationsService.updateError).not.toHaveBeenCalled();
+      });
+
+      it('displays a notification if the server replies with a failure', function() {
+        const f = this.processingTypeFixture.fixture();
+        const processingType = f.processingTypesFromCollected[0].processingType;
+        const output = processingType.specimenProcessing.output;
+        this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+
+        this.ProcessingTypeOutputModal.open = jasmine.createSpy()
+          .and.returnValue({ result: this.$q.when(output) });
+
+        const url = this.url('studies/proctypes/update', processingType.studyId, processingType.id);
+        this.$httpBackend
+          .expectPOST(url,
+                      {
+                        property: 'outputSpecimenProcessing',
+                        expectedVersion: processingType.version,
+                        newValue: output
+                      })
+          .respond(400, this.errorReply());
+        this.notificationsService.updateError = jasmine.createSpy().and.callThrough();
+
+        this.controller.outputSpecimenUpdate();
+        this.$httpBackend.flush();
+
+        expect(this.notificationsService.updateError).toHaveBeenCalled();
+      });
+
     });
 
   });
 
-  it('updates state when panel button is clicked', function() {
-    var panelState;
+  describe('removing a processing type', function() {
 
-    this.createController();
-    panelState = this.controller.isPanelCollapsed;
-    this.controller.panelButtonClicked();
-    this.scope.$digest();
+    it('can remove correctly', function() {
+      const f = this.processingTypeFixture.fixture();
+      const processingType = f.processingTypesFromCollected[0].processingType;
+      this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
 
-    expect(this.controller.isPanelCollapsed).not.toEqual(panelState);
-  });
+      this.$httpBackend
+        .expectGET(this.url('studies/proctypes/inuse', processingType.slug))
+        .respond(this.reply(false));
 
-  describe('removing a collection event type', function() {
-
-    it('can remove the collection event type', function() {
-      spyOn(this.CollectionEventType.prototype, 'inUse').and.returnValue(this.$q.when(false));
-      spyOn(this.CollectionEventType.prototype, 'remove').and.returnValue(this.$q.when(true));
+      this.$httpBackend
+        .expectDELETE(this.url('studies/proctypes',
+                               processingType.studyId,
+                               processingType.id,
+                               processingType.version))
+        .respond(this.reply(true));
 
       spyOn(this.domainNotificationService, 'removeEntity').and.callThrough();
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
       spyOn(this.notificationsService, 'success').and.returnValue(null);
 
-      this.createController();
-      this.controller.removeCeventType();
-      this.scope.$digest();
+      this.controller.removeProcessingType();
+      this.$httpBackend.flush();
 
       expect(this.domainNotificationService.removeEntity).toHaveBeenCalled();
       expect(this.notificationsService.success).toHaveBeenCalled();
@@ -279,12 +419,19 @@ describe('ceventTypeViewComponent', function() {
     });
 
     it('user is informed if it cannot be removed', function() {
-      spyOn(this.CollectionEventType.prototype, 'inUse').and.returnValue(this.$q.when(true));
+      const f = this.processingTypeFixture.fixture();
+      const processingType = f.processingTypesFromCollected[0].processingType;
+
+      this.createControllerForCollected(f, processingType, f.eventTypes[0].plainEventType);
+
+      this.$httpBackend
+        .expectGET(this.url('studies/proctypes/inuse', processingType.slug))
+        .respond(this.reply(true));
+
       spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
 
-      this.createController();
-      this.controller.removeCeventType();
-      this.scope.$digest();
+      this.controller.removeProcessingType();
+      this.$httpBackend.flush();
 
       expect(this.modalService.modalOk).toHaveBeenCalled();
     });

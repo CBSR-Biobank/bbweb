@@ -54,10 +54,10 @@ class ProcessingTypeAnnotationTypeViewController {
         })
     ];
 
-    // reload the collection event type in case changes were made to it
+    // reload the processing type in case changes were made to it
     this.ProcessingType.get(this.study.slug, this.processingType.slug)
-      .then(ceventType => {
-        this.processingType = ceventType;
+      .then(processingType => {
+        this.processingType = processingType;
       });
   }
 

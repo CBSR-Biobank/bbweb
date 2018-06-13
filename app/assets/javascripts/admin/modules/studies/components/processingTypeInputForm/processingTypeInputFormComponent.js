@@ -39,7 +39,6 @@ class ProcessingTypeInputFormController {
       throw new Error('invalid value for button config: ' + this.buttonConfig);
     }
 
-    this.inputType = undefined;
     const input = this.processingType.specimenProcessing.input;
     if (input.definitionType !== undefined) {
       this.inputTypeIsCollected = input.isCollected();
@@ -70,14 +69,14 @@ class ProcessingTypeInputFormController {
             this.validInputType = true;
           }
           this.commonInit();
-        } else {
+        } else if (input.definitionType === undefined) {
           this.inputTypeIsCollected = true;
-          this.collectedSpecimen();
+          this.collectedSpecimensSelected();
         }
       })
   }
 
-  collectedSpecimen() {
+  collectedSpecimensSelected() {
     this.eventType = undefined;
     this.specimenDefinition = undefined;
     this.getCollectionSpecimenDefinitions()()
@@ -89,18 +88,18 @@ class ProcessingTypeInputFormController {
       });
   }
 
-  processedSpecimen() {
+  processedSpecimensSelected() {
     this.eventType = undefined;
     this.inputProcessingType = undefined;
     this.getProcessedSpecimenDefinitions()()
       .then(reply => {
         this.processingTypes = this.combinedNames(reply);
+        this.validInputType = (reply.length > 0);
         if (reply.length === 1) {
           this.inputProcessingType = reply[0];
         }
         this.commonInit();
-        this.validInputType = (reply.length > 0);
-      })
+      });
   }
 
   commonInit() {
@@ -115,10 +114,6 @@ class ProcessingTypeInputFormController {
       const combinedName = pt.name + ': ' + pt.specimenDefinitionName.name;
       return Object.assign(pt, { combinedName })
     });
-  }
-
-  updateCollectionEventType() {
-    this.specimenDefinition = undefined;
   }
 
   assignValues() {

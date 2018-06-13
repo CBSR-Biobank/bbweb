@@ -10,7 +10,7 @@
              type="radio"
              ng-model="vm.inputTypeIsCollected"
              ng-value="true"
-             ng-change="vm.collectedSpecimen()"
+             ng-change="vm.collectedSpecimensSelected()"
              focus-me="true"
              required />
       <translate>Collected specimen</translate>
@@ -20,7 +20,7 @@
              type="radio"
              ng-model="vm.inputTypeIsCollected"
              ng-value="false"
-             ng-change="vm.processedSpecimen()"
+             ng-change="vm.processedSpecimensSelected()"
              required />
       <translate>Processed specimen</translate>
     </div>

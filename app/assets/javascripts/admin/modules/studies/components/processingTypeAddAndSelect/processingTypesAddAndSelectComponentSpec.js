@@ -36,29 +36,29 @@ describe('processingTypesAddAndSelectComponent', function() {
 
       this.createController =
         (jsonStudy = this.Factory.study(), jsonProcessingType = this.Factory.processingType()) => {
-          this.study = new this.Study(jsonStudy);
+      this.study = new this.Study(jsonStudy);
 
           let responseObjects = [];
 
           if (jsonProcessingType) {
             this.processingType = new this.CollectionEventType(jsonProcessingType);
             responseObjects = [ jsonProcessingType ];
-          }
+        }
 
           this.expectGET(this.study.slug, responseObjects);
-          ComponentTestSuiteMixin.createController.call(
-            this,
+        ComponentTestSuiteMixin.createController.call(
+          this,
             `<processing-types-add-and-select
               study="vm.study"
               processing-types="vm.collectionEventTypes">
            </processing-types-add-and-select>`,
-            {
+          {
               study:           this.study,
               processingTypes: [ this.processingType ]
-            },
-            'processingTypesAddAndSelect');
+          },
+          'processingTypesAddAndSelect');
           this.$httpBackend.flush();
-        };
+      };
     });
   });
 

@@ -11,7 +11,7 @@ describe('admin/centre states', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test', function ($qProvider) {
-      // this is needed to make promis rejections work for a state's resolves
+      // this is needed to make promise rejections work for a state's resolves
       $qProvider.errorOnUnhandledRejections(false);
     })
 

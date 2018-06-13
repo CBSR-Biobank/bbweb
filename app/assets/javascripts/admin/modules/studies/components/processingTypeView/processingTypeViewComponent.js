@@ -165,13 +165,15 @@ class ProcessingTypeViewController {
     this.ProcessingTypeInputModal.open(this.study, _.cloneDeep(this.processingType))
       .result
       .then(inputSpecimenProcessing =>
-            this.processingType.updateInputSpecimenDefinition(inputSpecimenProcessing))
+            this.processingType.updateInputSpecimenProcessing(inputSpecimenProcessing))
       .then(processingType => {
         this.processingType = processingType;
         this.notificationsService.success(this.gettextCatalog.getString('Input specimen updated'));
       })
       .catch(error => {
         // if user pressed the 'Cancel' button then error is of type string and equal to 'cancel'
+        //
+        // otherwise, the server has replied with an error
         if (typeof error === 'object') {
           this.notificationsService.updateError(error);
         }
@@ -182,13 +184,15 @@ class ProcessingTypeViewController {
     this.ProcessingTypeOutputModal.open(this.study, _.cloneDeep(this.processingType))
       .result
       .then(outputSpecimenProcessing =>
-            this.processingType.updateOutputSpecimenDefinition(outputSpecimenProcessing))
+            this.processingType.updateOutputSpecimenProcessing(outputSpecimenProcessing))
       .then(processingType => {
         this.processingType = processingType;
         this.notificationsService.success(this.gettextCatalog.getString('Output specimen updated'));
       })
       .catch(error => {
         // if user pressed the 'Cancel' button then error is of type string and equal to 'cancel'
+        //
+        // otherwise, the server has replied with an error
         if (typeof error === 'object') {
           this.notificationsService.updateError(error);
         }
