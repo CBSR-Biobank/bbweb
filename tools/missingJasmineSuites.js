@@ -17,16 +17,28 @@ require('console.table');
 
   /**
    * Displays a table of all the JavaScript files in the 'app' directory and whether or not there is a
-   * Jasmine test suite for that file in the 'test' directory.
+   * Jasmine test suite for that file.
    */
 
-  const appfiles   = dirGetFiles('app/assets/javascripts'),
-        testfiles  = dirGetFiles('test/assets/javascripts'),
-        jsfiles    = getJsFiles(appfiles),
-        suitefiles = getJsSuiteFiles(testfiles);
+  const allfiles = dirGetFiles('app/assets/javascripts');
+
+  const appfiles = allfiles
+        .filter((item) =>
+                item.match(/\.js$/) &&
+                !item.match(/\Spec.js$/) &&
+                !item.match(/assets\/javascripts\/test/) &&
+                !item.match(/(app|main|states|index).js/));
+
+  const testsuites = allfiles
+        .filter((item) =>
+                item.match(/\Spec.js$/) &&
+                !item.match(/assets\/javascripts\/test/) &&
+                !item.match(/^test-main\.js$/));
+
+  //console.log(testsuites);
 
   program.parse(process.argv);
-  checkForAllSuites(jsfiles, suitefiles);
+  checkForAllSuites(appfiles, testsuites);
 
   /*
    * Walks the directory tree looking for files.
@@ -52,22 +64,14 @@ require('console.table');
     return _.flatMap(result);
   }
 
-  function getJsFiles(files) {
-    return _.filter(files, (item) => item.match(/\.js$/) && !item.match(/(app|main|states).js/));
-  }
-
-  function getJsSuiteFiles(files) {
-    return _.filter(getJsFiles(files), (item) =>
-                    !item.match(/test\/assets\/javascripts\/test\/assets\/javascripts\/test/) &&
-                    !item.match(/^test-main\.js$/));
-  }
-
   function jsPathToSuitePath(jspath) {
-    return jspath.replace(/^app/, 'test').replace(/\.js$/, 'Spec.js');
+    return jspath.replace(/\.js$/, 'Spec.js');
   }
 
   function hasSuite(jspath, suitefiles) {
-    return suitefiles.indexOf(jsPathToSuitePath(jspath)) > 0;
+    const testFileName = jsPathToSuitePath(jspath)
+    //console.log(jspath, testFileName, suitefiles.indexOf(testFileName) >= 0);
+    return suitefiles.indexOf(testFileName) >= 0;
   }
 
   function checkForAllSuites(jsfiles, suitefiles) {
