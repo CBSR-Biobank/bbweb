@@ -34,49 +34,62 @@ function AnnotationTypeFactory($log,
    */
   class AnnotationType extends DomainEntity {
 
-    /**
-     * A short identifying name that is unique.
-     *
-     * @name domain.annotations.AnnotationType#name
-     * @type {string}
-     */
+    constructor(obj) {
+      /**
+       * A short identifying name that is unique.
+       *
+       * @name domain.annotations.AnnotationType#name
+       * @type {string}
+       */
 
-    /**
-     * An optional description that can provide additional details on the name.
-     *
-     * @name domain.annotations.AnnotationType#description
-     * @type {string}
-     */
+      /**
+       * An optional description that can provide additional details on the name.
+       *
+       * @name domain.annotations.AnnotationType#description
+       * @type {string}
+       */
 
-    /**
-     * The type of information stored by the annotation.
-     *
-     * @name domain.annotations.AnnotationType#valueType
-     * @type {domain.AnnotationValueType}
-     */
+      /**
+       * The type of information stored by the annotation.
+       *
+       * @name domain.annotations.AnnotationType#valueType
+       * @type {domain.AnnotationValueType}
+       */
 
-    /**
-     * When `valueType` is {@link domain.AnnotationValueType.SELECT}, this is the number of items allowed to
-     * be selected. If the value is greater than 1 then any number of values can be selected.
-     *
-     * @name domain.annotations.AnnotationType#maxValueCount
-     * @type {domain.AnnotationMaxValueCount}
-     */
+      /**
+       * When `valueType` is {@link domain.AnnotationValueType.SELECT}, this is the number of items allowed to
+       * be selected. If the value is greater than 1 then any number of values can be selected.
+       *
+       * @name domain.annotations.AnnotationType#maxValueCount
+       * @type {domain.AnnotationMaxValueCount}
+       */
 
-    /**
-     * When true, the user must enter a value for this annotation.
-     *
-     * @name domain.annotations.AnnotationType#required
-     * @type {boolean}
-     */
+      /**
+       * When true, the user must enter a value for this annotation.
+       *
+       * @name domain.annotations.AnnotationType#required
+       * @type {boolean}
+       */
 
-    /**
-     * When `valueType` is {@link domain.AnnotationValueType.SELECT}, these are the values allowed to be
-     * selected.
-     *
-     * @name domain.annotations.AnnotationType#options
-     * @type {string[]}
-     */
+      /**
+       * When `valueType` is {@link domain.AnnotationValueType.SELECT}, these are the values allowed to be
+       * selected.
+       *
+       * @name domain.annotations.AnnotationType#options
+       * @type {string[]}
+       */
+
+      super(Object.assign(
+        {
+          name:          undefined,
+          description:   undefined,
+          valueType:     undefined,
+          maxValueCount: undefined,
+          required:      false,
+          options:       []
+        },
+        obj));
+     }
 
     isValueTypeText() {
       return (this.valueType === AnnotationValueType.TEXT);

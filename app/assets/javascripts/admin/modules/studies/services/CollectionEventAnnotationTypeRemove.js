@@ -21,9 +21,9 @@ function CollectionEventAnnotationTypeRemoveFactory(gettextCatalog,
 
     constructor() {
       super(gettextCatalog.getString(`
-This annotation type is in use by a collection event type.
-If you want to make changes to the annotation type,
-it must first be removed from the collection event type(s) that use it.`));
+This annotation is in use by a collection event.
+If you want to make changes to the annotation,
+it must first be removed from the collection event that uses it.`));
     }
   }
 

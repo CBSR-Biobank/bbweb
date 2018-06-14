@@ -1,0 +1,9 @@
+<breadcrumbs crumbs="vm.breadcrumbs"></breadcrumbs>
+<div class="page-header">
+  <h1>{{vm.study.name}} <small translate>Processing Step Annotation</small></h1>
+</div>
+<annotation-type-view annotation-type="vm.annotationType"
+                      read-only="!vm.study.isDisabled()"
+                      on-update="vm.onUpdate.bind(vm)"
+                      on-remove="vm.removeRequest.bind(vm)">
+</annotation-type-view>

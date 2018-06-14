@@ -135,11 +135,11 @@ class ProcessingTypeViewController {
   }
 
   addAnnotationType() {
-    this.$state.go('home.admin.studies.study.collection.processingType.annotationTypeAdd');
+    this.$state.go('home.admin.studies.study.processing.viewType.annotationTypeAdd');
   }
 
   editAnnotationType(annotType) {
-    this.$state.go('home.admin.studies.study.collection.processingType.annotationTypeView',
+    this.$state.go('home.admin.studies.study.processing.viewType.annotationTypeView',
                    { annotationTypeSlug: annotType.slug });
   }
 
@@ -259,7 +259,7 @@ function resolveProcessingType($transition$, study, ProcessingType, resourceErro
 function stateConfig($stateProvider, $urlRouterProvider) {
   'ngInject';
   $stateProvider.state('home.admin.studies.study.processing.viewType', {
-    url: '/proctype/{processingTypeSlug}',
+    url: '/step/{processingTypeSlug}',
     resolve: {
       processingType: resolveProcessingType
     },

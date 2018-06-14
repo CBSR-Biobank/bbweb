@@ -333,7 +333,7 @@ function ProcessingTypeFactory($q,
      */
     addAnnotationType(annotationType) {
       return this.update(ProcessingType.url('annottype', this.id),
-                         _.omit(annotationType, 'uniqueId'));
+                         Object.assign({ studyId: this.studyId }, _.omit(annotationType, 'uniqueId')));
     }
 
     /**
@@ -341,7 +341,7 @@ function ProcessingTypeFactory($q,
      */
     updateAnnotationType(annotationType) {
       return this.update(ProcessingType.url('annottype', this.id, annotationType.id),
-                         annotationType);
+                         Object.assign({ studyId: this.studyId }, annotationType));
     }
 
     /**

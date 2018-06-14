@@ -18,6 +18,9 @@ import _ from 'lodash'
  */
 /* @ngInject */
 function adminStudiesUiRouterConfig($stateProvider) {
+
+  // FIXME: gradually moving state declarations to the files that define the component used by the state
+
   $stateProvider
     .state('home.admin.studies', {
       url: '/studies',
@@ -85,21 +88,6 @@ function adminStudiesUiRouterConfig($stateProvider) {
         'main@': 'ceventTypeAdd'
       }
     })
-    .state('home.admin.studies.study.collection.ceventType.annotationTypeAdd', {
-      url: '/annottypes/add',
-      views: {
-        'main@': 'collectionEventAnnotationTypeAdd'
-      }
-    })
-    .state('home.admin.studies.study.collection.ceventType.annotationTypeView', {
-      url: '/annottypes/{annotationTypeSlug}',
-      resolve: {
-        annotationType: resolveAnnotationType
-      },
-      views: {
-        'main@': 'collectionEventAnnotationTypeView'
-      }
-    })
     .state('home.admin.studies.study.collection.ceventType.specimenDefinitionView', {
       url: '/spcdefs/{specimenDefinitionSlug}',
       resolve: {
@@ -123,14 +111,6 @@ function adminStudiesUiRouterConfig($stateProvider) {
           annotationType = _.find(study.annotationTypes, { slug }),
           result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type slug')
     return result.catch(resourceErrorService.goto404(`invalid participant annotation type ID: ${slug}`))
-  }
-
-  /* @ngInject */
-  function resolveAnnotationType($q, $transition$, collectionEventType, resourceErrorService) {
-    const slug = $transition$.params().annotationTypeSlug,
-          annotationType = _.find(collectionEventType.annotationTypes, { slug  }),
-          result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type ID')
-    return result.catch(resourceErrorService.goto404(`invalid event-type annotation-type ID: ${slug}`))
   }
 
   /* @ngInject */

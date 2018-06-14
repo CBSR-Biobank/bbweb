@@ -1,7 +1,7 @@
 /**
- * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
+ * AngularJS Component for {@link domain.studies.ProcessingType ProcessingType} administration.
  *
- * @namespace admin.studies.components.collectionEventAnnotationTypeView
+ * @namespace admin.studies.components.processingTypeAnnotationTypeView
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -9,12 +9,12 @@
 
 import _ from 'lodash'
 
-class CollectionEventAnnotationTypeViewController {
+class ProcessingTypeAnnotationTypeViewController {
 
   constructor($q,
               $state,
-              CollectionEventType,
-              CollectionEventAnnotationTypeRemove,
+              ProcessingType,
+              ProcessingTypeAnnotationTypeRemove,
               gettextCatalog,
               notificationsService,
               breadcrumbService) {
@@ -23,29 +23,29 @@ class CollectionEventAnnotationTypeViewController {
                   {
                     $q,
                     $state,
-                    CollectionEventType,
+                    ProcessingType,
                     gettextCatalog,
                     notificationsService,
                     breadcrumbService
                   });
-    this.annotationTypeRemove = new CollectionEventAnnotationTypeRemove();
+    this.annotationTypeRemove = new ProcessingTypeAnnotationTypeRemove();
   }
 
   $onInit() {
     const studySlug = this.study.slug,
-          slug = this.collectionEventType.slug
+          slug = this.processingType.slug
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),
       this.breadcrumbService.forState('home.admin'),
       this.breadcrumbService.forState('home.admin.studies'),
       this.breadcrumbService.forStateWithFunc(
-        `home.admin.studies.study.collection({ studySlug: "${studySlug}" })`,
+        `home.admin.studies.study.processing({ studySlug: "${studySlug}" })`,
         () => this.study.name),
       this.breadcrumbService.forStateWithFunc(
-        `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
-        () => this.collectionEventType.name),
+        `home.admin.studies.study.processing.viewType({ studySlug: "${studySlug}", processingTypeSlug: "${slug}" })`,
+        () => this.processingType.name),
       this.breadcrumbService.forStateWithFunc(
-        'home.admin.studies.study.collection.ceventType.annotationTypeView',
+        'home.admin.studies.study.processing.viewType.annotationTypeView',
         () => {
           if (_.isUndefined(this.annotationType)) {
             return this.gettextCatalog.getString('Error');
@@ -55,17 +55,17 @@ class CollectionEventAnnotationTypeViewController {
     ];
 
     // reload the collection event type in case changes were made to it
-    this.CollectionEventType.get(this.study.slug, this.collectionEventType.slug)
+    this.ProcessingType.get(this.study.slug, this.processingType.slug)
       .then(ceventType => {
-        this.collectionEventType = ceventType;
+        this.processingType = ceventType;
       });
   }
 
   onUpdate(attr, annotationType) {
-    return this.collectionEventType.updateAnnotationType(annotationType)
-      .then(collectionEventType => {
-        this.collectionEventType = collectionEventType;
-        this.annotationType = _.find(this.collectionEventType.annotationTypes,
+    return this.processingType.updateAnnotationType(annotationType)
+      .then(processingType => {
+        this.processingType = processingType;
+        this.annotationType = _.find(this.processingType.annotationTypes,
                                      { id: this.annotationType.id });
         if (_.isUndefined(this.annotationType)) {
           return this.$q.reject('could not update annotation type');
@@ -97,7 +97,7 @@ class CollectionEventAnnotationTypeViewController {
 
     this.annotationTypeRemove.remove(
       this.annotationType,
-      () => this.collectionEventType.removeAnnotationType(this.annotationType)
+      () => this.processingType.removeAnnotationType(this.annotationType)
     ).then(() => {
       this.notificationsService.success(this.gettextCatalog.getString('Annotation removed'));
       this.$state.go('^', {}, { reload: true });
@@ -108,32 +108,32 @@ class CollectionEventAnnotationTypeViewController {
 
 /**
  * An AngularJS component that allows the user to display an {@link domain.annotations.AnnotationType AnnotationType} that
- * belongs to a {@link domain.studies.CollectionEventType CollectionEventType}.
+ * belongs to a {@link domain.studies.ProcessingType ProcessingType}.
  *
- * @memberOf admin.studies.components.collectionEventAnnotationTypeView
+ * @memberOf admin.studies.components.processingTypeAnnotationTypeView
  *
  * @param {domain.studies.Study} study - the study the collection event type belongs to.
  *
- * @param {domain.studies.CollectionEventType} collectionEventType - the collection event type the
+ * @param {domain.studies.ProcessingType} processingType - the collection event type the
  * annotation type belongs to.
  *
  * @param {domain.annotations.AnnotationType} annotationType - the annotation type to display.
  */
-const collectionEventAnnotationTypeViewComponent = {
-  template: require('./collectionEventAnnotationTypeView.html'),
-  controller: CollectionEventAnnotationTypeViewController,
+const processingTypeAnnotationTypeViewComponent = {
+  template: require('./processingTypeAnnotationTypeView.html'),
+  controller: ProcessingTypeAnnotationTypeViewController,
   controllerAs: 'vm',
   bindings: {
     study:               '<',
-    collectionEventType: '<',
+    processingType: '<',
     annotationType:      '<'
   }
 };
 
-function resolveAnnotationType($q, $transition$, collectionEventType, resourceErrorService) {
+function resolveAnnotationType($q, $transition$, processingType, resourceErrorService) {
   'ngInject';
   const slug = $transition$.params().annotationTypeSlug,
-        annotationType = _.find(collectionEventType.annotationTypes, { slug  }),
+        annotationType = _.find(processingType.annotationTypes, { slug }),
         result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type ID')
   return result.catch(resourceErrorService.goto404(`invalid event-type annotation-type ID: ${slug}`))
 }
@@ -141,13 +141,13 @@ function resolveAnnotationType($q, $transition$, collectionEventType, resourceEr
 function stateConfig($stateProvider, $urlRouterProvider) {
   'ngInject';
   $stateProvider
-    .state('home.admin.studies.study.collection.ceventType.annotationTypeView', {
+    .state('home.admin.studies.study.processing.viewType.annotationTypeView', {
       url: '/annottypes/{annotationTypeSlug}',
       resolve: {
         annotationType: resolveAnnotationType
       },
       views: {
-        'main@': 'collectionEventAnnotationTypeView'
+        'main@': 'processingTypeAnnotationTypeView'
       }
     });
   $urlRouterProvider.otherwise('/');
@@ -156,5 +156,5 @@ function stateConfig($stateProvider, $urlRouterProvider) {
 export default ngModule => {
   ngModule
     .config(stateConfig)
-    .component('collectionEventAnnotationTypeView', collectionEventAnnotationTypeViewComponent);
+    .component('processingTypeAnnotationTypeView', processingTypeAnnotationTypeViewComponent);
 }

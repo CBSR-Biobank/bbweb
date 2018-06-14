@@ -8,10 +8,11 @@
  */
 
 /**
- * An AngularJS component that allows the user to add an {@link domain.annotations.AnnotationType AnnotationType} using an
- * HTML form. The annotation type can then be added to one of these domain entities:
+ * An AngularJS component that allows the user to add an {@link domain.annotations.AnnotationType
+ * AnnotationType} using an HTML form. The annotation type can then be added to one of these domain entities:
  *
  * - {@link domain.studies.CollectionEventType CollectionEventType}
+ * - {@link domain.studies.ProcessingType ProcessingType}
  * - {@link domain.studies.Study Study}
  * - specimen link.
  *

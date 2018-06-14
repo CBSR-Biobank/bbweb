@@ -1,7 +1,7 @@
 /**
- * AngularJS Component for {@link domain.studies.CollectionEventType CollectionEventType} administration.
+ * AngularJS Component for {@link domain.studies.ProcessingType ProcessingType} administration.
  *
- * @namespace admin.studies.components.collectionEventAnnotationTypeAdd
+ * @namespace admin.studies.components.processingTypeAnnotationTypeAdd
  *
  * @author Nelson Loyola <loyola@ualberta.ca>
  * @copyright 2018 Canadian BioSample Repository (CBSR)
@@ -12,7 +12,7 @@ import { AnnotationTypeAddController } from '../../../common/controllers/Annotat
 /*
  * Controller for this component.
  */
-class CollectionEventAnnotationTypeAddController extends AnnotationTypeAddController {
+class ProcessingTypeAnnotationTypeAddController extends AnnotationTypeAddController {
 
   constructor($state,
               notificationsService,
@@ -26,65 +26,64 @@ class CollectionEventAnnotationTypeAddController extends AnnotationTypeAddContro
           domainNotificationService,
           modalService,
           gettextCatalog,
-          gettextCatalog.getString('Collection Event Type'),
-          'home.admin.studies.study.collection.ceventType')
+          gettextCatalog.getString('Processing Type'),
+          '^')
 
     Object.assign(this, { breadcrumbService })
   }
 
   $onInit() {
     const studySlug = this.study.slug,
-          slug = this.collectionEventType.slug
+          slug = this.processingType.slug
 
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),
       this.breadcrumbService.forState('home.admin'),
       this.breadcrumbService.forState('home.admin.studies'),
       this.breadcrumbService.forStateWithFunc(
-        `home.admin.studies.study.collection({ studySlug: "${studySlug}" })`,
+        `home.admin.studies.study.processing({ studySlug: "${studySlug}" })`,
         () => this.study.name),
       this.breadcrumbService.forStateWithFunc(
-        `home.admin.studies.study.collection.ceventType({ studySlug: "${studySlug}", eventTypeSlug: "${slug}" })`,
-        () => this.collectionEventType.name),
+        `home.admin.studies.study.processing.viewType({ studySlug: "${studySlug}", processingTypeSlug: "${slug}" })`,
+        () => this.processingType.name),
       this.breadcrumbService.forStateWithFunc(
-        'home.admin.studies.study.collection.ceventType.annotationTypeView',
+        'home.admin.studies.study.processing.viewType.annotationTypeView',
         () => this.gettextCatalog.getString('Add annotation'))
     ];
   }
 
   addAnnotationType(annotationType) {
-    return this.collectionEventType.addAnnotationType(annotationType)
+    return this.processingType.addAnnotationType(annotationType)
   }
 }
 
 /**
  * An AngularJS component that allows the user to add an {@link domain.annotations.AnnotationType AnnotationType} to a
- * {@link domain.studies.CollectionEventType CollectionEventType}.
+ * {@link domain.studies.ProcessingType ProcessingType}.
  *
- * @memberOf admin.studies.components.collectionEventAnnotationTypeAdd
+ * @memberOf admin.studies.components.processingTypeAnnotationTypeAdd
  *
  * @param {domain.studies.Study} study - the study the *Collection Event Type* belongs to.
  *
- * @param {domain.studies.CollectionEventType} collectionEventType - the collection event type the
+ * @param {domain.studies.ProcessingType} processingType - the collection event type the
  * *Annotation Type* should be added to.
  */
-const collectionEventAnnotationTypeAddComponent = {
-  template: require('./collectionEventAnnotationTypeAdd.html'),
-  controller: CollectionEventAnnotationTypeAddController,
+const processingTypeAnnotationTypeAddComponent = {
+  template: require('./processingTypeAnnotationTypeAdd.html'),
+  controller: ProcessingTypeAnnotationTypeAddController,
   controllerAs: 'vm',
   bindings: {
-    study:               '<',
-    collectionEventType: '<'
+    study:          '<',
+    processingType: '<'
   }
 };
 
-
 function stateConfig($stateProvider, $urlRouterProvider) {
   'ngInject';
-  $stateProvider.state('home.admin.studies.study.collection.ceventType.annotationTypeAdd', {
+  $stateProvider.state('home.admin.studies.study.processing.viewType.annotationTypeAdd', {
     url: '/annottypes/add',
     views: {
-        'main@': 'collectionEventAnnotationTypeAdd'
+        'main@': 'processingTypeAnnotationTypeAdd'
     }
   });
   $urlRouterProvider.otherwise('/');
@@ -93,5 +92,5 @@ function stateConfig($stateProvider, $urlRouterProvider) {
 export default ngModule => {
   ngModule
     .config(stateConfig)
-    .component('collectionEventAnnotationTypeAdd', collectionEventAnnotationTypeAddComponent);
+    .component('processingTypeAnnotationTypeAdd', processingTypeAnnotationTypeAddComponent);
 }

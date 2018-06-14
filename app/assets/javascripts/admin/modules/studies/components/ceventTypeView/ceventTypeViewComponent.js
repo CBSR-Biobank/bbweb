@@ -103,10 +103,6 @@ class CeventTypeViewController {
     this.$state.go('home.admin.studies.study.collection.ceventType.annotationTypeAdd');
   }
 
-  addSpecimenDefinition() {
-    this.$state.go('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd');
-  }
-
   editAnnotationType(annotType) {
     this.$state.go('home.admin.studies.study.collection.ceventType.annotationTypeView',
                    { annotationTypeSlug: annotType.slug });
@@ -128,6 +124,10 @@ class CeventTypeViewController {
         this.notificationsService.success(this.gettextCatalog.getString('Annotation removed'));
       });
     }
+  }
+
+  addSpecimenDefinition() {
+    this.$state.go('home.admin.studies.study.collection.ceventType.specimenDefinitionAdd');
   }
 
   editSpecimenDefinition(specimenDefinition) {

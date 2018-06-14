@@ -17,7 +17,7 @@ class ProcessingTypeInputModalService {
     Object.assign(this,
                   {
                     $uibModal
-                  })
+                  });
     //service = this;
   }
 
