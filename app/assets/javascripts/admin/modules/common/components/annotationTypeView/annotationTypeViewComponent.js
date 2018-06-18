@@ -36,7 +36,7 @@ class AnnotationTypeViewController {
                          this.gettextCatalog.getString('Name'),
                          this.annotationType.name,
                          { required: true, minLength: 2 }).result
-      .then(function (name) {
+      .then(name => {
         this.annotationType.name = name;
         this.onUpdate()('name', this.annotationType);
       });
@@ -46,8 +46,8 @@ class AnnotationTypeViewController {
     this.modalInput.textArea(this.gettextCatalog.getString('Update Annotation Description'),
                              this.gettextCatalog.getString('Description'),
                              this.annotationType.description)
-      .result.then(function (description) {
-        var annotationType = Object.assign({}, this.annotationType, { description: description });
+      .result.then(description => {
+        const annotationType = Object.assign({}, this.annotationType, { description: description });
         this.onUpdate()('description', annotationType);
       });
   }
@@ -57,17 +57,18 @@ class AnnotationTypeViewController {
                             this.gettextCatalog.getString('Required'),
                             this.annotationType.required,
                             { required: true }).result
-      .then(function (required) {
+      .then(required => {
         this.annotationType.required = required;
         this.onUpdate()('required', this.annotationType);
       });
   }
 
   editSelectionOptions() {
-    this.annotationTypeUpdateModal.openModal(this.annotationType).result.then(function (options) {
-      var annotationType = Object.assign({}, this.annotationType, { options: options });
-      this.onUpdate()(annotationType);
-    });
+    this.annotationTypeUpdateModal.openModal(this.annotationType).result
+      .then(options => {
+        const annotationType = Object.assign({}, this.annotationType, { options: options });
+        this.onUpdate()(annotationType);
+      });
   }
 
   removeRequest() {

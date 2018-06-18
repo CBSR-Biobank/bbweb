@@ -27,9 +27,9 @@ describe('Component: ceventsAddAndSelect', function() {
                               'CollectionEventTypeName',
                               'Factory');
 
+      this.jsonCeventType  = this.Factory.collectionEventType();
       this.jsonCevent      = this.Factory.collectionEvent();
       this.jsonParticipant = this.Factory.defaultParticipant();
-      this.jsonCeventType  = this.Factory.defaultCollectionEventType();
 
       this.participant          = this.Participant.create(this.jsonParticipant);
       this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);

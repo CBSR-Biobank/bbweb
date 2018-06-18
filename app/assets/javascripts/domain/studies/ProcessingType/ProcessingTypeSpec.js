@@ -120,11 +120,11 @@ describe('ProcessingType', function() {
     it('constructor with no parameters has default values', function() {
       const processingType = new this.ProcessingType();
 
-      expect(processingType.isNew()).toBe(true);
-      expect(processingType.studyId).toBe(null);
-      expect(processingType.name).toBe('');
-      expect(processingType.description).toBe(null);
-      expect(processingType.enabled).toBe(false);
+      expect(processingType.isNew()).toBeTrue();
+      expect(processingType.studyId).toBeUndefined();
+      expect(processingType.name).toBeUndefined();
+      expect(processingType.description).toBeUndefined();
+      expect(processingType.enabled).toBeFalse();
     });
 
     it('constructor with plain object has valid values', function() {
@@ -314,15 +314,15 @@ describe('ProcessingType', function() {
                       this.failTest.bind(this));
   });
 
-  it('can update the input specimen information', function() {
+  it('can update the input specimen processing', function() {
     const f = this.createEntities();
 
     this.updateEntity(f.processingType,
-                      'updateInputSpecimenDefinition',
+                      'updateInputSpecimenProcessing',
                       f.processingType.specimenProcessing.input,
                       this.url('update', f.serverStudy.id, f.processingType.id),
                       {
-                        property: 'inputSpecimenDefinition',
+                        property: 'inputSpecimenProcessing',
                         newValue: f.processingType.specimenProcessing.input
                       },
                       f.serverPt,
@@ -330,15 +330,15 @@ describe('ProcessingType', function() {
                       this.failTest.bind(this));
   });
 
-  it('can update the output specimen information', function() {
+  it('can update the output specimen processing', function() {
     const f = this.createEntities();
 
     this.updateEntity(f.processingType,
-                      'updateOutputSpecimenDefinition',
+                      'updateOutputSpecimenProcessing',
                       f.processingType.specimenProcessing.output,
                       this.url('update', f.serverStudy.id, f.processingType.id),
                       {
-                        property: 'outputSpecimenDefinition',
+                        property: 'outputSpecimenProcessing',
                         newValue: f.processingType.specimenProcessing.output
                       },
                       f.serverPt,
@@ -354,10 +354,11 @@ describe('ProcessingType', function() {
                         'addAnnotationType',
                         _.omit(f.serverAnnotationType, 'id'),
                         this.url('annottype', f.processingType.id),
-                        Object.assign(_.omit(f.serverAnnotationType, 'id')),
+                        Object.assign(_.omit(f.serverAnnotationType, 'id'),
+                                      { studyId: f.processingType.studyId }),
                         f.serverPt,
-                      this.expectPt.bind(this),
-                      this.failTest.bind(this));
+                        this.expectPt.bind(this),
+                        this.failTest.bind(this));
     });
 
     describe('removing an annotation type', function() {

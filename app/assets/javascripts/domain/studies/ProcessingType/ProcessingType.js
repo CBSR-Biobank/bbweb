@@ -107,7 +107,7 @@ function ProcessingTypeFactory($q,
         {
           studyId:     undefined,
           name:        undefined,
-          description: null,
+          description: undefined,
           enabled:     false
         },
         // for mixin
@@ -315,7 +315,7 @@ function ProcessingTypeFactory($q,
     /**
      * @param {domain.studies.InputSpecimenProcessing} input
      */
-    updateInputSpecimenDefinition(input) {
+    updateInputSpecimenProcessing(input) {
       return this.update(ProcessingType.url('update', this.studyId, this.id),
                          { property: 'inputSpecimenProcessing', newValue: input });
     }
@@ -323,7 +323,7 @@ function ProcessingTypeFactory($q,
     /**
      * @param {domain.studies.OutputSpecimenProcessing} output
      */
-    updateOutputSpecimenDefinition(output) {
+    updateOutputSpecimenProcessing(output) {
       return this.update(ProcessingType.url('update', this.studyId, this.id),
                          { property: 'outputSpecimenProcessing', newValue: output });
     }

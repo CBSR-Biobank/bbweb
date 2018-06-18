@@ -48,7 +48,7 @@ describe('AnnotationType', function() {
     expect(annotationType.description).toBeUndefined();
     expect(annotationType.valueType).toBeUndefined();
     expect(annotationType.maxValueCount).toBeUndefined();
-    expect(annotationType.options).toBeUndefined();
+    expect(annotationType.options).toBeEmptyArray();
   });
 
   it('create fails for invalid JSON', function () {

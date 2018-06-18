@@ -7,7 +7,7 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import _ from 'lodash';
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import ngModule from '../../index'
 
 describe('processingTypesAddAndSelectComponent', function() {
@@ -15,89 +15,86 @@ describe('processingTypesAddAndSelectComponent', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      var jsonStudy, jsonCet;
-
-      Object.assign(this, ComponentTestSuiteMixin);
+      Object.assign(this, ComponentTestSuiteMixin, ServerReplyMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
                               '$q',
                               '$state',
+                              '$httpBackend',
                               'Study',
                               'CollectionEventType',
                               'Factory');
 
-      jsonStudy = this.Factory.study();
-      jsonCet   = this.Factory.collectionEventType(jsonStudy);
+      this.$state.go = jasmine.createSpy().and.returnValue(null);
 
-      this.study = new this.Study(jsonStudy);
-      this.collectionEventType = new this.CollectionEventType(jsonCet);
-
-      spyOn(this.CollectionEventType, 'list').and.returnValue(this.$q.when([ this.collectionEventType ]));
-      spyOn(this.$state, 'go').and.callFake(function () {});
-
-      this.createController = (study, collectionEventType) => {
-        var collectionEventTypes;
-        study = study || this.study;
-        collectionEventType = collectionEventType || this.collectionEventType;
-
-        if (_.isUndefined(collectionEventType)) {
-          collectionEventTypes = [];
-        } else {
-          collectionEventTypes = [ collectionEventType ];
-        }
-
-        this.CollectionEventType.list =
-          jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult(collectionEventTypes)));
-
-        ComponentTestSuiteMixin.createController.call(
-          this,
-          '<processing-types-add-and-select study="vm.study" collection-event-types="vm.collectionEventTypes">' +
-            '</processing-types-add-and-select>',
-          {
-            study:                study,
-            collectionEventTypes: collectionEventType
-          },
-          'processingTypesAddAndSelect');
+      this.expectGET = (studySlug, reponseObjects = []) => {
+        const url = this.url('studies/proctypes', studySlug) + '?limit=5&page=1';
+        this.$httpBackend.expectGET(url)
+          .respond(this.reply(this.Factory.pagedResult(reponseObjects)));
       };
+
+      this.createController =
+        (jsonStudy = this.Factory.study(), jsonProcessingType = this.Factory.processingType()) => {
+          this.study = new this.Study(jsonStudy);
+
+          let responseObjects = [];
+
+          if (jsonProcessingType) {
+            this.processingType = new this.CollectionEventType(jsonProcessingType);
+            responseObjects = [ jsonProcessingType ];
+          }
+
+          this.expectGET(this.study.slug, responseObjects);
+          ComponentTestSuiteMixin.createController.call(
+            this,
+            `<processing-types-add-and-select
+              study="vm.study"
+              processing-types="vm.collectionEventTypes">
+           </processing-types-add-and-select>`,
+            {
+              study:           this.study,
+              processingTypes: [ this.processingType ]
+            },
+            'processingTypesAddAndSelect');
+          this.$httpBackend.flush();
+        };
     });
   });
 
+  afterEach(function() {
+    this.$httpBackend.verifyNoOutstandingExpectation();
+    this.$httpBackend.verifyNoOutstandingRequest();
+  });
+
   it('has valid scope', function() {
-    this.collectionEventType = undefined;
-    this.createController(this.study, undefined);
-    expect(this.controller.collectionEventTypes).toBeArrayOfSize(0);
+    this.createController(this.Factory.study(), null);
+     expect(this.controller.study).toBe(this.study);
+     expect(this.controller.processingTypes).toBeArrayOfSize(0);
   });
 
   it('function add switches to correct state', function() {
     this.createController();
     this.controller.add();
     this.scope.$digest();
-    expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection.processingTypeAdd');
+    expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.processing.addType.information');
   });
 
   it('function select switches to correct state', function() {
     this.createController();
-    this.controller.select(this.collectionEventType);
+    this.controller.select(this.processingType);
     this.scope.$digest();
     expect(this.$state.go).toHaveBeenCalledWith(
-      'home.admin.studies.study.collection.processingType',
-      { processingTypeSlug: this.collectionEventType.slug });
-  });
-
-  it('function recurring returns a valid result', function() {
-    this.createController();
-    this.collectionEventType.recurring = false;
-    expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('NonRec');
-    this.collectionEventType.recurring = true;
-    expect(this.controller.getRecurringLabel(this.collectionEventType)).toBe('Rec');
+      'home.admin.studies.study.processing.viewType',
+      { processingTypeSlug: this.processingType.slug });
   });
 
   it('function pageChanged switches to correct state', function() {
     this.createController();
     this.controller.pageChanged();
-    this.scope.$digest();
-    expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.collection');
+    this.expectGET(this.study.slug, []);
+    this.$httpBackend.flush();
+    expect(this.$state.go).toHaveBeenCalledWith('home.admin.studies.study.processing');
   });
 
   describe('for updating name filter', function() {
@@ -106,12 +103,14 @@ describe('processingTypesAddAndSelectComponent', function() {
       var name = this.Factory.stringNext();
       this.createController();
 
-      this.CollectionEventType.list =
-        jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult([])));
+      const url = this.url('studies/proctypes', this.study.slug) +
+            `?filter=name:like:${name}&limit=5&page=1`;
+      this.$httpBackend.expectGET(url)
+        .respond(this.reply(this.Factory.pagedResult([])));
 
       this.controller.nameFilter = name;
       this.controller.nameFilterUpdated();
-      this.scope.$digest();
+      this.$httpBackend.flush();
 
       expect(this.controller.pagerOptions.filter).toEqual('name:like:' + name);
       expect(this.controller.pagerOptions.page).toEqual(1);
@@ -122,7 +121,8 @@ describe('processingTypesAddAndSelectComponent', function() {
       this.createController();
       this.controller.nameFilter = '';
       this.controller.nameFilterUpdated();
-      this.scope.$digest();
+      this.expectGET(this.study.slug, []);
+      this.$httpBackend.flush();
 
       expect(this.controller.pagerOptions.filter).toBeEmptyString();
       expect(this.controller.pagerOptions.page).toEqual(1);
