@@ -34,5 +34,6 @@ config.plugins = [
 ];
 
 config.optimization = {};
+config.performance.hints = false;
 
 module.exports = config;

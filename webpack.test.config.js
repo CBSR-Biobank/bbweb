@@ -29,4 +29,6 @@ config.watchOptions = {
   poll: true
 };
 
+config.performance.hints = false;
+
 module.exports = config;
