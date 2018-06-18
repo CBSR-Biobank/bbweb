@@ -26,6 +26,7 @@ describe('admin/centre states', function() {
                               'Centre',
                               'Factory')
 
+      this.init();
       this.initAuthentication()
     })
   })

@@ -13,6 +13,17 @@ import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 let StateTestSuiteMixin = {
 
   /**
+   * Logging from UI Router
+   *
+   * Don't log these as errors during tests.
+   */
+  init: function () {
+    this.$state.defaultErrorHandler(function (error) {
+      console.log(error);
+    });
+  },
+
+  /**
    * Used to inject AngularJS dependencies into the test suite.
    *
    * Also injects dependencies required by this mixin.

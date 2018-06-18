@@ -63,7 +63,6 @@ context.keys().forEach(key => {
 
 export default appModule.name;
 
-/* @ngInject */
 function configToastr(toastrConfig) {
   angular.extend(toastrConfig, {
     positionClass: 'toast-bottom-right'
@@ -71,15 +70,15 @@ function configToastr(toastrConfig) {
 
 }
 
-/* @ngInject */
 function uiRouterTrace($trace) {
+  'ngInject';
   if (DEVELOPMENT) {
     $trace.enable('TRANSITION');
   }
 }
 
-/* @ngInject */
 function uiRouterIsAuthorized($transitions) {
+  'ngInject';
   $transitions.onStart({ to: 'home.admin.**' },      checkIsAuthenticated);
   $transitions.onStart({ to: 'home.collection.**' }, checkIsAuthenticated);
   $transitions.onStart({ to: 'home.shipping.**' },   checkIsAuthenticated);
@@ -99,8 +98,8 @@ function uiRouterIsAuthorized($transitions) {
   }
 }
 
-/* @ngInject */
 function loggingConfig($logProvider) {
+  'ngInject';
   if (!PRODUCTION) {
     $logProvider.debugEnabled(true);
   }

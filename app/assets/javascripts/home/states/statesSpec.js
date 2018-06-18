@@ -20,6 +20,7 @@ describe('states', function() {
                               '$httpBackend',
                               '$state');
 
+      this.init();
       this.initAuthentication();
     })
   })

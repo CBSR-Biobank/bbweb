@@ -26,6 +26,7 @@ describe('centre states', function() {
                               'Centre',
                               'Shipment')
 
+      this.init();
       this.initAuthentication()
     })
   })

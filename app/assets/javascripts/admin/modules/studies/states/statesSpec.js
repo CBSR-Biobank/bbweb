@@ -27,6 +27,7 @@ describe('study admin collection states', function() {
                               'CollectionEventType',
                               'Factory')
 
+      this.init();
       this.initAuthentication()
       this.study = this.Study.create(this.Factory.study())
     })
