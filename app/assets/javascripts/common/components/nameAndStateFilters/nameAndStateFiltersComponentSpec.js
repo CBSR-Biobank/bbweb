@@ -8,7 +8,7 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import filtersSharedBehaviour from 'test/behaviours/filtersSharedBehaviour';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('nameAndStateFiltersComponent', function() {
 
@@ -35,8 +35,7 @@ describe('nameAndStateFiltersComponent', function() {
 
         Object.assign(actualBindings, defaultBindings, bindings);
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<name-and-state-filters
               state-data="vm.stateData"
               on-name-filter-updated="vm.onNameFilterUpdated"

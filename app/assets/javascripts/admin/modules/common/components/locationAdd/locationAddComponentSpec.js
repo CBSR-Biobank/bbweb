@@ -34,8 +34,7 @@ describe('Component: locationAdd', function() {
       this.onSubmit = jasmine.createSpy('onSubmit');
       this.onCancel = jasmine.createSpy('onCancel');
       this.createController = (onSubmit, onCancel) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<location-add on-submit="vm.onSubmit" on-cancel="vm.onCancel"> </location-add>',
           {
             onSubmit: onSubmit,

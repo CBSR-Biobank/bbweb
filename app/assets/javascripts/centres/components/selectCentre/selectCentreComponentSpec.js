@@ -21,8 +21,7 @@ describe('selectCentreComponent', function() {
 
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
       this.createController = (options) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<select-centre panel-header="{{vm.panelHeader}}"
                           get-centres="vm.getCentres"
                           on-centre-selected="vm.onCentreSelected"

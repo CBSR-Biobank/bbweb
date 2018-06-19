@@ -50,8 +50,7 @@ describe('ceventTypesAddAndSelectComponent', function() {
         this.CollectionEventType.list =
           jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult(collectionEventTypes)));
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<cevent-types-add-and-select study="vm.study" collection-event-types="vm.collectionEventTypes">' +
             '</cevent-types-add-and-select>',
           {

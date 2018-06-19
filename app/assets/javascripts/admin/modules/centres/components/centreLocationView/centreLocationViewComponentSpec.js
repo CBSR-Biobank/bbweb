@@ -33,8 +33,7 @@ describe('Component: centreLocationView', function() {
         centre = centre || this.centre;
         location = location || this.location;
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>',
           {
             centre: centre,

@@ -8,7 +8,7 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash'
-import ngModule from '../../index'
+import ngModule from '../../../app'  // the whole appliction has to be loaded for these tests
 
 describe('Component: statusLine', function() {
 
@@ -27,8 +27,7 @@ describe('Component: statusLine', function() {
 
       this.createController = (stateLabelFunc, timeAdded, timeModified, useLabels) => {
         stateLabelFunc = stateLabelFunc || this.stateLabelFunc;
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<status-line
               state-label-func="vm.stateLabelFunc"
               time-added="vm.timeAdded"

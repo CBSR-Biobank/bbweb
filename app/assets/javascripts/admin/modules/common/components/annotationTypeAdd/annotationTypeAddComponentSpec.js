@@ -28,8 +28,7 @@ describe('Directive: annotationTypeAddDirective', function() {
       this.onCancel = jasmine.createSpy('onCancel');
 
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<annotation-type-add
               on-submit="vm.onSubmit"
               on-cancel="vm.onCancel"

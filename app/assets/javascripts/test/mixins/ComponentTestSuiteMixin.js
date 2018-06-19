@@ -3,6 +3,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
+import { StateTestSuiteMixin } from 'test/mixins/StateTestSuiteMixin';
 import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 import angular from 'angular';
 
@@ -25,6 +27,11 @@ let ComponentTestSuiteMixin = {
   injectDependencies: function (...dependencies) {
     const allDependencies = dependencies.concat([ '$rootScope', '$compile' ]);
     TestSuiteMixin.injectDependencies.call(this, ...allDependencies);
+    StateTestSuiteMixin.injectDependencies.call(this);
+  },
+
+  init: function () {
+    StateTestSuiteMixin.initAuthentication.call(this);
   },
 
   createScope: function (scopeVars) {
@@ -35,7 +42,7 @@ let ComponentTestSuiteMixin = {
     return scope;
   },
 
-  createController: function (htmlElement, scopeVars, controllerName) {
+  createControllerInternal: function (htmlElement, scopeVars, controllerName) {
     this.element = angular.element(htmlElement);
     this.scope = this.createScope(scopeVars);
     this.$compile(this.element)(this.scope);
@@ -44,11 +51,11 @@ let ComponentTestSuiteMixin = {
       this.controller = this.element.controller(controllerName);
     }
   }
-
 }
 
 ComponentTestSuiteMixin = Object.assign({},
-                                        TestSuiteMixin,
+                                        StateTestSuiteMixin,
+                                        ServerReplyMixin,
                                         ComponentTestSuiteMixin);
 
 export { ComponentTestSuiteMixin };

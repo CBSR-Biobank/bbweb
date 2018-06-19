@@ -6,7 +6,7 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash'
-import ngModule from '../../index'
+import ngModule from '../../../app'
 
 describe('tagsListComponent', function() {
 
@@ -21,8 +21,7 @@ describe('tagsListComponent', function() {
         (tagData = this.tagData, tagClass = undefined, onTagSelected = this.tagSelected) => {
           const tagClassAttr = tagClass ? `tag-class="${tagClass}"` : ''
 
-          ComponentTestSuiteMixin.createController.call(
-            this,
+          this.createControllerInternal(
             `<tags-list tag-data="vm.tagData"
                        ${tagClassAttr}
                        on-tag-selected="vm.onTagSelected">

@@ -30,8 +30,7 @@ describe('Component: collectionEventAnnotationTypeView', function() {
         this.CollectionEventType.get =
           jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType));
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<collection-event-annotation-type-view
              study="vm.study"
              collection-event-type="vm.collectionEventType"

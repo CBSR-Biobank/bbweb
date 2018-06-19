@@ -24,8 +24,7 @@ describe('Component: home', function() {
                               'userService',
                               'Factory');
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<home></home>',
           undefined,
           'home');

@@ -20,7 +20,7 @@ describe('states', function() {
                               '$httpBackend',
                               '$state');
 
-      this.init();
+      this.disableUiRouterLogging();
       this.initAuthentication();
     })
   })

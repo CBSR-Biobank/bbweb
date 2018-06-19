@@ -48,8 +48,7 @@ describe('Component: ceventsAddAndSelect', function() {
         this.CollectionEvent.list =
           jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult(replyItems)));
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<cevents-add-and-select
               participant="vm.participant"
               collection-events-refresh="vm.updateValue">

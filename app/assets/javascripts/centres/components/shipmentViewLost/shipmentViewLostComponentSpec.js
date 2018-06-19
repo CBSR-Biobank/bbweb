@@ -24,8 +24,7 @@ describe('shipmentViewLostComponent', function() {
                               'Factory');
 
       this.createController = (shipment) =>
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipment-view-lost shipment="vm.shipment"></shipment-view-lost>',
           { shipment: shipment },
           'shipmentViewLost');

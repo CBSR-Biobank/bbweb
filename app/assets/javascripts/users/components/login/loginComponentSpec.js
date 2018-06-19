@@ -24,8 +24,7 @@ describe('Component: login', function() {
                               'modalService');
 
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<login></login>',
           undefined,
           'login');

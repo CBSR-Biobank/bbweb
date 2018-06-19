@@ -29,8 +29,7 @@ describe('createController', function() {
           throw new Error('no centre to create component with');
         }
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<centre-shipments centre="vm.centre"></centre-shipments',
           { centre:  centre },
           'centreShipments');

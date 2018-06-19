@@ -35,8 +35,7 @@ describe('membershipViewComponent', function() {
                               'Factory')
 
       this.createController = (membership) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<membership-view membership="vm.membership"></membership-view>',
           { membership },
           'membershipView')

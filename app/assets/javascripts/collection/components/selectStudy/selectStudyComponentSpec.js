@@ -22,8 +22,7 @@ describe('Component: selectStudy', function() {
       this.injectDependencies('$q', '$rootScope', '$compile', 'Study', 'Factory');
 
       this.createController = (scopeVars) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<select-study
               header="${panelHeader}"
               get-studies="vm.getStudies"

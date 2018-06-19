@@ -29,8 +29,7 @@ describe('usersPagedListComponent', function() {
                               'Factory');
 
       this.createController = (userCounts = {}) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<users-paged-list user-counts="vm.userCounts"></users-paged-list>',
           { userCounts },
           'usersPagedList');

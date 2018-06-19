@@ -26,8 +26,7 @@ describe('collectionSpecimenDefinitionSummaryDirective', function() {
 
       this.createController = (specimenDefinition) => {
         specimenDefinition = specimenDefinition || this.specimenDefinition;
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           [
             '<collection-specimen-definition-summary',
             '  specimen-definition="vm.specimenDefinition">',

@@ -38,8 +38,7 @@ describe('Component: collectionSpecimenDefinitionView', function() {
         this.CollectionEventType.get = jasmine.createSpy()
           .and.returnValue(this.$q.when(this.collectionEventType));
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           [
             '<collection-specimen-definition-view',
             '  study="vm.study"',

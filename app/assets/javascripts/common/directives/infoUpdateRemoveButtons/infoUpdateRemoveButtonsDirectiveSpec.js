@@ -8,7 +8,7 @@
 
 import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
 import _ from 'lodash';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('Directive: infoUpdateRemoveButtons', function() {
 
@@ -20,8 +20,7 @@ describe('Directive: infoUpdateRemoveButtons', function() {
       this.injectDependencies();
 
       this.createController = (options = {}) => {
-        DirectiveTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<info-update-remove-buttons on-info="vm.information()"
                                        on-update="vm.update()"
                                        on-remove="vm.remove()"

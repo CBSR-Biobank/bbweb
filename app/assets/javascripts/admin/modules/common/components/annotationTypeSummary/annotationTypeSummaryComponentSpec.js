@@ -23,8 +23,7 @@ describe('annotationTypeSummaryComponent', function() {
       this.annotationType = new this.AnnotationType(this.Factory.annotationType());
 
       this.createController = (annotationType = this.annotationType) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<annotation-type-summary
               annotation-type="vm.annotationType">
            </annotation-type-summary>`,

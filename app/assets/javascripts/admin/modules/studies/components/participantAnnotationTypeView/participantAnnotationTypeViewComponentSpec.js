@@ -33,8 +33,7 @@ describe('Component: participantAnnotationTypeView', function() {
       this.annotationType = new this.AnnotationType(jsonAnnotType);
 
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<participant-annotation-type-view
             study="vm.study"
             annotation-type="vm.annotationType"

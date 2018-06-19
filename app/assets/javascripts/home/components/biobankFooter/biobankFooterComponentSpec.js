@@ -17,8 +17,7 @@ describe('Component: biobankFooter', function() {
       Object.assign(this, ComponentTestSuiteMixin);
       this.injectDependencies('$rootScope', '$compile');
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<biobank-footer></biobank-footer>',
           undefined,
           'biobankFooter');

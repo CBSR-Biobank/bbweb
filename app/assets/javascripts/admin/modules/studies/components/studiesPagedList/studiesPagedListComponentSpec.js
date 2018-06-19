@@ -31,8 +31,7 @@ describe('Component: studiesPagedList', function() {
                               'Factory');
 
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<studies-paged-list></studies-paged-list',
           undefined,
           'studiesPagedList');

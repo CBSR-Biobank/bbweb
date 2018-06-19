@@ -34,8 +34,7 @@ describe('Component: collectionSpecimenDefinitionAdd', function() {
 
       spyOn(this.$state, 'go').and.returnValue(null);
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           [
             '<collection-specimen-definition-add',
             ' study="vm.study"',

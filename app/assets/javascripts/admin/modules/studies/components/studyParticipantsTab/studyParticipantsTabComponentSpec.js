@@ -39,8 +39,7 @@ describe('Component: studyParticipantsTab', function() {
       };
 
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<study-participants-tab study="vm.study"></study-participants-tab>',
           { study: this.study },
           'studyParticipantsTab');

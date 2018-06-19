@@ -21,8 +21,7 @@ describe('shipmentsCompletedComponent', function() {
       this.centre = this.Centre.create(this.Factory.centre())
 
       this.createController = (centre = this.centre) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipments-completed centre="vm.centre"></shipments-completed>',
           { centre },
           'shipmentsCompleted');

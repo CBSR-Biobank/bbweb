@@ -23,8 +23,7 @@ describe('Component: biobankAdmin', function() {
                               'userService',
                               'Factory');
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<biobank-admin></biobank-admin>',
           undefined,
           'biobankAdmin');

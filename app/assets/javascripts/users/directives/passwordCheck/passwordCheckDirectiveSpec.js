@@ -17,8 +17,7 @@ describe('Directive: passwordCheck', function() {
       Object.assign(this, DirectiveTestSuiteMixin);
 
       this.injectDependencies();
-      DirectiveTestSuiteMixin.createController.call(
-        this,
+      this.createControllerInternal(
         `<form name="form">
             <input name="password" type="password" ng-model="vm.password"/>
             <input name="confirmPassword"

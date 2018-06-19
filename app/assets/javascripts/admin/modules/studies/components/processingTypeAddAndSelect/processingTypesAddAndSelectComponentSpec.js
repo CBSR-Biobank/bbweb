@@ -7,7 +7,6 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import ngModule from '../../index'
 
 describe('processingTypesAddAndSelectComponent', function() {
@@ -15,7 +14,7 @@ describe('processingTypesAddAndSelectComponent', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      Object.assign(this, ComponentTestSuiteMixin, ServerReplyMixin);
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
                               '$compile',
@@ -46,8 +45,7 @@ describe('processingTypesAddAndSelectComponent', function() {
         }
 
           this.expectGET(this.study.slug, responseObjects);
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
             `<processing-types-add-and-select
               study="vm.study"
               processing-types="vm.collectionEventTypes">

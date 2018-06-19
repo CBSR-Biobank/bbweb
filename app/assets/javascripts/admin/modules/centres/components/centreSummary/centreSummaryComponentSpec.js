@@ -34,8 +34,7 @@ describe('Component: centreSummary', function() {
       };
 
       this.createController = (centre) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<centre-summary centre="vm.centre"></centre-summary>',
           { centre: centre },
           'centreSummary');

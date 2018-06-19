@@ -22,8 +22,7 @@ describe('Component: centresAdmin', function() {
                               'Factory');
 
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<centres-admin></centres-admin>',
           undefined,
           'centresAdmin');

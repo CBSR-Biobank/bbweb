@@ -50,8 +50,7 @@ describe('Component: ceventGetType', function() {
       spyOn(this.$state, 'go').and.returnValue(null);
 
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<cevent-get-type study="vm.study"
                             participant="vm.participant">
            </cevent-get-type>`,

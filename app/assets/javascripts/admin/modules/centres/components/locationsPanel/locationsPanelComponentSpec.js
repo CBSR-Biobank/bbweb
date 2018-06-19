@@ -37,8 +37,7 @@ describe('Component: locationsPanel', function() {
       };
 
       this.createController = (centre) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<locations-panel centre="vm.centre"></locations-panel>',
           { centre: centre },
           'locationsPanel');

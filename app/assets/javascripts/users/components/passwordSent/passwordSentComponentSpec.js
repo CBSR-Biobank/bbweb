@@ -20,8 +20,7 @@ describe('Component: passwordSent', function() {
 
       this.createController = (email) => {
         email = email || this.email;
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<password-sent email="vm.email"></password-sent>',
           { email: email },
           'passwordSent');

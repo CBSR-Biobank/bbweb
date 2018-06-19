@@ -30,8 +30,7 @@ describe('Component: centreLocationAdd', function() {
       this.returnStateName = 'home.admin.centres.centre.locations';
 
       this.createController = (centre) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<centre-location-add centre="vm.centre"></centre-location-add>',
           { centre: centre },
           'centreLocationAdd');

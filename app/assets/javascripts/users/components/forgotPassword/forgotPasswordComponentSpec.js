@@ -26,8 +26,7 @@ describe('Component: forgotPassword', function() {
                               'Factory');
 
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<forgot-password></forgot-password>',
           undefined,
           'forgotPassword');

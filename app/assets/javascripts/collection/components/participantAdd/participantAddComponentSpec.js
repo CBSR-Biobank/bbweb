@@ -38,8 +38,7 @@ describe('Component: participantAdd', function() {
         study = study || this.study;
         uniqueId = uniqueId || this.uniqueId;
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<participant-add
              study="vm.study"
              unique-id="${uniqueId}">

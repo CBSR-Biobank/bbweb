@@ -40,11 +40,11 @@ class ProcessingTypeInformationController {
     processingType.name        = this.name;
     processingType.description = this.description;
     processingType.enabled     = this.enabled || false;
-    this.$state.go('home.admin.studies.study.processing.addType.input');
+    this.$state.go('^.input');
   }
 
   cancel() {
-    this.$state.go('home.admin.studies.study.processing');
+    this.$state.go('^.^');
   }
 
 }

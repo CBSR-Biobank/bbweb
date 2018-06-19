@@ -8,7 +8,6 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ProcessingTypeFixture from 'test/fixtures/ProcessingTypeFixture';
-import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import entityUpdateSharedBehaviour from 'test/behaviours/entityUpdateSharedBehaviour';
 import ngModule from '../../index'
 
@@ -17,7 +16,7 @@ describe('processingTypeViewComponent', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      Object.assign(this, ComponentTestSuiteMixin, ServerReplyMixin);
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -45,8 +44,7 @@ describe('processingTypeViewComponent', function() {
       this.$state.go = jasmine.createSpy().and.returnValue(null);
 
       this.createController = (fixture, processingType) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<processing-type-view
               study="vm.study"
               processing-type="vm.processingType">

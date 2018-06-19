@@ -24,8 +24,7 @@ describe('Component: collectionEventAnnotationTypeAdd', function() {
       this.collectionEventType = this.CollectionEventType.create(this.Factory.collectionEventType());
 
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
             `<collection-event-annotation-type-add
                study="vm.study"
                collection-event-type="vm.ceventType">

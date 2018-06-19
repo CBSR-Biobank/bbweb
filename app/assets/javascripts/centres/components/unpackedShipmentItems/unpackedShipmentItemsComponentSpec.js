@@ -4,7 +4,6 @@
  */
 /* global angular */
 
-import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import { ShippingComponentTestSuiteMixin } from 'test/mixins/ShippingComponentTestSuiteMixin';
 import ngModule from '../../index'
 
@@ -13,7 +12,7 @@ describe('unpackedShipmentItemsComponent', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      Object.assign(this, ShippingComponentTestSuiteMixin, ServerReplyMixin);
+      Object.assign(this, ShippingComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -26,8 +25,7 @@ describe('unpackedShipmentItemsComponent', function() {
                               'Factory');
 
       this.createController = (shipment, itemState) =>
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<unpacked-shipment-items shipment="vm.shipment"
                                     item-state="${itemState}">
            <unpacked-shipment-items>`,

@@ -35,8 +35,7 @@ describe('Component: participantGet', function() {
       this.createController = (study) => {
         study = study || this.study;
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<participant-get study="vm.study"></participant-get>',
           { study: study },
           'participantGet');

@@ -5,7 +5,7 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app'  // the whole appliction has to be loaded for these tests
 
 describe('Component: specimenTableAction', function() {
 
@@ -21,8 +21,7 @@ describe('Component: specimenTableAction', function() {
       this.addCustomMatchers();
 
       this.createController = (action, onActionSelected) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<specimen-table-action
              action="action"
              on-action-selected="vm.onActionSelected">

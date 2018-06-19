@@ -41,8 +41,7 @@ describe('ceventSpecimensViewComponent', function() {
         study = study || this.study;
         collectionEvent = collectionEvent || this.collectionEvent;
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<cevent-specimens-view
              study="vm.study"
              collection-event="vm.collectionEvent">

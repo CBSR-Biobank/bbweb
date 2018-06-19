@@ -22,8 +22,7 @@ describe('shipmentViewCompletedComponent', function() {
       this.addCustomMatchers();
 
       this.createController = (shipment) =>
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipment-view-completed shipment="vm.shipment"></shipment-view-completed>',
           { shipment: shipment },
           'shipmentViewCompleted');

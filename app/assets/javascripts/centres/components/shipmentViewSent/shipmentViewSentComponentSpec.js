@@ -31,8 +31,7 @@ describe('shipmentViewSentComponent', function() {
       this.addCustomMatchers();
 
       this.createController = (shipment) =>
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipment-view-sent shipment="vm.shipment"></shipment-view-sent>',
           { shipment: shipment },
           'shipmentViewSent');

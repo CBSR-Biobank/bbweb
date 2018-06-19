@@ -26,8 +26,7 @@ describe('Component: studyAdd', function() {
       this.returnState = 'home.admin.studies';
 
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<study-add study="vm.study"></study-add>',
           { study: this.study },
           'studyAdd');

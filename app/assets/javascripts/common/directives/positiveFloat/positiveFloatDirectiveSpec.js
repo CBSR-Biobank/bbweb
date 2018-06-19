@@ -7,7 +7,7 @@
 /* global angular */
 
 import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app'  // the whole appliction has to be loaded for these tests
 
 describe('Directive: positiveFloat', function() {
 
@@ -16,8 +16,7 @@ describe('Directive: positiveFloat', function() {
     angular.mock.inject(function () {
       Object.assign(this, DirectiveTestSuiteMixin);
       this.injectDependencies();
-      DirectiveTestSuiteMixin.createController.call(
-        this,
+      this.createControllerInternal(
         `<form name="testForm">
              <input type="number"
                     name="theNumber"

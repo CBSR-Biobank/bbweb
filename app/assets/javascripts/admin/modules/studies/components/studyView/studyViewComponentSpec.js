@@ -30,8 +30,7 @@ describe('Component: studyView', function() {
       this.study = new this.Study(this.Factory.study());
 
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<study-view study="vm.study"></study-view>',
           { study: this.study },
           'studyView');

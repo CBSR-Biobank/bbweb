@@ -55,8 +55,7 @@ describe('Component: studySummary', function() {
         this.Study.prototype.isEnableAllowed =
           jasmine.createSpy().and.returnValue(this.$q.when(enableAllowed));
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<study-summary study="vm.study"></study-summary>',
           { study: this.study },
           'studySummary');

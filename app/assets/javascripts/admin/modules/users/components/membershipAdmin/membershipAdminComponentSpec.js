@@ -22,8 +22,7 @@ describe('membershipAdminComponent', function() {
         this.Membership.list =
           jasmine.createSpy().and.returnValue(this.$q.when(this.Factory.pagedResult([])));
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<membership-admin></membership-admin>',
           undefined,
           'membershipAdmin')

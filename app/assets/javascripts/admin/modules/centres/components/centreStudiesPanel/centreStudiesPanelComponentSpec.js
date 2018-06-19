@@ -37,8 +37,7 @@ describe('Component: centreStudiesPanel', function() {
       };
 
       this.createController = (entities) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<centre-studies-panel
              centre="vm.centre"
              centre-studies="vm.centreStudies"

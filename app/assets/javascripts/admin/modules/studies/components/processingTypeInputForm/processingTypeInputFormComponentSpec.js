@@ -6,7 +6,6 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ProcessingTypeFixture from 'test/fixtures/ProcessingTypeFixture';
-import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import ngModule from '../../index';
 
 describe('processingTypeInputFormComponent', function() {
@@ -14,7 +13,7 @@ describe('processingTypeInputFormComponent', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      Object.assign(this, ComponentTestSuiteMixin, ServerReplyMixin);
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$state',
@@ -61,8 +60,7 @@ describe('processingTypeInputFormComponent', function() {
             return this.ProcessingTypeAdd.getProcessedSpecimenDefinitions(fixture.study);
           };
 
-          ComponentTestSuiteMixin.createController.call(
-            this,
+          this.createControllerInternal(
             `<processing-type-input-form
                 processing-type="vm.processingType"
                 get-collection-specimen-definitions="vm.getCollectionSpecimenDefinitions"

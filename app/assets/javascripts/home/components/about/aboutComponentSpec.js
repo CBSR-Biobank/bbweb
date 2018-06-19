@@ -17,8 +17,7 @@ describe('Component: about', function() {
       Object.assign(this, ComponentTestSuiteMixin);
       this.injectDependencies();
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<about></about>',
           undefined,
           'about');

@@ -9,7 +9,7 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash';
-import ngModule from '../../index'
+import ngModule from '../../../app'  // the whole appliction has to be loaded for these tests
 
 describe('progressTrackerComponent', function() {
 
@@ -21,8 +21,7 @@ describe('progressTrackerComponent', function() {
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
 
       this.createController = (taskData) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<progress-tracker task-data="vm.taskData"></progress-tracker>',
           { taskData },
           'progressTracker');

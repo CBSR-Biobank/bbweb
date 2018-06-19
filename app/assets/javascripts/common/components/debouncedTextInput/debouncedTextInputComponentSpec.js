@@ -7,7 +7,7 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app'  // the whole appliction has to be loaded for these tests
 
 describe('Component: debouncedTextInput', function() {
 
@@ -19,8 +19,7 @@ describe('Component: debouncedTextInput', function() {
       this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
       this.createController = (label, value = this.Factory.stringNext()) => {
         this.onValueChanged = jasmine.createSpy().and.returnValue(null);
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<debounced-text-input
               label="${label}"
               value="vm.value"

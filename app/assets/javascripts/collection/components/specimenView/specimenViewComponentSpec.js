@@ -27,8 +27,7 @@ describe('specimenViewComponent', function() {
 
       this.createController =
         (study, participant, collectionEventType, collectionEvent, specimen) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<specimen-view study="vm.study"
                           participant="vm.participant"
                           collection-event="vm.collectionEvent"

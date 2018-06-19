@@ -5,12 +5,13 @@
 /* global angular */
 
 import { StateTestSuiteMixin } from 'test/mixins/StateTestSuiteMixin';
+import UsersModule     from '../../../../users';
 import ngModule from '../../../../app' // the whole appliction has to be loaded for these states
 
 describe('admin/centre states', function() {
 
   beforeEach(() => {
-    angular.mock.module(ngModule, 'biobank.test', function ($qProvider) {
+    angular.mock.module(ngModule, UsersModule, 'biobank.test', function ($qProvider) {
       // this is needed to make promise rejections work for a state's resolves
       $qProvider.errorOnUnhandledRejections(false);
     })
@@ -26,7 +27,7 @@ describe('admin/centre states', function() {
                               'Centre',
                               'Factory')
 
-      this.init();
+      this.disableUiRouterLogging();
       this.initAuthentication()
     })
   })

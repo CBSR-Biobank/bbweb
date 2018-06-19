@@ -38,8 +38,7 @@ describe('Component: participantView', function() {
         study = study || this.study;
         participant = participant || this.participant;
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<participant-view
             study="vm.study"
             participant="vm.participant">

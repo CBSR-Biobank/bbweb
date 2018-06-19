@@ -30,8 +30,7 @@ describe('Component: centreAdd', function() {
       };
 
       this.createController = (centre) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<centre-add centre="vm.centre"></centre-add>',
           { centre: centre },
           'centreAdd');

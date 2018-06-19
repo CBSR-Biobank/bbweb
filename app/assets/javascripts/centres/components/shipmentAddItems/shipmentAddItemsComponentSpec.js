@@ -30,8 +30,7 @@ describe('shipmentAddItemsComponent', function() {
       this.addCustomMatchers();
 
       this.createController = (shipment) =>
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipment-add-items shipment="vm.shipment"></shipment-add-items',
           { shipment: shipment },
           'shipmentAddItems');

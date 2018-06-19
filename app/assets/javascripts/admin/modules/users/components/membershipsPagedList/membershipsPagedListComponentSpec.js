@@ -22,8 +22,7 @@ describe('membershipsPagedListComponent', function() {
                               'Factory');
 
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<memberships-paged-list></memberships-paged-list',
           undefined,
           'membershipsPagedList');

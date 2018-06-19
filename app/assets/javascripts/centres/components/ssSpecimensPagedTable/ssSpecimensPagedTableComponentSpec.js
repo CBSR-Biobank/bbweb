@@ -5,7 +5,7 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('ssSpecimensPagedTableComponent', function() {
 
@@ -58,8 +58,7 @@ describe('ssSpecimensPagedTableComponent', function() {
          noSpecimensMessage,
          actions,
          onActionSelected) => {
-           ComponentTestSuiteMixin.createController.call(
-             this,
+           this.createControllerInternal(
              `<ss-specimens-paged-table default-sort-field="${defaultSortField}"
                                         refresh="vm.refresh"
                                         show-item-state="vm.showItemState"
@@ -69,11 +68,11 @@ describe('ssSpecimensPagedTableComponent', function() {
                                         on-action-selected="vm.onActionSelected">
               </ss-specimens-paged-table>`,
              {
-               refresh:          refresh,
-               showItemState:    showItemState,
-               onGetSpecimens:   onGetSpecimens,
-               actions:          actions,
-               onActionSelected: onActionSelected
+               refresh,
+               showItemState,
+               onGetSpecimens,
+               actions,
+               onActionSelected
              },
              'ssSpecimensPagedTable');
          };

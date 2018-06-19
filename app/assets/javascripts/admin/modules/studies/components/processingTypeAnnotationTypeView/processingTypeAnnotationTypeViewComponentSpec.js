@@ -9,7 +9,6 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ProcessingTypeFixture from 'test/fixtures/ProcessingTypeFixture';
-import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import ngModule from '../../index'
 import sharedBehaviour from 'test/behaviours/annotationTypeViewComponentSharedBehaviour';
 
@@ -18,7 +17,7 @@ describe('Component: processingTypeAnnotationTypeView', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      Object.assign(this, ComponentTestSuiteMixin, ServerReplyMixin);
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$rootScope',
@@ -39,8 +38,7 @@ describe('Component: processingTypeAnnotationTypeView', function() {
         const url = this.url('studies/proctypes', study.slug, processingType.slug);
         this.$httpBackend.expectGET(url).respond(this.reply(plainProcessingType));
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<processing-type-annotation-type-view
               study="vm.study"
               processing-type="vm.processingType"

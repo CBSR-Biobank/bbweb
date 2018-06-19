@@ -30,7 +30,7 @@ describe('collection states', function() {
                               'Specimen',
                               'Factory')
 
-      this.init();
+      this.disableUiRouterLogging();
       this.initAuthentication()
 
       this.study = this.Study.create(this.Factory.study())

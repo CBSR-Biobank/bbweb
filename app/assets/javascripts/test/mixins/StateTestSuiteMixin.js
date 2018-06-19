@@ -6,7 +6,8 @@
 import { TestSuiteMixin } from 'test/mixins/TestSuiteMixin';
 
 /**
- * This is a mixin that can be added UserContext object of a Jasmine *UI Router* state definition test suite.
+ * This is a mixin that can be added to the UserContext object of a Jasmine *UI Router* state definition test
+ * suite.
  *
  * @exports test.mixins.StateTestSuiteMixin
  */
@@ -17,9 +18,9 @@ let StateTestSuiteMixin = {
    *
    * Don't log these as errors during tests.
    */
-  init: function () {
+  disableUiRouterLogging: function () {
     this.$state.defaultErrorHandler(function (error) {
-      console.log(error);
+      console.log(error); // eslint-disable-line no-console
     });
   },
 
@@ -35,7 +36,7 @@ let StateTestSuiteMixin = {
   injectDependencies: function (...dependencies) {
     const allDependencies = dependencies.concat([
       '$q',
-      '$cookies',
+      '$state',
       '$location',
       '$rootScope',
       'userService',
@@ -50,10 +51,7 @@ let StateTestSuiteMixin = {
    * {@link domain.users.User User}.
    */
   initAuthentication: function  () {
-    // the following line bypasses initialization in userService
-    //this.$cookies.remove('XSRF-TOKEN');
     this.userService.init = jasmine.createSpy().and.returnValue(null);
-
     const user = this.Factory.user();
     this.userService.requestCurrentUser = jasmine.createSpy().and.returnValue(this.$q.when(user));
   },

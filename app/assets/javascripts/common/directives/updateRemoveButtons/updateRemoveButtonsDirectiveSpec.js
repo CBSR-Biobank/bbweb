@@ -8,7 +8,7 @@
 
 import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
 import _ from 'lodash';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('Directive: updateRemoveButtons', function() {
   beforeEach(() => {
@@ -23,8 +23,7 @@ describe('Directive: updateRemoveButtons', function() {
       this.createController = (options) => {
         options = options || {};
 
-        DirectiveTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<update-remove-buttons
              on-update="vm.update()"
              on-remove="vm.remove()"

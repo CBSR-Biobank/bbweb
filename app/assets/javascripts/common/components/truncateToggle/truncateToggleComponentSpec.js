@@ -7,7 +7,7 @@
 /* global angular */
 
 import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('Component: truncateToggle', function() {
   var textEmptyWarning = 'text not entered yet.';
@@ -19,8 +19,7 @@ describe('Component: truncateToggle', function() {
       this.injectDependencies('$rootScope', '$compile', '$filter', 'gettextCatalog');
 
       this.createController = (text, toggleLength) => {
-        DirectiveTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<truncate-toggle
              text="vm.text"
              toggle-length="vm.toggleLength"

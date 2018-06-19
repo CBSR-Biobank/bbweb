@@ -30,8 +30,7 @@ describe('Component: userProfile', function() {
       this.ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
 
       this.createController = (user) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<user-profile user="vm.user"></user-profile>',
           { user: user },
           'userProfile');

@@ -5,7 +5,7 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('collapsiblePanelComponent', function() {
 
@@ -20,8 +20,7 @@ describe('collapsiblePanelComponent', function() {
                               'Factory');
 
       this.createController = (heading) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<collapsible-panel heading="' + heading + '"><collapsible-panel>',
           undefined,
           'collapsiblePanel');

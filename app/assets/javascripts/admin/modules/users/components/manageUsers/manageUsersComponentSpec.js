@@ -28,8 +28,7 @@ describe('manageUsersComponent', function() {
         this.UserCounts.get = jasmine.createSpy().and.returnValue(this.$q.when(counts))
 
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<manage-users></manage-users>',
           undefined,
           'manageUsers')

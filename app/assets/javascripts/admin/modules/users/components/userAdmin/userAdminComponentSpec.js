@@ -31,8 +31,7 @@ describe('Component: userAdminComponent', function() {
         this.userService.requestCurrentUser =
           jasmine.createSpy().and.returnValue(this.$q.when(user));
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<user-admin></user-admin>',
           undefined,
           'userAdmin');

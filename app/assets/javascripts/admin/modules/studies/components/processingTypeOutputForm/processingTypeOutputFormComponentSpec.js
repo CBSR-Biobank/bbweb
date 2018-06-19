@@ -6,7 +6,6 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ProcessingTypeFixture from 'test/fixtures/ProcessingTypeFixture';
-import { ServerReplyMixin } from 'test/mixins/ServerReplyMixin';
 import ngModule from '../../index';
 
 describe('processingTypeOutputFormComponent', function() {
@@ -14,7 +13,7 @@ describe('processingTypeOutputFormComponent', function() {
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
-      Object.assign(this, ComponentTestSuiteMixin, ServerReplyMixin);
+      Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$q',
                               '$state',
@@ -43,8 +42,7 @@ describe('processingTypeOutputFormComponent', function() {
           this.submitSpy = jasmine.createSpy('submitSpy').and.returnValue(1);
           this.cancelSpy = jasmine.createSpy('cancelSpy');
 
-          ComponentTestSuiteMixin.createController.call(
-            this,
+          this.createControllerInternal(
             `<processing-type-output-form
                 processing-type="vm.processingType"
                 button-config=${buttonConfig}

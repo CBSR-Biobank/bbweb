@@ -17,8 +17,7 @@ describe('resourceNotFoundComponent', function() {
       this.injectDependencies('Factory')
 
       this.createController = (errMessage = this.Factory.stringNext()) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<resource-not-found err-message="${errMessage}"></resource-not-found>`,
           undefined,
           'resourceNotFound');

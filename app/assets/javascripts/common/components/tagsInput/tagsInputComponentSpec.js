@@ -9,7 +9,7 @@
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import _ from 'lodash'
 import faker from 'faker'
-import ngModule from '../../index'
+import ngModule from '../../../app'
 
 describe('tagsInputComponent', function() {
 
@@ -30,8 +30,7 @@ describe('tagsInputComponent', function() {
          onTagSelected,
          onTagRemoved,
          required) => {
-           ComponentTestSuiteMixin.createController.call(
-             this,
+           this.createControllerInternal(
              `<form name="testForm">
                  <tags-input label="${label}"
                              placeholder="${placeholder}"

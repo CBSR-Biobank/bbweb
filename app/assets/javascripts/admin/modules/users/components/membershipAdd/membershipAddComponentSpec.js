@@ -29,8 +29,7 @@ describe('membershipAddComponent', function() {
                               'Factory')
 
       this.createController = () => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<membership-add></membership-add>',
           undefined,
           'membershipAdd')

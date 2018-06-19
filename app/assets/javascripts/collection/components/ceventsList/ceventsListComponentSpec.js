@@ -40,8 +40,7 @@ describe('Component: ceventList', function() {
         .and.returnValue(this.$q.when(this.Factory.pagedResult([ this.collectionEvent ])));
 
       this.createController = (participant = this.participant) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<cevents-list participant="vm.participant" update-collection-events="vm.updateValue">
            </cevents-list>`,
           {

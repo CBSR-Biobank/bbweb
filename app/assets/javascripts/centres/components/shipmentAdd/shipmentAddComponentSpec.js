@@ -28,8 +28,7 @@ describe('shipmentAddComponent', function() {
 
       this.addCustomMatchers();
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipment-add centre="vm.centre"></shipment-add',
           undefined,
           'shipmentAdd');

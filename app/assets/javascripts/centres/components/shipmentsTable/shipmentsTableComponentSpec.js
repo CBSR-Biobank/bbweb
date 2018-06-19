@@ -28,8 +28,7 @@ describe('shipmentsTableComponent', function() {
         (centre,
          shipmentTypes = this.SHIPMENT_TYPES.INCOMING,
          statesToDisplay = []) => {
-           ShippingComponentTestSuiteMixin.createController.call(
-             this,
+           this.createControllerInternal(
              `<shipments-table
                  centre="vm.centre"
                  shipment-types="${shipmentTypes}"

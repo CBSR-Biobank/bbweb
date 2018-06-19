@@ -5,7 +5,7 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('dateTimePickerComponent', function() {
 
@@ -22,8 +22,7 @@ describe('dateTimePickerComponent', function() {
         var labelAttrs = (labelCols) ? `label-cols="${labelCols}"` : '',
             inputAttrs = (inputCols) ? `input-cols="${inputCols}"` : '';
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<date-time-picker label="${label}"
               default-value="vm.defaultValue"
               required="vm.required"

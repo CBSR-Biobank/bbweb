@@ -12,8 +12,8 @@ import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
  */
 let DirectiveTestSuiteMixin = {
 
-  createController: function (htmlElement, scopeVars) {
-    ComponentTestSuiteMixin.createController.call(this, htmlElement, scopeVars, undefined);
+  createControllerInternal: function (htmlElement, scopeVars) {
+    ComponentTestSuiteMixin.createControllerInternal.call(this, htmlElement, scopeVars, undefined);
     this.controller = this.element.scope().vm;
   }
 

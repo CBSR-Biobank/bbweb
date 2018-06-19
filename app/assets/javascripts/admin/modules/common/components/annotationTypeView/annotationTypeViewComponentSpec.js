@@ -36,8 +36,7 @@ describe('Component: annotationTypeView', function() {
       this.onUpdate         = jasmine.createSpy('onUpdate').and.returnValue(this.$q.when(this.study));
 
       this.createController = ({ readOnly = false, annotationType = this.annotationType } = {}) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           [
             '<annotation-type-view ',
             '  annotation-type="vm.annotationType"',

@@ -7,7 +7,7 @@
 /* global angular */
 
 import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('Directive: smartFloat', function() {
 
@@ -17,8 +17,7 @@ describe('Directive: smartFloat', function() {
       Object.assign(this, DirectiveTestSuiteMixin);
 
       this.injectDependencies();
-      DirectiveTestSuiteMixin.createController.call(
-        this,
+      this.createControllerInternal(
         `<form name="testForm">
             <input type="number"
                    name="theNumber"

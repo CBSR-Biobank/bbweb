@@ -26,8 +26,7 @@ describe('Component: centreView', function() {
       this.centre = new this.Centre(this.Factory.centre());
 
       this.createController = (centre) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<centre-view centre="vm.centre"></centre-view>',
           { centre: centre },
           'centreView');

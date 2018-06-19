@@ -28,8 +28,7 @@ describe('shipmentViewPackedComponent', function() {
                               'Factory');
       this.addCustomMatchers();
       this.createController = (shipment) =>
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipment-view-packed shipment="vm.shipment"></shipment-view-packed>',
           { shipment: shipment },
           'shipmentViewPacked');

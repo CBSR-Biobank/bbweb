@@ -27,15 +27,15 @@ describe('study admin collection states', function() {
                               'CollectionEventType',
                               'Factory')
 
-      this.init();
-      this.initAuthentication()
-      this.study = this.Study.create(this.Factory.study())
+      this.disableUiRouterLogging();
+      this.initAuthentication();
+      this.study = this.Study.create(this.Factory.study());
     })
   })
 
   it('when navigating to `/admin/studies` should go to valid state', function () {
-    this.gotoUrl('/admin/studies')
-    expect(this.$state.current.name).toBe('home.admin.studies')
+    this.gotoUrl('/admin/studies');
+    expect(this.$state.current.name).toBe('home.admin.studies');
   })
 
   it('when navigating to `/admin/studies/add` should go to valid state', function () {

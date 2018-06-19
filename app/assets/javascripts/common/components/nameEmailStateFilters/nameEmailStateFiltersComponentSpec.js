@@ -8,7 +8,7 @@
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import filtersSharedBehaviour from 'test/behaviours/filtersSharedBehaviour';
-import ngModule from '../../index'
+import ngModule from '../../../app'  // the whole appliction has to be loaded for these tests
 
 describe('nameEmailStateFiltersComponent', function() {
 
@@ -16,7 +16,7 @@ describe('nameEmailStateFiltersComponent', function() {
     angular.mock.module(ngModule, 'biobank.test');
     angular.mock.inject(function() {
       Object.assign(this, ComponentTestSuiteMixin);
-      this.injectDependencies('$q', '$rootScope', '$compile', 'Factory');
+      this.injectDependencies('$q', 'Factory');
 
       this.createController = (bindings) => {
         var defaultBindings = {},
@@ -38,8 +38,7 @@ describe('nameEmailStateFiltersComponent', function() {
 
         Object.assign(actualBindings, defaultBindings, bindings);
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<name-email-state-filters
              state-data="vm.stateData"
              selected-state="${actualBindings.selectedState}"

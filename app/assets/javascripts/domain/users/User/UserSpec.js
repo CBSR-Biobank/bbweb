@@ -88,8 +88,7 @@ describe('User', function() {
           expect(pagedResult.items[0]).toEqual(jasmine.any(this.User));
         })
         .catch(error => {
-          console.log(error);
-          fail('here');
+          fail('here' + error);
         });
       this.$httpBackend.flush();
     });

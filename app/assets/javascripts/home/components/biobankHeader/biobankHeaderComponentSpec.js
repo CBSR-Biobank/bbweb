@@ -23,8 +23,7 @@ describe('Component: biobankHeader', function() {
                               'userService',
                               'Factory');
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<biobank-header></biobank-header>',
           undefined,
           'biobankHeader');

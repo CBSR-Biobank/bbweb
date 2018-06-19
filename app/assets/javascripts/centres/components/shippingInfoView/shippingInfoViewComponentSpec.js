@@ -25,8 +25,7 @@ describe('shippingInfoViewComponent', function() {
                               'Factory');
 
       this.createController = (shipment) =>
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipping-info-view shipment="vm.shipment"><shipping-info-view>',
           { shipment: shipment },
           'shippingInfoView');

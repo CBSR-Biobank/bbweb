@@ -26,8 +26,7 @@ describe('outputSpecimenProcessingSummaryDirective', function() {
 
       this.createController = (outputSpecimenProcessing) => {
         outputSpecimenProcessing = outputSpecimenProcessing || this.outputSpecimenProcessing;
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<output-specimen-processing-summary
                output="vm.outputSpecimenProcessing">
            </output-specimen-processing-summary>`,

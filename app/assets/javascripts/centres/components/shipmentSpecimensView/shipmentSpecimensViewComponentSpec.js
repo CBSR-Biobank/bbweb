@@ -22,8 +22,7 @@ describe('shipmentSpecimensViewComponent', function() {
                               'Factory');
       this.createController = (shipment, readOnly) => {
         readOnly = readOnly || false;
-        ShippingComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipment-specimens-view shipment="vm.shipment" read-only="vm.readOnly"></shipment-specimens-view',
           {
             shipment: shipment,

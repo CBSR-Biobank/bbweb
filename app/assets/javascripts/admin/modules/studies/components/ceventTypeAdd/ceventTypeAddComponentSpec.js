@@ -17,7 +17,6 @@ describe('Component: ceventTypeAdd', function() {
       Object.assign(this, ComponentTestSuiteMixin);
 
       this.injectDependencies('$rootScope',
-                              '$compile',
                               'Study',
                               'CollectionEventType',
                               'Factory');
@@ -25,8 +24,7 @@ describe('Component: ceventTypeAdd', function() {
       this.study = new this.Study(this.Factory.study());
 
       this.createController = (study) => {
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<cevent-type-add study="vm.study"><cevent-type-add>',
           { study: study },
           'ceventTypeAdd');

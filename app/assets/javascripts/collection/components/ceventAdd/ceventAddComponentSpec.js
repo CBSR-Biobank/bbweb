@@ -41,8 +41,7 @@ describe('Component: ceventAdd', function() {
       this.createController = (collectionEventType = this.collectionEventType) => {
         this.CollectionEventType.get =
           jasmine.createSpy().and.returnValue(this.$q.when(this.$q.when(collectionEventType)))
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<cevent-add study="vm.study"
                        participant="vm.participant"
                        collection-event-type="vm.collectionEventType">

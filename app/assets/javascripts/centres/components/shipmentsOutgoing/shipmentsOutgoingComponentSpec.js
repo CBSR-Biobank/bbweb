@@ -21,8 +21,7 @@ describe('shipmentsOutgoingComponent', function() {
       this.centre = this.Centre.create(this.Factory.centre())
 
       this.createController = (centre = this.centre) =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<shipments-outgoing centre="vm.centre"></shipments-outgoing>',
           { centre },
           'shipmentsOutgoing');

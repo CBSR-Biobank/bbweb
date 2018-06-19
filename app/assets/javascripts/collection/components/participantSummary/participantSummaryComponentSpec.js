@@ -59,8 +59,7 @@ describe('Component: participantSummary', function() {
         study = study || this.study;
         participant = participant || this.participant;
 
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           [
             '<participant-summary',
             '  study="vm.study"',

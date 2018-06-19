@@ -7,7 +7,7 @@
 /* global angular */
 
 import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 describe('Component: breadcrumbs', function() {
 
@@ -18,8 +18,7 @@ describe('Component: breadcrumbs', function() {
       this.injectDependencies('$rootScope', '$compile');
 
       this.createController = () =>
-        ComponentTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           '<breadcrumbs></breadcrumbs>',
           undefined,
           'breadcrumbs');

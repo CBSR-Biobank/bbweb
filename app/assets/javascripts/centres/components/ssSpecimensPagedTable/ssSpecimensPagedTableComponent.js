@@ -7,54 +7,13 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-var _ = require('lodash');
-
-/**
- * Displays Shipment Specimens in a table.
- *
- * @memberOf centres.components.ssSpecimensPagedTable
- *
- * * @param {string} defaultSortField - The column to initially sort by.
- *
- * @param {int} refresh - Increment this counter refresh the table.
- *
- * @param {boolean} showItemState - Set this to TRUE to how an additional column that displays the Shipment
- *    Specimen state.
- *
- * @param {function} onGetSpecimens - A callback that return the Shipment Specimens to display in a single
- *    page. This function takes has an object as a parameter, called {@link options}, that contains the page
- *    number to return results for. This should return an object with the following keys: items, and
- *    maxPages.
- *
- * @param {string} noSpecimensMessage - The text to display on the page where there are no Shipment
- *    Specimens to display.
- *
- * @param {object[]} actions - When this array is not empty, an additional column is displayed that contains
- *    one or more buttons the user can press to manipulate individual rows in the table.
- *
- * @param {funtion} onActionSelected - this function is called when one of the {@link action} buttons is
- *    pressed.
- */
-var component = {
-  template: require('./ssSpecimensPagedTable.html'),
-  controller: Controller,
-  controllerAs: 'vm',
-  bindings: {
-    defaultSortField:   '@',
-    refresh:            '<',
-    showItemState:      '<',
-    onGetSpecimens:     '&',
-    noSpecimensMessage: '@',
-    actions:            '<',
-    onActionSelected:   '&'
-  }
-};
+import _ from 'lodash';
 
 /**
  * Controller for the component.
  */
 /* @ngInject */
-function Controller($controller, BbwebError) {
+function SsSpecimensPagedTableController($controller, BbwebError) {
   var vm = this;
   vm.$onInit = onInit;
 
@@ -121,4 +80,45 @@ function Controller($controller, BbwebError) {
   }
 }
 
-export default ngModule => ngModule.component('ssSpecimensPagedTable', component)
+/**
+ * Displays Shipment Specimens in a table.
+ *
+ * @memberOf centres.components.ssSpecimensPagedTable
+ *
+ * * @param {string} defaultSortField - The column to initially sort by.
+ *
+ * @param {int} refresh - Increment this counter refresh the table.
+ *
+ * @param {boolean} showItemState - Set this to TRUE to how an additional column that displays the Shipment
+ *    Specimen state.
+ *
+ * @param {function} onGetSpecimens - A callback that return the Shipment Specimens to display in a single
+ *    page. This function takes has an object as a parameter, called {@link options}, that contains the page
+ *    number to return results for. This should return an object with the following keys: items, and
+ *    maxPages.
+ *
+ * @param {string} noSpecimensMessage - The text to display on the page where there are no Shipment
+ *    Specimens to display.
+ *
+ * @param {object[]} actions - When this array is not empty, an additional column is displayed that contains
+ *    one or more buttons the user can press to manipulate individual rows in the table.
+ *
+ * @param {funtion} onActionSelected - this function is called when one of the {@link action} buttons is
+ *    pressed.
+ */
+const ssSpecimensPagedTableComponent = {
+  template: require('./ssSpecimensPagedTable.html'),
+  controller: SsSpecimensPagedTableController,
+  controllerAs: 'vm',
+  bindings: {
+    defaultSortField:   '@',
+    refresh:            '<',
+    showItemState:      '<',
+    onGetSpecimens:     '&',
+    noSpecimensMessage: '@',
+    actions:            '<',
+    onActionSelected:   '&'
+  }
+};
+
+export default ngModule => ngModule.component('ssSpecimensPagedTable', ssSpecimensPagedTableComponent);

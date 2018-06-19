@@ -7,7 +7,7 @@
 /* global angular */
 
 import { DirectiveTestSuiteMixin } from 'test/mixins/DirectiveTestSuiteMixin';
-import ngModule from '../../index'
+import ngModule from '../../../app';
 
 /**
  * TODO: not sure how to test open / closed state of the panel since it is a ui-bootstrap panel.
@@ -24,8 +24,7 @@ describe('Component: panelButtons', function() {
       this.element = angular.element();
 
       this.createController = (options = {}) => {
-        DirectiveTestSuiteMixin.createController.call(
-          this,
+        this.createControllerInternal(
           `<panel-buttons
               on-add="vm.add()"
               add-button-title="add location"
