@@ -126,7 +126,6 @@ class ProcessingTypeViewController {
       .then(enabled => {
         this.processingType.updateEnabled(enabled)
           .then(processingType => {
-            this.$scope.$emit('collection-event-type-updated', processingType);
             this.postUpdate(this.gettextCatalog.getString('Enabled changed successfully.'),
                             this.gettextCatalog.getString('Change successful'))(processingType);
           })

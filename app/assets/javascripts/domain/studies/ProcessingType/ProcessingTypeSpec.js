@@ -396,9 +396,10 @@ describe('ProcessingType', function() {
 
   it('should remove a processing type', function() {
     const f = this.createEntities();
-    this.$httpBackend.expectDELETE(this.url(f.serverStudy.id,
-                                            f.processingType.id,
-                                            f.processingType.version))
+    this.$httpBackend
+      .expectDELETE(this.url(f.serverStudy.id,
+                             f.processingType.id,
+                             f.processingType.version))
       .respond(this.reply(true));
 
     f.processingType.remove()

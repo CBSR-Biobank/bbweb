@@ -273,7 +273,7 @@ function ProcessingTypeFactory($q,
     }
 
     add() {
-      const json = _.pick(this, 'studyId','name', 'description', 'enabled', 'specimenProcessing');
+      const json = _.pick(this, 'name', 'description', 'enabled', 'specimenProcessing');
       return biobankApi.post(ProcessingType.url(this.studyId), json)
         .then(ProcessingType.asyncCreate);
     }

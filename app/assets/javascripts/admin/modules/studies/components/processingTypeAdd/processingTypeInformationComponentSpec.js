@@ -34,6 +34,15 @@ describe('processingTypeInformationComponent', function() {
           },
           'processingTypeInformation');
       };
+
+      this.stateInit = (plainStudy) => {
+        this.$httpBackend.expectGET(this.url('studies', plainStudy.slug))
+          .respond(this.reply(plainStudy));
+
+        this.gotoUrl(`/admin/studies/${plainStudy.slug}/processing/add/information`);
+        this.$httpBackend.flush();
+        expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.information');
+      };
     });
   });
 
@@ -79,18 +88,20 @@ describe('processingTypeInformationComponent', function() {
   });
 
   it('calling `next` assigns processing type information and changes state correctly', function() {
+    const plainStudy = this.Factory.study();
     const study = this.Study.create(this.Factory.study());
     const processingType = this.ProcessingType.create(this.Factory.processingType());
+    this.stateInit(plainStudy);
     this.createController(study, true);
 
-    this.$state.go = jasmine.createSpy().and.returnValue(null);
     this.controller.name        = processingType.name;
     this.controller.description = processingType.description;
     this.controller.enabled     = processingType.enabled;
 
     this.controller.next();
+    this.$rootScope.$digest();
 
-    expect(this.$state.go).toHaveBeenCalledWith('^.input');
+    expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.input');
     expect(this.ProcessingTypeAdd.processingType.name).toBe(processingType.name);
     expect(this.ProcessingTypeAdd.processingType.description).toBe(processingType.description);
     expect(this.ProcessingTypeAdd.processingType.enabled).toBe(processingType.enabled);
@@ -100,18 +111,11 @@ describe('processingTypeInformationComponent', function() {
     const plainStudy = this.Factory.study();
     const study = this.Study.create(this.Factory.study());
 
-    this.$httpBackend.expectGET(this.url('studies', study.slug))
-      .respond(this.reply(plainStudy));
-
-    this.gotoUrl(`/admin/studies/${study.slug}/processing/add/information`);
-    this.$httpBackend.flush();
-    expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.information');
-
-    this.$state.go = jasmine.createSpy().and.returnValue(null);
+    this.stateInit(plainStudy);
     this.createController(study, true);
-
     this.controller.cancel();
-    expect(this.$state.go).toHaveBeenCalledWith('^.^');
+    this.$rootScope.$digest();
+    expect(this.$state.current.name).toBe('home.admin.studies.study.processing');
   });
 
-})
+});

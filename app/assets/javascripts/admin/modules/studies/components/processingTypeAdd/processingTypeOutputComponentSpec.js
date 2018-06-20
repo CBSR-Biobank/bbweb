@@ -8,7 +8,7 @@ import { ComponentTestSuiteMixin } from 'test/mixins/ComponentTestSuiteMixin';
 import ProcessingTypeFixture from 'test/fixtures/ProcessingTypeFixture';
 import ngModule from '../../../../../app';
 
-describe('processingTypeInputComponent', function() {
+describe('processingTypeOutputComponent', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -22,6 +22,9 @@ describe('processingTypeInputComponent', function() {
                               'CollectionEventType',
                               'ProcessingTypeAdd',
                               'ProcessingTypeAddTasks',
+                              'notificationsService',
+                              'domainNotificationService',
+                              'modalService',
                               'Factory');
 
       this.processingTypeFixture = new ProcessingTypeFixture(this.Factory,
@@ -30,23 +33,20 @@ describe('processingTypeInputComponent', function() {
                                                              this.ProcessingType);
 
       this.init();
-      this.createController = (study, plainProcessingTypes = []) => {
-        this.$httpBackend.expectGET(this.url('studies/proctypes/spcdefs', study.id))
-          .respond(this.reply(plainProcessingTypes));
-
+      this.createController = () => {
         this.createControllerInternal(
-          '<processing-type-input study="vm.study"> <processing-type-input>',
-          { study },
-          'processingTypeInput');
+          '<processing-type-output><processing-type-output>',
+          {},
+          'processingTypeOutput');
       };
 
       this.stateInit = (plainStudy) => {
         this.$httpBackend.expectGET(this.url('studies', plainStudy.slug))
           .respond(this.reply(plainStudy));
 
-        this.gotoUrl(`/admin/studies/${plainStudy.slug}/processing/add/input`);
+        this.gotoUrl(`/admin/studies/${plainStudy.slug}/processing/add/output`);
         this.$httpBackend.flush();
-        expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.input');
+        expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.output');
       };
     });
   });
@@ -55,8 +55,7 @@ describe('processingTypeInputComponent', function() {
     this.ProcessingTypeAdd.init();
     this.ProcessingTypeAdd.initIfRequired = jasmine.createSpy().and.callThrough();
     this.ProcessingTypeAdd.isValid = jasmine.createSpy().and.returnValue(true);
-    const study = this.Study.create(this.Factory.study());
-    this.createController(study);
+    this.createController();
 
     expect(this.ProcessingTypeAdd.initIfRequired).toHaveBeenCalled();
 
@@ -66,7 +65,7 @@ describe('processingTypeInputComponent', function() {
     expect(this.controller.progressInfo).toBeDefined();
     expect(this.controller.progressInfo).toBeArrayOfSize(Object.keys(taskData).length);
     taskData.forEach((taskInfo, index) => {
-      taskInfo.status = (index < 2);
+      taskInfo.status = (index < 3);
       expect(this.controller.progressInfo).toContain(taskInfo);
     });
   });
@@ -75,40 +74,9 @@ describe('processingTypeInputComponent', function() {
     const f = this.processingTypeFixture.fixture();
     this.stateInit(f.plainStudy);
     this.ProcessingTypeAdd.isValid = jasmine.createSpy().and.returnValue(false);
-    this.createController(f.study);
+    this.createController();
     this.$rootScope.$digest();
     expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.information');
-  });
-
-  it('`getCollectionSpecimenDefinitions` makes a request to the server', function() {
-    const f = this.processingTypeFixture.fixture();
-    this.ProcessingTypeAdd.isValid = jasmine.createSpy().and.returnValue(true);
-
-    this.ProcessingTypeAdd.getCollectionSpecimenDefinitions =
-      jasmine.createSpy().and.returnValue(f.collectionSpecimenDefinitionNames);
-
-    this.createController(f.study);
-    this.controller.getCollectionSpecimenDefinitions();
-
-    expect(this.ProcessingTypeAdd.getCollectionSpecimenDefinitions).toHaveBeenCalled();
-  });
-
-  it('`getProcessedSpecimenDefinitions` make a request to the server', function() {
-    const f = this.processingTypeFixture.fixture({
-      numEventTypes: 1,
-      numProcessingTypesFromCollected: 1,
-      numProcessingTypesFromProcessed: 1
-    });
-
-    this.ProcessingTypeAdd.processingType = f.processingTypesFromProcessed[0].processingType;
-    this.createController(f.study, f.processedSpecimenDefinitionNames);
-
-    this.$httpBackend.expectGET(this.url('studies/proctypes/spcdefs', f.study.id))
-      .respond(this.reply(f.processedSpecimenDefinitionNames));
-    this.controller.getProcessedSpecimenDefinitions();
-    this.$httpBackend.flush();
-
-    expect(this.ProcessingTypeAdd.processingTypes).toBeNonEmptyArray();
   });
 
   describe('for state transitions', function() {
@@ -121,25 +89,65 @@ describe('processingTypeInputComponent', function() {
     });
 
     it('when `previous` is called', function() {
-      const processingType = this.fixture.processingTypesFromProcessed[0].processingType;
-      this.controller.previous(processingType);
+      this.controller.previous();
       this.$rootScope.$digest();
-      expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.information');
-      expect(this.ProcessingTypeAdd.processingType).toBe(processingType);
-    });
-
-    it('when `next` is called', function() {
-      const processingType = this.fixture.processingTypesFromProcessed[0].processingType;
-      this.controller.next(processingType);
-      this.$rootScope.$digest();
-      expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.output');
-      expect(this.ProcessingTypeAdd.processingType).toBe(processingType);
+      expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.input');
     });
 
     it('when `cancel` is called', function() {
       this.controller.cancel();
       this.$rootScope.$digest();
       expect(this.$state.current.name).toBe('home.admin.studies.study.processing');
+    });
+
+  });
+
+  describe('for `submit`', function() {
+
+    beforeEach(function() {
+      const fixture = this.processingTypeFixture.fixture();
+      const processingType = fixture.processingTypesFromProcessed[0].processingType;
+
+      this.plainProcessingType = fixture.processingTypesFromProcessed[0].plainProcessingType;
+      this.ProcessingTypeAdd.processingType = processingType;
+      this.stateInit(fixture.plainStudy);
+      this.createController();
+
+      this.requestHandler = this.$httpBackend
+        .expectPOST(this.url('studies/proctypes', processingType.studyId),
+                    {
+                      name:               processingType.name,
+                      description:        processingType.description,
+                      enabled:            processingType.enabled,
+                      specimenProcessing: processingType.specimenProcessing
+                    });
+    });
+
+    it('makes a POST request to the server', function() {
+      this.requestHandler.respond(this.reply(this.plainProcessingType));
+      spyOn(this.notificationsService, 'submitSuccess').and.returnValue(null);
+      this.controller.submit();
+      this.$httpBackend.flush();
+      expect(this.notificationsService.submitSuccess).toHaveBeenCalled();
+      expect(this.$state.current.name).toBe('home.admin.studies.study.processing');
+    });
+
+    it('duplicate name error reply from server is handled', function() {
+      this.requestHandler.respond(400, this.errorReply('name already exists'));
+      spyOn(this.modalService, 'modalOk').and.returnValue(null);
+      this.controller.submit();
+      this.$httpBackend.flush();
+      expect(this.modalService.modalOk).toHaveBeenCalled();
+      expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.output');
+    });
+
+    it('error other than duplicate name reply from server is handled', function() {
+      this.requestHandler.respond(400, this.errorReply('simulated error'));
+      spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(null);
+      this.controller.submit();
+      this.$httpBackend.flush();
+      expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();
+      expect(this.$state.current.name).toBe('home.admin.studies.study.processing.addType.output');
     });
 
   });

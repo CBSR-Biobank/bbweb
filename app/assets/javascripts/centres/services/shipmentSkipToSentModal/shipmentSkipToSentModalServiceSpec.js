@@ -14,9 +14,6 @@ describe('shipmentSkipToSentModalService', function() {
     angular.mock.inject(function() {
       Object.assign(this, ModalTestSuiteMixin);
       this.injectDependencies('$q',
-                              '$rootScope',
-                              '$animate',
-                              '$document',
                               'shipmentSkipToSentModalService',
                               'Factory');
       this.addModalMatchers();
@@ -24,7 +21,7 @@ describe('shipmentSkipToSentModalService', function() {
 
       this.openModal = () => {
         this.modal = this.shipmentSkipToSentModalService.open();
-        this.modal.result.then(function () {}, function () {});
+        this.modal.result.then(angular.noop, angular.noop);
         this.$rootScope.$digest();
         this.modalElement = this.modalElementFind();
         this.scope = this.modalElement.scope();

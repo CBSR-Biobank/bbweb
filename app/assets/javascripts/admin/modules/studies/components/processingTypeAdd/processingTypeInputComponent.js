@@ -40,7 +40,7 @@ class ProcessingTypeInput {
   }
 
   goToPreviousState(initialize) {
-    this.$state.go('home.admin.studies.study.processing.addType.information',
+    this.$state.go('^.information',
                    {
                      study: this.study,
                      initialize: initialize
@@ -54,11 +54,11 @@ class ProcessingTypeInput {
 
   next(processingType) {
     this.ProcessingTypeAdd.processingType = processingType;
-    this.$state.go('home.admin.studies.study.processing.addType.output');
+    this.$state.go('^.output');
   }
 
   cancel() {
-    this.$state.go('home.admin.studies.study.processing');
+    this.$state.go('^.^');
   }
 
 }

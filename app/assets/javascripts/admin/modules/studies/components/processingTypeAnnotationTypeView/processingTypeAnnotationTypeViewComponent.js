@@ -124,9 +124,9 @@ const processingTypeAnnotationTypeViewComponent = {
   controller: ProcessingTypeAnnotationTypeViewController,
   controllerAs: 'vm',
   bindings: {
-    study:               '<',
+    study:          '<',
     processingType: '<',
-    annotationType:      '<'
+    annotationType: '<'
   }
 };
 
@@ -135,7 +135,7 @@ function resolveAnnotationType($q, $transition$, processingType, resourceErrorSe
   const slug = $transition$.params().annotationTypeSlug,
         annotationType = _.find(processingType.annotationTypes, { slug }),
         result = annotationType ? $q.when(annotationType) : $q.reject('invalid annotation type ID')
-  return result.catch(resourceErrorService.goto404(`invalid event-type annotation-type ID: ${slug}`))
+  return result.catch(resourceErrorService.goto404(`invalid processing-type annotation-type ID: ${slug}`))
 }
 
 function stateConfig($stateProvider, $urlRouterProvider) {

@@ -1,5 +1,3 @@
-import _ from 'lodash';
-
 /**
  * AngularJS Component for {@link domain.studies.Study Study} administration.
  *
@@ -22,17 +20,18 @@ class StudyProcessingTabController {
                     CollectionEventType
                   });
     this.haveCollectionEventTypes = false;
+    this.processingTypes = [];
   }
 
   $onInit() {
     // updates the selected tab in 'studyViewDirective' which is the parent component
     this.$scope.$emit('tabbed-page-update', 'tab-selected');
 
-    this.$scope.$on('collection-event-type-updated', (event, updatedProcessingType) => {
+    // handle updates to processing types
+    this.$scope.$on('processing-type-updated', (event, updatedProcessingType) => {
       event.stopPropagation();
-      const processingTypes =
-            _.filter(this.collectionEventTypes,
-                     processingType => processingType.id !== updatedProcessingType.id);
+      const processingTypes = this.processingTypes
+            .filter(processingType => processingType.id !== updatedProcessingType.id);
       processingTypes.push(updatedProcessingType);
       this.processingTypes = this.ProcessingType.sortByName(processingTypes);
     });

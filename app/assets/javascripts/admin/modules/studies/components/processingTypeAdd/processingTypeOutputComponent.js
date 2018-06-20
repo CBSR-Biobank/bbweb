@@ -5,6 +5,7 @@ class ProcessingTypeOutput {
               ProcessingTypeAddTasks,
               modalService,
               gettextCatalog,
+              notificationsService,
               domainNotificationService) {
     'ngInject';
     Object.assign(this,
@@ -14,6 +15,7 @@ class ProcessingTypeOutput {
                     ProcessingTypeAddTasks,
                     modalService,
                     gettextCatalog,
+                    notificationsService,
                     domainNotificationService
                   });
 
@@ -28,7 +30,7 @@ class ProcessingTypeOutput {
     this.ProcessingTypeAdd.initIfRequired();
     if (!this.ProcessingTypeAdd.isValid()) {
       // page was reloaded, must go back to first step
-      this.goToFirstState(true);
+      this.goToFirstState();
       return;
     }
   }
@@ -48,6 +50,7 @@ class ProcessingTypeOutput {
   submit() {
     this.ProcessingTypeAdd.processingType.add()
       .then(() => {
+        this.notificationsService.submitSuccess();
         this.$state.go('home.admin.studies.study.processing');
       })
       .catch(error => {

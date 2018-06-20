@@ -8,7 +8,7 @@
  */
 /* @ngInject */
 function ProcessingTypeAnnotationTypeRemoveFactory(gettextCatalog,
-                                                    annotationTypeRemove) {
+                                                   annotationTypeRemove) {
 
   /**
    * An AngularJS factory used to remove {@link domain.studies.ProcessingType ProcessingType} {@link

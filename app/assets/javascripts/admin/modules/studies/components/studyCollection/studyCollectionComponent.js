@@ -46,7 +46,7 @@ function StudyCollectionController($scope, CollectionEventType) {
 }
 
 /**
- * An AngularJS component that displays the collection aspect of the configuration for a a {@link
+ * An AngularJS component that displays the collection aspect of the configuration for a {@link
  * domain.studies.Study Study}.
  *
  * The user can add, modify, or remove a {@link domain.studies.CollectionEventType CollectionEventTypes}.
