@@ -7,6 +7,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import angular from 'angular';
+
 /*
  * Controller for this component.
  */
@@ -39,20 +41,20 @@ function LocationsPanelController($scope,
   }
 
   function remove(location) {
-    domainNotificationService.removeEntity(
-      doRemove,
-      gettextCatalog.getString('Remove Location'),
-      gettextCatalog.getString('Are you sure you want to remove location {{name}}?',
-                               { name: location.name}),
-      gettextCatalog.getString('Remove Failed'),
-      gettextCatalog.getString('Location {{name}} cannot be removed: ',
-                               { name: location.name}));
+    const doRemove = () => vm.centre.removeLocation(location)
+          .then(centre => {
+            vm.centre = centre;
+          });
 
-    function doRemove() {
-      return vm.centre.removeLocation(location).then(function (centre) {
-        vm.centre = centre;
-      });
-    }
+    domainNotificationService
+      .removeEntity(doRemove,
+                    gettextCatalog.getString('Remove Location'),
+                    gettextCatalog.getString('Are you sure you want to remove location {{name}}?',
+                                             { name: location.name}),
+                    gettextCatalog.getString('Remove Failed'),
+                    gettextCatalog.getString('Location {{name}} cannot be removed: ',
+                                             { name: location.name}))
+      .catch(angular.noop);
   }
 
 }

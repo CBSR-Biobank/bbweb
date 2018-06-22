@@ -12,7 +12,7 @@ import ProcessingTypeFixture from 'test/fixtures/ProcessingTypeFixture';
 import ngModule from '../../../../../app'
 import sharedBehaviour from 'test/behaviours/annotationTypeViewComponentSharedBehaviour';
 
-fdescribe('Component: processingTypeAnnotationTypeView', function() {
+describe('Component: processingTypeAnnotationTypeView', function() {
 
   beforeEach(() => {
     angular.mock.module(ngModule, 'biobank.test');
@@ -157,6 +157,32 @@ fdescribe('Component: processingTypeAnnotationTypeView', function() {
       expect(this.notificationsService.success).toHaveBeenCalled();
       expect(this.$state.current.name).toBe('home.admin.studies.study.processing.viewType');
    });
+
+    it('should handle an error response from the server', function() {
+      const f = this.processingTypeFixture.fixture();
+      const plainProcessingType = f.processingTypesFromCollected[0].plainProcessingType;
+      const processingType = f.processingTypesFromCollected[0].processingType;
+      const annotationType = processingType.annotationTypes[0];
+
+      this.stateInit(f.plainStudy, plainProcessingType, annotationType);
+      this.createController(f.study, processingType, plainProcessingType, annotationType);
+
+      this.$httpBackend
+        .expectDELETE(this.url('annottype',
+                               f.study.id,
+                               processingType.id,
+                               processingType.version,
+                               annotationType.id))
+        .respond(400, this.errorReply('simulated error'));
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
+      spyOn(this.notificationsService, 'success').and.returnValue(null);
+
+      this.controller.removeRequest();
+      this.$httpBackend.flush();
+      expect(this.notificationsService.success).not.toHaveBeenCalled();
+      expect(this.$state.current.name)
+        .toBe('home.admin.studies.study.processing.viewType.annotationTypeView');
+ });
 
   });
 

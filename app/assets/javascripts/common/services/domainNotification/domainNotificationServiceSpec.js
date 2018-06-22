@@ -87,42 +87,33 @@ describe('Service: domainNotificationService', function() {
     });
 
     it('works when user cancels the removal', function() {
-      var header = 'header',
-          body = 'body',
-          removeFailedHeader = 'removeFailedHeaderHtml',
-          removeFailedBody = 'removeFailedBody',
-          deferred = this.$q.defer();
+      const header = 'header';
+      const body = 'body';
+      const removeFailedHeader = 'removeFailedHeaderHtml';
+      const removeFailedBody = 'removeFailedBody';
 
-      spyOn(this.modalService, 'modalOkCancel').and.returnValue(deferred.promise);
-      deferred.reject('simulated error');
-
-      this.domainNotificationService.removeEntity(this.remove,
-                                                  header,
-                                                  body,
-                                                  removeFailedHeader,
-                                                  removeFailedBody);
+      spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.reject('simulated error'));
+      this.domainNotificationService
+        .removeEntity(this.remove, header, body, removeFailedHeader, removeFailedBody)
+        .catch(angular.noop);
 
       this.$rootScope.$digest();
       expect(this.remove).not.toHaveBeenCalled();
     });
 
     it('displays the removal failed modal', function() {
-      var self = this,
-          header = 'header',
-          body = 'body',
-          removeFailedHeader = 'removeFailedHeaderHtml',
-          removeFailedBody = 'removeFailedBody',
-          deferred = self.$q.defer();
+      const header = 'header';
+      const body = 'body';
+      const removeFailedHeader = 'removeFailedHeaderHtml';
+      const removeFailedBody = 'removeFailedBody';
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      this.remove = jasmine.createSpy('remove').and.returnValue(deferred.promise);
-      deferred.reject('simulated error');
+      this.remove = jasmine.createSpy('remove').and.returnValue(this.$q.reject('simulated error'));
 
-      this.domainNotificationService.removeEntity(this.remove,
-                                                  header,
-                                                  body,
-                                                  removeFailedHeader,
-                                                  removeFailedBody);
+      this.domainNotificationService
+        .removeEntity(this.remove, header, body, removeFailedHeader, removeFailedBody)
+        .catch(angular.noop);
+
       this.$rootScope.$digest();
       expect(this.remove).toHaveBeenCalled();
       expect(this.modalService.modalOkCancel.calls.count()).toEqual(2);

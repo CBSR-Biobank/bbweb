@@ -7,6 +7,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import angular from 'angular';
+
 /* @ngInject */
 function CeventSpecimensViewController($q,
                                        $state,
@@ -97,6 +99,13 @@ function CeventSpecimensViewController($q,
   }
 
   function removeSpecimen(specimen) {
+    const promiseFn = () =>
+          specimen.remove(vm.collectionEvent.id)
+          .then(() => {
+            notificationsService.success(gettextCatalog.getString('Specimen removed'));
+            reloadTableData();
+          });
+
     domainNotificationService.removeEntity(
       promiseFn,
       gettextCatalog.getString('Remove specimen'),
@@ -106,14 +115,8 @@ function CeventSpecimensViewController($q,
       gettextCatalog.getString('Remove failed'),
       gettextCatalog.getString(
         'Specimen with ID {{id}} cannot be removed',
-        { id: specimen.inventoryId }));
-
-    function promiseFn() {
-      return specimen.remove(vm.collectionEvent.id).then(function () {
-        notificationsService.success(gettextCatalog.getString('Specimen removed'));
-        reloadTableData();
-      });
-    }
+        { id: specimen.inventoryId }))
+      .catch(angular.noop);
   }
 
 }

@@ -35,7 +35,7 @@ define(function() {
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
         const attribute = 'name';
-        context.createController.call(this);
+        context.createController();
         this.controller.onUpdate(attribute, context.annotationType);
         this.scope.$digest();
         expect(context.entity.prototype[context.updateAnnotationTypeFuncName])
@@ -47,7 +47,7 @@ define(function() {
       });
 
       it('error message should be displayed when update fails', function() {
-        context.createController.call(this);
+        context.createController();
 
         spyOn(context.entity.prototype, context.updateAnnotationTypeFuncName)
           .and.returnValue(this.$q.reject('simulated error'));
@@ -66,7 +66,7 @@ define(function() {
           .and.returnValue(this.$q.when(obj));
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
-        context.createController.call(this);
+        context.createController();
         this.controller.onUpdate(context.annotationType);
         this.scope.$digest();
 

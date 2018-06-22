@@ -125,7 +125,7 @@ describe('shipmentSpecimensAddComponent', function() {
       expect(this.controller.refreshSpecimensTable).toBe(refreshCount + 1);
     });
 
-    it('removal of a shipment can be cancelled', function() {
+   it('removal of a shipment can be cancelled', function() {
       var shipment = this.createShipment(),
           shipmentSpecimen = this.ShipmentSpecimen.create(
             this.Factory.shipmentSpecimen({ shipmentId: shipment.id })),

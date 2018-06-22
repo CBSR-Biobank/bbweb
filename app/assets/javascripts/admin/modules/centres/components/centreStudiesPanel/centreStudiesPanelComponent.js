@@ -63,8 +63,8 @@ function CentreStudiesPanelController($scope,
     }
   }
 
-  function information(studyId) {
-    console.log('FIXME', studyId)
+  function information(studyId) { // eslint-disable-line no-unused-vars
+    // FIXME: needs implementation
   }
 
   function remove(study) {

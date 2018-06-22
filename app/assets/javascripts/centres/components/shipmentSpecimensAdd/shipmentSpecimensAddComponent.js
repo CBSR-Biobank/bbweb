@@ -8,6 +8,7 @@
  */
 
 import { ShipmentSpecimensController } from '../../controllers/ShipmentSpecimensController'
+import angular from 'angular';
 
 /*
  * This controller subclasses {@link ShipmentSpecimensController}.
@@ -114,6 +115,7 @@ class ShipmentSpecimensAddController extends ShipmentSpecimensController {
       this.gettextCatalog.getString(
         'Specimen with ID {{id}} cannot be removed',
         { id: shipmentSpecimen.specimen.inventoryId }))
+      .catch(angular.noop);
   }
 
 }

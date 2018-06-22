@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash';
+import angular from 'angular';
 
 class MembershipViewController {
 
@@ -94,7 +95,8 @@ class MembershipViewController {
                                     { name: this.membership.name }),
       this.gettextCatalog.getString('Remove failed'),
       this.gettextCatalog.getString('Membership with name {{name}} cannot be removed',
-                                    { name: this.membership.name }));
+                                    { name: this.membership.name }))
+      .catch(angular.noop);
   }
 
   postUpdate(message, title, timeout = 1500) {
@@ -171,7 +173,8 @@ class MembershipViewController {
       this.gettextCatalog.getString('Remove failed'),
       this.gettextCatalog.getString(
         'User named {{name}} cannot be removed',
-        { name: userName.name }));
+        { name: userName.name }))
+      .catch(angular.noop);
   }
 
   getMatchingStudyNames() {
@@ -218,7 +221,8 @@ class MembershipViewController {
       this.gettextCatalog.getString('Remove failed'),
       this.gettextCatalog.getString(
         'Study named {{name}} cannot be removed',
-        { name: studyName.name }));
+        { name: studyName.name }))
+      .catch(angular.noop);
   }
 
   getMatchingCentreNames() {
@@ -265,7 +269,8 @@ class MembershipViewController {
       this.gettextCatalog.getString('Remove failed'),
       this.gettextCatalog.getString(
         'Centre named {{name}} cannot be removed',
-        { name: centreName.name }));
+        { name: centreName.name }))
+      .catch(angular.noop);
   }
 
   back() {

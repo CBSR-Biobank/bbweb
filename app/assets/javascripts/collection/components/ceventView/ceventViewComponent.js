@@ -7,6 +7,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import angular from 'angular';
+
 /*
  * Controller for this component
  */
@@ -14,6 +16,7 @@ class CeventViewController {
 
   constructor($scope,
               $state,
+              $q,
               $log,
               gettextCatalog,
               CollectionEventType,
@@ -30,6 +33,7 @@ class CeventViewController {
     Object.assign(this, {
       $scope,
       $state,
+      $q,
       $log,
       gettextCatalog,
       CollectionEventType,
@@ -74,16 +78,22 @@ class CeventViewController {
                              this.gettextCatalog.getString('Time completed'),
                              this.collectionEvent.timeCompleted,
                              { required: true })
-      .result.then(timeCompleted => {
-        this.collectionEvent.updateTimeCompleted(this.timeService.dateAndTimeToUtcString(timeCompleted))
-          .then(cevent => {
-            this.$scope.$emit('collection-event-updated', cevent)
-            this.postUpdate(this.gettextCatalog.getString('Time completed updated successfully.'),
-                            this.gettextCatalog.getString('Change successful'),
-                            1500)(cevent)
-          })
-          .catch(this.notificationsService.updateError)
+      .result
+      .then(timeCompleted =>
+            this.collectionEvent.updateTimeCompleted(
+              this.timeService.dateAndTimeToUtcString(timeCompleted))
+           )
+      .catch(error => {
+        this.notificationsService.updateError(error);
+        return this.$q.reject(error);
       })
+      .then(cevent => {
+        this.$scope.$emit('collection-event-updated', cevent)
+        this.postUpdate(this.gettextCatalog.getString('Time completed updated successfully.'),
+                        this.gettextCatalog.getString('Change successful'),
+                        1500)(cevent)
+      })
+      .catch(angular.noop);
   }
 
   editAnnotation(annotation) {
@@ -109,9 +119,11 @@ class CeventViewController {
             this.gettextCatalog.getString('Cannot remove collection event'),
             this.gettextCatalog.getString('This collection event has specimens. Please remove the specimens first.'))
         } else {
-          const promiseFn = () => this.collectionEvent.remove()
+          const promiseFn = () =>
+                this.collectionEvent.remove()
                 .then(() => {
-                  this.notificationsService.success(this.gettextCatalog.getString('Collection event removed'))
+                  this.notificationsService.success(
+                    this.gettextCatalog.getString('Collection event removed'))
                   this.$state.go('home.collection.study.participant.cevents', {}, { reload: true })
                 })
 
@@ -126,8 +138,9 @@ class CeventViewController {
             this.gettextCatalog.getString(
               'Collection event with visit number {{visitNumber}} cannot be removed',
               { visitNumber: this.collectionEvent.visitNumber}))
+            .catch(angular.noop);
         }
-      })
+      });
   }
 
   setAnnotationLabels() {

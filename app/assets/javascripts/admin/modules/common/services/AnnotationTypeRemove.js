@@ -34,8 +34,8 @@ function AnnotationTypeRemoveFactory(gettextCatalog,
     }
 
     /**
-     * Displays a modal with only an `OK` button stating that the {@link domain.annotations.AnnotationType AnnotationType}
-     * cannot be removed.
+     * Displays a modal with only an `OK` button stating that the {@link domain.annotations.AnnotationType
+     * AnnotationType} cannot be removed.
      */
     removeInUseModal() {
       const headerHtml = gettextCatalog.getString('Cannot remove this annotation type');

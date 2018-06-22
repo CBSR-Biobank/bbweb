@@ -50,7 +50,7 @@ class SpecimenViewController {
   }
 
   editParticipant() {
-    console.log(this.participant);
+    // FIXME: needs implementation
   }
 
   back() {

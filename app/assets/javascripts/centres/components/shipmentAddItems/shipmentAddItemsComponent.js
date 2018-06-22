@@ -7,6 +7,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import angular from 'angular';
+
 /*
  * Allows the user to add items to a shipment.
  *
@@ -110,20 +112,23 @@ function ShipmentAddItemsController($q,
   function removeShipment() {
     if (!vm.shipment) { return; }
 
-    domainNotificationService.removeEntity(
-      doRemove,
-      gettextCatalog.getString('Remove shipment'),
-      gettextCatalog.getString('Are you sure you want to remove shipment {{trackingNumber}}?',
-                               { trackingNumber: vm.shipment.trackingNumber }),
-      gettextCatalog.getString('Remove failed'),
-      gettextCatalog.getString('Shipment {{trackingNumber}} cannot be removed',
-                               { trackingNumber: vm.shipment.trackingNumber }));
+    domainNotificationService
+      .removeEntity(
+        doRemove,
+        gettextCatalog.getString('Remove shipment'),
+        gettextCatalog.getString('Are you sure you want to remove shipment {{trackingNumber}}?',
+                                 { trackingNumber: vm.shipment.trackingNumber }),
+        gettextCatalog.getString('Remove failed'),
+        gettextCatalog.getString('Shipment {{trackingNumber}} cannot be removed',
+                                 { trackingNumber: vm.shipment.trackingNumber }))
+      .catch(angular.noop);
 
     function doRemove() {
-      return vm.shipment.remove().then(function () {
-        notificationsService.success(gettextCatalog.getString('Shipment removed'));
-        $state.go('home.shipping');
-      });
+      return vm.shipment.remove()
+        .then(() => {
+          notificationsService.success(gettextCatalog.getString('Shipment removed'));
+          $state.go('home.shipping');
+        });
     }
   }
 }

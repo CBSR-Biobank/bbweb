@@ -47,8 +47,8 @@ describe('Component: locationAdd', function() {
 
   it('scope should be valid', function() {
     this.createController(this.onSubmit, this.onCancel);
-    expect(this.controller.onSubmit).toBeFunction();
-    expect(this.controller.onCancel).toBeFunction();
+    expect(this.controller.onSubmit()).toBeFunction();
+    expect(this.controller.onCancel()).toBeFunction();
   });
 
   it('should invoke function on submit', function() {

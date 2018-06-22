@@ -18,7 +18,6 @@ describe('Component: studyParticipantsTab', function() {
 
       this.injectDependencies('$q',
                               '$rootScope',
-                              '$compile',
                               '$state',
                               'domainNotificationService',
                               'modalService',
@@ -26,32 +25,36 @@ describe('Component: studyParticipantsTab', function() {
                               'AnnotationType',
                               'Factory');
 
-      this.jsonStudy = this.Factory.study();
-      this.study     = new this.Study(this.jsonStudy);
+      this.createFixture = () => {
+        const plainAnnotationType = this.Factory.annotationType();
+        const plainStudy = this.Factory.study({ annotationTypes: [ plainAnnotationType ] });
+
+        return {
+          plainStudy,
+          plainAnnotationType,
+          study: this.Study.create(plainStudy)
+        };
+      };
 
       spyOn(this.$state, 'go').and.returnValue('ok');
 
-      this.createScope = () => {
-        var scope = ComponentTestSuiteMixin.createScope.call(this, { study: this.study });
-        this.eventRxFunc = jasmine.createSpy().and.returnValue(null);
-        scope.$on('tabbed-page-update', this.eventRxFunc);
-        return scope;
-      };
+      this.createController = (fixture) => {
+        this.eventRxFunc = jasmine.createSpy('eventRxFunc').and.returnValue(null);
+        this.$rootScope.$on('tabbed-page-update', this.eventRxFunc);
 
-      this.createController = () => {
         this.createControllerInternal(
           '<study-participants-tab study="vm.study"></study-participants-tab>',
-          { study: this.study },
+          { study: fixture.study },
           'studyParticipantsTab');
-
       };
     });
   });
 
   it('initialization is valid', function() {
-    this.createController();
+    const f = this.createFixture();
+    this.createController(f);
 
-    expect(this.controller.study).toBe(this.study);
+    expect(this.controller.study).toBe(f.study);
     expect(this.controller.add).toBeFunction();
     expect(this.controller.editAnnotationType).toBeFunction();
     expect(this.controller.removeAnnotationType).toBeFunction();
@@ -59,7 +62,8 @@ describe('Component: studyParticipantsTab', function() {
   });
 
   it('invoking add changes state', function() {
-    this.createController();
+    const f = this.createFixture();
+    this.createController(f);
 
     this.controller.add();
     this.scope.$digest();
@@ -70,19 +74,17 @@ describe('Component: studyParticipantsTab', function() {
 
   describe('for annotation types', function() {
 
-    beforeEach(function() {
-      this.annotationType = new this.AnnotationType(this.Factory.annotationType());
-    });
-
     it('invoking editAnnotationType changes state', function() {
-      this.createController();
+      const f = this.createFixture();
+      const annotationType = f.study.annotationTypes[0];
+      this.createController(f);
 
-      this.controller.editAnnotationType(this.annotationType);
+      this.controller.editAnnotationType(annotationType);
       this.scope.$digest();
 
       expect(this.$state.go).toHaveBeenCalledWith(
         'home.admin.studies.study.participants.annotationTypeView',
-        { annotationTypeSlug: this.annotationType.slug });
+        { annotationTypeSlug: annotationType.slug });
     });
 
     describe('when removing an annotation type', function() {
@@ -92,34 +94,36 @@ describe('Component: studyParticipantsTab', function() {
         spyOn(this.Study.prototype, 'removeAnnotationType')
           .and.returnValue(this.$q.when(this.study));
 
-        this.createController();
-        this.controller.removeAnnotationType(this.annotationType);
+        const f = this.createFixture();
+        const annotationType = f.study.annotationTypes[0];
+        this.createController(f);
+        this.controller.removeAnnotationType(annotationType);
         this.scope.$digest();
 
         expect(this.Study.prototype.removeAnnotationType).toHaveBeenCalled();
       });
 
       it('displays a modal when it cant be removed', function() {
-        spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
+        spyOn(this.modalService, 'modalOk').and.returnValue(this.$q.when('OK'));
 
-        this.createController();
-
-        this.controller.annotationTypeIdsInUse = [ this.annotationType.uniqueId ];
-        this.controller.removeAnnotationType(this.annotationType);
+        const f = this.createFixture();
+        const annotationType = f.study.annotationTypes[0];
+        this.createController(f);
+        this.controller.annotationTypeIdsInUse = [ annotationType.id ];
+        this.controller.removeAnnotationType(annotationType);
         this.scope.$digest();
 
-        expect(this.modalService.modalOkCancel).toHaveBeenCalled();
+        expect(this.modalService.modalOk).toHaveBeenCalled();
       });
 
       it('throws an error when it cant be removed', function() {
-        var self = this;
-
-        this.createController();
+        const f = this.createFixture();
+        this.createController(f);
         this.controller.annotationTypeIdsInUse = [ ];
         this.controller.modificationsAllowed = false;
 
-        expect(function () {
-          self.controller.removeAnnotationType(self.annotationType);
+        expect(() => {
+          this.controller.removeAnnotationType(f.study.annotationTypes[0]);
         }).toThrowError(/modifications not allowed/);
       });
 

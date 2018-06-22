@@ -8,6 +8,7 @@
  */
 
 import { UnpackBaseController } from '../../controllers/UnpackBaseController';
+import angular from 'angular';
 
 /*
  * Controller for this component.
@@ -92,7 +93,8 @@ class UnpackedShipmentExtraController extends UnpackBaseController {
       this.gettextCatalog.getString('Remove failed'),
       this.gettextCatalog.getString(
         'Specimen with ID {{id}} cannot be removed',
-        { id: shipmentSpecimen.specimen.inventoryId }));
+        { id: shipmentSpecimen.specimen.inventoryId }))
+      .catch(angular.noop);
 
   }
 

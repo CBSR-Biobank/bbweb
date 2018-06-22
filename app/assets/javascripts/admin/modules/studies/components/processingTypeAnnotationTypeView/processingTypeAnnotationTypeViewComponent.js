@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash'
+import angular from 'angular';
 
 class ProcessingTypeAnnotationTypeViewController {
 
@@ -97,11 +98,12 @@ class ProcessingTypeAnnotationTypeViewController {
 
     this.annotationTypeRemove.remove(
       this.annotationType,
-      () => this.processingType.removeAnnotationType(this.annotationType)
-    ).then(() => {
-      this.notificationsService.success(this.gettextCatalog.getString('Annotation removed'));
-      this.$state.go('^', {}, { reload: true });
-    });
+      () => this.processingType.removeAnnotationType(this.annotationType))
+      .then(() => {
+        this.notificationsService.success(this.gettextCatalog.getString('Annotation removed'));
+        this.$state.go('^', {}, { reload: true });
+      })
+      .catch(angular.noop);
 }
 
 }

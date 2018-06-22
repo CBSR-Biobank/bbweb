@@ -70,8 +70,8 @@ class NotificationsService {
    * @param {string} err The error message to display.
    */
   updateError(err) {
-    var message,
-        title   = this.gettextCatalog.getString('Cannot apply your change');
+    const title   = this.gettextCatalog.getString('Cannot apply your change');
+    let message;
     if (err.message) {
       message = err.message;
     } else {

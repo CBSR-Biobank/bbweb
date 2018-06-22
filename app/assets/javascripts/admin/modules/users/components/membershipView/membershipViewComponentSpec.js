@@ -431,7 +431,7 @@ describe('membershipViewComponent', function() {
         this.scope.$digest()
         expect(this.Membership.prototype[context.membershipRemoveFuncName]).not.toHaveBeenCalled()
         expect(this.notificationsService.success).not.toHaveBeenCalled()
-        expect(this.modalService.modalOkCancel.calls.count()).toBe(1)
+        expect(this.modalService.modalOkCancel.calls.count()).toBe(2)
       })
 
     })
