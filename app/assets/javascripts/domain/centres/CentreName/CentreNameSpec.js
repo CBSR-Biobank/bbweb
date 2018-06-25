@@ -27,7 +27,7 @@ describe('CentreName', function() {
       this.url = (...paths) => {
         const args = [ 'centres/names' ].concat(paths);
         return EntityTestSuiteMixin.url.apply(null, args);
-      }
+      };
     });
   });
 

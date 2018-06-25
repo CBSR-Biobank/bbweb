@@ -16,37 +16,26 @@ describe('Component: ceventList', function() {
     angular.mock.inject(function() {
       Object.assign(this, ComponentTestSuiteMixin);
 
-      this.injectDependencies('$q',
-                              '$rootScope',
-                              '$compile',
-                              '$state',
+      this.injectDependencies('$httpBackend',
                               'Participant',
-                              'CollectionEvent',
-                              'CollectionEventType',
                               'Factory');
 
-      this.jsonCevent      = this.Factory.collectionEvent();
-      this.jsonCeventType  = this.Factory.defaultCollectionEventType();
-      this.jsonParticipant = this.Factory.defaultParticipant();
+      this.plainParticipant = this.Factory.defaultParticipant();
+      this.participant      = this.Participant.create(this.plainParticipant);
 
-      this.participant          = this.Participant.create(this.jsonParticipant);
-      this.collectionEventTypes = [ new this.CollectionEventType(this.jsonCeventType) ];
-      this.collectionEvent      = this.CollectionEvent.create(this.jsonCevent);
-
-      this.CollectionEventType.list = jasmine.createSpy()
-        .and.returnValue(this.$q.when(this.Factory.pagedResult(this.collectionEventTypes)));
-
-      this.CollectionEvent.list = jasmine.createSpy()
-        .and.returnValue(this.$q.when(this.Factory.pagedResult([ this.collectionEvent ])));
+      this.url = (...paths) => {
+        const allPaths = [ 'participants/cevents' ].concat(paths);
+        return ComponentTestSuiteMixin.url(...allPaths);
+      }
 
       this.createController = (participant = this.participant) => {
+        this.$httpBackend
+          .whenGET(new RegExp(this.url('list')))
+          .respond(this.reply(this.Factory.pagedResult([])));
+
         this.createControllerInternal(
-          `<cevents-list participant="vm.participant" update-collection-events="vm.updateValue">
-           </cevents-list>`,
-          {
-            participant: participant,
-            updateValue: this.updateValue
-          },
+          '<cevents-list participant="vm.participant"></cevents-list>',
+          { participant },
           'ceventsList');
       };
     });
@@ -55,6 +44,18 @@ describe('Component: ceventList', function() {
   it('has valid scope', function() {
     this.createController();
     expect(this.controller.participant).toBe(this.participant);
+    expect(this.controller.collectionEventsRefresh).toBe(0);
+  });
+
+  it('listens to the `collection-event-updated` event', function() {
+    this.createController();
+    const currentValue = this.controller.collectionEventsRefresh;
+
+    const childScope = this.element.isolateScope().$new();
+    childScope.$emit('collection-event-updated', null);
+    this.scope.$digest();
+
+    expect(this.controller.collectionEventsRefresh).toBe(currentValue + 1);
   });
 
 });

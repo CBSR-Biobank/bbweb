@@ -39,29 +39,81 @@ export default function annotationTypeAddComponentSharedBehaviour(context) {
       this.injectDependencies('$q',
                               '$state',
                               'AnnotationType',
+                              'modalService',
+                              'domainNotificationService',
                               'Factory');
 
       spyOn(this.$state, 'go').and.returnValue('ok');
     });
 
-    it('should change to correct state on submit', function() {
-      var annotType = new this.AnnotationType(this.Factory.annotationType());
+    describe('for `submit`', function() {
 
-      spyOn(context.entity.prototype, context.addAnnotationTypeFuncName)
-        .and.returnValue(this.$q.when(this.study));
+      it('should change to correct state on a valid submit', function() {
+        const annotType = new this.AnnotationType(this.Factory.annotationType());
 
-      context.createController.call(this);
+        spyOn(context.entity.prototype, context.addAnnotationTypeFuncName)
+          .and.returnValue(this.$q.when(this.study));
 
-      this.controller.submit(annotType);
-      this.scope.$digest();
-      expect(context.entity.prototype[context.addAnnotationTypeFuncName])
-        .toHaveBeenCalledWith(annotType);
-      expect(this.$state.go).toHaveBeenCalledWith(
-        context.returnState, {}, { reload: true });
+        context.createController();
+
+        this.controller.submit(annotType);
+        this.scope.$digest();
+        expect(context.entity.prototype[context.addAnnotationTypeFuncName])
+          .toHaveBeenCalledWith(annotType);
+        expect(this.$state.go).toHaveBeenCalledWith(
+          context.returnState, {}, { reload: true });
+      });
+
+      it('should fail when annotation type name is a duplicate', function() {
+        context.createController();
+
+        spyOn(context.entity.prototype, context.addAnnotationTypeFuncName)
+          .and.returnValue(this.$q.reject({
+            status: 'error',
+            message: 'EntityCriteriaError: annotation type name already used:'
+          }));
+
+        spyOn(this.modalService ,'modalOk').and.returnValue(this.$q.when('OK'));
+
+        spyOn(this.domainNotificationService ,'updateErrorModal')
+          .and.returnValue(this.$q.when('OK'));
+
+        const annotType = new this.AnnotationType(this.Factory.annotationType());
+        this.controller.submit(annotType);
+        this.scope.$digest();
+
+        expect(this.modalService.modalOk).toHaveBeenCalled();
+        expect(this.domainNotificationService.updateErrorModal).not.toHaveBeenCalled();
+        expect(this.$state.go).not.toHaveBeenCalled();
+      });
+
+      it('should handle a failure response from the server', function() {
+        context.createController();
+
+        spyOn(context.entity.prototype, context.addAnnotationTypeFuncName)
+          .and.returnValue(this.$q.reject({
+            status: 'error',
+            message: 'simulated error'
+          }));
+
+        spyOn(this.modalService ,'modalOk').and.returnValue(this.$q.when('OK'));
+
+        spyOn(this.domainNotificationService ,'updateErrorModal')
+          .and.returnValue(this.$q.when('OK'));
+
+        const annotType = new this.AnnotationType(this.Factory.annotationType());
+        this.controller.submit(annotType);
+        this.scope.$digest();
+
+        expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled();
+        expect(this.modalService.modalOk).not.toHaveBeenCalled();
+        expect(this.$state.go).not.toHaveBeenCalled();
+      });
+
     });
 
     it('on cancel, the correct method should be called', function() {
-      context.createController.call(this);
+      context.createController();
       this.controller.cancel();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith(context.returnState, {}, { reload: true });

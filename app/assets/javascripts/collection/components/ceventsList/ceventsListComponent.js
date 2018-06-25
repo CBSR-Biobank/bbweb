@@ -7,29 +7,24 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/*
- * Controller for this component.
- */
-/* @ngInject */
-function CeventsListController($q, $scope) {
-  var vm = this;
-  vm.$onInit = onInit;
-  vm.updateCollectionEvents = updateCollectionEvents;
+class CeventsListController {
 
-  //---
-
-  function onInit() {
-    vm.updateCollectionEvents = 0;
-
-    $scope.$on('collection-event-updated', updateCollectionEvents);
+  constructor($scope) {
+    'ngInject';
+    Object.assign(this, { $scope });
   }
 
-  function updateCollectionEvents(event) {
-    event.stopPropagation();
-    vm.updateCollectionEvents += 1;
+  $onInit() {
+    this.collectionEventsRefresh = 0;
+
+    this.$scope.$on('collection-event-updated',
+                    (event) => {
+                      event.stopPropagation();
+                      this.collectionEventsRefresh += 1;
+                    });
   }
+
 }
-
 
 /**
  * An AngularJS component that lists the {@link domain.participants.CollectionEvent CollectionEvents} for a
@@ -50,4 +45,4 @@ const ceventsListComponent = {
   }
 };
 
-export default ngModule => ngModule.component('ceventsList', ceventsListComponent)
+export default ngModule => ngModule.component('ceventsList', ceventsListComponent);

@@ -46,7 +46,10 @@ describe('Component: collectionEventAnnotationTypeAdd', function() {
     var context = {};
 
     beforeEach(function () {
-      context.createController          = this.createController;
+      context.createController = () => {
+        this.createController();
+      }
+
       context.scope                     = this.scope;
       context.controller                = this.controller;
       context.entity                    = this.CollectionEventType;
