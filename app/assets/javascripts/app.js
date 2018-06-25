@@ -64,6 +64,7 @@ context.keys().forEach(key => {
 export default appModule.name;
 
 function configToastr(toastrConfig) {
+  'ngInject';
   angular.extend(toastrConfig, {
     positionClass: 'toast-bottom-right'
   });
