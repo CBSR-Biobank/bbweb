@@ -14,15 +14,25 @@
     <i class="glyphicon glyphicon-ok-circle"></i> {{vm.counts.enabled}} {{'Enabled'|translate}},
     <i class="glyphicon glyphicon-remove-sign"></i> {{vm.counts.retired}} {{'Retired'|translate}}
     <div class="dropdown pull-right">
-      <a href="#!" class="dropdown-toggle" data-toggle="dropdown">
-        <small class="text-muted"><translate>Sort</translate> <b class="caret"></b></small>
-      </a>
-      <ul class="dropdown-menu" role="menu">
-        <li role="presentation" class="dropdown-header" translate>Sort by</li>
-        <li ng-repeat="sortFieldInfo in vm.sortFieldData">
-          <a ng-click="vm.sortFieldSelected(sortFieldInfo.id)">{{ sortFieldInfo.labelFunc() }}</a>
-        </li>
-      </ul>
+
+      <span class="pull-right" uib-dropdown is-open="vm.tableMenu.isOpen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="tableMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="tableMenu">
+          <li role="menuitem" class="dropdown-header" translate>Sort by</li>
+          <li role="menuitem" ng-repeat="sortChoice in vm.sortChoices">
+            <a href ng-click="vm.sortFieldSelected(sortChoice.id)">
+              {{ sortChoice.labelFunc() }}
+            </a>
+          </li>
+        </ul>
+      </span>
+
     </div>
   </div>
 
