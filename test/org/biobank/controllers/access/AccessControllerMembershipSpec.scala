@@ -93,7 +93,7 @@ class AccessControllerMembershipSpec
           val defaultMembership = membershipRepository.getByKey(DefaultMembershipId).toOption.value
           val memberships = (0 until 2).map(_ => factory.createMembership).toList
           memberships.foreach(membershipRepository.put)
-          (new Url(uri("memberships")), defaultMembership :: memberships.sortBy(_.name))
+          (new Url(uri("memberships")), (defaultMembership :: memberships.sortBy(_.name)).sortBy(_.name))
         }
       }
 
@@ -849,9 +849,9 @@ class AccessControllerMembershipSpec
   }
 
   private def listMultipleMemberships(offset:    Long = 0,
-                                     maybeNext: Option[Int] = None,
-                                     maybePrev: Option[Int] = None)
-                                    (setupFunc: () => (Url, List[Membership])) = {
+                                      maybeNext: Option[Int] = None,
+                                      maybePrev: Option[Int] = None)
+                                     (setupFunc: () => (Url, List[Membership])) = {
 
     it("list multiple memberships") {
       val (url, expectedMemberships) = setupFunc()
@@ -861,9 +861,9 @@ class AccessControllerMembershipSpec
 
       val reqJson = contentAsJson(reply)
       reqJson must beMultipleItemResults(offset = offset,
-                                      total = expectedMemberships.size.toLong,
-                                      maybeNext = maybeNext,
-                                      maybePrev = maybePrev)
+                                         total = expectedMemberships.size.toLong,
+                                         maybeNext = maybeNext,
+                                         maybePrev = maybePrev)
 
       val replyMemberships = (reqJson \ "data" \ "items").validate[List[MembershipDto]]
       replyMemberships must be (jsSuccess)
