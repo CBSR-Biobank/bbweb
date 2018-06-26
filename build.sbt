@@ -137,7 +137,7 @@ libraryDependencies ++= Seq(
     ( "com.github.dnvriend"       %% "akka-persistence-jdbc"               % "3.4.0" % "compile"  )
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "mysql"                       % "mysql-connector-java"                 % "8.0.11",
-    "org.scalaz"                  %% "scalaz-core"                         % "7.2.23"  % "compile",
+    "org.scalaz"                  %% "scalaz-core"                         % "7.2.25"  % "compile",
     "com.github.mauricio"         %% "mysql-async"                         % "0.2.21",
     "com.github.t3hnar"           %% "scala-bcrypt"                        % "3.1",
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
@@ -152,7 +152,7 @@ libraryDependencies ++= Seq(
     "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.2"   % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
     "org.codehaus.janino"         %  "janino"                              % "3.0.8"   % "test",
-    "org.mockito"                 %  "mockito-core"                        % "2.18.3"  % "test",
+    "org.mockito"                 %  "mockito-core"                        % "2.19.0"  % "test",
     "it.bitbl"                    %% "scala-faker"                         % "0.4"     % "test",
     "com.chuusai"                 %% "shapeless"                           % "2.3.3"   % "test",
     "org.gnieh"                   %% "diffson-play-json"                   % "3.0.0"   % "test"
