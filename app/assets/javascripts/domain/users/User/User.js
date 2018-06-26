@@ -116,18 +116,18 @@ function UserFactory($q,
     }
 
     updateName(name) {
-      return this.update(User.url('update', this.id), { property: 'name', value: name });
+      return this.update(User.url('update', this.id), { property: 'name', newValue: name });
     }
 
     updateEmail(email) {
-      return this.update(User.url('update', this.id), { property: 'email', value: email });
+      return this.update(User.url('update', this.id), { property: 'email', newValue: email });
     }
 
     updatePassword(currentPassword, newPassword) {
       return this.update(User.url('update', this.id),
                          {
                            property: 'password',
-                           value: {
+                           newValue: {
                              currentPassword: currentPassword,
                              newPassword:     newPassword
                            }
@@ -135,28 +135,28 @@ function UserFactory($q,
     }
 
     updateAvatarUrl(avatarUrl) {
-      return this.update(User.url('update', this.id), { property: 'avatarUrl', value: avatarUrl });
+      return this.update(User.url('update', this.id), { property: 'avatarUrl', newValue: avatarUrl });
     }
 
     activate() {
       if (this.state !== UserState.REGISTERED) {
         throw new DomainError('user state is not registered: ' + this.state);
       }
-      return this.update(User.url('update', this.id), { property: 'state', value: 'activate' });
+      return this.update(User.url('update', this.id), { property: 'state', newValue: 'activate' });
     }
 
     lock() {
       if ((this.state !== UserState.REGISTERED) && (this.state !== UserState.ACTIVE))  {
         throw new DomainError('user state is not registered or active: ' + this.state);
       }
-      return this.update(User.url('update', this.id), { property: 'state', value: 'lock' });
+      return this.update(User.url('update', this.id), { property: 'state', newValue: 'lock' });
     }
 
     unlock() {
       if (this.state !== UserState.LOCKED) {
         throw new DomainError('user state is not locked: ' + this.state);
       }
-      return this.update(User.url('update', this.id), { property: 'state', value: 'unlock' });
+      return this.update(User.url('update', this.id), { property: 'state', newValue: 'unlock' });
     }
 
     addRole(roleId) {

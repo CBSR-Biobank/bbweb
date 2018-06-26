@@ -14,6 +14,7 @@
     <span class="pull-right">
       <button class="btn btn-xs btn-primary"
               uib-tooltip="{{'Add role'|translate}}"
+              ng-if="vm.onRoleAddRequest()"
               ng-click="vm.addRole()">
         <translate>Add</translate> <i class="glyphicon glyphicon-plus"></i>
       </button>

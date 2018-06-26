@@ -13,19 +13,22 @@ import ngModule from '../../index'
 describe('Component: userProfile', function() {
 
   beforeEach(() => {
-    angular.mock.module(ngModule, 'biobank.test');
+    angular.mock.module(ngModule, 'biobank.test', function ($qProvider) {
+      // this is needed to make promise rejections work
+      $qProvider.errorOnUnhandledRejections(false);
+    });
+
     angular.mock.inject(function() {
       Object.assign(this, ComponentTestSuiteMixin);
 
-      this.injectDependencies('$rootScope',
-                              '$compile',
-                              '$q',
-                              'Factory',
+      this.injectDependencies('$q',
                               '$uibModal',
+                              'User',
+                              'userService',
                               'modalService',
                               'modalInput',
-                              'User',
-                              'notificationsService');
+                              'notificationsService',
+                              'Factory');
 
       this.ctrlMethods = ['updateName', 'updateEmail', 'updateAvatarUrl'];
 
@@ -35,6 +38,9 @@ describe('Component: userProfile', function() {
           { user: user },
           'userProfile');
       };
+
+      const user = this.User.create(this.Factory.user())
+      this.userService.getCurrentUser = jasmine.createSpy().and.returnValue(user)
     });
   });
 
@@ -96,7 +102,7 @@ describe('Component: userProfile', function() {
     beforeEach(function () {
       context.controllerFuncName = 'updateName';
       context.modalInputFuncName = 'text';
-      context.modalReturnValue = this.Factory.stringNext();
+      context.modalReturnValue   = this.Factory.stringNext();
       context.userUpdateFuncName = 'updateName';
     });
 
@@ -154,7 +160,7 @@ describe('Component: userProfile', function() {
 
     spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
     spyOn(this.User.prototype, 'updateAvatarUrl')
-      .and.returnValue(this.$q.reject({ data: { message: 'xxx' } }));
+      .and.returnValue(this.$q.reject(this.errorReply('simulated error')));
     spyOn(this.notificationsService, 'updateError').and.returnValue(null);
 
     this.controller.removeAvatarUrl();
@@ -183,9 +189,9 @@ describe('Component: userProfile', function() {
 
     spyOn(this.modalInput, 'password').and.returnValue(
       { result : this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
-    spyOn(this.User.prototype, 'updatePassword').and.returnValue(
-      this.$q.reject({ data: { message: 'invalid password' } }));
-    spyOn(this.notificationsService, 'error').and.callFake(function () {});
+    spyOn(this.User.prototype, 'updatePassword')
+      .and.returnValue(this.$q.reject(this.errorReply('invalid password')));
+    spyOn(this.notificationsService, 'error').and.returnValue(this.$q.when('OK'));
 
     this.controller.updatePassword();
     this.scope.$digest();
@@ -193,16 +199,16 @@ describe('Component: userProfile', function() {
   });
 
   it('should display a notification error when updating password fails', function() {
-    var user = new this.User(this.Factory.user());
+    const user = new this.User(this.Factory.user());
+    this.createController(user);
 
     spyOn(this.modalInput, 'password').and.returnValue(
       { result: this.$q.when({ currentPassword: 'xx', newPassword: 'xx' })});
+
     spyOn(this.notificationsService, 'updateError').and.returnValue(null);
 
-    this.createController(user);
-
-    spyOn(this.User.prototype, 'updatePassword').and.returnValue(
-      this.$q.reject({ data: { message: 'xxx' } }));
+    spyOn(this.User.prototype, 'updatePassword')
+      .and.returnValue(this.$q.reject(this.errorReply('simulated error')));
 
     this.controller.updatePassword();
     this.scope.$digest();
@@ -239,7 +245,7 @@ describe('Component: userProfile', function() {
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: this.$q.when(context.modalReturnValue)});
         spyOn(this.User.prototype, context.userUpdateFuncName)
-          .and.returnValue(this.$q.reject({ data: { message: 'simulated error'}}));
+          .and.returnValue(this.$q.reject(this.errorReply({ message: 'simulated error'})));
         spyOn(this.notificationsService, 'updateError').and.returnValue(this.$q.when('OK'));
 
         this.controller[context.controllerFuncName]();

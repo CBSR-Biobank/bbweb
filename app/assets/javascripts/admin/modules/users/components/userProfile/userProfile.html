@@ -6,14 +6,85 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       <translate>Profile</translate>
-      <span class="btn-group pull-right">
-        <button class="btn btn-xs btn-primary"
-                ng-click="vm.updatePassword()"
-                uib-tooltip="{{'Change your password'|translate}}">
-          <translate>Update password</translate>
-          <i class="glyphicon glyphicon-edit"></i>
+
+      <span class="pull-right"
+            uib-dropdown
+            is-open="vm.userProfileMenu.isOpen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="userProfileMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
         </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="userProfileMenu">
+          <li role="menuitem" ng-class="{ 'disabled': !vm.user.isActive() }">
+            <a href
+               ng-click="vm.updateName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update name</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.user.isActive() }">
+            <a href
+               ng-click="vm.updateEmail()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update email</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.user.isActive() }">
+            <a href
+               ng-click="vm.updatePassword()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Change password</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.user.isActive() }">
+            <a href
+               ng-click="vm.updateAvatarUrl()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update avatar URL</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.user.isActive() }">
+            <a href
+               ng-click="vm.addRole()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Add role</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.user.isActive() }">
+            <a href
+               ng-click="vm.addMembership()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Add membership</translate>
+            </a>
+          </li>
+          <li class="divider" ng-if="vm.allowStateChange"></li>
+          <li role="menuitem" ng-if="vm.allowStateChange && vm.user.isRegistered()">
+            <a href
+               ng-click="vm.changeState('activate')">
+              <i class="glyphicon glyphicon-ok-circle text-success"></i>
+              <translate>Activate this user</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-if="vm.allowStateChange && vm.user.isActive()">
+            <a href
+               ng-click="vm.changeState('lock')">
+              <i class="glyphicon glyphicon-ok-circle text-danger"></i>
+              <translate>Lock this user</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-if="vm.allowStateChange && vm.user.isLocked()">
+            <a href
+               ng-click="vm.changeState('unlock')">
+              <i class="glyphicon glyphicon-ok-circle text-danger"></i>
+              <translate>Unlock this user</translate>
+            </a>
+          </li>
+        </ul>
       </span>
+
     </h3>
   </div>
 
@@ -22,14 +93,7 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3"><strong translate>Name</strong></div>
-        <div class="col-md-7">{{vm.user.name}}</div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Update name'|translate}}"
-                  ng-click="vm.updateName()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
+        <div class="col-md-9">{{vm.user.name}}</div>
       </div>
     </li>
 
@@ -37,14 +101,7 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3"><strong translate>Email</strong></div>
-        <div class="col-md-7">{{vm.user.email}}</div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Update email'|translate}}"
-                  ng-click="vm.updateEmail()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
+        <div class="col-md-9">{{vm.user.email}}</div>
       </div>
     </li>
 
@@ -52,19 +109,11 @@
     <li class="list-group-item">
       <div class="row">
         <div class="col-md-3"><strong translate>Avatar URL</strong></div>
-        <div class="col-md-6" ng-if="vm.user.avatarUrl">
+        <div class="col-md-7" ng-if="vm.user.avatarUrl">
           <a target="_blank" ng-href="{{vm.user.avatarUrl}}">{{vm.user.avatarUrl}}</a>
         </div>
-        <div class="col-md-6" ng-if="! vm.user.avatarUrl" translate>
+        <div class="col-md-7" ng-if="! vm.user.avatarUrl" translate>
           None
-        </div>
-        <div class="col-md-3">
-          <update-remove-buttons
-             on-update="vm.updateAvatarUrl()"
-             on-remove="vm.removeAvatarUrl()"
-             update-button-enabled="'true'"
-             remove-button-enabled="vm.allowRemoveAvatarUrl">
-          </update-remove-buttons>
         </div>
       </div>
     </li>
@@ -72,7 +121,6 @@
     <!-- ROLES -->
     <li class="list-group-item">
       <user-roles user="vm.user"
-                  on-role-add-request="vm.addRole.bind(vm)"
                   on-role-remove-request="vm.removeRole.bind(vm)">
       </user-roles>
     </li>
@@ -80,7 +128,6 @@
     <!-- MEMBERSHIPS -->
     <li class="list-group-item">
       <user-membership user="vm.user"
-                       on-add-request="vm.addMembership.bind(vm)"
                        on-remove-request="vm.removeMembership.bind(vm)">
       </user-membership>
     </li>

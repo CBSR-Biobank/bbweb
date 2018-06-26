@@ -182,7 +182,7 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
                                                           "sessionUserId" -> request.authInfo.userId.id)
       reqJson.validate[UpdateEntityJson].fold(
         errors =>  Future.successful(BadRequest(Json.obj("status" -> "error",
-                                                         "message" -> "invalid json values"))),
+                                                         "message" -> s"invalid json values: $errors"))),
         updateEntity => {
           updateEntityJsonToCommand(updateEntity).fold(
             errors => {

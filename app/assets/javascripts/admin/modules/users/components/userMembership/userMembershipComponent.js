@@ -91,7 +91,7 @@ class UserMembershipController {
 
   membershipLabelSelected(membershipName) {
     const promiseFn = () => {
-      this.onMembershipRemoveRequest()(membershipName)
+      this.onRemoveRequest()(membershipName)
         .then(() => {
           this.notificationsService.success(
             this.gettextCatalog.getString('Membership removed: {{name}}', { name: membershipName.name }))

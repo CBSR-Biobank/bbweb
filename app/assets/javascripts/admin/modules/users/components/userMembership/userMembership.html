@@ -2,21 +2,12 @@
   <div class="col-md-3">
     <strong translate>Membership</strong>
   </div>
-  <div class="col-md-7" ng-if="vm.user.membership">
+  <div class="col-md-9" ng-if="vm.user.membership">
     <tags-list tag-data="vm.membershipNameLabels"
                on-tag-selected="vm.membershipLabelSelected.bind(vm)">
     </tags-list>
   </div>
-  <div class="col-md-7" ng-if="!vm.user.membership">
+  <div class="col-md-9" ng-if="!vm.user.membership">
     <translate>None</translate>
-  </div>
-  <div class="col-md-2">
-    <span class="pull-right">
-      <update-remove-buttons on-update="vm.addMembership()"
-                             on-remove="vm.removeMembership()"
-                             update-button-enabled="'true'"
-                             remove-button-enabled="'true'">
-      </update-remove-buttons>
-    </span>
   </div>
 </div>

@@ -190,7 +190,7 @@ describe('User', function() {
                       'updateName',
                       user.name,
                       this.url('update', user.id),
-                      { property: 'name', value: user.name },
+                      { property: 'name', newValue: user.name },
                       rawUser,
                       this.expectUser.bind(this),
                       failTest.bind(this));
@@ -204,7 +204,7 @@ describe('User', function() {
                       'updateEmail',
                       user.email,
                       this.url('update', user.id),
-                      { property: 'email', value: user.email },
+                      { property: 'email', newValue: user.email },
                       rawUser,
                       this.expectUser.bind(this),
                       failTest.bind(this));
@@ -219,7 +219,7 @@ describe('User', function() {
                       'updateAvatarUrl',
                       user.avatarUrl,
                       this.url('update', user.id),
-                      { property: 'avatarUrl', value: user.avatarUrl },
+                      { property: 'avatarUrl', newValue: user.avatarUrl },
                       rawUser,
                       this.expectUser.bind(this),
                       failTest.bind(this));
@@ -237,7 +237,7 @@ describe('User', function() {
                       this.url('update', user.id),
                       {
                         property: 'password',
-                        value: {
+                        newValue: {
                           currentPassword: currentPassword,
                           newPassword:     newPassword
                         }
@@ -262,7 +262,7 @@ describe('User', function() {
                         stateInfo.action,
                         null,
                         this.url('update', user.id),
-                        { property: 'state', value: stateInfo.action },
+                        { property: 'state', newValue: stateInfo.action },
                         rawUser,
                         this.expectUser.bind(this),
                         failTest.bind(this));

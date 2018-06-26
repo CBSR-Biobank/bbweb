@@ -24,7 +24,9 @@ class UserProfileController {
               userService,
               User,
               breadcrumbService,
-              userStateLabelService) {
+              userStateLabelService,
+              matchingRoleNames,
+              matchingMembershipNames) {
     'ngInject'
     Object.assign(this,
                   {
@@ -37,11 +39,17 @@ class UserProfileController {
                     userService,
                     User,
                     breadcrumbService,
-                    userStateLabelService
+                    userStateLabelService,
+                    matchingRoleNames,
+                    matchingMembershipNames
                   });
   }
 
   $onInit() {
+    this.loggedInUser = this.userService.getCurrentUser();
+    this.userIsSelf = (this.loggedInUser.id === this.user.id);
+    this.allowStateChange = this.userIsSelf || this.loggedInUser.hasUserAdminRole();
+
     this.breadcrumbs = [
       this.breadcrumbService.forState('home'),
       this.breadcrumbService.forState('home.admin'),
@@ -52,11 +60,9 @@ class UserProfileController {
         () => this.gettextCatalog.getString('{{name}}', { name: this.user.name }))
     ];
 
-    this.studyMemberships     = '';
-    this.centreMemberships    = '';
-    this.allowRemoveAvatarUrl = (this.user.avatarUrl !== null);
-    this.stateLabelFunc       = this.userStateLabelService.stateToLabelFunc(this.user.state);
-
+    this.studyMemberships  = '';
+    this.centreMemberships = '';
+    this.stateLabelFunc    = this.userStateLabelService.stateToLabelFunc(this.user.state);
 
     if (this.user.membership) {
       if (this.user.membership.isForAllStudies()) {
@@ -87,9 +93,9 @@ class UserProfileController {
   }
 
   updateError(err) {
-    if (err.data) {
+    if ((typeof err === 'object') && err.message) {
       this.notificationsService.updateError(
-        this.gettextCatalog.getString('Your change could not be saved: ') + err.data.message,
+        this.gettextCatalog.getString('Your change could not be saved: ') + err.message,
         this.gettextCatalog.getString('Cannot apply your change'));
     }
   }
@@ -98,7 +104,6 @@ class UserProfileController {
     timeout = timeout || 1500;
     return user => {
       this.user = user;
-      this.allowRemoveAvatarUrl = (this.user.avatarUrl !== null);
       this.notificationsService.success(message, title, timeout);
     };
   }
@@ -114,7 +119,7 @@ class UserProfileController {
       .then(name => this.user.updateName(name))
       .then(this.postUpdate(this.gettextCatalog.getString('User name updated successfully.'),
                             this.gettextCatalog.getString('Update successful')))
-      .catch(this.updateError.bind(this));
+      .catch(err => this.updateError(err));
   }
 
   updateEmail() {
@@ -126,7 +131,7 @@ class UserProfileController {
       .then(email => this.user.updateEmail(email))
       .then(this.postUpdate(this.gettextCatalog.getString('Email updated successfully.'),
                             this.gettextCatalog.getString('Update successful')))
-      .catch(this.updateError.bind(this));
+      .catch(err => this.updateError(err));
   }
 
   updateAvatarUrl() {
@@ -137,7 +142,7 @@ class UserProfileController {
       .then(avatarUrl => this.user.updateAvatarUrl(avatarUrl))
       .then(this.postUpdate(this.gettextCatalog.getString('Avatar URL updated successfully.'),
                             this.gettextCatalog.getString('Update successful')))
-      .catch(this.updateError.bind(this));
+      .catch(err => this.updateError(err));
   }
 
   removeAvatarUrl() {
@@ -147,7 +152,7 @@ class UserProfileController {
       .then(() => this.user.updateAvatarUrl(null))
       .then(this.postUpdate(this.gettextCatalog.getString('Avatar URL remove successfully.'),
                             this.gettextCatalog.getString('Remove successful')))
-      .catch(this.updateError.bind(this));
+      .catch(err => this.updateError(err));
   }
 
   updatePassword() {
@@ -156,7 +161,9 @@ class UserProfileController {
       .then(this.postUpdate(this.gettextCatalog.getString('Your password was updated successfully.'),
                             this.gettextCatalog.getString('Update successful')))
       .catch(err => {
-        if (err.data.message.indexOf('invalid password') > -1) {
+        if ((typeof err === 'object') &&
+            err.message &&
+            (err.message.indexOf('InvalidPassword') > -1)) {
           this.notificationsService.error(
             this.gettextCatalog.getString('Your current password was incorrect.'),
             this.gettextCatalog.getString('Cannot update your password'));
@@ -166,32 +173,96 @@ class UserProfileController {
       });
   }
 
-  addRole(roleId) {
-    this.user.addRole(roleId)
+  addRole() {
+    let roleLabel;
+    this.matchingRoleNames.open(this.gettextCatalog.getString('Add a role'),
+                                this.gettextCatalog.getString('Role'),
+                                this.gettextCatalog.getString('enter a role\'s name or partial name'),
+                                this.gettextCatalog.getString('No matching roles found'),
+                                this.user.roles)
+      .then(modalValue => {
+        roleLabel = modalValue.label;
+        return this.user.addRole(modalValue.obj.id)
+      })
       .then(user => {
         this.user = user
+        this.notificationsService.success(
+          this.gettextCatalog.getString('Role added: {{name}}', { name: roleLabel }))
       })
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   removeRole(roleName) {
-    this.user.removeRole(roleName.id)
+    return this.user.removeRole(roleName.id)
       .then(user => {
         this.user = user;
       })
   }
 
-  addMembership(membershipId) {
-    this.user.addMembership(membershipId)
-      .then(user => {
-        this.user = user
+  addMembership() {
+    let membershipLabel;
+    this.matchingMembershipNames
+      .open(this.gettextCatalog.getString('Add a membership'),
+            this.gettextCatalog.getString('Membership'),
+            this.gettextCatalog.getString('enter a membership\'s name or partial name'),
+            this.gettextCatalog.getString('No matching membership found'),
+            this.user.membership)
+      .then(modalValue => {
+        membershipLabel = modalValue.label;
+        return this.user.addMembership(modalValue.obj.id);
       })
+      .then(user => {
+        this.user = user;
+        this.notificationsService.success(
+          this.gettextCatalog.getString('Membership added: {{name}}', { name: membershipLabel }))
+      })
+      .catch((error) => {
+        this.$log.error(error);
+      });
   }
 
   removeMembership(membershipName) {
-    this.user.removeMembership(membershipName.id)
+    return this.user.removeMembership(membershipName.id)
       .then(user => {
         this.user = user;
       })
+  }
+
+  changeState(stateAction) {
+    let stateChangeMsg;
+
+    switch (stateAction) {
+    case 'activate':
+      stateChangeMsg = this.gettextCatalog.getString('Are you sure you want to activate user {{name}}?',
+                                                     { name: this.user.name });
+      break;
+
+    case 'lock':
+      stateChangeMsg = this.gettextCatalog.getString('Are you sure you want to lock user {{name}}?',
+                                                     { name: this.user.name });
+      break;
+
+    case 'unlock':
+      stateChangeMsg = this.gettextCatalog.getString('Are you sure you want to unlock user {{name}}?',
+                                                     { name: this.user.name });
+      break;
+
+    default:
+      throw new Error('invalid state action: ' + stateAction);
+    }
+
+    this.modalService.modalOkCancel(this.gettextCatalog.getString('Confirm state change on user'),
+                                    stateChangeMsg)
+      .then(
+        () => this.user[stateAction]()
+      )
+      .then(user => {
+        this.user = user;
+        this.stateLabelFunc = this.userStateLabelService.stateToLabelFunc(this.user.state);
+        this.notificationsService.success(this.gettextCatalog.getString('State changed successfully'));
+      });
   }
 
 }
