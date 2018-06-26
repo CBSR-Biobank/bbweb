@@ -131,6 +131,7 @@ class RoleViewController {
   }
 
   addUser() {
+    let user;
     const getMatchingUserNames = viewValue =>
           this.UserName.list({ filter: 'name:like:' + viewValue}, this.role.userData)
           .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })))
@@ -140,11 +141,15 @@ class RoleViewController {
                               this.gettextCatalog.getString('enter a user\'s name or partial name'),
                               this.gettextCatalog.getString('No matching users found'),
                               getMatchingUserNames).result
-      .then((modalValue) => {
-        this.role.addUser(modalValue.obj.id).then((role) => {
-          this.role = role
-          this.userNameLabels = this.entityNamesToLabels(this.role.userData)
-        })
+      .then(modalValue => {
+        user = modalValue.obj;
+        return this.role.addUser(modalValue.obj.id);
+      })
+      .then(role => {
+        this.role = role
+        this.userNameLabels = this.entityNamesToLabels(this.role.userData);
+        this.notificationsService.success(
+          this.gettextCatalog.getString('User added: {{name}}', { name: user.name }))
       })
       .catch((error) => {
         this.$log.error(error);

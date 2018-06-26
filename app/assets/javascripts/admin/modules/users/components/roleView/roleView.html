@@ -6,13 +6,28 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       {{vm.role.name}}
-      <span class="pull-right">
-        <button class="btn btn-xs btn-warning"
-                uib-tooltip="{{'Remove role'|translate}}"
-                ng-click="vm.remove()">
-          Remove <i class="glyphicon glyphicon-remove"></i>
+
+      <span class="pull-right"
+            uib-dropdown
+            is-open="vm.roleMenu.isOpen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="roleMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
         </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="roleMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.addUser()">
+              <i class="glyphicon glyphicon-plus text-primary"></i>
+              <translate>Add user</translate>
+            </a>
+          </li>
+        </ul>
       </span>
+
     </h3>
   </div>
   <ul class="list-group">
@@ -23,16 +38,8 @@
         <div class="col-md-2">
           <strong translate>Name:</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.role.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit name'|translate}}"
-                  ng-click="vm.editName()"
-                  ng-if="vm.userCanUpdate">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -48,8 +55,7 @@
             text="vm.role.description"
             toggle-length="60"
             text-empty-warning="{{'Description not entered yet.'|translate}}"
-            allow-edit="vm.userCanUpdate"
-            on-edit="vm.editDescription()"
+            allow-edit="false"
             tooltip="{{'Edit description'|translate}}">
           </truncate-toggle>
         </div>
@@ -67,16 +73,8 @@
                      on-tag-selected="vm.userLabelSelected.bind(vm)">
           </tags-list>
         </div>
-        <div class="col-md-8" ng-if="!vm.roleHasUsers">
+        <div class="col-md-10" ng-if="!vm.roleHasUsers">
           <translate>None</translate>
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add a user'|translate}}"
-                  ng-click="vm.addUser()"
-                  ng-if="vm.userCanUpdate">
-            <i class="glyphicon glyphicon-plus"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -87,21 +85,13 @@
         <div class="col-md-2">
           <strong translate>Parent Roles:</strong>
         </div>
-        <div class="col-md-8" ng-if="vm.roleHasParentRoles">
+        <div class="col-md-10" ng-if="vm.roleHasParentRoles">
           <tags-list tag-data="vm.parentNameLabels"
                      on-tag-selected="vm.parentRoleLabelSelected.bind(vm)">
           </tags-list>
         </div>
-        <div class="col-md-8" ng-if="!vm.roleHasParentRoles">
+        <div class="col-md-10" ng-if="!vm.roleHasParentRoles">
           <translate>None</translate>
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add a parent'|translate}}"
-                  ng-click="vm.addParentRole()"
-                  ng-if="vm.userCanUpdate">
-            <i class="glyphicon glyphicon-plus"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -112,21 +102,13 @@
         <div class="col-md-2">
           <strong translate>Child Roles / Permissions:</strong>
         </div>
-        <div class="col-md-8" ng-if="vm.roleHasChildren">
+        <div class="col-md-10" ng-if="vm.roleHasChildren">
           <tags-list tag-data="vm.childNameLabels"
                      on-tag-selected="vm.childRoleLabelSelected.bind(vm)">
           </tags-list>
         </div>
-        <div class="col-md-8" ng-if="!vm.roleHasChildren">
+        <div class="col-md-10" ng-if="!vm.roleHasChildren">
           <translate>None</translate>
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add a child'|translate}}"
-                  ng-click="vm.addChildRole()"
-                  ng-if="vm.userCanUpdate">
-            <i class="glyphicon glyphicon-plus"></i>
-          </button>
         </div>
       </div>
     </li>
