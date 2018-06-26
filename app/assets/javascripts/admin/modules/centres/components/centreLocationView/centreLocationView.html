@@ -7,6 +7,79 @@
     <h3 class="panel-title">
       <translate>Location:</translate>
       {{vm.location.name}}
+
+      <span class="pull-right"
+            uib-dropdown
+            is-open="vm.locationMenu.isOpen"
+            ng-if="vm.centre.isDisabled()">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="locationMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="locationMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update name</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editStreet()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update street address</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editCity()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update city</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editProvince()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update province</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editPostalCode()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update postal code</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editPoBoxNumber()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update PO box number</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editCountryIsoCode()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update country ISO code</translate>
+            </a>
+          </li>
+          <li class="divider"></li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.remove()">
+              <i class="glyphicon glyphicon-remove text-danger"></i>
+              <translate>Remove this location</translate>
+            </a>
+          </li>
+        </ul>
+      </span>
+
     </h3>
   </div>
   <ul class="list-group" ng-if="vm.centre.hasLocations()">
@@ -17,15 +90,8 @@
         <div class="col-md-2">
           <strong translate>Name</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.location.name}}
-        </div>
-        <div class="col-md-2" ng-if="vm.centre.isDisabled()">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit name'|translate}}"
-                  ng-click="vm.editName()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -36,15 +102,8 @@
         <div class="col-md-2">
           <strong translate>Street</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.location.street}}
-        </div>
-        <div class="col-md-2" ng-if="vm.centre.isDisabled()">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit street'|translate}}"
-                  ng-click="vm.editStreet()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -55,15 +114,8 @@
         <div class="col-md-2">
           <strong translate>City</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.location.city}}
-        </div>
-        <div class="col-md-2" ng-if="vm.centre.isDisabled()">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit city'|translate}}"
-                  ng-click="vm.editCity()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -74,15 +126,8 @@
         <div class="col-md-2">
           <strong translate>Province</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.location.province}}
-        </div>
-        <div class="col-md-2" ng-if="vm.centre.isDisabled()">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit province'|translate}}"
-                  ng-click="vm.editProvince()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -93,15 +138,8 @@
         <div class="col-md-2">
           <strong translate>Postal code</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.location.postalCode}}
-        </div>
-        <div class="col-md-2" ng-if="vm.centre.isDisabled()">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit postal code'|translate}}"
-                  ng-click="vm.editPostalCode()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -112,15 +150,8 @@
         <div class="col-md-2">
           <strong translate>Postal Box Number</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.location.poBoxNumber}}
-        </div>
-        <div class="col-md-2" ng-if="vm.centre.isDisabled()">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit postal box number'|translate}}"
-                  ng-click="vm.editPoBoxNumber()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -131,15 +162,8 @@
         <div class="col-md-2">
           <strong translate>Country ISO code</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.location.countryIsoCode}}
-        </div>
-        <div class="col-md-2" ng-if="vm.centre.isDisabled()">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit country ISO code'|translate}}"
-                  ng-click="vm.editCountryIsoCode()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>

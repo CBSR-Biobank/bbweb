@@ -7,7 +7,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
+import _ from 'lodash';
+import angular from 'angular';
 
 /*
  * Controller for this component.
@@ -17,6 +18,7 @@ function CentreLocationViewController($state,
                                       gettextCatalog,
                                       modalInput,
                                       notificationsService,
+                                      domainNotificationService,
                                       breadcrumbService) {
   var vm = this;
   vm.$onInit = onInit;
@@ -44,6 +46,7 @@ function CentreLocationViewController($state,
     vm.editPostalCode     = editPostalCode;
     vm.editPoBoxNumber    = editPoBoxNumber;
     vm.editCountryIsoCode = editCountryIsoCode;
+    vm.remove             = remove;
   }
 
   function back() {
@@ -155,6 +158,24 @@ function CentreLocationViewController($state,
                            gettextCatalog.getString('Change successful')))
           .catch(notificationsService.updateError);
       });
+  }
+
+  function remove() {
+    const doRemove = () => vm.centre.removeLocation(vm.location)
+          .then(centre => {
+            vm.centre = centre;
+          });
+
+    domainNotificationService
+      .removeEntity(doRemove,
+                    gettextCatalog.getString('Remove Location'),
+                    gettextCatalog.getString('Are you sure you want to remove location {{name}}?',
+                                             { name: vm.location.name}),
+                    gettextCatalog.getString('Remove Failed'),
+                    gettextCatalog.getString('Location {{name}} cannot be removed: ',
+                                             { name: vm.location.name}))
+      .then(() => vm.back())
+      .catch(angular.noop);
   }
 
 }

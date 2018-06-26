@@ -12,21 +12,21 @@
         </button>
 
         <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="studySummaryMenu">
-          <li role="menuitem" ng-if="vm.study.isDisabled()">
+          <li role="menuitem" ng-class="{ 'disabled': !vm.study.isDisabled() }">
             <a href
                ng-click="vm.editName()">
               <i class="glyphicon glyphicon-edit text-primary"></i>
               <translate>Update name</translate>
             </a>
           </li>
-          <li role="menuitem" ng-if="vm.study.isDisabled()">
+          <li role="menuitem" ng-class="{ 'disabled': !vm.study.isDisabled() }">
             <a href
                ng-click="vm.editDescription()">
               <i class="glyphicon glyphicon-edit text-primary"></i>
               <translate>Update description</translate>
             </a>
           </li>
-          <li class="divider" ng-if="vm.study.isDisabled()"></li>
+          <li class="divider"></li>
           <li role="menuitem" ng-if="vm.study.isDisabled()">
             <a href
                ng-click="vm.changeState('enable')">

@@ -2,12 +2,27 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       <translate>Locations</translate>
-      <button class="btn btn-xs btn-primary pull-right"
-              uib-tooltip="{{'Add location'|translate}}"
-              ng-if="vm.centre.isDisabled()"
-              ng-click="vm.add()">
-        <i class="glyphicon glyphicon-plus"></i>
-      </button>
+      <span class="pull-right"
+            uib-dropdown
+            is-open="vm.locationAddMenu.isOpen"
+            ng-if="vm.centre.isDisabled()">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="locationAddMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="locationAddMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.add()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Add a location</translate>
+            </a>
+          </li>
+        </ul>
+      </span>
     </h3>
   </div>
 
@@ -31,19 +46,33 @@
           </strong>
         </div>
         <div class="col-md-2">
-          <span class="btn-group pull-right">
-            <button class="btn btn-xs btn-primary"
-                    uib-tooltip="{{'Edit location'|translate}}"
-                    ng-if="vm.centre.isDisabled()"
-                    ng-click="vm.view(location)">
-              <i class="glyphicon glyphicon-edit"></i>
+          <span class="pull-right"
+                uib-dropdown
+                is-open="vm.locationMenu.isOpen"
+                ng-if="vm.centre.isDisabled()">
+            <button class="btn btn-xs btn-default dropdown-toggle"
+                    type="button"
+                    id="locationMenu"
+                    uib-dropdown-toggle>
+              <span class="glyphicon glyphicon-option-vertical"></span>
             </button>
-            <button class="btn btn-xs btn-warning"
-                    uib-tooltip="{{'Remove location'|translate}}"
-                    ng-if="vm.centre.isDisabled()"
-                    ng-click="vm.remove(location)">
-              <i class="glyphicon glyphicon-remove"></i>
-            </button>
+
+            <ul class="dropdown-menu">
+              <li role="menuitem" ng-class="{ 'disabled': !vm.centre.isDisabled() }">
+                <a href
+                   ng-click="vm.view(location)">
+                  <i class="glyphicon glyphicon-edit text-primary"></i>
+                  <translate>Make changes to this location</translate>
+                </a>
+              </li>
+              <li role="menuitem">
+                <a href
+                   ng-click="vm.remove(location)">
+                  <i class="glyphicon glyphicon-remove text-danger"></i>
+                  <translate>Remove this location</translate>
+                </a>
+              </li>
+            </ul>
           </span>
         </div>
       </div>

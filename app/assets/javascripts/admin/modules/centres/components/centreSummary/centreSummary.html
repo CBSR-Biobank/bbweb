@@ -2,22 +2,47 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       {{vm.centre.name}}
-      <span class="btn-group pull-right">
-        <button class="btn btn-xs btn-success"
-                uib-tooltip="{{'Enable'|translate}}"
-                ng-disabled="!vm.centre.hasLocations()"
-                ng-if="vm.centre.isDisabled()"
-                ng-click="vm.changeState('enable')">
-          <i class="glyphicon glyphicon-ok-circle"></i>
+      <span class="pull-right"
+            uib-dropdown
+            is-open="vm.centreSummaryMenu.isOpen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="centreSummaryMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
         </button>
 
-        <button class="btn btn-xs btn-danger"
-                ng-click="vm.changeState('disable')"
-                uib-tooltip="{{'Disable'|translate}}"
-                ng-if="vm.centre.isEnabled()">
-          <i class="glyphicon glyphicon-cog"></i>
-        </button>
-
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="centreSummaryMenu">
+          <li role="menuitem" ng-class="{ 'disabled': !vm.centre.isDisabled() }">
+            <a href
+               ng-click="vm.editName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update name</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.centre.isDisabled() }">
+            <a href
+               ng-click="vm.editDescription()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update description</translate>
+            </a>
+          </li>
+          <li class="divider"></li>
+          <li role="menuitem" ng-if="vm.centre.isDisabled()">
+            <a href
+               ng-click="vm.changeState('enable')">
+              <i class="glyphicon glyphicon-ok-circle text-success"></i>
+              <translate>Enable this centre</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-if="vm.centre.isEnabled()">
+            <a href
+               ng-click="vm.changeState('disable')">
+              <i class="glyphicon glyphicon-ok-circle text-danger"></i>
+              <translate>Disable this centre</translate>
+            </a>
+          </li>
+        </ul>
       </span>
     </h3>
   </div>
@@ -27,16 +52,8 @@
         <div class="col-md-2">
           <strong translate>Name:</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.centre.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit name'|translate}}"
-                  ng-if="vm.centre.isDisabled()"
-                  ng-click="vm.editName()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -49,7 +66,7 @@
           <truncate-toggle text="vm.centre.description"
                            toggle-length="vm.descriptionToggleLength"
                            text-empty-warning="{{'Description not entered yet.'|translate}}"
-                           allow-edit="vm.centre.isDisabled()"
+                           allow-edit="false"
                            on-edit="vm.editDescription()">
           </truncate-toggle>
         </div>
