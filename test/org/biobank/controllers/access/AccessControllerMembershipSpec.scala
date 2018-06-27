@@ -409,12 +409,99 @@ class AccessControllerMembershipSpec
 
     }
 
+    describe("POST /api/access/memberships/studyData/:membershipId") {
+
+      it("can assign a membership to be for all studies") {
+        val f = new MembershipFixture
+        val allStudies = true
+        val studies = Set.empty[StudyId]
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allStudies"      -> allStudies,
+                               "studyIds"        -> studies)
+
+        val url = uri("memberships",  "studyData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beOkResponseWithJsonReply
+
+        val updatedMembership = f.membership
+          .copy(version      = f.membership.version + 1,
+                studyData    = MembershipEntitySet(allStudies, studies),
+                timeModified = Some(OffsetDateTime.now))
+        reply must matchUpdatedMembership(updatedMembership)
+      }
+
+      it("can assign a membership to be for a single study") {
+        val f = new MembershipFixture
+        val study  = factory.createEnabledStudy
+
+        addToRepository(study)
+
+        val allStudies = false
+        val studies = Set(study.id)
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allStudies"      -> allStudies,
+                               "studyIds"        -> studies)
+
+        val url = uri("memberships",  "studyData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beOkResponseWithJsonReply
+
+        val updatedMembership = f.membership
+          .copy(version      = f.membership.version + 1,
+                studyData    = MembershipEntitySet(allStudies, studies),
+                timeModified = Some(OffsetDateTime.now))
+        reply must matchUpdatedMembership(updatedMembership)
+      }
+
+      it("cannot assign a membership to be for all studies and also have study IDs") {
+        val f = new MembershipFixture
+        val allStudies = true
+        val studies = f.membership.studyData.ids
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allStudies"      -> allStudies,
+                               "studyIds"        -> studies)
+
+        val url = uri("memberships",  "studyData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beBadRequestWithMessage(
+          "EntityCriteriaError: membership cannot be for all studies and also individual studies")
+      }
+
+      it("cannot assign a membership to NOT be for all studies and also have EMPTY study IDs") {
+        val f = new MembershipFixture
+        val allStudies = false
+        val studies = Set.empty[StudyId]
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allStudies"      -> allStudies,
+                               "studyIds"        -> studies)
+
+        val url = uri("memberships",  "studyData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beBadRequestWithMessage("EntityCriteriaError: membership must contain studies")
+      }
+
+      it("cannot assign a membership to be for a study that does not exist") {
+        val f = new MembershipFixture
+        val study  = factory.createEnabledStudy
+        val allStudies = false
+        val studies = Set(study.id)
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allStudies"      -> allStudies,
+                               "studyIds"        -> studies)
+
+        val url = uri("memberships",  "studyData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beNotFoundWithMessage("IdNotFound: study id")
+      }
+
+    }
+
     describe("POST /api/access/memberships/allStudies/:membershipId") {
 
       it("can assign a membership, for a single study, to be for all studies") {
         val f = new MembershipFixture
 
-        f.membership.centreData.allEntities must be (false)
+        f.membership.studyData.allEntities must be (false)
         f.membership.studyData.ids must not have size (0L)
 
         val reqJson = Json.obj("expectedVersion" -> f.membership.version)
@@ -505,6 +592,93 @@ class AccessControllerMembershipSpec
         studyRepository.put(study)
         val reply = makeAuthRequest(POST, uri("memberships") + s"/study/${f.membership.id}", reqJson).value
         reply must beBadRequestWithMessage("expected version doesn't match current version")
+      }
+
+    }
+
+    describe("POST /api/access/memberships/centreData/:membershipId") {
+
+      it("can assign a membership to be for all centres") {
+        val f = new MembershipFixture
+        val allCentres = true
+        val centres = Set.empty[CentreId]
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allCentres"      -> allCentres,
+                               "centreIds"        -> centres)
+
+        val url = uri("memberships",  "centreData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beOkResponseWithJsonReply
+
+        val updatedMembership = f.membership
+          .copy(version      = f.membership.version + 1,
+                centreData    = MembershipEntitySet(allCentres, centres),
+                timeModified = Some(OffsetDateTime.now))
+        reply must matchUpdatedMembership(updatedMembership)
+      }
+
+      it("can assign a membership to be for a single centre") {
+        val f = new MembershipFixture
+        val centre  = factory.createEnabledCentre
+
+        addToRepository(centre)
+
+        val allCentres = false
+        val centres = Set(centre.id)
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allCentres"      -> allCentres,
+                               "centreIds"        -> centres)
+
+        val url = uri("memberships",  "centreData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beOkResponseWithJsonReply
+
+        val updatedMembership = f.membership
+          .copy(version      = f.membership.version + 1,
+                centreData    = MembershipEntitySet(allCentres, centres),
+                timeModified = Some(OffsetDateTime.now))
+        reply must matchUpdatedMembership(updatedMembership)
+      }
+
+      it("cannot assign a membership to be for all centres and also have centre IDs") {
+        val f = new MembershipFixture
+        val allCentres = true
+        val centres = f.membership.centreData.ids
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allCentres"      -> allCentres,
+                               "centreIds"        -> centres)
+
+        val url = uri("memberships",  "centreData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beBadRequestWithMessage(
+          "EntityCriteriaError: membership cannot be for all centres and also individual centres")
+      }
+
+      it("cannot assign a membership to NOT be for all centres and also have EMPTY centre IDs") {
+        val f = new MembershipFixture
+        val allCentres = false
+        val centres = Set.empty[CentreId]
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allCentres"      -> allCentres,
+                               "centreIds"        -> centres)
+
+        val url = uri("memberships",  "centreData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beBadRequestWithMessage("EntityCriteriaError: membership must contain centres")
+      }
+
+      it("cannot assign a membership to be for a centre that does not exist") {
+        val f = new MembershipFixture
+        val centre  = factory.createEnabledCentre
+        val allCentres = false
+        val centres = Set(centre.id)
+        val reqJson = Json.obj("expectedVersion" -> f.membership.version,
+                               "allCentres"      -> allCentres,
+                               "centreIds"        -> centres)
+
+        val url = uri("memberships",  "centreData", f.membership.id.id)
+        val reply = makeAuthRequest(POST, url, reqJson).value
+        reply must beNotFoundWithMessage("IdNotFound: centre id")
       }
 
     }

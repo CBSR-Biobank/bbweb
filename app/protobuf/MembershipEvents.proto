@@ -28,6 +28,18 @@ message MembershipEvent {
     optional string description = 2;
   }
 
+  message StudyDataUpdated {
+    optional int64  version    = 1;
+    optional bool   allStudies = 2;
+    repeated string studyIds   = 3;
+  }
+
+  message CentreDataUpdated {
+    optional int64  version    = 1;
+    optional bool   allCentres = 2;
+    repeated string centreIds  = 3;
+  }
+
   message WithId {
     optional int64  version = 1;
     optional string id      = 2;
@@ -42,14 +54,16 @@ message MembershipEvent {
     NameUpdated        nameUpdated        = 5;
     DescriptionUpdated descriptionUpdated = 6;
     WithId             userAdded          = 7;
-    WithVersion        allStudies         = 8;
-    WithVersion        allCentres         = 9;
-    WithId             studyAdded         = 10;
-    WithId             centreAdded        = 11;
-    WithId             userRemoved        = 12;
-    WithId             studyRemoved       = 13;
-    WithId             centreRemoved      = 14;
-    WithVersion        removed            = 15;
+    WithId             userRemoved        = 8;
+    StudyDataUpdated   studyDataUpdated   = 9;
+    WithVersion        allStudies         = 10;
+    WithId             studyAdded         = 11;
+    WithId             studyRemoved       = 12;
+    CentreDataUpdated  centreDataUpdated  = 13;
+    WithVersion        allCentres         = 14;
+    WithId             centreAdded        = 15;
+    WithId             centreRemoved      = 16;
+    WithVersion        removed            = 17;
   }
 
 }

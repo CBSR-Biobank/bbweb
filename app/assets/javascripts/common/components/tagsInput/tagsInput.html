@@ -12,12 +12,18 @@
              ng-model-options="{ debounce: 250 }"
              placeholder="{{vm.placeholder}}"
              uib-typeahead="value.obj as value.label for value in vm.getValues($viewValue)"
-             typeahead-loading="loadingValue"
+             typeahead-editable="false"
+             typeahead-loading="vm.loadingValue"
+             typeahead-no-results="vm.noValueResults"
              typeahead-on-select="vm.tagSelected($item)"
-             typeahead-no-results="noValueResults"/>
-      <i ng-show="loadingValue" class="glyphicon glyphicon-refresh"></i>
-      <div ng-show="noValueResults">
-        <i class="glyphicon glyphicon-remove"></i>{{vm.noResultsFound}}
+             typeahead-select-on-exact="true"/>
+      <div ng-show="vm.loadingValue">
+        <i class="glyphicon glyphicon-refresh text-primary"></i>
+        <span class="text-primary" translate>loading</span>
+      </div>
+      <div ng-show="vm.noValueResults">
+        <i class="glyphicon glyphicon-remove text-danger"></i>
+        <span class="text-danger">{{vm.noResultsFound}}</span>
       </div>
     </div>
 

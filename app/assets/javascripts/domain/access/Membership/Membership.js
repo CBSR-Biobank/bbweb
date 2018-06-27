@@ -127,6 +127,14 @@ function MembershipFactory($q,
       return biobankApi.del(url).then(Membership.asyncCreate);
     }
 
+    updateStudyData(studyData) {
+      return this.update(Membership.url('studyData', this.id),
+                         {
+                           allStudies: studyData.allEntities,
+                           studyIds:   studyData.entityData.map(ed => ed.id)
+                         });
+    }
+
     allStudies() {
       return this.update(Membership.url('allStudies', this.id), {});
     }
@@ -142,6 +150,14 @@ function MembershipFactory($q,
       }
       url = Membership.url('study', this.id, this.version, id);
       return biobankApi.del(url).then(Membership.asyncCreate);
+    }
+
+    updateCentreData(centreData) {
+      return this.update(Membership.url('centreData', this.id),
+                         {
+                           allCentres: centreData.allEntities,
+                           centreIds:  centreData.entityData.map(ed => ed.id)
+                         });
     }
 
     allCentres() {

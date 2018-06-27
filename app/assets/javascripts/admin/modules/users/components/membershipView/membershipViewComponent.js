@@ -12,7 +12,8 @@ import angular from 'angular';
 
 class MembershipViewController {
 
-  constructor($log,
+  constructor($q,
+              $log,
               $state,
               notificationsService,
               domainNotificationService,
@@ -25,11 +26,15 @@ class MembershipViewController {
               UserName,
               StudyName,
               CentreName,
-              matchingUserNames) {
+              matchingUserNames,
+              modalService,
+              MembershipChangeStudiesModal,
+              MembershipChangeCentresModal) {
     'ngInject';
 
     Object.assign(this,
                   {
+                    $q,
                     $log,
                     $state,
                     notificationsService,
@@ -43,7 +48,10 @@ class MembershipViewController {
                     UserName,
                     StudyName,
                     CentreName,
-                    matchingUserNames
+                    matchingUserNames,
+                    modalService,
+                    MembershipChangeStudiesModal,
+                    MembershipChangeCentresModal
                   });
   }
 
@@ -177,27 +185,19 @@ class MembershipViewController {
       .catch(angular.noop);
   }
 
-  getMatchingStudyNames() {
-    return (viewValue) =>
-      this.StudyName.list({ filter: 'name:like:' + viewValue}, this.membership.studyData.entityData)
-      .then((nameObjs) =>
-            nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
-  }
-
-  addStudy() {
-    this.asyncInputModal.open(this.gettextCatalog.getString('Add study to membership'),
-                              this.gettextCatalog.getString('Study'),
-                              this.gettextCatalog.getString('enter a study\'s name or partial name'),
-                              this.gettextCatalog.getString('No matching studys found'),
-                              this.getMatchingStudyNames()).result
-      .then((modalValue) => {
-        this.membership.addStudy(modalValue.obj.id).then((membership) => {
-          this.membership = membership;
-          this.studyNameLabels = this.entityNamesToLabels(this.membership.studyData.entityData);
-        });
+  changeStudies() {
+    this.MembershipChangeStudiesModal.open(this.membership)
+      .result
+      .then(modalValue => this.membership.updateStudyData(modalValue))
+      .then((membership) => {
+        this.membership = membership;
+        this.studyNameLabels = this.entityNamesToLabels(this.membership.studyData.entityData);
+        this.notificationsService.success(this.gettextCatalog.getString('Studies updated'));
       })
-      .catch((error) => {
-        this.$log.error(error);
+      .catch(error => {
+        this.domainNotificationService
+          .updateErrorModal(error, this.gettextCatalog.getString('membership'));
+        return null;
       });
   }
 
@@ -225,27 +225,19 @@ class MembershipViewController {
       .catch(angular.noop);
   }
 
-  getMatchingCentreNames() {
-    return (viewValue) =>
-      this.CentreName.list({ filter: 'name:like:' + viewValue}, this.membership.centreData.entityData)
-      .then((nameObjs) => nameObjs.map((nameObj) => ({ label: nameObj.name, obj: nameObj })));
-
-  }
-
-  addCentre() {
-    this.asyncInputModal.open(this.gettextCatalog.getString('Add centre to membership'),
-                              this.gettextCatalog.getString('Centre'),
-                              this.gettextCatalog.getString('enter a centre\'s name or partial name'),
-                              this.gettextCatalog.getString('No matching centres found'),
-                              this.getMatchingCentreNames()).result
-      .then((modalValue) => {
-        this.membership.addCentre(modalValue.obj.id).then((membership) => {
-          this.membership = membership;
-          this.centreNameLabels = this.entityNamesToLabels(this.membership.centreData.entityData);
-        });
+  changeCentres() {
+    this.MembershipChangeCentresModal.open(this.membership)
+      .result
+      .then(modalValue => this.membership.updateCentreData(modalValue))
+      .then((membership) => {
+        this.membership = membership;
+        this.centreNameLabels = this.entityNamesToLabels(this.membership.centreData.entityData);
+        this.notificationsService.success(this.gettextCatalog.getString('Centres updated'));
       })
-      .catch((error) => {
-        this.$log.error(error);
+       .catch(error => {
+        this.domainNotificationService
+          .updateErrorModal(error, this.gettextCatalog.getString('membership'));
+        return null;
       });
   }
 

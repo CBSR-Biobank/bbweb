@@ -325,8 +325,8 @@ trait DtoMatchers {
         val nonMatching = matchers filter { case (k, v) => !v } keys
 
         MatchResult(nonMatching.size <= 0,
-                    "dto does not match membership for the following attributes: {0},\ndto: {1},\nrole: {2}",
-                    "dto matches membership: dto: {1},\nrole: {2}",
+                    "dto does not match membership for the following attributes: {0},\ndto: {1},\nmembership: {2}",
+                    "dto matches membership: dto: {1},\nmembership: {2}",
                     IndexedSeq(nonMatching.mkString(", "), left, membership))
       }
     }

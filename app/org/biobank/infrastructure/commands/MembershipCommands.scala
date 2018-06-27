@@ -41,12 +41,14 @@ object MembershipCommands {
                                         userId:          String)
       extends MembershipModifyCommand
 
-  final case class MembershipAllStudiesCmd(sessionUserId:   String,
-                                           expectedVersion: Long,
-                                           membershipId:    String)
+  final case class MembershipUpdateStudyDataCmd(sessionUserId:   String,
+                                                expectedVersion: Long,
+                                                membershipId:    String,
+                                                allStudies:      Boolean,
+                                                studyIds:        List[String])
       extends MembershipModifyCommand
 
-  final case class MembershipAllCentresCmd(sessionUserId:   String,
+  final case class MembershipAllStudiesCmd(sessionUserId:   String,
                                            expectedVersion: Long,
                                            membershipId:    String)
       extends MembershipModifyCommand
@@ -55,6 +57,18 @@ object MembershipCommands {
                                          expectedVersion: Long,
                                          membershipId:    String,
                                          studyId:         String)
+      extends MembershipModifyCommand
+
+  final case class MembershipUpdateCentreDataCmd(sessionUserId:   String,
+                                                 expectedVersion: Long,
+                                                 membershipId:    String,
+                                                 allCentres:      Boolean,
+                                                 centreIds:       List[String])
+      extends MembershipModifyCommand
+
+  final case class MembershipAllCentresCmd(sessionUserId:   String,
+                                           expectedVersion: Long,
+                                           membershipId:    String)
       extends MembershipModifyCommand
 
   final case class MembershipAddCentreCmd(sessionUserId:   String,
@@ -98,14 +112,20 @@ object MembershipCommands {
   implicit val membershipAddUserCmdReads: Reads[MembershipAddUserCmd] =
     Json.reads[MembershipAddUserCmd]
 
+  implicit val membershipUpdateStudyDataCmdReads: Reads[MembershipUpdateStudyDataCmd] =
+    Json.reads[MembershipUpdateStudyDataCmd]
+
   implicit val membershipAllStudiesCmdReads: Reads[MembershipAllStudiesCmd] =
     Json.reads[MembershipAllStudiesCmd]
 
-  implicit val membershipAllCentresCmdReads: Reads[MembershipAllCentresCmd] =
-    Json.reads[MembershipAllCentresCmd]
-
   implicit val membershipAddStudyCmdReads: Reads[MembershipAddStudyCmd] =
     Json.reads[MembershipAddStudyCmd]
+
+  implicit val membershipUpdateCentreDataCmdReads: Reads[MembershipUpdateCentreDataCmd] =
+    Json.reads[MembershipUpdateCentreDataCmd]
+
+  implicit val membershipAllCentresCmdReads: Reads[MembershipAllCentresCmd] =
+    Json.reads[MembershipAllCentresCmd]
 
   implicit val membershipAddCentreCmdReads: Reads[MembershipAddCentreCmd] =
     Json.reads[MembershipAddCentreCmd]

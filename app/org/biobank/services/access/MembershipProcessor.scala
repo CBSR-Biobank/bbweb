@@ -53,16 +53,21 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
         case _: MembershipEvent.EventType.NameUpdated        => applyNameUpdatedEvent(event)
         case _: MembershipEvent.EventType.DescriptionUpdated => applyDescriptionUpdatedEvent(event)
         case _: MembershipEvent.EventType.UserAdded          => applyUserAddedEvent(event)
-        case _: MembershipEvent.EventType.AllStudies         => applyAllStudiesEvent(event)
-        case _: MembershipEvent.EventType.AllCentres         => applyAllCentresEvent(event)
-        case _: MembershipEvent.EventType.StudyAdded         => applyStudyAddedEvent(event)
-        case _: MembershipEvent.EventType.CentreAdded        => applyCentreAddedEvent(event)
         case _: MembershipEvent.EventType.UserRemoved        => applyUserRemovedEvent(event)
+
+        case _: MembershipEvent.EventType.StudyDataUpdated   => applyStudyDataUpdateEvent(event)
+        case _: MembershipEvent.EventType.AllStudies         => applyAllStudiesEvent(event)
+        case _: MembershipEvent.EventType.StudyAdded         => applyStudyAddedEvent(event)
         case _: MembershipEvent.EventType.StudyRemoved       => applyStudyRemovedEvent(event)
+
+        case _: MembershipEvent.EventType.CentreDataUpdated  => applyCentreDataUpdateEvent(event)
+        case _: MembershipEvent.EventType.AllCentres         => applyAllCentresEvent(event)
+        case _: MembershipEvent.EventType.CentreAdded        => applyCentreAddedEvent(event)
         case _: MembershipEvent.EventType.CentreRemoved      => applyCentreRemovedEvent(event)
+
         case _: MembershipEvent.EventType.Removed            => applyMembershipRemovedEvent(event)
         case _ => throw new Exception(s"membership event not handled: $event")
-     }
+      }
 
     case SnapshotOffer(_, snapshotFilename: String) =>
       applySnapshot(snapshotFilename)
@@ -87,20 +92,27 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
           processUpdateMembershipCmd(cmd, updateDescriptionCmdToEvent, applyDescriptionUpdatedEvent)
         case cmd: MembershipAddUserCmd =>
           processUpdateMembershipCmd(cmd, addUserCmdToEvent, applyUserAddedEvent)
-        case cmd: MembershipAllStudiesCmd =>
-          processUpdateMembershipCmd(cmd, allStudiesCmdToEvent, applyAllStudiesEvent)
-        case cmd: MembershipAllCentresCmd =>
-          processUpdateMembershipCmd(cmd, allCentresCmdToEvent, applyAllCentresEvent)
-        case cmd: MembershipAddStudyCmd =>
-          processUpdateMembershipCmd(cmd, addStudyCmdToEvent, applyStudyAddedEvent)
-        case cmd: MembershipAddCentreCmd =>
-          processUpdateMembershipCmd(cmd, addCentreCmdToEvent, applyCentreAddedEvent)
         case cmd: MembershipRemoveUserCmd =>
           processUpdateMembershipCmd(cmd, removeUserCmdToEvent, applyUserRemovedEvent)
+
+        case cmd: MembershipUpdateStudyDataCmd =>
+          processUpdateMembershipCmd(cmd, updateStudyDataCmdToEvent, applyStudyDataUpdateEvent)
+        case cmd: MembershipAllStudiesCmd =>
+          processUpdateMembershipCmd(cmd, allStudiesCmdToEvent, applyAllStudiesEvent)
+        case cmd: MembershipAddStudyCmd =>
+          processUpdateMembershipCmd(cmd, addStudyCmdToEvent, applyStudyAddedEvent)
         case cmd: MembershipRemoveStudyCmd =>
           processUpdateMembershipCmd(cmd, removeStudyCmdToEvent, applyStudyRemovedEvent)
+
+        case cmd: MembershipUpdateCentreDataCmd =>
+          processUpdateMembershipCmd(cmd, updateCentreDataCmdToEvent, applyCentreDataUpdateEvent)
+        case cmd: MembershipAllCentresCmd =>
+          processUpdateMembershipCmd(cmd, allCentresCmdToEvent, applyAllCentresEvent)
+        case cmd: MembershipAddCentreCmd =>
+          processUpdateMembershipCmd(cmd, addCentreCmdToEvent, applyCentreAddedEvent)
         case cmd: MembershipRemoveCentreCmd =>
           processUpdateMembershipCmd(cmd, removeCentreCmdToEvent, applyCentreRemovedEvent)
+
         case cmd: RemoveMembershipCmd =>
           processUpdateMembershipCmd(cmd, removeMembershipCmdToEvent, applyMembershipRemovedEvent)
       }
@@ -146,16 +158,16 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
       name          <- nameAvailable(cmd.name)
       membershipId  <- validNewIdentity(membershipRepository.nextIdentity, membershipRepository)
       newMembership <- Membership.create(id           = membershipId,
-                                         version      = 0L,
-                                         timeAdded    = OffsetDateTime.now,
-                                         timeModified = None,
-                                         name         = cmd.name,
-                                         description  = cmd.description,
-                                         userIds      = cmd.userIds.map(id => UserId(id)).toSet,
-                                         allStudies   = cmd.allStudies,
-                                         allCentres   = cmd.allCentres,
-                                         studyIds     = cmd.studyIds.map(id => StudyId(id)).toSet,
-                                         centreIds    = cmd.centreIds.map(id => CentreId(id)).toSet)
+                                        version      = 0L,
+                                        timeAdded    = OffsetDateTime.now,
+                                        timeModified = None,
+                                        name         = cmd.name,
+                                        description  = cmd.description,
+                                        userIds      = cmd.userIds.map(id => UserId(id)).toSet,
+                                        allStudies   = cmd.allStudies,
+                                        allCentres   = cmd.allCentres,
+                                        studyIds     = cmd.studyIds.map(id => StudyId(id)).toSet,
+                                        centreIds    = cmd.centreIds.map(id => CentreId(id)).toSet)
     } yield MembershipEvent(cmd.sessionUserId).update(
       _.time                      := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
       _.id                        := membershipId.id,
@@ -208,6 +220,29 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
     }
   }
 
+  // study IDs were already validated in service
+  private def updateStudyDataCmdToEvent(cmd: MembershipUpdateStudyDataCmd, membership: Membership)
+      : ServiceValidation[MembershipEvent] = {
+    if (cmd.allStudies && cmd.studyIds.nonEmpty) {
+      EntityCriteriaError("membership cannot be for all studies and also individual studies")
+        .failureNel[MembershipEvent]
+    } else if (!cmd.allStudies && cmd.studyIds.isEmpty) {
+      EntityCriteriaError("membership must contain studies")
+        .failureNel[MembershipEvent]
+    } else {
+      val subEvent = MembershipEvent.StudyDataUpdated()
+        .update(_.version    := cmd.expectedVersion,
+                _.allStudies := cmd.allStudies,
+                _.studyIds   := cmd.studyIds)
+
+      MembershipEvent(cmd.sessionUserId).update(
+        _.time             := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+        _.id               := membership.id.id,
+        _.studyDataUpdated := subEvent
+      ).successNel[String]
+    }
+  }
+
   private def allStudiesCmdToEvent(cmd: MembershipAllStudiesCmd, membership: Membership)
       : ServiceValidation[MembershipEvent] = {
     MembershipEvent(cmd.sessionUserId).update(
@@ -217,15 +252,7 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
       ).successNel[String]
   }
 
-  private def allCentresCmdToEvent(cmd: MembershipAllCentresCmd, membership: Membership)
-      : ServiceValidation[MembershipEvent] = {
-    MembershipEvent(cmd.sessionUserId).update(
-      _.time               := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-      _.id                 := membership.id.id,
-      _.allCentres.version := cmd.expectedVersion,
-      ).successNel[String]
-  }
-
+  // study IDs were already validated in service
   private def addStudyCmdToEvent(cmd: MembershipAddStudyCmd, membership: Membership)
       : ServiceValidation[MembershipEvent] = {
     val studyId = StudyId(cmd.studyId)
@@ -239,6 +266,39 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
         _.studyAdded.id      := cmd.studyId
       ).successNel[String]
     }
+  }
+
+  // centre IDs were already validated in service
+  private def updateCentreDataCmdToEvent(cmd: MembershipUpdateCentreDataCmd, membership: Membership)
+      : ServiceValidation[MembershipEvent] = {
+    if (cmd.allCentres && cmd.centreIds.nonEmpty) {
+      EntityCriteriaError("membership cannot be for all centres and also individual centres")
+        .failureNel[MembershipEvent]
+    } else if (!cmd.allCentres && cmd.centreIds.isEmpty) {
+      EntityCriteriaError("membership must contain centres")
+        .failureNel[MembershipEvent]
+    } else {
+      val subEvent = MembershipEvent.CentreDataUpdated().update(
+          _.version    := cmd.expectedVersion,
+          _.allCentres := cmd.allCentres,
+          _.centreIds  := cmd.centreIds
+        )
+
+      MembershipEvent(cmd.sessionUserId).update(
+        _.time              := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+        _.id                := membership.id.id,
+        _.centreDataUpdated := subEvent
+      ).successNel[String]
+    }
+  }
+
+  private def allCentresCmdToEvent(cmd: MembershipAllCentresCmd, membership: Membership)
+      : ServiceValidation[MembershipEvent] = {
+    MembershipEvent(cmd.sessionUserId).update(
+      _.time               := OffsetDateTime.now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+      _.id                 := membership.id.id,
+      _.allCentres.version := cmd.expectedVersion,
+      ).successNel[String]
   }
 
   private def addCentreCmdToEvent(cmd: MembershipAddCentreCmd, membership: Membership)
@@ -387,23 +447,28 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
     }
   }
 
+  private def applyStudyDataUpdateEvent(event: MembershipEvent): Unit = {
+    onValidMembershipEventAndVersion(event,
+                                     event.eventType.isStudyDataUpdated,
+                                     event.getStudyDataUpdated.getVersion) {
+      (membership, _, time) =>
+      val subEvent = event.getStudyDataUpdated
+      val studyData = MembershipEntitySet(subEvent.getAllStudies,
+                                          subEvent.studyIds.map(id => StudyId(id)).toSet)
+      val updated = membership.copy(version = membership.version + 1,
+                                    studyData    = studyData,
+                                    timeModified = Some(time))
+      membershipRepository.put(updated)
+      true.successNel[String]
+    }
+  }
+
   private def applyAllStudiesEvent(event: MembershipEvent): Unit = {
     onValidMembershipEventAndVersion(event,
                                      event.eventType.isAllStudies,
                                      event.getAllStudies.getVersion) {
       (membership, _, time) =>
       val updated = membership.hasAllStudies.copy(timeModified = Some(time))
-      membershipRepository.put(updated)
-      true.successNel[String]
-    }
-  }
-
-  private def applyAllCentresEvent(event: MembershipEvent): Unit = {
-    onValidMembershipEventAndVersion(event,
-                                     event.eventType.isAllCentres,
-                                     event.getAllCentres.getVersion) {
-      (membership, _, time) =>
-      val updated = membership.hasAllCentres.copy(timeModified = Some(time))
       membershipRepository.put(updated)
       true.successNel[String]
     }
@@ -417,6 +482,33 @@ class MembershipProcessor @Inject() (val membershipRepository: MembershipReposit
       val updated = membership
         .addStudy(StudyId(event.getStudyAdded.getId))
         .copy(timeModified = Some(time))
+      membershipRepository.put(updated)
+      true.successNel[String]
+    }
+  }
+
+  private def applyCentreDataUpdateEvent(event: MembershipEvent): Unit = {
+    onValidMembershipEventAndVersion(event,
+                                     event.eventType.isCentreDataUpdated,
+                                     event.getCentreDataUpdated.getVersion) {
+      (membership, _, time) =>
+      val subEvent = event.getCentreDataUpdated
+      val centreData = MembershipEntitySet(subEvent.getAllCentres,
+                                           subEvent.centreIds.map(id => CentreId(id)).toSet)
+      val updated = membership.copy(version     = membership.version + 1,
+                                    centreData  = centreData,
+                                    timeModified = Some(time))
+      membershipRepository.put(updated)
+      true.successNel[String]
+    }
+  }
+
+  private def applyAllCentresEvent(event: MembershipEvent): Unit = {
+    onValidMembershipEventAndVersion(event,
+                                     event.eventType.isAllCentres,
+                                     event.getAllCentres.getVersion) {
+      (membership, _, time) =>
+      val updated = membership.hasAllCentres.copy(timeModified = Some(time))
       membershipRepository.put(updated)
       true.successNel[String]
     }

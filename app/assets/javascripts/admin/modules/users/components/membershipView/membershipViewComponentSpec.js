@@ -15,9 +15,10 @@ describe('membershipViewComponent', function() {
     angular.mock.inject(function () {
       Object.assign(this, ComponentTestSuiteMixin, MembershipTestSuiteMixin)
 
-      this.injectDependencies('$rootScope',
-                              '$compile',
-                              '$q',
+      this.injectDependencies = ComponentTestSuiteMixin.injectDependencies;
+
+      this.injectDependencies('$q',
+                              '$httpBackend',
                               '$state',
                               'Membership',
                               'User',
@@ -32,7 +33,14 @@ describe('membershipViewComponent', function() {
                               'notificationsService',
                               'modalInput',
                               'matchingUserNames',
-                              'Factory')
+                              'MembershipChangeStudiesModal',
+                              'MembershipChangeCentresModal',
+                              'Factory');
+
+      this.url = (...paths) => {
+        const allPaths = [ 'access/memberships' ].concat(paths);
+        return ComponentTestSuiteMixin.url(...allPaths);
+      };
 
       this.createController = (membership) => {
         this.createControllerInternal(
@@ -199,63 +207,105 @@ describe('membershipViewComponent', function() {
 
   })
 
-  describe('adding studies', function() {
-    const context = {};
+  describe('changing studies', function() {
 
-    beforeEach(function () {
-      const studyName = this.StudyName.create(this.Factory.studyNameDto()),
-            rawMembership = this.Factory.membership()
+    it('sends a request to the server', function() {
+      const plainMembership = this.Factory.membership({
+        studyData: {
+          allEntities: true,
+          entityData: []
+        }
+      });
+      const membership = this.Membership.create(plainMembership);
 
-      // shared test requires that this field be an empty array
-      rawMembership.studyData.entityData = [];
+      spyOn(this.MembershipChangeStudiesModal, 'open')
+        .and.returnValue({ result:  this.$q.when(membership.studyData) });
+      spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'))
+      this.createController(membership);
 
-      context.controllerAddEntityFuncName     = 'addStudy'
-      context.addEntityFuncName               = 'addStudy'
-      context.entityName                      = studyName
-      context.membership                      = this.Membership.create(rawMembership)
-      context.controllerEntityLabelsFieldName = 'studyNameLabels'
-      context.entityNameClass                 = this.StudyName
-      context.controllerGetMatchingEntityNamesFuncName = 'getMatchingStudyNames'
+      this.$httpBackend
+        .expectPOST(this.url('studyData', membership.id)).respond(this.reply(plainMembership));
 
-      context.replyMembership = this.Membership.create(Object.assign({}, rawMembership, {
-          studyData: {
-            allEntities: false,
-            entityData: [ studyName ]
-          }}))
+      this.controller.changeStudies();
+      this.$httpBackend.flush();
+      expect(this.notificationsService.success).toHaveBeenCalled()
     });
 
-    sharedAsyncModalBehaviour(context);
+    it('handles an error from the server', function() {
+      const plainMembership = this.Factory.membership({
+        studyData: {
+          allEntities: true,
+          entityData: []
+        }
+      });
+      const membership = this.Membership.create(plainMembership);
 
-  })
+      spyOn(this.MembershipChangeStudiesModal, 'open')
+        .and.returnValue({ result:  this.$q.when(membership.studyData) });
+      spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
+
+      this.createController(membership);
+
+      this.$httpBackend
+        .expectPOST(this.url('studyData', membership.id))
+        .respond(400, this.errorReply('simulated bad request'));
+
+      this.controller.changeStudies();
+      this.$httpBackend.flush();
+      expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled()
+    });
+
+  });
 
   describe('adding centres', function() {
-    const context = {};
 
-    beforeEach(function () {
-      const centreName = this.CentreName.create(this.Factory.centreNameDto()),
-            rawMembership = this.Factory.membership()
+    it('sends a request to the server', function() {
+      const plainMembership = this.Factory.membership({
+        centreData: {
+          allEntities: true,
+          entityData: []
+        }
+      });
+      const membership = this.Membership.create(plainMembership);
 
-      // shared test requires that this field be an empty array
-      rawMembership.centreData.entityData = [];
+      spyOn(this.MembershipChangeCentresModal, 'open')
+        .and.returnValue({ result:  this.$q.when(membership.centreData) });
+      spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'))
+      this.createController(membership);
 
-      context.controllerAddEntityFuncName     = 'addCentre'
-      context.addEntityFuncName               = 'addCentre'
-      context.entityName                      = centreName
-      context.membership                      = this.Membership.create(rawMembership)
-      context.controllerEntityLabelsFieldName = 'centreNameLabels'
-      context.entityNameClass                 = this.CentreName
-      context.controllerGetMatchingEntityNamesFuncName = 'getMatchingCentreNames'
+      this.$httpBackend
+        .expectPOST(this.url('centreData', membership.id)).respond(this.reply(plainMembership));
 
-      context.replyMembership = this.Membership.create(Object.assign({}, rawMembership, {
-          centreData: {
-            allEntities: false,
-            entityData: [ centreName ]
-          }}))
+      this.controller.changeCentres();
+      this.$httpBackend.flush();
+      expect(this.notificationsService.success).toHaveBeenCalled()
     });
 
-    sharedAsyncModalBehaviour(context);
+    it('handles an error from the server', function() {
+      const plainMembership = this.Factory.membership({
+        centreData: {
+          allEntities: true,
+          entityData: []
+        }
+      });
+      const membership = this.Membership.create(plainMembership);
 
-  })
+      spyOn(this.MembershipChangeCentresModal, 'open')
+        .and.returnValue({ result:  this.$q.when(membership.centreData) });
+      spyOn(this.domainNotificationService, 'updateErrorModal').and.returnValue(this.$q.when('OK'));
+
+      this.createController(membership);
+
+      this.$httpBackend
+        .expectPOST(this.url('centreData', membership.id))
+        .respond(400, this.errorReply('simulated bad request'));
+
+      this.controller.changeCentres();
+      this.$httpBackend.flush();
+      expect(this.domainNotificationService.updateErrorModal).toHaveBeenCalled()
+    });
+
+  });
 
   describe('selecting a user label tag', function() {
     const context = {};

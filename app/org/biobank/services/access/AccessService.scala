@@ -430,17 +430,23 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
             case c: MembershipAddUserCmd =>
               userRepository.getByKey(UserId(c.userId)).map(_ => true)
 
+            case c: MembershipUpdateStudyDataCmd =>
+              c.studyIds.map(id => studyRepository.getByKey(StudyId(id))).toList.sequenceU.map(_ => true)
+
             case c: MembershipAddStudyCmd =>
               studyRepository.getByKey(StudyId(c.studyId)).map(_ => true)
+
+            case c: MembershipRemoveStudyCmd =>
+              studyRepository.getByKey(StudyId(c.studyId)).map(_ => true)
+
+            case c: MembershipUpdateCentreDataCmd =>
+              c.centreIds.map(id => centreRepository.getByKey(CentreId(id))).toList.sequenceU.map(_ => true)
 
             case c: MembershipAddCentreCmd =>
               centreRepository.getByKey(CentreId(c.centreId)).map(_ => true)
 
             case c: MembershipRemoveUserCmd =>
               userRepository.getByKey(UserId(c.userId)).map(_ => true)
-
-            case c: MembershipRemoveStudyCmd =>
-              studyRepository.getByKey(StudyId(c.studyId)).map(_ => true)
 
             case c: MembershipRemoveCentreCmd =>
               centreRepository.getByKey(CentreId(c.centreId)).map(_ => true)

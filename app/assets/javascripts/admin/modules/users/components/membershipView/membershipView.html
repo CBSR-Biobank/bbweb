@@ -6,12 +6,53 @@
   <div class="panel-heading">
     <h3 class="panel-title">
       {{vm.membership.name}}
-      <span class="pull-right">
-        <button class="btn btn-xs btn-warning"
-                uib-tooltip="{{'Remove membership'|translate}}"
-                ng-click="vm.remove()">
-          Remove <i class="glyphicon glyphicon-remove"></i>
+      <span class="pull-right"
+            uib-dropdown
+            is-open="vm.roleMenu.isOpen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="roleMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
         </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="roleMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update name</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editDescription()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update description</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.userCanUpdate }">
+            <a href
+               ng-click="vm.addUser()">
+              <i class="glyphicon glyphicon-plus text-primary"></i>
+              <translate>Add user</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.userCanUpdate }">
+            <a href
+               ng-click="vm.changeStudies()">
+              <i class="glyphicon glyphicon-refresh text-primary"></i>
+              <translate>Change studies</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-class="{ 'disabled': !vm.userCanUpdate }">
+            <a href
+               ng-click="vm.changeCentres()">
+              <i class="glyphicon glyphicon-refresh text-primary"></i>
+              <translate>Change centres</translate>
+            </a>
+          </li>
+        </ul>
       </span>
     </h3>
   </div>
@@ -23,16 +64,8 @@
         <div class="col-md-2">
           <strong translate>Name:</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           {{vm.membership.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Edit name'|translate}}"
-                  ng-click="vm.editName()"
-                  ng-if="vm.userCanUpdate">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -48,8 +81,6 @@
              text="vm.membership.description"
              toggle-length="60"
              text-empty-warning="{{'Description not entered yet.'|translate}}"
-             allow-edit="vm.userCanUpdate"
-             on-edit="vm.editDescription()"
              tooltip="{{'Edit description'|translate}}">
           </truncate-toggle>
         </div>
@@ -62,18 +93,10 @@
         <div class="col-md-2">
           <strong translate>Users:</strong>
         </div>
-        <div class="col-md-8">
+        <div class="col-md-10">
           <tags-list tag-data="vm.userNameLabels"
                      on-tag-selected="vm.userLabelSelected.bind(vm)">
           </tags-list>
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add a user'|translate}}"
-                  ng-click="vm.addUser()"
-                  ng-if="vm.userCanUpdate">
-            <i class="glyphicon glyphicon-plus"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -84,24 +107,16 @@
         <div class="col-md-2">
           <strong translate>Studies:</strong>
         </div>
-        <div class="col-md-8" ng-if="vm.membership.studyData.allEntities">
+        <div class="col-md-10" ng-if="vm.membership.studyData.allEntities">
           <translate>All studies</translate>
         </div>
-        <div class="col-md-8" ng-if="!vm.membership.studyData.allEntities">
+        <div class="col-md-10" ng-if="!vm.membership.studyData.allEntities">
           <tags-list tag-data="vm.studyNameLabels"
                        on-tag-selected="vm.studyLabelSelected.bind(vm)">
           </tags-list>
         </div>
-        <div class="col-md-8" ng-if="vm.noStudiesMembership">
+        <div class="col-md-10" ng-if="vm.noStudiesMembership">
           <translate>None</translate>
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add a study'|translate}}"
-                  ng-click="vm.addStudy()"
-                  ng-if="vm.userCanUpdate">
-            <i class="glyphicon glyphicon-plus"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -112,24 +127,16 @@
         <div class="col-md-2">
           <strong translate>Centres:</strong>
         </div>
-        <div class="col-md-8" ng-if="vm.membership.centreData.allEntities">
+        <div class="col-md-10" ng-if="vm.membership.centreData.allEntities">
           <translate>All centres</translate>
         </div>
-        <div class="col-md-8" ng-if="!vm.membership.centreData.allEntities">
+        <div class="col-md-10" ng-if="!vm.membership.centreData.allEntities">
           <tags-list tag-data="vm.centreNameLabels"
                      on-tag-selected="vm.centreLabelSelected.bind(vm)">
           </tags-list>
         </div>
-        <div class="col-md-8" ng-if="vm.noCentresMembership">
+        <div class="col-md-10" ng-if="vm.noCentresMembership">
           <translate>None</translate>
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Add a centre'|translate}}"
-                  ng-click="vm.addCentre()"
-                  ng-if="vm.userCanUpdate">
-            <i class="glyphicon glyphicon-plus"></i>
-          </button>
         </div>
       </div>
     </li>

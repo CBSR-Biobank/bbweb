@@ -72,11 +72,17 @@ class AccessRouter @Inject()(controller: AccessController) extends SimpleRouter 
     case POST(p"/memberships/user/${membershipId(mId)}") =>
       controller.membershipAddUser(mId)
 
+    case POST(p"/memberships/studyData/${membershipId(mId)}") =>
+      controller.membershipUpdateStudyData(mId)
+
     case POST(p"/memberships/allStudies/${membershipId(mId)}") =>
       controller.membershipAllStudies(mId)
 
     case POST(p"/memberships/study/${membershipId(mId)}") =>
       controller.membershipAddStudy(mId)
+
+    case POST(p"/memberships/centreData/${membershipId(mId)}") =>
+      controller.membershipUpdateCentreData(mId)
 
     case POST(p"/memberships/allCentres/${membershipId(mId)}") =>
       controller.membershipAllCentres(mId)

@@ -1,0 +1,46 @@
+<div class="modal-header">
+  <button type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-hidden="true"
+          ng-click="vm.closePressed()">
+    &times;
+  </button>
+  <h3 class="modal-title">
+    Add Studies To Membership
+  </h3>
+</div>
+
+<div class="modal-body">
+
+  <form class="form-horizontal voffset4" name="form" novalidate>
+    <div class="form-group">
+      <label for="studies" class="col-md-2 form-control-label" translate>Studies</label>
+      <div class="col-md-10">
+        <input type="checkbox"
+               name="studies"
+               ng-model="vm.allStudiesMembership"
+               ng-change="vm.allStudiesChanged()" />
+        <span translate>All studies</span>: {{vm.allStudiesMembership | yesNo}}
+      </div>
+    </div>
+    <tags-input label="{{'Add studies'|translate}}"
+                tags="vm.tags"
+                placeholder="{{'enter a study\'s name or partial name'|translate}}"
+                labels-placeholder="{{'No studies added yet'|translate}}"
+                no-results-found="{{'No matching studies found'|translate}}"
+                on-get-values="vm.getStudyNames.bind(vm)"
+                on-tag-selected="vm.studySelected.bind(vm)"
+                on-tag-removed="vm.removeStudy.bind(vm)"
+                ng-if="!vm.allStudiesMembership">
+    </tags-input>
+  </form>
+
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn" ng-click="vm.closePressed()" translate>Cancel</button>
+  <button type="button" class="btn btn-primary" ng-click="vm.okPressed()"
+          ng-disabled="form.$invalid" translate>
+    OK
+  </button>
+</div>

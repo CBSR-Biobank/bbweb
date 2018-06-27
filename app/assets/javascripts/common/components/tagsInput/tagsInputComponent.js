@@ -7,8 +7,6 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 const DefaultLabel = 'label-info'
 
 /*
@@ -17,14 +15,15 @@ const DefaultLabel = 'label-info'
 class TagsInputController {
 
   constructor($scope) {
-    'ngInject'
-
-    Object.assign(this, { $scope })
+    'ngInject';
+    Object.assign(this, { $scope });
   }
 
   $onInit() {
-    this.tags = []
-    this.labelClass = DefaultLabel
+    if (this.tags === undefined) {
+      this.tags = [];
+    }
+    this.labelClass = DefaultLabel;
   }
 
   getValues(viewValue) {
@@ -32,26 +31,24 @@ class TagsInputController {
   }
 
   tagSelected(value) {
-    this.value = ''
-    this.tags.push(value)
-    this.onTagSelected()(value.obj)
+    this.value = '';
+    this.tags.push(value);
+    this.onTagSelected()(value.obj);
     if (this.required) {
-      this.$scope.tagsForm.tagsInput.$setValidity('tagsEntered', true)
+      this.$scope.tagsForm.tagsInput.$setValidity('tagsEntered', true);
     }
   }
 
   tagRemoved(tagToRemove) {
-    const found = this.tags.find((el) => el.label === tagToRemove.label)
+    const found = this.tags.find((el) => el.label === tagToRemove.label);
     if (!found) {
-      throw new Error('tag was never selected: ' + tagToRemove.label)
+      throw new Error('tag was never selected: ' + tagToRemove.label);
     }
-    _.remove(this.tags, function (tag) {
-      return tag.label === tagToRemove.label
-    })
-    this.onTagRemoved()(tagToRemove.obj)
+    this.tags = this.tags.filter(tag => tag.label !== tagToRemove.label);
+    this.onTagRemoved()(tagToRemove.obj);
 
     if (this.required && (this.tags.length <= 0)) {
-      this.$scope.tagsForm.tagsInput.$setValidity('tagsEntered', false)
+      this.$scope.tagsForm.tagsInput.$setValidity('tagsEntered', false);
     }
   }
 
@@ -66,6 +63,8 @@ class TagsInputController {
  * @memberOf common.components.tagsInput
  *
  * @param {string} label - the label to display in the form containing this component.
+ *
+ * @param Array<common.components.tagsInput.Tag> tags - the initial tags to display.
  *
  * @param {string} placeholder - the placeholder text to display in the input when it is empty.
  *
@@ -88,6 +87,7 @@ const tagsInputComponent = {
   controllerAs: 'vm',
   bindings: {
     label:              '@',
+    tags:               '<',
     placeholder:        '@',
     tagsPlaceholder:    '@',
     noResultsFound:     '@',
@@ -107,7 +107,7 @@ const tagsInputComponent = {
  *
  * @param {string} viewValue - the text  entered by the user.
  *
- * @returns {Array<common.components.tagsInput.MatchingTags>}
+ * @returns {Array<common.components.tagsInput.Tag>}
  */
 
 /**
@@ -139,7 +139,7 @@ const tagsInputComponent = {
 /**
  * A *Tag Item* displayed by {@link common.components.tagsInput.tagsInputComponent tagsInputComponent}.
  *
- * @typedef common.components.tagsInput.MatchingTags
+ * @typedef common.components.tagsInput.Tag
  *
  * @type object
  *

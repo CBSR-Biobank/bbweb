@@ -181,11 +181,17 @@ class AccessController @Inject() (controllerComponents: ControllerComponents,
   def membershipAddUser(membershipId: MembershipId): Action[JsValue] =
     commandAction[MembershipAddUserCmd](Json.obj("membershipId" -> membershipId))(processMembershipCommand)
 
+  def membershipUpdateStudyData(membershipId: MembershipId): Action[JsValue] =
+    commandAction[MembershipUpdateStudyDataCmd](Json.obj("membershipId" -> membershipId))(processMembershipCommand)
+
   def membershipAllStudies(membershipId: MembershipId): Action[JsValue] =
     commandAction[MembershipAllStudiesCmd](Json.obj("membershipId" -> membershipId))(processMembershipCommand)
 
   def membershipAddStudy(membershipId: MembershipId): Action[JsValue] =
     commandAction[MembershipAddStudyCmd](Json.obj("membershipId" -> membershipId))(processMembershipCommand)
+
+  def membershipUpdateCentreData(membershipId: MembershipId): Action[JsValue] =
+    commandAction[MembershipUpdateCentreDataCmd](Json.obj("membershipId" -> membershipId))(processMembershipCommand)
 
   def membershipAllCentres(membershipId: MembershipId): Action[JsValue] =
     commandAction[MembershipAllCentresCmd](Json.obj("membershipId" -> membershipId))(processMembershipCommand)
