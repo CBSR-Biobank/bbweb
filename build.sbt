@@ -1,5 +1,5 @@
 import com.typesafe.config._
-import java.nio.file.Files
+import java.nio.file.{Files, StandardCopyOption}
 
 val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 
@@ -16,6 +16,7 @@ def excludeSpecs2(module: ModuleID): ModuleID =
     .exclude("com.novocode", "junit-interface")
 
 lazy val copyLogbackTest = taskKey[Unit]("copyLogbackTest")
+lazy val forcedCopyLogbackTest = taskKey[Unit]("forcedCopyLogbackTest")
 lazy val copyTestData = taskKey[Unit]("copyTestData")
 lazy val copyEmailConf = taskKey[Unit]("copyEmailConf")
 lazy val developmentInit = taskKey[Unit]("developmentInit")
@@ -31,6 +32,13 @@ def copyTemplate(templateName: String, destName: String): Unit = {
   }
 }
 
+def forcedCopyTemplate(templateName: String, destName: String): Unit = {
+  val template = new File(templateName)
+  val dest = new File(destName)
+  Files.copy(template.toPath, dest.toPath, StandardCopyOption.REPLACE_EXISTING)
+  println(s"file $destName overwritten with $templateName")
+}
+
 lazy val root = (project in file("."))
   .enablePlugins(PlayScala, DebianPlugin)
   .settings(
@@ -38,6 +46,10 @@ lazy val root = (project in file("."))
 
     copyLogbackTest := {
       copyTemplate("conf/logback-test.xml.template", "conf/logback-test.xml")
+    },
+
+    forcedCopyLogbackTest := {
+      forcedCopyTemplate("conf/logback-test.xml.template", "conf/logback-test.xml")
     },
 
     copyTestData := {
