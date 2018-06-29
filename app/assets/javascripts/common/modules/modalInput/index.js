@@ -161,9 +161,6 @@ class ModalInputService {
         }));
       }
 
-      dateTimeOnEdit(datetime) {
-        this.value = datetime;
-      }
     }
 
     modal = this.$uibModal.open({
@@ -222,6 +219,11 @@ function init() {
 
       multipleSelectSomeSelected() {
         return (_.find(this.value, { checked: true }) !== undefined);
+      }
+
+      dateTimeOnEdit(datetime) {
+        this.value = datetime;
+        this.valueChanged();
       }
     }
 

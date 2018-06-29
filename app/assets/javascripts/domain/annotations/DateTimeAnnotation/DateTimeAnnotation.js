@@ -39,6 +39,13 @@ function DateTimeAnnotationFactory(Annotation, timeService) {
     }
 
     /**
+     * @return {Date} The date stored in this annotation.
+     */
+    getDisplayValue() {
+      return this.getValue();
+    }
+
+    /**
      * Assigns a value to this annotation.
      *
      * @param {Date} value - the value to assign to this annotation.

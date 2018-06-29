@@ -33,16 +33,34 @@
         <td><small>{{specimen.timeCreated| localTime}}</small></td>
         <td><small>{{specimen.locationInfo.name}}</small></td>
         <td>
-          <button class="btn btn-xs btn-primary"
-                  ng-click="vm.viewSpecimen(specimen)"
-                  uib-tooltip="{{'View specimen'|translate}}">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-          <button class="btn btn-xs btn-warning"
-                  ng-click="vm.removeSpecimen(specimen)"
-                  uib-tooltip="{{'Remove specimen'|translate}}">
-            <i class="glyphicon glyphicon-remove"></i>
-          </button>
+
+          <span class="pull-right"
+                uib-dropdown is-open="vm.specimenMenu.isopen_{{specimen.slug}}">
+            <button class="btn btn-xs btn-default dropdown-toggle"
+                    type="button"
+                    id="specimenMenu"
+                    uib-dropdown-toggle>
+              <span class="glyphicon glyphicon-option-vertical"></span>
+            </button>
+
+            <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="specimenMenu">
+              <li role="menuitem">
+                <a href
+                   ng-click="vm.viewSpecimen(specimen)">
+                  <i class="glyphicon glyphicon-eye-open text-primary"></i>
+                  <translate>View specimen</translate>
+                </a>
+              </li>
+              <li role="menuitem">
+                <a href
+                   ng-click="vm.removeSpecimen(specimen)">
+                  <i class="glyphicon glyphicon-remove text-primary"></i>
+                  <translate>Remove specimen</translate>
+                </a>
+              </li>
+            </ul>
+          </span>
+
         </td>
       </tr>
     </tbody>
@@ -60,7 +78,7 @@
               No specimens collected yet.
           </div>
         </td>
-      </tr>
+            </tr>
     </tbody>
     <tfoot>
       <tr>

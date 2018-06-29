@@ -8,15 +8,15 @@
       {{vm.membership.name}}
       <span class="pull-right"
             uib-dropdown
-            is-open="vm.roleMenu.isOpen">
+            is-open="vm.membershipMenu.isOpen">
         <button class="btn btn-xs btn-default dropdown-toggle"
                 type="button"
-                id="roleMenu"
+                id="membershipMenu"
                 uib-dropdown-toggle>
           <span class="glyphicon glyphicon-option-vertical"></span>
         </button>
 
-        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="roleMenu">
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="membershipMenu">
           <li role="menuitem">
             <a href
                ng-click="vm.editName()">

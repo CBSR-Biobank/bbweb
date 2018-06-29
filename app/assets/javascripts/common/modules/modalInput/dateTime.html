@@ -1,7 +1,7 @@
 <ng-form name="subForm">
   <date-time-picker label="{{vm.label}}"
+                    on-edit="vm.dateTimeOnEdit.bind(vm)"
                     default-value="vm.value"
-                    required="vm.options.required"
-                    on-edit="vm.dateTimeOnEdit">
+                    required="vm.options.required">
   </date-time-picker>
 </ng-form>

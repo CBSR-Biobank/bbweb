@@ -45,7 +45,7 @@ class AnnotationUpdateService {
     if (annotation instanceof this.DateTimeAnnotation) {
       return this.modalInput.dateTime(title,
                                       annotation.annotationType.name,
-                                      annotation.stringValue,
+                                      annotation.getValue(),
                                       { required: annotation.required }
                                      ).result.then(assignNewValue);
     } else if (annotation instanceof this.MultipleSelectAnnotation) {

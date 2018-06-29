@@ -21,9 +21,8 @@ function ParticipantSummaryController(gettextCatalog,
   //--
 
   function onInit() {
-    vm.editUniqueId                   = editUniqueId;
-    vm.editAnnotation                 = editAnnotation;
-    vm.getAnnotationUpdateButtonTitle = getAnnotationUpdateButtonTitle;
+    vm.editUniqueId   = editUniqueId;
+    vm.editAnnotation = editAnnotation;
   }
 
   function postUpdate(message, title, timeout) {
@@ -48,17 +47,15 @@ function ParticipantSummaryController(gettextCatalog,
   }
 
   function editAnnotation(annotation) {
-    annotationUpdate.update(annotation).then(function (newAnnotation) {
-      vm.participant.addAnnotation(newAnnotation)
-        .then(postUpdate(gettextCatalog.getString('Annotation updated successfully.'),
-                         gettextCatalog.getString('Change successful')))
-        .catch(notificationsService.updateError);
-    });
-  }
-
-  function getAnnotationUpdateButtonTitle(annotation) {
-    /// label is a name assigned by the user for an annotation type
-    return gettextCatalog.getString('Update {{label}}', { label: annotation.getLabel() });
+    annotationUpdate.update(annotation)
+      .then(newAnnotation => vm.participant.addAnnotation(newAnnotation))
+      .then(postUpdate(gettextCatalog.getString('Annotation updated successfully.'),
+                       gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        if (typeof error !== 'string') {
+          notificationsService.updateError(error);
+        }
+      });
   }
 }
 

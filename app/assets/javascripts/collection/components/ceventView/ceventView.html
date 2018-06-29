@@ -3,24 +3,42 @@
     <h3 class="panel-title">
       <translate>Visit #</translate>
       {{vm.collectionEvent.visitNumber}}
-      <span class="pull-right">
-        <button class="btn btn-xs btn-warning"
-                uib-tooltip="{{'Remove this event'|translate}}"
-                ng-click="vm.remove()">
-          <translate>Remove</translate>
-          <i class="glyphicon glyphicon-remove"></i>
+      <span class="pull-right"
+            uib-dropdown is-open="vm.ceventMenu.isopen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="ceventMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
         </button>
-        <a data-toggle="collapse"
-           href="#collapseCevent"
-           class="btn btn-xs btn-default"
-           ng-click="vm.panelButtonClicked()">
+
+        <button type="button"
+                class="btn btn-xs btn-default"
+                ng-click="vm.isPanelCollapsed = !vm.isPanelCollapsed">
           <i class="glyphicon"
-             ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
-        </a>
+             ng-class="vm.isPanelCollapsed ? 'glyphicon-chevron-right' : 'glyphicon-chevron-down'"></i>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="ceventMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editTimeCompleted()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update time completed</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-repeat="annotation in vm.collectionEvent.annotations">
+            <a href
+               ng-click="vm.editAnnotation(annotation)">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update {{annotation.getLabel()}}</translate>
+            </a>
+          </li>
+        </ul>
       </span>
     </h3>
   </div>
-  <div id="collapseCevent" class="panel-collapse collapse in" aria-expanded="true">
+  <div uib-collapse="vm.isPanelCollapsed" class="panel-collapse">
     <ul class="list-group">
       <li class="list-group-item">
         <div class="row">
@@ -37,15 +55,8 @@
           <div class="col-md-3">
             <strong translate>Time completed</strong>
           </div>
-          <div class="col-md-7">
+          <div class="col-md-9">
             {{vm.collectionEvent.timeCompleted | localTime}}
-          </div>
-          <div class="col-md-2">
-            <button class="btn btn-xs btn-primary pull-right"
-                    uib-tooltip="{{'Update time completed'|translate}}"
-                    ng-click="vm.editTimeCompleted()">
-              <i class="glyphicon glyphicon-edit"></i>
-            </button>
           </div>
         </div>
       </li>
@@ -54,16 +65,11 @@
           <div class="col-md-3">
             <strong>{{vm.annotationLabels[annotation.annotationTypeId]}}</strong>
           </div>
-          <div class="col-md-7">
-            {{annotation.getDisplayValue()}}
-          </div>
-          <div class="col-md-2">
-            <button class="btn btn-xs btn-primary pull-right"
-                    uib-tooltip="{{'Update this annotation'|translate}}"
-                    ng-click="vm.editAnnotation(annotation)">
-              <i class="glyphicon glyphicon-edit"></i>
-            </button>
-          </div>
+        <div class="col-md-9" ng-if="annotation.getDisplayValue()">
+          {{annotation.getDisplayValue()}}
+        </div>
+        <div class="col-md-9" ng-if="!annotation.getDisplayValue()">
+          <span class="label label-warning" translate>Value not entered yet</span>
         </div>
       </li>
     </ul>

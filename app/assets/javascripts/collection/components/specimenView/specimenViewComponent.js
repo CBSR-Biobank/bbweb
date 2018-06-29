@@ -18,6 +18,7 @@ class SpecimenViewController {
               specimenStateLabelService,
               CollectionEventType,
               resourceErrorService) {
+    'ngInject';
     Object.assign(this, {
       $state,
       gettextCatalog,
@@ -25,7 +26,7 @@ class SpecimenViewController {
       specimenStateLabelService,
       CollectionEventType,
       resourceErrorService
-    })
+    });
   }
 
   $onInit() {

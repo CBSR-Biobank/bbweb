@@ -7,31 +7,31 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-/* @ngInject */
-function DateTimePickerController(AppConfig) {
-  var vm = this;
-  vm.$onInit = onInit;
 
-  //--
+class DateTimePickerController {
 
-  function onInit() {
-    vm.value                = vm.defaultValue;
-    vm.labelCols            = vm.labelCols || 'col-sm-2';
-    vm.inputCols            = vm.inputCols || 'col-sm-10';
-    vm.open                 = false;
-    vm.openCalendar         = openCalendar;
-    vm.datetimePickerFormat = AppConfig.datepickerFormat;
-    vm.timepickerOptions    = { readonlyInput: false, showMeridian: false };
-    vm.onChange             = onChange;
+  constructor(AppConfig) {
+    'ngInject';
+    Object.assign(this, { AppConfig });
   }
 
-  function openCalendar() {
-    vm.open = true;
+  $onInit() {
+    this.value                = this.defaultValue;
+    this.labelCols            = this.labelCols || 'col-sm-2';
+    this.inputCols            = this.inputCols || 'col-sm-10';
+    this.open                 = false;
+    this.datetimePickerFormat = this.AppConfig.datepickerFormat;
+    this.timepickerOptions    = { readonlyInput: false, showMeridian: false };
   }
 
-  function onChange() {
-    vm.onEdit()(vm.value);
+  openCalendar() {
+    this.open = true;
   }
+
+  onChange() {
+    this.onEdit()(this.value);
+  }
+
 }
 
 /**

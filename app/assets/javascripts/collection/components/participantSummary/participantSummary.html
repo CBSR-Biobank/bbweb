@@ -1,6 +1,35 @@
 <div class="panel panel-default">
   <div class="panel-heading">
-    <h3 class="panel-title" translate>Participant</h3>
+    <h3 class="panel-title">
+      <translate>Participant</translate>
+      <span class="pull-right"
+            uib-dropdown
+            is-open="vm.participantMenu.isOpen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="participantMenu"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
+
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="participantMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editUniqueId()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update unique ID</translate>
+            </a>
+          </li>
+          <li role="menuitem" ng-repeat="annotation in vm.participant.annotations">
+            <a href
+               ng-click="vm.editAnnotation(annotation)">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update {{annotation.getLabel()}}</translate>
+            </a>
+          </li>
+        </ul>
+      </span>
+    </h3>
   </div>
 
   <ul class="list-group">
@@ -9,15 +38,8 @@
         <div class="col-md-3">
           <strong translate>Unique ID</strong>
         </div>
-        <div class="col-md-7">
+        <div class="col-md-9">
           {{vm.participant.uniqueId}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{'Update unique ID'|translate}}"
-                  ng-click="vm.editUniqueId()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
         </div>
       </div>
     </li>
@@ -36,15 +58,11 @@
         <div class="col-md-3">
           <strong>{{annotation.getLabel()}}</strong>
         </div>
-        <div class="col-md-7">
-          {{annotation.getValue()}}
+        <div class="col-md-9" ng-if="annotation.getDisplayValue()">
+          {{annotation.getDisplayValue()}}
         </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="{{vm.getAnnotationUpdateButtonTitle(annotation)}}"
-                  ng-click="vm.editAnnotation(annotation)">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
+        <div class="col-md-9" ng-if="!annotation.getDisplayValue()">
+          <span class="label label-warning" translate>Value not entered yet</span>
         </div>
       </div>
     </li>

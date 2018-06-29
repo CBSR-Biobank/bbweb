@@ -1,0 +1,19 @@
+<span class="pull-right"
+      uib-dropdown is-open="vm.annotationMenu_{{vm.annotation.annotationTypeId}}.isopen">
+  <button class="btn btn-xs btn-default dropdown-toggle"
+          type="button"
+          id="annotationMenu"
+          uib-dropdown-toggle>
+    <span class="glyphicon glyphicon-option-vertical"></span>
+  </button>
+
+  <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="annotationMenu">
+    <li role="menuitem">
+      <a href
+         ng-click="vm.update()">
+        <i class="glyphicon glyphicon-edit text-primary"></i>
+        <translate>Update {{vm.annotation.getLabel()}}</translate>
+      </a>
+    </li>
+  </ul>
+</span>
