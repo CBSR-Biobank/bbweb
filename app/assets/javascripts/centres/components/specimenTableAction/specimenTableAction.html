@@ -1,6 +1,18 @@
-g<button class="btn btn-xs"
-        ng-class="vm.action.class"
-        uib-tooltip="{{vm.action.title}}"
-        ng-click="vm.onActionSelected()">
-  <i class="glyphicon" ng-class="vm.action.icon"></i>
-</button>
+<span uib-dropdown is-open="vm.actionMenu.isopen">
+  <button class="btn btn-xs btn-default dropdown-toggle"
+          type="button"
+          id="actionMenu"
+          uib-dropdown-toggle>
+    <span class="glyphicon glyphicon-option-vertical"></span>
+  </button>
+
+  <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="actionMenu">
+    <li role="menuitem">
+      <a href
+         ng-click="vm.onActionSelected()">
+        <i class="glyphicon" ng-class="vm.action.icon"></i>
+        {{vm.action.title}}
+      </a>
+    </li>
+  </ul>
+</span>

@@ -41,9 +41,8 @@ class UnpackedShipmentExtraController extends UnpackBaseController {
     this.actions =  [
       {
         id:    'tag-as-extra',
-        class: 'btn-warning',
         title: this.gettextCatalog.getString('Remove'),
-        icon:  'glyphicon-remove'
+        icon:  'glyphicon-remove text-danger'
       }
     ];
     this.$scope.$emit('tabbed-page-update', 'tab-selected');

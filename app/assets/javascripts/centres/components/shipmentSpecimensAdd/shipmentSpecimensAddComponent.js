@@ -44,9 +44,8 @@ class ShipmentSpecimensAddController extends ShipmentSpecimensController {
 
     this.actions =  [{
       id:    'remove',
-      class: 'btn-warning',
       title: this.gettextCatalog.getString('Remove specimen'),
-      icon:  'glyphicon-remove'
+      icon:  'glyphicon-remove text-danger'
     }]
   }
 

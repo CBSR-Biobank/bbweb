@@ -38,9 +38,8 @@ class UnpackedShipmentUnpackController extends UnpackBaseController {
     this.actions =  [
       {
         id:    'tag-as-missing',
-        class: 'btn-warning',
         title: this.gettextCatalog.getString('Tag as missing'),
-        icon:  'glyphicon-cloud'
+        icon:  'glyphicon-cloud text-warning'
       }
     ];
 

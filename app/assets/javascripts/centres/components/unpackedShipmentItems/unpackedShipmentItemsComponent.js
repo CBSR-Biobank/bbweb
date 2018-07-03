@@ -30,9 +30,8 @@ function UnpackedShipmentItemsController($q,
     vm.actions =  [
       {
         id:    'tag-as-extra',
-        class: 'btn-warning',
         title: gettextCatalog.getString('Tag as present'),
-        icon:  'glyphicon-arrow-left'
+        icon:  'glyphicon-arrow-left text-primary'
       }
     ];
 

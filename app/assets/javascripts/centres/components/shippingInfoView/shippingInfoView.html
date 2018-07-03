@@ -1,160 +1,185 @@
-<collapsible-panel heading="{{'Shipment information'|translate}}"
-                   collapsible="vm.collapsible">
-  <ul class="list-group">
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <h3 class="panel-title">
+      <translate>Shipment Information</translate>
+      {{vm.collectionEvent.visitNumber}}
+      <span class="pull-right"
+            uib-dropdown is-open="vm.shipmentMenu.isopen">
+        <button class="btn btn-xs btn-default dropdown-toggle"
+                type="button"
+                id="shipmentMenu"
+                ng-if="!vm.readOnly"
+                uib-dropdown-toggle>
+          <span class="glyphicon glyphicon-option-vertical"></span>
+        </button>
 
-    <!-- COURIER NAME -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>Courier</strong>
-        </div>
-        <div class="col-md-7">
-          {{vm.shipment.courierName}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="Update courier"
-                  ng-if="!vm.readOnly"
-                  ng-click="vm.editCourierName()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
+        <button type="button"
+                class="btn btn-xs btn-default"
+                ng-click="vm.isPanelCollapsed = !vm.isPanelCollapsed"
+                ng-if="vm.collapsible">
+          <i class="glyphicon"
+             ng-class="vm.isPanelCollapsed ? 'glyphicon-chevron-right' : 'glyphicon-chevron-down'"></i>
+        </button>
 
-    <!-- TRACKING NUMBER -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>Tracking number</strong>
-        </div>
-        <div class="col-md-7">
-          {{vm.shipment.trackingNumber}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="Update tracking number"
-                  ng-if="!vm.readOnly"
-                  ng-click="vm.editTrackingNumber()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
+        <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="shipmentMenu">
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editCourierName()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update courier</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editTrackingNumber()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update tracking number</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editFromLocation()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update source location</translate>
+            </a>
+          </li>
+          <li role="menuitem">
+            <a href
+               ng-click="vm.editToLocation()">
+              <i class="glyphicon glyphicon-edit text-primary"></i>
+              <translate>Update destination location</translate>
+            </a>
+          </li>
+        </ul>
+      </span>
+    </h3>
+  </div>
 
-    <!-- FROM CENTRE -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>From</strong>
-        </div>
-        <div class="col-md-7">
-          {{vm.shipment.fromLocationInfo.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="Update from location"
-                  ng-if="!vm.readOnly"
-                  ng-click="vm.editFromLocation()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
+  <div class="panel-collapse collapse" uib-collapse="vm.isPanelCollapsed">
+    <ul class="list-group">
 
-    <!-- TO CENTRE -->
-    <li class="list-group-item">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>To</strong>
+      <!-- COURIER NAME -->
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>Courier</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.courierName}}
+          </div>
         </div>
-        <div class="col-md-7">
-          {{vm.shipment.toLocationInfo.name}}
-        </div>
-        <div class="col-md-2">
-          <button class="btn btn-xs btn-primary pull-right"
-                  uib-tooltip="Update to location"
-                  ng-if="!vm.readOnly"
-                  ng-click="vm.editToLocation()">
-            <i class="glyphicon glyphicon-edit"></i>
-          </button>
-        </div>
-      </div>
-    </li>
+      </li>
 
-    <!-- TIME PACKED -->
-    <li class="list-group-item" ng-if="vm.shipment.timePacked">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>Time packed</strong>
+      <!-- TRACKING NUMBER -->
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>Tracking number</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.trackingNumber}}
+          </div>
         </div>
-        <div class="col-md-9">
-          {{vm.shipment.timePacked | localTime}}
-        </div>
-      </div>
-    </li>
+      </li>
 
-    <!-- TIME SENT -->
-    <li class="list-group-item" ng-if="vm.shipment.timeSent">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>Time sent</strong>
+      <!-- FROM CENTRE -->
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>From</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.fromLocationInfo.name}}
+          </div>
         </div>
-        <div class="col-md-9">
-          {{vm.shipment.timeSent | localTime}}
-        </div>
-      </div>
-    </li>
+      </li>
 
-    <!-- TIME RECEIVED -->
-    <li class="list-group-item" ng-if="vm.shipment.timeReceived">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>Time received</strong>
+      <!-- TO CENTRE -->
+      <li class="list-group-item">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>To</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.toLocationInfo.name}}
+          </div>
         </div>
-        <div class="col-md-9">
-          {{vm.shipment.timeReceived | localTime}}
-        </div>
-      </div>
-    </li>
+      </li>
 
-    <!-- TIME UNPACKED -->
-    <li class="list-group-item" ng-if="vm.shipment.timeUnpacked">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>Time unpacked</strong>
+      <!-- TIME PACKED -->
+      <li class="list-group-item" ng-if="vm.shipment.timePacked">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>Time packed</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.timePacked | localTime}}
+          </div>
         </div>
-        <div class="col-md-9">
-          {{vm.shipment.timeUnpacked | localTime}}
-        </div>
-      </div>
-    </li>
+      </li>
 
-    <!-- TIME COMPLETED -->
-    <li class="list-group-item" ng-if="vm.shipment.timeCompleted">
-      <div class="row">
-        <div class="col-md-3">
-          <strong translate>Time completed</strong>
+      <!-- TIME SENT -->
+      <li class="list-group-item" ng-if="vm.shipment.timeSent">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>Time sent</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.timeSent | localTime}}
+          </div>
         </div>
-        <div class="col-md-9">
-          {{vm.shipment.timeCompleted | localTime}}
-        </div>
-      </div>
-    </li>
+      </li>
 
-    <!-- NUM CONTAINERS -->
-    <li class="list-group-item" ng-if="vm.shipment.isPacked() && vm.shipment.containerCount > 0">
-      <div class="row">
-        <div class="col-md-3">
-          <strong>Number of containers</strong>
+      <!-- TIME RECEIVED -->
+      <li class="list-group-item" ng-if="vm.shipment.timeReceived">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>Time received</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.timeReceived | localTime}}
+          </div>
         </div>
-        <div class="col-md-9">
-          {{vm.shipment.containerCount}}
-        </div>
-      </div>
-    </li>
+      </li>
 
-  </ul>
+      <!-- TIME UNPACKED -->
+      <li class="list-group-item" ng-if="vm.shipment.timeUnpacked">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>Time unpacked</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.timeUnpacked | localTime}}
+          </div>
+        </div>
+      </li>
+
+      <!-- TIME COMPLETED -->
+      <li class="list-group-item" ng-if="vm.shipment.timeCompleted">
+        <div class="row">
+          <div class="col-md-3">
+            <strong translate>Time completed</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.timeCompleted | localTime}}
+          </div>
+        </div>
+      </li>
+
+      <!-- NUM CONTAINERS -->
+      <li class="list-group-item" ng-if="vm.shipment.isPacked() && vm.shipment.containerCount > 0">
+        <div class="row">
+          <div class="col-md-3">
+            <strong>Number of containers</strong>
+          </div>
+          <div class="col-md-9">
+            {{vm.shipment.containerCount}}
+          </div>
+        </div>
+      </li>
+
+    </ul>
+  </div>
   <status-line state-label-func="vm.stateLabelFunc(vm.shipment.state)"
                time-added="vm.shipment.timeAdded"
                time-modified="vm.shipment.timeModified"></status-line>
