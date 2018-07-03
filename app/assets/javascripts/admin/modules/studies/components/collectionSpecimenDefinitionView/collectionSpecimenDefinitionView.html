@@ -8,7 +8,7 @@
       {{vm.specimenDefinition.name}}
       <span class="pull-right"
             uib-dropdown is-open="vm.specimenDefinitionMenu.isopen"
-            ng-if="!vm.readOnly">
+            ng-if="vm.allowEdit">
         <button class="btn btn-xs btn-default dropdown-toggle"
                 type="button"
                 id="specimenDefinitionMenu"

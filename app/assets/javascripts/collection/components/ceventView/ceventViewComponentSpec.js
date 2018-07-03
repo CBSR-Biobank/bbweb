@@ -164,7 +164,7 @@ describe('Component: ceventView', function() {
         context.controllerUpdateFuncName = 'editAnnotation';
         context.modalInputFuncName       = 'dateTime';
         context.annotation               = f.collectionEvent.annotations[0];
-        context.newValue                 = { date: newValue, time: newValue };
+        context.newValue                 = newValue;
         context.createController = () =>
           this.createController(f);
       });

@@ -103,7 +103,9 @@ class CeventViewController {
           .then(this.postUpdate(this.gettextCatalog.getString('Annotation updated successfully.'),
                                 this.gettextCatalog.getString('Change successful'),
                                 1500))
-          .catch(this.notificationsService.updateError)
+          .catch(error => {
+            this.notificationsService.updateError(error);
+          })
       })
   }
 

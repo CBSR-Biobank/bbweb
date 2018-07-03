@@ -37,19 +37,25 @@ class DomainNotificationService {
       actionButtonText: this.gettextCatalog.getString('OK')
     };
 
-    if (error.message) {
-      this.$log.error(error.message);
-    }
-
-    if ((typeof error.message === 'string') &&
-        (error.message.indexOf('expected version doesn\'t match current version') > -1)) {
-      /* concurrent change error */
-      modalDefaults.template = require('./modalConcurrencyError.html');
-      modalOptions.domainType = domainEntityName;
+    if (typeof error === 'object') {
+      if ((typeof error.status === 'number') && (error.status === 401)) {
+        // unauthorized
+        modalOptions.headerHtml = this.gettextCatalog.getString('Cannot submit this change');
+        modalOptions.bodyHtml =
+          this.gettextCatalog.getString('Error: you are not allowed to make this change');
+      } else if ((typeof error.message === 'string') &&
+          (error.message.indexOf('expected version doesn\'t match current version') > -1)) {
+        /* concurrent change error */
+        modalDefaults.template = require('./modalConcurrencyError.html');
+        modalOptions.domainType = domainEntityName;
+      } else {
+        // most likely a programming error
+        modalOptions.headerHtml = this.gettextCatalog.getString('Cannot submit this change');
+        modalOptions.bodyHtml = this.gettextCatalog.getString('Error: ') + JSON.stringify(error);
+      }
     } else {
-      // most likely a programming error
-      modalOptions.headerHtml = this.gettextCatalog.getString('Cannot submit this change');
-      modalOptions.bodyHtml = this.gettextCatalog.getString('Error: ') + JSON.stringify(error.message);
+        modalOptions.headerHtml = this.gettextCatalog.getString('Cannot submit this change');
+        modalOptions.bodyHtml = this.gettextCatalog.getString('Error: ') + JSON.stringify(error);
     }
 
     return this.modalService.showModal(modalDefaults, modalOptions);

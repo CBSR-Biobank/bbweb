@@ -69,8 +69,14 @@ class CollectionSpecimenDefinitionAddController {
         this.notificationsService.submitSuccess();
         this.$state.go(returnState, {}, { reload: true });
       })
-      .catch((error) =>
-             this.domainNotificationService.updateErrorModal(error, this.gettextCatalog.getString('study')));
+      .catch(error => {
+        this.domainNotificationService
+          .updateErrorModal(error, this.gettextCatalog.getString('study'));
+
+        if ((typeof error.status === 'number') && (error.status === 401)) {
+          this.$state.go('404', { errMessage : 'unauthorized' }, { location: false })
+        }
+      });
   }
 
   cancel() {

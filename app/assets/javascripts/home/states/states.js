@@ -26,6 +26,15 @@ function config($stateProvider) {
         'main@': 'contact'
       }
     })
+    .state('401', {
+      url: 'unauthorized/{errMessage}',
+      resolve: {
+        errMessage: resolveErrMessage
+      },
+      views: {
+        'main@': 'unauthorized'
+      }
+    })
     .state('404', {
       url: 'resourceNotFound/{errMessage}',
       resolve: {

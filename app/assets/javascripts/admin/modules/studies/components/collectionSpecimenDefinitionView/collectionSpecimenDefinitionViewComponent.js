@@ -210,7 +210,8 @@ class CollectionSpecimenDefinitionViewController {
   }
 
   back() {
-    this.$state.go(this.returnState.name, this.returnState.param);
+    // reload the state in case the user modified this specimen definition
+    this.$state.go(this.returnState.name, this.returnState.param, { reload: true });
   }
 
 }

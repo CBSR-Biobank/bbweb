@@ -12,14 +12,15 @@ const returnState = 'home.admin.studies';
 /*
  * Controller for this component.
  */
-/* @ngInject */
 function StudyAddController($state,
+                            Study,
                             gettextCatalog,
                             notificationsService,
                             domainNotificationService,
                             breadcrumbService) {
-
+  'ngInject';
   var vm = this;
+  vm.study = new Study();
   vm.$onInit = onInit;
 
   //--
@@ -36,19 +37,15 @@ function StudyAddController($state,
     vm.cancel = cancel;
   }
 
-  function submit(study) {
-    study.add()
-      .then(submitSuccess)
-      .catch(submitError);
-
-    function submitSuccess() {
-      notificationsService.submitSuccess();
-      $state.go(returnState, {}, { reload: true });
-    }
-
-    function submitError(error) {
-      domainNotificationService.updateErrorModal(error, gettextCatalog.getString('study'));
-    }
+  function submit() {
+    vm.study.add()
+      .then(() => {
+        notificationsService.submitSuccess();
+        $state.go(returnState, {}, { reload: true });
+      })
+      .catch(error => {
+        domainNotificationService.updateErrorModal(error, gettextCatalog.getString('study'));
+      });
   }
 
   function cancel() {

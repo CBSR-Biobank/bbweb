@@ -86,7 +86,8 @@ describe('Component: collectionSpecimenDefinitionView', function() {
 
     expect($state.go).toHaveBeenCalledWith(
       'home.admin.studies.study.collection.ceventType',
-      { ceventTypeId: this.collectionEventType.id }
+      { ceventTypeId: this.collectionEventType.id },
+      { reload: true }
     );
   });
 
