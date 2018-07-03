@@ -156,7 +156,7 @@ describe('Component: collectionEventAnnotationTypeView', function() {
       expect(this.$state.current.name).toBe('home.admin.studies.study.collection.ceventType');
     });
 
-    it('should an error response from the server', function() {
+    it('should handle error response from the server', function() {
       const f = this.fixture();
       this.stateInit(f);
       this.createController(f);
@@ -177,7 +177,7 @@ describe('Component: collectionEventAnnotationTypeView', function() {
       expect(this.notificationsService.success).not.toHaveBeenCalled();
       expect(this.$state.current.name)
         .toBe('home.admin.studies.study.collection.ceventType.annotationTypeView');
-  });
+    });
 
   });
 

@@ -43,66 +43,59 @@ describe('collection states', function() {
     expect(this.$state.current.name).toBe('home.collection')
   })
 
-  describe('when navigating to `/collection/study/study-slug-1`', function () {
+  describe('when navigating to `/collection/study-slug-1`', function () {
 
     it('should go to valid state', function () {
       this.Study.get = jasmine.createSpy().and.returnValue(this.$q.when({}))
-      this.gotoUrl('/collection/study/study-slug-1')
+      this.gotoUrl('/collection/study-slug-1')
       expect(this.$state.current.name).toBe('home.collection.study')
     })
 
     it('should go to the 404 state when an invalid studyId is used', function() {
       this.Study.get = jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'))
-      this.gotoUrl('/collection/study/study-slug-1')
+      this.gotoUrl('/collection/study-slug-1')
       expect(this.$state.current.name).toBe('404')
     })
 
   })
 
-  it('when navigating to `/collection/study/study-slug-1/add/participant-slug-1` should go to valid state',
-     function () {
-       this.Study.get = jasmine.createSpy().and.returnValue(this.$q.when({}))
-       this.gotoUrl('/collection/study/study-slug-1/add/participant-slug-1')
-       expect(this.$state.current.name).toBe('home.collection.study.participantAdd')
-     })
-
   describe(
-    'when navigating to `/collection/study/study-slug-1/participants/participant-slug-1/summary`',
+    'when navigating to `/collection/study-slug-1/participants/participant-slug-1/summary`',
     function () {
       const context = {}
 
       beforeEach(function() {
         context.childState = 'summary'
-        context.url = '/collection/study/study-slug-1/participants/participant-slug-1/summary'
+        context.url = '/collection/study-slug-1/participants/participant-slug-1/summary'
       });
 
       participantSharedBehaviour(context)
     })
 
   describe(
-    'when navigating to `/collection/study/study-slug-1/participants/participant-slug-1/events`',
+    'when navigating to `/collection/study-slug-1/participants/participant-slug-1/events`',
     function () {
       const context = {}
 
       beforeEach(function() {
         context.childState = 'cevents'
-        context.url = '/collection/study/study-slug-1/participants/participant-slug-1/events'
+        context.url = '/collection/study-slug-1/participants/participant-slug-1/events'
       });
 
       participantSharedBehaviour(context)
     })
 
-  it('when navigating to `/collection/study/study-slug-1/participants/participant-slug-1/events/add` should go to valid state',
+  it('when navigating to `/collection/study-slug-1/participants/participant-slug-1/events/add` should go to valid state',
      function () {
        this.Study.get       = jasmine.createSpy().and.returnValue(this.$q.when(this.study))
        this.Participant.get = jasmine.createSpy().and.returnValue(this.$q.when(this.participant))
 
-       this.gotoUrl('/collection/study/study-slug-1/participants/participant-slug-1/events/add')
+       this.gotoUrl('/collection/study-slug-1/participants/participant-slug-1/events/add')
        expect(this.$state.current.name).toBe('home.collection.study.participant.cevents.add')
      })
 
   describe(
-    'when navigating to `/collection/study/study-slug-1/participants/participant-slug-1/events/add/collection-event-type-id-1`',
+    'when navigating to `/collection/study-slug-1/participants/participant-slug-1/events/add/collection-event-type-id-1`',
     function () {
 
       beforeEach(function() {
@@ -115,21 +108,21 @@ describe('collection states', function() {
 
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.when(collectionEventType))
         this.gotoUrl(
-          '/collection/study/study-slug-1/participants/participant-slug-1/events/add/collection-event-type-slug-1')
+          '/collection/study-slug-1/participants/participant-slug-1/events/add/collection-event-type-slug-1')
         expect(this.$state.current.name).toBe('home.collection.study.participant.cevents.add.details')
       })
 
       it('should go to the 404 state when an invalid eventTypeId is used', function() {
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'))
         this.gotoUrl(
-          '/collection/study/study-slug-1/participants/participant-slug-1/events/add/collection-event-type-id-1')
+          '/collection/study-slug-1/participants/participant-slug-1/events/add/collection-event-type-id-1')
         expect(this.$state.current.name).toBe('404')
       })
 
     })
 
   describe(
-    'navigating to `/collection/study/study-slug-1/participants/participant-slug-1/events/event-type-id-1/event-id-1`',
+    'navigating to `/collection/study-slug-1/participants/participant-slug-1/events/event-type-id-1/event-id-1`',
     function () {
 
       beforeEach(function() {
@@ -146,20 +139,20 @@ describe('collection states', function() {
         this.CollectionEvent.getByVisitNumber = jasmine.createSpy().and.returnValue(this.$q.when(collectionEvent))
 
         this.gotoUrl(
-          '/collection/study/study-slug-1/participants/participant-slug-1/events/event-id-1')
+          '/collection/study-slug-1/participants/participant-slug-1/events/event-id-1')
         expect(this.$state.current.name).toBe('home.collection.study.participant.cevents.details')
       })
 
       it('should go to the 404 state when an invalid eventId is used', function() {
         this.CollectionEventType.get = jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'))
         this.gotoUrl(
-          '/collection/study/study-slug-1/participants/participant-slug-1/events/add/event-type-id-1')
+          '/collection/study-slug-1/participants/participant-slug-1/events/add/event-type-id-1')
         expect(this.$state.current.name).toBe('404')
       })
     })
 
   describe(
-    'when navigating to `/collection/study/study-slug-1/participants/participant-slug-1/events/event-id-1/spc/specimen-inv-id-1`',
+    'when navigating to `/collection/study-slug-1/participants/participant-slug-1/events/event-id-1/spc/specimen-inv-id-1`',
     function () {
 
       beforeEach(function() {
@@ -178,14 +171,14 @@ describe('collection states', function() {
         this.Specimen.get = jasmine.createSpy().and.returnValue(this.$q.when(specimen))
 
         this.gotoUrl(
-          '/collection/study/study-slug-1/participants/participant-slug-1/events/event-id-1/spc/specimen-inv-id-1')
+          '/collection/study-slug-1/participants/participant-slug-1/events/event-id-1/spc/specimen-inv-id-1')
         expect(this.$state.current.name).toBe('home.collection.study.participant.cevents.details.specimen')
       })
 
       it('should go to the 404 state when an invalid eventId is used', function() {
         this.Specimen.get = jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'))
         this.gotoUrl(
-          '/collection/study/study-slug-1/participants/participant-slug-1/events/event-id-1/spc/specimen-inv-id-1')
+          '/collection/study-slug-1/participants/participant-slug-1/events/event-id-1/spc/specimen-inv-id-1')
         expect(this.$state.current.name).toBe('404')
       })
 

@@ -52,9 +52,7 @@ function ParticipantSummaryController(gettextCatalog,
       .then(postUpdate(gettextCatalog.getString('Annotation updated successfully.'),
                        gettextCatalog.getString('Change successful')))
       .catch(error => {
-        if (typeof error !== 'string') {
-          notificationsService.updateError(error);
-        }
+        notificationsService.updateError(error);
       });
   }
 }

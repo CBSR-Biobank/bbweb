@@ -83,11 +83,11 @@ function ParticipantFactory($q,
         },
         obj));
 
-      Object.assign(this,
-                    {
-                      study:       study,
-                      annotations: annotations
-                    });
+      Object.assign(this, { study });
+
+      if (annotations !== undefined) {
+        this.annotations = annotations;
+      }
 
       if (study) {
         this.setStudy(study);
@@ -105,35 +105,30 @@ function ParticipantFactory($q,
      * annotations are valid, then a request is made to the server to add the participant.
      */
     add() {
-      var deferred = $q.defer(),
-          invalidAnnotationErrMsg = null,
-          cmd = _.pick(this, 'studyId', 'uniqueId');
+      let invalidAnnotationErrMsg = null;
+      const cmd = _.pick(this, 'uniqueId');
 
       // convert annotations to server side entities
       if (this.annotations) {
-        cmd.annotations = this.annotations.map((annotation) => {
-          // make sure required annotations have values
-          if (!annotation.isValueValid()) {
-            invalidAnnotationErrMsg = 'required annotation has no value: annotationId: ' +
-              annotation.annotationTypeId;
-          }
-          return annotation.getServerAnnotation();
-        });
+        cmd.annotations = this.annotations
+          .map(annotation => {
+            // make sure required annotations have values
+            if (!annotation.isValueValid()) {
+              invalidAnnotationErrMsg =
+                `required annotation has no value: annotationId: ${annotation.annotationTypeId}`;
+            }
+            return annotation.getServerAnnotation();
+          });
       } else {
         cmd.annotations = [];
       }
 
       if (invalidAnnotationErrMsg) {
-        deferred.reject(invalidAnnotationErrMsg);
-      } else {
-        biobankApi.post(Participant.url(this.studyId), cmd)
-          .then(Participant.asyncCreate)
-          .then(function (participant) {
-            deferred.resolve(participant);
-          });
+        return $q.reject(invalidAnnotationErrMsg);
       }
 
-      return deferred.promise;
+      return biobankApi.post(Participant.url(this.studyId), cmd)
+        .then(Participant.asyncCreate);
     }
 
     /*

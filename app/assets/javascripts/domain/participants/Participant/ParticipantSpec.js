@@ -39,13 +39,12 @@ describe('Participant', function() {
 
       this.addCustomMatchers();
 
-      this.getParticipantEntities = (isNew) => {
-        var jsonAnnotationTypes = this.Factory.allAnnotationTypes(),
-            jsonStudy           = this.Factory.study({ annotationTypes: jsonAnnotationTypes }),
-            study               = new this.Study(jsonStudy),
-            jsonParticipant     = this.Factory.participant(),
-            annotationTypes,
-            participant;
+      this.fixture = (isNew) => {
+        const jsonAnnotationTypes = this.Factory.allAnnotationTypes();
+        const jsonStudy           = this.Factory.study({ annotationTypes: jsonAnnotationTypes });
+        const study               = this.Study.create(jsonStudy);
+        const jsonParticipant     = this.Factory.participant();
+        let participant;
 
         if (isNew) {
           participant = new this.Participant(_.omit(jsonParticipant, 'id'), study);
@@ -54,21 +53,20 @@ describe('Participant', function() {
         }
 
         return {
-          jsonStudy:           study,
-          jsonAnnotationTypes: jsonAnnotationTypes,
-          jsonParticipant:     jsonParticipant,
-          annotationTypes:     annotationTypes,
-          participant:         participant
+          jsonStudy,
+          jsonAnnotationTypes,
+          jsonParticipant,
+          participant
         };
       };
 
-      this.generateJsonAnnotationTypesAndAnnotations = () => {
-        var annotationTypes = this.Factory.allAnnotationTypes(),
-            study           = this.Factory.study({ annotationTypes: annotationTypes }),
-            annotations     = annotationTypes.map((annotationType) => {
-              var value = this.Factory.valueForAnnotation(annotationType);
-              return this.Factory.annotation({ value: value }, annotationType);
-            });
+      this.generatePlainAnnotationTypesAndAnnotations = () => {
+        const annotationTypes = this.Factory.allAnnotationTypes();
+        const study           = this.Factory.study({ annotationTypes: annotationTypes });
+        const annotations     = annotationTypes.map((annotationType) => {
+          const value = this.Factory.valueForAnnotation(annotationType);
+          return this.Factory.annotation({ value: value }, annotationType);
+        });
         return {
           study: study,
           annotations: annotations
@@ -89,12 +87,12 @@ describe('Participant', function() {
   });
 
   afterEach(function() {
-    this.$httpBackend.verifyNoOutstandingExpectation();
+    this.$httpBackend.verifyNoOutstandingExpectation(false);
     this.$httpBackend.verifyNoOutstandingRequest();
   });
 
   it('constructor with no parameters has default values', function() {
-    var participant = new this.Participant();
+    const participant = new this.Participant();
 
     expect(participant.id).toBeNull();
     expect(participant.version).toBe(0);
@@ -104,68 +102,63 @@ describe('Participant', function() {
   });
 
   it('constructor with annotation parameter has valid values', function() {
-    var self               = this,
-        jsonAnnotationData = self.generateJsonAnnotationTypesAndAnnotations(),
-        study              = self.Study.create(jsonAnnotationData.study),
-        annotations,
-        participant;
+    const jsonAnnotationData = this.generatePlainAnnotationTypesAndAnnotations();
+    const study              = this.Study.create(jsonAnnotationData.study);
 
-    annotations = study.annotationTypes.map(function (annotationType) {
-      var annotation = _.find(jsonAnnotationData.annotations, { annotationTypeId: annotationType.id });
-      return self.annotationFactory.create(annotation, annotationType);
+    const annotations = study.annotationTypes.map(annotationType => {
+      const annotation = _.find(jsonAnnotationData.annotations, { annotationTypeId: annotationType.id });
+      return this.annotationFactory.create(annotation, annotationType);
     });
 
-    participant = new self.Participant({}, study, annotations);
+    const participant = new this.Participant({}, study, annotations);
 
     expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
     participant.annotations.forEach((annotation) => {
-      var jsonAnnotation = _.find(jsonAnnotationData.annotations,
-                                  { annotationTypeId: annotation.annotationTypeId }),
-          annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
+      const jsonAnnotation = _.find(jsonAnnotationData.annotations,
+                                    { annotationTypeId: annotation.annotationTypeId });
+      const annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
 
       expect(jsonAnnotation).toBeDefined();
-      self.validateAnnotationClass(annotationType, annotation);
+      this.validateAnnotationClass(annotationType, annotation);
       expect(annotation.required).toBe(annotationType.required);
     });
   });
 
   it('constructor with study parameter has valid values', function() {
-    var study = new this.Study(this.Factory.study());
-    var participant = new this.Participant({}, study);
+    const study = new this.Study(this.Factory.study());
+    const participant = new this.Participant({}, study);
 
     expect(participant.study).toEqual(study);
     expect(participant.studyId).toBe(study.id);
   });
 
   it('constructor with NO annotation parameters has valid values', function() {
-    var self = this,
-        annotationData = this.generateJsonAnnotationTypesAndAnnotations(),
-        study = this.Study.create(annotationData.study),
-        participant = new this.Participant({}, study);
+    const annotationData = this.generatePlainAnnotationTypesAndAnnotations();
+    const study = this.Study.create(annotationData.study);
+    const participant = new this.Participant({}, study);
 
     expect(participant.annotations).toBeArrayOfSize(study.annotationTypes.length);
-    participant.annotations.forEach((annotation) => {
-      var annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
-      self.validateAnnotationClass(annotationType, annotation);
+    participant.annotations.forEach(annotation => {
+      const  annotationType = _.find(study.annotationTypes, { id: annotation.annotationTypeId });
+      this.validateAnnotationClass(annotationType, annotation);
       expect(annotation.required).toBe(annotationType.required);
     });
   });
 
   it('constructor with invalid annotation parameter throws error', function() {
-    var self             = this,
-        annotationType   = new this.AnnotationType(this.Factory.annotationType()),
-        jsonStudy        = this.Factory.study({ annotationTypes: [ annotationType ]}),
-        study            = this.Study.create(jsonStudy),
-        serverAnnotation = self.Factory.annotation({ value: self.Factory.valueForAnnotation(annotationType) },
-                                                   annotationType),
-        annotation;
+    const annotationType   = new this.AnnotationType(this.Factory.annotationType());
+    const jsonStudy        = this.Factory.study({ annotationTypes: [ annotationType ]});
+    const study            = this.Study.create(jsonStudy);
+    const serverAnnotation = this.Factory.annotation(
+      { value: this.Factory.valueForAnnotation(annotationType) },
+      annotationType);
 
     // put an invalid value in serverAnnotation.annotationTypeId
-    annotation = Object.assign(this.annotationFactory.create(serverAnnotation, annotationType),
-                          { annotationTypeId: self.Factory.stringNext() });
-    expect(function () {
-      return new self.Participant({}, study, [ annotation ]);
-    }).toThrowError(/annotation types not found/);
+    const annotation = Object.assign(this.annotationFactory.create(serverAnnotation, annotationType),
+                                     { annotationTypeId: this.Factory.stringNext() });
+    expect(
+      () => new this.Participant({}, study, [ annotation ])
+    ).toThrowError(/annotation types not found/);
   });
 
   describe('when creating', function() {
@@ -177,30 +170,28 @@ describe('Participant', function() {
     });
 
     it('fails when creating from an object with invalid keys', function() {
-      var self = this,
-          serverObj = { tmp: 1 };
-      expect(function () {
-        self.Participant.create(serverObj);
-      }).toThrowError(/Missing required property/);
+      const serverObj = { tmp: 1 };
+      expect(
+        ()  => this.Participant.create(serverObj)
+      ).toThrowError(/Missing required property/);
     });
 
     it('fails when creating from an object and an annotation has invalid keys', function() {
-      var self = this,
-          study = this.Factory.study(),
-          jsonParticipant = this.Factory.participant({ studyId: study.id });
+      const study = this.Factory.study();
+      const jsonParticipant = this.Factory.participant({ studyId: study.id });
 
       jsonParticipant.annotations = [{ tmp: 1 }];
-      expect(function () {
-        self.Participant.create(jsonParticipant);
-      }).toThrowError(/annotations.*Missing required property/);
+      expect(
+        () => this.Participant.create(jsonParticipant)
+      ).toThrowError(/annotations.*Missing required property/);
     });
 
     it('fails when creating async from an object with invalid keys', function() {
-      var serverObj = { tmp: 1 },
-          catchTriggered = false;
+      const serverObj = { tmp: 1 };
+      let catchTriggered = false;
 
       this.Participant.asyncCreate(serverObj)
-        .catch(function (err) {
+        .catch(err => {
           expect(err.message).toContain('Missing required property');
           catchTriggered = true;
         });
@@ -211,8 +202,8 @@ describe('Participant', function() {
   });
 
   it('can retrieve a single participant', function() {
-    var study = this.Factory.study(),
-        participant = this.Factory.participant({ studyId: study.id });
+    const study = this.Factory.study();
+    const participant = this.Factory.participant({ studyId: study.id });
 
     this.$httpBackend.whenGET(this.url('participants', participant.slug))
       .respond(this.reply(participant));
@@ -225,8 +216,8 @@ describe('Participant', function() {
   });
 
   it('can retrieve a single participant by uniqueId', function() {
-    var study = this.Factory.study(),
-        participant = this.Factory.participant({ studyId: study.id });
+    const study = this.Factory.study();
+    const participant = this.Factory.participant({ studyId: study.id });
 
     this.$httpBackend.whenGET(this.url('participants', participant.slug))
       .respond(this.reply(participant));
@@ -238,10 +229,10 @@ describe('Participant', function() {
   });
 
   it('can add a participant', function() {
-    var study = this.Factory.study(),
-        jsonParticipant = this.Factory.participant({ studyId: study.id }),
-        participant = new this.Participant(_.omit(jsonParticipant, 'id')),
-        reqJson = addJson(participant);
+    const study = this.Factory.study();
+    const jsonParticipant = this.Factory.participant({ studyId: study.id });
+    const participant = new this.Participant(_.omit(jsonParticipant, 'id'));
+    const reqJson = addJson(participant);
 
     this.$httpBackend.expectPOST(this.url('participants', study.id), reqJson)
       .respond(this.reply(jsonParticipant));
@@ -253,36 +244,35 @@ describe('Participant', function() {
   });
 
   it('can add a participant with annotations', function() {
-    var entities = this.getParticipantEntities(true),
-        reqJson = addJson(entities.participant);
+    const fixture = this.fixture(true);
+    const reqJson = addJson(fixture.participant);
 
-    this.$httpBackend.expectPOST(this.url('participants', entities.jsonStudy.id), reqJson)
-      .respond(this.reply(entities.jsonParticipant));
+    this.$httpBackend.expectPOST(this.url('participants', fixture.jsonStudy.id), reqJson)
+      .respond(this.reply(fixture.jsonParticipant));
 
-    entities.participant.add()
+    fixture.participant.add()
       .then((replyParticipant) => {
-        expect(replyParticipant.id).toEqual(entities.jsonParticipant.id);
+        expect(replyParticipant.id).toEqual(fixture.jsonParticipant.id);
       });
     this.$httpBackend.flush();
   });
 
   it('can not add a participant with empty required annotations', function() {
-    var biobankApi = this.$injector.get('biobankApi'),
-        jsonAnnotationTypes = this.Factory.allAnnotationTypes(),
-        replyParticipant = this.Factory.participant();
+    const biobankApi = this.$injector.get('biobankApi');
+    const jsonAnnotationTypes = this.Factory.allAnnotationTypes();
+    const replyParticipant = this.Factory.participant();
 
     spyOn(biobankApi, 'post').and.returnValue(this.$q.when(replyParticipant));
 
     jsonAnnotationTypes.forEach((serverAnnotationType) => {
-      var annotationType  = new this.AnnotationType(serverAnnotationType),
-          jsonStudy       = this.Factory.study({ annotationTypes: [ annotationType ]}),
-          study           = this.Study.create(jsonStudy),
-          jsonParticipant = this.Factory.participant(),
-          participant;
+      const annotationType  = new this.AnnotationType(serverAnnotationType);
+      const jsonStudy       = this.Factory.study({ annotationTypes: [ annotationType ]});
+      const study           = this.Study.create(jsonStudy);
+      const jsonParticipant = this.Factory.participant();
 
       jsonParticipant.annotations[0] = this.Factory.annotation({value: undefined}, annotationType);
 
-      participant = new this.Participant(_.omit(jsonParticipant, 'id'), study);
+      const participant = new this.Participant(_.omit(jsonParticipant, 'id'), study);
 
       participant.annotations.forEach((annotation) => {
         annotation.required = true;
@@ -328,17 +318,17 @@ describe('Participant', function() {
 
   describe('updates to annotations', function () {
 
-    var context = {};
+    const context = {};
 
     beforeEach(function () {
-      var jsonAnnotationType = this.Factory.annotationType(),
-          jsonStudy = this.Factory.study({ annotationTypes: [ jsonAnnotationType ]}),
-          jsonParticipant = this.Factory.participant({
-            studyId: jsonStudy.id,
-            annotationTypes: [ jsonAnnotationType ]
-          }),
-          study = this.Study.create(jsonStudy),
-          participant = new this.Participant(jsonParticipant, study);
+      const jsonAnnotationType = this.Factory.annotationType();
+      const jsonStudy = this.Factory.study({ annotationTypes: [ jsonAnnotationType ]});
+      const jsonParticipant = this.Factory.participant({
+        studyId: jsonStudy.id,
+        annotationTypes: [ jsonAnnotationType ]
+      });
+      const study = this.Study.create(jsonStudy);
+      const participant = new this.Participant(jsonParticipant, study);
 
       context.entityType     = this.Participant;
       context.entity         = participant;
@@ -364,8 +354,8 @@ describe('Participant', function() {
   }
 
   function addJson(participant) {
-    return Object.assign(_.pick(participant, 'studyId', 'uniqueId'),
-                    { annotations: annotationsForCommand(participant) } );
+    return Object.assign(_.pick(participant, 'uniqueId'),
+                         { annotations: annotationsForCommand(participant) } );
   }
 
 });

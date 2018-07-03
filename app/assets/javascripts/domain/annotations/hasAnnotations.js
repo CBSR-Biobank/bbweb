@@ -63,12 +63,17 @@ function hasAnnotationsFactory($q,
       annotationTypes = annotationTypes || [];
       this.annotations = this.annotations || [];
 
-      // make sure the annotations ids match up with the corresponding annotation types
-      const differentIds = _.difference(_.map(this.annotations, 'annotationTypeId'),
-                                        _.map(annotationTypes, 'id'));
+      const validIds = annotationTypes.map(at => at.id);
+      const invalidIds = [];
 
-      if (differentIds.length > 0) {
-        throw new DomainError('annotation types not found: ' + differentIds);
+      this.annotations.forEach(a => {
+        if (!validIds.includes(a.annotationTypeId)) {
+          invalidIds.push(a.annotationTypeId);
+        }
+      });
+
+      if (invalidIds.length > 0) {
+        throw new DomainError('annotation types not found: ' + invalidIds.join(', '));
       }
 
       this.annotations = annotationTypes.map((annotationType) => {

@@ -40,21 +40,24 @@ function ParticipantAddController($state,
   function submit(participant) {
     // convert the data from the form to data expected by REST API
     participant.add()
-      .then(submitSuccess)
-      .catch(function(error) {
-        return domainNotificationService.updateErrorModal(error, gettextCatalog.getString('participant'));
-      }).catch(function () {
+      .then(reply => {
+        // the reply contains the id assigned to this new participant
+        //
+        // therefore, the state data can be updated
+        notificationsService.submitSuccess();
+        $state.go(
+          'home.collection.study.participant.summary',
+          {
+            studySlug:       vm.study.slug,
+            participantSlug: reply.slug
+          },
+          { reload: true });
+      })
+      .catch(error =>
+             domainNotificationService.updateErrorModal(error, gettextCatalog.getString('participant')))
+      .catch(() => {
         $state.go('home.collection.study', { studyId: vm.study.id });
       });
-  }
-
-  function submitSuccess(reply) {
-    // the reply contains the id assigned to this new participant, therefore, the state data can be updated
-    notificationsService.submitSuccess();
-    $state.go(
-      'home.collection.study.participant.summary',
-      { studyId: vm.study.id, participantId: reply.id },
-      { reload: true });
   }
 
   function cancel() {
@@ -81,4 +84,27 @@ const participantAddComponent = {
   }
 };
 
-export default ngModule => ngModule.component('participantAdd', participantAddComponent)
+function resolveParticipantUniqueId($transition$) {
+  'ngInject';
+  return $transition$.params().uniqueId;
+}
+
+function stateConfig($stateProvider, $urlRouterProvider) {
+  'ngInject';
+  $stateProvider.state('home.collection.study.participantAdd', {
+    url: '/participants/add/{uniqueId}',
+    resolve: {
+      uniqueId: resolveParticipantUniqueId
+    },
+    views: {
+      'main@': 'participantAdd'
+    }
+  });
+  $urlRouterProvider.otherwise('/');
+}
+
+export default ngModule => {
+  ngModule
+    .config(stateConfig)
+    .component('participantAdd', participantAddComponent);
+}

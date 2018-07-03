@@ -27,21 +27,12 @@ function collectionUiRouterConfig($stateProvider) {
       }
     })
     .state('home.collection.study', {
-      url: '/study/:studySlug',
+      url: '/:studySlug',
       resolve: {
         study: resolveStudy
       },
       views: {
         'main@': 'participantGet'
-      }
-    })
-    .state('home.collection.study.participantAdd', {
-      url: '/add/{uniqueId}',
-      resolve: {
-        uniqueId: resolveParticipantUniqueId
-      },
-      views: {
-        'main@': 'participantAdd'
       }
     })
     .state('home.collection.study.participant', {
@@ -105,11 +96,6 @@ function collectionUiRouterConfig($stateProvider) {
     const slug = $transition$.params().studySlug
     return Study.get(slug)
       .catch(resourceErrorService.goto404(`study slug not found: ${slug}`))
-  }
-
-  /* @ngInject */
-  function resolveParticipantUniqueId($transition$) {
-    return $transition$.params().uniqueId;
   }
 
   /* @ngInject */

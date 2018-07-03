@@ -44,33 +44,31 @@ function ParticipantGetController($q,
     if (vm.uniqueId.length > 0) {
       const slug = biobankApi.slugify(vm.uniqueId)
       Participant.get(slug)
-        .then(function (participant) {
+        .then(participant => {
           $state.go('home.collection.study.participant.summary', { participantSlug: participant.slug });
         })
-        .catch(participantGetError);
-    }
-  }
+        .catch(error => {
+          if (error.status !== 'error') {
+            $log.error('expected an error reply: ', JSON.stringify(error));
+            return;
+          }
 
-  function participantGetError(error) {
-    if (error.status !== 'error') {
-      $log.error('expected an error reply: ', JSON.stringify(error));
-      return;
-    }
-
-    if (error.message.match(patientDoesNotExistRe)) {
-      createParticipantModal(vm.uniqueId);
-    } else if (error.message.match(studyMismatchRe)) {
-      modalService.modalOk(
-        gettextCatalog.getString('Duplicate unique ID'),
-        gettextCatalog.getString(
-          'Unique ID <strong>{{id}}</strong> is already in use by a participant ' +
-            'in another study. Please use a different one.',
-          { id: vm.uniqueId }))
-        .then(function () {
-          vm.uniqueId = '';
+          if (error.message.match(patientDoesNotExistRe)) {
+            createParticipantModal(vm.uniqueId);
+          } else if (error.message.match(studyMismatchRe)) {
+            modalService.modalOk(
+              gettextCatalog.getString('Duplicate unique ID'),
+              gettextCatalog.getString(
+                'Unique ID <strong>{{id}}</strong> is already in use by a participant ' +
+                  'in another study. Please use a different one.',
+                { id: vm.uniqueId }))
+              .then(function () {
+                vm.uniqueId = '';
+              });
+          } else {
+            $log.error('could not get participant by uniqueId: ', JSON.stringify(error));
+          }
         });
-    } else {
-      $log.error('could not get participant by uniqueId: ', JSON.stringify(error));
     }
   }
 
