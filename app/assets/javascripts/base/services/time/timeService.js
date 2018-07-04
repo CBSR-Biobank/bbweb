@@ -86,6 +86,10 @@ function dateToLocal(date) {
     throw new Error('date is invalid');
   }
 
+  if (! (date instanceof Date) ) {
+    throw new Error('date is not a real date');
+  }
+
   date.setUTCSeconds(0);
   date.setUTCMilliseconds(0);
   return moment(date).local();
