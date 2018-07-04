@@ -71,7 +71,7 @@ describe('collectionSpecimenDefinitionMenuComponent', function() {
       expect(hyperlinks.length).toBe(2);
       _.range(hyperlinks.length).forEach(index => {
         const hyperlinkText = hyperlinks.eq(index).text().trim();
-        if (hyperlinkText === 'Update this specimen') {
+        if (hyperlinkText === 'View / update this specimen') {
           updateHyperlink = hyperlinks.eq(index);
         }
         if (hyperlinkText === 'Remove this specimen') {
