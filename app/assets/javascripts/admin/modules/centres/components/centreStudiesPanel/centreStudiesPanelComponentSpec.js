@@ -23,7 +23,6 @@ describe('Component: centreStudiesPanel', function() {
                               'Centre',
                               'CentreState',
                               'Study',
-                              'EntityViewer',
                               'modalService',
                               'Factory');
 
