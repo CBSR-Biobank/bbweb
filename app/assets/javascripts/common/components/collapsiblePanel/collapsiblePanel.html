@@ -3,16 +3,18 @@
     <h3 class="panel-title">
       {{vm.heading}}
       <span class="pull-right" ng-if="vm.collapsible">
-        <a data-toggle="collapse"
-           class="btn btn-xs btn-default"
-           ng-click="vm.panelButtonClicked()">
+        <button type="button"
+                class="btn btn-xs btn-default"
+                ng-click="vm.panelButtonClicked()">
           <i class="glyphicon"
              ng-class="vm.panelOpen ? 'glyphicon-chevron-down' : 'glyphicon-chevron-right'"></i>
         </a>
       </span>
     </h3>
   </div>
-  <div class="panel-collapse collapse"
+  <div class="panel-collapse collapse in"
+       uib-collapse="!vm.panelOpen"
+       aria-expanded="true"
        uib-collapse="!vm.panelOpen"
        ng-transclude>
   </div>

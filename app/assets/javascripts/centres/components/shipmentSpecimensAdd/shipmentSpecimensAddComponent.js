@@ -35,7 +35,8 @@ class ShipmentSpecimensAddController extends ShipmentSpecimensController {
       domainNotificationService,
       notificationsService,
       Specimen
-    })
+    });
+    this.panelOpen = true;
   }
 
   $onInit() {
@@ -47,6 +48,10 @@ class ShipmentSpecimensAddController extends ShipmentSpecimensController {
       title: this.gettextCatalog.getString('Remove specimen'),
       icon:  'glyphicon-remove text-danger'
     }]
+  }
+
+  panelButtonClicked() {
+    this.panelOpen = !this.panelOpen;
   }
 
   addSpecimens() {
