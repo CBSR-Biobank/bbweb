@@ -187,6 +187,7 @@ describe('shipmentAddItemsComponent', function() {
     var shipment = this.createShipment();
 
     spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
+    spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
     spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
     spyOn(this.notificationsService, 'success').and.returnValue(null);
     spyOn(this.$state, 'go').and.returnValue(null);
@@ -203,6 +204,7 @@ describe('shipmentAddItemsComponent', function() {
   it('removal of a shipment can be cancelled', function() {
     var shipment = this.createShipment();
 
+    spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
     spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
     this.createController(shipment);
@@ -216,6 +218,7 @@ describe('shipmentAddItemsComponent', function() {
   it('removeShipment does nothing if shipment is not defined', function() {
     var shipment = this.createShipment();
 
+    spyOn(this.ShipmentSpecimen, 'list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
     spyOn(this.Shipment.prototype, 'remove').and.returnValue(this.$q.when(true));
 
     this.createController(shipment);

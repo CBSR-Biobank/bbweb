@@ -110,8 +110,8 @@ class UnpackedShipmentViewController extends TabbedPageController {
     this.modalService.modalOkCancel(
       this.gettextCatalog.getString('Please confirm'),
       this.gettextCatalog.getString('Are you sure you want to place this shipment in <b>Received</b> state?'))
-      .then(() => this.shipment.receive(this.shipment.timeReceived))
-      .catch(err => this.notificationsService.updateError(err))
+      .then(() => this.shipment.receive(this.shipment.timeReceived)
+            .catch(err => this.notificationsService.updateError(err)))
       .then(() => {
         this.$state.go('home.shipping.shipment', { shipmentId: this.shipment.id }, { reload: true });
       });
@@ -121,13 +121,10 @@ class UnpackedShipmentViewController extends TabbedPageController {
     this.ShipmentSpecimen.list(this.shipment.id,
                                { filter: 'state:out:' + this.ShipmentItemState.PRESENT })
       .then(pagedResult => {
-        const hasNonPresentSpecimens = pagedResult.items.length > 0;
-
-        if (hasNonPresentSpecimens) {
+        if (pagedResult.total > 0) {
           this.cannotGoBackToReceivedModal();
           return;
         }
-
         this.backToReceived();
       });
   }
@@ -140,13 +137,15 @@ class UnpackedShipmentViewController extends TabbedPageController {
   }
 
   completeShipmentConfirm() {
-    this.modalInput.dateTime(this.gettextCatalog.getString('Date and time shipment was completed'),
-                             this.gettextCatalog.getString('Time completed'),
-                             this.timeCompleted,
-                             { required: true }).result
+    this.modalInput
+      .dateTime(this.gettextCatalog.getString('Date and time shipment was completed'),
+                this.gettextCatalog.getString('Time completed'),
+                this.timeCompleted,
+                { required: true })
+      .result
       .then(timeCompleted =>
-            this.shipment.complete(this.timeService.dateAndTimeToUtcString(timeCompleted)))
-      .catch(this.notificationsService.updateError)
+            this.shipment.complete(this.timeService.dateAndTimeToUtcString(timeCompleted))
+            .catch(error => this.notificationsService.updateError(error)))
       .then(() => {
         this.$state.go('home.shipping.shipment', { shipmentId: this.shipment.id }, { reload: true });
       });

@@ -22,9 +22,9 @@ function ShipmentViewPackedController($q,
   //--
 
   function onInit() {
-    vm.timeSent     = new Date();
-    vm.sendShipment = sendShipment;
-    vm.addMoreItems = addMoreItems;
+    vm.timeSent      = new Date();
+    vm.sendShipment  = sendShipment;
+    vm.backToCreated = backToCreated;
 
     vm.progressInfo = shipmentSendTasksService.getTaskData().map((taskInfo) => {
       taskInfo.status = true;
@@ -37,30 +37,29 @@ function ShipmentViewPackedController($q,
                         gettextCatalog.getString('Time sent'),
                         vm.timeSent,
                         { required: true }).result
-      .then(function (timeSent) {
-        return vm.shipment.send(timeService.dateAndTimeToUtcString(timeSent))
-          .then(function () {
-            $state.go('home.shipping');
-          })
-          .catch(function (err) {
-            if (err.message === 'TimeSentBeforePacked') {
-              err.message = gettextCatalog.getString('The sent time is before the packed time');
-            }
+      .then(timeSent =>
+            vm.shipment.send(timeService.dateAndTimeToUtcString(timeSent))
+            .catch(function (err) {
+              if (err.message === 'TimeSentBeforePacked') {
+                err.message = gettextCatalog.getString('The sent time is before the packed time');
+              }
             notificationsService.updateError(err);
-          });
+            }))
+      .then(function () {
+        $state.go('home.shipping');
       });
   }
 
-  function addMoreItems() {
+  function backToCreated() {
     modalService.modalOkCancel(
       gettextCatalog.getString('Please confirm'),
       gettextCatalog.getString('Are you sure you want to add more items to this shipment?'))
-      .then(() => vm.shipment.created())
+      .then(() => vm.shipment.created()
+            .catch(error => {
+              notificationsService.updateError(error);
+            }))
       .then(() => {
         $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
-      })
-      .catch(error => {
-        notificationsService.updateError(error);
       });
   }
 }

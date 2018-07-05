@@ -7,8 +7,6 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import angular from 'angular';
-
 /*
  * Allows the user to add items to a shipment.
  *
@@ -16,11 +14,13 @@ import angular from 'angular';
  */
 /* @ngInject */
 function ShipmentAddItemsController($q,
+                                    $log,
                                     $state,
                                     gettextCatalog,
                                     shipmentSendTasksService,
                                     Shipment,
                                     ShipmentState,
+                                    ShipmentSpecimen,
                                     modalInput,
                                     modalService,
                                     timeService,
@@ -60,15 +60,16 @@ function ShipmentAddItemsController($q,
   }
 
   function validateStateChangeAllowed() {
-    return Shipment.get(vm.shipment.id).then(function (shipment) {
-      if (shipment.specimenCount <= 0) {
-        modalService.modalOk(gettextCatalog.getString('Shipment has no specimens'),
-                             gettextCatalog.getString('Please add specimens to this shipment fist.'));
-        return $q.reject(false);
-      }
+    return Shipment.get(vm.shipment.id)
+      .then(shipment => {
+        if (shipment.specimenCount <= 0) {
+          modalService.modalOk(gettextCatalog.getString('Shipment has no specimens'),
+                               gettextCatalog.getString('Please add specimens to this shipment fist.'));
+          return $q.reject(false);
+        }
 
-      return $q.when(true);
-    });
+        return $q.when(true);
+      });
   }
 
   /*
@@ -80,56 +81,66 @@ function ShipmentAddItemsController($q,
                                  gettextCatalog.getString('Time packed'),
                                  vm.timePacked,
                                  { required: true }).result
-        .then(timePacked => vm.shipment.pack(timeService.dateAndTimeToUtcString(timePacked)))
-        .catch(err => notificationsService.updateError(err))
+        .then(timePacked => vm.shipment.pack(timeService.dateAndTimeToUtcString(timePacked))
+              .catch(err => notificationsService.updateError(err)))
         .then(shipment => $state.go('home.shipping.shipment', { shipmentId: shipment.id}));
     });
   }
 
   function tagAsSent() {
-    return validateStateChangeAllowed().then(function () {
-      vm.timePacked = new Date();
-      vm.timeSent = new Date();
-      return shipmentSkipToSentModalService.open().result
-        .then(function (timeResult) {
-          return vm.shipment.skipToStateSent(timeService.dateAndTimeToUtcString(timeResult.timePacked),
-                                             timeService.dateAndTimeToUtcString(timeResult.timeSent))
-            .then(function () {
-              return $state.go('home.shipping.shipment',
-                               { shipmentId: vm.shipment.id },
-                               { reload: true });
-            })
-            .catch(function (err) {
-              if (err.message === 'TimeSentBeforePacked') {
-                err.message = 'the time sent is before the time shipment was packed';
+    return validateStateChangeAllowed()
+      .then(() => {
+        vm.timePacked = new Date();
+        vm.timeSent = new Date();
+        return shipmentSkipToSentModalService.open()
+          .result
+          .then(timeResult =>
+                vm.shipment.skipToStateSent(timeService.dateAndTimeToUtcString(timeResult.timePacked),
+                                            timeService.dateAndTimeToUtcString(timeResult.timeSent))
+              .catch(function (err) {
+                if (err.message === 'TimeSentBeforePacked') {
+                  err.message = 'the time sent is before the time shipment was packed';
               }
-              notificationsService.updateError(err);
-            });
-        });
-    });
+                notificationsService.updateError(err);
+              }))
+          .then(() => {
+            $state.go('home.shipping.shipment', { shipmentId: vm.shipment.id }, { reload: true });
+          });
+      });
   }
 
   function removeShipment() {
     if (!vm.shipment) { return; }
 
-    domainNotificationService
-      .removeEntity(
-        doRemove,
-        gettextCatalog.getString('Remove shipment'),
-        gettextCatalog.getString('Are you sure you want to remove shipment {{trackingNumber}}?',
-                                 { trackingNumber: vm.shipment.trackingNumber }),
-        gettextCatalog.getString('Remove failed'),
-        gettextCatalog.getString('Shipment {{trackingNumber}} cannot be removed',
-                                 { trackingNumber: vm.shipment.trackingNumber }))
-      .catch(angular.noop);
+    const doRemove = () => vm.shipment.remove()
+          .then(() => {
+            notificationsService.success(gettextCatalog.getString('Shipment removed'));
+            $state.go('home.shipping');
+          });
 
-    function doRemove() {
-      return vm.shipment.remove()
-        .then(() => {
-          notificationsService.success(gettextCatalog.getString('Shipment removed'));
-          $state.go('home.shipping');
-        });
-    }
+    ShipmentSpecimen.list(vm.shipment.id)
+      .then(pagedResult => {
+        if (pagedResult.total > 0) {
+          modalService.modalOk(gettextCatalog.getString('Cannot remove this shipment'),
+                               gettextCatalog.getString('This shipment has specimens. Remove specimens first.'));
+          return;
+        }
+
+        domainNotificationService
+          .removeEntity(
+            doRemove,
+            gettextCatalog.getString('Remove shipment'),
+            gettextCatalog.getString('Are you sure you want to remove shipment {{trackingNumber}}?',
+                                     { trackingNumber: vm.shipment.trackingNumber }),
+            gettextCatalog.getString('Remove failed'),
+            gettextCatalog.getString('Shipment {{trackingNumber}} cannot be removed',
+                                     { trackingNumber: vm.shipment.trackingNumber }))
+          .catch(error => {
+            if (typeof error !== 'string') {
+              $log.error(error)
+            }
+          });
+      });
   }
 }
 

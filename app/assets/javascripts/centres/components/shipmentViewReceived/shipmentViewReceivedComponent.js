@@ -37,17 +37,16 @@ function ShipmentViewReceivedController($q,
                         gettextCatalog.getString('Time unpacked'),
                         vm.timeUnpacked,
                         { required: true }).result
-      .then(function (timeUnpacked) {
-        return vm.shipment.unpack(timeService.dateAndTimeToUtcString(timeUnpacked))
-          .then(function () {
-            $state.go('home.shipping.shipment.unpack.info', { shipmentId: vm.shipment.id });
-          })
-          .catch(function (err) {
-            if (err.message === 'TimeUnpackedBeforeReceived') {
-              err.message = gettextCatalog.getString('The unpacked time is before the received time');
-            }
+      .then(timeUnpacked =>
+            vm.shipment.unpack(timeService.dateAndTimeToUtcString(timeUnpacked))
+            .catch(function (err) {
+              if (err.message === 'TimeUnpackedBeforeReceived') {
+                err.message = gettextCatalog.getString('The unpacked time is before the received time');
+              }
             notificationsService.updateError(err);
-          });
+            }))
+      .then(function () {
+        $state.go('home.shipping.shipment.unpack.info', { shipmentId: vm.shipment.id });
       });
   }
 
@@ -55,14 +54,12 @@ function ShipmentViewReceivedController($q,
     modalService.modalOkCancel(
       gettextCatalog.getString('Please confirm'),
       gettextCatalog.getString('Are you sure you want to place this shipment in <b>sent</b> state?'))
-      .then(function () {
-        return vm.shipment.send(vm.shipment.timeSent);
-      })
-      .then(function () {
+      .then(() => vm.shipment.send(vm.shipment.timeSent)
+            .catch(error => {
+              notificationsService.updateError(error);
+            }))
+      .then(() => {
         $state.reload();
-      })
-      .catch(error => {
-        notificationsService.updateError(error);
       });
   }
 }

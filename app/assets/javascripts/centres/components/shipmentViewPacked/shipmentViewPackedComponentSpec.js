@@ -112,7 +112,7 @@ describe('shipmentViewPackedComponent', function() {
 
     it('user can add more items to the shipment', function() {
       spyOn(this.Shipment.prototype, 'created').and.returnValue(this.$q.when(this.shipment));
-      this.controller.addMoreItems();
+      this.controller.backToCreated();
       this.scope.$digest();
       expect(this.$state.go).toHaveBeenCalledWith('home.shipping.addItems',
                                                   { shipmentId: this.shipment.id});
@@ -121,7 +121,7 @@ describe('shipmentViewPackedComponent', function() {
     it('user is informed if more items cannot be added to the shipment', function() {
       spyOn(this.Shipment.prototype, 'created').and.returnValue(this.$q.reject('simulated error'));
       spyOn(this.notificationsService, 'updateError').and.returnValue(null);
-      this.controller.addMoreItems();
+      this.controller.backToCreated();
       this.scope.$digest();
       expect(this.notificationsService.updateError).toHaveBeenCalled();
     });

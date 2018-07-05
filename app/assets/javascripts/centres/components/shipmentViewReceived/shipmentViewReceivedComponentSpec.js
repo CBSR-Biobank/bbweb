@@ -31,7 +31,7 @@ describe('shipmentViewReceivedComponent', function() {
       this.createController = (shipment) =>
         this.createControllerInternal(
           '<shipment-view-received shipment="vm.shipment"></shipment-view-received>',
-          { shipment: shipment },
+          { shipment },
           'shipmentViewReceived');
     });
   });
@@ -75,25 +75,24 @@ describe('shipmentViewReceivedComponent', function() {
     });
 
     it('user is informed if shipment cannot be unpacked', function() {
-      var self = this,
-          errorMsgs = [
-            'TimeUnpackedBeforeReceived',
-            'simulated error'
-          ];
+      var errorMsgs = [
+        'TimeUnpackedBeforeReceived',
+        'simulated error'
+      ];
+
+      spyOn(this.Shipment, 'get').and.returnValue(this.$q.when(this.shipment));
 
       spyOn(this.toastr, 'error').and.returnValue(null);
-      errorMsgs.forEach(function (errMsg, index) {
-        var args;
+      errorMsgs.forEach((errMsg, index) => {
+        this.Shipment.prototype.unpack =
+          jasmine.createSpy().and.returnValue(this.$q.reject(errMsg));
 
-        self.Shipment.prototype.unpack =
-          jasmine.createSpy().and.returnValue(self.$q.reject(errMsg));
-
-        self.controller.unpackShipment();
-        self.scope.$digest();
-        expect(self.toastr.error.calls.count()).toBe(index + 1);
+        this.controller.unpackShipment();
+        this.scope.$digest();
+        expect(this.toastr.error.calls.count()).toBe(index + 1);
 
         if (errMsg === 'TimeReceivedBeforeSent') {
-          args = self.toastr.error.calls.argsFor(index);
+          const args = this.toastr.error.calls.argsFor(index);
           expect(args[0]).toContain('The unpacked time is before the received time');
         }
       });

@@ -7,6 +7,8 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
+import angular from 'angular';
+
 /*
  * Controller for this component.
  */
@@ -42,12 +44,13 @@ function ShipmentViewSentController($q,
     modalService.modalOkCancel(
       gettextCatalog.getString('Please confirm'),
       gettextCatalog.getString('Are you sure you want to place this shipment in <b>Packed</b> state?'))
-      .then(() => vm.shipment.pack(vm.shipment.timePacked))
-      .then(function () {
+      .then(() =>
+            vm.shipment.pack(vm.shipment.timePacked)
+            .catch(error => {
+              notificationsService.updateError(error);
+            }))
+      .then(() => {
         $state.reload();
-      })
-      .catch(error => {
-        notificationsService.updateError(error);
       });
   }
 
@@ -55,12 +58,13 @@ function ShipmentViewSentController($q,
     modalService.modalOkCancel(
       gettextCatalog.getString('Please confirm'),
       gettextCatalog.getString('Are you sure you want to tag this shipment as <b>Lost</b>?'))
-      .then(() => vm.shipment.lost())
+      .then(() =>
+            vm.shipment.lost()
+            .catch(error => {
+              notificationsService.updateError(error);
+            }))
       .then(() => {
         $state.reload();
-      })
-      .catch(error => {
-        notificationsService.updateError(error);
       });
   }
 
@@ -69,40 +73,40 @@ function ShipmentViewSentController($q,
                         gettextCatalog.getString('Time received'),
                         vm.timeReceived,
                         { required: true }).result
-      .then(function (timeReceived) {
-        return vm.shipment.receive(timeService.dateAndTimeToUtcString(timeReceived))
-          .then(function () {
-            $state.reload();
-          })
-          .catch(function (err) {
-            if (err.message === 'TimeReceivedBeforeSent') {
-              err.message = gettextCatalog.getString('The received time is before the sent time');
-            }
+      .then(timeReceived =>
+            vm.shipment.receive(timeService.dateAndTimeToUtcString(timeReceived))
+            .catch(function (err) {
+              if (err.message === 'TimeReceivedBeforeSent') {
+                err.message = gettextCatalog.getString('The received time is before the sent time');
+              }
             notificationsService.updateError(err);
-          });
+            }))
+      .then(function () {
+        $state.reload();
       });
   }
 
   function unpackShipment() {
     return shipmentSkipToUnpackedModalService.open().result
-      .then(function (timeResult) {
-        return vm.shipment.skipToStateUnpacked(timeService.dateAndTimeToUtcString(timeResult.timeReceived),
-                                               timeService.dateAndTimeToUtcString(timeResult.timeUnpacked))
-          .then(function (shipment) {
-            return $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id});
-          })
-          .catch(function (err) {
-            var newErr = {};
-            if (err.message === 'TimeReceivedBeforeSent') {
-              newErr.message =
-                gettextCatalog.getString('The received time is before the sent time');
-            } else if (err.message === 'TimeUnpackedBeforeReceived') {
-              newErr.message =
-                gettextCatalog.getString('The unpacked time is before the received time');
-            }
-            notificationsService.updateError(newErr);
-          });
-      });
+      .then(timeResult =>
+            vm.shipment.skipToStateUnpacked(timeService.dateAndTimeToUtcString(timeResult.timeReceived),
+                                            timeService.dateAndTimeToUtcString(timeResult.timeUnpacked))
+            .catch(function (err) {
+              const newErr = {};
+              if (err.message === 'TimeReceivedBeforeSent') {
+                newErr.message =
+                  gettextCatalog.getString('The received time is before the sent time');
+              } else if (err.message === 'TimeUnpackedBeforeReceived') {
+                newErr.message =
+                  gettextCatalog.getString('The unpacked time is before the received time');
+              }
+              notificationsService.updateError(newErr);
+              return $q.reject(newErr);
+            }))
+      .then(shipment => {
+        $state.go('home.shipping.shipment.unpack.info', { shipmentId: shipment.id});
+      })
+      .catch(angular.noop);
   }
 }
 
