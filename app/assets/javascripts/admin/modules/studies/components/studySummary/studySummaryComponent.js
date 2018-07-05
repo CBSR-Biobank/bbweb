@@ -39,7 +39,7 @@ function StudySummaryController($scope,
       vm.isEnableAllowed = enableAllowed;
     });
 
-    vm.stateLabelFunc  = studyStateLabelService.stateToLabelFunc(vm.study.state);
+    vm.stateLabelFunc  = () => studyStateLabelService.stateToLabelFunc(vm.study.state)();
   }
 
   function changeState(stateAction) {
@@ -69,9 +69,8 @@ function StudySummaryController($scope,
     body += stateAction + ' study ' + vm.study.name + '?';
 
     modalService.modalOkCancel(gettextCatalog.getString('Confirm study state change'), body)
-      .then(function () {
-        return vm.study[stateAction]();
-      }).then(function (study) {
+      .then(() =>  vm.study[stateAction]())
+      .then(study => {
         vm.study = study;
         notificationsService.success('The study\'s state has been updated.', null, 2000);
       });

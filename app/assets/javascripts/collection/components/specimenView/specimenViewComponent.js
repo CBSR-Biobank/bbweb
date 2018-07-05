@@ -47,7 +47,7 @@ class SpecimenViewController {
         () => this.specimen.inventoryId)
     ];
 
-    this.stateLabelFunc  = this.specimenStateLabelService.stateToLabelFunc(this.specimen.state);
+    this.stateLabelFunc = () => this.specimenStateLabelService.stateToLabelFunc(this.specimen.state)();
   }
 
   editParticipant() {

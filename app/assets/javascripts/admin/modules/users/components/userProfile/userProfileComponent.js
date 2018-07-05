@@ -62,7 +62,7 @@ class UserProfileController {
 
     this.studyMemberships  = '';
     this.centreMemberships = '';
-    this.stateLabelFunc    = this.userStateLabelService.stateToLabelFunc(this.user.state);
+    this.stateLabelFunc    = () => this.userStateLabelService.stateToLabelFunc(this.user.state)();
 
     if (this.user.membership) {
       if (this.user.membership.isForAllStudies()) {

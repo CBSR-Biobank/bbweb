@@ -7,41 +7,43 @@
  * @copyright 2018 Canadian BioSample Repository (CBSR)
  */
 
-import _ from 'lodash'
-
 /*
  * Controller for this component.
  */
-function StatusLineController() {
-  var vm = this;
-  vm.$onInit = onInit;
+class StatusLineController {
 
-  //--
+  $onInit() {
+    if ((this.useLabels === undefined) || this.useLabels) {
+      this.useLabels = true;
 
-  function onInit() {
-    if (_.isUndefined(vm.useLabels) || vm.useLabels) {
-      vm.useLabels = true;
-
-      if (_.isUndefined(vm.class)) {
-        vm.class = 'label-default';
+      if (this.class === undefined) {
+        this.class = 'label-default';
       }
-    } else if (_.isUndefined(vm.class)) {
-      vm.class = 'text-info';
+    } else if (this.class === undefined) {
+      this.class = 'text-info';
     }
+    this.hasState = (this.stateLabelFunc() !== undefined);
 
-    vm.hasState =!_.isUndefined(vm.stateLabelFunc());
-
-    if (typeof vm.timeAdded === 'string') {
-      vm.timeAdded = new Date(vm.timeAdded);
+    if (typeof this.timeAdded === 'string') {
+      this.timeAdded = new Date(this.timeAdded);
     }
-    if (typeof vm.timeModified === 'string') {
-      vm.timeModified = new Date(vm.timeModified);
+    if (typeof this.timeModified === 'string') {
+      this.timeModified = new Date(this.timeModified);
     }
-    if (vm.timeAdded.getFullYear() < 2000) {
+    if (this.timeAdded.getFullYear() < 2000) {
       // timestamp will display as 'on system initialization'
-      vm.timeAdded = undefined;
+      this.timeAdded = undefined;
     }
   }
+
+  $onChanges(changed) {
+    if (changed.state) {
+      if (this.stateLabelFunc()) {
+        this.state = this.stateLabelFunc()();
+      }
+    }
+  }
+
 }
 
 /**
@@ -76,6 +78,7 @@ const statusLineComponent = {
   controller: StatusLineController,
   controllerAs: 'vm',
   bindings: {
+    state:          '<',
     stateLabelFunc: '&',
     timeAdded:      '<',
     timeModified:   '<',

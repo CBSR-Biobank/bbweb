@@ -36,7 +36,7 @@ describe('Component: centreSummary', function() {
       this.createController = (centre) =>
         this.createControllerInternal(
           '<centre-summary centre="vm.centre"></centre-summary>',
-          { centre: centre },
+          { centre },
           'centreSummary');
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('ok'));
@@ -55,12 +55,12 @@ describe('Component: centreSummary', function() {
     var context = {};
 
     beforeEach(function () {
-      var self = this,
-          centre = new this.Centre(this.Factory.centre());
+      const centre = new this.Centre(this.Factory.centre());
 
-      context.entity             = self.Centre;
-      context.createController   = this.createController.bind(this, centre);
+      context.entity             = this.Centre;
+      context.createController   = () => this.createController(centre);
       context.updateFuncName     = 'updateName';
+      context.updateReturnValue  = centre;
       context.controllerFuncName = 'editName';
       context.modalInputFuncName = 'text';
     });
@@ -74,12 +74,12 @@ describe('Component: centreSummary', function() {
     var context = {};
 
     beforeEach(function () {
-      var self = this,
-          centre = new self.Centre(self.Factory.centre());
+      const centre = new this.Centre(this.Factory.centre());
 
       context.entity             = this.Centre;
-      context.createController   = this.createController.bind(this, centre);
+      context.createController   = () => this.createController(centre);
       context.updateFuncName     = 'updateDescription';
+      context.updateReturnValue  = centre;
       context.controllerFuncName = 'editDescription';
       context.modalInputFuncName = 'textArea';
     });
@@ -94,13 +94,12 @@ describe('Component: centreSummary', function() {
       var context = {};
 
       beforeEach(function () {
-        var self = this,
-            centre = new self.Centre(self.Factory.centre());
+        const centre = new this.Centre(this.Factory.centre());
 
-        context.createController = this.createController.bind(this, centre);
+        context.createController = () => this.createController(centre);
         context.centre           = centre;
         context.state            = 'enable';
-        context.entity           = self.Centre;
+        context.entity           = this.Centre;
       });
 
       sharedCentreStateBehaviour(context);
@@ -110,10 +109,9 @@ describe('Component: centreSummary', function() {
       var context = {};
 
       beforeEach(function () {
-        var self = this,
-            centre = new self.Centre(self.Factory.centre({ state: self.CentreState.ENABLED }));
+        const centre = new this.Centre(this.Factory.centre({ state: this.CentreState.ENABLED }));
 
-        context.createController = this.createController.bind(this, centre);
+        context.createController   = () => this.createController(centre);
         context.centre           = centre;
         context.state            = 'disable';
         context.entity           = this.Centre;
@@ -123,11 +121,11 @@ describe('Component: centreSummary', function() {
     });
 
     it('changing state to an invalid value causes an exception', function() {
-      var self = this,
-          invalidState = self.Factory.stringNext();
-      self.createController();
-      expect(function () { self.controller.changeState(invalidState); })
-        .toThrowError(/invalid state/);
+      const invalidState = this.Factory.stringNext();
+      this.createController();
+      expect(
+        () => { this.controller.changeState(invalidState); }
+      ).toThrowError(/invalid state/);
     });
 
   });

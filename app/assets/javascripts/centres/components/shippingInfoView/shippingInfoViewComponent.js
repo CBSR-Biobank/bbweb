@@ -25,7 +25,7 @@ function ShippingInfoViewController(gettextCatalog,
     vm.editFromLocation   = editFromLocation;
     vm.editToLocation     = editToLocation;
 
-    vm.stateLabelFunc = shipmentStateLabelService.stateToLabelFunc(vm.shipment.state);
+    vm.stateLabelFunc = () => shipmentStateLabelService.stateToLabelFunc(vm.shipment.state)();
   }
 
   function postUpdate(property, message, title) {

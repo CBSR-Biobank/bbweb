@@ -13,25 +13,25 @@
         </button>
 
         <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="centreSummaryMenu">
-          <li role="menuitem" ng-class="{ 'disabled': !vm.centre.isDisabled() }">
+          <li role="menuitem" ng-if="vm.centre.isDisabled()">
             <a href
                ng-click="vm.editName()">
               <i class="glyphicon glyphicon-edit text-primary"></i>
               <translate>Update name</translate>
             </a>
           </li>
-          <li role="menuitem" ng-class="{ 'disabled': !vm.centre.isDisabled() }">
+          <li role="menuitem" ng-if="vm.centre.isDisabled()">
             <a href
                ng-click="vm.editDescription()">
               <i class="glyphicon glyphicon-edit text-primary"></i>
               <translate>Update description</translate>
             </a>
           </li>
-          <li class="divider"></li>
+          <li class="divider" ng-if="vm.centre.isDisabled()"></li>
           <li role="menuitem" ng-if="vm.centre.isDisabled()">
             <a href
                ng-click="vm.changeState('enable')">
-              <i class="glyphicon glyphicon-ok-circle text-success"></i>
+              <i class="glyphicon glyphicon-ok text-success"></i>
               <translate>Enable this centre</translate>
             </a>
           </li>
@@ -81,7 +81,9 @@
       </div>
     </li>
   </ul>
-  <status-line state-label-func="vm.stateLabelFunc(vm.centre.state)"
+  <status-line state="vm.centre.state"
+               state-label-func="vm.stateLabelFunc"
                time-added="vm.centre.timeAdded"
-               time-modified="vm.centre.timeModified"></status-line>
+               time-modified="vm.centre.timeModified">
+  </status-line>
 </div>

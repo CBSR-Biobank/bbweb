@@ -12,6 +12,7 @@
  */
 /* @ngInject */
 function CentreSummaryController($scope,
+                                 $state,
                                  gettextCatalog,
                                  modalService,
                                  modalInput,
@@ -19,6 +20,7 @@ function CentreSummaryController($scope,
                                  centreStateLabelService) {
   var vm = this;
   vm.$onInit = onInit;
+  vm.refreshCount = 0;
 
   //----
 
@@ -31,7 +33,7 @@ function CentreSummaryController($scope,
     vm.editName        = editName;
     vm.editDescription = editDescription;
 
-    vm.stateLabelFunc  = centreStateLabelService.stateToLabelFunc(vm.centre.state);
+    vm.stateLabelFunc = () => centreStateLabelService.stateToLabelFunc(vm.centre.state)();
 
     // updates the selected tab in 'centreView' component which is the parent directive
     $scope.$emit('tabbed-page-update', 'tab-selected');
@@ -55,12 +57,12 @@ function CentreSummaryController($scope,
 
     modalService.modalOkCancel(gettextCatalog.getString('Confirm state change on centre'),
                                stateChangeMsg)
-      .then(function () {
-        changeStateFn.call(vm.centre)
-          .then(function (centre) {
-            vm.centre = centre;
-          });
-      });
+      .then(() => changeStateFn.call(vm.centre)
+            .then(centre => {
+              vm.centre = centre;
+              vm.refreshCount += 1;
+              notificationsService.success('The centre\'s state has been updated.', null, 2000);
+            }));
   }
 
   function postUpdate(message, title, timeout) {

@@ -1,6 +1,6 @@
 <div style="margin: 3px;" ng-if="vm.useLabels">
   <span class="label" ng-class="vm.class" ng-if="vm.hasState">
-    <span><translate>State:</translate> {{vm.stateLabelFunc()}}</span>
+    <span><translate>State:</translate> {{vm.state}}</span>
   </span>
   &nbsp;
   <span class="label" ng-class="vm.class">
@@ -17,7 +17,7 @@
 </div>
 <div ng-if="!vm.useLabels">
   <small class="text-muted" ng-class="vm.class" ng-if="vm.hasState">
-    <span><strong translate>State:</strong> {{vm.stateLabelFunc()}},</span>
+    <span><strong translate>State:</strong> {{vm.state}},</span>
   </small>
   <small class="text-muted" ng-class="vm.class" >
     <strong translate>Added:</strong>

@@ -30,7 +30,7 @@
           <li role="menuitem" ng-if="vm.study.isDisabled()">
             <a href
                ng-click="vm.changeState('enable')">
-              <i class="glyphicon glyphicon-ok-circle text-success"></i>
+              <i class="glyphicon glyphicon-ok text-success"></i>
               <translate>Enable this study</translate>
             </a>
           </li>
@@ -93,7 +93,8 @@
       </div>
     </li>
   </ul>
-  <status-line state-label-func="vm.stateLabelFunc(vm.study.state)"
+  <status-line state="vm.study.state"
+               state-label-func="vm.stateLabelFunc"
                time-added="vm.study.timeAdded"
                time-modified="vm.study.timeModified"></status-line>
 </div>
