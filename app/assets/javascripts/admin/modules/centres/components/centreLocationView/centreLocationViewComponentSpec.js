@@ -25,22 +25,20 @@ describe('Component: centreLocationView', function() {
                               'Location',
                               'Factory');
 
-      this.location = new this.Location(this.Factory.location());
-      this.centre = new this.Centre(this.Factory.centre({ locations: [ this.location ]}));
+      this.location = this.Location.create(this.Factory.location());
+      this.centre = this.Centre.create(this.Factory.centre({ locations: [ this.location ]}));
       this.returnStateName = 'home.admin.centres.centre.locations';
 
-      this.createController = (centre, location) => {
-        centre = centre || this.centre;
-        location = location || this.location;
-
-        this.createControllerInternal(
-          '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>',
-          {
-            centre: centre,
-            location: location
-          },
-          'centreLocationView');
-      };
+      this.createController =
+        (centre = this.centre, location = this.location) => {
+          this.createControllerInternal(
+            '<centre-location-view centre="vm.centre" location="vm.location"></centre-location-view>',
+            {
+              centre,
+              location
+            },
+            'centreLocationView');
+        };
     });
   });
 
@@ -72,8 +70,8 @@ describe('Component: centreLocationView', function() {
     beforeEach(function () {
       context.entity                   = this.centre;
       context.entityUpdateFuncName     = 'updateLocation';
-      context.createController         = this.createController;
       context.location                 = this.centre.locations[0];
+      context.createController         = () => this.createController();
     });
 
     describe('updates to location name', function () {

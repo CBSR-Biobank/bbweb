@@ -16,21 +16,17 @@ define(function() {
 
       beforeEach(function() {
         this.injectDependencies('$q', 'modalInput', 'notificationsService');
-        this.$state.go = jasmine.createSpy().and.returnValue(null);
+        spyOn(this.$state, 'go').and.returnValue(null);
       });
 
       it('on update should invoke the update method on entity', function() {
-        var modalInputDeferred = this.$q.defer();
-
-        modalInputDeferred.resolve(context.newValue);
-
         spyOn(this.modalInput, context.modalInputFuncName)
-          .and.returnValue({ result: modalInputDeferred.promise});
+          .and.returnValue({ result: this.$q.when(context.newValue) });
         spyOn(context.entity, context.entityUpdateFuncName)
           .and.returnValue(this.$q.when(context.entity));
         spyOn(this.notificationsService, 'success').and.returnValue(this.$q.when('OK'));
 
-        context.createController.call(this);
+        context.createController();
         this.controller[context.controllerUpdateFuncName](context.location);
         this.scope.$digest();
 
@@ -44,7 +40,7 @@ define(function() {
         spyOn(this.modalInput, context.modalInputFuncName)
           .and.returnValue({ result: this.$q.when(context.newValue) });
 
-        context.createController.call(this);
+        context.createController();
 
         spyOn(context.entity, context.entityUpdateFuncName)
           .and.returnValue(this.$q.reject('simulated error'));

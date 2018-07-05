@@ -95,7 +95,9 @@ describe('Component: locationsPanel', function() {
     spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
 
     this.createController(entities.centre);
-    spyOn(this.Centre.prototype, 'removeLocation').and.returnValue(this.$q.reject('simulated error'));
+    spyOn(this.Centre.prototype, 'removeLocation')
+      .and.returnValue(this.$q.reject(this.errorReply('simulated error')));
+
     this.controller.remove(locationToRemove);
     this.scope.$digest();
     expect(this.modalService.modalOkCancel.calls.count()).toBe(2);

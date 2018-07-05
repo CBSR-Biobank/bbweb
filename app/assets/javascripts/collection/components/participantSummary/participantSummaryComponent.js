@@ -42,7 +42,9 @@ function ParticipantSummaryController(gettextCatalog,
         vm.participant.updateUniqueId(uniqueId)
           .then(postUpdate(gettextCatalog.getString('Unique ID updated successfully.'),
                            gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+          .catch(error => {
+            notificationsService.updateError(error);
+          });
       });
   }
 

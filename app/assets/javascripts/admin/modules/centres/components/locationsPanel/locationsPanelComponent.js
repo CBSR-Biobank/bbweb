@@ -41,7 +41,8 @@ function LocationsPanelController($scope,
   }
 
   function remove(location) {
-    const doRemove = () => vm.centre.removeLocation(location)
+    const doRemove =
+           () => vm.centre.removeLocation(location)
           .then(centre => {
             vm.centre = centre;
           });

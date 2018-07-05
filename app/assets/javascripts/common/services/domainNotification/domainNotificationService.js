@@ -99,10 +99,13 @@ class DomainNotificationService {
         if (error.status && (error.status === 401)) {
           errMsg = this.gettextCatalog.getString('You do not have permission to perform this action');
         }
-        this.modalService
-          .modalOkCancel(removeFailedHeaderHtml, removeFaileBodyHtml + ': ' + errMsg)
-          .catch(angular.noop); // handles user pressing cancel button
-        return this.$q.reject(error);
+        if (typeof error !== 'string') {
+          this.modalService
+            .modalOkCancel(removeFailedHeaderHtml, removeFaileBodyHtml + ': ' + errMsg)
+            .catch(angular.noop); // handles user pressing cancel button
+          return this.$q.reject(error);
+        }
+        return null;
       });
   }
 }

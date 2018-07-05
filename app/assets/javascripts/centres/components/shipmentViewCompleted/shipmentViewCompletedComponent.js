@@ -36,7 +36,9 @@ function ShipmentViewCompletedController($state,
           .then(function () {
             $state.go('home.shipping.shipment.unpack.info', { shipmentId: vm.shipment.id});
           })
-          .catch(notificationsService.updateError);
+          .catch(error => {
+            notificationsService.updateError(error);
+          });
       });
   }
 }

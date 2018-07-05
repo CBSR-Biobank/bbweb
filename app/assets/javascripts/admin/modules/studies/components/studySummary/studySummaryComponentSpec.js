@@ -82,8 +82,9 @@ describe('Component: studySummary', function() {
 
     beforeEach(function () {
       context.entity             = this.Study;
-      context.createController   = this.createController.bind(this);
+      context.createController   = () => this.createController();
       context.updateFuncName     = 'updateName';
+      context.updateReturnValue  = this.study;
       context.controllerFuncName = 'editName';
       context.modalInputFuncName = 'text';
     });
@@ -97,8 +98,9 @@ describe('Component: studySummary', function() {
 
     beforeEach(function () {
       context.entity             = this.Study;
-      context.createController   = this.createController.bind(this);
+      context.createController   = () => this.createController();
       context.updateFuncName     = 'updateDescription';
+      context.updateReturnValue  = this.study;
       context.controllerFuncName = 'editDescription';
       context.modalInputFuncName = 'textArea';
     });

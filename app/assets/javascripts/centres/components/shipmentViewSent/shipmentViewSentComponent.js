@@ -42,12 +42,12 @@ function ShipmentViewSentController($q,
     modalService.modalOkCancel(
       gettextCatalog.getString('Please confirm'),
       gettextCatalog.getString('Are you sure you want to place this shipment in <b>Packed</b> state?'))
+      .then(() => vm.shipment.pack(vm.shipment.timePacked))
       .then(function () {
-        return vm.shipment.pack(vm.shipment.timePacked)
-          .then(function () {
-            $state.reload();
-          })
-          .catch(notificationsService.updateError);
+        $state.reload();
+      })
+      .catch(error => {
+        notificationsService.updateError(error);
       });
   }
 
@@ -55,12 +55,12 @@ function ShipmentViewSentController($q,
     modalService.modalOkCancel(
       gettextCatalog.getString('Please confirm'),
       gettextCatalog.getString('Are you sure you want to tag this shipment as <b>Lost</b>?'))
-      .then(function () {
-        return vm.shipment.lost()
-          .then(function () {
-            $state.reload();
-          })
-          .catch(notificationsService.updateError);
+      .then(() => vm.shipment.lost())
+      .then(() => {
+        $state.reload();
+      })
+      .catch(error => {
+        notificationsService.updateError(error);
       });
   }
 

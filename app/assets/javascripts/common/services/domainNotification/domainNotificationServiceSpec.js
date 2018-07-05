@@ -106,16 +106,17 @@ describe('Service: domainNotificationService', function() {
       const body = 'body';
       const removeFailedHeader = 'removeFailedHeaderHtml';
       const removeFailedBody = 'removeFailedBody';
+      const remove = jasmine.createSpy('remove')
+            .and.returnValue(this.$q.reject({ message: 'simulated error' }));
 
       spyOn(this.modalService, 'modalOkCancel').and.returnValue(this.$q.when('OK'));
-      this.remove = jasmine.createSpy('remove').and.returnValue(this.$q.reject('simulated error'));
 
       this.domainNotificationService
-        .removeEntity(this.remove, header, body, removeFailedHeader, removeFailedBody)
+        .removeEntity(remove, header, body, removeFailedHeader, removeFailedBody)
         .catch(angular.noop);
 
       this.$rootScope.$digest();
-      expect(this.remove).toHaveBeenCalled();
+      expect(remove).toHaveBeenCalled();
       expect(this.modalService.modalOkCancel.calls.count()).toEqual(2);
     });
 

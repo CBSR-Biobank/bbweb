@@ -123,8 +123,9 @@ describe('membershipViewComponent', function() {
     })
 
     it('user is informed if a membership removal attempt fails', function() {
-      this.Membership.prototype.remove = jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'))
-      this.controller.remove()
+      this.Membership.prototype.remove =
+        jasmine.createSpy().and.returnValue(this.$q.reject(this.errorReply('simulated error')))
+       this.controller.remove()
       this.scope.$digest()
       expect(this.Membership.prototype.remove).toHaveBeenCalled()
       expect(this.notificationsService.success).not.toHaveBeenCalled()
@@ -465,7 +466,7 @@ describe('membershipViewComponent', function() {
 
       it('user is informed if removal of the entity attempt fails', function() {
         this.Membership.prototype[context.membershipRemoveFuncName] =
-          jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'))
+          jasmine.createSpy().and.returnValue(this.$q.reject(this.errorReply('simulated error')))
         this.controller[context.labelSelectedFuncName](context.entityName)
         this.scope.$digest()
         expect(this.Membership.prototype[context.membershipRemoveFuncName]).toHaveBeenCalled()
@@ -476,12 +477,12 @@ describe('membershipViewComponent', function() {
       it('user can press cancel on the verification modal', function() {
         this.Membership.prototype[context.membershipRemoveFuncName] =
           jasmine.createSpy().and.returnValue(this.$q.when(this.membership))
-        this.modalService.modalOkCancel   = jasmine.createSpy().and.returnValue(this.$q.reject('Cancel'))
+        this.modalService.modalOkCancel = jasmine.createSpy().and.returnValue(this.$q.reject('Cancel'))
         this.controller[context.labelSelectedFuncName](context.entityName)
         this.scope.$digest()
         expect(this.Membership.prototype[context.membershipRemoveFuncName]).not.toHaveBeenCalled()
         expect(this.notificationsService.success).not.toHaveBeenCalled()
-        expect(this.modalService.modalOkCancel.calls.count()).toBe(2)
+        expect(this.modalService.modalOkCancel.calls.count()).toBe(1)
       })
 
     })

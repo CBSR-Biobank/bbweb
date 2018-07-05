@@ -49,7 +49,9 @@ function ParticipantAnnotationTypeViewController($q,
   function onUpdate(attr, annotationType) {
     return vm.study.updateAnnotationType(annotationType)
       .then(postUpdate)
-      .catch(notificationsService.updateError)
+      .catch(error => {
+        notificationsService.updateError(error);
+      })
       .then(notifySuccess)
       .then(() => {
         if (attr === 'name') {

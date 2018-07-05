@@ -13,168 +13,179 @@ import angular from 'angular';
 /*
  * Controller for this component.
  */
-/* @ngInject */
-function CentreLocationViewController($state,
-                                      gettextCatalog,
-                                      modalInput,
-                                      notificationsService,
-                                      domainNotificationService,
-                                      breadcrumbService) {
-  var vm = this;
-  vm.$onInit = onInit;
+class CentreLocationViewController {
 
-  //----
+  constructor($state,
+              gettextCatalog,
+              modalInput,
+              notificationsService,
+              domainNotificationService,
+              breadcrumbService) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $state,
+                    gettextCatalog,
+                    modalInput,
+                    notificationsService,
+                    domainNotificationService,
+                    breadcrumbService
+                  });
+  }
 
-  function onInit() {
-    vm.breadcrumbs = [
-      breadcrumbService.forState('home'),
-      breadcrumbService.forState('home.admin'),
-      breadcrumbService.forState('home.admin.centres'),
-      breadcrumbService.forStateWithFunc(
-        `home.admin.centres.centre.locations({ centreId: "${vm.centre.id}", locationId: "${vm.location.id}" })`,
-        () => vm.centre.name),
-      breadcrumbService.forStateWithFunc(
+  $onInit() {
+    this.breadcrumbs = [
+      this.breadcrumbService.forState('home'),
+      this.breadcrumbService.forState('home.admin'),
+      this.breadcrumbService.forState('home.admin.centres'),
+      this.breadcrumbService.forStateWithFunc(
+        `home.admin.centres.centre.locations({ centreId: "${this.centre.id}", locationId: "${this.location.id}" })`,
+        () => this.centre.name),
+      this.breadcrumbService.forStateWithFunc(
         'home.admin.centres.centre.locations.locationsView',
-        () => vm.location.name)
+        () => this.location.name)
     ];
-
-    vm.back               = back;
-    vm.editName           = editName;
-    vm.editStreet         = editStreet;
-    vm.editCity           = editCity;
-    vm.editProvince       = editProvince;
-    vm.editPostalCode     = editPostalCode;
-    vm.editPoBoxNumber    = editPoBoxNumber;
-    vm.editCountryIsoCode = editCountryIsoCode;
-    vm.remove             = remove;
   }
 
-  function back() {
-    $state.go('home.admin.centres.centre.locations', {}, { reload: true });
+  back() {
+    this.$state.go('home.admin.centres.centre.locations', {}, { reload: true });
   }
 
-  function postUpdate(message, title, timeout) {
-    timeout = timeout || 1500;
-    return function (centre) {
-      vm.centre = centre;
-      vm.location = _.find(vm.centre.locations, { id: vm.location.id });
-      notificationsService.success(message, title, timeout);
+  postUpdate(message, title, timeout = 1500) {
+    return (centre) => {
+      this.centre = centre;
+      this.location = _.find(this.centre.locations, { id: this.location.id });
+      this.notificationsService.success(message, title, timeout);
     };
   }
 
-  function editName() {
-    modalInput.text(gettextCatalog.getString('Edit location name'),
-                    gettextCatalog.getString('Name'),
-                    vm.location.name,
-                    { required: true, minLength: 2 }).result
-      .then(function (name) {
-        vm.location.name = name;
-        return vm.centre.updateLocation(vm.location)
+  editName() {
+    this.modalInput.text(this.gettextCatalog.getString('Edit location name'),
+                         this.gettextCatalog.getString('Name'),
+                         this.location.name,
+                         { required: true, minLength: 2 }).result
+      .then(name => {
+        this.location.name = name;
+        return this.centre.updateLocation(this.location)
       })
-      .then(postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                       gettextCatalog.getString('Change successful')))
-      .catch(notificationsService.updateError)
+      .then(this.postUpdate(this.gettextCatalog.getString('Name changed successfully.'),
+                            this.gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        this.notificationsService.updateError(error);
+      })
       .then(() => {
         // reload the state so that the URL gets updated
-        $state.go($state.current.name,
-                  { locationSlug: vm.location.slug },
-                  { reload: true  })
+        this.$state.go(this.$state.current.name,
+                       { locationSlug: this.location.slug },
+                       { reload: true  })
       });
   }
 
-  function editStreet() {
-    modalInput.text(gettextCatalog.getString('Edit street address'),
-                    gettextCatalog.getString('Street address'),
-                    vm.location.street).result
-      .then(function (street) {
-        vm.location.street = street;
-        vm.centre.updateLocation(vm.location)
-          .then(postUpdate(gettextCatalog.getString('Street address changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+  editStreet() {
+    this.modalInput.text(this.gettextCatalog.getString('Edit street address'),
+                         this.gettextCatalog.getString('Street address'),
+                         this.location.street).result
+      .then(street => {
+        this.location.street = street;
+        return this.centre.updateLocation(this.location);
+      })
+      .then(this.postUpdate(this.gettextCatalog.getString('Street address changed successfully.'),
+                            this.gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        this.notificationsService.updateError(error);
       });
   }
 
-  function editCity() {
-    modalInput.text(gettextCatalog.getString('Edit city name'),
-                    gettextCatalog.getString('City'),
-                    vm.location.city).result
-      .then(function (city) {
-        vm.location.city = city;
-        vm.centre.updateLocation(vm.location)
-          .then(postUpdate(gettextCatalog.getString('City changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+  editCity() {
+    this.modalInput.text(this.gettextCatalog.getString('Edit city name'),
+                         this.gettextCatalog.getString('City'),
+                         this.location.city).result
+      .then(city => {
+        this.location.city = city;
+        return this.centre.updateLocation(this.location);
+      })
+      .then(this.postUpdate(this.gettextCatalog.getString('City changed successfully.'),
+                            this.gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        this.notificationsService.updateError(error);
       });
   }
 
-  function editProvince() {
-    modalInput.text(gettextCatalog.getString('Edit province'),
-                    gettextCatalog.getString('Province'),
-                    vm.location.province).result
-      .then(function (province) {
-        vm.location.province = province;
-        vm.centre.updateLocation(vm.location)
-          .then(postUpdate(gettextCatalog.getString('Province changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+  editProvince() {
+    this.modalInput.text(this.gettextCatalog.getString('Edit province'),
+                         this.gettextCatalog.getString('Province'),
+                         this.location.province).result
+      .then(province => {
+        this.location.province = province;
+        return this.centre.updateLocation(this.location);
+      })
+      .then(this.postUpdate(this.gettextCatalog.getString('Province changed successfully.'),
+                            this.gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        this.notificationsService.updateError(error);
       });
   }
 
-  function editPostalCode() {
-    modalInput.text(gettextCatalog.getString('Edit postal code'),
-                    gettextCatalog.getString('Postal code'),
-                    vm.location.postalCode).result
-      .then(function (postalCode) {
-        vm.location.postalCode = postalCode;
-        vm.centre.updateLocation(vm.location)
-          .then(postUpdate(gettextCatalog.getString('PostalCode changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+  editPostalCode() {
+    this.modalInput.text(this.gettextCatalog.getString('Edit postal code'),
+                         this.gettextCatalog.getString('Postal code'),
+                         this.location.postalCode).result
+      .then(postalCode => {
+        this.location.postalCode = postalCode;
+        return this.centre.updateLocation(this.location);
+      })
+      .then(this.postUpdate(this.gettextCatalog.getString('PostalCode changed successfully.'),
+                            this.gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        this.notificationsService.updateError(error);
       });
   }
 
-  function editPoBoxNumber() {
-    modalInput.text(gettextCatalog.getString('Edit PO box number'),
-                    gettextCatalog.getString('PO box Number'),
-                    vm.location.poBoxNumber).result
-      .then(function (poBoxNumber) {
-        vm.location.poBoxNumber = poBoxNumber;
-        vm.centre.updateLocation(vm.location)
-          .then(postUpdate(gettextCatalog.getString('PoBoxNumber changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+  editPoBoxNumber() {
+    this.modalInput.text(this.gettextCatalog.getString('Edit PO box number'),
+                         this.gettextCatalog.getString('PO box Number'),
+                         this.location.poBoxNumber).result
+      .then(poBoxNumber => {
+        this.location.poBoxNumber = poBoxNumber;
+        return this.centre.updateLocation(this.location);
+      })
+      .then(this.postUpdate(this.gettextCatalog.getString('PoBoxNumber changed successfully.'),
+                            this.gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        this.notificationsService.updateError(error);
       });
   }
 
-  function editCountryIsoCode() {
-    modalInput.text(gettextCatalog.getString('Edit country ISO code'),
-                    gettextCatalog.getString('Country ISO code'),
-                    vm.location.countryIsoCode).result
-      .then(function (countryIsoCode) {
-        vm.location.countryIsoCode = countryIsoCode;
-        vm.centre.updateLocation(vm.location)
-          .then(postUpdate(gettextCatalog.getString('CountryIsoCode changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+  editCountryIsoCode() {
+    this.modalInput.text(this.gettextCatalog.getString('Edit country ISO code'),
+                         this.gettextCatalog.getString('Country ISO code'),
+                         this.location.countryIsoCode).result
+      .then(countryIsoCode => {
+        this.location.countryIsoCode = countryIsoCode;
+        return this.centre.updateLocation(this.location);
+      })
+      .then(this.postUpdate(this.gettextCatalog.getString('CountryIsoCode changed successfully.'),
+                            this.gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        this.notificationsService.updateError(error);
       });
   }
 
-  function remove() {
-    const doRemove = () => vm.centre.removeLocation(vm.location)
+  remove() {
+    const doRemove = () => this.centre.removeLocation(this.location)
           .then(centre => {
-            vm.centre = centre;
+            this.centre = centre;
           });
 
-    domainNotificationService
+    this.domainNotificationService
       .removeEntity(doRemove,
-                    gettextCatalog.getString('Remove Location'),
-                    gettextCatalog.getString('Are you sure you want to remove location {{name}}?',
-                                             { name: vm.location.name}),
-                    gettextCatalog.getString('Remove Failed'),
-                    gettextCatalog.getString('Location {{name}} cannot be removed: ',
-                                             { name: vm.location.name}))
-      .then(() => vm.back())
+                    this.gettextCatalog.getString('Remove Location'),
+                    this.gettextCatalog.getString('Are you sure you want to remove location {{name}}?',
+                                                  { name: this.location.name}),
+                    this.gettextCatalog.getString('Remove Failed'),
+                    this.gettextCatalog.getString('Location {{name}} cannot be removed: ',
+                                                  { name: this.location.name}))
+      .then(() => this.back())
       .catch(angular.noop);
   }
 

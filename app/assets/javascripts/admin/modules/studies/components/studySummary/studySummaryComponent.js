@@ -89,15 +89,15 @@ function StudySummaryController($scope,
                     gettextCatalog.getString('Name'),
                     vm.study.name,
                     { required: true, minLength: 2 }).result
-      .then(function (name) {
-        vm.study.updateName(name)
-          .then(function (study) {
-            $scope.$emit('study-name-changed', study);
-            postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                       gettextCatalog.getString('Change successful'))(study);
-            $state.go('home.admin.studies.study.summary', { studySlug: study.slug });
-          })
-          .catch(notificationsService.updateError);
+      .then(name => vm.study.updateName(name))
+      .then(study => {
+        $scope.$emit('study-name-changed', study);
+        postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                   gettextCatalog.getString('Change successful'))(study);
+        $state.go('home.admin.studies.study.summary', { studySlug: study.slug });
+      })
+      .catch(error => {
+            notificationsService.updateError(error);
       });
   }
 
@@ -105,11 +105,11 @@ function StudySummaryController($scope,
     modalInput.textArea(gettextCatalog.getString('Edit description'),
                         gettextCatalog.getString('Description'),
                         vm.study.description).result
-      .then(function (description) {
-        vm.study.updateDescription(description)
-          .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+      .then(description => vm.study.updateDescription(description))
+      .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
+                       gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        notificationsService.updateError(error);
       });
   }
 }

@@ -40,11 +40,11 @@ function ShippingInfoViewController(gettextCatalog,
                     gettextCatalog.getString('Courier'),
                     vm.shipment.courierName,
                     { required: true, minLength: 2 }).result
-      .then(function (name) {
-        vm.shipment.updateCourierName(name)
-          .then(postUpdate(gettextCatalog.getString('Courier changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+      .then(name => vm.shipment.updateCourierName(name))
+      .then(postUpdate(gettextCatalog.getString('Courier changed successfully.'),
+                       gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        notificationsService.updateError(error);
       });
   }
 
@@ -53,11 +53,11 @@ function ShippingInfoViewController(gettextCatalog,
                     gettextCatalog.getString('Tracking Number'),
                     vm.shipment.trackingNumber,
                     { required: true, minLength: 2 }).result
-      .then(function (tn) {
-        vm.shipment.updateTrackingNumber(tn)
-          .then(postUpdate(gettextCatalog.getString('Tracking number changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+      .then(tn => vm.shipment.updateTrackingNumber(tn))
+      .then(postUpdate(gettextCatalog.getString('Tracking number changed successfully.'),
+                       gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        notificationsService.updateError(error);
       });
   }
 
@@ -67,15 +67,18 @@ function ShippingInfoViewController(gettextCatalog,
       gettextCatalog.getString('From centre'),
       gettextCatalog.getString('The location of the centre this shipment is coming from'),
       vm.shipment.fromLocationInfo,
-      [ vm.shipment.toLocationInfo ]
-    ).result.then(function (selection) {
-      if (selection) {
-        vm.shipment.updateFromLocation(selection.locationId)
-          .then(postUpdate(gettextCatalog.getString('From location changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
-      }
-    });
+      [ vm.shipment.toLocationInfo ])
+      .result
+      .then(selection => {
+        if (selection) {
+          vm.shipment.updateFromLocation(selection.locationId)
+            .then(postUpdate(gettextCatalog.getString('From location changed successfully.'),
+                             gettextCatalog.getString('Change successful')))
+            .catch(error => {
+              notificationsService.updateError(error);
+            });
+        }
+      });
   }
 
   function editToLocation() {
@@ -90,7 +93,9 @@ function ShippingInfoViewController(gettextCatalog,
         vm.shipment.updateToLocation(selection.locationId)
           .then(postUpdate(gettextCatalog.getString('To location changed successfully.'),
                            gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+          .catch(error => {
+            notificationsService.updateError(error);
+          });
       }
     });
   }

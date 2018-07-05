@@ -61,7 +61,9 @@ function ShipmentViewReceivedController($q,
       .then(function () {
         $state.reload();
       })
-      .catch(notificationsService.updateError);
+      .catch(error => {
+        notificationsService.updateError(error);
+      });
   }
 }
 

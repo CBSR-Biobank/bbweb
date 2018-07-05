@@ -66,7 +66,9 @@ class CeventTypeViewController {
                            },
                            { reload: true });
           })
-          .catch(this.notificationsService.updateError);
+          .catch(error => {
+            this.notificationsService.updateError(error);
+          });
       });
   }
 
@@ -79,7 +81,9 @@ class CeventTypeViewController {
         this.collectionEventType.updateDescription(description)
           .then(this.postUpdate(this.gettextCatalog.getString('Description changed successfully.'),
                                 this.gettextCatalog.getString('Change successful')))
-          .catch(this.notificationsService.updateError);
+          .catch(error => {
+            this.notificationsService.updateError(error);
+          });
       });
   }
 
@@ -95,7 +99,9 @@ class CeventTypeViewController {
             this.postUpdate(this.gettextCatalog.getString('Recurring changed successfully.'),
                             this.gettextCatalog.getString('Change successful'))(ceventType);
           })
-          .catch(this.notificationsService.updateError);
+          .catch(error => {
+            this.notificationsService.updateError(error);
+          });
       });
   }
 

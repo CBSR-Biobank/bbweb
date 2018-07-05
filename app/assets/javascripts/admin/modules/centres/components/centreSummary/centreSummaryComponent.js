@@ -78,14 +78,14 @@ function CentreSummaryController($scope,
                     gettextCatalog.getString('Name'),
                     vm.centre.name,
                     { required: true, minLength: 2 }).result
-      .then(function (name) {
-        vm.centre.updateName(name)
-          .then(function (centre) {
-            $scope.$emit('centre-name-changed', centre);
-            postUpdate(gettextCatalog.getString('Name changed successfully.'),
-                       gettextCatalog.getString('Change successful'))(centre);
-          })
-          .catch(notificationsService.updateError);
+      .then(name => vm.centre.updateName(name))
+      .then(centre => {
+        $scope.$emit('centre-name-changed', centre);
+        postUpdate(gettextCatalog.getString('Name changed successfully.'),
+                   gettextCatalog.getString('Change successful'))(centre);
+      })
+      .catch(error => {
+        notificationsService.updateError(error);
       });
   }
 
@@ -93,11 +93,11 @@ function CentreSummaryController($scope,
     modalInput.textArea(gettextCatalog.getString('Edit description'),
                         gettextCatalog.getString('Description'),
                         vm.centre.description).result
-      .then(function (description) {
-        vm.centre.updateDescription(description)
-          .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
-                           gettextCatalog.getString('Change successful')))
-          .catch(notificationsService.updateError);
+      .then(description => vm.centre.updateDescription(description))
+      .then(postUpdate(gettextCatalog.getString('Description changed successfully.'),
+                       gettextCatalog.getString('Change successful')))
+      .catch(error => {
+        notificationsService.updateError(error);
       });
   }
 

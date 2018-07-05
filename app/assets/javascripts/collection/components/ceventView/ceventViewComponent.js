@@ -116,7 +116,7 @@ class CeventViewController {
   remove() {
     this.Specimen.list(this.collectionEvent.slug)
       .then(pagedResult => {
-        if (pagedResult.items.length > 0) {
+        if (pagedResult.total > 0) {
           this.modalService.modalOk(
             this.gettextCatalog.getString('Cannot remove collection event'),
             this.gettextCatalog.getString('This collection event has specimens. Please remove the specimens first.'))

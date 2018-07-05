@@ -305,13 +305,13 @@ describe('Component: ceventView', function() {
       this.createController(this.fixture);
 
       this.Specimen.list =
-        jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [] }));
+        jasmine.createSpy('list').and.returnValue(this.$q.when(this.Factory.pagedResult([])));
 
       this.modalService.modalOkCancel =
         jasmine.createSpy('modalOkCancel').and.returnValue(this.$q.when('OK'));
 
       this.CollectionEvent.prototype.remove =
-        jasmine.createSpy('remove').and.returnValue(this.$q.reject('simulated error'));
+        jasmine.createSpy('remove').and.returnValue(this.$q.reject(this.errorReply('simulated error')));
 
       this.notificationsService.success =
         jasmine.createSpy('remove').and.returnValue(this.$q.when(null));
@@ -330,7 +330,7 @@ describe('Component: ceventView', function() {
       const specimen = new this.Specimen(this.Factory.specimen());
 
       this.Specimen.list =
-        jasmine.createSpy('list').and.returnValue(this.$q.when({ items: [ specimen ] }));
+        jasmine.createSpy('list').and.returnValue(this.$q.when(this.Factory.pagedResult([ specimen ])));
 
       this.modalService.modalOk =
         jasmine.createSpy('modalOk').and.returnValue(this.$q.when('OK'));

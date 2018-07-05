@@ -55,12 +55,12 @@ function ShipmentViewPackedController($q,
     modalService.modalOkCancel(
       gettextCatalog.getString('Please confirm'),
       gettextCatalog.getString('Are you sure you want to add more items to this shipment?'))
-      .then(function () {
-        return vm.shipment.created()
-          .then(function () {
-            $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
-          })
-          .catch(notificationsService.updateError);
+      .then(() => vm.shipment.created())
+      .then(() => {
+        $state.go('home.shipping.addItems', { shipmentId: vm.shipment.id });
+      })
+      .catch(error => {
+        notificationsService.updateError(error);
       });
   }
 }
