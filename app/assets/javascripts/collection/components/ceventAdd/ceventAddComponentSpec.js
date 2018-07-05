@@ -81,10 +81,7 @@ describe('Component: ceventAdd', function() {
 
     expect(this.$state.go).toHaveBeenCalledWith(
       'home.collection.study.participant.cevents.details',
-      {
-        eventTypeId: this.collectionEvent.collectionEventTypeId,
-        eventId:     this.collectionEvent.id
-      },
+      { visitNumber: this.collectionEvent.visitNumber },
       { reload: true });
   });
 

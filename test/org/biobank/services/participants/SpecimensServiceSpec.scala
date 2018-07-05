@@ -201,7 +201,7 @@ class SpecimensServiceSpec
           val cmd = getAddSpecimensCmd(user.id, f.cevent.id, f.specimen)
           specimenRepository.removeAll
           specimensService.processCommand(cmd).futureValue mustSucceed { reply =>
-            reply.participantId must be (f.participant.id)
+            reply.participantId must be (f.participant.id.id)
           }
         }
       }

@@ -14,13 +14,13 @@
     </h3>
   </div>
 
-  <div class="panel-body" ng-if="vm.collectionEvents.length <= 0">
+  <div class="panel-body" ng-if="!vm.isDisplayStateHaveResults()">
     <div class="alert alert-warning">
       <span class="glyphicon glyphicon-warning-sign"></span>
-      <translate ng-if="vm.displayState === vm.displayStates.NONE_ADDED">
-        No collection events added to this participant yet.
+      <translate ng-if="vm.isDisplayStateNoneAdded()">
+        No collection events have been added to this participant yet.
       </translate>
-      <translate ng-if="vm.displayState === vm.displayStates.NO_RESULTS">
+      <translate ng-if="vm.isDisplayStateNoResults()">
         No Events match the criteria.
       </translate>
     </div>
@@ -68,7 +68,7 @@
   </div>
 
   <div class="panel-footer"
-       ng-if="vm.displayState !== vm.displayStates.NOT_CONFIGURED">
+       ng-if="vm.isDisplayStateHaveResults()">
     <form class="form-inline" name="filters" autocomplete="off">
       <div class="form-group">
         <label for="nameFilter"

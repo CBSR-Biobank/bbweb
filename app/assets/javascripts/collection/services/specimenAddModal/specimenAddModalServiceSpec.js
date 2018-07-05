@@ -241,8 +241,7 @@ describe('Service: specimenAddModal', function() {
       });
 
       it('validity is assigned correctly for a new inventory id', function() {
-        this.Specimen.getByInventoryId =
-          jasmine.createSpy().and.returnValue(this.$q.reject('simulated error'));
+        spyOn(this.Specimen, 'get').and.returnValue(this.$q.reject('simulated error'));
 
         this.scope.vm.specimens = [];
         this.scope.vm.inventoryId = this.Factory.stringNext();
@@ -255,8 +254,7 @@ describe('Service: specimenAddModal', function() {
       it('validity is assigned correctly for a an inventory id already in the system', function() {
         var specimen = new this.Specimen.create(this.Factory.specimen());
 
-        this.Specimen.getByInventoryId =
-          jasmine.createSpy('getByInventoryId').and.returnValue(this.$q.when(specimen));
+        spyOn(this.Specimen, 'get').and.returnValue(this.$q.when(specimen));
 
         this.scope.vm.specimens = [];
         this.scope.vm.inventoryId = this.Factory.stringNext();

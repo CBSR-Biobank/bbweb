@@ -66,10 +66,7 @@ class CeventAddController {
       .then(cevent => {
         this.notificationsService.submitSuccess();
         this.$state.go('home.collection.study.participant.cevents.details',
-                       {
-                         eventTypeId: cevent.collectionEventTypeId,
-                         eventId:     cevent.id
-                       },
+                       { visitNumber: cevent.visitNumber },
                        { reload: true });
       })
       .catch(error => {

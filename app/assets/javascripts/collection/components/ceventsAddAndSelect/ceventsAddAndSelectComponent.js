@@ -13,97 +13,112 @@ const DisplayStates = {
   NONE_ADDED: 2
 };
 
+
 /*
  * Controller for this component.
  */
-/* @ngInject */
-function CeventsAddAndSelectController($state,
-                                      BbwebError,
-                                      CollectionEvent,
-                                      CollectionEventTypeName) {
-  var vm = this;
-  vm.$onInit = onInit;
+class CeventsAddAndSelectController {
 
-  //--
+  constructor($state,
+              BbwebError,
+              CollectionEvent,
+              CollectionEventTypeName) {
+    'ngInject';
+    Object.assign(this,
+                  {
+                    $state,
+                    BbwebError,
+                    CollectionEvent,
+                    CollectionEventTypeName
+                  });
+  }
 
-  function onInit() {
-
-    vm.pagerOptions = {
+  $onInit() {
+    this.pagerOptions = {
       page:      1,
       limit:  5,
       sortField: 'visitNumber'
     };
 
-    vm.$onChanges           = onChanges;
-    vm.visitNumberFilter    = '';
-    vm.pageChanged          = pageChanged;
-    vm.add                  = add;
-    vm.eventInformation     = eventInformation;
-    vm.visitFilterUpdated   = visitFilterUpdated;
-
-    collectionEventRefresh();
+    this.CollectionEvents = [];
+    this.visitNumberFilter = '';
+    this.collectionEventRefresh();
   }
 
   /*
    * Parent component can trigger a collection event reload by calling updating this binding.
    */
-  function onChanges(changed) {
+  $onChanges(changed) {
     if (changed.collectionEventsRefresh) {
-      collectionEventRefresh();
+      this.collectionEventRefresh();
     }
   }
 
-  function getDisplayState() {
-    if (vm.pagedResult.total > 0) {
+  getDisplayState() {
+    if (this.pagedResult.total > 0) {
       return DisplayStates.HAVE_RESULTS;
     }
-    return (vm.visitNumberFilter === '') ? DisplayStates.NONE_ADDED : DisplayStates.NO_RESULTS;
+    return (this.visitNumberFilter === '') ? DisplayStates.NONE_ADDED : DisplayStates.NO_RESULTS;
   }
 
-  function getShowPagination() {
-    return (vm.displayState === DisplayStates.HAVE_RESULTS) &&
-      (vm.pagedResult.maxPages > 1);
+  isDisplayStateNoneAdded() {
+    return (this.displayState === DisplayStates.NONE_ADDED);
   }
 
-  function collectionEventRefresh() {
-    CollectionEvent.list(vm.participant.id, vm.pagerOptions).then(function (pagedResult) {
-      vm.collectionEvents = pagedResult.items;
-      vm.pagedResult = pagedResult;
-      vm.displayState = getDisplayState();
-      vm.showPagination = getShowPagination();
-      vm.paginationNumPages = pagedResult.maxPages;
-    });
+  isDisplayStateNoResults() {
+    return (this.displayState === DisplayStates.NO_RESULTS);
   }
 
-  function pageChanged() {
-    collectionEventRefresh();
-    $state.go('home.collection.study.participant.cevents');
+  isDisplayStateHaveResults() {
+    return (this.displayState === DisplayStates.HAVE_RESULTS);
   }
 
-  function add() {
-    CollectionEventTypeName.list(vm.participant.studyId)
+  getShowPagination() {
+    return (this.displayState === DisplayStates.HAVE_RESULTS) &&
+      (this.pagedResult.maxPages > 1);
+  }
+
+  collectionEventRefresh() {
+    this.CollectionEvent.list(this.participant.id, this.pagerOptions)
+      .then(pagedResult => {
+        this.collectionEvents = pagedResult.items;
+        this.pagedResult = pagedResult;
+        this.displayState = this.getDisplayState();
+        this.showPagination = this.getShowPagination();
+        this.paginationNumPages = pagedResult.maxPages;
+      });
+  }
+
+  pageChanged() {
+    this.collectionEventRefresh();
+    this.$state.go('home.collection.study.participant.cevents');
+  }
+
+  add() {
+    this.CollectionEventTypeName.list(this.participant.studyId)
       .then(typeNames => {
         if (typeNames.length > 1) {
-          $state.go('home.collection.study.participant.cevents.add');
+          this.$state.go('home.collection.study.participant.cevents.add');
         } else {
-          $state.go('home.collection.study.participant.cevents.add.details',
+          this.$state.go('home.collection.study.participant.cevents.add.details',
                     { eventTypeSlug: typeNames[0].slug });
         }
       })
   }
 
-  function eventInformation(cevent) {
-    $state.go('home.collection.study.participant.cevents.details', { visitNumber: cevent.visitNumber });
+  eventInformation(cevent) {
+    this.$state.go('home.collection.study.participant.cevents.details',
+                   { visitNumber: cevent.visitNumber });
   }
 
-  function visitFilterUpdated() {
-    if (vm.visitNumberFilter) {
-      vm.pagerOptions.filter = 'visitNumber::' + vm.visitNumberFilter;
+  visitFilterUpdated() {
+    if (this.visitNumberFilter) {
+      this.pagerOptions.filter = 'visitNumber::' + this.visitNumberFilter;
     } else {
-      vm.pagerOptions.filter = '';
+      this.pagerOptions.filter = '';
     }
-    vm.pagerOptions.page = 1;
-    collectionEventRefresh();
+    this.pagerOptions.page = 1;
+    this.collectionEventRefresh();
   }
 }
 

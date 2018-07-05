@@ -20,7 +20,8 @@ class SpecimenAddModalService {
               $window,
               $timeout,
               Specimen,
-              timeService) {
+              timeService,
+              biobankApi) {
     'ngInject';
     Object.assign(this,
                   {
@@ -28,7 +29,8 @@ class SpecimenAddModalService {
                     $window,
                     $timeout,
                     Specimen,
-                    timeService
+                    timeService,
+                    biobankApi
                   })
     service = this;
   }
@@ -68,14 +70,14 @@ class SpecimenAddModalService {
                         defaultDatetime
                       },
                       {
-                        inventoryId:                 undefined,
+                        inventoryId:                undefined,
                         selectedSpecimenDefinition: undefined,
-                        selectedLocationInfo:        undefined,
-                        amount:                      undefined,
-                        defaultAmount:               undefined,
-                        usingDefaultAmount:          true,
-                        timeCollected:               defaultDatetime,
-                        specimens:                   []
+                        selectedLocationInfo:       undefined,
+                        amount:                     undefined,
+                        defaultAmount:              undefined,
+                        usingDefaultAmount:         true,
+                        timeCollected:              defaultDatetime,
+                        specimens:                  []
                       })
 
         this.$scope.$watch('this.amount', () => {
@@ -174,7 +176,7 @@ class SpecimenAddModalService {
 
         if (!alreadyEntered) {
           this.$scope.form.inventoryId.$setValidity('inventoryIdTaken', true);
-          service.Specimen.getByInventoryId(this.inventoryId)
+          service.Specimen.get(service.biobankApi.slugify(this.inventoryId))
             .then(() => {
               this.$scope.form.inventoryId.$setValidity('inventoryIdTaken', false);
             })

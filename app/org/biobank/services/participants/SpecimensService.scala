@@ -10,7 +10,7 @@ import org.biobank.domain.centres.CentreRepository
 import org.biobank.domain.participants._
 import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
-import org.biobank.dto.SpecimenDto
+import org.biobank.dto.{CollectionEventDto, SpecimenDto}
 import org.biobank.infrastructure.AscendingOrder
 import org.biobank.infrastructure.commands.SpecimenCommands._
 import org.biobank.infrastructure.events.SpecimenEvents._
@@ -37,7 +37,7 @@ trait SpecimensService extends BbwebService {
   def listBySlug(requestUserId: UserId, eventSlug: Slug, query: PagedQuery)
       : Future[ServiceValidation[PagedResults[SpecimenDto]]]
 
-  def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]]
+  def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEventDto]]
 
   def processRemoveCommand(cmd: SpecimenCommand): Future[ServiceValidation[Boolean]]
 
@@ -50,6 +50,7 @@ trait SpecimensService extends BbwebService {
 class SpecimensServiceImpl @Inject() (
   @Named("specimensProcessor") val processor: ActorRef,
   val accessService:                          AccessService,
+  val eventsService:                          CollectionEventsService,
   val studyRepository:                        StudyRepository,
   val collectionEventRepository:              CollectionEventRepository,
   val collectionEventTypeRepository:          CollectionEventTypeRepository,
@@ -149,7 +150,7 @@ class SpecimensServiceImpl @Inject() (
     }
   }
 
-  def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEvent]] = {
+  def processCommand(cmd: SpecimenCommand): Future[ServiceValidation[CollectionEventDto]] = {
     val validCommand = cmd match {
         case c: RemoveSpecimenCmd =>
           ServiceError(s"invalid service call: $cmd, use processRemoveCommand").failureNel[CollectionEvent]
@@ -157,13 +158,15 @@ class SpecimensServiceImpl @Inject() (
       }
 
     validCommand.fold(
-      err => Future.successful(err.failure[CollectionEvent]),
+      err => Future.successful(err.failure[CollectionEventDto]),
       _   => whenSpecimenPermittedAsync(cmd) { () =>
         ask(processor, cmd).mapTo[ServiceValidation[SpecimenEvent]].map { validation =>
           for {
             event  <- validation
-            cevent <- collectionEventRepository.getByKey(CollectionEventId(event.getAdded.getCollectionEventId))
-          } yield cevent
+            cevent <- collectionEventRepository.getByKey(
+              CollectionEventId(event.getAdded.getCollectionEventId))
+            dto    <- eventsService.collectionEventToDto(UserId(cmd.sessionUserId), cevent)
+          } yield dto
         }
       }
     )

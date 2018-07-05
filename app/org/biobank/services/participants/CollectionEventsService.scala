@@ -34,6 +34,9 @@ trait CollectionEventsService extends BbwebService {
            participantId: ParticipantId,
            pagedQuery:    PagedQuery): Future[ServiceValidation[PagedResults[CollectionEventDto]]]
 
+  def collectionEventToDto(requestUserId: UserId, event: CollectionEvent)
+      : ServiceValidation[CollectionEventDto]
+
   def processCommand(cmd: CollectionEventCommand): Future[ServiceValidation[CollectionEventDto]]
 
   def processRemoveCommand(cmd: RemoveCollectionEventCmd): Future[ServiceValidation[Boolean]]
@@ -218,7 +221,7 @@ class CollectionEventsServiceImpl @Inject() (
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  private def collectionEventToDto(requestUserId: UserId, event: CollectionEvent)
+  def collectionEventToDto(requestUserId: UserId, event: CollectionEvent)
       : ServiceValidation[CollectionEventDto] = {
     participantRepository.getByKey(event.participantId) flatMap { participant =>
       collectionEventToDto(requestUserId, event, participant)
