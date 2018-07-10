@@ -107,7 +107,7 @@ function UserFactory($q,
         password:  password,
         avatarUrl: this.avatarUrl
       };
-      return biobankApi.post(User.url(), json).then(User.asyncCreate);
+      return biobankApi.post(User.url(''), json).then(User.asyncCreate);
     }
 
     /** @protected */

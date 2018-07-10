@@ -130,16 +130,14 @@ package biobank {
       if (s == null) err.failureNel[String] else s.successNel[String]
     }
 
-    def validateNonEmptyStringOption(maybeString: Option[String],
-                                     err: ValidationKey)
+    def validateNonEmptyStringOption(maybeString: Option[String], err: ValidationKey)
         : SystemValidation[Option[String]] = {
       maybeString match {
         case None => maybeString.successNel[String]
         case Some(s) =>
-          validateNonEmptyString(s, err).fold(
-            err => err.failure[Option[String]],
-            str => Some(str).successNel[String]
-          )
+          validateNonEmptyString(s, err)
+            .fold(err => err.failure[Option[String]],
+                  str => Some(str).successNel[String])
       }
     }
 
@@ -232,6 +230,17 @@ package biobank {
 
     def validateUrl(url: String): SystemValidation[String] = {
       urlRegex.findFirstIn(url).toSuccessNel(InvalidUrl.toString)
+    }
+
+    def validateOptionalUrl(url: Option[String]): SystemValidation[Option[String]] = {
+      url match {
+        case Some(u) => validateUrl(u).fold(
+          err => err.failure[Option[String]],
+          str => Some(str).successNel[String])
+        case None    => url.successNel[String]
+      }
+
+
     }
 
   }

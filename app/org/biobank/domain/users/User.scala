@@ -216,8 +216,7 @@ object RegisteredUser extends UserValidations {
        validateEmail(email) |@|
        validateNonEmptyString(password, PasswordRequired) |@|
        validateNonEmptyString(salt, SaltRequired) |@|
-       validateNonEmptyStringOption(avatarUrl, InvalidUrl) |@|
-       validateUrl(avatarUrl.getOrElse(""))) { case _ =>
+       validateOptionalUrl(avatarUrl)) { case _ =>
         RegisteredUser(id           = id,
                        version      = version,
                        timeAdded    = OffsetDateTime.now,
@@ -228,7 +227,7 @@ object RegisteredUser extends UserValidations {
                        password     = password,
                        salt         = salt,
                        avatarUrl    = avatarUrl)
-      }
+    }
   }
 
 }

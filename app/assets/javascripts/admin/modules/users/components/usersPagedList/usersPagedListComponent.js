@@ -82,13 +82,13 @@ class UsersPagedListController extends PagedListController {
 
   getItemIcon(user) {
     if (user.isRegistered()) {
-      return 'glyphicon-cog';
+      return 'glyphicon-cog text-warning';
     }
     if (user.isActive()) {
-      return 'glyphicon-user';
+      return 'glyphicon-user text-success';
     }
     if (user.isLocked()) {
-      return 'glyphicon-lock';
+      return 'glyphicon-lock text-danger';
     }
     throw new Error('invalid user state: ' + user.state);
   }

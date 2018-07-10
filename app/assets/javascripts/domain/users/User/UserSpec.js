@@ -174,7 +174,7 @@ describe('User', function() {
           user       = new this.User(_.omit(serverUser, 'id')),
           cmd        = registerCommand(user, password);
 
-    this.$httpBackend.expectPOST(this.url(), cmd).respond(this.reply(serverUser));
+    this.$httpBackend.expectPOST(this.url(''), cmd).respond(this.reply(serverUser));
 
     user.register(password).then((reply) => {
       expect(reply).toEqual(jasmine.any(this.User));

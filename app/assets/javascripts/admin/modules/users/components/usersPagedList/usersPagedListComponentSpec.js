@@ -118,7 +118,7 @@ describe('usersPagedListComponent', function() {
 
       statesInfo.forEach(info => {
         const user = this.User.create(this.Factory.user({ state: info.state }));
-        expect(this.controller.getItemIcon(user)).toEqual(info.icon);
+        expect(this.controller.getItemIcon(user)).toStartWith(info.icon);
       });
     });
 
