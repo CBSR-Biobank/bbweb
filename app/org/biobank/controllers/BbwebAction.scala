@@ -1,56 +1,32 @@
 package org.biobank.controllers
 
 import javax.inject.Inject
-import org.biobank.services.AuthToken
-import org.biobank.services.users.UsersService
-import play.api.Environment
+import com.mohiva.play.silhouette.api.{HandlerResult, Silhouette}
+import com.mohiva.play.silhouette.api.actions._
+import org.biobank.utils.auth.DefaultEnv
 import play.api.http.HttpVerbs
 import play.api.mvc._
-import play.api.mvc.Results.Unauthorized
 import scala.concurrent.{ExecutionContext, Future}
 
-class BbwebRequest[A](request: Request[A], val authInfo: AuthenticationInfo)
-    extends WrappedRequest[A](request)
-
-@SuppressWarnings(Array("org.wartremover.warts.ImplicitParameter"))
 class BbwebAction @Inject()(controllerComponents: ControllerComponents,
-                            val env:              Environment,
-                            val usersService:     UsersService,
-                            val authToken:        AuthToken)
-                         (implicit ec: ExecutionContext)
-    extends ActionBuilder[BbwebRequest, AnyContent]
+                            silhouette: Silhouette[DefaultEnv])
+    extends ActionBuilder[({ type R[B] = SecuredRequest[DefaultEnv, B] })#R, AnyContent]
     with HttpVerbs
-    with Security {
-
-  type BbwebRequestBlock[A] = BbwebRequest[A] => Future[Result]
-
-  private val logger = org.slf4j.LoggerFactory.getLogger(this.getClass)
+{
+  type BbwebRequestBlock[A] = SecuredRequest[DefaultEnv, A] => Future[Result]
 
   override protected def executionContext: ExecutionContext = controllerComponents.executionContext
 
   override def parser: BodyParser[AnyContent] = controllerComponents.parsers.defaultBodyParser
 
+  private val requestHandler = silhouette.SecuredRequestHandler
+
+  @SuppressWarnings(Array("org.wartremover.warts.ExplicitImplicitTypes"))
   override def invokeBlock[A](request: Request[A], block: BbwebRequestBlock[A]): Future[Result] = {
-    if (logger.isTraceEnabled) {
-      logger.trace(s"invokeBlock: request: $request")
-    }
+    implicit val ec = executionContext
+    implicit val req = request
+    val b = (r: SecuredRequest[DefaultEnv, A]) => block(r).map(r => HandlerResult(r))
 
-    validateToken(request).fold(
-      err => {
-        Future.successful(Unauthorized)
-      },
-      authInfo => {
-        val future = block(new BbwebRequest(request, authInfo))
-        future.map { result =>
-          request.method match {
-            case GET | HEAD =>
-              result.withHeaders("Cache-Control" -> "max-age: 100")
-            case other =>
-              result
-          }
-        }
-      }
-    )
+    requestHandler(request)(b).map(_.result).recoverWith(requestHandler.errorHandler.exceptionHandler)
   }
-
 }

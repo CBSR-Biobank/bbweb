@@ -32,13 +32,13 @@ class CeventTypesController @Inject() (
 
   def get(studySlug: Slug, ceventTypeSlug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val ceventType = service.eventTypeBySlug(request.authInfo.userId, studySlug, ceventTypeSlug)
+      val ceventType = service.eventTypeBySlug(request.identity.user.id, studySlug, ceventTypeSlug)
       validationReply(ceventType)
     }
 
   def getById(studyId: StudyId, eventTypeId: CollectionEventTypeId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val ceventType = service.eventTypeWithId(request.authInfo.userId, studyId, eventTypeId)
+      val ceventType = service.eventTypeWithId(request.identity.user.id, studyId, eventTypeId)
       validationReply(ceventType)
     }
 
@@ -49,7 +49,7 @@ class CeventTypesController @Inject() (
           validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
         },
         pagedQuery => {
-          validationReply(service.listByStudySlug(request.authInfo.userId,
+          validationReply(service.listByStudySlug(request.identity.user.id,
                                                   studySlug,
                                                   pagedQuery))
         }
@@ -64,7 +64,7 @@ class CeventTypesController @Inject() (
           validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
         },
         query => {
-          validationReply(service.listNamesByStudyId(request.authInfo.userId, studyId, query))
+          validationReply(service.listNamesByStudyId(request.identity.user.id, studyId, query))
         }
       )
     }
@@ -77,7 +77,7 @@ class CeventTypesController @Inject() (
           validationReply(Future.successful(err.failure[Set[CollectionSpecimenDefinitionNames]]))
         },
         pagedQuery => {
-          validationReply(service.specimenDefinitionsForStudy(request.authInfo.userId, studySlug))
+          validationReply(service.specimenDefinitionsForStudy(request.identity.user.id, studySlug))
         }
       )
     }
@@ -85,12 +85,12 @@ class CeventTypesController @Inject() (
 
   def inUse(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.eventTypeInUse(request.authInfo.userId, slug))
+      validationReply(service.eventTypeInUse(request.identity.user.id, slug))
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.snapshotRequest(request.authInfo.userId).map { _ => true })
+      validationReply(service.snapshotRequest(request.identity.user.id).map { _ => true })
     }
 
   def add(studyId: StudyId): Action[JsValue] =
@@ -98,7 +98,7 @@ class CeventTypesController @Inject() (
 
   def remove(studyId: StudyId, id: CollectionEventTypeId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = RemoveCollectionEventTypeCmd(request.authInfo.userId.id, studyId.id, id.id, ver)
+      val cmd = RemoveCollectionEventTypeCmd(request.identity.user.id.id, studyId.id, id.id, ver)
       val future = service.processRemoveCommand(cmd)
       validationReply(future)
     }
@@ -123,7 +123,7 @@ class CeventTypesController @Inject() (
       : Action[Unit]=
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionEventTypeAnnotationTypeCmd(
-          sessionUserId         = request.authInfo.userId.id,
+          sessionUserId         = request.identity.user.id.id,
           studyId               = studyId.id,
           id                    = id.id,
           expectedVersion       = ver,
@@ -142,7 +142,7 @@ class CeventTypesController @Inject() (
       : Action[Unit]=
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveCollectionSpecimenDefinitionCmd(
-          sessionUserId         = request.authInfo.userId.id,
+          sessionUserId         = request.identity.user.id.id,
           studyId               = studyId.id,
           id                    = id.id,
           expectedVersion       = ver,

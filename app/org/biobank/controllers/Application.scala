@@ -34,23 +34,24 @@ class Application @Inject() (controllerComponents: ControllerComponents,
 
   def aggregateCounts: Action[Unit] =
     action.async(parse.empty) { implicit request =>
+      val userId = request.identity.user.id
       Future {
         val counts =  for {
             studyCounts  <- {
-              accessService.hasPermission(request.authInfo.userId, PermissionId.StudyRead).flatMap { p =>
-                if (p) studiesService.getStudyCount(request.authInfo.userId)
+              accessService.hasPermission(userId, PermissionId.StudyRead).flatMap { p =>
+                if (p) studiesService.getStudyCount(userId)
                 else 0L.successNel[String]
               }
             }
             centreCounts <- {
-              accessService.hasPermission(request.authInfo.userId, PermissionId.CentreRead).flatMap { p =>
-                if (p) centresService.getCentresCount(request.authInfo.userId)
+              accessService.hasPermission(userId, PermissionId.CentreRead).flatMap { p =>
+                if (p) centresService.getCentresCount(userId)
                 else 0L.successNel[String]
               }
             }
             userCounts   <- {
-              accessService.hasPermission(request.authInfo.userId, PermissionId.UserRead).flatMap { p =>
-                if (p) usersService.getCountsByStatus(request.authInfo.userId).map(c => c.total)
+              accessService.hasPermission(userId, PermissionId.UserRead).flatMap { p =>
+                if (p) usersService.getCountsByStatus(userId).map(c => c.total)
                 else 0L.successNel[String]
               }
             }

@@ -38,13 +38,13 @@ class ProcessingTypesController @Inject() (
 
   def get(studySlug: Slug, procTypeSlug: Slug): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val processingType = service.processingTypeBySlug(request.authInfo.userId, studySlug, procTypeSlug)
+      val processingType = service.processingTypeBySlug(request.identity.user.id, studySlug, procTypeSlug)
       validationReply(processingType)
     }
 
   def getById(studyId: StudyId, processingTypeId: ProcessingTypeId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val processingType = service.processingTypeById(request.authInfo.userId, studyId, processingTypeId)
+      val processingType = service.processingTypeById(request.identity.user.id, studyId, processingTypeId)
       validationReply(processingType)
     }
 
@@ -55,7 +55,7 @@ class ProcessingTypesController @Inject() (
           validationReply(Future.successful(err.failure[PagedResults[ProcessingType]]))
         },
         pagedQuery => {
-          validationReply(service.processingTypesForStudy(request.authInfo.userId, studySlug, pagedQuery))
+          validationReply(service.processingTypesForStudy(request.identity.user.id, studySlug, pagedQuery))
         }
       )
     }
@@ -63,17 +63,17 @@ class ProcessingTypesController @Inject() (
 
   def inUse(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.processingTypeInUse(request.authInfo.userId, slug))
+      validationReply(service.processingTypeInUse(request.identity.user.id, slug))
     }
 
   def specimenDefinitions(studyId: StudyId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(service.specimenDefinitionsForStudy(request.authInfo.userId, studyId))
+      validationReply(service.specimenDefinitionsForStudy(request.identity.user.id, studyId))
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      val reply = service.snapshotRequest(request.authInfo.userId).map { _ => true }
+      val reply = service.snapshotRequest(request.identity.user.id).map { _ => true }
       validationReply(reply)
     }
 
@@ -84,7 +84,7 @@ class ProcessingTypesController @Inject() (
     action.async(parse.json) { request =>
       val reqJson = request.body.as[JsObject] ++ Json.obj("studyId"      -> studyId,
                                                          "id"            -> id,
-                                                         "sessionUserId" -> request.authInfo.userId.id)
+                                                         "sessionUserId" -> request.identity.user.id.id)
       reqJson.validate[UpdateJson].fold(
         errors => {
           Future.successful(BadRequest(Json.obj("status" -> "error",
@@ -104,7 +104,7 @@ class ProcessingTypesController @Inject() (
 
   def removeProcessingType(studyId: StudyId, id: ProcessingTypeId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = RemoveProcessingTypeCmd(request.authInfo.userId.id, studyId.id, id.id, ver)
+      val cmd = RemoveProcessingTypeCmd(request.identity.user.id.id, studyId.id, id.id, ver)
       val future = service.processRemoveCommand(cmd)
       validationReply(future)
     }
@@ -181,7 +181,7 @@ class ProcessingTypesController @Inject() (
       : Action[Unit]=
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveProcessingTypeAnnotationTypeCmd(
-          sessionUserId         = request.authInfo.userId.id,
+          sessionUserId         = request.identity.user.id.id,
           studyId               = studyId.id,
           id                    = id.id,
           expectedVersion       = ver,

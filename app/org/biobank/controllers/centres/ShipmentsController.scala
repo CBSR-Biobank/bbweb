@@ -39,7 +39,7 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
 
   def get(id: ShipmentId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(shipmentsService.getShipment(request.authInfo.userId, id))
+      validationReply(shipmentsService.getShipment(request.identity.user.id, id))
     }
 
   def list: Action[Unit] =
@@ -49,7 +49,7 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
           validationReply(Future.successful(err.failure[PagedResults[ShipmentDto]]))
         },
         pagedQuery => {
-          validationReply(shipmentsService.getShipments(request.authInfo.userId, pagedQuery))
+          validationReply(shipmentsService.getShipments(request.identity.user.id, pagedQuery))
         }
       )
     }
@@ -61,7 +61,7 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
           validationReply(Future.successful(err.failure[PagedResults[ShipmentDto]]))
         },
         pagedQuery => {
-          validationReply(shipmentsService.getShipmentSpecimens(request.authInfo.userId,
+          validationReply(shipmentsService.getShipmentSpecimens(request.identity.user.id,
                                                                 shipmentId,
                                                                 pagedQuery))
         }
@@ -70,7 +70,7 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
 
   def canAddSpecimens(shipmentId: ShipmentId, specimenInventoryId: String): Action[Unit] =
     action(parse.empty) { request =>
-      val v = shipmentsService.shipmentCanAddSpecimen(request.authInfo.userId,
+      val v = shipmentsService.shipmentCanAddSpecimen(request.identity.user.id,
                                                       shipmentId,
                                                       specimenInventoryId)
         .map { specimen => true }
@@ -79,21 +79,21 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
 
   def getSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(shipmentsService.getShipmentSpecimen(request.authInfo.userId,
+      validationReply(shipmentsService.getShipmentSpecimen(request.identity.user.id,
                                                            shipmentId,
                                                            ShipmentSpecimenId(shipmentSpecimenId)))
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(shipmentsService.snapshotRequest(request.authInfo.userId).map { _ => true })
+      validationReply(shipmentsService.snapshotRequest(request.identity.user.id).map { _ => true })
     }
 
   def add(): Action[JsValue] = commandAction[AddShipmentCmd](JsNull)(processCommand)
 
   def remove(shipmentId: ShipmentId, version: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = ShipmentRemoveCmd(sessionUserId   = request.authInfo.userId.id,
+      val cmd = ShipmentRemoveCmd(sessionUserId   = request.identity.user.id.id,
                                   id              = shipmentId.id,
                                   expectedVersion = version)
       val future = shipmentsService.removeShipment(cmd)
@@ -150,7 +150,7 @@ class ShipmentsController @Inject() (controllerComponents: ControllerComponents,
 
   def removeSpecimen(shipmentId: ShipmentId, shipmentSpecimenId: String, version: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = ShipmentSpecimenRemoveCmd(sessionUserId      = request.authInfo.userId.id,
+      val cmd = ShipmentSpecimenRemoveCmd(sessionUserId      = request.identity.user.id.id,
                                           shipmentId         = shipmentId.id,
                                           expectedVersion    = version,
                                           shipmentSpecimenId = shipmentSpecimenId)

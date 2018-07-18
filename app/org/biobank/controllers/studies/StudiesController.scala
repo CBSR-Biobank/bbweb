@@ -38,14 +38,14 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
           validationReply(Future.successful(err.failure[PagedResults[Study]]))
         },
         query => {
-          validationReply(service.collectionStudies(request.authInfo.userId, query))
+          validationReply(service.collectionStudies(request.identity.user.id, query))
         }
       )
     }
 
   def studyCounts(): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(Future(service.getCountsByStatus(request.authInfo.userId)))
+      validationReply(Future(service.getCountsByStatus(request.identity.user.id)))
     }
 
   def list: Action[Unit] =
@@ -55,7 +55,7 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
           validationReply(Future.successful(err.failure[PagedResults[Study]]))
         },
         pagedQuery => {
-          validationReply(service.getStudies(request.authInfo.userId, pagedQuery))
+          validationReply(service.getStudies(request.identity.user.id, pagedQuery))
         }
       )
     }
@@ -67,29 +67,29 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
           validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
         },
         query => {
-          validationReply(service.getStudyNames(request.authInfo.userId, query))
+          validationReply(service.getStudyNames(request.identity.user.id, query))
         }
       )
     }
 
   def getBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.getStudyBySlug(request.authInfo.userId, slug))
+      validationReply(service.getStudyBySlug(request.identity.user.id, slug))
     }
 
   def enableAllowed(id: StudyId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.enableAllowed(request.authInfo.userId, id))
+      validationReply(service.enableAllowed(request.identity.user.id, id))
     }
 
   def centresForStudy(studyId: StudyId): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      validationReply(Future(service.getCentresForStudy(request.authInfo.userId, studyId)))
+      validationReply(Future(service.getCentresForStudy(request.identity.user.id, studyId)))
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.snapshotRequest(request.authInfo.userId).map { _ => true })
+      validationReply(service.snapshotRequest(request.identity.user.id).map { _ => true })
     }
 
   def add: Action[JsValue] = commandAction[AddStudyCmd](JsNull)(processCommand)
@@ -110,7 +110,7 @@ class StudiesController @Inject() (controllerComponents: ControllerComponents,
 
   def removeAnnotationType(studyId: StudyId, ver: Long, annotationTypeId: String): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(request.authInfo.userId.id),
+      val cmd = UpdateStudyRemoveAnnotationTypeCmd(Some(request.identity.user.id.id),
                                                    studyId.id,
                                                    ver,
                                                    annotationTypeId)

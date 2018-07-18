@@ -32,7 +32,7 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
    */
   def get(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val v = service.getBySlug(request.authInfo.userId, slug)
+      val v = service.getBySlug(request.identity.user.id, slug)
       validationReply(v)
     }
 
@@ -43,14 +43,14 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
           validationReply(Future.successful(err.failure[PagedResults[SpecimenDto]]))
         },
         pagedQuery => {
-          validationReply(service.listBySlug(request.authInfo.userId, ceventSlug, pagedQuery))
+          validationReply(service.listBySlug(request.identity.user.id, ceventSlug, pagedQuery))
         }
       )
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.snapshotRequest(request.authInfo.userId).map(_ => true))
+      validationReply(service.snapshotRequest(request.identity.user.id).map(_ => true))
     }
 
   def addSpecimens(ceventId: CollectionEventId): Action[JsValue] =
@@ -62,7 +62,7 @@ class SpecimensController @Inject() (controllerComponents: ControllerComponents,
   def removeSpecimen(ceventId: CollectionEventId, spcId: SpecimenId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
       val cmd = RemoveSpecimenCmd(
-          sessionUserId         = request.authInfo.userId.id,
+          sessionUserId         = request.identity.user.id.id,
           id                    = spcId.id,
           collectionEventId     = ceventId.id,
           expectedVersion       = ver)

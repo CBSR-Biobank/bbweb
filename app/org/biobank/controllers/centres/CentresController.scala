@@ -34,7 +34,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
 
   def centreCounts(): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      Future(validationReply(service.getCountsByStatus(request.authInfo.userId)))
+      Future(validationReply(service.getCountsByStatus(request.identity.user.id)))
     }
 
   def list: Action[Unit] =
@@ -44,7 +44,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
           validationReply(Future.successful(err.failure[PagedResults[CentreDto]]))
         },
         pagedQuery => {
-          validationReply(service.getCentres(request.authInfo.userId, pagedQuery))
+          validationReply(service.getCentres(request.identity.user.id, pagedQuery))
         }
       )
     }
@@ -56,7 +56,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
           validationReply(Future.successful(err.failure[Seq[CentreDto]]))
         },
         query => {
-          validationReply(service.getCentreNames(request.authInfo.userId,
+          validationReply(service.getCentreNames(request.identity.user.id,
                                                  query.filter,
                                                  query.sort))
         }
@@ -70,13 +70,13 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
 
   def getBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
-      val v = service.getCentreBySlug(request.authInfo.userId, slug)
+      val v = service.getCentreBySlug(request.identity.user.id, slug)
       validationReply(v)
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.snapshotRequest(request.authInfo.userId).map(_ => true))
+      validationReply(service.snapshotRequest(request.identity.user.id).map(_ => true))
     }
 
   def add(): Action[JsValue] = commandAction[AddCentreCmd](JsNull)(processCommand)
@@ -92,7 +92,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
 
   def removeStudy(centreId: CentreId, ver: Long, studyId: String): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      processCommand(RemoveStudyFromCentreCmd(request.authInfo.userId.id, centreId.id, ver, studyId))
+      processCommand(RemoveStudyFromCentreCmd(request.identity.user.id.id, centreId.id, ver, studyId))
     }
 
   def addLocation(id: CentreId): Action[JsValue] =
@@ -105,7 +105,7 @@ class CentresController @Inject()(controllerComponents: ControllerComponents,
 
   def removeLocation(centreId: CentreId, ver: Long, locationId: String): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      processCommand(RemoveCentreLocationCmd(request.authInfo.userId.id, centreId.id, ver, locationId))
+      processCommand(RemoveCentreLocationCmd(request.identity.user.id.id, centreId.id, ver, locationId))
     }
 
   def enable(id: CentreId): Action[JsValue] =

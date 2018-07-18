@@ -28,7 +28,7 @@ class CollectionEventsController @Inject() (controllerComponents: ControllerComp
 
   def get(ceventId: String): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.get(request.authInfo.userId, CollectionEventId(ceventId)))
+      validationReply(service.get(request.identity.user.id, CollectionEventId(ceventId)))
     }
 
   def list(participantId: ParticipantId): Action[Unit] =
@@ -38,19 +38,19 @@ class CollectionEventsController @Inject() (controllerComponents: ControllerComp
           validationReply(Future.successful(err.failure[PagedResults[CollectionEventDto]]))
         },
         pagedQuery => {
-          validationReply(service.list(request.authInfo.userId, participantId, pagedQuery))
+          validationReply(service.list(request.identity.user.id, participantId, pagedQuery))
         }
       )
     }
 
   def getByVisitNumber(participantId: ParticipantId, visitNumber: Int): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.getByVisitNumber(request.authInfo.userId, participantId, visitNumber))
+      validationReply(service.getByVisitNumber(request.identity.user.id, participantId, visitNumber))
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(service.snapshotRequest(request.authInfo.userId).map(_ => true))
+      validationReply(service.snapshotRequest(request.identity.user.id).map(_ => true))
     }
 
   def add(participantId: ParticipantId): Action[JsValue] =
@@ -69,7 +69,7 @@ class CollectionEventsController @Inject() (controllerComponents: ControllerComp
                        annotTypeId:   String,
                        ver:           Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = RemoveCollectionEventAnnotationCmd(sessionUserId    = request.authInfo.userId.id,
+      val cmd = RemoveCollectionEventAnnotationCmd(sessionUserId    = request.identity.user.id.id,
                                                    id               = ceventId.id,
                                                    expectedVersion  = ver,
                                                    annotationTypeId = annotTypeId)
@@ -78,7 +78,7 @@ class CollectionEventsController @Inject() (controllerComponents: ControllerComp
 
   def remove(participantId: ParticipantId, ceventId: CollectionEventId, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = RemoveCollectionEventCmd(sessionUserId   = request.authInfo.userId.id,
+      val cmd = RemoveCollectionEventCmd(sessionUserId   = request.identity.user.id.id,
                                          id              = ceventId.id,
                                          participantId   = participantId.id,
                                          expectedVersion = ver)

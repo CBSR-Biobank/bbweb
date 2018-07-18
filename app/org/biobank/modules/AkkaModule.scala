@@ -10,7 +10,7 @@ import play.api.libs.concurrent.AkkaGuiceSupport
 
 class AkkaModule extends AbstractModule with AkkaGuiceSupport {
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))
-  def configure() = {
+  override def configure() = {
 
     bindActor[AccessProcessor]("accessProcessor")
     bindActor[MembershipProcessor]("membershipProcessor")

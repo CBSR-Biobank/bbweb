@@ -6,6 +6,7 @@ val conf = ConfigFactory.parseFile(new File("conf/application.conf")).resolve()
 version := conf.getString("app.version")
 
 val akkaVer = "2.5.19"
+val silhouetteVersion = "5.0.5"
 
 name := "bbweb"
 
@@ -73,7 +74,7 @@ packageSummary in Linux := "Biorepository application for tracking biospecimens.
 
 packageDescription := "Biorepository application for tracking biospecimens."
 
-scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.8")
+scalaVersion := Option(System.getProperty("scala.version")).getOrElse("2.12.6")
 
 scalacOptions in Compile ++= Seq(
     "-target:jvm-1.8",
@@ -141,6 +142,7 @@ libraryDependencies ++= Seq(
     ehcache,
     filters,
     "org.scala-stm"               %% "scala-stm"                           % "0.9",
+    "com.iheart"                  %% "ficus"                               % "1.4.3",
     "com.typesafe.play"           %% "play-json"                           % "2.6.9",
     ( "com.typesafe.akka"         %% "akka-persistence"                    % akkaVer   % "compile"  )
       .excludeAll(ExclusionRule(organization="com.google.protobuf")),
@@ -155,6 +157,10 @@ libraryDependencies ++= Seq(
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
     "com.typesafe.play"           %% "play-mailer"                         % "6.0.1",
     "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.1",
+    "net.codingwell"              %% "scala-guice"                         % "4.2.1",
+    "com.mohiva"                  %% "play-silhouette"                     % silhouetteVersion,
+    "com.mohiva"                  %% "play-silhouette-password-bcrypt"     % silhouetteVersion,
+    "com.mohiva"                  %% "play-silhouette-crypto-jca"          % silhouetteVersion,
     "com.typesafe.scala-logging"  %% "scala-logging"                       % "3.9.2",
     "com.github.ghik"             %% "silencer-lib"                        % "1.0"  % "compile",
     // Testing
@@ -162,6 +168,7 @@ libraryDependencies ++= Seq(
       .excludeAll(ExclusionRule(organization="com.typesafe.akka")),
     "com.typesafe.akka"           %% "akka-testkit"                        % akkaVer   % "test",
     "org.scalatestplus.play"      %% "scalatestplus-play"                  % "3.1.2"   % "test",
+    "com.mohiva"                  %% "play-silhouette-testkit"             % silhouetteVersion % "test",
     "org.pegdown"                 %  "pegdown"                             % "1.6.0"   % "test",
     "org.codehaus.janino"         %  "janino"                              % "3.0.11"  % "test",
     "org.mockito"                 %  "mockito-core"                        % "2.23.4"  % "test",

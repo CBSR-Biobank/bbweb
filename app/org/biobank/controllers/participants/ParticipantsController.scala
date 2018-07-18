@@ -25,17 +25,17 @@ class ParticipantsController @Inject() (controllerComponents: ControllerComponen
 
   def get(studyId: StudyId, participantId: ParticipantId): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(participantsService.get(request.authInfo.userId, studyId, participantId))
+      validationReply(participantsService.get(request.identity.user.id, studyId, participantId))
     }
 
   def getBySlug(slug: Slug): Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(participantsService.getBySlug(request.authInfo.userId, slug))
+      validationReply(participantsService.getBySlug(request.identity.user.id, slug))
     }
 
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
-      validationReply(participantsService.snapshotRequest(request.authInfo.userId).map(_ => true))
+      validationReply(participantsService.snapshotRequest(request.identity.user.id).map(_ => true))
     }
 
   def add(studyId: StudyId): Action[JsValue] =
@@ -49,7 +49,7 @@ class ParticipantsController @Inject() (controllerComponents: ControllerComponen
 
   def removeAnnotation(participantId: ParticipantId, annotTypeId: String, ver: Long): Action[Unit] =
     action.async(parse.empty) { implicit request =>
-      val cmd = ParticipantRemoveAnnotationCmd(sessionUserId    = request.authInfo.userId.id,
+      val cmd = ParticipantRemoveAnnotationCmd(sessionUserId    = request.identity.user.id.id,
                                                id               = participantId.id,
                                                expectedVersion  = ver,
                                                annotationTypeId = annotTypeId)
