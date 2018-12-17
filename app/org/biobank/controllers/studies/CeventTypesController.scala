@@ -4,6 +4,7 @@ import javax.inject.{Inject, Singleton}
 import org.biobank.controllers._
 import org.biobank.domain.Slug
 import org.biobank.domain.studies.{StudyId, CollectionEventType, CollectionEventTypeId}
+import org.biobank.dto.CollectionSpecimenDefinitionNames
 import org.biobank.infrastructure.commands.CollectionEventTypeCommands._
 import org.biobank.services.PagedResults
 import org.biobank.services.studies.CollectionEventTypeService
@@ -73,7 +74,7 @@ class CeventTypesController @Inject() (
     action.async(parse.empty) { implicit request =>
       PagedQueryHelper(request.rawQueryString, PageSizeMax).fold(
         err => {
-          validationReply(Future.successful(err.failure[PagedResults[CollectionEventType]]))
+          validationReply(Future.successful(err.failure[Set[CollectionSpecimenDefinitionNames]]))
         },
         pagedQuery => {
           validationReply(service.specimenDefinitionsForStudy(request.authInfo.userId, studySlug))
