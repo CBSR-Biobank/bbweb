@@ -14,7 +14,7 @@ trait ProcessingTypeRepository
   def withId(studyId: StudyId, processingTypeId: ProcessingTypeId)
       : DomainValidation[ProcessingType]
 
-  def processingTypeInUse(processingTypeId: ProcessingTypeId): Boolean
+  def processingTypeInUse(processingType: ProcessingType): Boolean
 
   def allForStudy(studyId: StudyId): Set[ProcessingType]
 
@@ -49,9 +49,14 @@ class ProcessingTypeRepositoryImpl
     } yield pt
   }
 
-  def processingTypeInUse(processingTypeId: ProcessingTypeId): Boolean = {
-    // FIXME: this needs to be implemented
-    false
+  def processingTypeInUse(processingType: ProcessingType): Boolean = {
+    // check if this processing type is an input for other processing types
+    val found = getValues.find { pt =>
+        (pt.specimenProcessing.input.definitionType == ProcessingType.processedDefinition) &&
+        (pt.specimenProcessing.input.entityId == processingType.id)
+      }
+
+    !found.isEmpty
   }
 
   def allForStudy(studyId: StudyId): Set[ProcessingType] = {

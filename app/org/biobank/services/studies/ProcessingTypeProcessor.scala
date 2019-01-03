@@ -672,13 +672,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
   val ErrMsgNameExists: String = "processing type with name already exists"
 
   def checkNotInUse(processingType: ProcessingType): Boolean = {
-    // check if this processing type is an input for other processing types
-    val found = processingTypeRepository.getValues.find { pt =>
-        (pt.specimenProcessing.input.definitionType == ProcessingType.processedDefinition) &&
-        (pt.specimenProcessing.input.entityId == processingType.id)
-      }
-
-    found.isEmpty
+    !processingTypeRepository.processingTypeInUse(processingType)
 
     // FIXME: also check if there are specimens of this type in specimenReporitory
   }

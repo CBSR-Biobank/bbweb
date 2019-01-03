@@ -102,7 +102,7 @@ class ProcessingTypeServiceImpl @Inject() (
                                PermissionId.StudyRead,
                                Some(processingType.studyId),
                                None) { () =>
-        processingTypeRepository.processingTypeInUse(processingType.id).successNel[String]
+        processingTypeRepository.processingTypeInUse(processingType).successNel[String]
       }
     }
   }
