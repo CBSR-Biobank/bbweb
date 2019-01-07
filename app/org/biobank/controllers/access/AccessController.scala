@@ -14,7 +14,6 @@ import org.biobank.services.centres.CentresService
 import org.biobank.services.studies.StudiesService
 import org.biobank.services.users.UsersService
 import play.api.Logger
-import play.api.libs.json.Reads._
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.{Environment, Logger}

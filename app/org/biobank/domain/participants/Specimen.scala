@@ -8,7 +8,6 @@ import org.biobank.domain._
 import org.biobank.domain.containers.{ContainerId, ContainerSchemaPositionId}
 import org.biobank.domain.studies.{CollectionSpecimenDefinition, SpecimenDefinitionId, StudyValidations}
 import org.biobank.domain.{ConcurrencySafeEntity, DomainValidation}
-import org.biobank.infrastructure.EnumUtils._
 import org.biobank.services.centres.CentreLocationInfo
 import play.api.libs.json._
 import scalaz.Scalaz._
