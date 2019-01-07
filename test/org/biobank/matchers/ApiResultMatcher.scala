@@ -28,6 +28,9 @@ trait ApiResultMatchers { this: org.biobank.fixtures.ControllerFixture =>
   def beUnauthorizedNoContent: Matcher[Future[Result]] =
     new ReplyWithNoContent(401)
 
+  def beOkNoContent: Matcher[Future[Result]] =
+    new ReplyWithNoContent(200)
+
   private class ReplyWithJsonStatus(htmlStatus: Int, jsonStatus: String) extends Matcher[Future[Result]] {
     override def apply(left: Future[Result]) = {
       val responseStatus = status(left)

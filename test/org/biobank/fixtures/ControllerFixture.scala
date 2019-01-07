@@ -1,6 +1,11 @@
 package org.biobank.fixtures
 
-import org.biobank._
+import com.google.inject.AbstractModule
+import com.mohiva.play.silhouette.api._
+import com.mohiva.play.silhouette.test._
+import com.mohiva.play.silhouette.impl.providers.CredentialsProvider
+import net.codingwell.scalaguice.ScalaModule
+import org.biobank.Global.{ DefaultUserId, DefaultUserEmail }
 import org.biobank.controllers.CacheForTesting
 import org.biobank.domain._
 import org.biobank.domain.access._
@@ -11,6 +16,7 @@ import org.biobank.domain.studies._
 import org.biobank.domain.users._
 import org.biobank.matchers.ApiResultMatchers
 import org.biobank.services.PasswordHasher
+import org.biobank.utils.auth.DefaultEnv
 import org.scalatest._
 import org.scalatestplus.play._
 import org.scalatestplus.play.guice.GuiceOneServerPerTest
@@ -22,7 +28,9 @@ import play.api.libs.json._
 import play.api.mvc._
 import play.api.test.Helpers._
 import play.api.test._
-import scala.concurrent.{ Await, Future }
+import scala.concurrent.Future
+
+import scala.concurrent.ExecutionContext.Implicits.global
 
 class Url(val path: String) extends AnyVal {
   override def toString: String = path
@@ -50,32 +58,39 @@ abstract class ControllerFixture
 
   protected val factory = new Factory
 
+  private val loginInfo = LoginInfo(CredentialsProvider.ID, DefaultUserId.id)
+
+  private val identity =
+    org.biobank.utils.auth.User(
+      user = RegisteredUser(id           = DefaultUserId,
+                            version      = 0L,
+                            timeAdded    = org.biobank.Global.StartOfTime,
+                            timeModified = None,
+                            slug         = Slug(DefaultUserEmail),
+                            name         = DefaultUserEmail,
+                            email        = DefaultUserEmail,
+                            password     = "",
+                            salt         = "",
+                            avatarUrl    = None))
+
+  implicit val env: Environment[DefaultEnv] =
+    new FakeEnvironment[DefaultEnv](Seq(loginInfo -> identity))
+
+  /**
+   * A fake Guice module.
+   */
+  class FakeModule extends AbstractModule with ScalaModule {
+    override def configure() = {
+      bind[Environment[DefaultEnv]].toInstance(env)
+    }
+  }
+
   override def newAppForTest(testData: org.scalatest.TestData) =
     new GuiceApplicationBuilder()
       .overrides(bind[SyncCacheApi].to[DefaultSyncCacheApi])
       .overrides(bind[AsyncCacheApi].to[CacheForTesting])
+      .overrides(new FakeModule)
       .build
-
-  protected def doLogin(email: String = Global.DefaultUserEmail, password: String = "testuser") = {
-    val request = Json.obj("email" -> email, "password" -> password)
-    route(app, FakeRequest(POST, "/api/users/login").withJsonBody(request)).fold {
-      cancel("login failed")
-    } { response =>
-      status(response) mustBe (OK)
-      contentType(response) mustBe Some("application/json")
-      val json =contentAsJson(response)
-
-      (json \ "data" \ "email").as[String] must be (email)
-
-      val cookies = Await.result(response, defaultAwaitTimeout.duration)
-        .newCookies.groupBy(_.name).mapValues(_.head)
-
-      cookies.get("XSRF-TOKEN") match {
-        case Some(c) => c.value
-        case None =>    ""
-      }
-    }
-  }
 
   // for the following getters: a new application is created for each test, therefore,
   // new instances of each of these is created with the new application
@@ -121,15 +136,11 @@ abstract class ControllerFixture
   }
 
   protected def makeAuthRequest(method: String,
-                              path: String,
-                              json: JsValue = JsNull,
-                              token: String = "bbweb-test-token"): Option[Future[Result]] = {
-    val cookie = Cookie("XSRF-TOKEN", token)
+                                path: String,
+                                json: JsValue = JsNull): Option[Future[Result]] = {
     val fakeRequest = FakeRequest(method, path)
       .withJsonBody(json)
-      .withHeaders("X-XSRF-TOKEN" -> token,
-                   "Set-Cookie"   -> Cookies.encodeCookieHeader(Seq(cookie)))
-      .withCookies(cookie)
+      .withAuthenticator(loginInfo)
 
     if (json != JsNull) {
       log.debug(s"request: ${method}, ${path},\n${Json.prettyPrint(json)}")
