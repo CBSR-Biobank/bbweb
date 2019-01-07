@@ -115,7 +115,7 @@ class ProcessingTypeServiceImpl @Inject() (
         processingTypes <- queryInternal(study.id, new FilterString(""), new SortString(""))
       } yield {
          processingTypes.map { processingType =>
-           val definition = processingType.specimenProcessing.output.specimenDefinition
+           val definition = processingType.output.specimenDefinition
            ProcessedSpecimenDefinitionNames(
              processingType.id.id,
              processingType.slug,

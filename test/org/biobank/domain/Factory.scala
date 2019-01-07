@@ -267,20 +267,19 @@ class Factory {
                                     containerTypeId    = None,
                                     specimenDefinition = defaultProcessedSpecimenDefinition)
 
-    val specimenProcessing = SpecimenProcessing(input, output)
-
     val processingType        = ProcessingType(
-        id                    = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
-        studyId               = disabledStudy.id,
-        version               = 0L,
-        timeAdded             = OffsetDateTime.now,
-        timeModified          = None,
-        slug                  = Slug(name),
-        name                  = name,
-        description           = Some(faker.Lorem.sentence(4)),
-        enabled               = false,
-        specimenProcessing    = specimenProcessing,
-        annotationTypes       = Set.empty)
+        id              = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
+        studyId         = disabledStudy.id,
+        version         = 0L,
+        timeAdded       = OffsetDateTime.now,
+        timeModified    = None,
+        slug            = Slug(name),
+        name            = name,
+        description     = Some(faker.Lorem.sentence(4)),
+        enabled         = false,
+        input           = input,
+        output          = output,
+        annotationTypes = Set.empty)
 
     domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
     processingType

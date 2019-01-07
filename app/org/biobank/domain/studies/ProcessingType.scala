@@ -136,13 +136,6 @@ final case class OutputSpecimenProcessing(expectedChange:     BigDecimal,
   }
 }
 
-final case class SpecimenProcessing(input: InputSpecimenProcessing, output: OutputSpecimenProcessing) {
-
-  def validate(): DomainValidation[Boolean] = {
-    (input.validate |@| output.validate) { case _ => true }
-  }
-}
-
 /**
  * Records a regularly preformed specimen processing procedure. It defines and allows for recording of
  * procedures performed on different types of [[domain.participants.Specimen Specimens]].
@@ -158,17 +151,18 @@ final case class SpecimenProcessing(input: InputSpecimenProcessing, output: Outp
  * @param annotationTypes The [[domain.studies.AnnotationType AnnotationType]]s for recorded for this
  * processing type.
  */
-final case class ProcessingType(studyId:            StudyId,
-                                id:                 ProcessingTypeId,
-                                version:            Long,
-                                timeAdded:          OffsetDateTime,
-                                timeModified:       Option[OffsetDateTime],
-                                slug:               Slug,
-                                name:               String,
-                                description:        Option[String],
-                                enabled:            Boolean,
-                                specimenProcessing: SpecimenProcessing,
-                                annotationTypes:    Set[AnnotationType])
+final case class ProcessingType(studyId:         StudyId,
+                                id:              ProcessingTypeId,
+                                version:         Long,
+                                timeAdded:       OffsetDateTime,
+                                timeModified:    Option[OffsetDateTime],
+                                slug:            Slug,
+                                name:            String,
+                                description:     Option[String],
+                                enabled:         Boolean,
+                                input:           InputSpecimenProcessing,
+                                output:          OutputSpecimenProcessing,
+                                annotationTypes: Set[AnnotationType])
     extends ConcurrencySafeEntity[ProcessingTypeId]
     with HasUniqueName
     with HasSlug
@@ -229,9 +223,9 @@ final case class ProcessingType(studyId:            StudyId,
        validatePositiveNumber(input.count, InvalidPositiveNumber) |@|
        validateIdOption(input.containerTypeId, ContainerTypeIdRequired) |@|
        entityIdValidator) { case _ =>
-        copy(specimenProcessing = specimenProcessing.copy(input = input),
-             version            = version + 1,
-             timeModified       = Some(OffsetDateTime.now))
+        copy(input        = input,
+             version      = version + 1,
+             timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -241,9 +235,9 @@ final case class ProcessingType(studyId:            StudyId,
        validatePositiveNumber(output.count, InvalidPositiveNumber) |@|
        validateIdOption(output.containerTypeId, ContainerTypeIdRequired) |@|
        ProcessedSpecimenDefinition.validate(output.specimenDefinition)) { case _ =>
-        copy(specimenProcessing = specimenProcessing.copy(output = output),
-             version            = version + 1,
-             timeModified       = Some(OffsetDateTime.now))
+        copy(output       = output,
+             version      = version + 1,
+             timeModified = Some(OffsetDateTime.now))
     }
   }
 
@@ -276,7 +270,8 @@ final case class ProcessingType(studyId:            StudyId,
         |  name:               $name,
         |  description:        $description,
         |  enabled:            $enabled,
-        |  specimenProcessing: $specimenProcessing,
+        |  input:              $input,
+        |  output:             $output,
         |  annotationTypes:    { $annotationTypes }
         |}""".stripMargin
 }
@@ -400,8 +395,6 @@ object ProcessingType extends ProcessingTypeValidations {
 
   val processedDefinition: InputSpecimenDefinitionType = new InputSpecimenDefinitionType("processed")
 
-  implicit val specimenProcessingFormat: Format[SpecimenProcessing] = Json.format[SpecimenProcessing]
-
   implicit val processingTypeFormat: Format[ProcessingType] =
     Json.format[ProcessingType]
 
@@ -411,7 +404,8 @@ object ProcessingType extends ProcessingTypeValidations {
              name:               String,
              description:        Option[String],
              enabled:            Boolean,
-             specimenProcessing: SpecimenProcessing,
+             input:              InputSpecimenProcessing,
+             output:             OutputSpecimenProcessing,
              annotationTypes:    Set[AnnotationType])
       : DomainValidation[ProcessingType] = {
 
@@ -420,19 +414,21 @@ object ProcessingType extends ProcessingTypeValidations {
        validateVersion(version) |@|
        validateNonEmptyString(name, NameRequired) |@|
        validateNonEmptyStringOption(description, InvalidDescription) |@|
-       specimenProcessing.validate() |@|
+       input.validate() |@|
+       output.validate() |@|
        annotationTypes.toList.traverseU(AnnotationType.validate)) { case _ =>
-        ProcessingType(studyId               = studyId,
-                       id                    = id,
-                       version               = version,
-                       timeAdded             = OffsetDateTime.now,
-                       timeModified          = None,
-                       slug                  = Slug(name),
-                       name                  = name,
-                       description           = description,
-                       enabled               = enabled,
-                       specimenProcessing    = specimenProcessing,
-                       annotationTypes       = annotationTypes)
+        ProcessingType(studyId         = studyId,
+                       id              = id,
+                       version         = version,
+                       timeAdded       = OffsetDateTime.now,
+                       timeModified    = None,
+                       slug            = Slug(name),
+                       name            = name,
+                       description     = description,
+                       enabled         = enabled,
+                       input           = input,
+                       output          = output,
+                       annotationTypes = annotationTypes)
 
     }
   }

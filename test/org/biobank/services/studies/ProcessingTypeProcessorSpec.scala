@@ -86,16 +86,15 @@ class ProcessingTypesProcessorSpec extends ProcessorTestFixture with ProcessingT
 
     it("allow recovery from journal", PersistenceTest) {
       val f = collectionSpecimenDefinitionFixtures
-      val input = f.processingType.specimenProcessing.input
       val cmdInput = ProcessingTypeCommands.InputSpecimenProcessing(
-          expectedChange       = input.expectedChange,
-          count                = input.count,
-          containerTypeId      = input.containerTypeId.map(_.id),
+          expectedChange       = f.processingType.input.expectedChange,
+          count                = f.processingType.input.count,
+          containerTypeId      = f.processingType.input.containerTypeId.map(_.id),
           definitionType       = ProcessingType.collectedDefinition.id,
-          entityId             = input.entityId.toString,
-          specimenDefinitionId = input.specimenDefinitionId.id)
+          entityId             = f.processingType.input.entityId.toString,
+          specimenDefinitionId = f.processingType.input.specimenDefinitionId.id)
 
-      val specimenDefinition = f.processingType.specimenProcessing.output.specimenDefinition
+      val specimenDefinition = f.processingType.output.specimenDefinition
       val cmdSpecimenDefintition = ProcessingTypeCommands.SpecimenDefinition(
           name                    = specimenDefinition.name,
           description             = specimenDefinition.description,
@@ -105,7 +104,7 @@ class ProcessingTypesProcessorSpec extends ProcessorTestFixture with ProcessingT
           preservationTemperature = specimenDefinition.preservationTemperature,
           specimenType            = specimenDefinition.specimenType)
 
-      val output = f.processingType.specimenProcessing.output
+      val output = f.processingType.output
       val cmdOutput = ProcessingTypeCommands.OutputSpecimenProcessing(
         expectedChange     = output.expectedChange,
         count              = output.count,
@@ -113,12 +112,13 @@ class ProcessingTypesProcessorSpec extends ProcessorTestFixture with ProcessingT
         specimenDefinition = cmdSpecimenDefintition)
 
       val cmd = AddProcessingTypeCmd(
-          sessionUserId      = Global.DefaultUserId.id,
-          studyId            = f.processingType.studyId.id,
-          name               = f.processingType.name,
-          description        = f.processingType.description,
-          enabled            = f.processingType.enabled,
-          specimenProcessing = ProcessingTypeCommands.SpecimenProcessing(cmdInput, cmdOutput))
+          sessionUserId = Global.DefaultUserId.id,
+          studyId       = f.processingType.studyId.id,
+          name          = f.processingType.name,
+          description   = f.processingType.description,
+          enabled       = f.processingType.enabled,
+          input         = cmdInput,
+          output        = cmdOutput)
 
       val v = ask(processingTypeProcessor, cmd)
         .mapTo[ServiceValidation[ProcessingTypeEvent]]

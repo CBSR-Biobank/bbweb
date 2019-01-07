@@ -480,8 +480,8 @@ trait EntityMatchers {
   }
 
   private def inputSpecimenInfosMatch(a: ProcessingType, b: ProcessingType) = {
-    val aIsi = a.specimenProcessing.input
-    val bIsi = b.specimenProcessing.input
+    val aIsi = a.input
+    val bIsi = b.input
     Map(
       ("input.expectedChange"       -> (aIsi.expectedChange       equals bIsi.expectedChange)),
       ("input.count"                -> (aIsi.count                equals bIsi.count)),
@@ -493,8 +493,8 @@ trait EntityMatchers {
   }
 
   private def outputSpecimenInfosMatch(a: ProcessingType, b: ProcessingType) = {
-    val aOsi = a.specimenProcessing.output
-    val bOsi = b.specimenProcessing.output
+    val aOsi = a.output
+    val bOsi = b.output
     Map(
       ("output.expectedChange"  -> (aOsi.expectedChange equals bOsi.expectedChange)),
       ("output.count"           -> (aOsi.count equals bOsi.count)),
@@ -504,8 +504,8 @@ trait EntityMatchers {
   }
 
   private def outputSpecimenDefinitionsMatch(a: ProcessingType, b: ProcessingType) = {
-    val aOsd = a.specimenProcessing.output.specimenDefinition
-    val bOsd = b.specimenProcessing.output.specimenDefinition
+    val aOsd = a.output.specimenDefinition
+    val bOsd = b.output.specimenDefinition
     Map(
       ("output.specimenDefinition.id"                      ->
          (aOsd.id                      equals bOsd.id)),

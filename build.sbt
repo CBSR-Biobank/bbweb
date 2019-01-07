@@ -91,7 +91,6 @@ scalacOptions in Compile ++= Seq(
     "-Ywarn-dead-code",
     "-Ywarn-inaccessible",
     "-Ywarn-numeric-widen",
-    "-Ywarn-unused:params",
     "-Ywarn-unused-import",
     "-Ywarn-value-discard" // Warn when non-Unit expression results are unused
   )

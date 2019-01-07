@@ -909,7 +909,7 @@ class UsersControllerSpec
         val content = contentAsString(reply)
         content must include("Authentication required")
       }
-      }
+    }
 
     describe("POST /api/logout") {
 

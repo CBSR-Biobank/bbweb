@@ -158,7 +158,7 @@ class ProcessingTypesControllerSpec
       it("can retrieve specimen definitions for a study") {
         val f = new CollectionSpecimenDefinitionFixtures
         Set(f.study, f.collectionEventType, f.processingType).foreach(addToRepository)
-        val definition = f.processingType.specimenProcessing.output.specimenDefinition
+        val definition = f.processingType.output.specimenDefinition
         val expectedReply = List(
             ProcessedSpecimenDefinitionNames(
               f.processingType.id.id,
@@ -213,14 +213,14 @@ class ProcessingTypesControllerSpec
         ptId must be (jsSuccess)
 
         val sdId =
-          (contentAsJson(reply) \ "data" \ "specimenProcessing" \ "output" \ "specimenDefinition" \ "id")
+          (contentAsJson(reply) \ "data" \ "output" \ "specimenDefinition" \ "id")
             .validate[SpecimenDefinitionId]
         sdId must be (jsSuccess)
 
         sdId.get.id.length must be > 0
 
         val updateLens = lens[ProcessingType].id ~
-          lens[ProcessingType].specimenProcessing.output.specimenDefinition.id
+          lens[ProcessingType].output.specimenDefinition.id
 
         val updatedPt = updateLens.set(f.processingType)(Tuple2(ptId.get, sdId.get))
         reply must matchUpdatedProcessingType(updatedPt)
@@ -239,12 +239,12 @@ class ProcessingTypesControllerSpec
         ptId must be (jsSuccess)
 
         val osdId =
-          (contentAsJson(reply) \ "data" \ "specimenProcessing" \ "output" \ "specimenDefinition" \ "id")
+          (contentAsJson(reply) \ "data" \ "output" \ "specimenDefinition" \ "id")
             .validate[SpecimenDefinitionId]
         osdId must be (jsSuccess)
 
         val updateLens = lens[ProcessingType].id ~
-        lens[ProcessingType].specimenProcessing.output.specimenDefinition.id
+        lens[ProcessingType].output.specimenDefinition.id
 
         val updatedPt = updateLens.set(f.outputProcessingType)(Tuple2(ptId.get, osdId.get))
         reply must matchUpdatedProcessingType(updatedPt)
@@ -497,7 +497,7 @@ class ProcessingTypesControllerSpec
             val specimenDefinition = factory.createCollectionSpecimenDefinition
             val eventType =
               factory.createCollectionEventType.copy(specimenDefinitions = Set(specimenDefinition))
-            val newValue = f.processingType.specimenProcessing.input
+            val newValue = f.processingType.input
               .copy(entityId = eventType.id, specimenDefinitionId = specimenDefinition.id)
 
             (f, eventType, newValue)
@@ -514,7 +514,7 @@ class ProcessingTypesControllerSpec
 
             val updateLens = lens[ProcessingType].version ~
               lens[ProcessingType].timeModified ~
-              lens[ProcessingType].specimenProcessing.input
+              lens[ProcessingType].input
 
             val updatedProcessingType =
               updateLens.set(f.processingType)(Tuple3(f.processingType.version + 1,
@@ -562,7 +562,7 @@ class ProcessingTypesControllerSpec
               .withOutputSpecimenProcessing(output)
               .toOption.value
 
-            val newValue = newInputProcessingType.specimenProcessing.input
+            val newValue = newInputProcessingType.input
               .copy(definitionType       = ProcessingType.processedDefinition,
                     entityId             = newInputProcessingType.id,
                     specimenDefinitionId = specimenDefinition.id)
@@ -581,7 +581,7 @@ class ProcessingTypesControllerSpec
 
             val updateLens = lens[ProcessingType].version ~
             lens[ProcessingType].timeModified ~
-            lens[ProcessingType].specimenProcessing.input
+            lens[ProcessingType].input
 
             val updatedProcessingType =
               updateLens.set(f.outputProcessingType)(Tuple3(f.outputProcessingType.version + 1,
@@ -617,7 +617,7 @@ class ProcessingTypesControllerSpec
         describe("fail when updating input specimen info and an invalid version is used") {
           updateWithInvalidVersionSharedBehaviour { processingType =>
             processingTypeRepository.put(processingType)
-            val newValue = processingType.specimenProcessing.input
+            val newValue = processingType.input
 
             (new Url(uri("update", processingType.studyId.id, processingType.id.id)),
              Json.obj("property" -> "inputSpecimenProcessing",
@@ -629,7 +629,7 @@ class ProcessingTypesControllerSpec
           updateWithInvalidVersionSharedBehaviour { processingType =>
             processingTypeRepository.put(processingType)
 
-            val json = Json.toJson(processingType.specimenProcessing.input)
+            val json = Json.toJson(processingType.input)
 
             (new Url(uri("update", processingType.studyId.id, processingType.id.id)),
              Json.obj("property" -> "inputSpecimenProcessing", "newValue" -> json))
@@ -639,7 +639,7 @@ class ProcessingTypesControllerSpec
         describe("not update when study is not disabled") {
           updateSharedBehaviour { () =>
             val f = collectionSpecimenDefinitionFixtures
-            ("inputSpecimenProcessing", Json.toJson(f.processingType.specimenProcessing.input))
+            ("inputSpecimenProcessing", Json.toJson(f.processingType.input))
           }
         }
 
@@ -650,7 +650,7 @@ class ProcessingTypesControllerSpec
         def commonSetup = {
           val f = processedSpecimenDefinitionFixtures
           val specimenDefinition = factory.createProcessedSpecimenDefinition
-          val output = f.outputProcessingType.specimenProcessing.output
+          val output = f.outputProcessingType.output
             .copy(specimenDefinition = specimenDefinition)
           (f, output)
         }
@@ -664,7 +664,7 @@ class ProcessingTypesControllerSpec
           reply must beOkResponseWithJsonReply
 
           val sdId =
-            (contentAsJson(reply) \ "data" \ "specimenProcessing" \ "output" \ "specimenDefinition" \ "id")
+            (contentAsJson(reply) \ "data" \ "output" \ "specimenDefinition" \ "id")
               .validate[SpecimenDefinitionId]
           sdId must be (jsSuccess)
 
@@ -672,7 +672,7 @@ class ProcessingTypesControllerSpec
 
           val updateLens = lens[ProcessingType].version ~
             lens[ProcessingType].timeModified ~
-            lens[ProcessingType].specimenProcessing.output.specimenDefinition
+            lens[ProcessingType].output.specimenDefinition
 
           val updatedProcessingType =
             updateLens.set(f.outputProcessingType)(Tuple3(f.outputProcessingType.version + 1,
@@ -714,14 +714,14 @@ class ProcessingTypesControllerSpec
           processingTypeRepository.put(processingType)
           (new Url(uri("update", processingType.studyId.id, processingType.id.id)),
            Json.obj("property" -> "outputSpecimenProcessing",
-                    "newValue" -> Json.toJson(processingType.specimenProcessing.output)))
+                    "newValue" -> Json.toJson(processingType.output)))
         }
       }
 
       describe("not update when study is not disabled") {
         updateSharedBehaviour { () =>
           val f = collectionSpecimenDefinitionFixtures
-          ("outputSpecimenProcessing", Json.toJson(f.processingType.specimenProcessing.output))
+          ("outputSpecimenProcessing", Json.toJson(f.processingType.output))
         }
       }
 
@@ -1121,8 +1121,8 @@ class ProcessingTypesControllerSpec
   }
 
   private def procTypeToAddJson(procType: ProcessingType) = {
-    val input = procType.specimenProcessing.input
-    val output = procType.specimenProcessing.output
+    val input = procType.input
+    val output = procType.output
     val outputDefinition = output.specimenDefinition
 
     Json.obj(
@@ -1130,28 +1130,26 @@ class ProcessingTypesControllerSpec
       "name"                -> procType.name,
       "description"         -> procType.description,
       "enabled"             -> procType.enabled,
-      "specimenProcessing"  -> Json.obj(
-        "input"  -> Json.obj(
-          "expectedChange"       -> input.expectedChange,
-          "count"                -> input.count,
-          "containerTypeId"      -> input.containerTypeId,
-          "definitionType"       -> input.definitionType.id,
-          "entityId"             -> input.entityId.toString,
-          "specimenDefinitionId" -> input.specimenDefinitionId
-        ),
-        "output"  -> Json.obj(
-          "expectedChange"       -> output.expectedChange,
-          "count"                -> output.count,
-          "containerTypeId"      -> output.containerTypeId,
-          "specimenDefinition"   -> Json.obj(
-            "name"                    -> outputDefinition.name,
-            "description"             -> outputDefinition.description,
-            "units"                   -> outputDefinition.units,
+      "input"  -> Json.obj(
+        "expectedChange"       -> input.expectedChange,
+        "count"                -> input.count,
+        "containerTypeId"      -> input.containerTypeId,
+        "definitionType"       -> input.definitionType.id,
+        "entityId"             -> input.entityId.toString,
+        "specimenDefinitionId" -> input.specimenDefinitionId
+      ),
+      "output"  -> Json.obj(
+        "expectedChange"       -> output.expectedChange,
+        "count"                -> output.count,
+        "containerTypeId"      -> output.containerTypeId,
+        "specimenDefinition"   -> Json.obj(
+          "name"                    -> outputDefinition.name,
+          "description"             -> outputDefinition.description,
+          "units"                   -> outputDefinition.units,
             "anatomicalSourceType"    -> outputDefinition.anatomicalSourceType,
-            "preservationType"        -> outputDefinition.preservationType,
-            "preservationTemperature" -> outputDefinition.preservationTemperature,
-            "specimenType"            -> outputDefinition.specimenType
-          )
+          "preservationType"        -> outputDefinition.preservationType,
+          "preservationTemperature" -> outputDefinition.preservationTemperature,
+          "specimenType"            -> outputDefinition.specimenType
         )
       ),
       "annotationTypes"   -> procType.annotationTypes)
@@ -1231,26 +1229,26 @@ class ProcessingTypesControllerSpec
       if (specimenProcessingType == "inputSpecimenProcessing") {
         val updateLens = lens[ProcessingType].version ~
           lens[ProcessingType].timeModified ~
-          lens[ProcessingType].specimenProcessing.input.expectedChange
+          lens[ProcessingType].input.expectedChange
 
         val updatedProcessingType =
           updateLens.set(processingType)(Tuple3(processingType.version + 1,
                                                 Some(OffsetDateTime.now),
                                                 newValue))
 
-        (Json.toJson(updatedProcessingType.specimenProcessing.input), updatedProcessingType)
+        (Json.toJson(updatedProcessingType.input), updatedProcessingType)
 
       } else if (specimenProcessingType == "outputSpecimenProcessing") {
         val updateLens = lens[ProcessingType].version ~
           lens[ProcessingType].timeModified ~
-          lens[ProcessingType].specimenProcessing.output.expectedChange
+          lens[ProcessingType].output.expectedChange
 
         val updatedProcessingType =
           updateLens.set(processingType)(Tuple3(processingType.version + 1,
                                                 Some(OffsetDateTime.now),
                                                 newValue))
 
-        (Json.toJson(updatedProcessingType.specimenProcessing.output), updatedProcessingType)
+        (Json.toJson(updatedProcessingType.output), updatedProcessingType)
       } else {
         fail(s"invalid specimen processing type: $specimenProcessingType")
       }
@@ -1298,26 +1296,26 @@ class ProcessingTypesControllerSpec
       if (specimenProcessingType == "inputSpecimenProcessing") {
         val updateLens = lens[ProcessingType].version ~
           lens[ProcessingType].timeModified ~
-          lens[ProcessingType].specimenProcessing.input.count
+          lens[ProcessingType].input.count
 
         val updatedProcessingType =
           updateLens.set(processingType)(Tuple3(processingType.version + 1,
                                                 Some(OffsetDateTime.now),
                                                 newValue))
 
-        (Json.toJson(updatedProcessingType.specimenProcessing.input), updatedProcessingType)
+        (Json.toJson(updatedProcessingType.input), updatedProcessingType)
 
       } else if (specimenProcessingType == "outputSpecimenProcessing") {
         val updateLens = lens[ProcessingType].version ~
           lens[ProcessingType].timeModified ~
-          lens[ProcessingType].specimenProcessing.output.count
+          lens[ProcessingType].output.count
 
         val updatedProcessingType =
           updateLens.set(processingType)(Tuple3(processingType.version + 1,
                                                 Some(OffsetDateTime.now),
                                                 newValue))
 
-        (Json.toJson(updatedProcessingType.specimenProcessing.output), updatedProcessingType)
+        (Json.toJson(updatedProcessingType.output), updatedProcessingType)
       } else {
         fail(s"invalid specimen processing type: $specimenProcessingType")
       }
@@ -1366,26 +1364,26 @@ class ProcessingTypesControllerSpec
       if (specimenProcessingType == "inputSpecimenProcessing") {
         val updateLens = lens[ProcessingType].version ~
           lens[ProcessingType].timeModified ~
-          lens[ProcessingType].specimenProcessing.input.containerTypeId
+          lens[ProcessingType].input.containerTypeId
 
         val updatedProcessingType =
           updateLens.set(processingType)(Tuple3(processingType.version + 1,
                                                 Some(OffsetDateTime.now),
                                                 newValue))
 
-        (Json.toJson(updatedProcessingType.specimenProcessing.input), updatedProcessingType)
+        (Json.toJson(updatedProcessingType.input), updatedProcessingType)
 
       } else if (specimenProcessingType == "outputSpecimenProcessing") {
         val updateLens = lens[ProcessingType].version ~
           lens[ProcessingType].timeModified ~
-          lens[ProcessingType].specimenProcessing.output.containerTypeId
+          lens[ProcessingType].output.containerTypeId
 
         val updatedProcessingType =
           updateLens.set(processingType)(Tuple3(processingType.version + 1,
                                                 Some(OffsetDateTime.now),
                                                 newValue))
 
-        (Json.toJson(updatedProcessingType.specimenProcessing.output), updatedProcessingType)
+        (Json.toJson(updatedProcessingType.output), updatedProcessingType)
       } else {
         fail(s"invalid specimen processing type: $specimenProcessingType")
       }

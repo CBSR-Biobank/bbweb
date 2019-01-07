@@ -38,14 +38,13 @@ object ProcessingTypeCommands {
                                             containerTypeId:    Option[String],
                                             specimenDefinition: SpecimenDefinition)
 
-  final case class SpecimenProcessing(input: InputSpecimenProcessing, output: OutputSpecimenProcessing)
-
-  final case class AddProcessingTypeCmd(sessionUserId:      String,
-                                        studyId:            String,
-                                        name:               String,
-                                        description:        Option[String],
-                                        enabled:            Boolean,
-                                        specimenProcessing: SpecimenProcessing)
+  final case class AddProcessingTypeCmd(sessionUserId: String,
+                                        studyId:       String,
+                                        name:          String,
+                                        description:   Option[String],
+                                        enabled:       Boolean,
+                                        input:         InputSpecimenProcessing,
+                                        output:        OutputSpecimenProcessing)
       extends ProcessingTypeCommand
 
   final case class UpdateNameCmd(sessionUserId:   String,
@@ -134,8 +133,6 @@ object ProcessingTypeCommands {
   implicit val inputSpecimenInfoFormat: Format[InputSpecimenProcessing] = Json.format[InputSpecimenProcessing]
 
   implicit val outputSpecimenInfoFormat: Format[OutputSpecimenProcessing] = Json.format[OutputSpecimenProcessing]
-
-  implicit val specimenProcessingFormat: Format[SpecimenProcessing] = Json.format[SpecimenProcessing]
 
 
   implicit val addAddProcessingTypeCmdReads: Reads[AddProcessingTypeCmd] =
