@@ -179,7 +179,8 @@ object BbpspTestData {
   val BbpspStudyId: StudyId        = StudyId("BBPSP_id")
   val CentreNames: List[String]    = List("100-Calgary AB", "101-London ON")
   val NumParticipants: Int         = 3
-  val EventTypeNames: List[String] = List("Default Event", "Second Event")
+  val EventTypeNames: List[String] = List("1 - Default Event",
+                                          "2 - Second Event")
 
   val ParticipantAnnotationTypeHashids: Hashids = Hashids("bbpsp-participant-annotation-types")
   val EventTypeAnnotationTypeHashids: Hashids   = Hashids("bbpsp-collection-event-annotation-types")
