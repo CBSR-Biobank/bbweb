@@ -17,7 +17,7 @@ trait ProcessingTypeFixtures {
                                         count                = 1,
                                         containerTypeId      = None,
                                         definitionType       = ProcessingType.collectedDefinition,
-                                        entityId             = collectionEventType.id,
+                                        entityId             = collectionEventType.id.id,
                                         specimenDefinitionId = collectionSpecimenDefinition.id)
 
     val processingType = factory.createProcessingType.copy(input = input)
@@ -33,14 +33,14 @@ trait ProcessingTypeFixtures {
 
   protected class ProcessedSpecimenDefinitionFixtures  {
     private val f = new SpecimenDefinitionFixtures
-    val inputProcessingType = f.processingType
+    val inputProcessingType = f.processingType.copy(inUse = true)
     val inputSpecimenDefinition = inputProcessingType.output.specimenDefinition
     val outputSpecimenDefinition = factory.createProcessedSpecimenDefinition
     val input = InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
                                         count                = 1,
                                         containerTypeId      = None,
                                         definitionType       = ProcessingType.processedDefinition,
-                                        entityId             = inputProcessingType.id,
+                                        entityId             = inputProcessingType.id.id,
                                         specimenDefinitionId = inputSpecimenDefinition.id)
 
     private val _processingType = factory.createProcessingType.copy(input = input)

@@ -40,8 +40,8 @@ trait CollectionEventTypeValidations extends StudyValidations {
   * @param recurring Set to true when the collection event type occurs more than once during the
   *        lifetime of the study. False otherwise.
 
-  * @param specimenGroupData One or more [[SpecimenGroup]]s that need to be collected with this
-  *        type of collection event. See [[org.biobank.infrastructure.CollectionEventTypeSpecimenGroupData]].
+  * @param specimenDefinitions The definitions of the specimens ([[SpecimenDefinition]]) that are collected
+  *        for the collection event.
 
   * @param annotationTypeData The [[AnnotationType]]s for a collection event type.
   *

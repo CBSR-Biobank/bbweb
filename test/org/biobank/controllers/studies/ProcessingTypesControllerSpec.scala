@@ -24,6 +24,7 @@ class ProcessingTypesControllerSpec
     with PagedResultsMatchers
     with ProcessingTypeFixtures {
 
+  import org.biobank.TestUtils._
   import org.biobank.matchers.EntityMatchers._
   import org.biobank.matchers.JsonMatchers._
 
@@ -248,6 +249,10 @@ class ProcessingTypesControllerSpec
 
         val updatedPt = updateLens.set(f.outputProcessingType)(Tuple2(ptId.get, osdId.get))
         reply must matchUpdatedProcessingType(updatedPt)
+
+        processingTypeRepository.getByKey(f.inputProcessingType.id) mustSucceed { pt =>
+          pt.inUse must be(true)
+        }
       }
 
       describe("not add a processing type to an enabled study") {
@@ -498,7 +503,7 @@ class ProcessingTypesControllerSpec
             val eventType =
               factory.createCollectionEventType.copy(specimenDefinitions = Set(specimenDefinition))
             val newValue = f.processingType.input
-              .copy(entityId = eventType.id, specimenDefinitionId = specimenDefinition.id)
+              .copy(entityId = eventType.id.id, specimenDefinitionId = specimenDefinition.id)
 
             (f, eventType, newValue)
           }
@@ -538,7 +543,7 @@ class ProcessingTypesControllerSpec
             Set(eventType, f.processingType).foreach(addToRepository)
 
             val newValue = validValue
-              .copy(entityId = eventType.id,
+              .copy(entityId = eventType.id.id,
                     specimenDefinitionId = SpecimenDefinitionId(nameGenerator.next[String]))
 
             val reply = makeUpdateRequest(f.processingType,
@@ -564,7 +569,7 @@ class ProcessingTypesControllerSpec
 
             val newValue = newInputProcessingType.input
               .copy(definitionType       = ProcessingType.processedDefinition,
-                    entityId             = newInputProcessingType.id,
+                    entityId             = newInputProcessingType.id.id,
                     specimenDefinitionId = specimenDefinition.id)
 
             (f, newInputProcessingType, newValue)
@@ -850,19 +855,20 @@ class ProcessingTypesControllerSpec
     describe("DELETE /api/studies/proctypes/:studyId/:id/:ver") {
 
       it("remove a processing type") {
-        val study = factory.createDisabledStudy
-        studyRepository.put(study)
+        val f = new ProcessedSpecimenDefinitionFixtures
+        Set(f.study, f.inputProcessingType, f.outputProcessingType).foreach(addToRepository)
 
-        val procType = factory.createProcessingType
-        processingTypeRepository.put(procType)
-
-        val url = uri(study.id.id, procType.id.id, procType.version.toString)
+        val url = uri(f.study.id.id, f.outputProcessingType.id.id, f.outputProcessingType.version.toString)
         val reply = makeAuthRequest(DELETE, url).value
         reply must beOkResponseWithJsonReply
 
         val result = (contentAsJson(reply) \ "data").validate[Boolean]
         result must be (jsSuccess)
         result.get must be (true)
+
+        processingTypeRepository.getByKey(f.inputProcessingType.id) mustSucceed { pt =>
+          pt.inUse must be(false)
+        }
       }
 
       it("not remove a processing type that is an input to another processing type") {

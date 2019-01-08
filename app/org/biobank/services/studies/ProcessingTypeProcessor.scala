@@ -412,7 +412,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
 
   private def removeCmdToEvent(cmd: RemoveProcessingTypeCmd, processingType: ProcessingType)
       : ServiceValidation[ProcessingTypeEvent] = {
-    if (!checkNotInUse(processingType)) {
+    if (processingType.inUse) {
       EntityInUse(s"processing type in use: ${processingType.id}").failureNel[ProcessingTypeEvent]
     } else {
       ProcessingTypeEvent(processingType.id.id).update(
@@ -437,7 +437,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
             count                = collectedEvent.getCount,
             containerTypeId      = collectedEvent.containerTypeId.map(ContainerTypeId.apply),
             definitionType       = collectedDefinition,
-            entityId             = CollectionEventTypeId(collectedEvent.getEntityId),
+            entityId             = collectedEvent.getEntityId,
             specimenDefinitionId = SpecimenDefinitionId(collectedEvent.getSpecimenDefinitionId))
         } else {
           val processedEvent = addedEvent.getProcessed
@@ -446,7 +446,7 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
             count                = processedEvent.getCount,
             containerTypeId      = processedEvent.containerTypeId.map(ContainerTypeId.apply),
             definitionType       = processedDefinition,
-            entityId             = ProcessingTypeId(processedEvent.getEntityId),
+            entityId             = processedEvent.getEntityId,
             specimenDefinitionId = SpecimenDefinitionId(processedEvent.getSpecimenDefinitionId))
         }
 
@@ -472,10 +472,18 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
         log.error(s"could not add processing type from event: $v")
       }
 
-      v.foreach { ct =>
+      v.foreach { pt =>
         val timeAdded = OffsetDateTime.parse(event.getTime)
-        val slug = processingTypeRepository.uniqueSlugFromStr(ct.name)
-        processingTypeRepository.put(ct.copy(slug = slug, timeAdded = timeAdded))
+        val slug = processingTypeRepository.uniqueSlugFromStr(pt.name)
+        processingTypeRepository.put(pt.copy(slug = slug, timeAdded = timeAdded))
+
+        if (pt.input.definitionType == ProcessingType.processedDefinition) {
+          // modify the inUse status on the input processing type
+          val processingTypeId = ProcessingTypeId(pt.input.entityId.toString)
+          processingTypeRepository.getByKey(processingTypeId).foreach { inputPt =>
+            processingTypeRepository.put(inputPt.copy(inUse = true, timeModified = Some(timeAdded)))
+          }
+        }
       }
     }
   }
@@ -663,17 +671,26 @@ class ProcessingTypeProcessor @javax.inject.Inject() (
                            event.getRemoved.getVersion) { (pt, _) =>
       val v = processingTypeRepository.getByKey(pt.id)
       v.foreach(processingTypeRepository.remove)
+
+      if (pt.input.definitionType == ProcessingType.processedDefinition) {
+        // modify the inUse status on the input processing type
+        val inUseId = ProcessingTypeId(pt.input.entityId.toString)
+        if (!processingTypeRepository.processingTypeInUse(inUseId)) {
+          processingTypeRepository.getByKey(inUseId).foreach { inputPt =>
+
+            if (inputPt.inUse) {
+              val timeModified = Some(OffsetDateTime.parse(event.getTime))
+              processingTypeRepository.put(inputPt.copy(inUse = false, timeModified = timeModified))
+            }
+          }
+        }
+      }
+
       v.map(_ => true)
     }
   }
 
   val ErrMsgNameExists: String = "processing type with name already exists"
-
-  def checkNotInUse(processingType: ProcessingType): Boolean = {
-    !processingTypeRepository.processingTypeInUse(processingType)
-
-    // FIXME: also check if there are specimens of this type in specimenReporitory
-  }
 
   private def nameAvailable(name: String, studyId: StudyId): ServiceValidation[Boolean] = {
     nameAvailableMatcher(name, processingTypeRepository, ErrMsgNameExists) { item =>

@@ -78,7 +78,7 @@ final case class InputSpecimenProcessing(expectedChange:       BigDecimal,
                                          count:                Int,
                                          containerTypeId:      Option[ContainerTypeId],
                                          definitionType:       InputSpecimenDefinitionType,
-                                         entityId:             IdentifiedDomainObject[_],
+                                         entityId:             String,
                                          specimenDefinitionId: SpecimenDefinitionId)
     extends SpecimenProcessingInfo
     with CollectionEventTypeValidations {
@@ -146,10 +146,15 @@ final case class OutputSpecimenProcessing(expectedChange:     BigDecimal,
  * specimen types is taking place. However, throughout the lifetime of the study, it may be decided to stop a
  * processing type in favour of another. In this case enabled is set to `FALSE`.
  *
- * @param specimenProcessing Details for how the processed specimen is derived.
+ * @param input Information for the specimen the output specimen is derived from.
+ *
+ * @param output The definition of the specimen that is output by this processing type.
  *
  * @param annotationTypes The [[domain.studies.AnnotationType AnnotationType]]s for recorded for this
  * processing type.
+ *
+ * @param inUse When TRUE, the output of this processing type is being used as an input by another processing
+ * type.
  */
 final case class ProcessingType(studyId:         StudyId,
                                 id:              ProcessingTypeId,
@@ -162,7 +167,8 @@ final case class ProcessingType(studyId:         StudyId,
                                 enabled:         Boolean,
                                 input:           InputSpecimenProcessing,
                                 output:          OutputSpecimenProcessing,
-                                annotationTypes: Set[AnnotationType])
+                                annotationTypes: Set[AnnotationType],
+                                inUse:           Boolean)
     extends ConcurrencySafeEntity[ProcessingTypeId]
     with HasUniqueName
     with HasSlug
@@ -260,19 +266,32 @@ final case class ProcessingType(studyId:         StudyId,
     }
   }
 
+  def used(): ProcessingType = {
+    copy(inUse        = true,
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
+  def unused(): ProcessingType = {
+    copy(inUse        = false,
+         version      = version + 1,
+         timeModified = Some(OffsetDateTime.now))
+  }
+
   override def toString: String =
     s"""|ProcessingType:{
-        |  studyId:            $studyId,
-        |  id:                 $id,
-        |  timeAdded:          $timeAdded,
-        |  timeModified:       $timeModified,
-        |  version:            $version,
-        |  name:               $name,
-        |  description:        $description,
-        |  enabled:            $enabled,
-        |  input:              $input,
-        |  output:             $output,
-        |  annotationTypes:    { $annotationTypes }
+        |  studyId:         $studyId,
+        |  id:              $id,
+        |  timeAdded:       $timeAdded,
+        |  timeModified:    $timeModified,
+        |  version:         $version,
+        |  name:            $name,
+        |  description:     $description,
+        |  enabled:         $enabled,
+        |  input:           $input,
+        |  output:          $output,
+        |  annotationTypes: { $annotationTypes }
+        |  inUse:           $inUse,
         |}""".stripMargin
 }
 
@@ -286,15 +305,11 @@ object InputSpecimenProcessing {
              specimenDefinitionId: String): DomainValidation[InputSpecimenProcessing] = {
     for {
       dt <- validateDefinitionType(definitionType)
-      eId: IdentifiedDomainObject[String] = {
-        if (dt == ProcessingType.collectedDefinition) CollectionEventTypeId(entityId)
-        else ProcessingTypeId(entityId)
-      }
       input = InputSpecimenProcessing(expectedChange       = expectedChange,
                                       count                = count,
                                       containerTypeId      = containerTypeId,
                                       definitionType       = dt,
-                                      entityId             = eId,
+                                      entityId             = entityId,
                                       specimenDefinitionId = SpecimenDefinitionId(specimenDefinitionId))
       valid <- input.validate
     } yield input
@@ -328,14 +343,11 @@ object InputSpecimenProcessing {
           entityId             <- (json \ "entityId").validate[String]
           specimenDefinitionId <- (json \ "specimenDefinitionId").validate[SpecimenDefinitionId]
         } yield {
-          val id: IdentifiedDomainObject[_] =
-            if (validDefinitionType == ProcessingType.collectedDefinition) CollectionEventTypeId(entityId)
-            else ProcessingTypeId(entityId)
           InputSpecimenProcessing(expectedChange,
                                   count,
                                   containerTypeId,
                                   validDefinitionType,
-                                  id,
+                                  entityId,
                                   specimenDefinitionId)
         }
       }
@@ -428,8 +440,8 @@ object ProcessingType extends ProcessingTypeValidations {
                        enabled         = enabled,
                        input           = input,
                        output          = output,
-                       annotationTypes = annotationTypes)
-
+                       annotationTypes = annotationTypes,
+                       inUse           = false)
     }
   }
 

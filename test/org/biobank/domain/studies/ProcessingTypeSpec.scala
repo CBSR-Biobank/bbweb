@@ -162,6 +162,22 @@ class ProcessingTypeSpec
       }
     }
 
+    it("have it's inUse status updated") {
+      val f = new CollectionSpecimenDefinitionFixtures
+
+      val statusTable = Table(("processing type inUse status", "label"),
+                              (true, "used"),
+                              (false, "unused"))
+
+      forAll (statusTable) { (status, label) =>
+        info(label)
+        val pt = if (status) f.processingType.used() else f.processingType.unused()
+        val updatedPt = f.processingType.copy(inUse = status,
+                                              version = f.processingType.version + 1,
+                                              timeModified = Some(OffsetDateTime.now))
+        pt must matchProcessingType(updatedPt)
+      }
+    }
 
     describe("not be created") {
 
@@ -263,11 +279,10 @@ class ProcessingTypeSpec
 
           val invalidSpecimenDefinitionTable =
             Table(("processingType", "error", "label"),
-                  (inputSpecimenInfoLens.set(f.processingType)(Tuple2(CollectionEventTypeId(""),
-                                                                      f.collectionSpecimenDefinition.id)),
+                  (inputSpecimenInfoLens.set(f.processingType)(Tuple2("", f.collectionSpecimenDefinition.id)),
                    "CollectionEventTypeIdRequired",
                    "invalid collection event type id"),
-                  (inputSpecimenInfoLens.set(f.processingType)(Tuple2(f.collectionEventType.id,
+                  (inputSpecimenInfoLens.set(f.processingType)(Tuple2(f.collectionEventType.id.id,
                                                                       SpecimenDefinitionId(""))),
                    "SpecimenDefinitionIdRequired",
                    "invalid specimen definition id"))
@@ -283,11 +298,10 @@ class ProcessingTypeSpec
 
           val invalidSpecimenDefinitionTable =
             Table(("invalid specimen definition", "error", "label"),
-                  (inputSpecimenInfoLens.set(f.outputProcessingType)(Tuple2(ProcessingTypeId(""),
-                                                                            f.inputSpecimenDefinition.id)),
+                  (inputSpecimenInfoLens.set(f.outputProcessingType)(Tuple2("", f.inputSpecimenDefinition.id)),
                    "ProcessingTypeIdRequired",
                    "invalid processing type id"),
-                  (inputSpecimenInfoLens.set(f.outputProcessingType)(Tuple2(f.inputProcessingType.id,
+                  (inputSpecimenInfoLens.set(f.outputProcessingType)(Tuple2(f.inputProcessingType.id.id,
                                                                             SpecimenDefinitionId(""))),
                    "SpecimenDefinitionIdRequired",
                    "invalid specimen definition id"))

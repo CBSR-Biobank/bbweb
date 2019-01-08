@@ -260,14 +260,14 @@ class Factory {
                                   count                = 1,
                                   containerTypeId      = None,
                                   definitionType       = ProcessingType.collectedDefinition,
-                                  entityId             = CollectionEventTypeId(""),
+                                  entityId             = "",
                                   specimenDefinitionId = SpecimenDefinitionId(""))
     val output = OutputSpecimenProcessing(expectedChange     = BigDecimal(1.0),
                                     count              = 1,
                                     containerTypeId    = None,
                                     specimenDefinition = defaultProcessedSpecimenDefinition)
 
-    val processingType        = ProcessingType(
+    val processingType = ProcessingType(
         id              = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
         studyId         = disabledStudy.id,
         version         = 0L,
@@ -279,7 +279,8 @@ class Factory {
         enabled         = false,
         input           = input,
         output          = output,
-        annotationTypes = Set.empty)
+        annotationTypes = Set.empty,
+        inUse           = false)
 
     domainObjects = domainObjects + (classOf[ProcessingType] -> processingType)
     processingType

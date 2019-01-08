@@ -62,7 +62,7 @@ class ShipmentsProcessorSpec extends ProcessorTestFixture with ShipmentSpecFixtu
                                        centreRepository,
                                        app.injector.instanceOf[SpecimenRepository],
                                        app.injector.instanceOf[SnapshotWriter])),
-                               "shipments")
+                               "shipments-processor-id-2")
     Thread.sleep(250)
     actor
   }
