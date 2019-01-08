@@ -59,7 +59,7 @@ class SpecimensProcessorSpec
                                        app.injector.instanceOf[CeventSpecimenRepository],
                                        app.injector.instanceOf[ProcessingEventInputSpecimenRepository],
                                        app.injector.instanceOf[SnapshotWriter])),
-                               "specimens")
+                               "specimens-processor-id-2")
     Thread.sleep(250)
     actor
   }

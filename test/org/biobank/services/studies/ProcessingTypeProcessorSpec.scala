@@ -77,7 +77,7 @@ class ProcessingTypesProcessorSpec extends ProcessorTestFixture with ProcessingT
                                        app.injector.instanceOf[ProcessingTypeRepository],
                                        app.injector.instanceOf[CollectionEventTypeRepository],
                                        app.injector.instanceOf[SnapshotWriter])),
-                               "processingType-2")
+                               "processing-type-processor-id-2")
     Thread.sleep(100)
     actor
   }
