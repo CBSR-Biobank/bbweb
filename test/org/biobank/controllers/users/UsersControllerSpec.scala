@@ -17,6 +17,7 @@ import org.biobank.services.users.UserCountsByStatus
 import org.scalatest.Inside
 import org.scalatest.matchers.{MatchResult, Matcher}
 import org.scalatest.prop.TableDrivenPropertyChecks._
+import play.api.Configuration
 import play.api.libs.json._
 import play.api.mvc._
 import play.api.mvc.Result
@@ -47,6 +48,8 @@ class UsersControllerSpec
     userRepository.put(user)
     addMembershipForUser(user)
   }
+
+  protected def configuration = app.injector.instanceOf[Configuration]
 
   describe("Users REST API") {
 
@@ -969,30 +972,29 @@ class UsersControllerSpec
 
     describe("GET /api/users/authenticate") {
 
-      ignore("allow a user to authenticate") {
-        val plainPassword = nameGenerator.next[String]
-        val user = createActiveUserInRepository(plainPassword)
-        doLogin(user.email, plainPassword)
-
+      it("allow a user to authenticate") {
         val reply = makeAuthRequest(GET, uri("authenticate")).value
         reply must beOkResponseWithJsonReply
 
         val dto = (contentAsJson(reply) \ "data").validate[UserDto]
         dto must be (jsSuccess)
-        dto.get.email must equal (user.email)
+        dto.get.email must equal (configuration.get[String]("admin.email"))
       }
 
-      ignore("not allow a locked user to authenticate") {
-        val plainPassword = nameGenerator.next[String]
-        val activeUser = createActiveUserInRepository(plainPassword)
-        val token = doLogin(activeUser.email, plainPassword)
-        token.length must be > 0
+      it("not allow a locked user to authenticate") {
+        userRepository.getByEmail(configuration.get[String]("admin.email")) mustSucceed { defaultUser =>
+          defaultUser match {
+            case user: ActiveUser =>
+              val lockedUser = user.lock.toOption.value
+              userRepository.put(lockedUser)
 
-        val lockedUser = activeUser.lock.toOption.value
-        userRepository.put(lockedUser)
+              val reply = makeAuthRequest(GET, uri("authenticate"), JsNull).value
+              reply must beUnauthorizedNoContent
 
-        val reply = makeAuthRequest(GET, uri("authenticate"), JsNull).value
-        reply must beUnauthorizedNoContent
+            case x =>
+              fail(s"default user is not active: $x")
+          }
+        }
       }
     }
 
