@@ -105,11 +105,19 @@ class UsersController @Inject() (controllerComponents: ControllerComponents,
   def authenticateUser(): Action[AnyContent] = silhouette.SecuredAction.async { implicit request =>
       Future {
         val userId = request.identity.user.id
-        usersService.getUserIfAuthorized(userId, userId)
-          .fold(
-            err => Unauthorized,
-            user => Ok(user)
-          )
+        val v = for {
+            dto <- usersService.getUserIfAuthorized(userId, userId)
+            user <- usersService.getUser(userId)
+            isActive <- user match {
+              case u: ActiveUser => dto.successNel
+              case _ => ControllerError("user is not active").failureNel
+            }
+          } yield dto
+
+        v.fold(
+          err => Unauthorized,
+          user => Ok(user)
+        )
       }
     }
 
