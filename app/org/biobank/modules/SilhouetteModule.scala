@@ -25,8 +25,7 @@ import net.ceedubs.ficus.readers.ArbitraryTypeReader._
 import net.ceedubs.ficus.readers.EnumerationReader._
 import net.ceedubs.ficus.readers.ValueReader
 import net.codingwell.scalaguice.ScalaModule
-import org.biobank.utils.auth.DefaultEnv
-import org.biobank.utils.auth.{UserService, UserServiceImpl}
+import org.biobank.utils.auth.{ DefaultEnv, UserService, UserServiceImpl }
 import play.api.Configuration
 import play.api.libs.openid.OpenIdClient
 import play.api.libs.ws.WSClient

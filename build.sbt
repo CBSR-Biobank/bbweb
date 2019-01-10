@@ -156,7 +156,7 @@ libraryDependencies ++= Seq(
     "com.github.ancane"           %% "hashids-scala"                       % "1.3",
     "com.typesafe.play"           %% "play-mailer"                         % "6.0.1",
     "com.typesafe.play"           %% "play-mailer-guice"                   % "6.0.1",
-    "net.codingwell"              %% "scala-guice"                         % "4.2.2",
+    "net.codingwell"              %% "scala-guice"                         % "4.2.1",
     "com.mohiva"                  %% "play-silhouette"                     % silhouetteVersion,
     "com.mohiva"                  %% "play-silhouette-password-bcrypt"     % silhouetteVersion,
     "com.mohiva"                  %% "play-silhouette-crypto-jca"          % silhouetteVersion,
