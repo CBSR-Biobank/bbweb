@@ -2,8 +2,9 @@ package org.biobank.domain.studies
 
 import org.biobank.domain._
 
-import javax.inject.Singleton
 import com.google.inject.ImplementedBy
+import javax.inject.{Inject, Singleton}
+import org.biobank.TestData
 import scalaz.Scalaz._
 import scalaz.Validation.FlatMap._
 
@@ -21,10 +22,15 @@ trait ProcessingTypeRepository
 }
 
 @Singleton
-class ProcessingTypeRepositoryImpl
+class ProcessingTypeRepositoryImpl @Inject() (val testData: TestData)
     extends ReadWriteRepositoryRefImplWithSlug[ProcessingTypeId, ProcessingType](v => v.id)
     with ProcessingTypeRepository {
   import org.biobank.CommonValidations._
+
+  override def init(): Unit = {
+    super.init()
+    testData.testProcessingTypes.foreach(put)
+  }
 
   def nextIdentity: ProcessingTypeId = new ProcessingTypeId(nextIdentityAsString)
 

@@ -172,21 +172,23 @@ object TestData {
     )
 
   val EventTypeHashids: Hashids      = Hashids("test-data-cevent-types")
+  val ProcessingTypeHashids: Hashids = Hashids("test-data-processing-types")
+  val SpecimenHashids: Hashids       = Hashids("test-data-specimen-specs")
 }
 
 object BbpspTestData {
+  import TestData._
 
-  val BbpspStudyId: StudyId        = StudyId("BBPSP_id")
-  val CentreNames: List[String]    = List("100-Calgary AB", "101-London ON")
-  val NumParticipants: Int         = 3
-  val EventTypeNames: List[String] = List("1 - Default Event",
-                                          "2 - Second Event")
+  val BbpspStudyId: StudyId             = StudyId("BBPSP_id")
+  val CentreNames: List[String]         = List("100-Calgary AB", "101-London ON")
+  val NumParticipants: Int                = 3
+  val EventTypeNames: List[String]      = List("1 - Default Event", "2 - Second Event")
+  val ProcessingTypeNames: List[String] = List("1 - Step 1", "2 - Step 2")
 
   val ParticipantAnnotationTypeHashids: Hashids = Hashids("bbpsp-participant-annotation-types")
   val EventTypeAnnotationTypeHashids: Hashids   = Hashids("bbpsp-collection-event-annotation-types")
   val EventHashids: Hashids                     = Hashids("bbpsp-collection-events")
   val ParticipantHashids: Hashids               = Hashids("bbpsp-participants")
-  val SpecimenHashids: Hashids                  = Hashids("bbpsp-specimen-specs")
 
   // the slug is temporarily assigned an empty value, once the set is created, the slug is then derived
   // from the name below.
@@ -269,7 +271,7 @@ object BbpspTestData {
     Set(
       AnnotationType(
         id            = AnnotationTypeId(EventTypeAnnotationTypeHashids.encode(1)),
-        slug          = Slug(""),
+        slug          = Slug("Phlebotomist"),
         name          = "Phlebotomist",
         description   = None,
         valueType     = AnnotationValueType.Text,
@@ -278,12 +280,25 @@ object BbpspTestData {
         required      = true),
       AnnotationType(
         id            = AnnotationTypeId(EventTypeAnnotationTypeHashids.encode(2)),
-        slug          = Slug(""),
+        slug          = Slug("Consent"),
         name          = "Consent",
         description   = None,
         valueType     = AnnotationValueType.Select,
         maxValueCount = Some(2),
         options       = Seq("Surveillance", "Genetic Predisposition", "Previous Samples", "Genetic Mutation"),
+        required      = true)
+    ).map { at => at.copy(slug = Slug(at.name)) }
+
+  val ProcessingTypeAnnotationTypes: Set[AnnotationType] =
+    Set(
+      AnnotationType(
+        id            = AnnotationTypeId(EventTypeAnnotationTypeHashids.encode(3)),
+        slug          = Slug("PBMC Count"),
+        name          = "PBMC Count",
+        description   = None,
+        valueType     = AnnotationValueType.Number,
+        maxValueCount = None,
+        options       = Seq.empty[String],
         required      = true)
     ).map { at => at.copy(slug = Slug(at.name)) }
 
@@ -485,6 +500,66 @@ class TestData @Inject() (config:         Configuration,
     }
   }
 
+  def testProcessingTypes(): List[ProcessingType] = {
+    if (!loadTestData) {
+      List.empty[ProcessingType]
+    } else {
+      log.debug("testProcessingTypes")
+
+      BbpspTestData.ProcessingTypeNames.zipWithIndex.map { case (name, index) =>
+        val id = ProcessingTypeId(ProcessingTypeHashids.encode(index.toLong))
+        val annotationTypes =
+          if (name == BbpspTestData.ProcessingTypeNames(0)) BbpspTestData.ProcessingTypeAnnotationTypes
+          else Set.empty[AnnotationType]
+
+        val input =
+          if (index == 0)
+            InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
+                                    count                = 1,
+                                    containerTypeId      = None,
+                                    definitionType       = ProcessingType.collectedDefinition,
+                                    entityId             = CollectionEventTypeId(EventTypeHashids.encode(0L)).id,
+                                    specimenDefinitionId = SpecimenDefinitionId(SpecimenHashids.encode(1L)))
+          else
+            InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
+                                    count                = 1,
+                                    containerTypeId      = None,
+                                    definitionType       = ProcessingType.processedDefinition,
+                                    entityId             = ProcessingTypeId(ProcessingTypeHashids.encode(0L)).id,
+                                    specimenDefinitionId = SpecimenDefinitionId(SpecimenHashids.encode(1L)))
+        val specimenDefinition =
+          ProcessedSpecimenDefinition(id                      = SpecimenDefinitionId(id.id),
+                                      slug                    = Slug(name),
+                                      name                    = name,
+                                      description             = None,
+                                      units                   = "mL",
+                                      anatomicalSourceType    = AnatomicalSourceType.Blood,
+                                      preservationType        = PreservationType.FreshSpecimen,
+                                      preservationTemperature = PreservationTemperature.Minus80celcius,
+                                      specimenType            = SpecimenType.BuffyCoat)
+         val output =
+          OutputSpecimenProcessing(expectedChange     = BigDecimal(1.0),
+                                   count              = 1,
+                                   containerTypeId    = None,
+                                   specimenDefinition = specimenDefinition)
+
+        ProcessingType(studyId         = BbpspTestData.BbpspStudyId,
+                       id              = id,
+                       version         = 0L,
+                       timeAdded       = Global.StartOfTime,
+                       timeModified    = None,
+                       slug            = Slug(name),
+                       name            = name,
+                       description     = None,
+                       enabled         = true,
+                       input           = input,
+                       output          = output,
+                       annotationTypes = annotationTypes,
+                       inUse           = index == 0)
+      }
+    }
+  }
+
   def testParticipants(): List[Participant] =
     participantData.map { pd =>  pd.participant }
 
@@ -673,7 +748,7 @@ class TestData @Inject() (config:         Configuration,
           val eventIndex = reverseHash(1)
           val uniqueId = 1000L * centreIndex + 100 * participantIndex + 10 * eventIndex + specimenIndex
           val inventoryId = f"A$uniqueId%05d"
-          val id = SpecimenId(BbpspTestData.SpecimenHashids.encode(uniqueId))
+          val id = SpecimenId(SpecimenHashids.encode(uniqueId))
 
           UsableSpecimen(id                    = id,
                          version               = 0L,

@@ -257,15 +257,15 @@ class Factory {
     val name = faker.Lorem.sentence(2)
 
     val input = InputSpecimenProcessing(expectedChange       = BigDecimal(1.0),
-                                  count                = 1,
-                                  containerTypeId      = None,
-                                  definitionType       = ProcessingType.collectedDefinition,
-                                  entityId             = "",
-                                  specimenDefinitionId = SpecimenDefinitionId(""))
+                                        count                = 1,
+                                        containerTypeId      = None,
+                                        definitionType       = ProcessingType.collectedDefinition,
+                                        entityId             = "",
+                                        specimenDefinitionId = SpecimenDefinitionId(""))
     val output = OutputSpecimenProcessing(expectedChange     = BigDecimal(1.0),
-                                    count              = 1,
-                                    containerTypeId    = None,
-                                    specimenDefinition = defaultProcessedSpecimenDefinition)
+                                          count              = 1,
+                                          containerTypeId    = None,
+                                          specimenDefinition = defaultProcessedSpecimenDefinition)
 
     val processingType = ProcessingType(
         id              = ProcessingTypeId(nextIdentityAsString[ProcessingType]),
