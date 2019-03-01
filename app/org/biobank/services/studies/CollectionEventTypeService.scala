@@ -154,9 +154,9 @@ class CollectionEventTypeServiceImpl @Inject()(
                  EntityInfoDto(definition.id.id, definition.slug, definition.name)
                }
              CollectionSpecimenDefinitionNames(eventType.id.id,
-                                     eventType.slug,
-                                     eventType.name,
-                                     definitionNames)
+                                               eventType.slug,
+                                               eventType.name,
+                                               definitionNames)
            }
            .toSet
        }
