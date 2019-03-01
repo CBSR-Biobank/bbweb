@@ -366,17 +366,41 @@ class TestData @Inject() (config:         Configuration,
       val hashids = Hashids("test-data-users")
 
       userData.zipWithIndex.map { case((name, email), index) =>
-        ActiveUser(id           = UserId(hashids.encode(index.toLong)),
-                   version      = 0L,
-                   timeAdded    = Global.StartOfTime,
-                   timeModified = None,
-                   slug         = Slug(name),
-                   name         = name,
-                   email        = email,
-                   password     = passwordHasher.encrypt(plainPassword, salt),
-                   salt         = salt,
-                   avatarUrl    = None)
-      }
+        ActiveUser(
+          id           = UserId(hashids.encode(index.toLong)),
+          version      = 0L,
+          timeAdded    = Global.StartOfTime,
+          timeModified = None,
+          slug         = Slug(name),
+          name         = name,
+          email        = email,
+          password     = passwordHasher.encrypt(plainPassword, salt),
+          salt         = salt,
+          avatarUrl    = None)
+      } ++ List[User](
+        RegisteredUser(
+          id           = UserId("registered-user"),
+          version      = 0L,
+          timeAdded    = Global.StartOfTime,
+          timeModified = None,
+          slug         = Slug("registered-user"),
+          name         = "Registered User",
+          email        = "registered@admin.com",
+          password     = passwordHasher.encrypt(plainPassword, salt),
+          salt         = salt,
+          avatarUrl    = None),
+        LockedUser(
+          id           = UserId("locked-user"),
+          version      = 0L,
+          timeAdded    = Global.StartOfTime,
+          timeModified = None,
+          slug         = Slug("locked-user"),
+          name         = "Locked User",
+          email        = "locked@admin.com",
+          password     = passwordHasher.encrypt(plainPassword, salt),
+          salt         = salt,
+          avatarUrl    = None)
+      )
     }
   }
 
@@ -537,7 +561,7 @@ class TestData @Inject() (config:         Configuration,
                                       preservationType        = PreservationType.FreshSpecimen,
                                       preservationTemperature = PreservationTemperature.Minus80celcius,
                                       specimenType            = SpecimenType.BuffyCoat)
-         val output =
+        val output =
           OutputSpecimenProcessing(expectedChange     = BigDecimal(1.0),
                                    count              = 1,
                                    containerTypeId    = None,
@@ -548,7 +572,7 @@ class TestData @Inject() (config:         Configuration,
                        version         = 0L,
                        timeAdded       = Global.StartOfTime,
                        timeModified    = None,
-                       slug            = Slug(name),
+                       slug            = Slug(s"$name specimen"),
                        name            = name,
                        description     = None,
                        enabled         = true,
