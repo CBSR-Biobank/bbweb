@@ -190,18 +190,27 @@ class AccessControllerMembershipSpec
         reply must matchUpdatedMembership(updatedMembership)
       }
 
+      it("can create membership with no users") {
+        val f = new MembershipFixture
+        membershipRepository.remove(f.membership)
+        val membership = f.membership.copy(userIds = Set.empty[UserId])
+        val reqJson = membershipToAddJson(membership)
+
+        val reply = makeAuthRequest(POST, uri("memberships"), reqJson).value
+        reply must beOkResponseWithJsonReply
+
+        val jsonId = (contentAsJson(reply) \ "data" \ "id").validate[MembershipId]
+        jsonId must be (jsSuccess)
+
+        val updatedMembership = membership.copy(id = jsonId.get, timeAdded = OffsetDateTime.now)
+        reply must matchUpdatedMembership(updatedMembership)
+      }
+
       it("fails when adding a second membership with a name that already exists") {
         val f = new MembershipFixture
         val reqJson = membershipToAddJson(f.membership)
         val reply = makeAuthRequest(POST, uri("memberships"), reqJson).value
         reply must beBadRequestWithMessage("EntityCriteriaError: name already used:")
-      }
-
-      it("attempt to create membership fails if no users are added") {
-        val f = new MembershipFixture
-        val reqJson = membershipToAddJson(f.membership.copy(userIds = Set.empty[UserId]))
-        val reply = makeAuthRequest(POST, uri("memberships"), reqJson).value
-        reply must beBadRequestWithMessage("userIds cannot be empty")
       }
 
       it("attempt to create membership fails if user does not exist") {

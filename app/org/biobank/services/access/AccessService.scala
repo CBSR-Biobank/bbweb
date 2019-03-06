@@ -417,10 +417,6 @@ class AccessServiceImpl @Inject() (@Named("accessProcessor") val processor:     
           cmd match {
             case c: AddMembershipCmd => {
               for {
-                usersNonEmpty <- {
-                  if (c.userIds.isEmpty) ServiceError("userIds cannot be empty").failureNel[Boolean]
-                  else true.successNel[String]
-                }
                 validUsers   <- c.userIds.map(id => userRepository.getByKey(UserId(id))).toList.sequenceU
                 validStudies <- c.studyIds.map(id => studyRepository.getByKey(StudyId(id))).toList.sequenceU
                 validCentres <- c.centreIds.map(id => centreRepository.getByKey(CentreId(id))).toList.sequenceU
