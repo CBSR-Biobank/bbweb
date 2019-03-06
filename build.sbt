@@ -120,6 +120,8 @@ sources in (Compile, doc) ~= (_ filter (_.getParent contains "org/biobank"))
 
 fork in run := true
 
+run / javaOptions += "-Xmx2G -Duser.timezone=GMT"
+
 testOptions in Test := Nil
 
 (testOptions in Test) += Tests.Argument(TestFrameworks.ScalaTest, "-h", "target/report")
