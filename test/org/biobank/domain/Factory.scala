@@ -324,6 +324,7 @@ class Factory {
 
   def createAnnotation(): Annotation = {
     val annot = Annotation(annotationTypeId = defaultAnnotationType.id,
+                           valueType        = defaultAnnotationType.valueType,
                            stringValue      = None,
                            numberValue      = None,
                            selectedValues   = Set.empty[String])

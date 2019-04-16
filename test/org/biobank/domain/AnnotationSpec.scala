@@ -11,6 +11,7 @@ class AnnotationSpec extends DomainSpec {
 
   def createFrom(annotation: Annotation): DomainValidation[Annotation] =
     Annotation.create(annotationTypeId = annotation.annotationTypeId,
+                      valueType        = annotation.valueType,
                       stringValue      = annotation.stringValue,
                       numberValue      = annotation.numberValue,
                       selectedValues   = annotation.selectedValues)

@@ -43,6 +43,7 @@ object EventUtils {
       : org.biobank.infrastructure.events.CommonEvents.Annotation = {
     org.biobank.infrastructure.events.CommonEvents.Annotation().update(
       _.annotationTypeId    := annotation.annotationTypeId.id,
+      _.valueType           := annotation.valueType.toString,
       _.optionalStringValue := annotation.stringValue,
       _.optionalNumberValue := annotation.numberValue,
       _.selectedValues      := annotation.selectedValues.toSeq
@@ -53,6 +54,7 @@ object EventUtils {
       : org.biobank.domain.annotations.Annotation = {
     org.biobank.domain.annotations.Annotation(
       annotationTypeId = AnnotationTypeId(event.getAnnotationTypeId),
+      valueType        = AnnotationValueType.withName(event.getValueType),
       stringValue      = event.stringValue,
       numberValue      = event.numberValue,
       selectedValues   = event.selectedValues.toSet

@@ -213,12 +213,13 @@ class CollectionEventsProcessor @Inject() (
       : ServiceValidation[CollectionEventEvent] = {
     val id = AnnotationTypeId(cmd.annotationTypeId)
     for {
-      hasAnnotationType  <- {
+       annotationType  <- {
         collectionEventType.annotationTypes
           .find(at => at.id == id)
           .toSuccessNel(s"IdNotFound: Collection Event Type does not have annotation type: $id")
-      }
-      annotation     <- Annotation.create(id,
+       }
+       annotation     <- Annotation.create(id,
+                                          annotationType.valueType,
                                           cmd.stringValue,
                                           cmd.numberValue,
                                           cmd.selectedValues)

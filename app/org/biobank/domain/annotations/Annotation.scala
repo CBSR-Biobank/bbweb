@@ -2,6 +2,7 @@ package org.biobank.domain.annotations
 
 import org.biobank.ValidationKey
 import org.biobank.domain._
+import org.biobank.domain.annotations.AnnotationValueType._
 import play.api.libs.json._
 import play.api.libs.json.Reads._
 import org.slf4j.{Logger, LoggerFactory}
@@ -30,6 +31,7 @@ import scalaz.Validation.FlatMap._
  * property.
  */
 final case class Annotation(annotationTypeId: AnnotationTypeId,
+                            valueType:        AnnotationValueType,
                             stringValue:      Option[String],
                             numberValue:      Option[String], // FIXME: should we use java.lang.Number
                             selectedValues:   Set[String]) {
@@ -58,12 +60,13 @@ object Annotation {
   implicit val annotationFormat: Format[Annotation] = Json.format[Annotation]
 
   def create(annotationTypeId: AnnotationTypeId,
+             valueType:        AnnotationValueType,
              stringValue:      Option[String],
              numberValue:      Option[String],
              selectedValues:   Set[String])
       : DomainValidation[Annotation] = {
     validate(annotationTypeId, stringValue, numberValue, selectedValues)
-      .map { _ => Annotation(annotationTypeId, stringValue, numberValue, selectedValues) }
+      .map { _ => Annotation(annotationTypeId, valueType, stringValue, numberValue, selectedValues) }
   }
 
   @SuppressWarnings(Array("org.wartremover.warts.Overloading"))

@@ -169,15 +169,16 @@ class ParticipantsProcessor @Inject() (val participantRepository: ParticipantRep
                                          participant: Participant): ServiceValidation[ParticipantEvent] = {
     val id = AnnotationTypeId(cmd.annotationTypeId)
     for {
-      hasAnnotationType  <- {
+      annotationType  <- {
         study.annotationTypes
           .find(at => at.id == id)
           .toSuccessNel(s"IdNotFound: study does not have annotation type: $id")
       }
-      annotation         <- Annotation.create(id,
-                                              cmd.stringValue,
-                                              cmd.numberValue,
-                                              cmd.selectedValues)
+      annotation <- Annotation.create(id,
+                                     annotationType.valueType,
+                                     cmd.stringValue,
+                                     cmd.numberValue,
+                                     cmd.selectedValues)
       updatedParticipant <- participant.withAnnotation(annotation)
     } yield ParticipantEvent(updatedParticipant.id.id).update(
       _.sessionUserId                := cmd.sessionUserId,
