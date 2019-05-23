@@ -6,6 +6,7 @@ import org.biobank.domain._
 import org.biobank.domain.annotations._
 import org.biobank.domain.participants._
 import org.biobank.domain.studies._
+import org.biobank.dto._
 import org.scalatest.matchers.{MatchResult, Matcher}
 import play.api.libs.json._
 import play.api.mvc._
@@ -20,6 +21,7 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
   import org.biobank.AnnotationTestUtils._
   import org.biobank.matchers.JsonMatchers._
   import org.biobank.matchers.EntityMatchers._
+  import org.biobank.matchers.DtoMatchers._
 
   class Fixture {
     val study = factory.createEnabledStudy
@@ -64,9 +66,9 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         val reply = makeAuthRequest(GET, uri(factory.defaultEnabledStudy, participant)).value
         reply must beOkResponseWithJsonReply
 
-        val replyParticipant = (contentAsJson(reply) \ "data").validate[Participant]
+        val replyParticipant = (contentAsJson(reply) \ "data").validate[ParticipantDto]
         replyParticipant must be (jsSuccess)
-        replyParticipant.get must matchParticipant(participant)
+        replyParticipant.get must matchDtoToParticipant(participant)
       }
 
       it("get participant with no annotations") {
@@ -78,9 +80,9 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
         val reply = makeAuthRequest(GET, uri(factory.defaultEnabledStudy, participant)).value
         reply must beOkResponseWithJsonReply
-        val replyParticipant = (contentAsJson(reply) \ "data").validate[Participant]
+        val replyParticipant = (contentAsJson(reply) \ "data").validate[ParticipantDto]
         replyParticipant must be (jsSuccess)
-        replyParticipant.get must matchParticipant(participant)
+        replyParticipant.get must matchDtoToParticipant(participant)
       }
 
     }
@@ -91,9 +93,9 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
         val f = new Fixture
         val reply = makeAuthRequest(GET, uri(f.participant.slug.id)).value
         reply must beOkResponseWithJsonReply
-        val replyParticipant = (contentAsJson(reply) \ "data").validate[Participant]
+        val replyParticipant = (contentAsJson(reply) \ "data").validate[ParticipantDto]
         replyParticipant must be (jsSuccess)
-        replyParticipant.get must matchParticipant(f.participant)
+        replyParticipant.get must matchDtoToParticipant(f.participant)
       }
 
       it("must return NOT_FOUND for a participant slug that does not exist") {
@@ -310,13 +312,13 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
   private def matchUpdatedParticipant(participant: Participant) =
     new Matcher[Future[Result]] {
       def apply (left: Future[Result]) = {
-        val replyParticipant = (contentAsJson(left) \ "data").validate[Participant]
+        val replyParticipant = (contentAsJson(left) \ "data").validate[ParticipantDto]
         val jsSuccessMatcher = jsSuccess(replyParticipant)
 
         if (!jsSuccessMatcher.matches) {
           jsSuccessMatcher
         } else {
-          val entitiesMatcher = matchParticipant(participant)(replyParticipant.get)
+          val entitiesMatcher = matchDtoToParticipant(participant)(replyParticipant.get)
 
           if (!entitiesMatcher.matches) {
             MatchResult(false,

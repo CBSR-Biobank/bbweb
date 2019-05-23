@@ -81,7 +81,7 @@ class ParticipantsServiceSpec
           info(label)
           participantsService.get(user.id, f.enabledStudy.id, f.participant.id)
             .mustSucceed { result =>
-              result.id must be (f.participant.id)
+              result.id must be (f.participant.id.id)
             }
         }
       }
@@ -104,7 +104,7 @@ class ParticipantsServiceSpec
           info(label)
           participantsService.getByUniqueId(user.id, f.enabledStudy.id, f.participant.uniqueId)
             .mustSucceed { result =>
-              result.id must be (f.participant.id)
+              result.id must be (f.participant.id.id)
             }
         }
       }
@@ -166,7 +166,7 @@ class ParticipantsServiceSpec
               }
             participantRepository.put(participant)
             participantsService.processCommand(cmd).futureValue mustSucceed { result =>
-              result.id must be (f.participant.id)
+              result.id must be (f.participant.id.id)
             }
           }
         }

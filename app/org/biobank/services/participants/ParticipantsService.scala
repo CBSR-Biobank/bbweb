@@ -3,12 +3,14 @@ package org.biobank.services.participants
 import akka.actor._
 import akka.pattern.ask
 import com.google.inject.ImplementedBy
+import java.time.format.DateTimeFormatter
 import javax.inject.{Inject, Named, Singleton}
 import org.biobank.domain.Slug
 import org.biobank.domain.access._
 import org.biobank.domain.participants._
 import org.biobank.domain.studies._
 import org.biobank.domain.users.UserId
+import org.biobank.dto._
 import org.biobank.infrastructure.commands.ParticipantCommands._
 import org.biobank.infrastructure.events.ParticipantEvents._
 import org.biobank.services._
@@ -24,15 +26,15 @@ trait ParticipantsService extends BbwebService {
 
   def get(requestUserId: UserId,
           studyId:       StudyId,
-          participantId: ParticipantId): ServiceValidation[Participant]
+          participantId: ParticipantId): ServiceValidation[ParticipantDto]
 
-  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Participant]
+  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[ParticipantDto]
 
   def getByUniqueId(requestUserId: UserId,
                     studyId:       StudyId,
-                    uniqueId:      String): ServiceValidation[Participant]
+                    uniqueId:      String): ServiceValidation[ParticipantDto]
 
-  def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]]
+  def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[ParticipantDto]]
 
   def snapshotRequest(requestUserId: UserId): ServiceValidation[Unit]
 
@@ -57,16 +59,19 @@ class ParticipantsServiceImpl @Inject() (
 
   def get(requestUserId: UserId,
           studyId:       StudyId,
-          participantId: ParticipantId): ServiceValidation[Participant] = {
+          participantId: ParticipantId): ServiceValidation[ParticipantDto] = {
     whenPermittedAndIsMember(requestUserId,
                              PermissionId.ParticipantRead,
                              Some(studyId),
                              None) { () =>
-      participantRepository.withId(studyId, participantId)
+      for {
+        participant <- participantRepository.withId(studyId, participantId)
+        study       <- studiesService.getStudy(requestUserId, studyId)
+      } yield participantToDto(participant, study)
     }
   }
 
-  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[Participant] = {
+  def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[ParticipantDto] = {
     for {
       participant <- participantRepository.getBySlug(slug)
       study       <- studiesService.getStudy(requestUserId, participant.studyId)
@@ -74,26 +79,29 @@ class ParticipantsServiceImpl @Inject() (
                                                             PermissionId.ParticipantRead,
                                                             Some(study.id),
                                                             None)
-      result  <- {
+      result <- {
         if (permission) participant.successNel[String]
         else Unauthorized.failureNel[Participant]
       }
-    } yield result
+    } yield participantToDto(participant, study)
 
   }
 
   def getByUniqueId(requestUserId: UserId,
                     studyId:       StudyId,
-                    uniqueId:      String): ServiceValidation[Participant] = {
+                    uniqueId:      String): ServiceValidation[ParticipantDto] = {
     whenPermittedAndIsMember(requestUserId,
                              PermissionId.ParticipantRead,
                              Some(studyId),
                              None) { () =>
-      participantRepository.withUniqueId(studyId, uniqueId)
+      for {
+        participant <- participantRepository.withUniqueId(studyId, uniqueId)
+        study       <- studiesService.getStudy(requestUserId, studyId)
+      } yield participantToDto(participant, study)
     }
   }
 
-  def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[Participant]] = {
+  def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[ParticipantDto]] = {
     val validStudyId = cmd match {
         case c: AddParticipantCmd => StudyId(c.studyId).successNel[String]
         case c: ParticipantModifyCommand =>
@@ -105,20 +113,34 @@ class ParticipantsServiceImpl @Inject() (
         case c                    => PermissionId.ParticipantUpdate
       }
 
+    val requestUserId = UserId(cmd.sessionUserId)
+
     validStudyId.fold(
-      err => Future.successful(err.failure[Participant]),
-      studyId => whenPermittedAndIsMemberAsync(UserId(cmd.sessionUserId),
-                                               permission,
-                                               Some(studyId),
-                                               None) { () =>
+      err => Future.successful(err.failure[ParticipantDto]),
+      studyId => whenPermittedAndIsMemberAsync(requestUserId,
+                                              permission,
+                                              Some(studyId),
+                                              None) { () =>
         ask(processor, cmd).mapTo[ServiceValidation[ParticipantEvent]].map { validation =>
           for {
             event       <- validation
             participant <- participantRepository.getByKey(ParticipantId(event.id))
-          } yield participant
+            study       <- studiesService.getStudy(requestUserId, studyId)
+          } yield participantToDto(participant, study)
         }
       }
     )
+  }
+
+  private def participantToDto(participant: Participant, study: Study): ParticipantDto = {
+    ParticipantDto(id           = participant.id.id,
+                   slug         = participant.slug,
+                   study        = EntityInfoDto(study),
+                   version      = participant.version,
+                   timeAdded    = participant.timeAdded.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
+                   timeModified = participant.timeModified.map(_.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)),
+                   uniqueId     = participant.uniqueId,
+                   annotations  = participant.annotations)
   }
 
 }

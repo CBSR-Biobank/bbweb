@@ -363,6 +363,34 @@ trait DtoMatchers {
       }
     }
 
+  def matchDtoToParticipant(participant: Participant) =
+    new Matcher[ParticipantDto] {
+      def apply(left: ParticipantDto) = {
+        val timeAddedMatcher =
+          beTimeWithinSeconds(participant.timeAdded, 5L)(OffsetDateTime.parse(left.timeAdded))
+
+        val timeModifiedMatcher = beOptionalTimeWithinSeconds(participant.timeModified, 5L)
+          .apply(left.timeModified.map(OffsetDateTime.parse))
+
+        val matchers = Map(
+            ("id"           -> (left.id equals participant.id.id)),
+            ("version"      -> (left.version equals participant.version)),
+            ("timeAdded"    -> timeAddedMatcher.matches),
+            ("timeModified" -> (timeModifiedMatcher.matches)),
+            ("studyId"      -> (left.study.id equals participant.studyId.id)),
+            ("slug"         -> (left.slug equals participant.slug)),
+            ("uniqueId"     -> (left.uniqueId equals participant.uniqueId)),
+            ("annotations"  -> (left.annotations equals participant.annotations)))
+
+        val nonMatching = matchers filter { case (k, v) => !v } keys
+
+        MatchResult(nonMatching.size <= 0,
+                    "dto does not match participant for the following attributes: {0},\ndto: {1},\nrole: {2}",
+                    "dto matches participant: dto: {1},\nrole: {2}",
+                    IndexedSeq(nonMatching.mkString(", "), left, participant))
+      }
+    }
+
   def matchDtoToEntitySetDto(entitySet: MembershipEntitySet[_]) =
     new Matcher[EntitySetDto] {
       def apply(left: EntitySetDto) = {

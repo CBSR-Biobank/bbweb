@@ -108,7 +108,23 @@ package dto {
 
   }
 
+  final case class ParticipantDto(id:           String,
+                                  slug:         Slug,
+                                  study:        EntityInfoDto,
+                                  version:      Long,
+                                  timeAdded:    String,
+                                  timeModified: Option[String],
+                                  uniqueId:     String,
+                                  annotations:  Set[Annotation])
+
+  object ParticipantDto {
+
+    implicit val participantDtoForma: Format[ParticipantDto] = Json.format[ParticipantDto]
+
+  }
+
   final case class CollectionEventDto(id:                      String,
+                                      slug:                    Slug,
                                       participantId:           String,
                                       participantSlug:         String,
                                       collectionEventTypeId:   String,
@@ -116,7 +132,6 @@ package dto {
                                       version:                 Long,
                                       timeAdded:               String,
                                       timeModified:            Option[String],
-                                      slug:                    Slug,
                                       timeCompleted:           String,
                                       visitNumber:             Int,
                                       annotations:             Set[Annotation])
