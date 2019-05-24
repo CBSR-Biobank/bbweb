@@ -15,6 +15,9 @@ class ParticipantsRouter @Inject()(controller: ParticipantsController) extends S
     case GET(p"/${slug(s)}") =>
       controller.getBySlug(s)
 
+    case GET(p"/uniqueId/$uniqueId") =>
+      controller.getByUniqueId(uniqueId)
+
     case GET(p"/${studyId(sId)}/${participantId(id)}") =>
       controller.get(sId, id)
 

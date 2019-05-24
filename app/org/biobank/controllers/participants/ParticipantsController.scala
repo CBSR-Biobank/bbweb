@@ -33,6 +33,11 @@ class ParticipantsController @Inject() (controllerComponents: ControllerComponen
       validationReply(participantsService.getBySlug(request.identity.user.id, slug))
     }
 
+  def getByUniqueId(uniqueId: String): Action[Unit] =
+    action(parse.empty) { implicit request =>
+      validationReply(participantsService.getByUniqueId(request.identity.user.id, uniqueId))
+    }
+
   def snapshot: Action[Unit] =
     action(parse.empty) { implicit request =>
       validationReply(participantsService.snapshotRequest(request.identity.user.id).map(_ => true))

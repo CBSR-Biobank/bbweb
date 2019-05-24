@@ -102,7 +102,7 @@ class ParticipantsServiceSpec
         val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCanReadTable) { (user, label) =>
           info(label)
-          participantsService.getByUniqueId(user.id, f.enabledStudy.id, f.participant.uniqueId)
+          participantsService.getByUniqueId(user.id, f.participant.uniqueId)
             .mustSucceed { result =>
               result.id must be (f.participant.id.id)
             }
@@ -113,7 +113,7 @@ class ParticipantsServiceSpec
         val f = new UsersWithParticipantAccessFixture
         forAll (f.usersCannotReadTable) { (user, label) =>
           info(label)
-          participantsService.getByUniqueId(user.id, f.enabledStudy.id, f.participant.uniqueId)
+          participantsService.getByUniqueId(user.id, f.participant.uniqueId)
             .mustFail("Unauthorized")
         }
       }

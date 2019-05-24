@@ -89,6 +89,26 @@ class ParticipantsControllerSpec extends StudyAnnotationsControllerSharedSpec[Pa
 
     describe("GET /api/participants/:slug") {
 
+      it("can retrieve a participant by uniqueId") {
+        val f = new Fixture
+        val reply = makeAuthRequest(GET, uri("uniqueId", f.participant.slug.id)).value
+        reply must beOkResponseWithJsonReply
+        val replyParticipant = (contentAsJson(reply) \ "data").validate[ParticipantDto]
+        replyParticipant must be (jsSuccess)
+        replyParticipant.get must matchDtoToParticipant(f.participant)
+      }
+
+      it("must return NOT_FOUND for a participant unique ID that does not exist") {
+        val f = new Fixture
+        participantRepository.remove(f.participant)
+        val reply = makeAuthRequest(GET, uri("uniqueId", f.participant.slug.id)).value
+        reply must beNotFoundWithMessage("EntityCriteriaNotFound.*participant.*unique.*ID")
+      }
+
+    }
+
+    describe("GET /api/participants/uniqueId/:studyId/:uniqueId") {
+
       it("can retrieve a participant by slug") {
         val f = new Fixture
         val reply = makeAuthRequest(GET, uri(f.participant.slug.id)).value

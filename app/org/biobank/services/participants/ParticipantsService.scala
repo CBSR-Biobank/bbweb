@@ -30,9 +30,7 @@ trait ParticipantsService extends BbwebService {
 
   def getBySlug(requestUserId: UserId, slug: Slug): ServiceValidation[ParticipantDto]
 
-  def getByUniqueId(requestUserId: UserId,
-                    studyId:       StudyId,
-                    uniqueId:      String): ServiceValidation[ParticipantDto]
+  def getByUniqueId(requestUserId: UserId, uniqueId: String): ServiceValidation[ParticipantDto]
 
   def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[ParticipantDto]]
 
@@ -84,21 +82,21 @@ class ParticipantsServiceImpl @Inject() (
         else Unauthorized.failureNel[Participant]
       }
     } yield participantToDto(participant, study)
-
   }
 
-  def getByUniqueId(requestUserId: UserId,
-                    studyId:       StudyId,
-                    uniqueId:      String): ServiceValidation[ParticipantDto] = {
-    whenPermittedAndIsMember(requestUserId,
-                             PermissionId.ParticipantRead,
-                             Some(studyId),
-                             None) { () =>
-      for {
-        participant <- participantRepository.withUniqueId(studyId, uniqueId)
-        study       <- studiesService.getStudy(requestUserId, studyId)
-      } yield participantToDto(participant, study)
-    }
+  def getByUniqueId(requestUserId: UserId, uniqueId: String): ServiceValidation[ParticipantDto] = {
+    for {
+      participant <- participantRepository.withUniqueId(uniqueId)
+      study       <- studiesService.getStudy(requestUserId, participant.studyId)
+      permission  <- accessService.hasPermissionAndIsMember(requestUserId,
+                                                            PermissionId.ParticipantRead,
+                                                            Some(study.id),
+                                                            None)
+      result <- {
+        if (permission) participant.successNel[String]
+        else Unauthorized.failureNel[Participant]
+      }
+    } yield participantToDto(participant, study)
   }
 
   def processCommand(cmd: ParticipantCommand): Future[ServiceValidation[ParticipantDto]] = {

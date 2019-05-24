@@ -14,7 +14,7 @@ trait ParticipantRepository
 
   def withId(studyId: StudyId, participantId: ParticipantId): DomainValidation[Participant]
 
-  def withUniqueId(studyId: StudyId, uniqueId: String): DomainValidation[Participant]
+  def withUniqueId(uniqueId: String): DomainValidation[Participant]
 
   def allForStudy(studyId: StudyId): Set[Participant]
 
@@ -54,22 +54,9 @@ class ParticipantRepositoryImpl @Inject() (val testData: TestData)
     } yield validPtcp
   }
 
-  def withUniqueId(studyId: StudyId, uniqueId: String): DomainValidation[Participant] = {
-    for {
-      participant <- {
-        getValues.find(p => p.uniqueId == uniqueId).toSuccess(
-          EntityCriteriaNotFound(s"participant with unique ID does not exist: $uniqueId").nel)
-      }
-      valid <- {
-        if (participant.studyId != studyId) {
-          EntityCriteriaError(
-            s"participant not in study: { uniqueId: $uniqueId, studyId: $studyId }"
-          ).failureNel[Participant]
-        } else {
-          participant.successNel[String]
-        }
-      }
-    } yield valid
+  def withUniqueId(uniqueId: String): DomainValidation[Participant] = {
+    getValues.find(p => p.uniqueId == uniqueId).toSuccess(
+      EntityCriteriaNotFound(s"participant with unique ID does not exist: $uniqueId").nel)
   }
 
   def allForStudy(studyId: StudyId): Set[Participant] = {
