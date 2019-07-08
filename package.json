@@ -51,7 +51,7 @@
     "istanbul-instrumenter-loader": "^3.0.1",
     "jasmine-core": "^3.1.0",
     "jsdoc": "^3.5.5",
-    "jsdoc-baseline": "https://github.com/hegemonic/baseline/tarball/master",
+    "jsdoc-baseline": "https://github.com/hegemonic/baseline/tarball/222e13a",
     "karma": "^2.0.4",
     "karma-chrome-launcher": "^2.2.0",
     "karma-coverage-istanbul-reporter": "^2.0.1",
